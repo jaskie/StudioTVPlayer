@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{0865f8dc-6fcf-4419-90b8-10b353ef9502}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{9ef1a49d-643c-45fb-b3ad-5537574bed32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Decklink">
+      <UniqueIdentifier>{3408a765-0c18-41b4-8ee5-64f3be313cf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Decklink\Interop">
+      <UniqueIdentifier>{7c9c31e0-681f-41f4-a112-de0488e1a77e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FFMpeg">
+      <UniqueIdentifier>{6383a109-8738-4ebc-a479-21bd5e6cb721}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ndi">
+      <UniqueIdentifier>{6f716b27-aa05-4ff3-8292-053665c2c643}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\ComInitializer.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\Iterator.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\rational.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\VideoFormat.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Channel.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\AudioFilter.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\Decoder.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\FilterBase.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\InputFormat.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\OutputVideoFilter.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\VideoFilter.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Exceptions.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Decklink\ApiVersion.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\Decklink.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\OutputDevice.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\NonCopyable.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\Utils.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\OutputFrameClock.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\DeckLinkAPI_h.h">
+      <Filter>Decklink\Interop</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\InputSource.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\FFMpegInputSource.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\AVDecklinkVideoFrame.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PixelFormat.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\AVDecklinkAudioBuffer.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Ndi\Ndi.h">
+      <Filter>Ndi</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\ThumbnailFilter.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\HwAccel.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\OutputDeviceSource.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\AudioFifo.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Decklink\Iterator.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\VideoFormat.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Channel.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\AudioFilter.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\Decoder.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\FilterBase.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\InputFormat.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\OutputVideoFilter.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\VideoFilter.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Decklink\Decklink.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\OutputDevice.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\OutputFrameClock.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\DeckLinkAPI_i.c">
+      <Filter>Decklink\Interop</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\FFMpegInputSource.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\AVDecklinkVideoFrame.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="Ndi\Ndi.cpp">
+      <Filter>Ndi</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\ThumbnailFilter.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\OutputDeviceSource.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\AudioFifo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">
+      <Filter>Decklink\Interop</Filter>
+    </Midl>
+  </ItemGroup>
+</Project>

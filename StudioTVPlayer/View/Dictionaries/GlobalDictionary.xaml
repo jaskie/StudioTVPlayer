@@ -1,0 +1,588 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib">
+
+    <SolidColorBrush x:Key="Program_MainColor" Color="#262626" />
+    <SolidColorBrush x:Key="Program_SecondaryColor" Color="#0D0D0D" />
+    <SolidColorBrush x:Key="Program_Foreground" Color="LightGray" />
+    <SolidColorBrush x:Key="Program_MouseOver" Color="#50262626" />
+
+    <SolidColorBrush x:Key="Player_Foreground" Color="White" />
+    <SolidColorBrush x:Key="Player_Duration" Color="Green" />
+    <SolidColorBrush x:Key="Player_Out" Color="Red" />
+
+    <SolidColorBrush x:Key="Player_PlayEllipseBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="Player_StopEllipseBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="Player_PauseEllipseBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="Player_NextEllipseBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="Player_PlayEllipseStroke" Color="Green" />
+    <SolidColorBrush x:Key="Player_PauseEllipseStroke" Color="Yellow" />
+    <SolidColorBrush x:Key="Player_StopEllipseStroke" Color="Red" />
+    <SolidColorBrush x:Key="Player_NextEllipseStroke" Color="Blue" />
+
+    <SolidColorBrush x:Key="Player_PlayShape" Color="Green" />
+    <SolidColorBrush x:Key="Player_PauseShape" Color="Yellow" />
+    <SolidColorBrush x:Key="Player_StopShape" Color="Red" />
+    <SolidColorBrush x:Key="Player_NextShape" Color="Blue" />
+
+    <SolidColorBrush x:Key="Player_PlayEllipseMouseOver" Color="#2000FF00" />
+    <SolidColorBrush x:Key="Player_StopEllipseMouseOver" Color="#20FF0000" />
+    <SolidColorBrush x:Key="Player_PauseEllipseMouseOver" Color="#20FFFF00" />
+    <SolidColorBrush x:Key="Player_NextEllipseMouseOver" Color="#400000FF" />
+
+    <SolidColorBrush x:Key="Player_ItemBackground" Color="#FF404040" />
+
+    <Style x:Key="ContextMenuIconless" TargetType="ContextMenu">
+        <Setter Property="Background" Value="{StaticResource Program_SecondaryColor}" />
+        <Setter Property="Foreground" Value="{StaticResource Program_Foreground}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{StaticResource Program_Foreground}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <StackPanel ClipToBounds="True" Orientation="Horizontal" IsItemsHost="True" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BrowserFocused" TargetType="{x:Type UserControl}">
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="LightGray" />
+                <Setter Property="BorderThickness" Value="2" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="PlayerFocused" TargetType="{x:Type UserControl}">
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="Red" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ListItem_FocusVisualStyle" TargetType="Control">
+        <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}"></Setter>
+    </Style>
+    
+    <!--===============GRAFIKI===============-->
+    <System:Double x:Key="IconSize">16</System:Double>
+    <System:Double x:Key="ThumbnailSize">64</System:Double>
+    <System:Double x:Key="BackgroundSize">512</System:Double>
+
+    <Viewbox x:Key="AddIcon" Stretch="Uniform" x:Shared="False">
+        <Rectangle Width="{StaticResource IconSize}" Height="{StaticResource IconSize}">
+            <Rectangle.Fill>
+                <DrawingBrush>
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <DrawingGroup.Children>
+                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M6.0186,12L6.0186,10 3.9996,10 3.9996,6.018 6.0186,6.018 6.0186,4 9.9996,4 9.9996,6.018 11.9996,6.018 11.9996,10 9.9996,10 9.9996,12z" />
+                                <GeometryDrawing Brush="#FF388A34" Geometry="F1M11,9L9,9 9,11 7.019,11 7.019,9 5,9 5,7.018 7.019,7.018 7.019,5 9,5 9,7.018 11,7.018z" />
+                            </DrawingGroup.Children>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+    </Viewbox>
+
+    <Viewbox x:Key="CancelIcon" Stretch="Uniform" Width="24" Height="24">
+        <Canvas Width="48" Height="48">
+            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Fill="#000000">
+                <Path.Data>
+                    <PathGeometry Figures="M24 4c-11.05 0-20 8.95-20 20s8.95 20 20 20 20-8.95 20-20-8.95-20-20-20zm10 27.17l-2.83 2.83-7.17-7.17-7.17 7.17-2.83-2.83 7.17-7.17-7.17-7.17 2.83-2.83 7.17 7.17 7.17-7.17 2.83 2.83-7.17 7.17 7.17 7.17z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                <Path.Data>
+                    <PathGeometry Figures="M0 0h48v48h-48z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+        </Canvas>
+    </Viewbox>
+
+    <Viewbox x:Key="ControlIcon" Stretch="Uniform">
+        <Canvas Width="16" Height="16">
+            <Path Fill="{StaticResource Program_Foreground}">
+                <Path.Data>
+                    <GeometryGroup>
+                        <PathGeometry Figures="M7.5 0C6.291 0 5.282 0.859 5.05 2H0v1h5.05c0.232 1.141 1.24 2 2.45 2s2.218-0.859 2.45-2H16V2H9.95  C9.718 0.859 8.709 0 7.5 0z" FillRule="NonZero"/>
+                        <PathGeometry Figures="M12.5 6c-1.209 0-2.218 0.859-2.45 2H0v1h10.05c0.232 1.141 1.24 2 2.45 2s2.218-0.859 2.45-2H16V8h-1.05  C14.718 6.859 13.709 6 12.5 6z" FillRule="NonZero"/>
+                        <PathGeometry Figures="M5.5 11c-1.209 0-2.218 0.859-2.45 2H0v1h3.05c0.232 1.141 1.24 2 2.45 2s2.218-0.859 2.45-2H16v-1H7.95  C7.718 11.859 6.709 11 5.5 11z" FillRule="NonZero"/>
+                    </GeometryGroup>
+                </Path.Data>
+            </Path>
+        </Canvas>
+    </Viewbox>
+
+    <Viewbox x:Key="DeleteIcon" Width="{StaticResource IconSize}" Height="{StaticResource IconSize}">    
+        <Canvas  Width="113.526997884116" Height="113.527656182647">
+        <Canvas.RenderTransform>
+            <TranslateTransform X="-0" Y="0.2"/>
+        </Canvas.RenderTransform>
+        <Canvas.Resources>
+            <LinearGradientBrush x:Key="def0" MappingMode="RelativeToBoundingBox" StartPoint="0,0" EndPoint="0,1">
+                <LinearGradientBrush.GradientStops>
+                    <GradientStopCollection>
+                        <GradientStop Color="#F27E5E" Offset="0"/>
+                        <GradientStop Color="#EB1C24" Offset="0.5"/>
+                        <GradientStop Color="#CE2229" Offset="1"/>
+                    </GradientStopCollection>
+                </LinearGradientBrush.GradientStops>
+            </LinearGradientBrush>
+        </Canvas.Resources>
+        <Canvas>
+            <Path Fill="#FF990000">
+                <Path.Data>
+                    <PathGeometry Figures="M2.54313E-06 87.5347L30.964 56.564 2.54313E-06 25.6013 25.7973 -0.194656 56.7627 30.7707 87.7267 -0.194656 113.527 25.6013 82.5627 56.5693 113.527 87.5347 87.7267 113.329 56.7667 82.364 25.7973 113.333 2.54313E-06 87.5347z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+            <Path Fill="{StaticResource def0}">
+                <Path.Data>
+                    <PathGeometry Figures="M111.641 87.5341L80.6768 56.5701 111.641 25.6021 87.7261 1.69014 56.7635 32.6555 25.7968 1.69014 1.8848 25.6021 32.8501 56.5648 1.8848 87.5341 25.7968 111.447 56.7675 80.4781 87.7261 111.443 111.641 87.5341z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+            <Path Fill="#1AFFFFFF">
+                <Path.Data>
+                    <PathGeometry Figures="M53.5507 42.1597C69.9773 36.9184 86.2987 35.0784 101.036 36.2077L111.64 25.6024 87.7267 1.6904 56.7627 32.6557 25.7973 1.6904 1.88534 25.6024 29.0347 52.7491C36.5187 48.5651 44.7387 44.9717 53.5507 42.1597z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+        </Canvas>
+    </Canvas>
+    </Viewbox>
+
+
+    <Viewbox x:Key="DragDropBackground" Stretch="Uniform">
+        <Canvas Width="32" Height="32">
+            <Canvas>
+                <Line X1="16" Y1="7" X2="16" Y2="25" Stroke="Black" StrokeThickness="2" />
+                <Polyline Points="23 24 16 31 9 24" StrokeThickness="1" Fill="Black"/>
+                <Path Fill="Transparent" StrokeThickness="3" Stroke="Black">
+                    <Path.Data>
+                        <PathGeometry Figures="M5 23H3a2 2 0 0 1-2-2V3A2 2 0 0 1 3 1H29a2 2 0 0 1 2 2V21a2 2 0 0 1-2 2H27" />
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Canvas>
+    </Viewbox>
+    
+    <Canvas x:Key="LoadingThumbnail" Width="{StaticResource ThumbnailSize}" Height="{StaticResource ThumbnailSize}">
+        <Canvas Name="g6">
+            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path2" Fill="#000000">
+                <Path.Data>
+                    <PathGeometry Figures="M96.1 103.6c-10.4 8.4-23.5 12.4-36.8 11.1c-10.5-1-20.3-5.1-28.2-11.8H44v-8H18v26h8v-11.9c9.1 7.7 20.4 12.5 32.6 13.6   c1.9 0.2 3.7 0.3 5.5 0.3c13.5 0 26.5-4.6 37-13.2c19.1-15.4 26.6-40.5 19.1-63.9l-7.6 2.4C119 68.6 112.6 90.3 96.1 103.6z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+            <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path4" Fill="#000000">
+                <Path.Data>
+                    <PathGeometry Figures="M103 19.7c-21.2-18.7-53.5-20-76.1-1.6C7.9 33.5 0.4 58.4 7.7 81.7l7.6-2.4C9 59.2 15.5 37.6 31.9 24.4   C51.6 8.4 79.7 9.6 98 26H85v8h26V8h-8V19.7z" FillRule="NonZero"/>
+                </Path.Data>
+            </Path>
+        </Canvas>
+    </Canvas>
+
+    <Viewbox x:Key="SaveIcon" Stretch="Uniform" Width="24" Height="24">
+        <Canvas Width="32" Height="32">
+        <Canvas Name="Layer_28">
+            <Canvas Name="g30">
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path28" Fill="#808080">
+                    <Path.Data>
+                        <PathGeometry Figures="M31 8v22c0 0.55-0.45 1-1 1H2c-0.55 0-1-0.45-1-1V2c0-0.55 0.45-1 1-1h22c0.27 0 0.52 0.11 0.71 0.29l6 6    C30.89 7.48 31 7.73 31 8z" FillRule="NonZero"/>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+            <Canvas Name="g34">
+                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path32" Fill="LightGray">
+                    <Path.Data>
+                        <PathGeometry Figures="M25 1.58V10c0 0.55-0.45 1-1 1H8c-0.55 0-1-0.45-1-1V1h17c0.27 0 0.52 0.11 0.71 0.29L25 1.58z" FillRule="NonZero"/>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+            <Canvas Name="g38">
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path36" Fill="Orange">
+                    <Path.Data>
+                        <PathGeometry Figures="M25 20v11H7V20c0-0.55 0.45-1 1-1h16C24.55 19 25 19.45 25 20z" FillRule="NonZero"/>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+            <Canvas Name="g42">
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path40" Fill="#FF4391B2">
+                    <Path.Data>
+                        <PathGeometry Figures="M20 1v5c0 0.55-0.45 1-1 1s-1-0.45-1-1V1H20z" FillRule="NonZero"/>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+            <Canvas Name="g46">
+                <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path44" Fill="#FF4391B2">
+                    <Path.Data>
+                        <PathGeometry Figures="M19 26h-6c-0.5527 0-1-0.4478-1-1s0.4473-1 1-1h6c0.5527 0 1 0.4478 1 1S19.5527 26 19 26z" FillRule="NonZero"/>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Canvas>
+        <Canvas Name="Layer_29"/>
+        <Canvas Name="Layer_30"/>
+        <Canvas Name="Layer_31"/>
+    </Canvas>
+    </Viewbox>
+
+
+
+    <Canvas x:Key="SettingsBackground" Width="{StaticResource BackgroundSize}" Height="{StaticResource BackgroundSize}">
+        <Canvas.RenderTransform>
+            <ScaleTransform ScaleX="0.5" ScaleY="0.5"  />
+        </Canvas.RenderTransform>
+        <Path Fill="#000000">
+            <Path.Data>
+                <PathGeometry Figures="m 286.547 465.016 c 16.843 16.812 81.716 85.279 81.716 85.279 L 404.231 513.202 347.858 454.954 456.072 340.02 c 0 0 -48.842 -47.623 -27.468 -28.655 C 449.042 235.462 430.416 150.776 372.762 91.122 315.608 31.936 234.392 12.53 161.425 32.904 L 285.078 160.619 252.548 285.928 131.488 319.366 7.898 191.618 c -19.718 75.436 -0.969 159.339 56.311 218.556 60.093 62.123 146.621 80.373 222.338 54.842 z M 698.815 589.231 549.694 736.539 795.626 991.344 c 20.062 20.812 46.498 31.188 72.872 31.188 26.25 0 52.624 -10.375 72.811 -31.188 40.249 -41.624 40.249 -108.997 0 -150.62 z M 1023.681 161.838 867.06 -0.001 405.387 477.297 l 56.373 58.248 -276.335 285.616 -63.154 33.749 -89.217 145.559 22.719 23.562 140.839 -92.247 32.655 -65.312 276.336 -285.554 56.404 58.248 z" FillRule="NonZero"/>
+            </Path.Data>
+        </Path>
+    </Canvas>
+
+    <Viewbox x:Key="SettingsIcon" Stretch="Uniform">
+        <Canvas Width="20" Height="20">
+            <Path Fill="{StaticResource Program_Foreground}" StrokeThickness="1">
+                <Path.Data>
+                    <PathGeometry Figures="M17.4 11 C17.4 10.7 17.5 10.4 17.5 10 C17.5 9.6 17.5 9.3 17.4 9 L19.5 7.3 C19.7 7.1 19.7 6.9 19.6 6.7 L17.6 3.2 C17.5 3.1 17.3 3 17 3.1 L14.5 4.1 C14 3.7 13.4 3.4 12.8 3.1 L12.4 0.5 C12.5 0.2 12.2 0 12 0 L8 0 C7.8 0 7.5 0.2 7.5 0.4 L7.1 3.1 C6.5 3.3 6 3.7 5.4 4.1 L3 3.1 C2.7 3 2.5 3.1 2.3 3.3 L0.3 6.8 C0.2 6.9 0.3 7.2 0.5 7.4 L2.6 9 C2.6 9.3 2.5 9.6 2.5 10 C2.5 10.4 2.5 10.7 2.6 11 L0.5 12.7 C0.3 12.9 0.3 13.1 0.4 13.3 L2.4 16.8 C2.5 16.9 2.7 17 3 16.9 L5.5 15.9 C6 16.3 6.6 16.6 7.2 16.9 L7.6 19.5 C7.6 19.7 7.8 19.9 8.1 19.9 L12.1 19.9 C12.3 19.9 12.6 19.7 12.6 19.5 L13 16.9 C13.6 16.6 14.2 16.3 14.7 15.9 L17.2 16.9 C17.4 17 17.7 16.9 17.8 16.7 L19.8 13.2 C19.9 13 19.9 12.7 19.7 12.6 L17.4 11 L17.4 11 Z M10 13.5 C8.1 13.5 6.5 11.9 6.5 10 C6.5 8.1 8.1 6.5 10 6.5 C11.9 6.5 13.5 8.1 13.5 10 C13.5 11.9 11.9 13.5 10 13.5 L10 13.5 Z" FillRule="EvenOdd"/>
+                </Path.Data>
+            </Path>
+        </Canvas>
+    </Viewbox>
+
+
+    <Rectangle x:Key="SortIcon" Width="16" Height="16">
+        <Rectangle.Style>
+            <Style TargetType="Rectangle">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding SortDirection}" Value="Ascending">
+                        <Setter Property="LayoutTransform">
+                            <Setter.Value>
+                                <RotateTransform Angle="180" />
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding SortDirection}" Value="Descending">
+                        <Setter Property="LayoutTransform">
+                            <Setter.Value>
+                                <RotateTransform Angle="0" />
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Rectangle.Style>
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M0.9999,-0.000199999999999534L0.9999,15.9998 10.9999,15.9998 10.9999,13.4148 11.9999,14.4138 15.9999,10.4138 15.9999,5.5858 14.0009,7.5858 14.0009,3.0008 10.9999,3.0008 10.9999,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242" Geometry="F1M10,12.4141L10,15.0001 2,15.0001 2,1.0001 10,1.0001 10,3.0001 10,7.5861 8.414,6.0001 9,6.0001 9,3.0001 3,3.0001 3,6.0001 8,6.0001 8,7.0001 3,7.0001 3,10.0001 8,10.0001 8,10.4141 8.586,11.0001 3,11.0001 3,14.0001 9,14.0001 9,11.4141z" />
+                            <GeometryDrawing Brush="#FFEFEFF0" Geometry="F1M8.5859,11L2.9999,11 2.9999,14 8.9999,14 8.9999,11.414z M7.9999,7L2.9999,7 2.9999,10 7.9999,10z M7.9999,6L2.9999,6 2.9999,3 8.9999,3 8.9999,6 8.4139,6 7.9999,5.586z" />
+                            <GeometryDrawing Brush="#FF00529C" Geometry="F1M13,10L13,4 11,4 11,10 9,8 9,10 12,13 15,10 15,8z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <ControlTemplate x:Key="WindowButtonsControlTemplate" TargetType="{x:Type Button}">
+        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsDefaulted" Value="true">
+                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Background" Value="#50808080" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    
+    
+    <!---=====================SCROLLVIEWER========================-->
+    <SolidColorBrush x:Key="ScrollBar.Static.Background" Color="Orange"/>
+    <SolidColorBrush x:Key="ScrollBar.Static.Border" Color="Orange"/>
+    <SolidColorBrush x:Key="ScrollBar.Pressed.Glyph" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ScrollBar.MouseOver.Glyph" Color="#000000"/>
+    <SolidColorBrush x:Key="ScrollBar.Disabled.Glyph" Color="#BFBFBF"/>
+    <SolidColorBrush x:Key="ScrollBar.Static.Glyph" Color="White"/>
+    <Style x:Key="FocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <SolidColorBrush x:Key="ScrollBar.MouseOver.Background" Color="#DADADA"/>
+    <SolidColorBrush x:Key="ScrollBar.MouseOver.Border" Color="Black"/>
+    <SolidColorBrush x:Key="ScrollBar.Pressed.Background" Color="#606060"/>
+    <SolidColorBrush x:Key="ScrollBar.Pressed.Border" Color="#606060"/>
+    <SolidColorBrush x:Key="ScrollBar.Disabled.Background" Color="Black"/>
+    <SolidColorBrush x:Key="ScrollBar.Disabled.Border" Color="Black"/>
+    <SolidColorBrush x:Key="ScrollBar.MouseOver.Thumb" Color="#A6A6A6"/>
+    <SolidColorBrush x:Key="ScrollBar.Pressed.Thumb" Color="#606060"/>
+    <SolidColorBrush x:Key="ScrollBar.Static.Thumb" Color="#808080"/>
+
+    <ControlTemplate x:Key="ScrollViewerControlTemplate" TargetType="{x:Type ScrollViewer}">
+        <Grid x:Name="Grid" Background="{TemplateBinding Background}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Rectangle x:Name="Corner" Grid.Column="1" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Grid.Row="1"/>
+            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" CanContentScroll="{TemplateBinding CanContentScroll}" CanHorizontallyScroll="False" CanVerticallyScroll="False" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Grid.Column="0" Margin="{TemplateBinding Padding}" Grid.Row="0"/>
+            <ScrollBar x:Name="PART_VerticalScrollBar" AutomationProperties.AutomationId="VerticalScrollBar" Cursor="Arrow" Grid.Column="1" Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Grid.Row="0" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}" Style="{DynamicResource ScrollBarStyle}"/>
+            <ScrollBar x:Name="PART_HorizontalScrollBar" AutomationProperties.AutomationId="HorizontalScrollBar" Cursor="Arrow" Grid.Column="0" Maximum="{TemplateBinding ScrollableWidth}" Minimum="0" Orientation="Horizontal" Grid.Row="1" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}" Style="{DynamicResource ScrollBarStyle}" />
+        </Grid>
+    </ControlTemplate>
+    
+    <Style x:Key="ScrollBarButton" TargetType="{x:Type RepeatButton}">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="IsTabStop" Value="false"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Border x:Name="border" BorderBrush="{StaticResource Program_SecondaryColor}" BorderThickness="1" Background="{StaticResource Program_SecondaryColor}" SnapsToDevicePixels="true">
+                        <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource ScrollBar.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ScrollBar.MouseOver.Border}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource ScrollBar.Pressed.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ScrollBar.Pressed.Border}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" TargetName="contentPresenter" Value="0.56"/>
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource ScrollBar.Disabled.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ScrollBar.Disabled.Border}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="RepeatButtonTransparent" TargetType="{x:Type RepeatButton}">
+        <Setter Property="OverridesDefaultStyle" Value="true"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="IsTabStop" Value="false"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Rectangle Fill="{TemplateBinding Background}" Height="{TemplateBinding Height}" Width="{TemplateBinding Width}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ScrollBarThumbVertical" TargetType="{x:Type Thumb}">
+        <Setter Property="OverridesDefaultStyle" Value="true"/>
+        <Setter Property="IsTabStop" Value="false"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Rectangle x:Name="rectangle" Fill="{StaticResource ScrollBar.Static.Thumb}" Height="{TemplateBinding Height}" SnapsToDevicePixels="True" Width="{TemplateBinding Width}"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Fill" TargetName="rectangle" Value="{StaticResource ScrollBar.MouseOver.Thumb}"/>
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="true">
+                            <Setter Property="Fill" TargetName="rectangle" Value="{StaticResource ScrollBar.Pressed.Thumb}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ScrollBarThumbHorizontal" TargetType="{x:Type Thumb}">
+        <Setter Property="OverridesDefaultStyle" Value="true"/>
+        <Setter Property="IsTabStop" Value="false"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Rectangle x:Name="rectangle" Fill="{StaticResource ScrollBar.Static.Thumb}" Height="{TemplateBinding Height}" SnapsToDevicePixels="True" Width="{TemplateBinding Width}"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Fill" TargetName="rectangle" Value="{StaticResource ScrollBar.MouseOver.Thumb}"/>
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="true">
+                            <Setter Property="Fill" TargetName="rectangle" Value="{StaticResource ScrollBar.Pressed.Thumb}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ScrollBarStyle" TargetType="{x:Type ScrollBar}">
+        <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
+        <Setter Property="Stylus.IsFlicksEnabled" Value="false"/>
+        <Setter Property="Background" Value="{StaticResource Program_MainColor}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Program_SecondaryColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource Program_Foreground}"/>
+        <Setter Property="BorderThickness" Value="1,0"/>
+        <Setter Property="Width" Value="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}"/>
+        <Setter Property="MinWidth" Value="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid x:Name="Bg" SnapsToDevicePixels="true">
+                        <Grid.RowDefinitions>
+                            <RowDefinition MaxHeight="{DynamicResource {x:Static SystemParameters.VerticalScrollBarButtonHeightKey}}"/>
+                            <RowDefinition Height="0.00001*"/>
+                            <RowDefinition MaxHeight="{DynamicResource {x:Static SystemParameters.VerticalScrollBarButtonHeightKey}}"/>
+                        </Grid.RowDefinitions>
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Grid.Row="1"/>
+                        <RepeatButton x:Name="PART_LineUpButton" Command="{x:Static ScrollBar.LineUpCommand}" IsEnabled="{TemplateBinding IsMouseOver}" Style="{StaticResource ScrollBarButton}">
+                            <Path x:Name="ArrowTop" Data="M 0,4 C0,4 0,6 0,6 0,6 3.5,2.5 3.5,2.5 3.5,2.5 7,6 7,6 7,6 7,4 7,4 7,4 3.5,0.5 3.5,0.5 3.5,0.5 0,4 0,4 z" Fill="{StaticResource ScrollBar.Static.Glyph}" Margin="3,4,3,3" Stretch="Uniform"/>
+                        </RepeatButton>
+                        <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsMouseOver}" Grid.Row="1">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Style="{StaticResource RepeatButtonTransparent}"/>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Style="{StaticResource RepeatButtonTransparent}"/>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource ScrollBarThumbVertical}"/>
+                            </Track.Thumb>
+                        </Track>
+                        <RepeatButton x:Name="PART_LineDownButton" Command="{x:Static ScrollBar.LineDownCommand}" IsEnabled="{TemplateBinding IsMouseOver}" Grid.Row="2" Style="{StaticResource ScrollBarButton}">
+                            <Path x:Name="ArrowBottom" Data="M 0,2.5 C0,2.5 0,0.5 0,0.5 0,0.5 3.5,4 3.5,4 3.5,4 7,0.5 7,0.5 7,0.5 7,2.5 7,2.5 7,2.5 3.5,6 3.5,6 3.5,6 0,2.5 0,2.5 z" Fill="{StaticResource ScrollBar.Static.Glyph}" Margin="3,4,3,3" Stretch="Uniform"/>
+                        </RepeatButton>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineDownButton}" Value="true"/>
+                                <Condition Binding="{Binding IsPressed, ElementName=PART_LineDownButton}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Fill" TargetName="ArrowBottom" Value="{StaticResource ScrollBar.Pressed.Glyph}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineUpButton}" Value="true"/>
+                                <Condition Binding="{Binding IsPressed, ElementName=PART_LineUpButton}" Value="true"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Fill" TargetName="ArrowTop" Value="{StaticResource ScrollBar.Pressed.Glyph}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineDownButton}" Value="true"/>
+                                <Condition Binding="{Binding IsPressed, ElementName=PART_LineDownButton}" Value="false"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Fill" TargetName="ArrowBottom" Value="{StaticResource ScrollBar.MouseOver.Glyph}"/>
+                        </MultiDataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineUpButton}" Value="true"/>
+                                <Condition Binding="{Binding IsPressed, ElementName=PART_LineUpButton}" Value="false"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Fill" TargetName="ArrowTop" Value="{StaticResource ScrollBar.MouseOver.Glyph}"/>
+                        </MultiDataTrigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Fill" TargetName="ArrowTop" Value="{StaticResource ScrollBar.Disabled.Glyph}"/>
+                            <Setter Property="Fill" TargetName="ArrowBottom" Value="{StaticResource ScrollBar.Disabled.Glyph}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="MinWidth" Value="0"/>
+                <Setter Property="Height" Value="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarHeightKey}}"/>
+                <Setter Property="MinHeight" Value="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarHeightKey}}"/>
+                <Setter Property="BorderThickness" Value="0,1"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ScrollBar}">
+                            <Grid x:Name="Bg" SnapsToDevicePixels="true">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition MaxWidth="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}}"/>
+                                    <ColumnDefinition Width="0.00001*"/>
+                                    <ColumnDefinition MaxWidth="{DynamicResource {x:Static SystemParameters.HorizontalScrollBarButtonWidthKey}}"/>
+                                </Grid.ColumnDefinitions>
+                                <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Grid.Column="1"/>
+                                <RepeatButton x:Name="PART_LineLeftButton" Command="{x:Static ScrollBar.LineLeftCommand}" IsEnabled="{TemplateBinding IsMouseOver}" Style="{StaticResource ScrollBarButton}">
+                                    <Path x:Name="ArrowLeft" Data="M 3.18,7 C3.18,7 5,7 5,7 5,7 1.81,3.5 1.81,3.5 1.81,3.5 5,0 5,0 5,0 3.18,0 3.18,0 3.18,0 0,3.5 0,3.5 0,3.5 3.18,7 3.18,7 z" Fill="{StaticResource ScrollBar.Static.Glyph}" Margin="3" Stretch="Uniform"/>
+                                </RepeatButton>
+                                <Track x:Name="PART_Track" Grid.Column="1" IsEnabled="{TemplateBinding IsMouseOver}">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Style="{StaticResource RepeatButtonTransparent}"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Style="{StaticResource RepeatButtonTransparent}"/>
+                                    </Track.IncreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource ScrollBarThumbHorizontal}"/>
+                                    </Track.Thumb>
+                                </Track>
+                                <RepeatButton x:Name="PART_LineRightButton" Grid.Column="2" Command="{x:Static ScrollBar.LineRightCommand}" IsEnabled="{TemplateBinding IsMouseOver}" Style="{StaticResource ScrollBarButton}">
+                                    <Path x:Name="ArrowRight" Data="M 1.81,7 C1.81,7 0,7 0,7 0,7 3.18,3.5 3.18,3.5 3.18,3.5 0,0 0,0 0,0 1.81,0 1.81,0 1.81,0 5,3.5 5,3.5 5,3.5 1.81,7 1.81,7 z" Fill="{StaticResource ScrollBar.Static.Glyph}" Margin="3" Stretch="Uniform"/>
+                                </RepeatButton>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineRightButton}" Value="true"/>
+                                        <Condition Binding="{Binding IsPressed, ElementName=PART_LineRightButton}" Value="true"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Fill" TargetName="ArrowRight" Value="{StaticResource ScrollBar.Pressed.Glyph}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineLeftButton}" Value="true"/>
+                                        <Condition Binding="{Binding IsPressed, ElementName=PART_LineLeftButton}" Value="true"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Fill" TargetName="ArrowLeft" Value="{StaticResource ScrollBar.Pressed.Glyph}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineRightButton}" Value="true"/>
+                                        <Condition Binding="{Binding IsPressed, ElementName=PART_LineRightButton}" Value="false"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Fill" TargetName="ArrowRight" Value="{StaticResource ScrollBar.MouseOver.Glyph}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, ElementName=PART_LineLeftButton}" Value="true"/>
+                                        <Condition Binding="{Binding IsPressed, ElementName=PART_LineLeftButton}" Value="false"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Fill" TargetName="ArrowLeft" Value="{StaticResource ScrollBar.MouseOver.Glyph}"/>
+                                </MultiDataTrigger>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Fill" TargetName="ArrowLeft" Value="{StaticResource ScrollBar.Disabled.Glyph}"/>
+                                    <Setter Property="Fill" TargetName="ArrowRight" Value="{StaticResource ScrollBar.Disabled.Glyph}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

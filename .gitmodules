@@ -1,0 +1,4 @@
+[submodule "Submodules/tvplayr"]
+	path = Submodules/tvplayr
+	url = http://git.tvp.pl/P91782/tvplayr.git
+	branch = master

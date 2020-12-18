@@ -79,7 +79,7 @@ namespace TVPlayR {
 				: decklink_(decklink)
 				, output_(decklink)
 				, format_(Core::VideoFormat::invalid)
-				, executor_("Decklink thread")
+				, executor_()
 			{
 				if (output_)
 					output_frame_clock_.reset(new Core::OutputFrameClock());

@@ -147,6 +147,9 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\blockingconcurrentqueue.h" />
+    <ClInclude Include="Common\Executor.h" />
+    <ClInclude Include="Common\concurrentqueue.h" />
     <ClInclude Include="FFMpeg\AudioFifo.h" />
     <ClInclude Include="Core\OutputDeviceSource.h" />
     <ClInclude Include="Core\HwAccel.h" />
@@ -169,6 +172,7 @@
     <ClInclude Include="FFMpeg\InputFormat.h" />
     <ClInclude Include="FFMpeg\FFMpegInputSource.h" />
     <ClInclude Include="Common\NonCopyable.h" />
+    <ClInclude Include="Common\lightweightsemaphore.h" />
     <ClInclude Include="Ndi\Ndi.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\rational.h" />

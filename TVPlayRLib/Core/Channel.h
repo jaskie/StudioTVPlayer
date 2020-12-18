@@ -10,7 +10,7 @@ namespace TVPlayR {
 		class InputSource;
 		class OutputDevice;
 
-class Channel : public Common::NonCopyable
+class Channel : public TVPlayR::Common::NonCopyable
 {
 public:
 	Channel(const VideoFormat::Type& format, const Core::PixelFormat pixel_format, const int audio_channels_count);

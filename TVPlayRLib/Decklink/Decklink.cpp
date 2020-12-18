@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "Decklink.h"
 #include "../Common/ComInitializer.h"
+#include "../Common/Executor.h"
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
@@ -66,17 +67,19 @@ namespace TVPlayR {
 			CComPtr<IDeckLinkMutableVideoFrame> empty_video_frame_;
 			std::deque<std::pair<AVDecklinkVideoFrame, AVDecklinkAudioBuffer>> frame_buffer_;
 			Core::VideoFormat format_;
-			BMDPixelFormat pixel_format_;
+			BMDPixelFormat pixel_format_ = BMDPixelFormat::bmdFormat8BitYUV;
 			size_t buffer_size_ = 8;
-			int64_t scheduled_frames_;
-			int64_t scheduled_samples_;
+			int64_t scheduled_frames_ = 0ULL;
+			int64_t scheduled_samples_ = 0ULL;
 			std::shared_ptr<Core::OutputFrameClock> output_frame_clock_;
+			Common::Executor executor_;
 			std::mutex mutex_;
 
 			implementation(IDeckLink* decklink)
 				: decklink_(decklink)
 				, output_(decklink)
 				, format_(Core::VideoFormat::invalid)
+				, executor_("Decklink thread")
 			{
 				if (output_)
 					output_frame_clock_.reset(new Core::OutputFrameClock());

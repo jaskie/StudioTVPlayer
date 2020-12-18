@@ -110,7 +110,21 @@
     <ClInclude Include="Core\OutputDeviceSource.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="FFMpeg\AudioFifo.h" />
+    <ClInclude Include="Common\Executor.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\AudioFifo.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\concurrentqueue.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\blockingconcurrentqueue.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\lightweightsemaphore.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">
@@ -168,7 +182,9 @@
     <ClCompile Include="Core\OutputDeviceSource.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="FFMpeg\AudioFifo.cpp" />
+    <ClCompile Include="FFMpeg\AudioFifo.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

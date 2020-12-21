@@ -26,7 +26,8 @@ namespace StudioTVPlayer.Extensions
 
         public static bool IsMediaFile(string fileName)
         {
-            return Model.Configuration.Instance.Extensions.Contains(Path.GetExtension(fileName).ToLower());
+            //TODO: add checking
+            return true;
         }
 
         public static bool GetFFMeta(this BrowserTabItemViewModel browserVM, FFMeta ffmeta = default(FFMeta),

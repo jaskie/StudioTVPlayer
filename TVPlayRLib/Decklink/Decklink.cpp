@@ -75,11 +75,11 @@ namespace TVPlayR {
 			Common::Executor executor_;
 			std::mutex mutex_;
 
-			implementation(IDeckLink* decklink)
+			implementation(IDeckLink* decklink, const int card_index)
 				: decklink_(decklink)
 				, output_(decklink)
 				, format_(Core::VideoFormat::invalid)
-				, executor_("Decklink thread")
+				, executor_(L"Decklink " + std::to_wstring(card_index) + L" thread")
 			{
 				if (output_)
 					output_frame_clock_.reset(new Core::OutputFrameClock());
@@ -284,8 +284,8 @@ namespace TVPlayR {
 
 		};
 
-		Decklink::Decklink(IDeckLink * decklink)
-			: impl_(new implementation(decklink))
+		Decklink::Decklink(IDeckLink * decklink, const int card_index)
+			: impl_(new implementation(decklink, card_index))
 		{}
 
 		Decklink::~Decklink() { }

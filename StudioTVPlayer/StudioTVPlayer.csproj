@@ -64,6 +64,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Bootstrapper.cs" />
     <Compile Include="Controls\Seekbar.cs" />
     <Compile Include="Controls\Timecode.cs" />
     <Compile Include="Converters\DateConverter.cs" />
@@ -86,8 +87,8 @@
     <Compile Include="Model\Interfaces\IConfiguration.cs" />
     <Compile Include="Model\Interfaces\IUIFocusService.cs" />
     <Compile Include="Model\StringWrapper.cs" />
-    <Compile Include="Model\WatcherMeta.cs" />
-    <Compile Include="Model\Interfaces\IConfigurationDataProvider.cs" />
+    <Compile Include="Model\Watcher.cs" />
+    <Compile Include="Model\Interfaces\IGlobalApplicationData.cs" />
     <Compile Include="Model\Interfaces\IExchangeService.cs" />
     <Compile Include="Model\Interfaces\INavigationService.cs" />
     <Compile Include="Model\Interfaces\IPilotingDataProvider.cs" />
@@ -97,7 +98,7 @@
     <Compile Include="Model\Interfaces\IPlayerController.cs" />
     <Compile Include="Model\Args\ModifiedEventArgs.cs" />
     <Compile Include="Providers\MediaDataProvider.cs" />
-    <Compile Include="Providers\ConfigurationDataProvider.cs" />
+    <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="Providers\PilotingDataProvider.cs" />
     <Compile Include="Services\MediaWatcherService.cs" />
     <Compile Include="Services\UIFocusService.cs" />

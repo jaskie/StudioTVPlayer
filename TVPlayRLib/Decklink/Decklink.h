@@ -11,7 +11,7 @@ namespace TVPlayR {
 class Decklink : public Core::OutputDevice
 {
 public:
-	explicit Decklink(IDeckLink* decklink);
+	explicit Decklink(IDeckLink* decklink, const int card_index);
 	~Decklink();
 	virtual std::shared_ptr<Core::OutputFrameClock> OutputFrameClock() override;
 	std::wstring GetDisplayName();

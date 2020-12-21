@@ -31,10 +31,9 @@ namespace StudioTVPlayer.ViewModel.Main.Piloting.Browser
         public ObservableCollection<BrowserTabItemViewModel> MediaFiles { get; } = new ObservableCollection<BrowserTabItemViewModel>();
 
         #region Properties
-        public Model.Configuration Configuration { get => Model.Configuration.Instance; }
 
-        private WatcherMeta _watcherMeta;
-        public WatcherMeta WatcherMeta
+        private Watcher _watcherMeta;
+        public Watcher WatcherMeta
         {
             get => _watcherMeta;
             set

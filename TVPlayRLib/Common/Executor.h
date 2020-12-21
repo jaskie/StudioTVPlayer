@@ -17,16 +17,15 @@ namespace TVPlayR {
         using task_t = std::function<void()>;
         using queue_t = moodycamel::BlockingConcurrentQueue<task_t>;
 
-        std::string      name_;
         std::atomic<bool> is_running_{ true };
         queue_t           queue_;
         std::thread       thread_;
 
     public:
-        Executor(const std::string& name)
-            : name_(name)
-            , thread_(std::thread([this] { run(); }))
+        Executor(const std::wstring& name)
+            : thread_(std::thread([this] { run(); }))
         {
+            SetThreadDescription(thread_.native_handle(), name.c_str());
         }
 
         ~Executor()
@@ -89,8 +88,6 @@ namespace TVPlayR {
         bool is_running() const { return is_running_; }
 
         bool is_current() const { return std::this_thread::get_id() == thread_.get_id(); }
-
-        const std::string& name() const { return name_; }
 
     private:
         void run()

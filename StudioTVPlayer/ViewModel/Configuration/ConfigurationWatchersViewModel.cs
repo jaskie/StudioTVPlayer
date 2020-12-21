@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
@@ -14,14 +10,16 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ConfigurationWatchersViewModel : ViewModelBase
     {
+        private readonly IGlobalApplicationData _globalApplicationData = SimpleIoc.GetInstance<IGlobalApplicationData>();
+
         private IExchangeService _exchangeService;
         public UiCommand AddRowCommand { get; set; }
         public UiCommand DeleteRowCommand { get; set; }
         public UiCommand UnloadedCommand { get; set; }
         public UiCommand BrowseCommand { get; set; }     
 
-        private WatcherMeta _selectedPath;
-        public WatcherMeta SelectedPath
+        private Watcher _selectedPath;
+        public Watcher SelectedPath
         {
             get => _selectedPath;
             set
@@ -30,8 +28,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
 
-        private ObservableCollection<WatcherMeta> _watcherMetas = new ObservableCollection<WatcherMeta>();
-        public ObservableCollection<WatcherMeta> WatcherMetas
+        private ObservableCollection<Watcher> _watcherMetas = new ObservableCollection<Watcher>();
+        public ObservableCollection<Watcher> WatcherMetas
         {
             get => _watcherMetas;
             set
@@ -50,7 +48,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void LoadData()
         {
-            foreach (var ingestPath in Model.Configuration.Instance.WatcherMetas)
+            foreach (var ingestPath in _globalApplicationData.Configuration.Watchers)
             {
                 WatcherMetas.Add(ingestPath.Clone());
             }
@@ -101,13 +99,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (obj != null)
             {
-                WatcherMetas.Remove((WatcherMeta)obj);
+                WatcherMetas.Remove((Watcher)obj);
             }
         }       
 
         private void AddRow(object obj)
         {
-            WatcherMetas.Add(new WatcherMeta());            
+            WatcherMetas.Add(new Watcher());            
         }
 
         protected override bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)

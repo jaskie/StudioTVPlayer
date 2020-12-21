@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Providers
         public List<PlayerViewModel> GetPlayers()
         {
             List<PlayerViewModel> Players = new List<PlayerViewModel>();
-            foreach (Channel c in Configuration.Instance.Channels)
+            foreach (Channel c in SimpleIoc.GetInstance<IGlobalApplicationData>().Configuration.Channels)
             {
                 PlayerViewModel temp = SimpleIoc.GetInstance<PlayerViewModel>(true);
                 temp.Channel = c;

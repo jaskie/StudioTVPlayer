@@ -11,7 +11,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ConfigurationChannelsViewModel : ViewModelBase
     {
-        public Model.Configuration Configuration { get => Model.Configuration.Instance; }
+        private readonly IGlobalApplicationData _globalApplicationData = SimpleIoc.GetInstance<IGlobalApplicationData>();
+
+        public Model.Configuration Configuration => _globalApplicationData.Configuration;
 
         private IExchangeService _exchangeService;
         public UiCommand AddRowCommand { get; set; }
@@ -55,9 +57,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void LoadData()
         {           
-            for (int i = 0; i < Model.Configuration.Instance.Channels.Count; ++i)
+            for (int i = 0; i < _globalApplicationData.Configuration.Channels.Count; ++i)
             {
-                Channels.Add(Model.Configuration.Instance.Channels[i].Clone());
+                Channels.Add(_globalApplicationData.Configuration.Channels[i].Clone());
                 Channels[i].PropertyChanged += Channels_PropertyChanged;
             }
             Channels.CollectionChanged += Channels_CollectionChanged;

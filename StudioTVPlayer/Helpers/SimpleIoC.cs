@@ -17,25 +17,10 @@ namespace StudioTVPlayer.Helpers
         public static void Register<T>() => Bindings.Add(typeof(T), typeof(T));
         public static void Register<T, R>() => Bindings.Add(typeof(T), typeof(R));
 
-        //public static void RegisterInstance<T>(bool multipleInstancesMember, T instance) //do wywalenia, powinno unikać się parametrów w konstruktorach
-        //{
-        //    Bindings.TryGetValue(typeof(T), out var registeredType);
-
-        //    if (multipleInstancesMember)
-        //        if ((!(Instances.TryGetValue(registeredType, out _))) && multipleInstancesMember == false)
-        //            Instances.Add(typeof(T), instance);
-        //        else { }
-        //    else
-        //    {
-        //        if (!Instances.TryGetValue(typeof(List<T>), out var list))
-        //            Instances.Add(typeof(List<T>), Activator.CreateInstance(typeof(List<T>)));
-
-        //        Instances.TryGetValue(typeof(List<T>), out list);
-
-        //        List<T> tempList = list as List<T>;
-        //        tempList.Add((T)instance);
-        //    }
-        //}
+        public static void RegisterSingleton<T>(T instance) 
+        {
+            Instances.Add(typeof(T), instance);
+        }
 
         public static T GetInstance<T>(bool multipleInstancesMember = false, object[] parameters = null) where T : class
         {

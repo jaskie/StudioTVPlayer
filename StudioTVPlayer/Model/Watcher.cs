@@ -9,7 +9,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public class WatcherMeta : INotifyPropertyChanged
+    public class Watcher : INotifyPropertyChanged
     {
         private string _name;
         [XmlElement("Name")]

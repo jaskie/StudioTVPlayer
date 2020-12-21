@@ -14,6 +14,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ConfigurationExtensionsViewModel : ViewModelBase
     {
+        private readonly IGlobalApplicationData _globalApplicationData = SimpleIoc.GetInstance<IGlobalApplicationData>();
+        
         private IExchangeService _exchangeService = null;
         public UiCommand AddRowCommand { get; set; }
         public UiCommand DeleteRowCommand { get; set; }
@@ -52,7 +54,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void LoadData()
         {
-            foreach(var extension in Model.Configuration.Instance.Extensions)
+            foreach(var extension in _globalApplicationData.Configuration.Extensions)
             {
                 Extensions.Add(new StringWrapper(extension));
             }

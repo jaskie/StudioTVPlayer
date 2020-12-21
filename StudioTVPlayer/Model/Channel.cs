@@ -59,7 +59,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        private int _audioChannelsCount;
+        private int _audioChannelsCount = 2;
         [XmlElement("AudioChannels")]
         public int AudioChannelsCount
         {

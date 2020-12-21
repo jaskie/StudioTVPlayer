@@ -23,16 +23,15 @@ namespace StudioTVPlayer.ViewModel.Main
         public UiCommand SwitchToPilotingCommand { get; set; }
         public UiCommand SwitchToConfigurationCommand { get; set; }
 
-        private IConfigurationDataProvider _configurationDataProvider { get; }
+        private IGlobalApplicationData _configurationDataProvider { get; }
         private INavigationService _navigationService { get; }
 
-        public MainViewModel(IConfigurationDataProvider configurationDataProvider, INavigationService navigationService)
+        public MainViewModel(IGlobalApplicationData configurationDataProvider, INavigationService navigationService)
         {
             _configurationDataProvider = configurationDataProvider;
             _navigationService = navigationService;
             try
             {
-                Model.Configuration.Instance = _configurationDataProvider.LoadConfig();
                 SwitchToConfigurationCommand = new UiCommand(SwitchToConfiguration);
                 SwitchToPilotingCommand = new UiCommand(SwitchToPiloting);
                 CurrentViewModel = SimpleIoc.GetInstance<PilotingViewModel>();

@@ -45,8 +45,9 @@ namespace TVPlayR {
 				if (!decklink_iterator_)
 					return;
 				IDeckLink* decklink;
+				int index = 0;
 				while (decklink_iterator_->Next(&decklink) == S_OK)
-					decklink_list_.push_back(std::shared_ptr<Decklink>(new Decklink(decklink)));
+					decklink_list_.push_back(std::make_shared<Decklink>(decklink, index++));
 			}
 
 			ApiVersion GetVersion()

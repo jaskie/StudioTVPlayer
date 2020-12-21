@@ -14,7 +14,6 @@ namespace StudioTVPlayer.Helpers
         static ViewModelLocator()
         {          
             SimpleIoc.Register<IMediaDataProvider, MediaDataProvider>();
-            SimpleIoc.Register<IConfigurationDataProvider, ConfigurationDataProvider>();
             SimpleIoc.Register<INavigationService, NavigationService>();
             SimpleIoc.Register<IPilotingDataProvider, PilotingDataProvider>();
             SimpleIoc.Register<IExchangeService, ExchangeService>();

@@ -92,8 +92,6 @@ namespace TVPlayR {
     private:
         void run()
         {
-            //set_thread_name(name_);
-
             task_t task;
 
             while (is_running_) {

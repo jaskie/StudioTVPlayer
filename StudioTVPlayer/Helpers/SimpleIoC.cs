@@ -22,65 +22,9 @@ namespace StudioTVPlayer.Helpers
             Instances.Add(typeof(T), instance);
         }
 
-        public static T GetInstance<T>(bool multipleInstancesMember = false, object[] parameters = null) where T : class
+        public static T Get<T>(object[] parameters = null) where T : class
         {
-            Bindings.TryGetValue(typeof(T), out var registeredType);
-            var constructors = typeof(T).GetConstructors();
-
-            var constructor = constructors.FirstOrDefault((c) => {
-                var localParameters = c.GetParameters();
-                if (localParameters.Length == 0)
-                    return false;
-                else
-                    return true;                               
-            });
-
-            if (constructor != null)
-            {
-                bool parametersFilled = default(bool);
-                var localParameters = constructor.GetParameters();
-
-                if (parameters?.Length == localParameters.Length)
-                    parametersFilled = true;
-
-                if (!parametersFilled)
-                {
-                    parameters = new object[localParameters.Length];
-                    for (int i = 0; i < localParameters.Length; ++i)
-                    {
-                        if (Instances.TryGetValue(localParameters[i].ParameterType, out var localInstance))
-                            parameters[i] = localInstance;
-                        else
-                        {
-                            Bindings.TryGetValue(localParameters[i].ParameterType, out var type);
-                            Instances.Add(localParameters[i].ParameterType, Activator.CreateInstance(type));
-                            Instances.TryGetValue(localParameters[i].ParameterType, out parameters[i]);
-                        }
-                    }
-                }
-                
-            }
-
-            if ((!(Instances.TryGetValue(registeredType, out var instance))) && multipleInstancesMember == false)
-            {
-                Instances.Add(typeof(T), (T)Activator.CreateInstance(registeredType, parameters));
-                Instances.TryGetValue(registeredType, out instance);
-            }
-
-            if (multipleInstancesMember == true)
-            {
-                if (!Instances.TryGetValue(typeof(List<T>), out var list))
-                    Instances.Add(typeof(List<T>), Activator.CreateInstance(typeof(List<T>)));
-
-                Instances.TryGetValue(typeof(List<T>), out list);
-                instance = (T)Activator.CreateInstance(registeredType,parameters);
-
-                List<T> tempList = list as List<T>;
-                tempList.Add((T)instance);
-            }
-            
-
-            return (T)instance;                      
+            return (T)Get(typeof(T), parameters);
         }
 
         public static void Destroy<T>()
@@ -100,6 +44,33 @@ namespace StudioTVPlayer.Helpers
                 Instances.TryGetValue(typeof(List<T>), out list);
 
             return list as List<T>;
-        }        
+        }
+
+        private static object Get(Type requestedType, object[] parameters = null)
+        {
+            if (Instances.TryGetValue(requestedType, out var instance))
+                return instance;
+
+            if (!Bindings.TryGetValue(requestedType, out var registeredType))
+            {
+                if (requestedType.IsAbstract)
+                    throw new ApplicationException($"Type {requestedType} not registered");
+                else registeredType = requestedType;
+            }
+            var constructor = registeredType.GetConstructors().FirstOrDefault();
+            if (constructor == null)
+                throw new ApplicationException($"No default constructor found for type {registeredType}");
+            var localParameters = constructor.GetParameters();
+            if ((parameters?.Length ?? 0) == localParameters.Length)
+                instance = constructor.Invoke(parameters);
+            else
+            {
+                parameters = new object[localParameters.Length];
+                for (int i = 0; i < localParameters.Length; ++i)
+                    parameters[i] = Get(localParameters[i].ParameterType);
+                instance = constructor.Invoke(parameters);
+            }
+            return instance;
+        }
     }
 }

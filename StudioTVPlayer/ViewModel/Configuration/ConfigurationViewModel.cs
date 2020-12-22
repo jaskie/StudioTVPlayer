@@ -1,26 +1,22 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Interfaces;
+using StudioTVPlayer.ViewModel.Main;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ConfigurationViewModel : ViewModelBase
     {
-        private readonly IGlobalApplicationData _globalApplicationData = SimpleIoc.GetInstance<IGlobalApplicationData>();
-        private INavigationService _navigationService;
-        private IExchangeService _exchangeService;      
+        private readonly IGlobalApplicationData _globalApplicationData;
+        private readonly IExchangeService _exchangeService;      
        
         private bool _isModified;
 
-        public Model.Configuration Configuration => _globalApplicationData.Configuration;
-
-        public ConfigurationViewModel(IGlobalApplicationData configDataProvider, INavigationService navigationService, IExchangeService vMNotifyService)
+        public ConfigurationViewModel(IGlobalApplicationData globalApplicationData, IExchangeService vMNotifyService)
         {
-            _globalApplicationData = configDataProvider;
-            _navigationService = navigationService;
+            _globalApplicationData = globalApplicationData;
             _exchangeService = vMNotifyService;
-
             _exchangeService.NotifyOnConfigurationIsModifiedChanged += _exchangeService_NotifyOnConfigurationItemChanged;
             SaveConfigurationCommand = new UiCommand(SaveConfiguration, CanSaveConfiguration);
             CancelCommand = new UiCommand(Cancel);
@@ -29,6 +25,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public UiCommand SaveConfigurationCommand { get; }
 
         public UiCommand CancelCommand { get; }
+
+        public ChannelsViewModel ChannelsViewModel { get; } = SimpleIoc.Get<ChannelsViewModel>();
+
+        public ExtensionsViewModel ExtensionsViewModel { get; }
 
 
         private void _exchangeService_NotifyOnConfigurationItemChanged(object sender, ModifiedEventArgs e)
@@ -45,24 +45,21 @@ namespace StudioTVPlayer.ViewModel.Configuration
        
         private void Cancel(object obj)
         {
-            _navigationService.SwitchView(Enums.ViewType.Piloting);
+            MainViewModel.Instance.CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
         }
 
         private void SaveConfiguration(object obj)
-        {          
+        {
             if (_isModified)
             {
                 Model.Configuration conf = _globalApplicationData.Configuration;
                 conf.Channels = _globalApplicationData.Configuration.Channels;
-                conf.Watchers = _globalApplicationData.Configuration.Watchers;
+                conf.WatchedFolders = _globalApplicationData.Configuration.WatchedFolders;
                 conf.Extensions = _globalApplicationData.Configuration.Extensions.ToList();
                 _exchangeService.RaiseConfigurationChanged(new Model.Args.ConfigurationChangedEventArgs(conf));
-                _globalApplicationData.Save();
+                _globalApplicationData.SaveConfiguration();
             }
-            _navigationService.SwitchView(Enums.ViewType.Piloting);      
+            MainViewModel.Instance.CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
         }
-
-        
-
     }
 }

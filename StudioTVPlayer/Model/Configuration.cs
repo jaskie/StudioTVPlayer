@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer.Helpers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
@@ -7,8 +6,8 @@ namespace StudioTVPlayer.Model
     public class Configuration
     {
         [XmlArray]
-        [XmlArrayItem("Watcher")]
-        public List<Watcher> Watchers { get; set; } = new List<Watcher>();
+        [XmlArrayItem("WatchedFolder")]
+        public List<WatchedFolder> WatchedFolders { get; set; } = new List<WatchedFolder>();
 
         [XmlArray]
         [XmlArrayItem("Channel")]

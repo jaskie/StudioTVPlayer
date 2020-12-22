@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using StudioTVPlayer.ViewModel.Main.Piloting.Player;
+using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.Model.Interfaces
 {

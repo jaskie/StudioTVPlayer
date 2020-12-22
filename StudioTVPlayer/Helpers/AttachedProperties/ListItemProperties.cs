@@ -1,9 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using StudioTVPlayer.Model;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
-using StudioTVPlayer.ViewModel.Main.Piloting.Player;
+using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.Helpers.AttachedProperties
 {

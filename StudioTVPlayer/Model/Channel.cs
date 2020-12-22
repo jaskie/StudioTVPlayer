@@ -1,31 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Serialization;
 using TVPlayR;
 
 namespace StudioTVPlayer.Model
 {
-    [Serializable]
     public class Channel : INotifyPropertyChanged, IDisposable
     {
         private int _id;
-        [XmlElement("ID")]
-        public int ID { get => _id; set => _id = value; }
+        private string _name = string.Empty;
+        private VideoFormat _videoFormat;
+        private int _videoFormatId;
+        private PixelFormat _pixelFormat;
+        private int _deviceIndex;
+
+        [XmlAttribute]
+        public int Id { get => _id; set => _id = value; }
       
         private TVPlayR.Channel _channelR;
         
-        private string _name;
-        [XmlElement("Name")]
+        [XmlAttribute]
         public string Name { get => _name; set => _name = value; }
 
-        private VideoFormat _videoFormat;
-        [XmlIgnoreAttribute]
+        [XmlIgnore]
         public VideoFormat VideoFormat
         {
             get => _videoFormat;
@@ -36,16 +35,14 @@ namespace StudioTVPlayer.Model
 
                 _videoFormat = value;
                 VideoFormatId = value.Id;
-                RaisePropertyRaised();
+                RaisePropertyChanged();
             }
         }
 
-        private int _videoFormatId;
-        [XmlElement("VideoFormatID")]
+        [XmlAttribute]
         public int VideoFormatId { get => _videoFormatId; set => _videoFormatId = value; }
 
-        private PixelFormat _pixelFormat;
-        [XmlElement("PixelFormat")]
+        [XmlAttribute]
         public PixelFormat PixelFormat
         {
             get => _pixelFormat;
@@ -55,47 +52,40 @@ namespace StudioTVPlayer.Model
                     return;
 
                 _pixelFormat = value;
-                RaisePropertyRaised();
+                RaisePropertyChanged();
             }
         }
-
-        private int _audioChannelsCount = 2;
-        [XmlElement("AudioChannels")]
-        public int AudioChannelsCount
+        
+       
+        [XmlAttribute]
+        public int DeviceIndex
         {
-            get { return _audioChannelsCount; }
+            get => _deviceIndex;
             set
             {
-                if (_audioChannelsCount == value)
+                if (_deviceIndex == value)
                     return;
-
-                _audioChannelsCount = value;
-                RaisePropertyRaised();
+                _deviceIndex = value;
+                RaisePropertyChanged();
             }
         }
 
-        private Device _device;     
-        [XmlElement("Device")]
-        public Device Device
+        internal Channel Clone()
         {
-            get => _device;
-            set
-            {
-                if (_device == value)
-                    return;
-
-                _device = value;
-                RaisePropertyRaised();
-            }
+            return new Channel { Id = this.Id, Name = this.Name };
         }
 
-        public void Init(int videoFormat, PixelFormat pixelFormat, int audioChannelCount) => _channelR = new TVPlayR.Channel(videoFormat, pixelFormat, audioChannelCount);
-        public void AddOutput(TVPlayR.DecklinkDevice device) => _channelR.AddOutput(device);
+        public void Init(int videoFormat, PixelFormat pixelFormat)
+        {
+            _channelR = new TVPlayR.Channel(videoFormat, pixelFormat, 16);
+        }
+
+        public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);
         public void Load(InputFile inputFile) => _channelR.Load(inputFile);
         public void Clear() => _channelR.Clear();
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private void RaisePropertyRaised([CallerMemberName]string propertyname = null)
+        private void RaisePropertyChanged([CallerMemberName]string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }

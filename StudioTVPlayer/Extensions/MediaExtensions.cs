@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TVPlayR;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
-using static StudioTVPlayer.Model.Enums;
+using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Extensions
 {
@@ -30,7 +30,7 @@ namespace StudioTVPlayer.Extensions
             return true;
         }
 
-        public static bool GetFFMeta(this BrowserTabItemViewModel browserVM, FFMeta ffmeta = default(FFMeta),
+        public static bool GetFFMeta(this BrowserTabItemViewModel browserVM, FFMeta ffmeta = default,
             bool getAudioDuration = false, int height = 200)
         {
             if (!File.Exists(browserVM.Media.Path))

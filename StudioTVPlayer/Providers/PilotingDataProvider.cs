@@ -2,7 +2,7 @@
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Interfaces;
-using StudioTVPlayer.ViewModel.Main.Piloting.Player;
+using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.Providers
 {
@@ -11,9 +11,9 @@ namespace StudioTVPlayer.Providers
         public List<PlayerViewModel> GetPlayers()
         {
             List<PlayerViewModel> Players = new List<PlayerViewModel>();
-            foreach (Channel c in SimpleIoc.GetInstance<IGlobalApplicationData>().Configuration.Channels)
+            foreach (Channel c in SimpleIoc.Get<IGlobalApplicationData>().Configuration.Channels)
             {
-                PlayerViewModel temp = SimpleIoc.GetInstance<PlayerViewModel>(true);
+                PlayerViewModel temp = SimpleIoc.Get<PlayerViewModel>();
                 temp.Channel = c;
                 Players.Add(temp);
             }

@@ -4,8 +4,8 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
 using StudioTVPlayer.Model.Interfaces;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
-using StudioTVPlayer.ViewModel.Main.Piloting.Player;
+using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.Services
 {
@@ -41,7 +41,7 @@ namespace StudioTVPlayer.Services
 
         public void AddToPlayerQueueByChannelID(int id, BrowserTabItemViewModel item)
         {           
-            SimpleIoc.GetInstances<PlayerViewModel>().FirstOrDefault(param => param.Channel.ID == id).MediaQueue.Add(new PlayerQueueItemViewModel(item));
+            SimpleIoc.GetInstances<PlayerViewModel>().FirstOrDefault(param => param.Channel.Id == id).MediaQueue.Add(new PlayerQueueItemViewModel(item));
         }
     }
 }

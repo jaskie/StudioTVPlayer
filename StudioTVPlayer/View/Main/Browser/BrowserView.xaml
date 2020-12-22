@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="StudioTVPlayer.View.Main.Browser.BrowserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StudioTVPlayer.View.Main.Browser" 
+             xmlns:browserViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Browser"
+             xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"            
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="300"
+             MinWidth="360"
+             KeyboardNavigation.TabNavigation="Local"
+             FocusManager.IsFocusScope="True"                         
+             attachedProp:ControlProperties.IsFocused="{Binding IsFocused, Mode=TwoWay}"           
+             Background="#202020">
+
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type browserViewModels:BrowserTabViewModel}">
+            <local:BrowserTabView />
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <Grid Background="Transparent">
+        <TabControl ItemsSource="{Binding BrowserTabs}" Padding="0" BorderThickness="0" Background="{StaticResource Program_SecondaryColor}">
+            <TabControl.ToolTip>
+                <ToolTip Content="CTRL+0 by zaznaczyć" />
+            </TabControl.ToolTip>
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem">
+                    <Setter Property="Foreground" Value="{StaticResource Program_Foreground}" />
+                    <Setter Property="Padding" Value="10,5,10,5" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Header" Value="{Binding WatcherMeta.Name}" />
+                    <Setter Property="Template" Value="{StaticResource TabItemControlTemplate}" />
+                </Style>
+            </TabControl.ItemContainerStyle>
+            <!--<TabItem Focusable="True" IsTabStop="False" Header="Ingest" Template="{DynamicResource TabItemControlTemplate}">
+                <local:IngestView />
+            </TabItem>
+            <TabItem Header="Oprawa" Template="{DynamicResource TabItemControlTemplate}">
+                <local:UniqueIngestView />
+            </TabItem>-->
+        </TabControl>
+    </Grid>
+</UserControl>

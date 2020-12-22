@@ -6,7 +6,6 @@
              xmlns:views="clr-namespace:StudioTVPlayer.View.Configuration"
              mc:Ignorable="d" 
              d:DesignHeight="1050" d:DesignWidth="1920"
-             DataContext="{Binding Configuration, Source={StaticResource Locator}}"
              Background="{StaticResource Program_SecondaryColor}">
     <Grid x:Name="rootGrid">
         <ContentControl Content="{StaticResource SettingsBackground}" VerticalAlignment="Center" />
@@ -55,11 +54,11 @@
                     <ColumnDefinition Width="10*" />
                     <ColumnDefinition Width="33*" />
                 </Grid.ColumnDefinitions>
-                <views:ConfigurationIngestView HorizontalAlignment="Center" Margin="5" />
+                <views:IngestView HorizontalAlignment="Center" Margin="5" />
                 <Rectangle Grid.Column="1" HorizontalAlignment="Center" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" />
-                <views:ConfigurationChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" />
+                <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" />
                 <Rectangle Grid.Column="3" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" />
-                <views:ConfigurationMediaExtensionsView HorizontalAlignment="Center" Grid.Column="4" VerticalAlignment="Top" Margin="5" />
+                <views:ExtensionsView HorizontalAlignment="Center" Grid.Column="4" VerticalAlignment="Top" Margin="5" />
             </Grid>
         </Grid>
     </Grid>

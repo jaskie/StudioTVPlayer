@@ -1,5 +1,5 @@
 ﻿using System;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
+using StudioTVPlayer.ViewModel.Main.Browser;
 
 namespace StudioTVPlayer.Model.Args
 {

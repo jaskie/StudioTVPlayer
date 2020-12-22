@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using StudioTVPlayer.Services;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
+using StudioTVPlayer.ViewModel.Main.Browser;
 
 namespace StudioTVPlayer.Model.Interfaces
 {

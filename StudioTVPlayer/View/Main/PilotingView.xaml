@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="StudioTVPlayer.View.Main.PilotingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:playerViews="clr-namespace:StudioTVPlayer.View.Main.Player"    
+             xmlns:playerViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
+             xmlns:browserViews="clr-namespace:StudioTVPlayer.View.Main.Browser"       
+             xmlns:local="clr-namespace:StudioTVPlayer.View.Main"
+             mc:Ignorable="d" 
+             d:DesignHeight="1080" d:DesignWidth="1920"
+             FocusManager.IsFocusScope="True"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Loaded="UserControl_Loaded">
+    <UserControl.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="D0" Command="{Binding FocusBrowserCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="D1" Command="{Binding FocusPlayerCommand}" CommandParameter="1" />
+        <KeyBinding Modifiers="Ctrl" Key="D2" Command="{Binding FocusPlayerCommand}" CommandParameter="2" />
+        <KeyBinding Modifiers="Ctrl" Key="D3" Command="{Binding FocusPlayerCommand}" CommandParameter="3" />
+        <KeyBinding Modifiers="Ctrl" Key="D4" Command="{Binding FocusPlayerCommand}" CommandParameter="4" />
+        <KeyBinding Modifiers="Ctrl" Key="D5" Command="{Binding FocusPlayerCommand}" CommandParameter="5" />
+        <KeyBinding Modifiers="Ctrl" Key="D6" Command="{Binding FocusPlayerCommand}" CommandParameter="6" />
+        <KeyBinding Modifiers="Ctrl" Key="D7" Command="{Binding FocusPlayerCommand}" CommandParameter="7" />
+        <KeyBinding Modifiers="Ctrl" Key="D8" Command="{Binding FocusPlayerCommand}" CommandParameter="8" />
+        <KeyBinding Modifiers="Ctrl" Key="D9" Command="{Binding FocusPlayerCommand}" CommandParameter="9" />
+    </UserControl.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="100px" />
+                </Grid.RowDefinitions>
+                <ScrollViewer Template="{StaticResource ScrollViewerControlTemplate}" Background="{StaticResource Program_MainColor}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl Focusable="False" IsTabStop="False" Margin="5,5,0,0" Grid.Column="0" ItemsSource="{Binding Players}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">
+                                <playerViews:PlayerView Margin="10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Grid Background="{StaticResource Program_SecondaryColor}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"></Grid>
+            </Grid>
+            <Grid Grid.Column="1" Background="{StaticResource Program_SecondaryColor}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <browserViews:BrowserView />
+                <local:InfoView Margin="5,0,0,0" x:Name="info" Grid.Row="1" />
+            </Grid>
+            
+            <GridSplitter IsTabStop="False" Grid.Column="1" Width="2" BorderBrush="LightGray" Background="LightGray" HorizontalAlignment="Left" />
+            
+        </Grid>
+    </Grid>
+</UserControl>

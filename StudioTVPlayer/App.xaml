@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:StudioTVPlayer"
              xmlns:locator="clr-namespace:StudioTVPlayer.Helpers"
-             StartupUri="MainWindow.xaml">
+             StartupUri="View\MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -14,9 +14,10 @@
                 <ResourceDictionary Source="View/Dictionaries/PlayerDictionary.xaml"/>
                 <ResourceDictionary Source="View/Dictionaries/BrowserDictionary.xaml"/>
                 <ResourceDictionary Source="View/Dictionaries/ConfigurationDictionary.xaml" />
+                <ResourceDictionary>
+                    <local:Bootstrapper x:Key="Bootstrapper" />
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
-            <local:Bootstrapper x:Key="Bootstrapper" />
-            <locator:ViewModelLocator x:Key="Locator" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

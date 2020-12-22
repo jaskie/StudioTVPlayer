@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model.Interfaces;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
-using StudioTVPlayer.ViewModel.Main.Piloting.Player;
+using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.Services
 {

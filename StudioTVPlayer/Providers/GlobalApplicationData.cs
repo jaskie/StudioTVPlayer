@@ -1,43 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.IO;
 using System.Linq;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Interfaces;
-using StudioTVPlayer.ViewModel.Configuration;
+using TVPlayR;
 
 namespace StudioTVPlayer.Providers
 {
     class GlobalApplicationData : IGlobalApplicationData
     {
-        private const string _configurationFile = "configuration";
+
+        private const string PathName = "StudioTVPlayer";
+        private const string ConfigurationFile = "configuration.xml";
+        private static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
 
         public static Configuration LoadConfig()
         {
-            return DataStore.Load<Configuration>(_configurationFile) ?? new Configuration();
+            var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
+            return DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
         }
 
         public Configuration Configuration { get; } = LoadConfig();
 
-        private List<Device> LoadDevices()
-        {          
-            var Devices = TVPlayR.DecklinkDevice.EnumerateDevices();
+        public DecklinkDevice[] DecklinkDevices { get; } = DecklinkDevice.EnumerateDevices();
 
-            if (!(Devices.Length > 0))
-                return null;
+        public VideoFormat[] VideoFormats { get; } = VideoFormat.EnumVideoFormats();
 
-            List<Device> LoadedDevices = new List<Device>();
+        public PixelFormat[] PixelFormats { get; } = Enum.GetValues(typeof(PixelFormat)).Cast<PixelFormat>().ToArray();
 
-            foreach (var device in Devices)
-            {
-                LoadedDevices.Add(new Device { ID = device.Index, Name = device.DisplayName });
-            }
-
-            return LoadedDevices;          
-        }
-
-        public void Save()
+        public void SaveConfiguration()
         {
-            DataStore.Save(Configuration, _configurationFile);
+            var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
+            DataStore.Save(Configuration, configurationFile);
         }
     }
 }

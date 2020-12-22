@@ -11,21 +11,23 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Interfaces;
 using StudioTVPlayer.Services;
-using StudioTVPlayer.ViewModel.Main.Piloting.Browser;
-using static StudioTVPlayer.Model.Enums;
+using StudioTVPlayer.ViewModel.Main.Browser;
 
 namespace StudioTVPlayer.Providers
 {
     public class MediaDataProvider : IMediaDataProvider
     {
-        public MediaWatcherService StartWatcher(string path) => new MediaWatcherService(path);
+        public MediaWatcherService StartWatcher(string path)
+        {
+            return new MediaWatcherService(path);
+        }
 
         public ObservableCollection<BrowserTabViewModel> GetBrowserTabs()
         {
             var browserTabs = new ObservableCollection<BrowserTabViewModel>();
-            foreach (var item in SimpleIoc.GetInstance<IGlobalApplicationData>().Configuration.Watchers)
+            foreach (var item in SimpleIoc.Get<IGlobalApplicationData>().Configuration.WatchedFolders)
             {
-                var tab = SimpleIoc.GetInstance<BrowserTabViewModel>(true);
+                var tab = SimpleIoc.Get<BrowserTabViewModel>();
                 tab.WatcherMeta = item;
                 browserTabs.Add(tab);
             }
@@ -34,7 +36,7 @@ namespace StudioTVPlayer.Providers
         
         public BrowserTabItemViewModel GetNewBrowserTabItem(Media m)
         {
-            var item = SimpleIoc.GetInstance<BrowserTabItemViewModel>(true);
+            var item = SimpleIoc.Get<BrowserTabItemViewModel>();
             item.Media = m;
 
             return item;
@@ -55,7 +57,7 @@ namespace StudioTVPlayer.Providers
 
             foreach(var media in mediaFiles)
             {
-                var tabItem = SimpleIoc.GetInstance<BrowserTabItemViewModel>(true);
+                var tabItem = SimpleIoc.Get<BrowserTabItemViewModel>();
                 tabItem.Media = media;
                 tabItems.Add(tabItem);
             }

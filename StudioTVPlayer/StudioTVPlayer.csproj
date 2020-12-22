@@ -16,7 +16,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -27,7 +27,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -74,23 +74,19 @@
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />
     <Compile Include="Helpers\AttachedProperties\ListItemProperties.cs" />
     <Compile Include="Helpers\DataStore.cs" />
-    <Compile Include="Helpers\ObjectOperations.cs" />
     <Compile Include="Helpers\SimpleIoc.cs" />
-    <Compile Include="Helpers\ViewModelLocator.cs" />
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\ConfigurationChangedEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Channel.cs" />
     <Compile Include="Model\Configuration.cs" />
-    <Compile Include="Model\Device.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\Interfaces\IConfiguration.cs" />
     <Compile Include="Model\Interfaces\IUIFocusService.cs" />
     <Compile Include="Model\StringWrapper.cs" />
-    <Compile Include="Model\Watcher.cs" />
+    <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\Interfaces\IGlobalApplicationData.cs" />
     <Compile Include="Model\Interfaces\IExchangeService.cs" />
-    <Compile Include="Model\Interfaces\INavigationService.cs" />
     <Compile Include="Model\Interfaces\IPilotingDataProvider.cs" />
     <Compile Include="Model\Interfaces\IMediaWatcherService.cs" />
     <Compile Include="Model\Media.cs" />
@@ -103,53 +99,54 @@
     <Compile Include="Services\MediaWatcherService.cs" />
     <Compile Include="Services\UIFocusService.cs" />
     <Compile Include="Services\ExchangeService.cs" />
-    <Compile Include="Services\NavigationService.cs" />
-    <Compile Include="ViewModel\Main\Piloting\Browser\BrowserTabItemViewModel.cs" />
-    <Compile Include="ViewModel\Main\Piloting\Browser\BrowserViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ConfigurationChannelsViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ConfigurationWatchersViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ConfigurationExtensionsViewModel.cs" />
-    <Compile Include="ViewModel\Main\Piloting\InfoViewModel.cs" />
-    <Compile Include="ViewModel\Main\Piloting\Browser\BrowserTabViewModel.cs" />
-    <Compile Include="ViewModel\Main\MainViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
+    <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
+    <Compile Include="ViewModel\Main\Browser\BrowserTabItemViewModel.cs" />
+    <Compile Include="ViewModel\Main\Browser\BrowserViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\WatchersViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\ExtensionsViewModel.cs" />
+    <Compile Include="ViewModel\Main\InfoViewModel.cs" />
+    <Compile Include="ViewModel\Main\Browser\BrowserTabViewModel.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />
-    <Compile Include="ViewModel\Main\Piloting\PilotingViewModel.cs" />
-    <Compile Include="ViewModel\Main\Piloting\Player\PlayerViewModel.cs" />
-    <Compile Include="ViewModel\Main\Piloting\Player\PlayerQueueItemViewModel.cs" />
-    <Compile Include="View\Configuration\ConfigurationChannelsView.xaml.cs">
-      <DependentUpon>ConfigurationChannelsView.xaml</DependentUpon>
+    <Compile Include="ViewModel\Main\PilotingViewModel.cs" />
+    <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
+    <Compile Include="ViewModel\Main\Player\PlayerQueueItemViewModel.cs" />
+    <Compile Include="View\Configuration\ChannelsView.xaml.cs">
+      <DependentUpon>ChannelsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Configuration\ConfigurationIngestView.xaml.cs">
-      <DependentUpon>ConfigurationIngestView.xaml</DependentUpon>
+    <Compile Include="View\Configuration\IngestView.xaml.cs">
+      <DependentUpon>IngestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\ConfigurationExtensionsView.xaml.cs">
       <DependentUpon>ConfigurationExtensionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\Browser\BrowserTabItemView.xaml.cs">
+    <Compile Include="View\Main\Browser\BrowserTabItemView.xaml.cs">
       <DependentUpon>BrowserTabItemView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\Browser\BrowserView.xaml.cs">
+    <Compile Include="View\Main\Browser\BrowserView.xaml.cs">
       <DependentUpon>BrowserView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\ConfigurationView.xaml.cs">
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\InfoView.xaml.cs">
+    <Compile Include="View\Main\InfoView.xaml.cs">
       <DependentUpon>InfoView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\Browser\BrowserTabView.xaml.cs">
+    <Compile Include="View\Main\Browser\BrowserTabView.xaml.cs">
       <DependentUpon>BrowserTabView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\PilotingView.xaml.cs">
+    <Compile Include="View\Main\PilotingView.xaml.cs">
       <DependentUpon>PilotingView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\Player\PlayerQueueItemView.xaml.cs">
+    <Compile Include="View\Main\Player\PlayerQueueItemView.xaml.cs">
       <DependentUpon>PlayerQueueItemView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Piloting\Player\PlayerView.xaml.cs">
+    <Compile Include="View\Main\Player\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
-    <Page Include="MainWindow.xaml">
+    <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -158,16 +155,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\UICommand.cs" />
-    <Compile Include="Helpers\ViewModelBase.cs" />
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="ViewModel\ViewModelBase.cs" />
+    <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="View\Configuration\ConfigurationChannelsView.xaml">
+    <Page Include="View\Configuration\ChannelsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Configuration\ConfigurationIngestView.xaml">
+    <Page Include="View\Configuration\IngestView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -187,11 +184,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\Browser\BrowserTabItemView.xaml">
+    <Page Include="View\Main\Browser\BrowserTabItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\Browser\BrowserView.xaml">
+    <Page Include="View\Main\Browser\BrowserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -203,23 +200,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\InfoView.xaml">
+    <Page Include="View\Main\InfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\Browser\BrowserTabView.xaml">
+    <Page Include="View\Main\Browser\BrowserTabView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\PilotingView.xaml">
+    <Page Include="View\Main\PilotingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\Player\PlayerQueueItemView.xaml">
+    <Page Include="View\Main\Player\PlayerQueueItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Piloting\Player\PlayerView.xaml">
+    <Page Include="View\Main\Player\PlayerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

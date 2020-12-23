@@ -12,7 +12,7 @@ using StudioTVPlayer.Model.Interfaces;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ExtensionsViewModel : ViewModelBase
+    public class ExtensionsViewModel : ModifyableViewModelBase
     {
         private readonly IGlobalApplicationData _globalApplicationData = SimpleIoc.Get<IGlobalApplicationData>();
         
@@ -24,15 +24,15 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         
 
-        private StringWrapper _selectedExtension;
-        public StringWrapper SelectedExtension
+        private ExtensionViewModel _selectedExtension;
+        public ExtensionViewModel SelectedExtension
         {
             get => _selectedExtension;
             set => Set(ref _selectedExtension, value);
         }
 
-        private ObservableCollection<StringWrapper> _extensions = new ObservableCollection<StringWrapper>();
-        public ObservableCollection<StringWrapper> Extensions
+        private ObservableCollection<ExtensionViewModel> _extensions = new ObservableCollection<ExtensionViewModel>();
+        public ObservableCollection<ExtensionViewModel> Extensions
         {
             get => _extensions;
             set => Set(ref _extensions, value);
@@ -50,7 +50,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach(var extension in _globalApplicationData.Configuration.Extensions)
             {
-                Extensions.Add(new StringWrapper(extension));
+                Extensions.Add(new ExtensionViewModel(extension));
             }
         }
 
@@ -86,13 +86,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (obj != null)
             {
-                Extensions.Remove((StringWrapper)obj);
+                Extensions.Remove((ExtensionViewModel)obj);
             }
         }
 
         private void AddRow(object obj)
         {
-            Extensions.Add(new StringWrapper(String.Empty));
+            Extensions.Add(new ExtensionViewModel(string.Empty));
         }
 
         protected override bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
@@ -100,6 +100,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (!EqualityComparer<T>.Default.Equals(field, value))
                 _exchangeService.RaiseConfigurationIsModifiedChanged(new ModifiedEventArgs(true));
             return base.Set(ref field, value, propertyName);
+        }
+
+        public override void Apply()
+        {
+            
         }
     }
 }

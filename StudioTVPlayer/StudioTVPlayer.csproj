@@ -74,6 +74,7 @@
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />
     <Compile Include="Helpers\AttachedProperties\ListItemProperties.cs" />
     <Compile Include="Helpers\DataStore.cs" />
+    <Compile Include="Helpers\FolderHelper.cs" />
     <Compile Include="Helpers\SimpleIoc.cs" />
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\ConfigurationChangedEventArgs.cs" />
@@ -100,11 +101,12 @@
     <Compile Include="Services\UIFocusService.cs" />
     <Compile Include="Services\ExchangeService.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\Browser\BrowserTabItemViewModel.cs" />
     <Compile Include="ViewModel\Main\Browser\BrowserViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\WatchersViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ExtensionsViewModel.cs" />
     <Compile Include="ViewModel\Main\InfoViewModel.cs" />
     <Compile Include="ViewModel\Main\Browser\BrowserTabViewModel.cs" />
@@ -116,8 +118,8 @@
     <Compile Include="View\Configuration\ChannelsView.xaml.cs">
       <DependentUpon>ChannelsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Configuration\IngestView.xaml.cs">
-      <DependentUpon>IngestView.xaml</DependentUpon>
+    <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
+      <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\ConfigurationExtensionsView.xaml.cs">
       <DependentUpon>ConfigurationExtensionsView.xaml</DependentUpon>
@@ -164,7 +166,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Configuration\IngestView.xaml">
+    <Page Include="View\Configuration\WatchedFoldersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

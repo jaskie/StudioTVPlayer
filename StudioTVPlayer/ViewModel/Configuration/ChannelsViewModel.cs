@@ -1,27 +1,33 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using StudioTVPlayer.Model.Interfaces;
+using StudioTVPlayer.Providers;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ChannelsViewModel : ViewModelBase
+    public class ChannelsViewModel : ModifyableViewModelBase
     {
-        private readonly IExchangeService _exchangeService;
         private ChannelViewModel _selectedChannel;
 
-        public ChannelsViewModel(IGlobalApplicationData globalApplicationData, IExchangeService exchangeService)
+        public ChannelsViewModel()
         {
-            _exchangeService = exchangeService;
-            AddChannelCommand = new UiCommand(AddRow);
-            DeleteChannelCommand = new UiCommand(DeleteRow, CanDeleteRow);
+            AddChannelCommand = new UiCommand(AddChannel);
+            DeleteChannelCommand = new UiCommand(DeleteChannel, CanDeleteChannel);
             UnloadedCommand = new UiCommand((param) => { CommitChanges(param); });
-            Channels = new ObservableCollection<ChannelViewModel>(globalApplicationData.Configuration.Channels.Select(c => new ChannelViewModel(c)));
-        }    
-        
+            Channels = new ObservableCollection<ChannelViewModel>(GlobalApplicationData.Current.Configuration.Channels.Select(c => new ChannelViewModel(c)));
+            foreach (var channel in Channels)
+                channel.PropertyChanged += Channel_PropertyChanged;
+        }
+
+        private void Channel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsModified))
+                IsModified = true;
+        }
+
         public UiCommand AddChannelCommand { get; }
         public UiCommand DeleteChannelCommand { get; }
         public UiCommand UnloadedCommand { get; }
@@ -33,16 +39,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public ObservableCollection<ChannelViewModel> Channels { get; }
 
-        private void Channels_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            _exchangeService.RaiseConfigurationIsModifiedChanged(new ModifiedEventArgs(true));
-        }
-
-        private void Channels_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            _exchangeService.RaiseConfigurationIsModifiedChanged(new ModifiedEventArgs(true));
-        }
-
         private void CommitChanges(object param)
         {
             if (param != null)
@@ -53,43 +49,36 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
        
-        private bool CanDeleteRow(object obj)
+        private bool CanDeleteChannel(object obj)
         {
             if (_selectedChannel != null) return true;
             return false;
         }
 
-        private void DeleteRow(object obj)
+        private void DeleteChannel(object obj)
         {
-            if (obj != null)
-            {
-                Channels.Remove((ChannelViewModel)obj);
-            }
+            var channel = obj as ChannelViewModel ?? throw new ArgumentException(nameof(obj));
+            Channels.Remove(channel);            
         }        
 
-        private void AddRow(object obj)
+        private void AddChannel(object obj)
         {
-            Channels.Add(new ChannelViewModel(new Channel()));
+            var channel = new Channel();
             int index = 0;
             while (true)
             {
-                if (Channels.FirstOrDefault(param => param.Id == index) != null)
-                {
-                    ++index;
+                if (Channels.FirstOrDefault(param => param.Id == index++) != null)
                     continue;
-                }
-                Channels.Last().Id = index;
+                channel.Id = index;
                 break;
             }
+            Channels.Add(new ChannelViewModel(channel));
         }
 
-
-        protected override bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        public override void Apply()
         {
-            if (!base.Set(ref field, value, propertyName))
-                return false;
-            _exchangeService.RaiseConfigurationIsModifiedChanged(new ModifiedEventArgs(true));
-            return true;
+            foreach (var channel in Channels)
+                channel.Apply();
         }
     }
 }

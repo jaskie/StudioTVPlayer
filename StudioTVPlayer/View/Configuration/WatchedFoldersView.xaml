@@ -1,10 +1,12 @@
-﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.IngestView"
+﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.WatchedFoldersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"             
              xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:WatchedFoldersViewModel}"
              d:DesignHeight="450" d:DesignWidth="800"
              >
     <Border BorderThickness="0" BorderBrush="{StaticResource Program_Foreground}">
@@ -16,7 +18,7 @@
             
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Foldery monitorowane" FontSize="18" Foreground="{StaticResource Program_Foreground}" VerticalAlignment="Center" Margin="5" />
-                <Button Style="{StaticResource Configuration_Button}" Command="{Binding AddRowCommand}" Margin="5" Padding="10,2,10,2" VerticalAlignment="Center" HorizontalAlignment="Left">
+                <Button Style="{StaticResource Configuration_Button}" Command="{Binding AddWatchedFolderCommand}" Margin="5" Padding="10,2,10,2" VerticalAlignment="Center" HorizontalAlignment="Left">
                     <Button.Content>
                         <ContentControl Content="{StaticResource AddIcon}" />
                     </Button.Content>
@@ -28,8 +30,8 @@
                 Style="{StaticResource Configuration_DataGrid}"            
                 x:Name="WatcherMetas_DataGrid"             
                 Grid.Row="2" 
-                ItemsSource="{Binding WatcherMetas}" 
-                SelectedItem="{Binding SelectedPath}"           
+                ItemsSource="{Binding WatchedFolders}" 
+                SelectedItem="{Binding SelectedWatchedFolder}"           
                 CellStyle="{StaticResource Configuration_DataGridCell}"
                 RowStyle="{StaticResource Configuration_DataGridRow}"
                 RowHeaderStyle="{StaticResource Configuration_DataGridRowHeader}"
@@ -57,7 +59,7 @@
                     <DataGridTemplateColumn Header="Filtrowanie daty">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox IsChecked="{Binding IsFiltered, Mode=TwoWay}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <CheckBox IsChecked="{Binding IsFiltered}" VerticalAlignment="Center" HorizontalAlignment="Center" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -65,7 +67,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Padding="5,0,5,0" HorizontalAlignment="Center" Content="..." Margin="5" 
-                                        Command="{Binding DataContext.BrowseCommand, ElementName=rootGrid}" />
+                                        Command="{Binding BrowseCommand}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

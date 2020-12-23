@@ -4,47 +4,49 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"              
              xmlns:views="clr-namespace:StudioTVPlayer.View.Configuration"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance {x:Type vm:ConfigurationViewModel}}"
              d:DesignHeight="1050" d:DesignWidth="1920"
              Background="{StaticResource Program_SecondaryColor}">
-    <Grid x:Name="rootGrid">
+    <Grid>
         <ContentControl Content="{StaticResource SettingsBackground}" VerticalAlignment="Center" />
         <Grid>
             <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0">
-            <Button Style="{StaticResource Configuration_Button}" 
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <Button Style="{StaticResource Configuration_Button}" 
                     Command="{Binding CancelCommand}" 
                     Margin="10" Padding="5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                <Button.Content>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+                    <Button.Content>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
                             <ContentControl Content="{StaticResource CancelIcon}" />
                             <TextBlock FontSize="18" Padding="5,0,0,0" Grid.Column="1" Text="Anuluj" />
                         </Grid>
-                </Button.Content>
-            </Button>
-            <Button Style="{StaticResource Configuration_Button}" Command="{Binding SaveConfigurationCommand}" 
+                    </Button.Content>
+                </Button>
+                <Button Style="{StaticResource Configuration_Button}" Command="{Binding SaveConfigurationCommand}" 
                     Margin="10" Padding="5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                <Button.Content>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+                    <Button.Content>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
                             <ContentControl Content="{StaticResource SaveIcon}" />
                             <TextBlock FontSize="18" Padding="5,0,0,0" Grid.Column="1" Text="Zapisz" />
                         </Grid>
-                </Button.Content>
-            </Button>
-        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -54,10 +56,10 @@
                     <ColumnDefinition Width="10*" />
                     <ColumnDefinition Width="33*" />
                 </Grid.ColumnDefinitions>
-                <views:IngestView HorizontalAlignment="Center" Margin="5" />
+                <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
                 <Rectangle Grid.Column="1" HorizontalAlignment="Center" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" />
-                <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" />
-                <Rectangle Grid.Column="3" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" />
+                <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" DataContext="{Binding Channels}"/>
+                <Rectangle Grid.Column="3" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" DataContext="{Binding Extensions}"/>
                 <views:ExtensionsView HorizontalAlignment="Center" Grid.Column="4" VerticalAlignment="Top" Margin="5" />
             </Grid>
         </Grid>

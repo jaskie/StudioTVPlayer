@@ -9,7 +9,7 @@ namespace StudioTVPlayer
     {
         public Bootstrapper()
         {
-            SimpleIoc.RegisterSingleton<IGlobalApplicationData>(new GlobalApplicationData());
+            SimpleIoc.RegisterSingleton<IGlobalApplicationData>(GlobalApplicationData.Current);
 
             // services
             SimpleIoc.Register<IMediaDataProvider, MediaDataProvider>();

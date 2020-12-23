@@ -15,11 +15,10 @@ namespace StudioTVPlayer.Providers
         private const string ConfigurationFile = "configuration.xml";
         private static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
 
-        public static Configuration LoadConfig()
-        {
-            var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
-            return DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
-        }
+        private GlobalApplicationData()
+        { }
+
+        public static IGlobalApplicationData Current { get; } = new GlobalApplicationData();
 
         public Configuration Configuration { get; } = LoadConfig();
 
@@ -33,6 +32,12 @@ namespace StudioTVPlayer.Providers
         {
             var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
             DataStore.Save(Configuration, configurationFile);
+        }
+
+        private static Configuration LoadConfig()
+        {
+            var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
+            return DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
         }
     }
 }

@@ -1,65 +1,56 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using StudioTVPlayer.Model.Interfaces;
 using StudioTVPlayer.ViewModel.Main;
+using System;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ConfigurationViewModel : ViewModelBase
+    public class ConfigurationViewModel : ModifyableViewModelBase
     {
-        private readonly IGlobalApplicationData _globalApplicationData;
-        private readonly IExchangeService _exchangeService;      
-       
-        private bool _isModified;
-
-        public ConfigurationViewModel(IGlobalApplicationData globalApplicationData, IExchangeService vMNotifyService)
+      
+        public ConfigurationViewModel()
         {
-            _globalApplicationData = globalApplicationData;
-            _exchangeService = vMNotifyService;
-            _exchangeService.NotifyOnConfigurationIsModifiedChanged += _exchangeService_NotifyOnConfigurationItemChanged;
-            SaveConfigurationCommand = new UiCommand(SaveConfiguration, CanSaveConfiguration);
+            WatchedFolders = new WatchedFoldersViewModel();
+            WatchedFolders.PropertyChanged += Item_PropertyChanged;
+            SaveConfigurationCommand = new UiCommand(SaveConfiguration);
             CancelCommand = new UiCommand(Cancel);
+        }
+
+        private void SaveConfiguration(object obj)
+        {
+            Apply();
+            MainViewModel.Instance.SwitchToPiloting();
         }
 
         public UiCommand SaveConfigurationCommand { get; }
 
         public UiCommand CancelCommand { get; }
 
-        public ChannelsViewModel ChannelsViewModel { get; } = SimpleIoc.Get<ChannelsViewModel>();
+        public WatchedFoldersViewModel WatchedFolders { get; } = new WatchedFoldersViewModel();
 
-        public ExtensionsViewModel ExtensionsViewModel { get; }
+        public ChannelsViewModel Channels { get; } = SimpleIoc.Get<ChannelsViewModel>();
+
+        public ExtensionsViewModel Extensions { get; }
 
 
-        private void _exchangeService_NotifyOnConfigurationItemChanged(object sender, ModifiedEventArgs e)
-        {
-            _isModified = true;
-        }
-
-        private bool CanSaveConfiguration(object obj)
-        {
-            if (_isModified)
-                return true;
-            return false;
-        }
-       
         private void Cancel(object obj)
         {
-            MainViewModel.Instance.CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
+            MainViewModel.Instance.SwitchToPiloting();
         }
 
-        private void SaveConfiguration(object obj)
+        public override void Apply()
         {
-            if (_isModified)
-            {
-                Model.Configuration conf = _globalApplicationData.Configuration;
-                conf.Channels = _globalApplicationData.Configuration.Channels;
-                conf.WatchedFolders = _globalApplicationData.Configuration.WatchedFolders;
-                conf.Extensions = _globalApplicationData.Configuration.Extensions.ToList();
-                _exchangeService.RaiseConfigurationChanged(new Model.Args.ConfigurationChangedEventArgs(conf));
-                _globalApplicationData.SaveConfiguration();
-            }
-            MainViewModel.Instance.CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
+            WatchedFolders.Apply();
+            Channels.Apply();
+            Extensions.Apply();
         }
+
+        private void Item_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsModified))
+                IsModified = true;
+        }
+
     }
 }

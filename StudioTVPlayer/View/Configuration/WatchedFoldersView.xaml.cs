@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace StudioTVPlayer.View.Configuration
 {
     /// <summary>
-    /// Interaction logic for IngestView.xaml
+    /// Interaction logic for WatchedFoldersView.xaml
     /// </summary>
-    public partial class IngestView : UserControl
+    public partial class WatchedFoldersView : UserControl
     {
-        public IngestView()
+        public WatchedFoldersView()
         {
             InitializeComponent();
         }

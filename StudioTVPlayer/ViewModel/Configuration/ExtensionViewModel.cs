@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudioTVPlayer.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -6,12 +7,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StudioTVPlayer.Model
+namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class StringWrapper : INotifyPropertyChanged
+    public class ExtensionViewModel : ModifyableViewModelBase
     {
         private string _value;
-        public string Value {
+        public string Value
+        {
             get { return _value; }
             set
             {
@@ -22,18 +24,18 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public StringWrapper(string value = null)
+        public ExtensionViewModel(string value = null)
         {
             Value = value;
         }
 
-        public static explicit operator String (StringWrapper wrapper)
+        public static explicit operator string(ExtensionViewModel wrapper)
         {
             return wrapper.Value;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void RaisePropertyChanged([CallerMemberName]string propertyname = null)
+        protected void RaisePropertyChanged([CallerMemberName] string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }

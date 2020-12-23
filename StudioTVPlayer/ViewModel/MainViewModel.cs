@@ -23,7 +23,7 @@ namespace StudioTVPlayer.ViewModel
             try
             {
                 SwitchToConfigurationCommand = new UiCommand(SwitchToConfiguration);
-                SwitchToPilotingCommand = new UiCommand(SwitchToPiloting);
+                SwitchToPilotingCommand = new UiCommand(_ => SwitchToPiloting());
                 CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
             }
             catch (Exception ex)
@@ -36,7 +36,7 @@ namespace StudioTVPlayer.ViewModel
         public UiCommand SwitchToPilotingCommand { get; }
         public UiCommand SwitchToConfigurationCommand { get; }
 
-        private void SwitchToPiloting(object _)
+        public void SwitchToPiloting()
         {
             if (CurrentViewModel is PilotingViewModel)
                 return;

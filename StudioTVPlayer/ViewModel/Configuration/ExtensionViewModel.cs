@@ -14,14 +14,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private string _value;
         public string Value
         {
-            get { return _value; }
-            set
-            {
-                if (_value == value)
-                    return;
-                _value = value;
-                RaisePropertyChanged();
-            }
+            get => _value;
+            set => Set(ref _value, value);
         }
 
         public ExtensionViewModel(string value = null)
@@ -34,10 +28,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
             return wrapper.Value;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void RaisePropertyChanged([CallerMemberName] string propertyname = null)
+        public override void Apply()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+            throw new NotImplementedException();
         }
     }
 }

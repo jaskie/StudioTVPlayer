@@ -84,7 +84,7 @@
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\Interfaces\IConfiguration.cs" />
     <Compile Include="Model\Interfaces\IUIFocusService.cs" />
-    <Compile Include="Model\StringWrapper.cs" />
+    <Compile Include="ViewModel\Configuration\ExtensionViewModel.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\Interfaces\IGlobalApplicationData.cs" />
     <Compile Include="Model\Interfaces\IExchangeService.cs" />

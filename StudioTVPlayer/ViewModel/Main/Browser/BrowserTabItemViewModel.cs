@@ -10,7 +10,6 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
 {
     public class BrowserTabItemViewModel : ViewModelBase
     {
-        private readonly IGlobalApplicationData _globalApplicationData = SimpleIoc.Get<IGlobalApplicationData>();
 
         private Media _media;
         public Media Media
@@ -30,7 +29,6 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         }
 
         private IExchangeService _exchangeService;
-        public Model.Configuration Configuration { get => _globalApplicationData.Configuration; }
 
         public string Name { get => Media.Name; }
         public TimeSpan Duration { get => Media.Duration; set { Media.Duration = value; } }

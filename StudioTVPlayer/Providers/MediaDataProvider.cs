@@ -25,7 +25,7 @@ namespace StudioTVPlayer.Providers
         public ObservableCollection<BrowserTabViewModel> GetBrowserTabs()
         {
             var browserTabs = new ObservableCollection<BrowserTabViewModel>();
-            foreach (var item in SimpleIoc.Get<IGlobalApplicationData>().Configuration.WatchedFolders)
+            foreach (var item in GlobalApplicationData.Current.Configuration.WatchedFolders)
             {
                 var tab = SimpleIoc.Get<BrowserTabViewModel>();
                 tab.WatcherMeta = item;

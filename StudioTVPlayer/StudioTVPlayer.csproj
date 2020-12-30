@@ -86,7 +86,6 @@
     <Compile Include="Model\Interfaces\IUIFocusService.cs" />
     <Compile Include="ViewModel\Configuration\ExtensionViewModel.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
-    <Compile Include="Model\Interfaces\IGlobalApplicationData.cs" />
     <Compile Include="Model\Interfaces\IExchangeService.cs" />
     <Compile Include="Model\Interfaces\IPilotingDataProvider.cs" />
     <Compile Include="Model\Interfaces\IMediaWatcherService.cs" />

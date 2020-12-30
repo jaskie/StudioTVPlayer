@@ -3,12 +3,11 @@ using System.IO;
 using System.Linq;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using StudioTVPlayer.Model.Interfaces;
 using TVPlayR;
 
 namespace StudioTVPlayer.Providers
 {
-    class GlobalApplicationData : IGlobalApplicationData
+    class GlobalApplicationData 
     {
 
         private const string PathName = "StudioTVPlayer";
@@ -18,7 +17,7 @@ namespace StudioTVPlayer.Providers
         private GlobalApplicationData()
         { }
 
-        public static IGlobalApplicationData Current { get; } = new GlobalApplicationData();
+        public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
 
         public Configuration Configuration { get; } = LoadConfig();
 

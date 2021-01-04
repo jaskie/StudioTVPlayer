@@ -22,9 +22,9 @@ namespace StudioTVPlayer.ViewModel
         {
             try
             {
-                SwitchToConfigurationCommand = new UiCommand(SwitchToConfiguration);
-                SwitchToPilotingCommand = new UiCommand(_ => SwitchToPiloting());
-                CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
+                ConfigurationCommand = new UiCommand(SwitchToConfiguration);
+                PlayoutCommand = new UiCommand(_ => SwitchToPlayout());
+                //CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
             }
             catch (Exception ex)
             {
@@ -33,14 +33,14 @@ namespace StudioTVPlayer.ViewModel
             Instance = this;
         }
 
-        public UiCommand SwitchToPilotingCommand { get; }
-        public UiCommand SwitchToConfigurationCommand { get; }
+        public UiCommand PlayoutCommand { get; }
+        public UiCommand ConfigurationCommand { get; }
 
-        public void SwitchToPiloting()
+        public void SwitchToPlayout()
         {
-            if (CurrentViewModel is PilotingViewModel)
+            if (CurrentViewModel is PlayoutViewModel)
                 return;
-            CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
+            CurrentViewModel = new PlayoutViewModel();
         }
 
         private void SwitchToConfiguration(object _)

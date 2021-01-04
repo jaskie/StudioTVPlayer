@@ -20,7 +20,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void SaveConfiguration(object obj)
         {
             Apply();
-            MainViewModel.Instance.SwitchToPiloting();
+            MainViewModel.Instance.SwitchToPlayout();
         }
 
         public UiCommand SaveConfigurationCommand { get; }
@@ -31,12 +31,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public ChannelsViewModel Channels { get; } = SimpleIoc.Get<ChannelsViewModel>();
 
-        public ExtensionsViewModel Extensions { get; }
+        public ExtensionsViewModel Extensions { get; } = new ExtensionsViewModel();
 
 
         private void Cancel(object obj)
         {
-            MainViewModel.Instance.SwitchToPiloting();
+            MainViewModel.Instance.SwitchToPlayout();
         }
 
         public override void Apply()

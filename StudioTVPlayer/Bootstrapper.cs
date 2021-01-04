@@ -13,7 +13,6 @@ namespace StudioTVPlayer
             SimpleIoc.Register<IMediaDataProvider, MediaDataProvider>();
             SimpleIoc.Register<IPilotingDataProvider, PilotingDataProvider>();
             SimpleIoc.Register<IExchangeService, ExchangeService>();
-            SimpleIoc.Register<IUIFocusService, UIFocusService>();
         }
 
     }

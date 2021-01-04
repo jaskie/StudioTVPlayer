@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Model.Interfaces;
 using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public class PilotingViewModel : ViewModelBase
+    public class PlayoutViewModel : ViewModelBase
     {
-        private IPilotingDataProvider _pilotingDataProvider;
-        private IExchangeService _exchangeService;
-        private IUIFocusService _uiFocusService;
-
         public UiCommand FocusPlayerCommand { get; set; }
         public UiCommand FocusBrowserCommand { get; set; }
 
@@ -28,25 +22,15 @@ namespace StudioTVPlayer.ViewModel.Main
 
         private void FocusBrowser(object obj)
         {
-            _uiFocusService.FocusBrowser();            
         }
 
         private void FocusPlayer(object obj)
         {
-            if (obj == null)
-                return;
-            var parameter = Int32.Parse(obj.ToString());
-
-            _uiFocusService.FocusPlayer(parameter);
         }
 
-        public PilotingViewModel(IPilotingDataProvider pilotingDataProvider, IExchangeService vMNotifyService, IUIFocusService uiFocusService)
+        public PlayoutViewModel()
         {
-            _exchangeService = vMNotifyService;
-            _pilotingDataProvider = pilotingDataProvider;
-            _uiFocusService = uiFocusService;
-            Players = new ObservableCollection<PlayerViewModel>(_pilotingDataProvider.GetPlayers());
-            _exchangeService.NotifyOnConfigurationChanged += ConfigurationChanged;
+            Players = new ObservableCollection<PlayerViewModel>();
             LoadCommands();
         }
 

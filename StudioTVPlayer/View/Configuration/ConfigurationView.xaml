@@ -1,50 +1,53 @@
-﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.OptionsView"
+﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.ConfigurationView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"              
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"    
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:views="clr-namespace:StudioTVPlayer.View.Configuration"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:ConfigurationViewModel}}"
              d:DesignHeight="1050" d:DesignWidth="1920"
-             Background="{StaticResource Program_SecondaryColor}">
+             >
     <Grid>
-        <ContentControl Content="{StaticResource SettingsBackground}" VerticalAlignment="Center" />
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-
-            <StackPanel Orientation="Horizontal" Grid.Row="0">
-                <Button Style="{StaticResource Configuration_Button}" 
-                    Command="{Binding CancelCommand}" 
-                    Margin="10" Padding="5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Button.Content>
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Height="50" HorizontalAlignment="Right">
+                <StackPanel.Resources>
+                    <Style TargetType="TextBlock" >
+                        <Setter Property="FontSize" Value="15"/>
+                        <Setter Property="FontWeight" Value="Normal"/>
+                        <Setter Property="Padding" Value="10 0 0 0"/>
+                        <Setter Property="Grid.Column" Value="1" />
+                    </Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Margin" Value="5"/>
+                        <Setter Property="Padding" Value="10 5"/>
+                    </Style>
+                </StackPanel.Resources>
+                <Button Command="{Binding CancelCommand}" >
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <ContentControl Content="{StaticResource CancelIcon}" />
-                            <TextBlock FontSize="18" Padding="5,0,0,0" Grid.Column="1" Text="Anuluj" />
+                            <mah:FontIcon Glyph="&#xE711;" />
+                            <TextBlock Text="Cancel" />
                         </Grid>
-                    </Button.Content>
                 </Button>
-                <Button Style="{StaticResource Configuration_Button}" Command="{Binding SaveConfigurationCommand}" 
-                    Margin="10" Padding="5" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-                    <Button.Content>
+                <Button Command="{Binding SaveConfigurationCommand}" >
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <ContentControl Content="{StaticResource SaveIcon}" />
-                            <TextBlock FontSize="18" Padding="5,0,0,0" Grid.Column="1" Text="Zapisz" />
+                            <mah:FontIcon Glyph="&#xE73E;" />
+                            <TextBlock Text="Save settings" />
                         </Grid>
-                    </Button.Content>
                 </Button>
             </StackPanel>
 
@@ -56,11 +59,9 @@
                     <ColumnDefinition Width="10*" />
                     <ColumnDefinition Width="33*" />
                 </Grid.ColumnDefinitions>
-                <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
-                <Rectangle Grid.Column="1" HorizontalAlignment="Center" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" />
+                <!--<views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
                 <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" DataContext="{Binding Channels}"/>
-                <Rectangle Grid.Column="3" Width="1" Fill="{StaticResource Program_Foreground}" StrokeThickness="1" DataContext="{Binding Extensions}"/>
-                <views:ExtensionsView HorizontalAlignment="Center" Grid.Column="4" VerticalAlignment="Top" Margin="5" />
+                <views:ExtensionsView HorizontalAlignment="Center" Grid.Column="4" VerticalAlignment="Top" Margin="5" />-->
             </Grid>
         </Grid>
     </Grid>

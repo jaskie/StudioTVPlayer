@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
-using StudioTVPlayer.Model.Interfaces;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ExtensionsViewModel : ModifyableViewModelBase
     {
         
-        private IExchangeService _exchangeService = null;
         public UiCommand AddRowCommand { get; set; }
         public UiCommand DeleteRowCommand { get; set; }
         public UiCommand UnloadedCommand { get; set; }
@@ -37,9 +28,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             set => Set(ref _extensions, value);
         }
 
-        public ExtensionsViewModel(IExchangeService vMNotifyService)
+        public ExtensionsViewModel()
         {
-            _exchangeService = vMNotifyService;
             Extensions.CollectionChanged += Extensions_CollectionChanged;           
             LoadCommands();
             LoadData();
@@ -55,7 +45,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Extensions_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            _exchangeService.RaiseConfigurationIsModifiedChanged(new ModifiedEventArgs(true));
+
         }
 
         private void LoadCommands()
@@ -92,13 +82,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void AddRow(object obj)
         {
             Extensions.Add(new ExtensionViewModel(string.Empty));
-        }
-
-        protected override bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (!EqualityComparer<T>.Default.Equals(field, value))
-                _exchangeService.RaiseConfigurationIsModifiedChanged(new ModifiedEventArgs(true));
-            return base.Set(ref field, value, propertyName);
         }
 
         public override void Apply()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,30 +19,11 @@ namespace StudioTVPlayer.View
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         public MainWindow()
         {          
             InitializeComponent();                     
         }
-
-        private void Button_Maximize_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.WindowState != WindowState.Maximized)            
-                this.WindowState = WindowState.Maximized;
-       
-            else
-                this.WindowState = WindowState.Normal;
-        }
-
-        private void Button_Close_Click(object sender, RoutedEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
-        private void Button_Minimize_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized;
-        }               
     }
 }

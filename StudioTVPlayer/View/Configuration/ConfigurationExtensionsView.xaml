@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="260"
              >
-    <Border BorderThickness="0" BorderBrush="{StaticResource Program_Foreground}" >
+    <Border BorderThickness="0" >
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -15,39 +15,27 @@
             </Grid.RowDefinitions>
             
             <StackPanel Orientation="Horizontal" Grid.Row="0">
-                <TextBlock Text="Rozszerzenia plików" FontSize="18" Foreground="{StaticResource Program_Foreground}" VerticalAlignment="Center" Margin="20,5,5,5" />
-                <Button Style="{StaticResource Configuration_Button}" Command="{Binding AddRowCommand}" 
-                        Margin="5" Padding="10,2,10,2" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <Button.Content>
-                        <ContentControl Content="{StaticResource AddIcon}" />
-                    </Button.Content>
+                <TextBlock Text="Rozszerzenia plików" FontSize="18" VerticalAlignment="Center" Margin="20,5,5,5" />
+                <Button Command="{Binding AddRowCommand}" Margin="5" Padding="10,2,10,2" VerticalAlignment="Center" HorizontalAlignment="Left">
                 </Button>
             </StackPanel>
 
-            <DataGrid 
-            attachedProp:EventToCommand.UnloadedCommand="{Binding UnloadedCommand}"
-            Style="{StaticResource Configuration_DataGrid}"            
-            x:Name="WatcherMetas_DataGrid"             
-            Grid.Row="2"                 
-            ItemsSource="{Binding Extensions}" 
-            SelectedItem="{Binding SelectedExtension}"           
-            CellStyle="{StaticResource Configuration_DataGridCell}"
-            RowStyle="{StaticResource Configuration_DataGridRow}"
-            RowHeaderStyle="{StaticResource Configuration_DataGridRowHeader}"
-            ColumnHeaderStyle="{StaticResource Configuration_DataGridColumnHeader}" >
+            <DataGrid attachedProp:EventToCommand.UnloadedCommand="{Binding UnloadedCommand}"
+                      Grid.Row="2"                 
+                      ItemsSource="{Binding Extensions}" 
+                      SelectedItem="{Binding SelectedExtension}"           
+                      >
                 <DataGrid.ContextMenu>
-                    <ContextMenu Style="{StaticResource ContextMenuIconless}">
+                    <ContextMenu >
                         <MenuItem Header="Usuń" Command="{Binding DeleteRowCommand}" CommandParameter="{Binding SelectedExtension}">
                             <MenuItem.Icon>
-                                <ContentControl Content="{StaticResource DeleteIcon}" />
+                                <ContentControl  />
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTextColumn ElementStyle="{StaticResource Configuration_DataGridTextBlock}" 
-                                    EditingElementStyle="{StaticResource Configuration_DataGridTextBox}" 
-                                    Header="Rozszerzenie" MinWidth="80" 
+                    <DataGridTextColumn Header="Rozszerzenie" MinWidth="80" 
                                     Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </DataGrid.Columns>
             </DataGrid>

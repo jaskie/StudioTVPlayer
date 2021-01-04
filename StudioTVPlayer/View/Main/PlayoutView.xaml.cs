@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace StudioTVPlayer.View.Main
 {
     /// <summary>
-    /// Interaction logic for PilotingView.xaml
+    /// Interaction logic for PlayoutView.xaml
     /// </summary>
-    public partial class PilotingView : UserControl
+    public partial class PlayoutView : UserControl
     {
-        public PilotingView()
+        public PlayoutView()
         {
             InitializeComponent();
         }

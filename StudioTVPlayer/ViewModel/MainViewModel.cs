@@ -43,7 +43,7 @@ namespace StudioTVPlayer.ViewModel
         {
             if (CurrentViewModel is PlayoutViewModel)
                 return;
-            CurrentViewModel = new PlayoutViewModel();
+            CurrentViewModel = null;//new PlayoutViewModel();
         }
 
         private void SwitchToConfiguration(object _)

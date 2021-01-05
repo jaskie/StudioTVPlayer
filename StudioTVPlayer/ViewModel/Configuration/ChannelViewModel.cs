@@ -6,8 +6,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ChannelViewModel : RemovableViewModelBase
     {
-        private readonly Model.Channel _channel;
-        private int _id;
         private string _name;
         private DecklinkDevice _selectedDevice;
         private VideoFormat _selectedVideoFormat;
@@ -15,19 +13,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public ChannelViewModel(Model.Channel channel)
         {
-            _channel = channel;
+            Channel = channel;
             _name = channel.Name;
-            _id = channel.Id;
-            _selectedDevice = GlobalApplicationData.Current.DecklinkDevices.FirstOrDefault(d => d.Index == channel.DeviceIndex);
-            _selectedVideoFormat = GlobalApplicationData.Current.VideoFormats.FirstOrDefault(d => d.Id == channel.VideoFormatId);
+            _selectedDevice = GlobalApplicationData.Current.DecklinkDevices.FirstOrDefault(dd => dd.Index == channel.DeviceIndex);
+            _selectedVideoFormat = GlobalApplicationData.Current.VideoFormats.FirstOrDefault(vf => vf.Id == channel.VideoFormatId);
             _selectedPixelFormat = channel.PixelFormat;
         }
 
-        public int Id
-        {
-            get => _id;
-            set => Set(ref _id, value);
-        }
+        public Model.Channel Channel { get; }
 
         public string Name
         {
@@ -45,13 +38,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (!IsModified)
                 return;
-            if (_channel.DeviceIndex != SelectedDevice.Index)
-                _channel.Uninitialize();
-            _channel.Id = Id;
-            _channel.Name = Name;
-            _channel.DeviceIndex = SelectedDevice.Index;
-            _channel.PixelFormat = SelectedPixelFormat;
-            _channel.VideoFormat = SelectedVideoFormat;
+            if (Channel.DeviceIndex != SelectedDevice.Index)
+                Channel.Uninitialize();
+            Channel.Name = Name;
+            Channel.DeviceIndex = SelectedDevice.Index;
+            Channel.PixelFormat = SelectedPixelFormat;
+            Channel.VideoFormat = SelectedVideoFormat;
             IsModified = false;
         }
 

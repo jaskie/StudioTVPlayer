@@ -9,16 +9,12 @@ namespace StudioTVPlayer.Model
 {
     public class Channel : INotifyPropertyChanged, IDisposable
     {
-        private int _id;
         private string _name = string.Empty;
         private VideoFormat _videoFormat;
         private int _videoFormatId;
         private PixelFormat _pixelFormat;
         private int _deviceIndex;
 
-        [XmlAttribute]
-        public int Id { get => _id; set => _id = value; }
-      
         private TVPlayR.Channel _channelR;
         
         [XmlAttribute]

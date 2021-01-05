@@ -78,9 +78,9 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Header="Filter by current date" Binding="{Binding IsFiltered}"                                        
-                                        ElementStyle="{DynamicResource MahApps.Styles.CheckBox.DataGrid.Win10}"
-                                        EditingElementStyle="{DynamicResource MahApps.Styles.CheckBox.DataGrid.Win10}"
+                <DataGridCheckBoxColumn Header="Filter by current date" Binding="{Binding IsFilteredByDate}"                                        
+                                        ElementStyle="{StaticResource MahApps.Styles.CheckBox.DataGrid.Win10}"
+                                        EditingElementStyle="{StaticResource MahApps.Styles.CheckBox.DataGrid.Win10}"
                                         />
                 <DataGridTemplateColumn Header="File match filter" Width="*" SortMemberPath="Filter">
                     <DataGridTemplateColumn.CellTemplate>
@@ -108,7 +108,7 @@
         <Button Grid.Row="1" Margin="0 10" Command="{Binding AddWatchedFolderCommand}" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal">
                 <mah:FontIcon Glyph="&#xE710;" />
-                <Label FontSize="16">Add new</Label>
+                <Label FontSize="16" FontWeight="Normal">Add new watched folder</Label>
             </StackPanel>
         </Button>
     </Grid>

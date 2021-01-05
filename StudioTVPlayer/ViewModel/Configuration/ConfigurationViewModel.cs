@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Providers;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -20,6 +21,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void SaveConfiguration(object obj)
         {
             Apply();
+            GlobalApplicationData.Current.SaveConfiguration();
             MainViewModel.Instance.SwitchToPlayout();
         }
 

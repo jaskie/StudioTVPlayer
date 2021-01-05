@@ -84,16 +84,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddChannel(object obj)
         {
-            var channel = new Channel { DeviceIndex = -1 };
-            int index = 0;
-            while (true)
-            {
-                if (Channels.FirstOrDefault(param => param.Id == index++) != null)
-                    continue;
-                channel.Id = index;
-                channel.Name = $"Channel {index + 1}";
-                break;
-            }
+            var channel = new Channel { DeviceIndex = -1, Name = $"Channel {Channels.Count + 1}" };
             var vm = new ChannelViewModel(channel);
             vm.RemoveRequested += Channel_RemoveRequested;
             Channels.Add(vm);
@@ -104,6 +95,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach (var channel in Channels)
                 channel.Apply();
+            GlobalApplicationData.Current.Configuration.Channels = Channels.Select(c => c.Channel).ToList();
         }
 
         public override bool IsValid()

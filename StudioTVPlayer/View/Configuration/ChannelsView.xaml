@@ -53,8 +53,8 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
 
                 </DataGridTemplateColumn>
-                <DataGridComboBoxColumn Header="Output device" Width="2*" ItemsSource="{Binding Source={StaticResource devices}}" DisplayMemberPath="DisplayName" SelectedItemBinding="{Binding SelectedDevice}" />
-                <DataGridComboBoxColumn Header="Video format"  Width="*" ItemsSource="{Binding Source={StaticResource videoFormats}}" DisplayMemberPath="Name" SelectedItemBinding="{Binding SelectedVideoFormat}" />
+                <DataGridComboBoxColumn Header="Output device" Width="2*" ItemsSource="{Binding Source={StaticResource devices}}" DisplayMemberPath="DisplayName" SelectedItemBinding="{Binding SelectedDevice, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridComboBoxColumn Header="Video format"  Width="*" ItemsSource="{Binding Source={StaticResource videoFormats}}" DisplayMemberPath="Name" SelectedItemBinding="{Binding SelectedVideoFormat, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridComboBoxColumn Header="Pixel format"  Width="*" ItemsSource="{Binding Source={StaticResource pixelFormats}}" SelectedItemBinding="{Binding SelectedPixelFormat}" />
                 <DataGridTemplateColumn Width="50" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
@@ -70,7 +70,7 @@
         <Button Grid.Row="1" Margin="0 10" Command="{Binding AddChannelCommand}" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal">
                 <mah:FontIcon Glyph="&#xE710;" />
-                <Label FontSize="16">Add new</Label>
+                <Label FontSize="16" FontWeight="Normal">Add new channel</Label>
             </StackPanel>
         </Button>
     </Grid>

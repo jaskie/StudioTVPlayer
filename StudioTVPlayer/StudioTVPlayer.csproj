@@ -47,7 +47,7 @@
       <HintPath>..\packages\MahApps.Metro.2.4.3\lib\net452\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
@@ -77,7 +77,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Bootstrapper.cs" />
     <Compile Include="Controls\Seekbar.cs" />
     <Compile Include="Controls\Timecode.cs" />
     <Compile Include="Converters\DateConverter.cs" />
@@ -88,7 +87,6 @@
     <Compile Include="Helpers\AttachedProperties\ListItemProperties.cs" />
     <Compile Include="Helpers\DataStore.cs" />
     <Compile Include="Helpers\FolderHelper.cs" />
-    <Compile Include="Helpers\SimpleIoc.cs" />
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\ConfigurationChangedEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
@@ -96,7 +94,6 @@
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\Interfaces\IConfiguration.cs" />
-    <Compile Include="ViewModel\Configuration\ExtensionViewModel.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\Interfaces\IExchangeService.cs" />
     <Compile Include="Model\Interfaces\IPilotingDataProvider.cs" />
@@ -117,7 +114,6 @@
     <Compile Include="ViewModel\Main\Browser\BrowserViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ExtensionsViewModel.cs" />
     <Compile Include="ViewModel\Main\InfoViewModel.cs" />
     <Compile Include="ViewModel\Main\Browser\BrowserTabViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
@@ -125,14 +121,12 @@
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\PlayerQueueItemViewModel.cs" />
+    <Compile Include="ViewModel\RemovableViewModelBase.cs" />
     <Compile Include="View\Configuration\ChannelsView.xaml.cs">
       <DependentUpon>ChannelsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Configuration\ConfigurationExtensionsView.xaml.cs">
-      <DependentUpon>ConfigurationExtensionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Main\Browser\BrowserTabItemView.xaml.cs">
       <DependentUpon>BrowserTabItemView.xaml</DependentUpon>
@@ -158,10 +152,6 @@
     <Compile Include="View\Main\Player\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Resources\Shapes.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -181,10 +171,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Configuration\WatchedFoldersView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Configuration\ConfigurationExtensionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

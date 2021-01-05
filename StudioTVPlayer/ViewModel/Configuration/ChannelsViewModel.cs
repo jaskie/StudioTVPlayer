@@ -10,6 +10,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class ChannelsViewModel : ModifyableViewModelBase
     {
+        private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
+
         private ChannelViewModel _selectedChannel;
 
         public ChannelsViewModel()
@@ -19,7 +21,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
             UnloadedCommand = new UiCommand((param) => { CommitChanges(param); });
             Channels = new ObservableCollection<ChannelViewModel>(GlobalApplicationData.Current.Configuration.Channels.Select(c => new ChannelViewModel(c)));
             foreach (var channel in Channels)
+            {
                 channel.PropertyChanged += Channel_PropertyChanged;
+                channel.RemoveRequested += Channel_RemoveRequested;
+            }
+        }
+
+        private async void Channel_RemoveRequested(object sender, EventArgs e)
+        {
+            var channel = sender as ChannelViewModel ?? throw new ArgumentException(nameof(sender));
+            if (await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Confirmation", $"Really remove channel \"{channel.Name}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+                return;
+            Channels.Remove(channel);
+            IsModified = true;
         }
 
         private void Channel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -36,6 +50,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
             get => _selectedChannel;
             set => Set(ref _selectedChannel, value);
         }
+
+        public TVPlayR.DecklinkDevice[] Devices => GlobalApplicationData.Current.DecklinkDevices;
+
+        public TVPlayR.VideoFormat[] VideoFormats => GlobalApplicationData.Current.VideoFormats;
+
+        public TVPlayR.PixelFormat[] PixelFormats => GlobalApplicationData.Current.PixelFormats;
+
 
         public ObservableCollection<ChannelViewModel> Channels { get; }
 
@@ -63,22 +84,31 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddChannel(object obj)
         {
-            var channel = new Channel();
+            var channel = new Channel { DeviceIndex = -1 };
             int index = 0;
             while (true)
             {
                 if (Channels.FirstOrDefault(param => param.Id == index++) != null)
                     continue;
                 channel.Id = index;
+                channel.Name = $"Channel {index + 1}";
                 break;
             }
-            Channels.Add(new ChannelViewModel(channel));
+            var vm = new ChannelViewModel(channel);
+            vm.RemoveRequested += Channel_RemoveRequested;
+            Channels.Add(vm);
+            IsModified = true;
         }
 
         public override void Apply()
         {
             foreach (var channel in Channels)
                 channel.Apply();
+        }
+
+        public override bool IsValid()
+        {
+            return Channels.All(c => c.IsValid());
         }
     }
 }

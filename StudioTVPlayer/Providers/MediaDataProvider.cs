@@ -25,21 +25,22 @@ namespace StudioTVPlayer.Providers
         public ObservableCollection<BrowserTabViewModel> GetBrowserTabs()
         {
             var browserTabs = new ObservableCollection<BrowserTabViewModel>();
-            foreach (var item in GlobalApplicationData.Current.Configuration.WatchedFolders)
-            {
-                var tab = SimpleIoc.Get<BrowserTabViewModel>();
-                tab.WatcherMeta = item;
-                browserTabs.Add(tab);
-            }
+            //foreach (var item in GlobalApplicationData.Current.Configuration.WatchedFolders)
+            //{
+            //    var tab = SimpleIoc.Get<BrowserTabViewModel>();
+            //    tab.WatcherMeta = item;
+            //    browserTabs.Add(tab);
+            //}
             return browserTabs;
         }    
         
         public BrowserTabItemViewModel GetNewBrowserTabItem(Media m)
         {
-            var item = SimpleIoc.Get<BrowserTabItemViewModel>();
-            item.Media = m;
+            //var item = SimpleIoc.Get<BrowserTabItemViewModel>();
+            //item.Media = m;
 
-            return item;
+            //return item;
+            throw new NotImplementedException();
         }
 
         public List<BrowserTabItemViewModel> GetBrowserTabItems(string path)
@@ -55,12 +56,12 @@ namespace StudioTVPlayer.Providers
                     CreationDate = File.GetCreationTime(p)
                 });
 
-            foreach(var media in mediaFiles)
-            {
-                var tabItem = SimpleIoc.Get<BrowserTabItemViewModel>();
-                tabItem.Media = media;
-                tabItems.Add(tabItem);
-            }
+            //foreach(var media in mediaFiles)
+            //{
+            //    var tabItem = SimpleIoc.Get<BrowserTabItemViewModel>();
+            //    tabItem.Media = media;
+            //    tabItems.Add(tabItem);
+            //}
 
             return tabItems;               
         }
@@ -75,12 +76,12 @@ namespace StudioTVPlayer.Providers
         public List<BrowserTabViewModel> ReloadBrowserTabs()
         {
             var list = new List<BrowserTabViewModel>();
-            var oldTabs = SimpleIoc.GetInstances<BrowserTabViewModel>();
+            //var oldTabs = SimpleIoc.GetInstances<BrowserTabViewModel>();
 
-            foreach (var tab in oldTabs)
-            {
+            //foreach (var tab in oldTabs)
+            //{
 
-            }
+            //}
 
             return list;
         }

@@ -3,76 +3,113 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"             
-             xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
+             FontSize="16"
              d:DataContext="{d:DesignInstance vm:WatchedFoldersViewModel}"
              d:DesignHeight="450" d:DesignWidth="800"
              >
-    <Border BorderThickness="0" BorderBrush="{StaticResource Program_Foreground}">
-        <Grid x:Name="rootGrid">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            
+    <Grid VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DataGrid DockPanel.Dock="Bottom" AutoGenerateColumns="False"
+                  ItemsSource="{Binding WatchedFolders}" 
+                  VerticalAlignment="Top"
+                  mah:DataGridHelper.EnableCellEditAssist="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  >
+            <DataGrid.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.MetroSquare}">
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Button.Border.Focus}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+                    <Setter Property="mah:TextBoxHelper.ClearTextButton" Value="False"/>
+                    <Setter Property="FontSize" Value="16"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns >
+                <DataGridTemplateColumn Header="Name" Width="*" SortMemberPath="Name">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="4 0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Path" Width="*" SortMemberPath="Path">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Path}" VerticalAlignment="Center" Margin="4 0"/>
+                                <Button Grid.Column="1" Command="{Binding BrowseCommand}" ToolTip="Change folder">
+                                    <mah:FontIcon Glyph="&#xED25;"/>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" Command="{Binding BrowseCommand}" ToolTip="Change folder">
+                                    <mah:FontIcon Glyph="&#xED25;"/>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridCheckBoxColumn Header="Filter by current date" Binding="{Binding IsFiltered}"                                        
+                                        ElementStyle="{DynamicResource MahApps.Styles.CheckBox.DataGrid.Win10}"
+                                        EditingElementStyle="{DynamicResource MahApps.Styles.CheckBox.DataGrid.Win10}"
+                                        />
+                <DataGridTemplateColumn Header="File match filter" Width="*" SortMemberPath="Filter">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Filter}" VerticalAlignment="Center" Margin="4 0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="*" CanUserSort="False" CanUserResize="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding RequestRemoveCommand}" ToolTip="Remove this folder">
+                                <mah:FontIcon Glyph="&#xE74D;"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Grid.Row="1" Margin="0 10" Command="{Binding AddWatchedFolderCommand}" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Foldery monitorowane" FontSize="18" Foreground="{StaticResource Program_Foreground}" VerticalAlignment="Center" Margin="5" />
-                <Button Style="{StaticResource Configuration_Button}" Command="{Binding AddWatchedFolderCommand}" Margin="5" Padding="10,2,10,2" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <Button.Content>
-                        <ContentControl Content="{StaticResource AddIcon}" />
-                    </Button.Content>
-                </Button>
+                <mah:FontIcon Glyph="&#xE710;" />
+                <Label FontSize="16">Add new</Label>
             </StackPanel>
-
-            <DataGrid 
-                attachedProp:EventToCommand.UnloadedCommand="{Binding UnloadedCommand}"
-                Style="{StaticResource Configuration_DataGrid}"            
-                x:Name="WatcherMetas_DataGrid"             
-                Grid.Row="2" 
-                ItemsSource="{Binding WatchedFolders}" 
-                SelectedItem="{Binding SelectedWatchedFolder}"           
-                CellStyle="{StaticResource Configuration_DataGridCell}"
-                RowStyle="{StaticResource Configuration_DataGridRow}"
-                RowHeaderStyle="{StaticResource Configuration_DataGridRowHeader}"
-                ColumnHeaderStyle="{StaticResource Configuration_DataGridColumnHeader}" >
-                <DataGrid.ContextMenu>
-                    <ContextMenu Style="{StaticResource ContextMenuIconless}">
-                        <MenuItem Background="Transparent" Header="Usuń" Command="{Binding DeleteRowCommand}" CommandParameter="{Binding SelectedPath}">
-                            <MenuItem.Icon>
-                                <ContentControl Content="{StaticResource DeleteIcon}" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-                <DataGrid.Columns>
-                    <DataGridTextColumn ElementStyle="{StaticResource Configuration_DataGridTextBlock}" 
-                                        EditingElementStyle="{StaticResource Configuration_DataGridTextBox}" 
-                                        Header="Nazwa" MinWidth="80" Width="auto" 
-                                        Binding="{Binding Name}" />
-
-                    <DataGridTextColumn ElementStyle="{StaticResource Configuration_DataGridTextBlock}" 
-                                        EditingElementStyle="{StaticResource Configuration_DataGridTextBox}" 
-                                        Header="Ścieżka" MinWidth="80" Width="auto" 
-                                        Binding="{Binding Path}" />
-
-                    <DataGridTemplateColumn Header="Filtrowanie daty">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox IsChecked="{Binding IsFiltered}" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Przeglądaj">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Padding="5,0,5,0" HorizontalAlignment="Center" Content="..." Margin="5" 
-                                        Command="{Binding BrowseCommand}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-    </Border>
+        </Button>
+    </Grid>
 </UserControl>

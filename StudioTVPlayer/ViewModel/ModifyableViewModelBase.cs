@@ -11,7 +11,7 @@ namespace StudioTVPlayer.ViewModel
             get => _isModified;
             protected set
             {
-                if (_isModified = value)
+                if (_isModified == value)
                     return;
                 _isModified = value;
                 NotifyPropertyChanged();
@@ -27,6 +27,8 @@ namespace StudioTVPlayer.ViewModel
             }
             return false;
         }
+
+        public abstract bool IsValid();
 
         public abstract void Apply();
     }

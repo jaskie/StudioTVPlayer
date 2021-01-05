@@ -162,7 +162,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
             ICommand command = GetUnloadedCommand(element);
             object[] param = { sender, e };
 
-            command.Execute(param);
+            command?.Execute(param);
         }
 
         public static void SetUnloadedCommand(UIElement element, ICommand value) => element.SetValue(UnloadedCommandProperty, value);

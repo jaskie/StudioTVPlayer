@@ -4,32 +4,44 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                  xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
                  xmlns:configurationViews="clr-namespace:StudioTVPlayer.View.Configuration"
-                 xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration" 
-                 xmlns:viewmodel="clr-namespace:StudioTVPlayer.ViewModel"
+                 xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
                  mc:Ignorable="d"    
                  Title="Studio TVPlayer" 
                  Height="1024" Width="1280"
                  TitleCharacterCasing="Normal"
-                 WindowStartupLocation="CenterScreen">
-    <Window.DataContext>
-        <viewmodel:MainViewModel/>
-    </Window.DataContext>
-    <Grid>
-        <Button HorizontalAlignment="Right" VerticalAlignment="Top" BorderThickness="0" ToolTip="Settings" Command="{Binding ConfigurationCommand}">
-            <mah:FontIcon Glyph="&#xE700;"/>
-        </Button>
-        <ContentControl Focusable="False" IsTabStop="False" Content="{Binding CurrentViewModel}" >
-            <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
-                    <mainViews:PlayoutView />
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
-                    <configurationViews:ConfigurationView />
-                </DataTemplate>
-            </ContentControl.Resources>
-        </ContentControl>
-    </Grid>
+                 ShowSystemMenu="True"
+                 dialogs:DialogParticipation.Register="{Binding}"
+                 WindowStartupLocation="CenterScreen"
+                 Loaded="MetroWindow_Loaded"
+                 >
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands>
+            <Button ToolTip="Settings" Command="{Binding ConfigurationCommand}" Opacity="0.9" Width="45">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Button.Flat.Background.MouseOver}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <mah:FontIcon  Glyph="&#xE713;" />
+            </Button>
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+    <ContentControl Focusable="False" IsTabStop="False" Content="{Binding CurrentViewModel}" >
+        <ContentControl.Resources>
+            <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
+                <mainViews:PlayoutView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
+                <configurationViews:ConfigurationView />
+            </DataTemplate>
+        </ContentControl.Resources>
+    </ContentControl>
 </mah:MetroWindow>

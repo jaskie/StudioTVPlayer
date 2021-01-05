@@ -70,14 +70,14 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        internal Channel Clone()
-        {
-            return new Channel { Id = this.Id, Name = this.Name };
-        }
-
-        public void Init(int videoFormat, PixelFormat pixelFormat)
+        public void Initialize(int videoFormat, PixelFormat pixelFormat)
         {
             _channelR = new TVPlayR.Channel(videoFormat, pixelFormat, 16);
+        }
+
+        public void Uninitialize()
+        {
+
         }
 
         public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);

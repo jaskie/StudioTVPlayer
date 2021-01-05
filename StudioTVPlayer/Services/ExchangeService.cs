@@ -32,16 +32,16 @@ namespace StudioTVPlayer.Services
 
         public void AddToPlayerQueueByIndex(int index, BrowserTabItemViewModel item)
         {          
-            var players = SimpleIoc.GetInstances<PlayerViewModel>();
-            if (index >= players.Count)
-                return;
+            //var players = SimpleIoc.GetInstances<PlayerViewModel>();
+            //if (index >= players.Count)
+            //    return;
 
-            players[index].MediaQueue.Add(new PlayerQueueItemViewModel(item));
+            //players[index].MediaQueue.Add(new PlayerQueueItemViewModel(item));
         }
 
         public void AddToPlayerQueueByChannelID(int id, BrowserTabItemViewModel item)
         {           
-            SimpleIoc.GetInstances<PlayerViewModel>().FirstOrDefault(param => param.Channel.Id == id).MediaQueue.Add(new PlayerQueueItemViewModel(item));
+            //SimpleIoc.GetInstances<PlayerViewModel>().FirstOrDefault(param => param.Channel.Id == id).MediaQueue.Add(new PlayerQueueItemViewModel(item));
         }
     }
 }

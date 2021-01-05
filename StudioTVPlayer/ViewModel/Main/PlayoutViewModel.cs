@@ -54,7 +54,7 @@ namespace StudioTVPlayer.ViewModel.Main
                     {
                         player.Dispose();
                         player.Channel = changedChannel;
-                        player.Channel.Init(player.Channel.VideoFormat.Id, player.Channel.PixelFormat);
+                        player.Channel.Initialize(player.Channel.VideoFormat.Id, player.Channel.PixelFormat);
                         player.Channel.AddOutput(TVPlayR.DecklinkDevice.EnumerateDevices().FirstOrDefault(f => f.Index == player.Channel.DeviceIndex));
                     }
                    
@@ -71,11 +71,11 @@ namespace StudioTVPlayer.ViewModel.Main
                     continue;
 
                 
-                c.Init(c.VideoFormat.Id, c.PixelFormat);
+                c.Initialize(c.VideoFormat.Id, c.PixelFormat);
                 c.AddOutput(TVPlayR.DecklinkDevice.EnumerateDevices().FirstOrDefault(f => f.Index == c.DeviceIndex));
-                PlayerViewModel newPlayer = SimpleIoc.Get<PlayerViewModel>();
-                newPlayer.Channel = c;
-                Players.Add(newPlayer);
+                //PlayerViewModel newPlayer = SimpleIoc.Get<PlayerViewModel>();
+                //newPlayer.Channel = c;
+                //Players.Add(newPlayer);
             }
         }
     }

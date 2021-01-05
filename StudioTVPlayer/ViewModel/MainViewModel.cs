@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
@@ -9,6 +8,7 @@ namespace StudioTVPlayer.ViewModel
     public class MainViewModel : ViewModelBase
     {
         private ViewModelBase _currentViewModel;
+        private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
 
         public ViewModelBase CurrentViewModel
         {
@@ -16,24 +16,27 @@ namespace StudioTVPlayer.ViewModel
             set => Set(ref _currentViewModel, value);
         }
 
-        public static MainViewModel Instance { get; private set; }
+        public static readonly MainViewModel Instance = new MainViewModel();
 
-        public MainViewModel()
+        private MainViewModel() 
+        {
+            ConfigurationCommand = new UiCommand(SwitchToConfiguration);
+        }
+
+        public async void LoadConfiguraion()
         {
             try
             {
-                ConfigurationCommand = new UiCommand(SwitchToConfiguration);
-                PlayoutCommand = new UiCommand(_ => SwitchToPlayout());
+                throw new ApplicationException();
                 //CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
             }
-            catch (Exception ex)
+            catch 
             {
-                MessageBox.Show("Błąd ładowania konfiguracji. " + ex.Message);
+                await _dialogCoordinator.ShowMessageAsync(this, "Configuration error", "Configuration data missing or invalid.\nPlease, configure the application now to use it.");
+                CurrentViewModel = new ConfigurationViewModel();
             }
-            Instance = this;
         }
 
-        public UiCommand PlayoutCommand { get; }
         public UiCommand ConfigurationCommand { get; }
 
         public void SwitchToPlayout()
@@ -47,7 +50,8 @@ namespace StudioTVPlayer.ViewModel
         {
             if (CurrentViewModel is ConfigurationViewModel)
                 return;
-            CurrentViewModel = SimpleIoc.Get<ConfigurationViewModel>();
+            CurrentViewModel = new ConfigurationViewModel();
         }
+
     }
 }

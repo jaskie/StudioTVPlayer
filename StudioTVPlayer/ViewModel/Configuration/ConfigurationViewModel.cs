@@ -1,8 +1,4 @@
 ﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
-using StudioTVPlayer.ViewModel.Main;
-using System;
-using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -13,10 +9,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolders = new WatchedFoldersViewModel();
             WatchedFolders.PropertyChanged += Item_PropertyChanged;
-            SaveConfigurationCommand = new UiCommand(SaveConfiguration);
+            Channels = new ChannelsViewModel();
+            Channels.PropertyChanged += Item_PropertyChanged;
+
+            SaveConfigurationCommand = new UiCommand(SaveConfiguration, _ => IsModified && IsValid());
             CancelCommand = new UiCommand(Cancel);
         }
 
+  
         private void SaveConfiguration(object obj)
         {
             Apply();
@@ -27,13 +27,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public UiCommand CancelCommand { get; }
 
-        public WatchedFoldersViewModel WatchedFolders { get; } = new WatchedFoldersViewModel();
+        public WatchedFoldersViewModel WatchedFolders { get; } 
 
-        public ChannelsViewModel Channels { get; } = SimpleIoc.Get<ChannelsViewModel>();
+        public ChannelsViewModel Channels { get; }
 
-        public ExtensionsViewModel Extensions { get; } = new ExtensionsViewModel();
-
-
+        
         private void Cancel(object obj)
         {
             MainViewModel.Instance.SwitchToPlayout();
@@ -43,7 +41,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolders.Apply();
             Channels.Apply();
-            Extensions.Apply();
+            IsModified = false;
         }
 
         private void Item_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -52,5 +50,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 IsModified = true;
         }
 
+        public override bool IsValid()
+        {
+            return WatchedFolders.IsValid() && Channels.IsValid();
+        }
     }
 }

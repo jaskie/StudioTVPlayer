@@ -11,6 +11,9 @@ namespace StudioTVPlayer.Model
         public string Path { get; set; }
 
         [XmlAttribute]
-        public bool IsFiltered { get; set; }
+        public bool IsFilteredByDate { get; set; }
+
+        [XmlAttribute]
+        public string Filter { get; set; }
     }
 }

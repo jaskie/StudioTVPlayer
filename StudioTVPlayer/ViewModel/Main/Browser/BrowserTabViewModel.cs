@@ -73,7 +73,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             {                
                 if (!Set(ref _selectedDate, value))
                     return;
-                if (!WatcherMeta.IsFiltered)
+                if (!WatcherMeta.IsFilteredByDate)
                     return;
                 //Jeżeli jakiś item był zanaczony na liście i zmienił się widok to kontrolka wysyła Keyboard.Focus(null) co wywala focus do main window             
                 IsFocused = false; //by przygotować odpalenie ValueChanged (ewentualnie można (a nawe trzeba) podpiąć pod event i wtedy bez tej linijki oraz wcześniejszego zerowania tej zmiennej przy komendach focusa)
@@ -126,7 +126,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             foreach (var media in _mediaDataProvider.GetBrowserTabItems(_mediaWatcher.GetPath()))
                 MediaFiles.Add(media);
             
-            if (WatcherMeta.IsFiltered)
+            if (WatcherMeta.IsFilteredByDate)
                 LoadMediaCollectionByDate();
             else
                 _mediaDataProvider.LoadMediaFiles(_mediaFilesView, _mediaWatcher);
@@ -146,7 +146,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 MediaFiles.Add(media);
             
 
-            if (WatcherMeta.IsFiltered)
+            if (WatcherMeta.IsFilteredByDate)
                 LoadMediaCollectionByDate();
             else
                 _mediaDataProvider.LoadMediaFiles(_mediaFilesView, _mediaWatcher);

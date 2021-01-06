@@ -20,7 +20,18 @@
         <Label FontSize="{DynamicResource MahApps.Font.Size.Header}">Configuration</Label>
 
         <TabControl Grid.Row="1">
-            <TabItem Header="Playout channels">
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource MahApps.Styles.TabItem}">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate DataType="{x:Type TabItem}">
+                                <ContentControl Content="{Binding}" Cursor="Hand"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="Channels">
                 <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" DataContext="{Binding Channels}"/>
             </TabItem>
             <TabItem Header="Watched folders">

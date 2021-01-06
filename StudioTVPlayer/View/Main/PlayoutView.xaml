@@ -38,7 +38,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="100px" />
                 </Grid.RowDefinitions>
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.RowSpan="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <ItemsControl Focusable="False" IsTabStop="False" Margin="5,5,0,0" Grid.Column="0" ItemsSource="{Binding Players}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">

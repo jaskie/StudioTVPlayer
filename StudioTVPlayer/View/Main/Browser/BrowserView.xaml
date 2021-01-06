@@ -21,19 +21,10 @@
     </UserControl.Resources>
     
     <Grid Background="Transparent">
-        <TabControl ItemsSource="{Binding BrowserTabs}" Padding="0" BorderThickness="0" Background="{StaticResource Program_SecondaryColor}">
+        <TabControl ItemsSource="{Binding BrowserTabs}" Padding="0" BorderThickness="0" >
             <TabControl.ToolTip>
                 <ToolTip Content="CTRL+0 by zaznaczyć" />
             </TabControl.ToolTip>
-            <TabControl.ItemContainerStyle>
-                <Style TargetType="TabItem">
-                    <Setter Property="Foreground" Value="{StaticResource Program_Foreground}" />
-                    <Setter Property="Padding" Value="10,5,10,5" />
-                    <Setter Property="FontSize" Value="16" />
-                    <Setter Property="Header" Value="{Binding WatcherMeta.Name}" />
-                    <Setter Property="Template" Value="{StaticResource TabItemControlTemplate}" />
-                </Style>
-            </TabControl.ItemContainerStyle>
             <!--<TabItem Focusable="True" IsTabStop="False" Header="Ingest" Template="{DynamicResource TabItemControlTemplate}">
                 <local:IngestView />
             </TabItem>

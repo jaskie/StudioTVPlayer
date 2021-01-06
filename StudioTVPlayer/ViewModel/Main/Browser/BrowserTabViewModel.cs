@@ -16,7 +16,6 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
     public class BrowserTabViewModel : ViewModelBase
     {
         private IMediaDataProvider _mediaDataProvider;
-        private IExchangeService _exchangeService;
         private IMediaWatcherService _mediaWatcher;
         private readonly ICollectionView _mediaFilesView;
 
@@ -61,7 +60,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             {                
                 if (!Set(ref _selectedMedia, value))
                     return;
-                _exchangeService.RaiseSelectedMediaChanged(new BrowserItemEventArgs(value));
+                //_exchangeService.RaiseSelectedMediaChanged(new BrowserItemEventArgs(value));
             }
         }
 
@@ -108,12 +107,10 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         }
         #endregion
 
-        public BrowserTabViewModel(IMediaDataProvider mediaBrowserDataProvider, IExchangeService exchangeService)
+        public BrowserTabViewModel(IMediaDataProvider mediaBrowserDataProvider)
         {            
             SelectedMedia = null;            
             _mediaDataProvider = mediaBrowserDataProvider;
-            _exchangeService = exchangeService;
-            _exchangeService.NotifyOnConfigurationChanged += NotifyOnConfigurationChanged;
             _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(MediaFiles);
             LoadCommands();
         }
@@ -219,7 +216,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 return;
             var index = Int32.Parse(obj.ToString());
 
-            _exchangeService.AddToPlayerQueueByIndex(index, SelectedMedia);
+            //_exchangeService.AddToPlayerQueueByIndex(index, SelectedMedia);
         }
 
 

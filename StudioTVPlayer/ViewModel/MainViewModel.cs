@@ -1,5 +1,4 @@
-﻿using System;
-using StudioTVPlayer.Helpers;
+﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
 
@@ -27,8 +26,7 @@ namespace StudioTVPlayer.ViewModel
         {
             try
             {
-                throw new ApplicationException();
-                //CurrentViewModel = SimpleIoc.Get<PilotingViewModel>();
+                CurrentViewModel = new PlayoutViewModel();
             }
             catch 
             {
@@ -43,7 +41,7 @@ namespace StudioTVPlayer.ViewModel
         {
             if (CurrentViewModel is PlayoutViewModel)
                 return;
-            CurrentViewModel = null;//new PlayoutViewModel();
+            CurrentViewModel = new PlayoutViewModel();
         }
 
         private void SwitchToConfiguration(object _)

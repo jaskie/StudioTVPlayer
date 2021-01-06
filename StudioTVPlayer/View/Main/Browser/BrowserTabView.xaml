@@ -13,8 +13,7 @@
              KeyboardNavigation.TabNavigation="Local"
              KeyboardNavigation.IsTabStop="True"
              FocusManager.IsFocusScope="True"                                       
-             attachedProp:ControlProperties.IsFocused="{Binding IsFocused, Mode=TwoWay}"
-             Style="{StaticResource BrowserFocused}">
+             >
 
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />

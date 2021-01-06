@@ -78,7 +78,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Header="Filter by current date" Binding="{Binding IsFilteredByDate}"                                        
+                <DataGridCheckBoxColumn Header="Filter by date" Binding="{Binding IsFilteredByDate}"                                        
                                         ElementStyle="{StaticResource MahApps.Styles.CheckBox.DataGrid.Win10}"
                                         EditingElementStyle="{StaticResource MahApps.Styles.CheckBox.DataGrid.Win10}"
                                         />

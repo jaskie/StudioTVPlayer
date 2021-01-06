@@ -28,8 +28,6 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             }
         }
 
-        private IExchangeService _exchangeService;
-
         public string Name { get => Media.Name; }
         public TimeSpan Duration { get => Media.Duration; set { Media.Duration = value; } }
         public DateTime CreationDate { get => Media.CreationDate; }
@@ -53,9 +51,8 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         public UiCommand MediaItem_MoveCommand { get; private set; }        
         public UiCommand QueueToPlayerByChannelIDCommand { get; private set; }
 
-        public BrowserTabItemViewModel(IExchangeService exchangeService)
+        public BrowserTabItemViewModel()
         {
-            _exchangeService = exchangeService;
             _thumbnail = null;            
             LoadCommands();
         }
@@ -85,7 +82,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 return;
             var id= Int32.Parse(obj.ToString());
 
-            _exchangeService.AddToPlayerQueueByChannelID(id, this);
+            //_exchangeService.AddToPlayerQueueByChannelID(id, this);
         }
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

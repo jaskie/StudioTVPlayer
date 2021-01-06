@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
-    public class ModifiedEventArgs : EventArgs
+    public class MediaPlayerQueueItem
     {
-        public bool IsModified { get; }
-        public ModifiedEventArgs(bool isModified)
+        public MediaPlayerQueueItem(Media media)
         {
-            IsModified = isModified;
+            Media = media;
         }
+
+        public Media Media { get; }
     }
 }

@@ -64,5 +64,7 @@ namespace StudioTVPlayer.Model
                 RaisePropertyChanged();
             }
         }
+
+        public string FullPath => System.IO.Path.Combine(Path, Name);
     }
 }

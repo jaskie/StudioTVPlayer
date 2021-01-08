@@ -13,7 +13,6 @@
              IsTabStop="True"             
              KeyboardNavigation.TabNavigation="Local"
              BorderThickness="4"
-             Style="{StaticResource PlayerFocused}" 
              MouseLeftButtonDown="UserControl_MouseLeftButtonDown"
              attachedProp:EventToCommand.TakesInputBindingPrecedence="True">
     <UserControl.InputBindings>
@@ -29,8 +28,6 @@
 
     <Border KeyboardNavigation.TabNavigation="None" Focusable="False" CornerRadius="5,5,5,5" 
             BorderThickness="2" 
-            BorderBrush="{StaticResource Program_MainColor}" 
-            Background="{StaticResource Program_SecondaryColor}" 
             Height="auto">
         <Grid Margin="5" Focusable="False">
             <Grid.ColumnDefinitions>
@@ -45,8 +42,8 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Text="{Binding Channel.Name}" FontSize="18" Foreground="{StaticResource Program_Foreground}" />
-                <Border Grid.Row="1" HorizontalAlignment="Center" MinWidth="200" Margin="5" Background="{StaticResource Program_MainColor}" CornerRadius="1,1,1,1">
+                <TextBlock Text="{Binding Channel.Name}" FontSize="18" />
+                <Border Grid.Row="1" HorizontalAlignment="Center" MinWidth="200" Margin="5" CornerRadius="1,1,1,1">
                     <Border.ToolTip>
                         <ToolTip Content="CTRL+1..9 by zaznaczyć player" />
                     </Border.ToolTip>
@@ -61,13 +58,12 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding Channel.VideoFormat}" />
-                            <TextBlock Foreground="{StaticResource Player_Foreground}" Text="Czas bieżący" Grid.Row="0" />
+                            <TextBlock Text="Czas bieżący" Grid.Row="0" />
 
                             <controls:Timecode Grid.Row="1"
                                                VideoFormat="{Binding Channel.VideoFormat, UpdateSourceTrigger=PropertyChanged}"
                                                Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
-                                               Foreground="{StaticResource Player_Duration}"
                                                Background="Transparent" 
                                                TextAlignment="Right" 
                                                FontSize="20"
@@ -92,12 +88,11 @@
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <TextBlock Foreground="{StaticResource Player_Foreground}" Text="Czas do zejścia" Grid.Row="0" />
+                            <TextBlock Text="Czas do zejścia" Grid.Row="0" />
                             <controls:Timecode Grid.Row="1"
                                                VideoFormat="{Binding Channel.VideoFormat, UpdateSourceTrigger=PropertyChanged}"
                                                Time="{Binding OutTime, UpdateSourceTrigger=PropertyChanged}"
                                                IsReadOnly="True"
-                                               Foreground="{StaticResource Player_Out}"
                                                Background="Transparent" 
                                                TextAlignment="Right" 
                                                FontSize="20"
@@ -124,29 +119,19 @@
                         <ColumnDefinition Width="33*" />
                     </Grid.ColumnDefinitions>
 
-                    <Control Focusable="False" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding StopCommand}" Grid.Column="0" Margin="10,0,0,0" Template="{StaticResource StopButton}">
+                    <Control Focusable="False" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding StopCommand}" Grid.Column="0" Margin="10,0,0,0" >
                         <Control.ToolTip>
                             <ToolTip Content="PAUSE/BREAK by odładować materiał" />
                         </Control.ToolTip>
                     </Control>
 
                     <Control Focusable="False" Grid.Column="1" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding PlayPauseCommand}">
-                        <Control.Style>
-                            <Style TargetType="Control">
-                                <Setter Property="Template" Value="{StaticResource PlayButton}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                        <Setter Property="Template" Value="{StaticResource PauseButton}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Control.Style>
                         <Control.ToolTip>
                             <ToolTip Content="SPACE Play/Pause" />
                         </Control.ToolTip>
                     </Control>
 
-                    <Control Focusable="False" Grid.Column="2" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding NextCommand}" Template="{StaticResource NextButton}">
+                    <Control Focusable="False" Grid.Column="2" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding NextCommand}" >
                         <Control.ToolTip>
                             <ToolTip Content="END Załaduj następny materiał z kolejki" />
                         </Control.ToolTip>
@@ -179,10 +164,9 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Button Focusable="False" Command="{Binding DeleteDisabledCommand}" Style="{StaticResource Configuration_Button}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,1,5,0">
+                <Button Focusable="False" Command="{Binding DeleteDisabledCommand}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,1,5,0">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
-                            <ContentPresenter Content="{StaticResource DeleteIcon}" />
                             <TextBlock VerticalAlignment="Center" Margin="5,0,0,0" Text="Usuń wyłączone" />
                         </StackPanel>
                     </Button.Content>
@@ -192,12 +176,12 @@
                           SelectedIndex="{Binding SelectedIndex, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"                                                   
                           attachedProp:EventToCommand.DropCommand="{Binding DropReceiveCommand}"                                                
                           ItemsSource="{Binding MediaQueue}" 
-                          Style="{DynamicResource Player_ListViewStyle}">
+                          >
                     <ListView.InputBindings>
                         <KeyBinding Modifiers="Ctrl" Key="Return" Command="{Binding LoadSelectedMediaCommand}" />
                     </ListView.InputBindings>
                     <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource Player_ListViewItemStyle}">
+                        <Style TargetType="{x:Type ListViewItem}" >
                             <Setter Property="attachedProp:ListItemProperties.IsDropped" Value="{Binding DragOver, Mode=TwoWay}" />
                             <Setter Property="attachedProp:ListItemProperties.DragEnter" Value="{Binding DragOver, Mode=TwoWay}" />
                             <Setter Property="attachedProp:ListItemProperties.DragLeave" Value="{Binding DragOver, Mode=TwoWay}" />

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="StudioTVPlayer.View.Main.Browser.BrowserTabItemView"
+﻿<UserControl x:Class="StudioTVPlayer.View.Main.Browser.BrowserMediaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -13,7 +13,7 @@
     </UserControl.ToolTip>
 
     <UserControl.ContextMenu>
-        <ContextMenu ItemsSource="{Binding Configuration.Channels}" Style="{StaticResource ContextMenuIconless}">
+        <ContextMenu ItemsSource="{Binding Configuration.Channels}" >
             <ContextMenu.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}" />
@@ -35,7 +35,7 @@
                     <DropShadowEffect BlurRadius="10" ShadowDepth="10" Color="Black" />
                 </Image.Effect>
             </Image>
-            <TextBlock Foreground="{StaticResource Program_Foreground}" TextWrapping="Wrap" Margin="5" Text="{Binding Media.Name}" />
+            <TextBlock TextWrapping="Wrap" Margin="5" Text="{Binding Media.Name}" />
         </StackPanel>
     </Border>
 

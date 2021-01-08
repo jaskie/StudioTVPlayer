@@ -4,11 +4,11 @@
 namespace StudioTVPlayer.View.Main.Browser
 {
     /// <summary>
-    /// Interaction logic for IngestView.xaml
+    /// Interaction logic for BrowsersView.xaml
     /// </summary>
-    public partial class BrowserTabView : UserControl
+    public partial class BrowsersView : UserControl
     {
-        public BrowserTabView()
+        public BrowsersView()
         {
             InitializeComponent();
         }

@@ -8,7 +8,7 @@ using StudioTVPlayer.Model.Interfaces;
 
 namespace StudioTVPlayer.ViewModel.Main.Browser
 {
-    public class BrowserTabItemViewModel : ViewModelBase
+    public class BrowserMediaViewModel : ViewModelBase
     {
 
         private Media _media;
@@ -51,7 +51,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         public UiCommand MediaItem_MoveCommand { get; private set; }        
         public UiCommand QueueToPlayerByChannelIDCommand { get; private set; }
 
-        public BrowserTabItemViewModel()
+        public BrowserMediaViewModel()
         {
             _thumbnail = null;            
             LoadCommands();

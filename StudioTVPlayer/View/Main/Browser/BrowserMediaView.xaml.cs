@@ -17,11 +17,11 @@ using StudioTVPlayer.Model;
 namespace StudioTVPlayer.View.Main.Browser
 {
     /// <summary>
-    /// Interaction logic for BrowserTabItem.xaml
+    /// Interaction logic for BrowserMediaView.xaml
     /// </summary>
-    public partial class BrowserTabItemView : UserControl
+    public partial class BrowserMediaView : UserControl
     {
-        public BrowserTabItemView()
+        public BrowserMediaView()
         {           
             InitializeComponent();
         }

@@ -5,8 +5,8 @@ namespace StudioTVPlayer.Model.Args
 {
     public class BrowserItemEventArgs : EventArgs
     {
-        public BrowserTabItemViewModel BrowserItem { get; }
-        public BrowserItemEventArgs(BrowserTabItemViewModel browserItem)
+        public BrowserMediaViewModel BrowserItem { get; }
+        public BrowserItemEventArgs(BrowserMediaViewModel browserItem)
         {
             BrowserItem = browserItem; 
         }

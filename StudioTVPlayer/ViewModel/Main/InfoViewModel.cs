@@ -9,8 +9,8 @@ namespace StudioTVPlayer.ViewModel.Main
     public class InfoViewModel : ViewModelBase
     {
 
-        private BrowserTabItemViewModel _browserItem;
-        public BrowserTabItemViewModel BrowserItem
+        private BrowserMediaViewModel _browserItem;
+        public BrowserMediaViewModel BrowserItem
         {
             get => _browserItem;
             set

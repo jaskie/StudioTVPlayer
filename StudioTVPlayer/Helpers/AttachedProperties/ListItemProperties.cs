@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         public static readonly DependencyProperty ItemSelectedProperty =
            DependencyProperty.RegisterAttached(
                "ItemSelected",
-               typeof(BrowserTabItemViewModel),
+               typeof(BrowserMediaViewModel),
                typeof(ListItemProperties),
                new FrameworkPropertyMetadata(ItemSelectedChanged));
 
@@ -107,19 +107,19 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void ItemSelectByFocus(object sender, RoutedEventArgs e)
         {
             if (sender is Control element)
-                SetItemSelected(element, (BrowserTabItemViewModel)element.DataContext);
+                SetItemSelected(element, (BrowserMediaViewModel)element.DataContext);
             e.Handled = true;
         }
 
         private static void ItemSelect(object sender, MouseButtonEventArgs e)
         {
             if (sender is Control element)
-                SetItemSelected(element, (BrowserTabItemViewModel)element.DataContext);
+                SetItemSelected(element, (BrowserMediaViewModel)element.DataContext);
             e.Handled = true;
         }
 
-        public static void SetItemSelected(UIElement element, BrowserTabItemViewModel value) => element.SetValue(ItemSelectedProperty, value);
-        public static BrowserTabItemViewModel GetItemSelected(UIElement element) => (BrowserTabItemViewModel)element.GetValue(ItemSelectedProperty);
+        public static void SetItemSelected(UIElement element, BrowserMediaViewModel value) => element.SetValue(ItemSelectedProperty, value);
+        public static BrowserMediaViewModel GetItemSelected(UIElement element) => (BrowserMediaViewModel)element.GetValue(ItemSelectedProperty);
 
 
     }

@@ -447,7 +447,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (e.Data == null)
                 return;
 
-            var browserVM = (BrowserTabItemViewModel)e.Data.GetData(typeof(BrowserTabItemViewModel));
+            var browserVM = (BrowserMediaViewModel)e.Data.GetData(typeof(BrowserMediaViewModel));
             var newIndex = MediaQueue.IndexOf(MediaQueue.FirstOrDefault(playerItemParam => playerItemParam.DragOver == true));
 
             if (browserVM == null && newIndex>-1) //browserItem null czyli to jest playerItem

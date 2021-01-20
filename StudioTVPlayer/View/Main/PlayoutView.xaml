@@ -38,7 +38,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="100px" />
                 </Grid.RowDefinitions>
-                <ScrollViewer Template="{StaticResource ScrollViewerControlTemplate}" Background="{StaticResource Program_MainColor}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <ItemsControl Focusable="False" IsTabStop="False" Margin="5,5,0,0" Grid.Column="0" ItemsSource="{Binding Players}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">
@@ -47,9 +47,9 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
-                <Grid Background="{StaticResource Program_SecondaryColor}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"></Grid>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"></Grid>
             </Grid>
-            <Grid Grid.Column="1" Background="{StaticResource Program_SecondaryColor}">
+            <Grid Grid.Column="1" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="auto" />

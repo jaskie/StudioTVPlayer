@@ -8,7 +8,7 @@ using StudioTVPlayer.Model.Interfaces;
 
 namespace StudioTVPlayer.ViewModel.Main.Browser
 {
-    public class BrowserTabItemViewModel : ViewModelBase
+    public class BrowserMediaViewModel : ViewModelBase
     {
 
         private Media _media;
@@ -27,8 +27,6 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 Media.PropertyChanged += Media_PropertyChanged;
             }
         }
-
-        private IExchangeService _exchangeService;
 
         public string Name { get => Media.Name; }
         public TimeSpan Duration { get => Media.Duration; set { Media.Duration = value; } }
@@ -53,9 +51,8 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         public UiCommand MediaItem_MoveCommand { get; private set; }        
         public UiCommand QueueToPlayerByChannelIDCommand { get; private set; }
 
-        public BrowserTabItemViewModel(IExchangeService exchangeService)
+        public BrowserMediaViewModel()
         {
-            _exchangeService = exchangeService;
             _thumbnail = null;            
             LoadCommands();
         }
@@ -85,7 +82,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 return;
             var id= Int32.Parse(obj.ToString());
 
-            _exchangeService.AddToPlayerQueueByChannelID(id, this);
+            //_exchangeService.AddToPlayerQueueByChannelID(id, this);
         }
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

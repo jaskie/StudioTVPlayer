@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <converters:DateConverter x:Key="DateConverter" />
     </UserControl.Resources>
-    <Grid Height="100" Grid.Row="1" Background="{StaticResource Program_SecondaryColor}" VerticalAlignment="Bottom">
+    <Grid Height="100" Grid.Row="1" VerticalAlignment="Bottom">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />
@@ -19,8 +19,8 @@
         <Image Source="{Binding Thumbnail}" Stretch="Uniform" Margin="5" />
         <WrapPanel Margin="10" Grid.Column="1" Orientation="Vertical">
             <StackPanel Orientation="Vertical" >
-                <TextBlock Foreground="{StaticResource Program_Foreground}" FontSize="20" Text="{Binding Name, StringFormat=Nazwa: {0}}" />
-                <TextBlock Foreground="{StaticResource Program_Foreground}" FontSize="20">
+                <TextBlock FontSize="20" Text="{Binding Name, StringFormat=Nazwa: {0}}" />
+                <TextBlock FontSize="20">
                         <Run Text="Czas trwania: " />
                         <Run>
                             <Run.Style>
@@ -35,7 +35,7 @@
                             </Run.Style>
                         </Run>
                 </TextBlock>
-                <TextBlock Foreground="{StaticResource Program_Foreground}" FontSize="20">
+                <TextBlock FontSize="20">
                         <Run Text="Data modyfikacji: " />
                         <Run>
                             <Run.Style>

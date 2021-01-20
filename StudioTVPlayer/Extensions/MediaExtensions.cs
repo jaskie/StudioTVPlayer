@@ -30,7 +30,7 @@ namespace StudioTVPlayer.Extensions
             return true;
         }
 
-        public static bool GetFFMeta(this BrowserTabItemViewModel browserVM, FFMeta ffmeta = default,
+        public static bool GetFFMeta(this BrowserMediaViewModel browserVM, FFMeta ffmeta = default,
             bool getAudioDuration = false, int height = 200)
         {
             if (!File.Exists(browserVM.Media.Path))
@@ -91,7 +91,7 @@ namespace StudioTVPlayer.Extensions
             return false;
         }
 
-        public static void GetResourceThumbnail(this BrowserTabItemViewModel browserVM, ThumbnailType thumbnailType = default(ThumbnailType))
+        public static void GetResourceThumbnail(this BrowserMediaViewModel browserVM, ThumbnailType thumbnailType = default(ThumbnailType))
         {           
             browserVM.Thumbnail = thumbnailType == ThumbnailType.NoPreview ? 
                 new BitmapImage(new Uri(@"pack://application:,,,/StudioTVPlayer;component/Resources/NoPreviewThumbnail.png")): 

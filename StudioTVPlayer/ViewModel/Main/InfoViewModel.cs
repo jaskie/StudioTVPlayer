@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows.Media;
-using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Model.Interfaces;
 using StudioTVPlayer.ViewModel.Main.Browser;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
     public class InfoViewModel : ViewModelBase
     {
-        private IExchangeService _exchangeService;
 
-        private BrowserTabItemViewModel _browserItem;
-        public BrowserTabItemViewModel BrowserItem
+        private BrowserMediaViewModel _browserItem;
+        public BrowserMediaViewModel BrowserItem
         {
             get => _browserItem;
             set
@@ -38,12 +34,6 @@ namespace StudioTVPlayer.ViewModel.Main
         public TimeSpan Duration { get => _browserItem == null ? default(TimeSpan) : _browserItem.Duration; set { _browserItem.Duration = value; } }
         public DateTime CreationDate { get => _browserItem == null ? default(DateTime) : _browserItem.CreationDate; }
         public ImageSource Thumbnail { get => _browserItem?.Thumbnail; }
-
-        public InfoViewModel(IExchangeService vmNotifyService)
-        {                       
-            _exchangeService = vmNotifyService;
-            _exchangeService.NotifyOnSelectedMediaChanged += SelectedMediaChanged;                        
-        }
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {

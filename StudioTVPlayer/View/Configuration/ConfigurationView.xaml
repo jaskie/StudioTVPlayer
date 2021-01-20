@@ -11,58 +11,67 @@
              d:DesignHeight="1050" d:DesignWidth="1920"
              >
     <Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Grid.Row="1" Height="50" HorizontalAlignment="Right">
-                <StackPanel.Resources>
-                    <Style TargetType="TextBlock" >
-                        <Setter Property="FontSize" Value="15"/>
-                        <Setter Property="FontWeight" Value="Normal"/>
-                        <Setter Property="Padding" Value="10 0 0 0"/>
-                        <Setter Property="Grid.Column" Value="1" />
-                    </Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                        <Setter Property="Margin" Value="5"/>
-                        <Setter Property="Padding" Value="10 5"/>
-                    </Style>
-                </StackPanel.Resources>
-                <Button Command="{Binding CancelCommand}" >
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <mah:FontIcon Glyph="&#xE711;" />
-                            <TextBlock Text="Cancel" />
-                        </Grid>
-                </Button>
-                <Button Command="{Binding SaveConfigurationCommand}" >
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <mah:FontIcon Glyph="&#xE73E;" />
-                            <TextBlock Text="Save settings" />
-                        </Grid>
-                </Button>
-            </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="10*" />
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="10*" />
-                    <ColumnDefinition Width="33*" />
-                </Grid.ColumnDefinitions>
-                <!--<views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
+        <Label FontSize="{DynamicResource MahApps.Font.Size.Header}">Configuration</Label>
+
+        <TabControl Grid.Row="1">
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource MahApps.Styles.TabItem}">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate DataType="{x:Type TabItem}">
+                                <ContentControl Content="{Binding}" Cursor="Hand"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="Channels">
                 <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" DataContext="{Binding Channels}"/>
-                <views:ExtensionsView HorizontalAlignment="Center" Grid.Column="4" VerticalAlignment="Top" Margin="5" />-->
-            </Grid>
-        </Grid>
+            </TabItem>
+            <TabItem Header="Watched folders">
+                <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
+            </TabItem>
+        </TabControl>
+        
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Height="50" HorizontalAlignment="Right">
+            <StackPanel.Resources>
+                <Style TargetType="TextBlock" >
+                    <Setter Property="FontSize" Value="15"/>
+                    <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="Padding" Value="10 0 0 0"/>
+                    <Setter Property="Grid.Column" Value="1" />
+                </Style>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Margin" Value="5"/>
+                    <Setter Property="Padding" Value="10 5"/>
+                </Style>
+            </StackPanel.Resources>
+            <Button Command="{Binding CancelCommand}" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <mah:FontIcon Glyph="&#xE711;" />
+                    <TextBlock Text="Cancel" />
+                </Grid>
+            </Button>
+            <Button Command="{Binding SaveConfigurationCommand}" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <mah:FontIcon Glyph="&#xE73E;" />
+                    <TextBlock Text="Save settings" />
+                </Grid>
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>

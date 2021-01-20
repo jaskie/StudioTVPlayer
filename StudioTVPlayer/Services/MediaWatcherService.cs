@@ -11,7 +11,7 @@ using StudioTVPlayer.Model.Interfaces;
 
 namespace StudioTVPlayer.Services
 {
-    public class MediaWatcherService : IMediaWatcherService
+    public class MediaWatcherService
     {
         private FileSystemWatcher _fs = null;
         public event EventHandler<MediaEventArgs> NotifyOnMediaChanged;
@@ -23,14 +23,14 @@ namespace StudioTVPlayer.Services
         private readonly List<Media> _mediaListToTrack;
 
         private bool IsVerificating;
-        private bool IsTracking;       
-      
-        public MediaWatcherService(string path)
+        private bool IsTracking;
+
+        public MediaWatcherService(WatchedFolder watchedFolder)
         {
             _mediaListToTrack = new List<Media>();
             _mediaListToVerify = new List<Media>();
 
-            _fs = new FileSystemWatcher(path);
+            _fs = new FileSystemWatcher(watchedFolder.Path);
             _fs.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
             _fs.InternalBufferSize = 64000; //zalecany max
             _fs.Error += _fs_Error;
@@ -39,8 +39,12 @@ namespace StudioTVPlayer.Services
             _fs.Renamed += MediaRenamed;
             _fs.Changed += MediaChanged;
             _fs.EnableRaisingEvents = true;
-        }           
-        
+            WatchedFolder = watchedFolder;
+        }
+
+        public WatchedFolder WatchedFolder { get; }
+
+
         public string GetPath()
         {
             return _fs.Path;
@@ -206,6 +210,23 @@ namespace StudioTVPlayer.Services
                 }
                 Debug.WriteLine("Verify task Exit");
             });
-        }       
+        }
+
+        public IEnumerable<Media> GetMedia()
+        {
+            return Directory.EnumerateFiles(WatchedFolder.Path)
+                .Where(Accept)
+                .Select(GetMedia);
+        }
+
+        private Media GetMedia(string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool Accept(string m)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -10,12 +10,19 @@ namespace StudioTVPlayer.Helpers
     {
         public static bool Browse(ref string currentFolder, string description = "")
         {
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog() { SelectedPath = currentFolder, Description = description, RootFolder = Environment.SpecialFolder.MyComputer })
+            
+            using (var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog(description) 
+            { 
+                IsFolderPicker = true,
+                ShowPlacesList = true,
+                Multiselect = false,
+                DefaultDirectory = currentFolder 
+            })
             {
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
+                var result = dialog.ShowDialog();
+                if (result == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
                 {
-                    currentFolder = dialog.SelectedPath;
+                    currentFolder = dialog.FileName;
                     return true;
                 }
                 return false;

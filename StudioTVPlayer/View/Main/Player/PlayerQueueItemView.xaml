@@ -21,7 +21,6 @@
         </Style>
         
         <Style x:Key="MainContainerStyle" TargetType="{x:Type Grid}">
-            <Setter Property="Background" Value="{StaticResource Player_ItemBackground}" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsDisabled}" Value="True">

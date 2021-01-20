@@ -1,21 +1,25 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
+using System.IO;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class WatchedFolderViewModel : ModifyableViewModelBase
+    public class WatchedFolderViewModel : RemovableViewModelBase
     {
         private string _name;
         private string _path;
-        private bool _isFiltered;
+        private bool _isFilteredByDate;
+        private string _filter;
 
         public WatchedFolderViewModel(WatchedFolder watchedFolder)
         {
             WatchedFolder = watchedFolder;
             _path = watchedFolder.Path;
             _name = watchedFolder.Name;
-            _isFiltered = watchedFolder.IsFiltered;
-            BrowseCommand = new UiCommand((_) => {
+            _isFilteredByDate = watchedFolder.IsFilteredByDate;
+            _filter = watchedFolder.Filter;
+            BrowseCommand = new UiCommand((_) =>
+            {
                 var path = Path;
                 if (FolderHelper.Browse(ref path, $"Select path for folder {Name}"))
                     Path = path;
@@ -27,7 +31,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public string Path { get => _path; set => Set(ref _path, value); }
 
-        public bool IsFiltered { get => _isFiltered; set => Set(ref _isFiltered, value); }
+        public bool IsFilteredByDate { get => _isFilteredByDate; set => Set(ref _isFilteredByDate, value); }
+
+        public string Filter { get => _filter; set => Set(ref _filter, value); }
 
         public UiCommand BrowseCommand { get; }
 
@@ -37,7 +43,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolder.Path = Path;
             WatchedFolder.Name = Name;
-            WatchedFolder.IsFiltered = IsFiltered;
+            WatchedFolder.IsFilteredByDate = IsFilteredByDate;
+            WatchedFolder.Filter = Filter;
+            IsModified = false;
+        }
+
+        public override bool IsValid()
+        {
+            return !string.IsNullOrEmpty(Name) && Directory.Exists(Path);
         }
     }
 }

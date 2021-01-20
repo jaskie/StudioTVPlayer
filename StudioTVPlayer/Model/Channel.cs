@@ -9,16 +9,12 @@ namespace StudioTVPlayer.Model
 {
     public class Channel : INotifyPropertyChanged, IDisposable
     {
-        private int _id;
         private string _name = string.Empty;
         private VideoFormat _videoFormat;
         private int _videoFormatId;
         private PixelFormat _pixelFormat;
         private int _deviceIndex;
 
-        [XmlAttribute]
-        public int Id { get => _id; set => _id = value; }
-      
         private TVPlayR.Channel _channelR;
         
         [XmlAttribute]
@@ -70,14 +66,14 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        internal Channel Clone()
-        {
-            return new Channel { Id = this.Id, Name = this.Name };
-        }
-
-        public void Init(int videoFormat, PixelFormat pixelFormat)
+        public void Initialize(int videoFormat, PixelFormat pixelFormat)
         {
             _channelR = new TVPlayR.Channel(videoFormat, pixelFormat, 16);
+        }
+
+        public void Uninitialize()
+        {
+
         }
 
         public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);

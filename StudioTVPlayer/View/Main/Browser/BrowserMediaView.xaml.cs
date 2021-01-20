@@ -12,16 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using StudioTVPlayer.Model;
 
-namespace StudioTVPlayer.View.Configuration
+namespace StudioTVPlayer.View.Main.Browser
 {
     /// <summary>
-    /// Interaction logic for ExtensionsView.xaml
+    /// Interaction logic for BrowserMediaView.xaml
     /// </summary>
-    public partial class ExtensionsView : UserControl
+    public partial class BrowserMediaView : UserControl
     {
-        public ExtensionsView()
-        {
+        public BrowserMediaView()
+        {           
             InitializeComponent();
         }
     }

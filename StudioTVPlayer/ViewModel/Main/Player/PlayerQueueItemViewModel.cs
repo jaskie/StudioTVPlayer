@@ -7,7 +7,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class PlayerQueueItemViewModel : ViewModelBase
     {
-        public BrowserTabItemViewModel BrowserItem { get; }        
+        public BrowserMediaViewModel BrowserItem { get; }        
 
         private bool _dragOver = false;
         public bool DragOver
@@ -77,7 +77,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public bool? IsVerified => BrowserItem?.IsVerified;
 
 
-        public PlayerQueueItemViewModel(BrowserTabItemViewModel browserMedia)
+        public PlayerQueueItemViewModel(BrowserMediaViewModel browserMedia)
         {
             BrowserItem = browserMedia;
             BrowserItem.PropertyChanged += BrowserItem_PropertyChanged;

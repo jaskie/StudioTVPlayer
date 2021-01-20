@@ -4,10 +4,8 @@ using TVPlayR;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ChannelViewModel : ModifyableViewModelBase
+    public class ChannelViewModel : RemovableViewModelBase
     {
-        private readonly Model.Channel _channel;
-        private int _id;
         private string _name;
         private DecklinkDevice _selectedDevice;
         private VideoFormat _selectedVideoFormat;
@@ -15,17 +13,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public ChannelViewModel(Model.Channel channel)
         {
-            _channel = channel;
+            Channel = channel;
             _name = channel.Name;
-            _id = channel.Id;
-            _selectedDevice = Devices.FirstOrDefault(d => d.Index == channel.DeviceIndex);
+            _selectedDevice = GlobalApplicationData.Current.DecklinkDevices.FirstOrDefault(dd => dd.Index == channel.DeviceIndex);
+            _selectedVideoFormat = GlobalApplicationData.Current.VideoFormats.FirstOrDefault(vf => vf.Id == channel.VideoFormatId);
+            _selectedPixelFormat = channel.PixelFormat;
         }
 
-        public int Id
-        {
-            get => _id;
-            set => Set(ref _id, value);
-        }
+        public Model.Channel Channel { get; }
 
         public string Name
         {
@@ -33,21 +28,28 @@ namespace StudioTVPlayer.ViewModel.Configuration
             set => Set(ref _name, value);
         }
 
-        public DecklinkDevice[] Devices => GlobalApplicationData.Current.DecklinkDevices;
         public DecklinkDevice SelectedDevice { get => _selectedDevice; set => Set(ref _selectedDevice, value); }
 
-        public VideoFormat[] VideoFormats => GlobalApplicationData.Current.VideoFormats;
         public VideoFormat SelectedVideoFormat { get => _selectedVideoFormat; set => Set(ref _selectedVideoFormat, value); }
 
-        public PixelFormat[] PixelFormats => GlobalApplicationData.Current.PixelFormats;
         public PixelFormat SelectedPixelFormat { get => _selectedPixelFormat; set => Set(ref _selectedPixelFormat, value); }
 
         public override void Apply()
         {
-            _channel.Id = Id;
-            _channel.Name = Name;
-            _channel.DeviceIndex = SelectedDevice.Index;
+            if (!IsModified)
+                return;
+            if (Channel.DeviceIndex != SelectedDevice.Index)
+                Channel.Uninitialize();
+            Channel.Name = Name;
+            Channel.DeviceIndex = SelectedDevice.Index;
+            Channel.PixelFormat = SelectedPixelFormat;
+            Channel.VideoFormat = SelectedVideoFormat;
             IsModified = false;
+        }
+
+        public override bool IsValid()
+        {
+            return SelectedDevice != null && SelectedVideoFormat != null;
         }
     }
 }

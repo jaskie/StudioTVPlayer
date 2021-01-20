@@ -3,74 +3,77 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:StudioTVPlayer.View.Configuration"
-             xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
+             FontSize="16"
+             d:DataContext="{d:DesignInstance {x:Type vm:ChannelsViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800"
              >
-    <Border BorderThickness="0" BorderBrush="{StaticResource Program_Foreground}" >
-        <Grid x:Name="rootGrid">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <Grid VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DataGrid DockPanel.Dock="Bottom" AutoGenerateColumns="False"
+                  ItemsSource="{Binding Channels}" 
+                  VerticalAlignment="Top"
+                  mah:DataGridHelper.EnableCellEditAssist="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  x:Name="dg"
+                  >
+            <DataGrid.Resources>
+                <CollectionViewSource x:Key="devices" Source="{Binding Devices}"/>
+                <CollectionViewSource x:Key="videoFormats" Source="{Binding VideoFormats}"/>
+                <CollectionViewSource x:Key="pixelFormats" Source="{Binding PixelFormats}"/>
+                <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.MetroSquare}">
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Button.Border.Focus}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
+                    <Setter Property="mah:TextBoxHelper.ClearTextButton" Value="False"/>
+                    <Setter Property="FontSize" Value="16"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns >
+                <DataGridTemplateColumn Header="Name" MinWidth="80" Width="2*" SortMemberPath="Name">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="4 0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
 
-            <StackPanel Margin="20,0,0,0" Orientation="Horizontal" Grid.Row="0">
-                <TextBlock Text="Kanały" FontSize="18" Foreground="{StaticResource Program_Foreground}" VerticalAlignment="Center" />
-                <Button Style="{StaticResource Configuration_Button}" Command="{Binding AddChannelCommand}"
-                        Margin="5" Padding="10,2,10,2" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <Button.Content>
-                        <ContentControl Content="{StaticResource AddIcon}" />
-                    </Button.Content>
-                </Button>
+                </DataGridTemplateColumn>
+                <DataGridComboBoxColumn Header="Output device" Width="2*" ItemsSource="{Binding Source={StaticResource devices}}" DisplayMemberPath="DisplayName" SelectedItemBinding="{Binding SelectedDevice, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridComboBoxColumn Header="Video format"  Width="*" ItemsSource="{Binding Source={StaticResource videoFormats}}" DisplayMemberPath="Name" SelectedItemBinding="{Binding SelectedVideoFormat, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridComboBoxColumn Header="Pixel format"  Width="*" ItemsSource="{Binding Source={StaticResource pixelFormats}}" SelectedItemBinding="{Binding SelectedPixelFormat}" />
+                <DataGridTemplateColumn Width="50" CanUserSort="False" CanUserResize="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding RequestRemoveCommand}" ToolTip="Remove this channel">
+                                <mah:FontIcon Glyph="&#xE74D;"/>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Grid.Row="1" Margin="0 10" Command="{Binding AddChannelCommand}" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal">
+                <mah:FontIcon Glyph="&#xE710;" />
+                <Label FontSize="16" FontWeight="Normal">Add new channel</Label>
             </StackPanel>
+        </Button>
+    </Grid>
 
-            <DataGrid 
-            attachedProp:EventToCommand.UnloadedCommand="{Binding UnloadedCommand}"
-            Style="{StaticResource Configuration_DataGrid}"            
-            x:Name="channels_DataGrid"             
-            Grid.Row="2" 
-            ItemsSource="{Binding Channels}" 
-            SelectedItem="{Binding SelectedChannel}"           
-            CellStyle="{StaticResource Configuration_DataGridCell}"
-            RowStyle="{StaticResource Configuration_DataGridRow}"
-            RowHeaderStyle="{StaticResource Configuration_DataGridRowHeader}"
-            ColumnHeaderStyle="{StaticResource Configuration_DataGridColumnHeader}" >
-                <DataGrid.ContextMenu>
-                    <ContextMenu Style="{StaticResource ContextMenuIconless}">
-                        <MenuItem Background="Transparent" Header="Usuń" Command="{Binding DeleteChannelCommand}" CommandParameter="{Binding SelectedChannel}">
-                            <MenuItem.Icon>
-                                <ContentControl Content="{StaticResource DeleteIcon}" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-                <DataGrid.Columns>
-                    <DataGridTextColumn ElementStyle="{StaticResource Configuration_DataGridTextBlock}" EditingElementStyle="{StaticResource Configuration_DataGridTextBox}" Header="Kanał" MinWidth="80" Width="auto" Binding="{Binding Name}" />
-                    <DataGridTemplateColumn Header="Urządzenie" MinWidth="150" Width="auto" >
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox Style="{StaticResource Browser_ComboBoxStyle}" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}" DisplayMemberPath="DisplayName" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Format Video" MinWidth="100" Width="auto" >
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox Style="{StaticResource Browser_ComboBoxStyle}" ItemsSource="{Binding VideoFormats}"  SelectedItem="{Binding SelectedVideoFormat}" DisplayMemberPath="Name"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="Pixel Format" MinWidth="100" Width="auto" >
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox Style="{StaticResource Browser_ComboBoxStyle}" ItemsSource="{Binding PixelFormats}" SelectedItem="{Binding SelectedPixelFormat}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-    </Border>
 </UserControl>

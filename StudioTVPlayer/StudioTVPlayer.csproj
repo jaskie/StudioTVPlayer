@@ -43,11 +43,18 @@
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.4.4.0\lib\net45\ControlzEx.dll</HintPath>
     </Reference>
+    <Reference Include="CustomMarshalers" />
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.3\lib\net452\MahApps.Metro.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.4.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft-WindowsAPICodePack-Core.1.1.4\lib\net452\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.4.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft-WindowsAPICodePack-Shell.1.1.4\lib\net452\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="System" />
@@ -55,10 +62,10 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management.Automation" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -71,13 +78,13 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Bootstrapper.cs" />
     <Compile Include="Controls\Seekbar.cs" />
     <Compile Include="Controls\Timecode.cs" />
     <Compile Include="Converters\DateConverter.cs" />
@@ -88,57 +95,49 @@
     <Compile Include="Helpers\AttachedProperties\ListItemProperties.cs" />
     <Compile Include="Helpers\DataStore.cs" />
     <Compile Include="Helpers\FolderHelper.cs" />
-    <Compile Include="Helpers\SimpleIoc.cs" />
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\ConfigurationChangedEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Channel.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Model\Enums.cs" />
-    <Compile Include="Model\Interfaces\IConfiguration.cs" />
-    <Compile Include="ViewModel\Configuration\ExtensionViewModel.cs" />
+    <Compile Include="Model\MediaPlayer.cs" />
+    <Compile Include="Model\MediaPlayerProgressEventArgs.cs" />
+    <Compile Include="Model\MediaPlayerQueueItem.cs" />
+    <Compile Include="Model\MediaPlayerQueueItemEventArgs.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
-    <Compile Include="Model\Interfaces\IExchangeService.cs" />
     <Compile Include="Model\Interfaces\IPilotingDataProvider.cs" />
-    <Compile Include="Model\Interfaces\IMediaWatcherService.cs" />
     <Compile Include="Model\Media.cs" />
-    <Compile Include="Model\Interfaces\IMediaDataProvider.cs" />
     <Compile Include="Model\Interfaces\IPlayerController.cs" />
-    <Compile Include="Model\Args\ModifiedEventArgs.cs" />
-    <Compile Include="Providers\MediaDataProvider.cs" />
     <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="Providers\PilotingDataProvider.cs" />
     <Compile Include="Services\MediaWatcherService.cs" />
-    <Compile Include="Services\ExchangeService.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
-    <Compile Include="ViewModel\Main\Browser\BrowserTabItemViewModel.cs" />
-    <Compile Include="ViewModel\Main\Browser\BrowserViewModel.cs" />
+    <Compile Include="ViewModel\Main\Browser\BrowserMediaViewModel.cs" />
+    <Compile Include="ViewModel\Main\Browser\BrowsersViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ExtensionsViewModel.cs" />
     <Compile Include="ViewModel\Main\InfoViewModel.cs" />
-    <Compile Include="ViewModel\Main\Browser\BrowserTabViewModel.cs" />
+    <Compile Include="ViewModel\Main\Browser\BrowserViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\PlayerQueueItemViewModel.cs" />
+    <Compile Include="ViewModel\RemovableViewModelBase.cs" />
     <Compile Include="View\Configuration\ChannelsView.xaml.cs">
       <DependentUpon>ChannelsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Configuration\ConfigurationExtensionsView.xaml.cs">
-      <DependentUpon>ConfigurationExtensionsView.xaml</DependentUpon>
+    <Compile Include="View\Main\Browser\BrowserMediaView.xaml.cs">
+      <DependentUpon>BrowserMediaView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Browser\BrowserTabItemView.xaml.cs">
-      <DependentUpon>BrowserTabItemView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Main\Browser\BrowserView.xaml.cs">
-      <DependentUpon>BrowserView.xaml</DependentUpon>
+    <Compile Include="View\Main\Browser\BrowsersView.xaml.cs">
+      <DependentUpon>BrowsersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\ConfigurationView.xaml.cs">
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
@@ -146,8 +145,8 @@
     <Compile Include="View\Main\InfoView.xaml.cs">
       <DependentUpon>InfoView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Browser\BrowserTabView.xaml.cs">
-      <DependentUpon>BrowserTabView.xaml</DependentUpon>
+    <Compile Include="View\Main\Browser\BrowserView.xaml.cs">
+      <DependentUpon>BrowserView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Main\PlayoutView.xaml.cs">
       <DependentUpon>PlayoutView.xaml</DependentUpon>
@@ -180,15 +179,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Configuration\ConfigurationExtensionsView.xaml">
+    <Page Include="View\Main\Browser\BrowserMediaView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Browser\BrowserTabItemView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Main\Browser\BrowserView.xaml">
+    <Page Include="View\Main\Browser\BrowsersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -200,7 +195,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Browser\BrowserTabView.xaml">
+    <Page Include="View\Main\Browser\BrowserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

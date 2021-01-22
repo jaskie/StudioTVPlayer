@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 using StudioTVPlayer.ViewModel.Main.Player;
 
 namespace StudioTVPlayer.Helpers.AttachedProperties
@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         public static readonly DependencyProperty ItemSelectedProperty =
            DependencyProperty.RegisterAttached(
                "ItemSelected",
-               typeof(BrowserMediaViewModel),
+               typeof(MediaViewModel),
                typeof(ListItemProperties),
                new FrameworkPropertyMetadata(ItemSelectedChanged));
 
@@ -107,19 +107,19 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void ItemSelectByFocus(object sender, RoutedEventArgs e)
         {
             if (sender is Control element)
-                SetItemSelected(element, (BrowserMediaViewModel)element.DataContext);
+                SetItemSelected(element, (MediaViewModel)element.DataContext);
             e.Handled = true;
         }
 
         private static void ItemSelect(object sender, MouseButtonEventArgs e)
         {
             if (sender is Control element)
-                SetItemSelected(element, (BrowserMediaViewModel)element.DataContext);
+                SetItemSelected(element, (MediaViewModel)element.DataContext);
             e.Handled = true;
         }
 
-        public static void SetItemSelected(UIElement element, BrowserMediaViewModel value) => element.SetValue(ItemSelectedProperty, value);
-        public static BrowserMediaViewModel GetItemSelected(UIElement element) => (BrowserMediaViewModel)element.GetValue(ItemSelectedProperty);
+        public static void SetItemSelected(UIElement element, MediaViewModel value) => element.SetValue(ItemSelectedProperty, value);
+        public static MediaViewModel GetItemSelected(UIElement element) => (MediaViewModel)element.GetValue(ItemSelectedProperty);
 
 
     }

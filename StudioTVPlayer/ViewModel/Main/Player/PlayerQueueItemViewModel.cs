@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class PlayerQueueItemViewModel : ViewModelBase
     {
-        public BrowserMediaViewModel BrowserItem { get; }        
+        public MediaViewModel BrowserItem { get; }        
 
         private bool _dragOver = false;
         public bool DragOver
@@ -77,7 +77,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public bool? IsVerified => BrowserItem?.IsVerified;
 
 
-        public PlayerQueueItemViewModel(BrowserMediaViewModel browserMedia)
+        public PlayerQueueItemViewModel(MediaViewModel browserMedia)
         {
             BrowserItem = browserMedia;
             BrowserItem.PropertyChanged += BrowserItem_PropertyChanged;

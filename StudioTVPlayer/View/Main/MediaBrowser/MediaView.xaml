@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="StudioTVPlayer.View.Main.Browser.BrowserMediaView"
+﻿<UserControl x:Class="StudioTVPlayer.View.Main.MediaBrowser.MediaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 

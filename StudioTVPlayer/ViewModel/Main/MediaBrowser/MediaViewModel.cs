@@ -6,9 +6,9 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Interfaces;
 
-namespace StudioTVPlayer.ViewModel.Main.Browser
+namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
-    public class BrowserMediaViewModel : ViewModelBase
+    public class MediaViewModel : ViewModelBase
     {
 
         private Media _media;
@@ -30,7 +30,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
 
         public string Name { get => Media.Name; }
         public TimeSpan Duration { get => Media.Duration; set { Media.Duration = value; } }
-        public DateTime CreationDate { get => Media.CreationDate; }
+        public DateTime CreationDate { get => Media.CreationTime; }
 
         private bool _isVerified;
         public bool IsVerified { get => _isVerified; set => Set(ref _isVerified, value); }
@@ -51,7 +51,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         public UiCommand MediaItem_MoveCommand { get; private set; }        
         public UiCommand QueueToPlayerByChannelIDCommand { get; private set; }
 
-        public BrowserMediaViewModel()
+        public MediaViewModel()
         {
             _thumbnail = null;            
             LoadCommands();
@@ -99,7 +99,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                     break;
 
 
-                case nameof(Media.CreationDate):
+                case nameof(Media.CreationTime):
                     NotifyPropertyChanged(nameof(CreationDate));
                     break;
             }           

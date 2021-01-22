@@ -2,15 +2,15 @@
 using System.Windows.Media;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
     public class InfoViewModel : ViewModelBase
     {
 
-        private BrowserMediaViewModel _browserItem;
-        public BrowserMediaViewModel BrowserItem
+        private MediaViewModel _browserItem;
+        public MediaViewModel BrowserItem
         {
             get => _browserItem;
             set
@@ -48,7 +48,7 @@ namespace StudioTVPlayer.ViewModel.Main
                     break;
 
 
-                case nameof(Media.CreationDate):
+                case nameof(Media.CreationTime):
                     NotifyPropertyChanged(nameof(CreationDate));
                     break;               
             }

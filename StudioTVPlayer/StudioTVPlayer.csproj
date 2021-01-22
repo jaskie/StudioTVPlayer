@@ -111,16 +111,15 @@
     <Compile Include="Model\Interfaces\IPlayerController.cs" />
     <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="Providers\PilotingDataProvider.cs" />
-    <Compile Include="Services\MediaWatcherService.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
-    <Compile Include="ViewModel\Main\Browser\BrowserMediaViewModel.cs" />
-    <Compile Include="ViewModel\Main\Browser\BrowsersViewModel.cs" />
+    <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
+    <Compile Include="ViewModel\Main\MediaBrowser\BrowsersViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
     <Compile Include="ViewModel\Main\InfoViewModel.cs" />
-    <Compile Include="ViewModel\Main\Browser\BrowserViewModel.cs" />
+    <Compile Include="ViewModel\Main\MediaBrowser\BrowserViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
@@ -133,10 +132,10 @@
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Browser\BrowserMediaView.xaml.cs">
-      <DependentUpon>BrowserMediaView.xaml</DependentUpon>
+    <Compile Include="View\Main\MediaBrowser\MediaView.xaml.cs">
+      <DependentUpon>MediaView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Browser\BrowsersView.xaml.cs">
+    <Compile Include="View\Main\MediaBrowser\BrowsersView.xaml.cs">
       <DependentUpon>BrowsersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\ConfigurationView.xaml.cs">
@@ -145,7 +144,7 @@
     <Compile Include="View\Main\InfoView.xaml.cs">
       <DependentUpon>InfoView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Browser\BrowserView.xaml.cs">
+    <Compile Include="View\Main\MediaBrowser\BrowserView.xaml.cs">
       <DependentUpon>BrowserView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Main\PlayoutView.xaml.cs">
@@ -157,6 +156,10 @@
     <Compile Include="View\Main\Player\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Resources\AppStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -179,11 +182,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Browser\BrowserMediaView.xaml">
+    <Page Include="View\Main\MediaBrowser\MediaView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Browser\BrowsersView.xaml">
+    <Page Include="View\Main\MediaBrowser\BrowsersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -195,7 +198,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Browser\BrowserView.xaml">
+    <Page Include="View\Main\MediaBrowser\BrowserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

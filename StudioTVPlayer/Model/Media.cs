@@ -1,30 +1,40 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace StudioTVPlayer.Model
 {
     public class Media : INotifyPropertyChanged
     {
-        private string _path;
+        private string _directoryName;
         private string _name;
         private TimeSpan _duration;
         private DateTime _creationDate;
+        private readonly FileInfo _fileInfo;
+
+        public Media(string path)
+        {
+            _fileInfo = new FileInfo(path);
+            ReadInfo();
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
+        
         private void RaisePropertyChanged([CallerMemberName]string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
-        public string Path
+        public string DirectoryName
         {
-            get => _path;
+            get => _directoryName;
             set
             {
-                if (_path == value)
+                if (_directoryName == value)
                     return;
-                _path = value;
+                _directoryName = value;
                 RaisePropertyChanged();
             }
         }
@@ -53,7 +63,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public DateTime CreationDate
+        public DateTime CreationTime
         {
             get => _creationDate;
             set
@@ -65,6 +75,19 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public string FullPath => System.IO.Path.Combine(Path, Name);
+        public string FullPath => Path.Combine(DirectoryName, Name);
+
+        public void Refresh()
+        {
+            _fileInfo.Refresh();
+            ReadInfo();
+        }
+        
+        private void ReadInfo()
+        {
+            Name = _fileInfo.Name;
+            CreationTime = _fileInfo.CreationTime;
+            DirectoryName = _fileInfo.DirectoryName;
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TVPlayR;
-using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Extensions
@@ -30,10 +30,10 @@ namespace StudioTVPlayer.Extensions
             return true;
         }
 
-        public static bool GetFFMeta(this BrowserMediaViewModel browserVM, FFMeta ffmeta = default,
+        public static bool GetFFMeta(this MediaViewModel browserVM, FFMeta ffmeta = default,
             bool getAudioDuration = false, int height = 200)
         {
-            if (!File.Exists(browserVM.Media.Path))
+            if (!File.Exists(browserVM.Media.DirectoryName))
                 return false;
 
             bool result = true;
@@ -43,7 +43,7 @@ namespace StudioTVPlayer.Extensions
 
             try
             {
-                using (InputFile input = new InputFile(browserVM.Media.Path))
+                using (InputFile input = new InputFile(browserVM.Media.DirectoryName))
                 {
                     switch (ffmeta)
                     {
@@ -91,7 +91,7 @@ namespace StudioTVPlayer.Extensions
             return false;
         }
 
-        public static void GetResourceThumbnail(this BrowserMediaViewModel browserVM, ThumbnailType thumbnailType = default(ThumbnailType))
+        public static void GetResourceThumbnail(this MediaViewModel browserVM, ThumbnailType thumbnailType = default(ThumbnailType))
         {           
             browserVM.Thumbnail = thumbnailType == ThumbnailType.NoPreview ? 
                 new BitmapImage(new Uri(@"pack://application:,,,/StudioTVPlayer;component/Resources/NoPreviewThumbnail.png")): 

@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main"    
              xmlns:playerViews="clr-namespace:StudioTVPlayer.View.Main.Player"    
              xmlns:playerViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
-             xmlns:browserViews="clr-namespace:StudioTVPlayer.View.Main.Browser"       
+             xmlns:browserViews="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"       
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920"
              FocusManager.IsFocusScope="True"
              KeyboardNavigation.TabNavigation="Cycle"
+             d:DataContext="{d:DesignInstance {x:Type vm:PlayoutViewModel}}"
              Loaded="UserControl_Loaded">
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="D0" Command="{Binding FocusBrowserCommand}" />
@@ -54,7 +56,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
-                <browserViews:BrowserView />
+                <browserViews:BrowsersView />
                 <local:InfoView Margin="5,0,0,0" x:Name="info" Grid.Row="1" />
             </Grid>
             

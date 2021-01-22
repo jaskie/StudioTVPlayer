@@ -1,12 +1,12 @@
 ﻿using System;
-using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.Model.Args
 {
     public class BrowserItemEventArgs : EventArgs
     {
-        public BrowserMediaViewModel BrowserItem { get; }
-        public BrowserItemEventArgs(BrowserMediaViewModel browserItem)
+        public MediaViewModel BrowserItem { get; }
+        public BrowserItemEventArgs(MediaViewModel browserItem)
         {
             BrowserItem = browserItem; 
         }

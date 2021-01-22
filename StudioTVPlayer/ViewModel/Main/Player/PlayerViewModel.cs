@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using StudioTVPlayer.ViewModel.Main.Browser;
+using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
@@ -278,7 +278,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 Stop();     
 
             IsPlaying = false;
-            _inputFile = new TVPlayR.InputFile(playerItem.BrowserItem.Media.Path);           
+            _inputFile = new TVPlayR.InputFile(playerItem.BrowserItem.Media.DirectoryName);           
             _inputFile.FramePlayed += Media_FramePlayed;
             _inputFile.Stopped += InputFileStopped;
 
@@ -447,7 +447,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (e.Data == null)
                 return;
 
-            var browserVM = (BrowserMediaViewModel)e.Data.GetData(typeof(BrowserMediaViewModel));
+            var browserVM = (MediaViewModel)e.Data.GetData(typeof(MediaViewModel));
             var newIndex = MediaQueue.IndexOf(MediaQueue.FirstOrDefault(playerItemParam => playerItemParam.DragOver == true));
 
             if (browserVM == null && newIndex>-1) //browserItem null czyli to jest playerItem

@@ -14,14 +14,14 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using StudioTVPlayer.Model;
 
-namespace StudioTVPlayer.View.Main.Browser
+namespace StudioTVPlayer.View.Main.MediaBrowser
 {
     /// <summary>
-    /// Interaction logic for BrowserMediaView.xaml
+    /// Interaction logic for MediaView.xaml
     /// </summary>
-    public partial class BrowserMediaView : UserControl
+    public partial class MediaView : UserControl
     {
-        public BrowserMediaView()
+        public MediaView()
         {           
             InitializeComponent();
         }

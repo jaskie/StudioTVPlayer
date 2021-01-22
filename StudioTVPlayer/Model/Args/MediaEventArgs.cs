@@ -8,12 +8,10 @@ namespace StudioTVPlayer.Model.Args
 {
     public class MediaEventArgs : EventArgs
     {
-        public string OldPath { get; }
         public Media Media { get; }
-        public MediaEventArgs(Media m, string oldPath=null)
+        public MediaEventArgs(Media m)
         {
             Media = m;
-            OldPath = oldPath;
         }
     }
 }

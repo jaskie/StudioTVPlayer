@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -10,37 +11,37 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
 using StudioTVPlayer.Model.Interfaces;
-using StudioTVPlayer.Services;
 
-namespace StudioTVPlayer.ViewModel.Main.Browser
+namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
     public class BrowserViewModel : ViewModelBase
     {
         private readonly ICollectionView _mediaFilesView;
-        private readonly MediaWatcherService _mediaWatcher;
+        private readonly WatchedFolder _watchedFolder;
 
         public UiCommand MediaItem_MoveCommand { get; private set; }
         public UiCommand SortDirectionCommand { get; private set; }        
         public UiCommand ChangeDateCommand { get; private set; }
         public UiCommand QueueToPlayerByIndexCommand { get; private set; }
 
+       
 
-        public ObservableCollection<BrowserMediaViewModel> MediaFiles { get; } = new ObservableCollection<BrowserMediaViewModel>();
+        public BrowserViewModel(WatchedFolder watchedFolder)
+        {
+            _watchedFolder = watchedFolder;
+            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(MediaFiles);
+            LoadCommands();
+            MediaFiles = new ObservableCollection<MediaViewModel>();
+            Name = watchedFolder.Name;
+        }
 
         #region Properties
 
-        private WatchedFolder _watcherMeta;
-        public WatchedFolder WatcherMeta
-        {
-            get => _watcherMeta;
-            set
-            {
-                if (!Set(ref _watcherMeta, value))
-                    return;
+        public IList<MediaViewModel> MediaFiles { get; } 
 
-                InitTab();               
-            }
-        }
+
+        public string Name { get; }
+
 
         private bool _isFocused;
         public bool IsFocused
@@ -52,8 +53,8 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             }
         }
 
-        private BrowserMediaViewModel _selectedMedia;
-        public BrowserMediaViewModel SelectedMedia
+        private MediaViewModel _selectedMedia;
+        public MediaViewModel SelectedMedia
         {
             get => _selectedMedia;
             set
@@ -64,7 +65,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             }
         }
 
-        private DateTime _selectedDate = DateTime.Now;
+        private DateTime _selectedDate = DateTime.Today;
         public DateTime SelectedDate
         {
             get => _selectedDate;
@@ -72,13 +73,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             {                
                 if (!Set(ref _selectedDate, value))
                     return;
-                if (!WatcherMeta.IsFilteredByDate)
-                    return;
-                //Jeżeli jakiś item był zanaczony na liście i zmienił się widok to kontrolka wysyła Keyboard.Focus(null) co wywala focus do main window             
-                IsFocused = false; //by przygotować odpalenie ValueChanged (ewentualnie można (a nawe trzeba) podpiąć pod event i wtedy bez tej linijki oraz wcześniejszego zerowania tej zmiennej przy komendach focusa)
-                //_mediaDataProvider.UnloadMediaFiles(_mediaFilesView);
                 LoadMediaCollectionByDate();              
-                IsFocused = true; //by wymusić ponowny focus elementu
             }
         }
 
@@ -107,22 +102,14 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         }
         #endregion
 
-        public BrowserViewModel(MediaWatcherService mediaWatcher)
-        {            
-            SelectedMedia = null;            
 
-            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(MediaFiles);
-            LoadCommands();
-            _mediaWatcher = mediaWatcher;
-        }
 
         private void InitTab() 
         {
-            _mediaWatcher.NotifyOnMediaAdd += MediaAdded;
-            _mediaWatcher.NotifyOnMediaDelete += MediaDeleted;
-            _mediaWatcher.NotifyOnMediaChanged += MediaChanged;
-            _mediaWatcher.NotifyOnMediaRenamed += MediaRenamed;
-            _mediaWatcher.NotifyOnMediaVerified += MediaVerified;
+            _watchedFolder.MediaAdd += MediaAdded;
+            _watchedFolder.MediaDelete += MediaDeleted;
+            _watchedFolder.MediaChanged += MediaChanged;
+            _watchedFolder.MediaVerified += MediaVerified;
 
             MediaFiles.Clear();
             //foreach (var media in _mediaDataProvider.GetBrowserTabItems(_mediaWatcher.GetPath()))
@@ -154,8 +141,8 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
         {
             _mediaFilesView.Filter = o =>
             {
-                var browserItem = o as BrowserMediaViewModel;
-                return browserItem.Media.CreationDate.ToShortDateString() == _selectedDate.ToShortDateString();
+                var browserItem = o as MediaViewModel;
+                return browserItem.Media.CreationTime.ToShortDateString() == _selectedDate.ToShortDateString();
             };          
             //_mediaDataProvider.LoadMediaFiles(_mediaFilesView, _mediaWatcher);
         }
@@ -167,14 +154,14 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 case Sortings.Name:
                     {
                         _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(BrowserMediaViewModel.Media.Name), _sortDirection));
+                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Media.Name), _sortDirection));
                         break;
                     }
 
                 case Sortings.Duration:
                     {
                         _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(BrowserMediaViewModel.Media.Duration), _sortDirection));
+                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Media.Duration), _sortDirection));
                         break;
                     }
 
@@ -182,7 +169,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
                 case Sortings.CreationDate:
                     {
                         _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(BrowserMediaViewModel.Media.CreationDate), _sortDirection));
+                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Media.CreationTime), _sortDirection));
                         break;
                     }
             }
@@ -209,7 +196,7 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
 
         private void MediaChanged(object sender, MediaEventArgs e)
         {
-            BrowserMediaViewModel browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.Path == e.Media.Path);           
+            MediaViewModel browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.DirectoryName == e.Media.DirectoryName);           
 
             if (browserItem == null)
                 return;
@@ -219,18 +206,18 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
 
             Debug.WriteLine("Media Track Point");
 
-            if (e.Media.Duration == default(TimeSpan))
-                _mediaWatcher.AddMediaToTrack(e.Media);
-            else
-                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-                {
-                    browserItem.Duration = e.Media.Duration;
-                }));
+            //if (e.Media.Duration == default(TimeSpan))
+            //    _mediaWatcher.AddMediaToTrack(e.Media);
+            //else
+            //    Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            //    {
+            //        browserItem.Duration = e.Media.Duration;
+            //    }));
         }
 
         private void MediaDeleted(object sender, MediaEventArgs e)
         {
-            var item = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.Path == e.Media.Path);
+            var item = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.DirectoryName == e.Media.DirectoryName);
             Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {               
                 if (item.IsQueued)
@@ -246,23 +233,10 @@ namespace StudioTVPlayer.ViewModel.Main.Browser
             }));
         }
 
-        private void MediaRenamed(object sender, MediaEventArgs e)
-        {
-            BrowserMediaViewModel browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.Path == e.OldPath);            
-
-            if (browserItem == null)
-                return;
-
-            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-            {
-                browserItem.Media.Name = Path.GetFileName(e.Media.Path);
-                browserItem.Media.Path = e.Media.Path;
-            }));
-        }
 
         private void MediaVerified(object sender, MediaEventArgs e)
         {
-            var browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.Path == e.Media.Path);
+            var browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.DirectoryName == e.Media.DirectoryName);
             
             if (browserItem == null)
                 return;

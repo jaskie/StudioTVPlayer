@@ -1,7 +1,7 @@
 ﻿using System.Windows.Controls;
 
 
-namespace StudioTVPlayer.View.Main.Browser
+namespace StudioTVPlayer.View.Main.MediaBrowser
 {
     /// <summary>
     /// Interaction logic for BrowsersView.xaml

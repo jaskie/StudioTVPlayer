@@ -15,12 +15,8 @@
              attachedProp:ControlProperties.IsFocused="{Binding IsFocused, Mode=TwoWay}"      
              d:DataContext="{d:DesignInstance vm:BrowsersViewModel}"
              Background="#202020">
-    <UserControl.DataContext>
-        <vm:BrowsersViewModel />
-    </UserControl.DataContext>
-
     <Grid >
-        <TabControl ItemsSource="{Binding Browsers}" Padding="0" BorderThickness="0" DisplayMemberPath="Name" 
+        <TabControl ItemsSource="{Binding Browsers}" Padding="0" BorderThickness="0" DisplayMemberPath="Name" SelectedItem="{Binding SelectedBrowser}"
                     mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">
             <TabControl.ContentTemplate>
                 <DataTemplate DataType="{x:Type vm:BrowserViewModel}">

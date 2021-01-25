@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using StudioTVPlayer.ViewModel.Main.MediaBrowser;
+using System.Windows.Controls;
 
 
 namespace StudioTVPlayer.View.Main.MediaBrowser
@@ -11,6 +12,9 @@ namespace StudioTVPlayer.View.Main.MediaBrowser
         public BrowsersView()
         {
             InitializeComponent();
+            DataContext = new BrowsersViewModel();
+            Unloaded += (s, e) => ((BrowsersViewModel)DataContext).Dispose();
         }
+
     }
 }

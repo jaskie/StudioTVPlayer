@@ -42,6 +42,8 @@ namespace StudioTVPlayer.Providers
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
+            foreach (var decklink in DecklinkDevices)
+                decklink.Dispose();
         }
 
     }

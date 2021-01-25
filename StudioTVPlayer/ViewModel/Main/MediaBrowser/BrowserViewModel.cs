@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Windows;
-using StudioTVPlayer.Extensions;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
@@ -18,11 +14,12 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private readonly ICollectionView _mediaFilesView;
         private readonly WatchedFolder _watchedFolder;
         private readonly ObservableCollection<MediaViewModel> _mediaFiles;
+        private bool _isDisposed;
 
-        public UiCommand MediaItem_MoveCommand { get; private set; }
-        public UiCommand SortDirectionCommand { get; private set; }
-        public UiCommand ChangeDateCommand { get; private set; }
-        public UiCommand QueueToPlayerByIndexCommand { get; private set; }
+        public UiCommand MediaItem_MoveCommand { get;  }
+        public UiCommand SortDirectionCommand { get; }
+        public UiCommand ChangeDateCommand { get; }
+        public UiCommand QueueToPlayerByIndexCommand { get; }
 
 
 
@@ -31,10 +28,14 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _watchedFolder = watchedFolder;
             _watchedFolder.MediaChanged += WatchedFolder_MediaChanged;
             _watchedFolder.Initialize();
-            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(MediaFiles);
-            LoadCommands();
             _mediaFiles = new ObservableCollection<MediaViewModel>(watchedFolder.Medias.Select(m => new MediaViewModel(m)));
+            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
             Name = watchedFolder.Name;
+            IsFilteredByDate = watchedFolder.IsFilteredByDate;
+
+            SortDirectionCommand = new UiCommand(ChangeSortDirection);
+            ChangeDateCommand = new UiCommand(ChangeDate);
+            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex);
         }
 
 
@@ -43,16 +44,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public IList<MediaViewModel> MediaFiles => _mediaFiles;
         public string Name { get; }
-
+        public bool IsFilteredByDate { get; }
 
         private bool _isFocused;
         public bool IsFocused
         {
             get => _isFocused;
-            set
-            {
-                Set(ref _isFocused, value);
-            }
+            set => Set(ref _isFocused, value);
         }
 
         private MediaViewModel _selectedMedia;
@@ -101,16 +99,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                 SortMediaCollection();
             }
         }
+
+        
         #endregion
 
 
 
-        private void LoadCommands()
-        {
-            SortDirectionCommand = new UiCommand(ChangeSortDirection);
-            ChangeDateCommand = new UiCommand(ChangeDate);
-            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex);
-        }
+       
 
         private void ChangeDate(object obj)
         {
@@ -196,72 +191,12 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             });
         }
 
-
-        private void MediaChanged(object sender, MediaEventArgs e)
-        {
-            MediaViewModel browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.DirectoryName == e.Media.DirectoryName);
-
-            if (browserItem == null)
-                return;
-
-            if (!browserItem.IsVerified)
-                return;
-
-            Debug.WriteLine("Media Track Point");
-
-            //if (e.Media.Duration == default(TimeSpan))
-            //    _mediaWatcher.AddMediaToTrack(e.Media);
-            //else
-            //    Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-            //    {
-            //        browserItem.Duration = e.Media.Duration;
-            //    }));
-        }
-
-        private void MediaVerified(object sender, MediaEventArgs e)
-        {
-            //var browserItem = MediaFiles.FirstOrDefault(ItemParam => ItemParam.Media.DirectoryName == e.Media.DirectoryName);
-
-            //if (browserItem == null)
-            //    return;
-
-            //var IsVisible = _mediaFilesView.Contains(browserItem);
-
-            //Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-            //{
-            //    if (e.Media.Duration == null)
-            //        browserItem.GetFFMeta(FFMeta.Thumbnail);
-            //    else
-            //    {
-            //        browserItem.Media.Duration = e.Media.Duration;
-            //        if (IsVisible || browserItem.IsQueued)
-            //            browserItem.GetFFMeta(FFMeta.Thumbnail);
-            //    }
-            //    browserItem.IsVerified = true;
-            //}));
-
-        }
-
-        private void MediaAdded(object sender, MediaEventArgs e)
-        {
-            //var browserItem = MediaFiles.FirstOrDefault(param => param.Media.Path == e.Media.Path) ?? _mediaDataProvider.GetNewBrowserTabItem(e.Media);
-
-            //Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-            //{
-            //    MediaFiles.Add(browserItem);
-            //    var IsVisible = _mediaFilesView.Contains(browserItem);
-
-            //    if (IsVisible || browserItem.IsQueued)
-            //    {
-            //        browserItem.GetResourceThumbnail(ThumbnailType.Loading);
-            //        _mediaWatcher.AddMediaToVerify(browserItem.Media);
-            //    }
-            //}));
-        }
-
         public void Dispose()
         {
-            throw new NotImplementedException();
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            _watchedFolder.MediaChanged -= WatchedFolder_MediaChanged;
         }
     }
 }

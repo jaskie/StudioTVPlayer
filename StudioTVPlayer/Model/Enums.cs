@@ -32,4 +32,11 @@ namespace StudioTVPlayer.Model
         NoPreview,
         Loading
     }
+
+    public enum MediaEventKind
+    {
+        Create,
+        Delete,
+        Change
+    }
 }

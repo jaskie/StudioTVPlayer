@@ -9,9 +9,13 @@ namespace StudioTVPlayer.Model.Args
     public class MediaEventArgs : EventArgs
     {
         public Media Media { get; }
-        public MediaEventArgs(Media m)
+        public MediaEventKind Kind { get; }
+
+        public MediaEventArgs(Media m, MediaEventKind kind)
         {
             Media = m;
+            Kind = kind;
         }
+
     }
 }

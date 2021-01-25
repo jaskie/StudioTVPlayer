@@ -4,33 +4,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using StudioTVPlayer.Model.Interfaces;
 
 namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
-    public class MediaViewModel : ViewModelBase
+    public class MediaViewModel : ViewModelBase, IDisposable
     {
 
-        private Media _media;
-        public Media Media
-        {
-            get => _media;
-            set
-            {
-                if (_media == value)
-                    return;
+        public Media Media { get; }
 
-                if (_media != null)
-                    Media.PropertyChanged -= Media_PropertyChanged;
-
-                _media = value;
-                Media.PropertyChanged += Media_PropertyChanged;
-            }
-        }
-
-        public string Name { get => Media.Name; }
-        public TimeSpan Duration { get => Media.Duration; set { Media.Duration = value; } }
-        public DateTime CreationDate { get => Media.CreationTime; }
+        public string Name => Media.Name;
+        public TimeSpan Duration => Media.Duration;
+        public DateTime CreationDate => Media.CreationTime;
 
         private bool _isVerified;
         public bool IsVerified { get => _isVerified; set => Set(ref _isVerified, value); }
@@ -45,15 +29,15 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             }
         }
 
-        private ImageSource _thumbnail;
-        public ImageSource Thumbnail { get => _thumbnail; set => Set(ref _thumbnail, value); }
+        public ImageSource Thumbnail => Media.Thumbnail;
 
         public UiCommand MediaItem_MoveCommand { get; private set; }        
         public UiCommand QueueToPlayerByChannelIDCommand { get; private set; }
 
-        public MediaViewModel()
+        public MediaViewModel(Media media)
         {
-            _thumbnail = null;            
+            Media = media;
+            media.PropertyChanged += Media_PropertyChanged;
             LoadCommands();
         }
 
@@ -87,22 +71,12 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
-            {
-                case nameof(Media.Name):
-                    NotifyPropertyChanged(nameof(Name));
-                    break;
+            NotifyPropertyChanged(e.PropertyName);
+        }
 
-
-                case nameof(Media.Duration):
-                    NotifyPropertyChanged(nameof(Duration));
-                    break;
-
-
-                case nameof(Media.CreationTime):
-                    NotifyPropertyChanged(nameof(CreationDate));
-                    break;
-            }           
-        }                     
+        public void Dispose()
+        {
+            Media.PropertyChanged -= Media_PropertyChanged;
+        }
     }
 }

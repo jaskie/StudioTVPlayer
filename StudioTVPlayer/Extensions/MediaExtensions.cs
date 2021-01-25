@@ -1,39 +1,19 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TVPlayR;
-using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Extensions
 {
     public static class MediaExtensions
     {        
-        public static TimeSpan TryGetDuration(string path, bool getAudioDuration = false)
-        {
-            //Debug.WriteLine("GetDuration thread ID " + Thread.CurrentThread.ManagedThreadId);
-            using (InputFile input = new InputFile(path))
-            {               
-                if (getAudioDuration)
-                    return input.AudioDuration;
-                else
-                    return input.VideoDuration;
-            }
-        }
-
-        public static bool IsMediaFile(string fileName)
-        {
-            //TODO: add checking
-            return true;
-        }
-
-        public static bool GetFFMeta(this MediaViewModel browserVM, FFMeta ffmeta = default,
+        public static bool GetFFMeta(this Media media, FFMeta ffmeta = default,
             bool getAudioDuration = false, int height = 200)
         {
-            if (!File.Exists(browserVM.Media.DirectoryName))
+            if (!File.Exists(media.DirectoryName))
                 return false;
 
             bool result = true;
@@ -43,13 +23,13 @@ namespace StudioTVPlayer.Extensions
 
             try
             {
-                using (InputFile input = new InputFile(browserVM.Media.DirectoryName))
+                using (InputFile input = new InputFile(media.DirectoryName))
                 {
                     switch (ffmeta)
                     {
                         case FFMeta.Duration:
                             {
-                                browserVM.Media.Duration =
+                                media.Duration =
                                     getAudioDuration ? input.AudioDuration : input.VideoDuration;
                                 break;
                             }
@@ -62,7 +42,7 @@ namespace StudioTVPlayer.Extensions
 
                         default:
                             {
-                                browserVM.Media.Duration =
+                                media.Duration =
                                     getAudioDuration ? input.AudioDuration : input.VideoDuration;
                                 //Debug.WriteLine("FFMeta: " + Application.Current.Dispatcher.Thread.ManagedThreadId);                               
                                 tempThumb = input.GetBitmapSource(height);
@@ -83,7 +63,7 @@ namespace StudioTVPlayer.Extensions
                 Application.Current?.Dispatcher?.BeginInvoke((Action)(() =>
                 {
                     //Debug.WriteLine("FFMeta Invoke: " + Thread.CurrentThread.ManagedThreadId);
-                    browserVM.Thumbnail = tempThumb;
+                    media.Thumbnail = tempThumb;
                 }));
                 return true;
             }
@@ -91,9 +71,9 @@ namespace StudioTVPlayer.Extensions
             return false;
         }
 
-        public static void GetResourceThumbnail(this MediaViewModel browserVM, ThumbnailType thumbnailType = default(ThumbnailType))
+        public static void GetResourceThumbnail(this Media media, ThumbnailType thumbnailType = default(ThumbnailType))
         {           
-            browserVM.Thumbnail = thumbnailType == ThumbnailType.NoPreview ? 
+            media.Thumbnail = thumbnailType == ThumbnailType.NoPreview ? 
                 new BitmapImage(new Uri(@"pack://application:,,,/StudioTVPlayer;component/Resources/NoPreviewThumbnail.png")): 
                 new BitmapImage(new Uri(@"pack://application:,,,/StudioTVPlayer;component/Resources/LoadingThumbnail.png")); 
         }

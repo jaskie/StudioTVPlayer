@@ -31,7 +31,7 @@ namespace StudioTVPlayer.ViewModel.Main
         }
 
         public string Name { get => _browserItem?.Name; }
-        public TimeSpan Duration { get => _browserItem == null ? default(TimeSpan) : _browserItem.Duration; set { _browserItem.Duration = value; } }
+        public TimeSpan Duration { get => _browserItem == null ? default(TimeSpan) : _browserItem.Duration; }
         public DateTime CreationDate { get => _browserItem == null ? default(DateTime) : _browserItem.CreationDate; }
         public ImageSource Thumbnail { get => _browserItem?.Thumbnail; }
 

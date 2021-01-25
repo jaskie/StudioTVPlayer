@@ -38,5 +38,11 @@ namespace StudioTVPlayer.Providers
             var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
             return DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
         }
+
+        public void Shutdown()
+        {
+            MediaVerifier.Current.Dispose();
+        }
+
     }
 }

@@ -105,6 +105,7 @@
     <Compile Include="Model\MediaPlayerProgressEventArgs.cs" />
     <Compile Include="Model\MediaPlayerQueueItem.cs" />
     <Compile Include="Model\MediaPlayerQueueItemEventArgs.cs" />
+    <Compile Include="Model\MediaVerifier.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\Interfaces\IPilotingDataProvider.cs" />
     <Compile Include="Model\Media.cs" />

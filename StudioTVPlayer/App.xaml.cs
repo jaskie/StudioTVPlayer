@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudioTVPlayer.Providers;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -48,6 +49,12 @@ namespace StudioTVPlayer
 
             themeColorField.SetValue(null, themeColor);
             themeNameField.SetValue(null, themeName);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            GlobalApplicationData.Current.Shutdown();
+            base.OnExit(e);
         }
     }
 }

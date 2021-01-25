@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
@@ -11,18 +12,19 @@ namespace StudioTVPlayer.Model
         private string _name;
         private TimeSpan _duration;
         private DateTime _creationDate;
+        private ImageSource _thumbnail;
         private readonly FileInfo _fileInfo;
 
         public Media(string path)
         {
             _fileInfo = new FileInfo(path);
-            ReadInfo();
+            ReadFileInfo();
         }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
-        
-        private void RaisePropertyChanged([CallerMemberName]string propertyname = null)
+
+        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
@@ -75,15 +77,25 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        public ImageSource Thumbnail
+        {
+            get => _thumbnail;
+            set
+            {
+                _thumbnail = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public string FullPath => Path.Combine(DirectoryName, Name);
 
         public void Refresh()
         {
             _fileInfo.Refresh();
-            ReadInfo();
+            ReadFileInfo();
         }
-        
-        private void ReadInfo()
+
+        private void ReadFileInfo()
         {
             Name = _fileInfo.Name;
             CreationTime = _fileInfo.CreationTime;

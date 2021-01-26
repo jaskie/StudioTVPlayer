@@ -4,14 +4,14 @@ using StudioTVPlayer.Converters;
 namespace StudioTVPlayer.Model
 {
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
-    public enum Sortings
+    public enum Sorting
     {
-        [Description("Nazwa")]
+        [Description("Name")]
         Name,
-        [Description("Czas trwania")]
+        [Description("Duration")]
         Duration,
-        [Description("Data modyfikacji")]
-        CreationDate
+        [Description("Creation time")]
+        CreationTime
     }
 
     public enum SortDirection

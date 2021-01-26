@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace StudioTVPlayer
 {
@@ -17,38 +18,28 @@ namespace StudioTVPlayer
     {
         public App()
         {
-            SetTheme("aero", "normalcolor");
-            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                    typeof(FrameworkElement),
+                    new FrameworkPropertyMetadata(
+                    System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Dispatcher.UnhandledException += App_DispatcherUnhandledException;
+        }
+
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.IsTerminating)
+                MessageBox.Show(e.ExceptionObject.ToString(), "Error - terminating application", MessageBoxButton.OK, MessageBoxImage.Error);
+            else
+                MessageBox.Show(e.ExceptionObject.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            MessageBox.Show(e.Exception.Message, "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(e.Exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
-        }
-
-        /// <summary>
-        /// Sets the WPF system theme.
-        /// </summary>
-        /// <param name="themeName">The name of the theme. (ie "aero")</param>
-        /// <param name="themeColor">The name of the color. (ie "normalcolor")</param>
-        public static void SetTheme(string themeName, string themeColor)
-        {
-            const BindingFlags staticNonPublic = BindingFlags.Static | BindingFlags.NonPublic;
-
-            var presentationFrameworkAsm = Assembly.GetAssembly(typeof(Window));
-
-            var themeWrapper = presentationFrameworkAsm.GetType("MS.Win32.UxThemeWrapper");
-
-            var isActiveField = themeWrapper.GetField("_isActive", staticNonPublic);
-            var themeColorField = themeWrapper.GetField("_themeColor", staticNonPublic);
-            var themeNameField = themeWrapper.GetField("_themeName", staticNonPublic);
-
-            // Set this to true so WPF doesn't default to classic.
-            isActiveField.SetValue(null, true);
-
-            themeColorField.SetValue(null, themeColor);
-            themeNameField.SetValue(null, themeName);
         }
 
         protected override void OnExit(ExitEventArgs e)

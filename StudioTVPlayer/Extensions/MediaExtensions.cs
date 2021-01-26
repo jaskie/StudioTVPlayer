@@ -23,7 +23,7 @@ namespace StudioTVPlayer.Extensions
 
             try
             {
-                using (InputFile input = new InputFile(media.DirectoryName))
+                using (InputFile input = new InputFile(media.DirectoryName, 2))
                 {
                     switch (ffmeta)
                     {

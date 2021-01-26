@@ -35,11 +35,11 @@ struct FFmpegInputSource::implementation
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 
-	implementation(const std::string& fileName, Core::HwAccel acceleration, const std::string& hw_device)
+	implementation(const std::string& fileName, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
 		: _acceleration(acceleration)
 		, input_(fileName)
 		, frame_duration_(av_rescale(AV_TIME_BASE, video_decoder_.frame_rate.den, video_decoder_.frame_rate.num))
-		, audio_decoders_(create_decoders(input_.GetAudioCodec(), input_.GetAudioStreams(), AV_TIME_BASE)) //fifo for one second
+		, audio_decoders_(audioChannelCount > 0 ? create_decoders(input_.GetAudioCodec(), input_.GetAudioStreams(), AV_TIME_BASE) : std::vector<std::unique_ptr<Decoder>>()) //fifo for one second
 		, video_decoder_(input_.GetVideoCodec(), input_.GetVideoStream(), acceleration, hw_device)
 	{ }
 
@@ -220,8 +220,8 @@ struct FFmpegInputSource::implementation
 };
 
 }
-FFmpeg::FFmpegInputSource::FFmpegInputSource(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device)
-	: impl_(new implementation(file_name, acceleration, hw_device))
+FFmpeg::FFmpegInputSource::FFmpegInputSource(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
+	: impl_(new implementation(file_name, acceleration, hw_device, audioChannelCount))
 { }
 
 FFmpeg::FFmpegInputSource::~FFmpegInputSource(){}

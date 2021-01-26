@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Model
         private string _directoryName;
         private string _name;
         private TimeSpan _duration;
-        private DateTime _creationDate;
+        private DateTime _creationTime;
         private ImageSource _thumbnail;
         private readonly FileInfo _fileInfo;
 
@@ -67,12 +67,12 @@ namespace StudioTVPlayer.Model
 
         public DateTime CreationTime
         {
-            get => _creationDate;
+            get => _creationTime;
             set
             {
-                if (_creationDate == value)
+                if (_creationTime == value)
                     return;
-                _creationDate = value;
+                _creationTime = value;
                 RaisePropertyChanged();
             }
         }
@@ -83,6 +83,7 @@ namespace StudioTVPlayer.Model
             set
             {
                 _thumbnail = value;
+                _thumbnail.Freeze();
                 RaisePropertyChanged();
             }
         }

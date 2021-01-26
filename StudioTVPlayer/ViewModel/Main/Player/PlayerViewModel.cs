@@ -278,7 +278,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 Stop();     
 
             IsPlaying = false;
-            _inputFile = new TVPlayR.InputFile(playerItem.BrowserItem.Media.DirectoryName);           
+            _inputFile = new TVPlayR.InputFile(playerItem.BrowserItem.Media.DirectoryName, 2);           
             _inputFile.FramePlayed += Media_FramePlayed;
             _inputFile.Stopped += InputFileStopped;
 

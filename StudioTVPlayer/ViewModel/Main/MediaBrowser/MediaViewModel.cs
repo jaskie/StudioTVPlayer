@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
-        public DateTime CreationDate => Media.CreationTime;
+        public DateTime CreationTime => Media.CreationTime;
 
         private bool _isVerified;
         public bool IsVerified { get => _isVerified; set => Set(ref _isVerified, value); }

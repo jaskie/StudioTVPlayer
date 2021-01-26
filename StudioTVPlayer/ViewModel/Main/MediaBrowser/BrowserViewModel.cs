@@ -15,9 +15,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private readonly WatchedFolder _watchedFolder;
         private readonly ObservableCollection<MediaViewModel> _mediaFiles;
         private bool _isDisposed;
+        private Sorting _selectedSorting;
+        private MediaViewModel _selectedMedia;
+        private DateTime _selectedDate = DateTime.Today;
+
+
 
         public UiCommand MediaItem_MoveCommand { get;  }
-        public UiCommand SortDirectionCommand { get; }
         public UiCommand ChangeDateCommand { get; }
         public UiCommand QueueToPlayerByIndexCommand { get; }
 
@@ -32,8 +36,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
             Name = watchedFolder.Name;
             IsFilteredByDate = watchedFolder.IsFilteredByDate;
-
-            SortDirectionCommand = new UiCommand(ChangeSortDirection);
             ChangeDateCommand = new UiCommand(ChangeDate);
             QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex);
         }
@@ -53,7 +55,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             set => Set(ref _isFocused, value);
         }
 
-        private MediaViewModel _selectedMedia;
         public MediaViewModel SelectedMedia
         {
             get => _selectedMedia;
@@ -64,7 +65,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             }
         }
 
-        private DateTime _selectedDate = DateTime.Today;
         public DateTime SelectedDate
         {
             get => _selectedDate;
@@ -76,20 +76,10 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             }
         }
 
-        private ListSortDirection _sortDirection = ListSortDirection.Ascending;
-        public ListSortDirection SortDirection
-        {
-            get { return _sortDirection; }
-            set
-            {
-                if (!Set(ref _sortDirection, value))
-                    return;
-                SortMediaCollection();
-            }
-        }
 
-        private Sortings _selectedSorting;
-        public Sortings SelectedSorting
+        public Array Sortings { get; } = Enum.GetValues(typeof(Sorting));
+
+        public Sorting SelectedSorting
         {
             get => _selectedSorting;
             set
@@ -129,38 +119,31 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         {
             switch (SelectedSorting)
             {
-                case Sortings.Name:
+                case Sorting.Name:
                     {
                         _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Media.Name), _sortDirection));
+                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Name), ListSortDirection.Ascending));
                         break;
                     }
 
-                case Sortings.Duration:
+                case Sorting.Duration:
                     {
                         _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Media.Duration), _sortDirection));
+                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Duration), ListSortDirection.Ascending));
                         break;
                     }
 
 
-                case Sortings.CreationDate:
+                case Sorting.CreationTime:
                     {
                         _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Media.CreationTime), _sortDirection));
+                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
                         break;
                     }
             }
         }
 
-        private void ChangeSortDirection(object obj)
-        {
-            if (_sortDirection == ListSortDirection.Ascending)
-                SortDirection = ListSortDirection.Descending;
-            else
-                SortDirection = ListSortDirection.Ascending;
-        }
-
+     
         private void QueueToPlayerByIndex(object obj)
         {
             if (obj == null || SelectedMedia == null)
@@ -179,11 +162,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                 {
                     case MediaEventKind.Create:
                         _mediaFiles.Add(new MediaViewModel(e.Media));
+                        _mediaFilesView.Refresh();
                         break;
                     case MediaEventKind.Delete:
                         var mediaVm = _mediaFiles.FirstOrDefault(m => m.Media == e.Media);
                         if (mediaVm != null)
                             _mediaFiles.Remove(mediaVm);
+                        _mediaFilesView.Refresh();
                         break;
                     case MediaEventKind.Change:
                         break;

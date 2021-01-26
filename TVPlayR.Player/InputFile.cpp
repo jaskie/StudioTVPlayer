@@ -8,11 +8,11 @@ namespace TVPlayR {
 
 
 
-	InputFile::InputFile(String^ fileName) : InputFile(fileName, HardwareAcceleration::None, String::Empty)
+	InputFile::InputFile(String^ fileName, int audioChannelCount) : InputFile(fileName, HardwareAcceleration::None, String::Empty, audioChannelCount)
 	{ }
 
-	InputFile::InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice)
-		: _nativeSource(new std::shared_ptr<FFmpeg::FFmpegInputSource>(new FFmpeg::FFmpegInputSource(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice))))
+	InputFile::InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount)
+		: _nativeSource(new std::shared_ptr<FFmpeg::FFmpegInputSource>(new FFmpeg::FFmpegInputSource(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice), audioChannelCount)))
 		, _fileName(fileName)
 		, _acceleration(acceleration)
 		, _hwDevice(hwDevice)

@@ -70,7 +70,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 if (BrowserItem == null)
                     return new DateTime(0);
-                return BrowserItem.CreationDate;
+                return BrowserItem.CreationTime;
             }
         }
 
@@ -97,7 +97,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     break;
 
 
-                case nameof(BrowserItem.CreationDate):
+                case nameof(BrowserItem.CreationTime):
                     NotifyPropertyChanged(nameof(CreationDate));
                     break;
 

@@ -46,7 +46,7 @@ namespace StudioTVPlayer.Model
                     return;
                 try
                 {
-                    using (var file = new InputFile(vd.Media.FullPath))
+                    using (var file = new InputFile(vd.Media.FullPath, 0))
                     {
                         vd.Media.Duration = file.VideoDuration;
                         if (vd.Height > 0)

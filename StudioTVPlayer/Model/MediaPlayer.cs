@@ -72,7 +72,7 @@ namespace StudioTVPlayer.Model
                 _inputFile.Stopped -= InputFile_Stopped;
                 _inputFile.Dispose();
             }
-            _inputFile = new TVPlayR.InputFile(fullPath);
+            _inputFile = new TVPlayR.InputFile(fullPath, 2);
             _inputFile.FramePlayed += InputFile_FramePlayed;
             _inputFile.Stopped += InputFile_Stopped;
             _channel.Load(_inputFile);

@@ -32,7 +32,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public string Name { get => _browserItem?.Name; }
         public TimeSpan Duration { get => _browserItem == null ? default(TimeSpan) : _browserItem.Duration; }
-        public DateTime CreationDate { get => _browserItem == null ? default(DateTime) : _browserItem.CreationDate; }
+        public DateTime CreationDate { get => _browserItem == null ? default(DateTime) : _browserItem.CreationTime; }
         public ImageSource Thumbnail { get => _browserItem?.Thumbnail; }
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

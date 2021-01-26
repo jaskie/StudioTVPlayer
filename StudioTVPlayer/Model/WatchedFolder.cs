@@ -40,6 +40,7 @@ namespace StudioTVPlayer.Model
         {
             if (!_needsInitialization)
                 return;
+            _needsInitialization = false;
             _wildcardPattern = new WildcardPattern(Filter, WildcardOptions.IgnoreCase);
             _fs = new FileSystemWatcher(Path)
             {
@@ -60,7 +61,7 @@ namespace StudioTVPlayer.Model
                     .Select(path => new Media(path)))
                 {
                     _medias.Add(media);
-                    MediaVerifier.Current.Queue(media, 200);
+                    MediaVerifier.Current.Queue(media, 90);
                 }
             }
         }

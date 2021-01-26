@@ -5,6 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:enums="clr-namespace:StudioTVPlayer.Model"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser"
              mc:Ignorable="d" 
@@ -29,18 +31,8 @@
         <KeyBinding Modifiers="Shift" Key="D7" Command="{Binding QueueToPlayerByIndexCommand}" CommandParameter="6" />
         <KeyBinding Modifiers="Shift" Key="D8" Command="{Binding QueueToPlayerByIndexCommand}" CommandParameter="7" />
         <KeyBinding Modifiers="Shift" Key="D9" Command="{Binding QueueToPlayerByIndexCommand}" CommandParameter="8" />
-
     </UserControl.InputBindings>
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
-                            ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="enums:Sortings"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-    </UserControl.Resources>
-
+    
     <Grid KeyboardNavigation.TabNavigation="None" Focusable="True" x:Name="rootGrid" >
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -50,27 +42,51 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-                <DatePicker Visibility="{Binding IsFilteredByDate, Converter={StaticResource BoolToVisibilityConverter}}" 
-                            KeyboardNavigation.TabNavigation="None" Focusable="True" IsTabStop="False" TabIndex="2" 
-                            SelectedDate="{Binding SelectedDate}" 
-                            MinWidth="100" BorderThickness="0" Margin="5" 
-                            VerticalAlignment="Center" HorizontalAlignment="Left" IsTodayHighlighted="True" 
-                            >
-                </DatePicker>
-                <ComboBox Grid.Column="1" Margin="5" VerticalAlignment="Center" MinWidth="150" 
-                              ItemsSource="{Binding Source={StaticResource dataFromEnum}}" 
+                <mah:DateTimePicker Visibility="{Binding IsFilteredByDate, Converter={StaticResource BoolToVisibilityConverter}}" 
+                                    SelectedDateTime="{Binding SelectedDate}" 
+                                    Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                    IsTodayHighlighted="True" 
+                                    >
+                </mah:DateTimePicker>
+                <ComboBox Grid.Column="1" Margin="5" VerticalAlignment="Center"  ItemsSource="{Binding Sortings}" 
                               SelectedItem="{Binding SelectedSorting, UpdateSourceTrigger=PropertyChanged}" 
-                              FontSize="14" />
-                
-        <ListView Grid.Row="1" Grid.ColumnSpan="2"
-                  TabIndex="1"
-                  Focusable="True"
-                  ItemsSource="{Binding MediaFiles}" 
-                  SelectedItem="{Binding SelectedMedia, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                  KeyboardNavigation.TabNavigation="Cycle"
-                  FocusManager.IsFocusScope="True"
-                  >
-        </ListView>
+                              />                
+        <ListBox Grid.Row="1" Grid.ColumnSpan="2"
+                 TabIndex="1"
+                 Focusable="True"
+                 ItemsSource="{Binding MediaFiles}" 
+                 SelectedItem="{Binding SelectedMedia, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                 KeyboardNavigation.TabNavigation="Cycle"
+                 FocusManager.IsFocusScope="True"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 dd:DragDrop.IsDragSource="True"
+                 >
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:MediaViewModel}">
+                    <Grid Margin="2" Height="90">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <mah:ProgressRing Grid.RowSpan="3" Foreground="{DynamicResource MahApps.Brushes.Accent}" IsActive="{Binding Thumbnail, Converter={StaticResource NotNullToBooleanConverter}}" />
+                        <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="18" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Duration}" FontSize="10" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding CreationTime}" FontSize="10" Margin="5 0 0 5" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
 
     </Grid>

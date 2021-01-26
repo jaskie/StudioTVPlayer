@@ -14,8 +14,8 @@ namespace TVPlayR {
 	public ref class InputFile
 	{
 	public:
-		InputFile(String^ fileName);
-		InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice);
+		InputFile(String^ fileName, int audioChannelCount);
+		InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount);
 		~InputFile();
 		!InputFile();
 		bool Seek(TimeSpan time);

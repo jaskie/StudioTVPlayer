@@ -12,7 +12,7 @@ namespace TVPlayR {
 class FFmpegInputSource: public Core::InputSource
 {
 public:
-	FFmpegInputSource(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
+	FFmpegInputSource(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount);
 	~FFmpegInputSource();
 	virtual FFmpeg::AVFramePtr PullVideo() override;
 	virtual FFmpeg::AVFramePtr LastVideo() override;

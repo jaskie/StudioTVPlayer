@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using TVPlayR;
 
 namespace StudioTVPlayer.Model
@@ -12,53 +14,77 @@ namespace StudioTVPlayer.Model
         {
             public Media Media;
             public int Height;
+            public CancellationToken CancellationToken;
+            public DateTime FirstVerification;
         }
 
-        private readonly Thread _thread;
+        private readonly Task _verificationTask;
         private readonly BlockingCollection<MediaVerifyData> _medias = new BlockingCollection<MediaVerifyData>();
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private MediaVerifier()
         {
-            _thread = new Thread(MediaVerifierThread) { Name = "Media verifier thread" };
-            _thread.Start();
+            _verificationTask = Task.Factory.StartNew(MediaVerifierTask, TaskCreationOptions.LongRunning);
         }
 
         public void Dispose()
         {
-            while (_medias.TryTake(out var _));
-            _medias.Add(new MediaVerifyData { Media = null }); // to exit thread
-            _thread.Join();
+            _cancellationTokenSource.Cancel();
             _medias.Dispose();
         }
 
         public static MediaVerifier Current { get; } = new MediaVerifier();
 
-        public void Queue(Media media, int thumbnailHeight)
+        public void Queue(Media media, int thumbnailHeight, CancellationToken cancellationToken)
         {
-            _medias.Add(new MediaVerifyData { Media = media, Height = thumbnailHeight });
+            _medias.Add(new MediaVerifyData { Media = media, Height = thumbnailHeight, CancellationToken = cancellationToken });
         }
 
-        private void MediaVerifierThread()
+        private void MediaVerifierTask()
         {
             while (true) 
             {
-                var vd = _medias.Take();
-                if (vd.Media == null)
-                    return;
+                var vd = _medias.Take(_cancellationTokenSource.Token);
+                if (_cancellationTokenSource.IsCancellationRequested)
+                    return; //exit when disposing this
+                if (vd.CancellationToken.IsCancellationRequested)
+                    continue; 
+                if (!File.Exists(vd.Media.FullPath))
+                    continue;
+                if (vd.FirstVerification == default(DateTime))
+                    vd.FirstVerification = DateTime.Now;
                 try
                 {
                     using (var file = new InputFile(vd.Media.FullPath, 0))
                     {
                         vd.Media.Duration = file.VideoDuration;
                         if (vd.Height > 0)
-                            vd.Media.Thumbnail = file.GetBitmapSource(vd.Height);
+                        {
+                            var thumb = file.GetBitmapSource(vd.Height);
+                            thumb.Freeze();
+                            vd.Media.Thumbnail = thumb;
+                        }
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine("Verification of {0} failed with {1}", vd.Media.FullPath, e);
+                    if (DateTime.Now > vd.FirstVerification + TimeSpan.FromMinutes(30))
+                    {
+                        Debug.WriteLine("Verification of {0} unsuccessfull in 30 minutes. Error: {1}", vd.Media.FullPath, e);
+                    }
+                    else
+                    {
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(10), vd.CancellationToken);
+                            _medias.Add(vd);
+                        }, _cancellationTokenSource.Token);
+                        Debug.WriteLine("Verification of {0} failed with {1}", vd.Media.FullPath, e);
+                    }
                 }                
             }
         }
+
+
 
     }
 }

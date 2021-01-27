@@ -83,7 +83,6 @@ namespace StudioTVPlayer.Model
             set
             {
                 _thumbnail = value;
-                _thumbnail.Freeze();
                 RaisePropertyChanged();
             }
         }

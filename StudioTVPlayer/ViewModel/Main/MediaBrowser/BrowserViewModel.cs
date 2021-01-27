@@ -17,12 +17,11 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private bool _isDisposed;
         private Sorting _selectedSorting;
         private MediaViewModel _selectedMedia;
-        private DateTime _selectedDate = DateTime.Today;
+        private DateTime _selectedDate;
 
 
 
         public UiCommand MediaItem_MoveCommand { get;  }
-        public UiCommand ChangeDateCommand { get; }
         public UiCommand QueueToPlayerByIndexCommand { get; }
 
 
@@ -34,13 +33,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _watchedFolder.Initialize();
             _mediaFiles = new ObservableCollection<MediaViewModel>(watchedFolder.Medias.Select(m => new MediaViewModel(m)));
             _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
+            _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
+            _selectedSorting = Sorting.CreationTime;
             Name = watchedFolder.Name;
             IsFilteredByDate = watchedFolder.IsFilteredByDate;
-            ChangeDateCommand = new UiCommand(ChangeDate);
+            _selectedDate = watchedFolder.FilterDate;
             QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex);
         }
-
-
 
         #region Properties
 
@@ -72,7 +71,11 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             {
                 if (!Set(ref _selectedDate, value))
                     return;
-                LoadMediaCollectionByDate();
+                _watchedFolder.FilterDate = value;
+                _mediaFiles.Clear();
+                foreach (var media in _watchedFolder.Medias)
+                    _mediaFiles.Add(new MediaViewModel(media));
+                _mediaFilesView.Refresh();
             }
         }
 
@@ -92,28 +95,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         
         #endregion
-
-
-
-       
-
-        private void ChangeDate(object obj)
-        {
-            if (obj == null)
-                return;
-
-            SelectedDate = SelectedDate.AddDays(Int32.Parse(obj.ToString()));
-        }
-
-        private void LoadMediaCollectionByDate()
-        {
-            _mediaFilesView.Filter = o =>
-            {
-                var browserItem = o as MediaViewModel;
-                return browserItem.Media.CreationTime.ToShortDateString() == _selectedDate.ToShortDateString();
-            };
-            //_mediaDataProvider.LoadMediaFiles(_mediaFilesView, _mediaWatcher);
-        }
 
         private void SortMediaCollection()
         {
@@ -165,7 +146,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                         _mediaFilesView.Refresh();
                         break;
                     case MediaEventKind.Delete:
-                        var mediaVm = _mediaFiles.FirstOrDefault(m => m.Media == e.Media);
+                        var mediaVm = _mediaFiles.FirstOrDefault(m => ReferenceEquals(m.Media, e.Media));
                         if (mediaVm != null)
                             _mediaFiles.Remove(mediaVm);
                         _mediaFilesView.Refresh();

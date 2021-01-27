@@ -42,15 +42,17 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-                <mah:DateTimePicker Visibility="{Binding IsFilteredByDate, Converter={StaticResource BoolToVisibilityConverter}}" 
-                                    SelectedDateTime="{Binding SelectedDate}" 
-                                    Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" 
-                                    IsTodayHighlighted="True" 
-                                    >
-                </mah:DateTimePicker>
+                <DatePicker Visibility="{Binding IsFilteredByDate, Converter={StaticResource BoolToVisibilityConverter}}" 
+                            SelectedDate="{Binding SelectedDate}" SelectedDateFormat="Short"
+                            Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                            IsTodayHighlighted="True" 
+                            ToolTip="Show only files created this day"
+                            >
+                </DatePicker>
                 <ComboBox Grid.Column="1" Margin="5" VerticalAlignment="Center"  ItemsSource="{Binding Sortings}" 
-                              SelectedItem="{Binding SelectedSorting, UpdateSourceTrigger=PropertyChanged}" 
-                              />                
+                          SelectedItem="{Binding SelectedSorting, UpdateSourceTrigger=PropertyChanged}" 
+                          ToolTip="Sort media list"
+                          />                
         <ListBox Grid.Row="1" Grid.ColumnSpan="2"
                  TabIndex="1"
                  Focusable="True"
@@ -87,7 +89,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
-
     </Grid>
 </UserControl>

@@ -23,12 +23,18 @@ namespace StudioTVPlayer.Model
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private MediaVerifier()
         {
-            _verificationTask = Task.Factory.StartNew(MediaVerifierTask, TaskCreationOptions.LongRunning);
+            _verificationTask = Task.Factory.StartNew(MediaVerifierTask, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         public void Dispose()
         {
             _cancellationTokenSource.Cancel();
+            try
+            {
+                _verificationTask.Wait();
+            }
+            catch (OperationCanceledException) 
+            { }
             _medias.Dispose();
         }
 
@@ -41,50 +47,48 @@ namespace StudioTVPlayer.Model
 
         private void MediaVerifierTask()
         {
-            while (true) 
+            while (!_verificationTask.IsCanceled)
             {
-                var vd = _medias.Take(_cancellationTokenSource.Token);
-                if (_cancellationTokenSource.IsCancellationRequested)
-                    return; //exit when disposing this
-                if (vd.CancellationToken.IsCancellationRequested)
-                    continue; 
-                if (!File.Exists(vd.Media.FullPath))
-                    continue;
-                if (vd.FirstVerification == default(DateTime))
-                    vd.FirstVerification = DateTime.Now;
                 try
                 {
-                    using (var file = new InputFile(vd.Media.FullPath, 0))
+                    var vd = _medias.Take(_cancellationTokenSource.Token);
+
+                    if (vd.CancellationToken.IsCancellationRequested)
+                        continue;
+                    if (!File.Exists(vd.Media.FullPath))
+                        continue;
+                    if (vd.FirstVerification == default(DateTime))
+                        vd.FirstVerification = DateTime.Now;
+                    try
                     {
-                        vd.Media.Duration = file.VideoDuration;
-                        if (vd.Height > 0)
+                        using (var file = new InputFile(vd.Media.FullPath, 0))
                         {
-                            var thumb = file.GetBitmapSource(vd.Height);
-                            thumb.Freeze();
-                            vd.Media.Thumbnail = thumb;
+                            vd.Media.Duration = file.VideoDuration;
+                            if (vd.Height > 0)
+                            {
+                                var thumb = file.GetBitmapSource(vd.Height);
+                                thumb.Freeze();
+                                vd.Media.Thumbnail = thumb;
+                            }
                         }
                     }
+                    catch (Exception e)
+                    {
+                        if (DateTime.Now > vd.FirstVerification + TimeSpan.FromMinutes(30))
+                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 minutes. Error: {1}", vd.Media.FullPath, e);
+                        else
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(5), vd.CancellationToken);
+                                _medias.Add(vd);
+                            }, _cancellationTokenSource.Token);
+                    }
                 }
-                catch (Exception e)
+                catch (OperationCanceledException)
                 {
-                    if (DateTime.Now > vd.FirstVerification + TimeSpan.FromMinutes(30))
-                    {
-                        Debug.WriteLine("Verification of {0} unsuccessfull in 30 minutes. Error: {1}", vd.Media.FullPath, e);
-                    }
-                    else
-                    {
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(TimeSpan.FromSeconds(10), vd.CancellationToken);
-                            _medias.Add(vd);
-                        }, _cancellationTokenSource.Token);
-                        Debug.WriteLine("Verification of {0} failed with {1}", vd.Media.FullPath, e);
-                    }
-                }                
+                    return;
+                }
             }
         }
-
-
-
     }
 }

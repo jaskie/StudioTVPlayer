@@ -24,7 +24,6 @@ namespace StudioTVPlayer.Model
         private DateTime _filterDate = DateTime.Today;
         private readonly List<Media> _medias = new List<Media>();
 
-
         [XmlAttribute]
         public string Name { get; set; }
 
@@ -60,12 +59,14 @@ namespace StudioTVPlayer.Model
             _fs.EnableRaisingEvents = true;
             lock (((IList)_medias).SyncRoot)
             {
+                _medias.ForEach(m => m.PropertyChanged -= Media_PropertyChanged);
                 _medias.Clear();
                 foreach (var media in Directory.EnumerateFiles(Path)
                     .Where(Accept)
                     .Select(path => new Media(path)))
                 {
                     _medias.Add(media);
+                    media.PropertyChanged += Media_PropertyChanged;
                     AddToVerificationQueue(media);
                 }
             }
@@ -137,7 +138,7 @@ namespace StudioTVPlayer.Model
             {
                 lock (((IList)_medias).SyncRoot)
                     _medias.Remove(media);
-                media.Refresh();
+                media.PropertyChanged -= Media_PropertyChanged;
                 MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Delete));
             }
             else if (media != null)
@@ -153,7 +154,14 @@ namespace StudioTVPlayer.Model
             var media = new Media(fullPath);
             lock (((IList)_medias).SyncRoot)
                 _medias.Add(media);
+            media.PropertyChanged += Media_PropertyChanged;
             return media;
+        }
+
+        private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(Media.Duration))
+                MediaChanged?.Invoke(this, new MediaEventArgs((Media)sender, MediaEventKind.Change));
         }
 
         private void Fs_MediaDeleted(object sender, FileSystemEventArgs e)
@@ -166,7 +174,10 @@ namespace StudioTVPlayer.Model
                 _medias.Remove(media);
             }
             if (media != null)
+            {
+                media.PropertyChanged -= Media_PropertyChanged;
                 MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Delete));
+            }
         }
 
         private void Fs_Error(object sender, ErrorEventArgs e)

@@ -15,8 +15,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             Channel = channel;
             _name = channel.Name;
-            _selectedDevice = GlobalApplicationData.Current.DecklinkDevices.FirstOrDefault(dd => dd.Index == channel.DeviceIndex);
-            _selectedVideoFormat = GlobalApplicationData.Current.VideoFormats.FirstOrDefault(vf => vf.Id == channel.VideoFormatId);
+            _selectedDevice = DecklinkDevice.EnumerateDevices().FirstOrDefault(dd => dd.Index == channel.DeviceIndex);
+            _selectedVideoFormat = VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
             _selectedPixelFormat = channel.PixelFormat;
         }
 

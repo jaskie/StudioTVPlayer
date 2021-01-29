@@ -21,6 +21,7 @@ namespace TVPlayR {
 		initonly String^ _name;
 		initonly Rational^ _sample_aspect_ratio;
 		initonly Rational^ _frame_rate;
+		static array<VideoFormat^>^ _videoFormats;
 	internal:
 		Core::VideoFormat::Type GetNativeEnumType() { return _native_fomat->type(); }
 	public:

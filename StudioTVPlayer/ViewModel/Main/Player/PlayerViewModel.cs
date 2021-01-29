@@ -13,6 +13,22 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class PlayerViewModel : ViewModelBase, IDisposable
     {
+        public PlayerViewModel(MediaPlayer player)
+        {
+            DropReceiveCommand = new UiCommand(param => DropReceive(param));
+            LoadMediaCommand = new UiCommand(param => PreliminaryLoadMedia(param));
+            LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia);
+            CheckItemCommand = new UiCommand(param => CheckItem(param));
+            PlayPauseCommand = new UiCommand(PlayPauseMedia);
+            SliderDragStartCommand = new UiCommand(param => SldierDragStart(param));
+            StopCommand = new UiCommand(StopMedia);
+            NextCommand = new UiCommand(NextMedia);
+            DeleteDisabledCommand = new UiCommand(DeleteDisabled, CanDeleteDisabled);
+            PlayerQueueItem_MoveCommand = new UiCommand(param => PlayerQueueItem_Move(param));
+            DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
+            SeekFramesCommand = new UiCommand(param => SeekFrames(param));
+        }
+
         private TVPlayR.InputFile _inputFile;
 
         private bool _isPlaying;
@@ -75,17 +91,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             switch (e.PropertyName)
             {
                 case nameof(Media.Duration):
-                    OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
+                    //OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
                     break;              
             }
         }
 
-        private ObservableCollection<PlayerQueueItemViewModel> _mediaQueue;
-        public ObservableCollection<PlayerQueueItemViewModel> MediaQueue
-        {
-            get => _mediaQueue;
-            set => Set(ref _mediaQueue, value);
-        }
 
         public UiCommand DropReceiveCommand { get; }
         public UiCommand LoadMediaCommand { get; }
@@ -102,52 +112,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public UiCommand PlayerQueueItem_MoveCommand { get; }
 
-
-        public PlayerViewModel()
-        {
-            Application.Current.MainWindow.Closing += MainWindow_Closing;
-            MediaQueue = new ObservableCollection<PlayerQueueItemViewModel>();
-            MediaQueue.CollectionChanged += MediaQueue_CollectionChanged;
-
-            DropReceiveCommand = new UiCommand(param => DropReceive(param));
-            LoadMediaCommand = new UiCommand(param => PreliminaryLoadMedia(param));
-            LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia);
-            CheckItemCommand = new UiCommand(param => CheckItem(param));
-            PlayPauseCommand = new UiCommand(PlayPauseMedia);
-            SliderDragStartCommand = new UiCommand(param => SldierDragStart(param));
-            StopCommand = new UiCommand(StopMedia);
-            NextCommand = new UiCommand(NextMedia);
-            DeleteDisabledCommand = new UiCommand(DeleteDisabled, CanDeleteDisabled);
-            PlayerQueueItem_MoveCommand = new UiCommand(param => PlayerQueueItem_Move(param));
-            DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
-            SeekFramesCommand = new UiCommand(param => SeekFrames(param));
-        }
-
-        private void MediaQueue_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-            {
-                List<PlayerQueueItemViewModel> items = e.NewItems.Cast<PlayerQueueItemViewModel>().ToList();
-                foreach(var item in items)
-                {
-                    item.BrowserItem.IsQueued = true;                  
-                }
-            }
-            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
-            {
-                List<PlayerQueueItemViewModel> items = e.OldItems.Cast<PlayerQueueItemViewModel>().ToList();
-                foreach (var item in items)
-                {
-                    item.BrowserItem.IsQueued = false;
-                }
-            }
-                
-        }       
-
-        private void MainWindow_Closing(object sender, CancelEventArgs e)
-        {
-            Dispose();
-        }
 
         private void InputFileStopped(object sender, EventArgs e)
         {
@@ -199,26 +163,24 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadSelectedMedia(object obj)
         {
-            if (SelectedIndex < _mediaQueue.Count && SelectedIndex > -1)
-                LoadMedia(_mediaQueue[SelectedIndex]);
         }
 
         private void DeleteDisabled(object obj)
         {
-            var mediaToDelete = MediaQueue.Where(param => param.IsDisabled == true);
+            //var mediaToDelete = MediaQueue.Where(param => param.IsDisabled == true);
 
-            foreach(PlayerQueueItemViewModel playerItem in mediaToDelete.ToList())
-            {
-                MediaQueue.Remove(playerItem);
-            }
+            //foreach(PlayerQueueItemViewModel playerItem in mediaToDelete.ToList())
+            //{
+            //    MediaQueue.Remove(playerItem);
+            //}
         }
 
         private bool CanDeleteDisabled(object obj)
         {
-            if (MediaQueue.Count == 0)
-                return false;
-            if (MediaQueue.Select(param => param.IsDisabled == true).Count() > 0)
-                return true;
+            //if (MediaQueue.Count == 0)
+            //    return false;
+            //if (MediaQueue.Select(param => param.IsDisabled == true).Count() > 0)
+            //    return true;
             return false;
         }
 
@@ -248,12 +210,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (usingSeekbar)
             {
                 DisplayTime = TimeSpan.FromMilliseconds(_seekbar);
-                OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;               
+                //OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;               
                 Seek(TimeSpan.FromMilliseconds(_seekbar));
             }
             else
             {
-                OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
+                //OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
                 _inputFile.Seek(DisplayTime);
             }         
         }
@@ -271,28 +233,28 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(PlayerQueueItemViewModel playerItem)
         {                      
-            if (playerItem.IsDisabled || !playerItem.BrowserItem.IsVerified)
-                return;
+            //if (playerItem.IsDisabled || !playerItem.BrowserItem.IsVerified)
+            //    return;
 
-            if (_playerItem != null)
-                Stop();     
+            //if (_playerItem != null)
+            //    Stop();     
 
-            IsPlaying = false;
-            _inputFile = new TVPlayR.InputFile(playerItem.BrowserItem.Media.DirectoryName, 2);           
-            _inputFile.FramePlayed += Media_FramePlayed;
-            _inputFile.Stopped += InputFileStopped;
+            //IsPlaying = false;
+            //_inputFile = new TVPlayR.InputFile(playerItem.BrowserItem.Media.DirectoryName, 2);           
+            //_inputFile.FramePlayed += Media_FramePlayed;
+            //_inputFile.Stopped += InputFileStopped;
 
-            PlayerItem = playerItem;
-            PlayerItem.BrowserItem.Media.PropertyChanged += MediaChanged;
+            //PlayerItem = playerItem;
+            //PlayerItem.BrowserItem.Media.PropertyChanged += MediaChanged;
 
-            Channel.Load(_inputFile);
-            PlayerItem.IsLoaded = true;
+            //Channel.Load(_inputFile);
+            //PlayerItem.IsLoaded = true;
         }
 
         private void Media_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {           
             DisplayTime = e.Time;
-            OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
+            //OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
 
             if (IsPlaying)
             {
@@ -304,23 +266,23 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void NextMedia(object obj)
         {          
-            var currentIndex = MediaQueue.IndexOf(_playerItem);
+            //var currentIndex = MediaQueue.IndexOf(_playerItem);
 
-            if (currentIndex >= MediaQueue.Count - 1)
-                return;         
+            //if (currentIndex >= MediaQueue.Count - 1)
+            //    return;         
 
-            while (true)
-            {              
-                if (MediaQueue[++currentIndex].IsDisabled == true)
-                {                
-                    if (currentIndex >= MediaQueue.Count)
-                        return;
-                    continue;
-                }
-                LoadMedia(MediaQueue[currentIndex]);             
-                SelectedIndex = currentIndex;
-                break;
-            }
+            //while (true)
+            //{              
+            //    if (MediaQueue[++currentIndex].IsDisabled == true)
+            //    {                
+            //        if (currentIndex >= MediaQueue.Count)
+            //            return;
+            //        continue;
+            //    }
+            //    LoadMedia(MediaQueue[currentIndex]);             
+            //    SelectedIndex = currentIndex;
+            //    break;
+            //}
         }
 
         private void StopMedia(object obj = null)
@@ -407,7 +369,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
                 IsPlaying = false;
                 PlayerItem.IsLoaded = false;
-                PlayerItem.BrowserItem.Media.PropertyChanged -= MediaChanged;
+                //PlayerItem.BrowserItem.Media.PropertyChanged -= MediaChanged;
                 PlayerItem = null;
                 Seekbar = 0;
                 DisplayTime = TimeSpan.Zero;
@@ -448,28 +410,28 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
 
             var browserVM = (MediaViewModel)e.Data.GetData(typeof(MediaViewModel));
-            var newIndex = MediaQueue.IndexOf(MediaQueue.FirstOrDefault(playerItemParam => playerItemParam.DragOver == true));
+            //var newIndex = MediaQueue.IndexOf(MediaQueue.FirstOrDefault(playerItemParam => playerItemParam.DragOver == true));
 
-            if (browserVM == null && newIndex>-1) //browserItem null czyli to jest playerItem
-            {                                                
-                var playerItemQueueVM = (PlayerQueueItemViewModel)e.Data.GetData(typeof(PlayerQueueItemViewModel));
-                var oldIndex = MediaQueue.IndexOf(playerItemQueueVM);
-                newIndex = newIndex > oldIndex ? --newIndex : newIndex;
+            //if (browserVM == null && newIndex>-1) //browserItem null czyli to jest playerItem
+            //{                                                
+            //    var playerItemQueueVM = (PlayerQueueItemViewModel)e.Data.GetData(typeof(PlayerQueueItemViewModel));
+            //    var oldIndex = MediaQueue.IndexOf(playerItemQueueVM);
+            //    newIndex = newIndex > oldIndex ? --newIndex : newIndex;
 
-                if (oldIndex>-1)
-                    MediaQueue.Move(oldIndex, newIndex < 0 ? 0 : newIndex);   
-                else
-                    MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
-                return;
-            }
+            //    if (oldIndex>-1)
+            //        MediaQueue.Move(oldIndex, newIndex < 0 ? 0 : newIndex);   
+            //    else
+            //        MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
+            //    return;
+            //}
 
-            if (browserVM == null)
-                return;
+            //if (browserVM == null)
+            //    return;
 
-            if (newIndex>-1)
-                MediaQueue.Insert(newIndex, new PlayerQueueItemViewModel(browserVM));
-            else
-                MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
+            //if (newIndex>-1)
+            //    MediaQueue.Insert(newIndex, new PlayerQueueItemViewModel(browserVM));
+            //else
+            //    MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
         }      
 
         public void Dispose()

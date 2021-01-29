@@ -49,19 +49,21 @@ namespace StudioTVPlayer.Model
             return true;
         }
 
-        public bool AddToQueue(MediaPlayerQueueItem media, int index)
+        public MediaPlayerQueueItem AddToQueue(Media media, int index)
         {
             if (index < _mediaQueue.Count)
             {
-                _mediaQueue.Insert(index, media);
-                return true;
+                var item = new MediaPlayerQueueItem(media);
+                _mediaQueue.Insert(index, item);
+                return item;
             }
             if (index == MediaQueue.Count)
             {
-                _mediaQueue.Add(media);
-                return true;
+                var item = new MediaPlayerQueueItem(media);
+                _mediaQueue.Add(item);
+                return item;
             }
-            return false;
+            return null;
         }
 
         private void InternalLoad(string fullPath)

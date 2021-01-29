@@ -21,12 +21,6 @@ namespace StudioTVPlayer.Providers
 
         public Configuration Configuration { get; } = LoadConfig();
 
-        public DecklinkDevice[] DecklinkDevices { get; } = DecklinkDevice.EnumerateDevices();
-
-        public VideoFormat[] VideoFormats { get; } = VideoFormat.EnumVideoFormats();
-
-        public PixelFormat[] PixelFormats { get; } = Enum.GetValues(typeof(PixelFormat)).Cast<PixelFormat>().ToArray();
-
         public void SaveConfiguration()
         {
             var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
@@ -42,7 +36,7 @@ namespace StudioTVPlayer.Providers
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
-            foreach (var decklink in DecklinkDevices)
+            foreach (var decklink in DecklinkDevice.EnumerateDevices())
                 decklink.Dispose();
         }
 

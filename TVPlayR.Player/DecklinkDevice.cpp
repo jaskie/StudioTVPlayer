@@ -25,14 +25,15 @@ namespace TVPlayR {
 
 	array<DecklinkDevice^>^ DecklinkDevice::EnumerateDevices()
 	{
-		static Decklink::Iterator iterator;
-		int size = static_cast<int> (iterator.Size());
-		array<DecklinkDevice^>^ result = gcnew array<DecklinkDevice^>(size);
-		for (int i = 0; i < size; i++)
+		if (_devices == nullptr)
 		{
-			result[i] = gcnew DecklinkDevice(i, iterator[i]);
+			Decklink::Iterator iterator;
+			int count = static_cast<int> (iterator.Size());
+			_devices = gcnew array<DecklinkDevice^>(count);
+			for (int i = 0; i < count; i++)
+				_devices[i] = gcnew DecklinkDevice(i, iterator[i]);
 		}
-		return result;
+		return _devices;
 	}
 
 }

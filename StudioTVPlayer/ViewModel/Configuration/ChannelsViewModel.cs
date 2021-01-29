@@ -51,11 +51,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             set => Set(ref _selectedChannel, value);
         }
 
-        public TVPlayR.DecklinkDevice[] Devices => GlobalApplicationData.Current.DecklinkDevices;
+        public static TVPlayR.DecklinkDevice[] Devices { get; } = TVPlayR.DecklinkDevice.EnumerateDevices();
 
-        public TVPlayR.VideoFormat[] VideoFormats => GlobalApplicationData.Current.VideoFormats;
+        public static TVPlayR.VideoFormat[] VideoFormats { get; } = TVPlayR.VideoFormat.EnumVideoFormats();
 
-        public TVPlayR.PixelFormat[] PixelFormats => GlobalApplicationData.Current.PixelFormats;
+        public static TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422 };
 
 
         public ObservableCollection<ChannelViewModel> Channels { get; }

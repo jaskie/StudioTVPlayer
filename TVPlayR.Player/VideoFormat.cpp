@@ -6,10 +6,13 @@ namespace TVPlayR {
 
 	array<VideoFormat^>^ VideoFormat::EnumVideoFormats()
 	{
-		array<VideoFormat^>^ result = gcnew array<VideoFormat^>(static_cast<int>(Core::VideoFormat::Type::count)-1);
-		for (int type = Core::VideoFormat::Type::pal; type != Core::VideoFormat::Type::count; type++)
-			result[type-1] = gcnew VideoFormat(static_cast<Core::VideoFormat::Type>(type));
-		return result;
+		if (_videoFormats == nullptr)
+		{
+			_videoFormats = gcnew array<VideoFormat^>(static_cast<int>(Core::VideoFormat::Type::count) - 1);
+			for (int type = Core::VideoFormat::Type::pal; type != Core::VideoFormat::Type::count; type++)
+				_videoFormats[type - 1] = gcnew VideoFormat(static_cast<Core::VideoFormat::Type>(type));
+		}
+		return _videoFormats;
 	}
 
 	VideoFormat::VideoFormat(int video_format_id)

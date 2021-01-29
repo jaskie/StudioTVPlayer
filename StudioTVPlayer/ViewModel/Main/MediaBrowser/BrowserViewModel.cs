@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
@@ -154,6 +155,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                     case MediaEventKind.Change:
                         break;
                 }
+                Debug.WriteLine("Media {0} {1}", e.Media.Name, e.Kind);
             });
         }
 

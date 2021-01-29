@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Xml.Serialization;
@@ -11,7 +12,7 @@ namespace StudioTVPlayer.Model
     {
         private string _name = string.Empty;
         private VideoFormat _videoFormat;
-        private int _videoFormatId;
+        private string _videoFormatName;
         private PixelFormat _pixelFormat;
         private int _deviceIndex;
 
@@ -30,13 +31,13 @@ namespace StudioTVPlayer.Model
                     return;
 
                 _videoFormat = value;
-                VideoFormatId = value.Id;
+                VideoFormatName = value.Name;
                 RaisePropertyChanged();
             }
         }
 
-        [XmlAttribute]
-        public int VideoFormatId { get => _videoFormatId; set => _videoFormatId = value; }
+        [XmlAttribute(nameof(VideoFormat))]
+        public string VideoFormatName { get => _videoFormatName; set => _videoFormatName = value; }
 
         [XmlAttribute]
         public PixelFormat PixelFormat
@@ -46,7 +47,6 @@ namespace StudioTVPlayer.Model
             {
                 if (_pixelFormat == value)
                     return;
-
                 _pixelFormat = value;
                 RaisePropertyChanged();
             }
@@ -66,14 +66,23 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public void Initialize(int videoFormat, PixelFormat pixelFormat)
+        public void Initialize()
         {
-            _channelR = new TVPlayR.Channel(videoFormat, pixelFormat, 16);
+            var device = DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
+            var format = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
+            if (device == null || format == null)
+                return;
+            _channelR = new TVPlayR.Channel(format, PixelFormat, 16);
+            _channelR.AddOutput(device);
         }
 
         public void Uninitialize()
         {
-
+            if (_channelR == null)
+                return;
+            _channelR.Clear();
+            _channelR?.Dispose();
+            _channelR = null;
         }
 
         public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);
@@ -92,9 +101,7 @@ namespace StudioTVPlayer.Model
                 return;
             try
             {
-                Clear();
-                _channelR.Dispose();
-                _channelR = null;
+                Uninitialize();
             }
             catch
             {

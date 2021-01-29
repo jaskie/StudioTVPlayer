@@ -63,7 +63,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         private static void DragEnter_Occurs(object sender, DragEventArgs e)
         {
-            if (sender is FrameworkElement element && (PlayerQueueItemViewModel)element.DataContext != e.Data.GetData(typeof(PlayerQueueItemViewModel)))
+            if (sender is FrameworkElement element && (RundownItemViewModel)element.DataContext != e.Data.GetData(typeof(RundownItemViewModel)))
                 SetDragEnter(element, true);
             e.Handled = true;
         }

@@ -2,12 +2,12 @@
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
-    public class PlayerQueueItemViewModel : ViewModelBase
+    public class RundownItemViewModel : ViewModelBase
     {
 
-        public PlayerQueueItemViewModel(MediaPlayerQueueItem queueItem)
+        public RundownItemViewModel(RundownItem rundownItem)
         {
-            QueueItem = queueItem;
+            RundownItem = rundownItem;
         }
 
         private bool _isLoaded;
@@ -24,7 +24,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _isDisabled, value);
         }
 
-        public MediaPlayerQueueItem QueueItem { get; }
+        public RundownItem RundownItem { get; }
 
     }
 }

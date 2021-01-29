@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudioTVPlayer.Model.Args;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +10,8 @@ namespace StudioTVPlayer.Model
     public class MediaPlayer : IDisposable
     {
         private readonly Channel _channel;
-        private readonly List<MediaPlayerQueueItem> _mediaQueue = new List<MediaPlayerQueueItem>();
-        private MediaPlayerQueueItem _playingQueueItem;
+        private readonly List<RundownItem> _rundown = new List<RundownItem>();
+        private RundownItem _playingQueueItem;
         private TVPlayR.InputFile _inputFile;
 
         public MediaPlayer(Channel channel)
@@ -18,9 +19,9 @@ namespace StudioTVPlayer.Model
             _channel = channel;
         }
 
-        public IReadOnlyCollection<MediaPlayerQueueItem> MediaQueue => _mediaQueue;
+        public IReadOnlyCollection<RundownItem> Rundown => _rundown;
         
-        public MediaPlayerQueueItem PlayingQueueItem
+        public RundownItem PlayingQueueItem
         {
             get => _playingQueueItem; 
             private set
@@ -29,7 +30,7 @@ namespace StudioTVPlayer.Model
                     return;
                 _playingQueueItem = value;
                 InternalLoad(value.Media.FullPath);
-                Loaded?.Invoke(this, new MediaPlayerQueueItemEventArgs(value));
+                Loaded?.Invoke(this, new RundownItemEventArgs(value));
             }
         }
 
@@ -38,29 +39,29 @@ namespace StudioTVPlayer.Model
             _inputFile?.Play();
         }
 
-        public event EventHandler<MediaPlayerQueueItemEventArgs> Loaded;
-        public event EventHandler<MediaPlayerProgressEventArgs> Progress;
+        public event EventHandler<RundownItemEventArgs> Loaded;
+        public event EventHandler<TimeEventArgs> Progress;
 
-        public bool Load(MediaPlayerQueueItem media)
+        public bool Load(RundownItem media)
         {
-            if (!_mediaQueue.Contains(media))
+            if (!_rundown.Contains(media))
                 return false;
             PlayingQueueItem = media;
             return true;
         }
 
-        public MediaPlayerQueueItem AddToQueue(Media media, int index)
+        public RundownItem AddToQueue(Media media, int index)
         {
-            if (index < _mediaQueue.Count)
+            if (index < _rundown.Count)
             {
-                var item = new MediaPlayerQueueItem(media);
-                _mediaQueue.Insert(index, item);
+                var item = new RundownItem(media);
+                _rundown.Insert(index, item);
                 return item;
             }
-            if (index == MediaQueue.Count)
+            if (index == Rundown.Count)
             {
-                var item = new MediaPlayerQueueItem(media);
-                _mediaQueue.Add(item);
+                var item = new RundownItem(media);
+                _rundown.Add(item);
                 return item;
             }
             return null;
@@ -87,7 +88,7 @@ namespace StudioTVPlayer.Model
 
         private void InputFile_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
-            Progress?.Invoke(this, new MediaPlayerProgressEventArgs(e.Time));
+            Progress?.Invoke(this, new TimeEventArgs(e.Time));
         }
 
         public void Dispose()

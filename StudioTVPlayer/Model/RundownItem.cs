@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
-    public class MediaPlayerQueueItem
+    public class RundownItem
     {
-        public MediaPlayerQueueItem(Media media)
+        public RundownItem(Media media)
         {
             Media = media;
         }

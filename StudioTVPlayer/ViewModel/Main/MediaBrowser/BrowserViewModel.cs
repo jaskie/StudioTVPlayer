@@ -153,6 +153,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                         _mediaFilesView.Refresh();
                         break;
                     case MediaEventKind.Change:
+                        _mediaFilesView.Refresh();
                         break;
                 }
                 Debug.WriteLine("Media {0} {1}", e.Media.Name, e.Kind);

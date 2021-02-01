@@ -9,18 +9,19 @@ namespace StudioTVPlayer.Model
 {
     public class MediaPlayer : IDisposable
     {
-        private readonly Channel _channel;
         private readonly List<RundownItem> _rundown = new List<RundownItem>();
         private RundownItem _playingQueueItem;
         private TVPlayR.InputFile _inputFile;
 
         public MediaPlayer(Channel channel)
         {
-            _channel = channel;
+            Channel = channel;
         }
 
         public IReadOnlyCollection<RundownItem> Rundown => _rundown;
-        
+
+        public Channel Channel { get; }
+
         public RundownItem PlayingQueueItem
         {
             get => _playingQueueItem; 
@@ -33,6 +34,7 @@ namespace StudioTVPlayer.Model
                 Loaded?.Invoke(this, new RundownItemEventArgs(value));
             }
         }
+
 
         public void Play()
         {
@@ -78,7 +80,7 @@ namespace StudioTVPlayer.Model
             _inputFile = new TVPlayR.InputFile(fullPath, 2);
             _inputFile.FramePlayed += InputFile_FramePlayed;
             _inputFile.Stopped += InputFile_Stopped;
-            _channel.Load(_inputFile);
+            Channel.Load(_inputFile);
         }
 
         private void InputFile_Stopped(object sender, EventArgs e)

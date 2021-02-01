@@ -11,9 +11,9 @@ using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
-    public class PlayerViewModel : ViewModelBase, IDisposable
+    public class MediaPlayerViewModel : ViewModelBase, IDisposable
     {
-        private readonly MediaPlayer _player;
+        private readonly MediaPlayer _mediaPlayer;
         
         private bool _isPlaying;
         private bool _isFocused;
@@ -21,9 +21,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private TimeSpan _outTime;
         private double _seekbar;
         private RundownItemViewModel _selectedRundownItem;
+        private bool _isDisposed;
 
-
-        public PlayerViewModel(MediaPlayer player)
+        public MediaPlayerViewModel(MediaPlayer player)
         {
             DropReceiveCommand = new UiCommand(param => DropReceive(param));
             LoadMediaCommand = new UiCommand(param => LoadMedia(param));
@@ -38,9 +38,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             
-            _player = player;
+            _mediaPlayer = player;
+            _mediaPlayer.Loaded += MediaPlayer_Loaded;
+            _mediaPlayer.Progress += MediaPlayer_Progress;
             RundownItems = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
+
 
         public bool IsPlaying
         {
@@ -66,7 +69,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _outTime, value);
         }
 
-        public Channel Channel { get; set; }
+        public Channel Channel => _mediaPlayer.Channel;
 
         public double Seekbar
         {
@@ -433,12 +436,24 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             //    MediaQueue.Insert(newIndex, new PlayerQueueItemViewModel(browserVM));
             //else
             //    MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
-        }      
+        }
+        private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void MediaPlayer_Loaded(object sender, Model.Args.RundownItemEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Dispose()
         {
-            Stop();
-            Channel?.Dispose();
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            _mediaPlayer.Loaded -= MediaPlayer_Loaded;
+            _mediaPlayer.Progress -= MediaPlayer_Progress;
         }
     }
 }

@@ -5,11 +5,11 @@ using System.Windows.Input;
 namespace StudioTVPlayer.View.Main.Player
 {
     /// <summary>
-    /// Interaction logic for PlayerView.xaml
+    /// Interaction logic for MediaPlayerView.xaml
     /// </summary>
-    public partial class PlayerView : UserControl
+    public partial class MediaPlayerView : UserControl
     {
-        public PlayerView()
+        public MediaPlayerView()
         {
             InitializeComponent();           
         }     

@@ -1,6 +1,7 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
+using System;
 
 namespace StudioTVPlayer.ViewModel
 {
@@ -12,7 +13,13 @@ namespace StudioTVPlayer.ViewModel
         public ViewModelBase CurrentViewModel
         {
             get => _currentViewModel;
-            set => Set(ref _currentViewModel, value);
+            set
+            {
+                var oldVm = _currentViewModel;
+                if (!Set(ref _currentViewModel, value))
+                    return;
+                (oldVm as IDisposable)?.Dispose();
+            }
         }
 
         public static readonly MainViewModel Instance = new MainViewModel();
@@ -26,7 +33,7 @@ namespace StudioTVPlayer.ViewModel
         {
             try
             {
-                CurrentViewModel = new PlayoutViewModel();
+                SwitchToPlayout();
             }
             catch 
             {
@@ -41,7 +48,7 @@ namespace StudioTVPlayer.ViewModel
         {
             if (CurrentViewModel is PlayoutViewModel)
                 return;
-            CurrentViewModel = new PlayoutViewModel();
+            CurrentViewModel = new PlayoutViewModel(Providers.GlobalApplicationData.Current.Players);
         }
 
         private void SwitchToConfiguration(object _)

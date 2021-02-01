@@ -125,7 +125,7 @@
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
-    <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
+    <Compile Include="ViewModel\Main\Player\MediaPlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\RundownItemViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
     <Compile Include="View\Configuration\ChannelsView.xaml.cs">
@@ -143,20 +143,17 @@
     <Compile Include="View\Configuration\ConfigurationView.xaml.cs">
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\InfoView.xaml.cs">
-      <DependentUpon>InfoView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\Main\MediaBrowser\BrowserView.xaml.cs">
       <DependentUpon>BrowserView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Main\PlayoutView.xaml.cs">
       <DependentUpon>PlayoutView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Player\PlayerQueueItemView.xaml.cs">
-      <DependentUpon>PlayerQueueItemView.xaml</DependentUpon>
+    <Compile Include="View\Main\Player\RundownItemView.xaml.cs">
+      <DependentUpon>RundownItemView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Player\PlayerView.xaml.cs">
-      <DependentUpon>PlayerView.xaml</DependentUpon>
+    <Compile Include="View\Main\Player\MediaPlayerView.xaml.cs">
+      <DependentUpon>MediaPlayerView.xaml</DependentUpon>
     </Compile>
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
@@ -196,10 +193,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\InfoView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\Main\MediaBrowser\BrowserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -208,11 +201,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Player\PlayerQueueItemView.xaml">
+    <Page Include="View\Main\Player\RundownItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Player\PlayerView.xaml">
+    <Page Include="View\Main\Player\MediaPlayerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

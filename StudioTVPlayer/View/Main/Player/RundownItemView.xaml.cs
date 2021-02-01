@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace StudioTVPlayer.View.Main.Player
 {
     /// <summary>
-    /// Interaction logic for PlayerQueueItemView.xaml
+    /// Interaction logic for RundownItemView.xaml
     /// </summary>
-    public partial class PlayerQueueItemView : UserControl
+    public partial class RundownItemView : UserControl
     {
-        public PlayerQueueItemView()
+        public RundownItemView()
         {
             InitializeComponent();
         }

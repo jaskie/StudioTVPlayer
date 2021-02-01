@@ -43,8 +43,8 @@
                 <ScrollViewer Grid.RowSpan="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <ItemsControl Focusable="False" IsTabStop="False" Margin="5,5,0,0" Grid.Column="0" ItemsSource="{Binding Players}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">
-                                <playerViews:PlayerView Margin="10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" />
+                            <DataTemplate DataType="{x:Type playerViewModels:MediaPlayerViewModel}">
+                                <playerViews:MediaPlayerView Margin="10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -56,8 +56,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
-                <browserViews:BrowsersView />
-                <local:InfoView Margin="5,0,0,0" x:Name="info" Grid.Row="1" />
+                <browserViews:BrowsersView DataContext="{Binding Browsers}"/>
             </Grid>
             
             <GridSplitter IsTabStop="False" Grid.Column="1" Width="2" BorderBrush="LightGray" Background="LightGray" HorizontalAlignment="Left" />

@@ -38,7 +38,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (!IsModified)
                 return;
-            if (Channel.DeviceIndex != SelectedDevice.Index)
+            if (Channel.DeviceIndex != SelectedDevice.Index || Channel.PixelFormat != SelectedPixelFormat || Channel.VideoFormat != SelectedVideoFormat)
                 Channel.Uninitialize();
             Channel.Name = Name;
             Channel.DeviceIndex = SelectedDevice.Index;

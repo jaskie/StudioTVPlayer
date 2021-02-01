@@ -66,8 +66,12 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        public bool IsInitialized => _channelR != null;
+
         public void Initialize()
         {
+            if (_channelR != null) 
+                throw new ApplicationException($"Channel {Name} already initialized");
             var device = DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
             var format = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
             if (device == null || format == null)
@@ -81,7 +85,7 @@ namespace StudioTVPlayer.Model
             if (_channelR == null)
                 return;
             _channelR.Clear();
-            _channelR?.Dispose();
+            _channelR.Dispose();
             _channelR = null;
         }
 
@@ -97,7 +101,7 @@ namespace StudioTVPlayer.Model
 
         public void Dispose()
         {
-            if (_channelR == null)
+            if (!IsInitialized)
                 return;
             try
             {

@@ -12,8 +12,6 @@ namespace StudioTVPlayer.View.Main.MediaBrowser
         public BrowsersView()
         {
             InitializeComponent();
-            DataContext = new BrowsersViewModel();
-            Unloaded += (s, e) => ((BrowsersViewModel)DataContext).Dispose();
         }
 
     }

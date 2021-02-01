@@ -95,7 +95,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach (var channel in Channels)
                 channel.Apply();
-            GlobalApplicationData.Current.Configuration.Channels = Channels.Select(c => c.Channel).ToList();
+            GlobalApplicationData.Current.UpdateChannels(Channels.Select(c => c.Channel).ToList());
         }
 
         public override bool IsValid()

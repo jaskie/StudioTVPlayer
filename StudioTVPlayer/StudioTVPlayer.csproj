@@ -117,7 +117,6 @@
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
-    <Compile Include="ViewModel\Main\MediaBrowser\BrowsersViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
     <Compile Include="ViewModel\Main\InfoViewModel.cs" />
@@ -136,9 +135,6 @@
     </Compile>
     <Compile Include="View\Main\MediaBrowser\MediaView.xaml.cs">
       <DependentUpon>MediaView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Main\MediaBrowser\BrowsersView.xaml.cs">
-      <DependentUpon>BrowsersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\ConfigurationView.xaml.cs">
       <DependentUpon>ConfigurationView.xaml</DependentUpon>
@@ -182,10 +178,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Main\MediaBrowser\MediaView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Main\MediaBrowser\BrowsersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

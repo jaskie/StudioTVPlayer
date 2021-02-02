@@ -5,13 +5,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using GongSolutions.Wpf.DragDrop;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
-    public class MediaPlayerViewModel : ViewModelBase, IDisposable
+    public class MediaPlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
         private readonly MediaPlayer _mediaPlayer;
         
@@ -34,14 +35,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             StopCommand = new UiCommand(StopMedia);
             NextCommand = new UiCommand(NextMedia);
             DeleteDisabledCommand = new UiCommand(DeleteDisabled, CanDeleteDisabled);
-            PlayerQueueItem_MoveCommand = new UiCommand(param => PlayerQueueItem_Move(param));
             DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
             _mediaPlayer.Progress += MediaPlayer_Progress;
-            RundownItems = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
+            Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
 
 
@@ -87,7 +87,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _selectedRundownItem, value);
         }
 
-        public IList<RundownItemViewModel> RundownItems { get; }
+        public IList<RundownItemViewModel> Rundown { get; }
 
 
         private void MediaChanged(object sender, PropertyChangedEventArgs e)
@@ -113,8 +113,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public UiCommand PlayPauseCommand { get; }
         public UiCommand StopCommand { get; }
         public UiCommand NextCommand { get; }
-
-        public UiCommand PlayerQueueItem_MoveCommand { get; }
 
 
         private void InputFileStopped(object sender, EventArgs e)
@@ -387,20 +385,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             return true;
         }
 
-        public void PlayerQueueItem_Move(object param)
-        {
-            if (param == null)
-                return;
-
-            object[] parameters = param as object[];
-            FrameworkElement sender = (FrameworkElement)parameters[0];
-            MouseEventArgs e = (MouseEventArgs)parameters[1];
-
-            if (e.LeftButton == MouseButtonState.Pressed)
-                DragDrop.DoDragDrop(sender, sender.DataContext, DragDropEffects.Move);
-
-        }
-
         private void DropReceive(object obj)
         {
             if (obj == null)
@@ -454,6 +438,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _isDisposed = true;
             _mediaPlayer.Loaded -= MediaPlayer_Loaded;
             _mediaPlayer.Progress -= MediaPlayer_Progress;
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            dropInfo.Effects = DragDropEffects.Link;
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            throw new NotImplementedException();
         }
     }
 }

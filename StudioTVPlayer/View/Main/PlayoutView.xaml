@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main"    
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:playerViews="clr-namespace:StudioTVPlayer.View.Main.Player"    
              xmlns:playerViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
              xmlns:browserViews="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"       
-             xmlns:local="clr-namespace:StudioTVPlayer.View.Main"
+             xmlns:browserViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser"       
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920"
              FocusManager.IsFocusScope="True"
@@ -41,7 +42,7 @@
                     <RowDefinition Height="100px" />
                 </Grid.RowDefinitions>
                 <ScrollViewer Grid.RowSpan="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl Focusable="False" IsTabStop="False" Margin="5,5,0,0" Grid.Column="0" ItemsSource="{Binding Players}">
+                    <ItemsControl Focusable="False" IsTabStop="False" Margin="5,5,0,0" Grid.Column="0" ItemsSource="{Binding Players}" >
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type playerViewModels:MediaPlayerViewModel}">
                                 <playerViews:MediaPlayerView Margin="10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" />
@@ -56,7 +57,14 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
-                <browserViews:BrowsersView DataContext="{Binding Browsers}"/>
+                <TabControl ItemsSource="{Binding Browsers}" Padding="0" BorderThickness="0" DisplayMemberPath="Name" SelectedIndex="0" 
+                    mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">
+                    <TabControl.ContentTemplate>
+                        <DataTemplate DataType="{x:Type browserViewModels:BrowserViewModel}">
+                            <browserViews:BrowserView />
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
             </Grid>
             
             <GridSplitter IsTabStop="False" Grid.Column="1" Width="2" BorderBrush="LightGray" Background="LightGray" HorizontalAlignment="Left" />

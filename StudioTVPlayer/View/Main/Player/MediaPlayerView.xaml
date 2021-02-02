@@ -179,7 +179,7 @@
                 <ListView Focusable="False" Grid.Row="1"                           
                           SelectedIndex="{Binding SelectedIndex, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"                                                   
                           attachedProp:EventToCommand.DropCommand="{Binding DropReceiveCommand}"                                                
-                          ItemsSource="{Binding MediaQueue}" 
+                          ItemsSource="{Binding Rundown}" 
                           >
                     <ListView.InputBindings>
                         <KeyBinding Modifiers="Ctrl" Key="Return" Command="{Binding LoadSelectedMediaCommand}" />
@@ -189,7 +189,6 @@
                             <Setter Property="attachedProp:ListItemProperties.IsDropped" Value="{Binding DragOver, Mode=TwoWay}" />
                             <Setter Property="attachedProp:ListItemProperties.DragEnter" Value="{Binding DragOver, Mode=TwoWay}" />
                             <Setter Property="attachedProp:ListItemProperties.DragLeave" Value="{Binding DragOver, Mode=TwoWay}" />
-                            <Setter Property="attachedProp:ControlProperties.MouseStartDragCommand" Value="{Binding DataContext.PlayerQueueItem_MoveCommand, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}" />
                             <Setter Property="attachedProp:EventToCommand.MouseDoubleClickCommand" Value="{Binding DataContext.LoadMediaCommand, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}" />
                             <Setter Property="attachedProp:EventToCommand.MouseRightButtonUpCommand" Value="{Binding DataContext.CheckItemCommand, RelativeSource={RelativeSource AncestorType={x:Type ListView}, Mode=FindAncestor}}" />
                         </Style>

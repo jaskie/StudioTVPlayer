@@ -99,6 +99,7 @@ namespace StudioTVPlayer.Model
                 return;
             _inputFile.FramePlayed -= InputFile_FramePlayed;
             _inputFile.Stopped -= InputFile_Stopped;
+            _rundown.Clear();
             _inputFile.Dispose();
             _inputFile = null;
         }

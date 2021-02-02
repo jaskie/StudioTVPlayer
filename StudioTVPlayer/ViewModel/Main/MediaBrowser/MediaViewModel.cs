@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -11,6 +12,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
     {
 
         public Media Media { get; }
+
+        public IList<Model.MediaPlayer> Players => Providers.GlobalApplicationData.Current.Players;
 
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
@@ -32,7 +35,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public ImageSource Thumbnail => Media.Thumbnail;
 
         public UiCommand MediaItem_MoveCommand { get; private set; }        
-        public UiCommand QueueToPlayerByChannelIDCommand { get; private set; }
+        public UiCommand QueueToPlayerCommand { get; private set; }
 
         public MediaViewModel(Media media)
         {
@@ -44,7 +47,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private void LoadCommands()
         {
             MediaItem_MoveCommand = new UiCommand(param => MediaItem_Move(param));          
-            QueueToPlayerByChannelIDCommand = new UiCommand(QueueToPlayerByChannelID);            
+            QueueToPlayerCommand = new UiCommand(QueueToPlayer);            
         }        
 
         public void MediaItem_Move(object param)
@@ -60,13 +63,10 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             }
         }
 
-        private void QueueToPlayerByChannelID(object obj)
+        private void QueueToPlayer(object obj)
         {
-            if (obj == null)
-                return;
-            var id= Int32.Parse(obj.ToString());
-
-            //_exchangeService.AddToPlayerQueueByChannelID(id, this);
+            var player = obj as Model.MediaPlayer ?? throw new ArgumentException(nameof(obj));
+            player.Submit(Media);
         }
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

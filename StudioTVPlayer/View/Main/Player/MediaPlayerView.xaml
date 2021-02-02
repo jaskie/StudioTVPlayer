@@ -4,6 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"         
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             xmlns:view="clr-namespace:StudioTVPlayer.View.Main.Player"
              xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              xmlns:controls="clr-namespace:StudioTVPlayer.Controls"    
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
@@ -17,6 +19,8 @@
              KeyboardNavigation.TabNavigation="Local"
              BorderThickness="4"
              MouseLeftButtonDown="UserControl_MouseLeftButtonDown"
+             dd:DragDrop.IsDropTarget="True"
+             dd:DragDrop.DropHandler="{Binding}"
              attachedProp:EventToCommand.TakesInputBindingPrecedence="True">
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />
@@ -29,6 +33,8 @@
         <KeyBinding Modifiers="CTRL" Key="Delete" Command="{Binding DeleteDisabledCommand}" />
     </UserControl.InputBindings>
 
+
+    
     <Border KeyboardNavigation.TabNavigation="None" Focusable="False" CornerRadius="5,5,5,5" 
             BorderThickness="2" 
             Height="auto">
@@ -181,6 +187,11 @@
                           attachedProp:EventToCommand.DropCommand="{Binding DropReceiveCommand}"                                                
                           ItemsSource="{Binding Rundown}" 
                           >
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:RundownItemViewModel}">
+                            <view:RundownItemView/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                     <ListView.InputBindings>
                         <KeyBinding Modifiers="Ctrl" Key="Return" Command="{Binding LoadSelectedMediaCommand}" />
                     </ListView.InputBindings>

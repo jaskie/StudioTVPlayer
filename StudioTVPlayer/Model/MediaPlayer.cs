@@ -43,6 +43,7 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TimeEventArgs> Progress;
+        public event EventHandler<RundownItemEventArgs> MediaSubmitted;
 
         public bool Load(RundownItem media)
         {
@@ -81,6 +82,13 @@ namespace StudioTVPlayer.Model
             _inputFile.FramePlayed += InputFile_FramePlayed;
             _inputFile.Stopped += InputFile_Stopped;
             Channel.Load(_inputFile);
+        }
+
+        internal void Submit(Media media)
+        {
+            var item = new RundownItem(media);
+            _rundown.Add(item);
+            MediaSubmitted?.Invoke(this, new RundownItemEventArgs(item));
         }
 
         private void InputFile_Stopped(object sender, EventArgs e)

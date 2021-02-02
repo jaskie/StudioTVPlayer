@@ -8,11 +8,11 @@ namespace StudioTVPlayer.Model.Args
 {
     public class RundownItemEventArgs : EventArgs
     {
-        public RundownItemEventArgs(RundownItem mediaPlayerQueueItem)
+        public RundownItemEventArgs(RundownItem rundownItem)
         {
-            MediaPlayerQueueItem = mediaPlayerQueueItem;
+            RundownItem = rundownItem;
         }
 
-        public RundownItem MediaPlayerQueueItem { get; }
+        public RundownItem RundownItem { get; }
     }
 }

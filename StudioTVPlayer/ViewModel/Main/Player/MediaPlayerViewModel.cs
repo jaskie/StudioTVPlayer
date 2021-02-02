@@ -41,9 +41,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
             _mediaPlayer.Progress += MediaPlayer_Progress;
+            _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
-
 
         public bool IsPlaying
         {
@@ -431,6 +431,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             throw new NotImplementedException();
         }
 
+        private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)
+        {
+            Rundown.Add(new RundownItemViewModel(e.RundownItem));
+        }
+
         public void Dispose()
         {
             if (_isDisposed)
@@ -438,11 +443,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _isDisposed = true;
             _mediaPlayer.Loaded -= MediaPlayer_Loaded;
             _mediaPlayer.Progress -= MediaPlayer_Progress;
+            _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
         }
 
         public void DragOver(IDropInfo dropInfo)
         {
-            dropInfo.Effects = DragDropEffects.Link;
+            dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+            dropInfo.Effects = DragDropEffects.Move;
         }
 
         public void Drop(IDropInfo dropInfo)

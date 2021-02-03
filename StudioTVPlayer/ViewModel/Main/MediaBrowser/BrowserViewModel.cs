@@ -147,12 +147,9 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                         _mediaFilesView.Refresh();
                         break;
                     case MediaEventKind.Delete:
-                        var mediaVm = _mediaFiles.FirstOrDefault(m => ReferenceEquals(m.Media, e.Media));
+                        var mediaVm = _mediaFiles.FirstOrDefault(m => m.Media == e.Media);
                         if (mediaVm != null)
                             _mediaFiles.Remove(mediaVm);
-                        _mediaFilesView.Refresh();
-                        break;
-                    case MediaEventKind.Change:
                         _mediaFilesView.Refresh();
                         break;
                 }

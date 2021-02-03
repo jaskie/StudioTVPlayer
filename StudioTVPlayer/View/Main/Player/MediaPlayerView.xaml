@@ -18,10 +18,12 @@
              IsTabStop="True"             
              KeyboardNavigation.TabNavigation="Local"
              BorderThickness="4"
-             MouseLeftButtonDown="UserControl_MouseLeftButtonDown"
+             attachedProp:EventToCommand.TakesInputBindingPrecedence="True"
+             Background="{DynamicResource MahApps.Brushes.Window.Background}"
              dd:DragDrop.IsDropTarget="True"
+             dd:DragDrop.DropTargetAdornerBrush="{DynamicResource MahApps.Brushes.Accent}"
              dd:DragDrop.DropHandler="{Binding}"
-             attachedProp:EventToCommand.TakesInputBindingPrecedence="True">
+             >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />
         <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="1" />
@@ -184,7 +186,6 @@
 
                 <ListView Focusable="False" Grid.Row="1"                           
                           SelectedIndex="{Binding SelectedIndex, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"                                                   
-                          attachedProp:EventToCommand.DropCommand="{Binding DropReceiveCommand}"                                                
                           ItemsSource="{Binding Rundown}" 
                           >
                     <ListView.ItemTemplate>

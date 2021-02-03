@@ -11,32 +11,6 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 {
     public class EventToCommand
     {
-        public static readonly DependencyProperty DropCommandProperty =
-        DependencyProperty.RegisterAttached(
-            "DropCommand",
-            typeof(ICommand),
-            typeof(EventToCommand),
-            new FrameworkPropertyMetadata(DropCommandChanged));
-
-        private static void DropCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            FrameworkElement element = (FrameworkElement)d;
-            element.PreviewDrop += new DragEventHandler(element_Drop);
-        }
-
-        static void element_Drop(object sender, DragEventArgs e)
-        {
-            FrameworkElement element = (FrameworkElement)sender;
-
-            ICommand command = GetDropCommand(element);
-            object[] param = { sender, e };
-
-            command.Execute(param);
-        }
-
-        public static void SetDropCommand(UIElement element, ICommand value) => element.SetValue(DropCommandProperty, value);
-        public static ICommand GetDropCommand(UIElement element) => (ICommand)element.GetValue(DropCommandProperty);
-
         public static readonly DependencyProperty MouseDoubleClickCommandProperty =
             DependencyProperty.RegisterAttached(
                 "MouseDoubleClickCommand",

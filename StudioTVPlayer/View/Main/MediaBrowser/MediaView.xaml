@@ -6,17 +6,11 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser"
-             xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance {x:Type vm:MediaViewModel}}"
-             d:DesignHeight="450" d:DesignWidth="800"
-             FocusVisualStyle="{x:Null}"
+             d:DesignHeight="100" d:DesignWidth="800"
              dd:DragDrop.IsDragSource="True"
-             attachedProp:ControlProperties.MouseStartDragCommand="{Binding MediaItem_MoveCommand}">
-    <UserControl.ToolTip>
-        <ToolTip Content="SHIFT+1..9 adds to corresponding player rundown" />
-    </UserControl.ToolTip>
-
+             >
     <UserControl.ContextMenu>
         <ContextMenu ItemsSource="{Binding Players}" >
             <ContextMenu.ItemTemplate>

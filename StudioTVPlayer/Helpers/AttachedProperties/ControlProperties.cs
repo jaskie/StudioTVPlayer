@@ -10,40 +10,11 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 {
     public class ControlProperties
     {
-        public static readonly DependencyProperty MouseStartDragCommandProperty =
-            DependencyProperty.RegisterAttached(
-                "MouseStartDragCommand", 
-                typeof(ICommand), typeof(ControlProperties), 
-                new FrameworkPropertyMetadata(MouseStartDragCommandChanged));
 
         public static readonly DependencyProperty IsFocusedProperty =
             DependencyProperty.RegisterAttached(
                 "IsFocused", typeof(bool), typeof(ControlProperties),
                 new FrameworkPropertyMetadata(false, OnIsFocusedPropertyChanged));
-
-
-        private static void MouseStartDragCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            FrameworkElement element = (FrameworkElement)d;
-            element.PreviewMouseMove += element_MouseStartDrag;
-        }
-
-        static void element_MouseStartDrag(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton != MouseButtonState.Pressed)
-                return;
-
-            FrameworkElement element = (FrameworkElement)sender;
-
-            ICommand command = GetMouseStartDragCommand(element);
-            object[] param = { sender, e };
-
-            command.Execute(param);
-        }
-
-        public static void SetMouseStartDragCommand(UIElement element, ICommand value) => element.SetValue(MouseStartDragCommandProperty, value);
-        public static ICommand GetMouseStartDragCommand(UIElement element) => (ICommand)element.GetValue(MouseStartDragCommandProperty);
-
 
         private static void OnIsFocusedPropertyChanged(
             DependencyObject d,

@@ -34,33 +34,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public ImageSource Thumbnail => Media.Thumbnail;
 
-        public UiCommand MediaItem_MoveCommand { get; private set; }        
-        public UiCommand QueueToPlayerCommand { get; private set; }
+        public UiCommand QueueToPlayerCommand { get; }
 
         public MediaViewModel(Media media)
         {
             Media = media;
             media.PropertyChanged += Media_PropertyChanged;
-            LoadCommands();
-        }
-
-        private void LoadCommands()
-        {
-            MediaItem_MoveCommand = new UiCommand(param => MediaItem_Move(param));          
-            QueueToPlayerCommand = new UiCommand(QueueToPlayer);            
-        }        
-
-        public void MediaItem_Move(object param)
-        {
-            if (param != null)
-            {
-                object[] parameters = param as object[];
-                FrameworkElement sender = (FrameworkElement)parameters[0];
-                MouseEventArgs e = (MouseEventArgs)parameters[1];
-
-                if (e.LeftButton == MouseButtonState.Pressed)
-                    DragDrop.DoDragDrop(sender, this, DragDropEffects.Copy);
-            }
+            QueueToPlayerCommand = new UiCommand(QueueToPlayer);
         }
 
         private void QueueToPlayer(object obj)

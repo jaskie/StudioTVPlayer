@@ -55,9 +55,6 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="{Binding Channel.Name}" FontSize="18" />
                 <Border Grid.Row="1" HorizontalAlignment="Center" MinWidth="200" Margin="5" CornerRadius="1,1,1,1">
-                    <Border.ToolTip>
-                        <ToolTip Content="CTRL+1..9 by zaznaczyć player" />
-                    </Border.ToolTip>
                     <Grid Margin="10" Width="auto" >
                         <Grid.RowDefinitions>
                             <RowDefinition />
@@ -79,10 +76,9 @@
                                                TextAlignment="Right" 
                                                FontSize="20"
                                                BorderThickness="0"    
-                                               mah:TextBoxHelper.Watermark="Current time" mah:TextBoxHelper.WatermarkAlignment="Left"
                                                >
                                 <controls:Timecode.Style>
-                                    <Style TargetType="{x:Type controls:Timecode}">
+                                    <Style TargetType="{x:Type controls:Timecode}" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Visibility" Value="Hidden" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding PlayerItem.IsLoaded}" Value="True">
@@ -92,15 +88,13 @@
                                     </Style>
                                 </controls:Timecode.Style>
                             </controls:Timecode>
-
-                            <Border Margin="5,0,5,0" BorderThickness="0,0,0,1" BorderBrush="Gray" Grid.Row="1" />
                         </Grid>
                         <Grid Margin="0,5,0,0" Grid.Row="1" Width="auto">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <TextBlock Text="Czas do zejścia" Grid.Row="0" />
+                            <TextBlock Text="Time left" Grid.Row="0" />
                             <controls:Timecode Grid.Row="1"
                                                VideoFormat="{Binding Channel.VideoFormat, UpdateSourceTrigger=PropertyChanged}"
                                                Time="{Binding OutTime, UpdateSourceTrigger=PropertyChanged}"
@@ -110,7 +104,7 @@
                                                FontSize="20"
                                                BorderThickness="0">
                                 <controls:Timecode.Style>
-                                    <Style TargetType="{x:Type controls:Timecode}">
+                                    <Style TargetType="{x:Type controls:Timecode}" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Visibility" Value="Hidden" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding PlayerItem.IsLoaded}" Value="True">
@@ -120,15 +114,14 @@
                                     </Style>
                                 </controls:Timecode.Style>
                             </controls:Timecode>
-                            <Border Margin="5,0,5,0" BorderThickness="0,0,0,1" BorderBrush="Gray" Grid.Row="1" />
                         </Grid>
                     </Grid>
                 </Border>
                 <Grid Margin="10" Grid.Row="2" Width="250">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <Control Focusable="False" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding StopCommand}" Grid.Column="0" Margin="10,0,0,0" >
@@ -185,7 +178,6 @@
                 </Button>
 
                 <ListView x:Name="listView" Focusable="False" Grid.Row="1" Margin="0 5"
-                          SelectedIndex="{Binding SelectedIndex, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"                                                   
                           ItemsSource="{Binding Rundown}" 
                           >
                     <ListView.ItemTemplate>

@@ -73,10 +73,10 @@ namespace StudioTVPlayer.Model
             if (_channelR != null) 
                 throw new ApplicationException($"Channel {Name} already initialized");
             var device = DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
-            var format = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
-            if (device == null || format == null)
+            _videoFormat = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
+            if (device == null || _videoFormat == null)
                 return;
-            _channelR = new TVPlayR.Channel(format, PixelFormat, 16);
+            _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, 16);
             _channelR.AddOutput(device);
         }
 

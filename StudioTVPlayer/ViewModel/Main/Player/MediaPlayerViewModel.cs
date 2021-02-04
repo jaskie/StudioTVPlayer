@@ -15,14 +15,14 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     public class MediaPlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
         private readonly MediaPlayer _mediaPlayer;
-        
+
         private bool _isPlaying;
         private bool _isFocused;
         private TimeSpan _displayTime;
         private TimeSpan _outTime;
         private double _seekbar;
-        private RundownItemViewModel _selectedRundownItem;
         private bool _isDisposed;
+        private RundownItem _currentRundownItem;
 
         public MediaPlayerViewModel(MediaPlayer player)
         {
@@ -37,6 +37,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             
+            Channel = player.Channel;
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
             _mediaPlayer.Progress += MediaPlayer_Progress;
@@ -68,7 +69,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _outTime, value);
         }
 
-        public Channel Channel => _mediaPlayer.Channel;
+        public Channel Channel { get; }
 
         public double Seekbar
         {
@@ -80,25 +81,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public RundownItemViewModel SelectedRundownItem
-        {
-            get => _selectedRundownItem;
-            set => Set(ref _selectedRundownItem, value);
-        }
-
         public IList<RundownItemViewModel> Rundown { get; }
 
-
-        private void MediaChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Media.Duration):
-                    //OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
-                    break;              
-            }
-        }
-
+        public RundownItem CurrentRundownItem { get => _currentRundownItem; private set => Set(ref _currentRundownItem, value); }
 
         public UiCommand LoadMediaCommand { get; }
         public UiCommand LoadSelectedMediaCommand { get; }
@@ -128,7 +113,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 Pause();
 
             var frameNumber = Channel.VideoFormat.TimeToFrameNumber(_displayTime);
-            switch(param.ToString())
+            switch (param.ToString())
             {
                 case "-1":
                     {
@@ -144,7 +129,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
                 case "-second":
                     {
-                        frameNumber -= Channel.VideoFormat.FrameRate.Numerator/Channel.VideoFormat.FrameRate.Denominator;
+                        frameNumber -= Channel.VideoFormat.FrameRate.Numerator / Channel.VideoFormat.FrameRate.Denominator;
                         break;
                     }
 
@@ -206,7 +191,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             //if (_inputFile == null)
             //    return;
-                   
+
             //if (usingSeekbar)
             //{
             //    DisplayTime = TimeSpan.FromMilliseconds(_seekbar);
@@ -227,7 +212,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
             object[] parameters = param as object[];
             FrameworkElement element = (FrameworkElement)parameters[0];
-           
+
             LoadMedia((RundownItemViewModel)(element.DataContext));
         }
 
@@ -254,7 +239,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
         private void Media_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
-        {           
+        {
             DisplayTime = e.Time;
             //OutTime = _playerItem.BrowserItem.Media.Duration - DisplayTime;
 
@@ -263,11 +248,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 _seekbar = e.Time.TotalMilliseconds;
                 NotifyPropertyChanged(nameof(Seekbar));
             }
-                
+
         }
 
         private void NextMedia(object obj)
-        {          
+        {
             //var currentIndex = MediaQueue.IndexOf(_playerItem);
 
             //if (currentIndex >= MediaQueue.Count - 1)
@@ -288,12 +273,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
         private void StopMedia(object obj = null)
-        {          
+        {
             //if (_inputFile == null)
             //    return;
-           
+
             Channel.Clear();
-            Stop();                     
+            Stop();
         }
 
         private void PlayPauseMedia(object obj)
@@ -301,12 +286,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             //if (_inputFile == null)
             //    return;
 
-            if (IsPlaying)           
-                Pause();          
-            else           
-                Play();           
+            if (IsPlaying)
+                Pause();
+            else
+                Play();
         }
-     
+
 
         public bool Play()
         {
@@ -387,12 +372,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
         {
-            throw new NotImplementedException();
+            DisplayTime = e.Time;
+            OutTime = CurrentRundownItem?.Media.Duration - e.Time ?? TimeSpan.Zero;
         }
 
         private void MediaPlayer_Loaded(object sender, Model.Args.RundownItemEventArgs e)
         {
-            throw new NotImplementedException();
+            CurrentRundownItem = e.RundownItem;
         }
 
         private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)

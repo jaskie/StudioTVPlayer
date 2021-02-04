@@ -35,6 +35,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        public TimeSpan Position { get; internal set; }
 
         public void Play()
         {

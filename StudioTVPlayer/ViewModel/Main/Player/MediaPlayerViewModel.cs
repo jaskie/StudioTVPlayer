@@ -26,7 +26,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public MediaPlayerViewModel(MediaPlayer player)
         {
-            DropReceiveCommand = new UiCommand(param => DropReceive(param));
             LoadMediaCommand = new UiCommand(param => LoadMedia(param));
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia);
             CheckItemCommand = new UiCommand(param => CheckItem(param));
@@ -101,7 +100,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
 
-        public UiCommand DropReceiveCommand { get; }
         public UiCommand LoadMediaCommand { get; }
         public UiCommand LoadSelectedMediaCommand { get; }
         public UiCommand CheckItemCommand { get; }
@@ -234,9 +232,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
         private void LoadMedia(RundownItemViewModel playerItem)
-        {                      
-            //if (playerItem.IsDisabled || !playerItem.BrowserItem.IsVerified)
-            //    return;
+        {
+            if (playerItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
+                return;
+            _mediaPlayer.Load(playerItem.RundownItem);
+            //
 
             //if (_playerItem != null)
             //    Stop();     
@@ -385,42 +385,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             return true;
         }
 
-        private void DropReceive(object obj)
-        {
-            if (obj == null)
-                return;
-
-            object[] parameters = obj as object[];
-            FrameworkElement sender = (FrameworkElement)parameters[0];
-            DragEventArgs e = (DragEventArgs)parameters[1];
-
-            if (e.Data == null)
-                return;
-
-            var browserVM = (MediaViewModel)e.Data.GetData(typeof(MediaViewModel));
-            //var newIndex = MediaQueue.IndexOf(MediaQueue.FirstOrDefault(playerItemParam => playerItemParam.DragOver == true));
-
-            //if (browserVM == null && newIndex>-1) //browserItem null czyli to jest playerItem
-            //{                                                
-            //    var playerItemQueueVM = (PlayerQueueItemViewModel)e.Data.GetData(typeof(PlayerQueueItemViewModel));
-            //    var oldIndex = MediaQueue.IndexOf(playerItemQueueVM);
-            //    newIndex = newIndex > oldIndex ? --newIndex : newIndex;
-
-            //    if (oldIndex>-1)
-            //        MediaQueue.Move(oldIndex, newIndex < 0 ? 0 : newIndex);   
-            //    else
-            //        MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
-            //    return;
-            //}
-
-            //if (browserVM == null)
-            //    return;
-
-            //if (newIndex>-1)
-            //    MediaQueue.Insert(newIndex, new PlayerQueueItemViewModel(browserVM));
-            //else
-            //    MediaQueue.Add(new PlayerQueueItemViewModel(browserVM));
-        }
         private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
         {
             throw new NotImplementedException();
@@ -448,6 +412,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public void DragOver(IDropInfo dropInfo)
         {
+            if (dropInfo.Data is MediaViewModel mediaViewModel && mediaViewModel.IsVerified)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Move;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
             if (dropInfo.Data is MediaViewModel mediaViewModel)
             {
                 dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
@@ -455,11 +428,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, 0);
                 Rundown.Add(new RundownItemViewModel(rundownItem));
             }
-        }
-
-        public void Drop(IDropInfo dropInfo)
-        {
-            throw new NotImplementedException();
         }
     }
 }

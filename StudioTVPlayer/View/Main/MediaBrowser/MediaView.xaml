@@ -10,16 +10,28 @@
              d:DataContext="{d:DesignInstance {x:Type vm:MediaViewModel}}"
              d:DesignHeight="100" d:DesignWidth="800"
              dd:DragDrop.IsDragSource="True"
+             dd:DragDrop.UseVisualSourceItemSizeForDragAdorner="True"
+             dd:DragDrop.UseDefaultDragAdorner="True"
+             Background="{DynamicResource MahApps.Brushes.Control.Background}"
              >
     <UserControl.ContextMenu>
-        <ContextMenu ItemsSource="{Binding Players}" >
+        <ContextMenu x:Name="menu" ItemsSource="{Binding Players}">
+            <ContextMenu.Style>
+                <Style TargetType="ContextMenu" BasedOn="{StaticResource {x:Type ContextMenu}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsVerified}" Value="False">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContextMenu.Style>
             <ContextMenu.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Channel.Name, StringFormat={}Add to {0}}" />
                 </DataTemplate>
             </ContextMenu.ItemTemplate>
             <ContextMenu.ItemContainerStyle>
-                <Style TargetType="MenuItem">
+                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                     <Setter Property="Command" Value="{Binding DataContext.QueueToPlayerCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                     <Setter Property="CommandParameter" Value="{Binding}" />
                 </Style>
@@ -27,7 +39,7 @@
         </ContextMenu>
     </UserControl.ContextMenu>
 
-    <Grid Margin="2">
+    <Grid Margin="2" IsHitTestVisible="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="170"/>
             <ColumnDefinition/>
@@ -38,7 +50,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <mah:ProgressRing Grid.RowSpan="3" Foreground="{DynamicResource MahApps.Brushes.Accent}" IsActive="{Binding Thumbnail, Converter={StaticResource NotNullToBooleanConverter}}" />
-        <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}" >
+        <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}">
             <Image.Effect>
                 <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
             </Image.Effect>

@@ -13,6 +13,7 @@ namespace StudioTVPlayer.Model
         private TimeSpan _duration;
         private DateTime _creationTime;
         private ImageSource _thumbnail;
+        private bool _isVerified;
         private readonly FileInfo _fileInfo;
 
         public Media(string path)
@@ -88,6 +89,18 @@ namespace StudioTVPlayer.Model
         }
 
         public string FullPath => Path.Combine(DirectoryName, Name);
+
+        public bool IsVerified
+        {
+            get => _isVerified;
+            internal set
+            {
+                if (_isVerified == value)
+                    return;
+                _isVerified = value;
+                RaisePropertyChanged();
+            }
+        }
 
         public void Refresh()
         {

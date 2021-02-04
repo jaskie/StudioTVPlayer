@@ -45,11 +45,11 @@ namespace StudioTVPlayer.Model
         public event EventHandler<TimeEventArgs> Progress;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
 
-        public bool Load(RundownItem media)
+        public bool Load(RundownItem item)
         {
-            if (!_rundown.Contains(media))
+            if (!_rundown.Contains(item))
                 return false;
-            PlayingQueueItem = media;
+            PlayingQueueItem = item;
             return true;
         }
 

@@ -3,25 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:StudioTVPlayer.View"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
              d:DataContext="{d:DesignInstance vm:RundownItemViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="800"
              Height="auto"
-             HorizontalAlignment="Stretch">
+             HorizontalAlignment="Stretch"
+             >
     <UserControl.Resources>
         <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5 3"/>
+            <Setter Property="FontSize" Value="13"/>
         </Style>
     </UserControl.Resources>
 
     <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Ellipse Stretch="Uniform" VerticalAlignment="Center" Margin="5,0,0,0" Width="15" 
                  Stroke="{DynamicResource MahApps.Brushes.Control.Border}"
@@ -38,8 +40,8 @@
                 </Style>
             </Ellipse.Style>
         </Ellipse>
-        <TextBlock Grid.Column="1" Text="{Binding RundownItem.Media.Name}" Margin="5,5,0,5" />
-        <TextBlock Grid.Column="2" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" Margin="0,5,0,5" />
-        <TextBlock Grid.Column="3" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" Margin="0,5,5,5" />
+        <TextBlock Grid.Column="1" Text="{Binding RundownItem.Media.Name}" />
+        <TextBlock Grid.Column="2" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
+        <TextBlock Grid.Column="3" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
     </Grid>
 </UserControl>

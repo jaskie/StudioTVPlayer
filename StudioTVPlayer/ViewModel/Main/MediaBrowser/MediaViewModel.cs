@@ -19,20 +19,9 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public TimeSpan Duration => Media.Duration;
         public DateTime CreationTime => Media.CreationTime;
 
-        private bool _isVerified;
-        public bool IsVerified { get => _isVerified; set => Set(ref _isVerified, value); }
-
-        private bool _isQueued;
-        public bool IsQueued
-        {
-            get => _isQueued;
-            set
-            {
-                Set(ref _isQueued, value);
-            }
-        }
-
         public ImageSource Thumbnail => Media.Thumbnail;
+
+        public bool IsVerified => Media.IsVerified;
 
         public UiCommand QueueToPlayerCommand { get; }
 

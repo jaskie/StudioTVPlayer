@@ -19,7 +19,7 @@ namespace StudioTVPlayer.Model
         }
 
         private readonly Task _verificationTask;
-        private readonly BlockingCollection<MediaVerifyData> _medias = new BlockingCollection<MediaVerifyData>();
+        private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private MediaVerifier()
         {
@@ -35,14 +35,30 @@ namespace StudioTVPlayer.Model
             }
             catch (OperationCanceledException) 
             { }
-            _medias.Dispose();
+            _mediaQueue.Dispose();
         }
 
         public static MediaVerifier Current { get; } = new MediaVerifier();
 
         public void Queue(Media media, int thumbnailHeight, CancellationToken cancellationToken)
         {
-            _medias.Add(new MediaVerifyData { Media = media, Height = thumbnailHeight, CancellationToken = cancellationToken });
+            media.IsVerified = false;
+            _mediaQueue.Add(new MediaVerifyData { Media = media, Height = thumbnailHeight, CancellationToken = cancellationToken });
+        }
+
+        public void Verify(Media media, int thumbnailHeight )
+        {
+            using (var file = new InputFile(media.FullPath, 0))
+            {
+                media.Duration = file.VideoDuration;
+                if (thumbnailHeight > 0)
+                {
+                    var thumb = file.GetBitmapSource(thumbnailHeight);
+                    thumb.Freeze();
+                    media.Thumbnail = thumb;
+                }
+            }
+            media.IsVerified = true;
         }
 
         private void MediaVerifierTask()
@@ -51,7 +67,7 @@ namespace StudioTVPlayer.Model
             {
                 try
                 {
-                    var vd = _medias.Take(_cancellationTokenSource.Token);
+                    var vd = _mediaQueue.Take(_cancellationTokenSource.Token);
 
                     if (vd.CancellationToken.IsCancellationRequested)
                         continue;
@@ -61,16 +77,7 @@ namespace StudioTVPlayer.Model
                         vd.FirstVerification = DateTime.Now;
                     try
                     {
-                        using (var file = new InputFile(vd.Media.FullPath, 0))
-                        {
-                            vd.Media.Duration = file.VideoDuration;
-                            if (vd.Height > 0)
-                            {
-                                var thumb = file.GetBitmapSource(vd.Height);
-                                thumb.Freeze();
-                                vd.Media.Thumbnail = thumb;
-                            }
-                        }
+                        Verify(vd.Media, vd.Height);
                     }
                     catch (Exception e)
                     {
@@ -80,7 +87,7 @@ namespace StudioTVPlayer.Model
                             Task.Run(async () =>
                             {
                                 await Task.Delay(TimeSpan.FromSeconds(5), vd.CancellationToken);
-                                _medias.Add(vd);
+                                _mediaQueue.Add(vd);
                             }, _cancellationTokenSource.Token);
                     }
                 }

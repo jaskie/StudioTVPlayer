@@ -448,8 +448,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public void DragOver(IDropInfo dropInfo)
         {
-            dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-            dropInfo.Effects = DragDropEffects.Move;
+            if (dropInfo.Data is MediaViewModel mediaViewModel)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Move;
+                var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, 0);
+                Rundown.Add(new RundownItemViewModel(rundownItem));
+            }
         }
 
         public void Drop(IDropInfo dropInfo)

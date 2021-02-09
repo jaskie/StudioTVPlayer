@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
@@ -15,6 +16,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     public class MediaPlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
         private readonly MediaPlayer _mediaPlayer;
+        private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
+
 
         private bool _isPlaying;
         private bool _isFocused;
@@ -26,12 +29,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public MediaPlayerViewModel(MediaPlayer player)
         {
-            LoadMediaCommand = new UiCommand(param => LoadMedia(param));
+            LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia);
             CheckItemCommand = new UiCommand(param => CheckItem(param));
-            PlayPauseCommand = new UiCommand(PlayPauseMedia);
+            TogglePlayCommand = new UiCommand(TogglePlay);
             SliderDragStartCommand = new UiCommand(param => SldierDragStart(param));
-            StopCommand = new UiCommand(StopMedia);
+            UnloadCommand = new UiCommand(Unload);
             NextCommand = new UiCommand(NextMedia);
             DeleteDisabledCommand = new UiCommand(DeleteDisabled, CanDeleteDisabled);
             DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
@@ -93,8 +96,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public UiCommand DeleteDisabledCommand { get; }
         public UiCommand SeekFramesCommand { get; }
 
-        public UiCommand PlayPauseCommand { get; }
-        public UiCommand StopCommand { get; }
+        public UiCommand TogglePlayCommand { get; }
+        public UiCommand UnloadCommand { get; }
         public UiCommand NextCommand { get; }
 
 
@@ -207,13 +210,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(object param)
         {
-            if (param == null)
-                return;
-
-            object[] parameters = param as object[];
-            FrameworkElement element = (FrameworkElement)parameters[0];
-
-            LoadMedia((RundownItemViewModel)(element.DataContext));
+            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModel ?? throw new ArgumentException(nameof(param)));
         }
 
         private void LoadMedia(RundownItemViewModel playerItem)
@@ -272,7 +269,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             //}
         }
 
-        private void StopMedia(object obj = null)
+        private void Unload(object obj = null)
         {
             //if (_inputFile == null)
             //    return;
@@ -281,49 +278,46 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Stop();
         }
 
-        private void PlayPauseMedia(object obj)
+        private async void TogglePlay(object obj)
         {
             //if (_inputFile == null)
             //    return;
 
             if (IsPlaying)
-                Pause();
+                await Pause();
             else
-                Play();
+                await Play();
         }
 
 
-        public bool Play()
+        private async Task<bool> Play()
         {
-            //if (_inputFile == null)
-            //    return false;
-            //try
-            //{
-            //    _inputFile.Play();
-            //    IsPlaying = true;
-            //}
-            //catch
-            //{
-            //    MessageBox.Show("Błąd Play");
-            //    return false;
-            //}
+            try
+            {
+                if (_mediaPlayer.Play())
+                    IsPlaying = true;
+            }
+            catch
+            {
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error occured when playing clip {_mediaPlayer.PlayingQueueItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                return false;
+            }
             return true;
         }
 
-        public bool Pause()
+        public async Task<bool> Pause()
         {
-            //if (_inputFile == null)
-            //    return false;
-            //try
-            //{
-            //    _inputFile.Pause();
-            //    IsPlaying = false;
-            //}
-            //catch
-            //{
-            //    MessageBox.Show("Błąd Pause");
-            //    return false;
-            //}
+            try
+            {
+                _mediaPlayer.Pause();
+                IsPlaying = false;
+            }
+            catch
+            {
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error occured pausing clip {_mediaPlayer.PlayingQueueItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                return false;
+            }
+            IsPlaying = false;
             return true;
         }
 

@@ -14,5 +14,6 @@ namespace StudioTVPlayer.Model
         }
 
         public Media Media { get; }
+
     }
 }

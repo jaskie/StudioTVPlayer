@@ -37,10 +37,19 @@ namespace StudioTVPlayer.Model
 
         public TimeSpan Position { get; internal set; }
 
-        public void Play()
+        public bool Play()
         {
+            if (_inputFile == null)
+                return false;
             _inputFile?.Play();
+            return true;
         }
+
+        public void Pause()
+        {
+            _inputFile?.Pause();
+        }
+
 
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TimeEventArgs> Progress;
@@ -112,6 +121,7 @@ namespace StudioTVPlayer.Model
             _inputFile.Dispose();
             _inputFile = null;
         }
+
     }
 
     

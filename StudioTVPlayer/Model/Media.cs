@@ -13,6 +13,12 @@ namespace StudioTVPlayer.Model
         private TimeSpan _duration;
         private DateTime _creationTime;
         private ImageSource _thumbnail;
+
+        internal void Play()
+        {
+            throw new NotImplementedException();
+        }
+
         private bool _isVerified;
         private readonly FileInfo _fileInfo;
 

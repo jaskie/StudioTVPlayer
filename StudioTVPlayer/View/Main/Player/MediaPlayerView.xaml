@@ -49,7 +49,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="50" />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
@@ -123,24 +123,49 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="Margin" Value="5 0"/>
+                        </Style>
+                    </Grid.Resources>
 
-                    <Control Focusable="False" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding StopCommand}" Grid.Column="0" Margin="10,0,0,0" >
+                    <Button Grid.Column="0" Command="{Binding UnloadCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="PAUSE/BREAK by odładować materiał" />
+                            <ToolTip Content="PAUSE/BREAK to unload" />
                         </Control.ToolTip>
-                    </Control>
+                    </Button>
 
-                    <Control Focusable="False" Grid.Column="1" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding PlayPauseCommand}">
+                    <Button Grid.Column="1" Command="{Binding TogglePlayCommand}">
                         <Control.ToolTip>
-                            <ToolTip Content="SPACE Play/Pause" />
+                            <ToolTip Content="SPACE to toggle play/pause" />
                         </Control.ToolTip>
-                    </Control>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="Content" >
+                                    <Setter.Value>
+                                        <mah:FontIcon Glyph="&#xE768;"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                        <Setter Property="Content" >
+                                            <Setter.Value>
+                                                <mah:FontIcon Glyph="&#xE769;"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
-                    <Control Focusable="False" Grid.Column="2" attachedProp:EventToCommand.MouseLeftButtonDownCommand="{Binding NextCommand}" >
+                    <Button Grid.Column="2" Command="{Binding NextCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="END Załaduj następny materiał z kolejki" />
+                            <ToolTip Content="END to cue next item" />
                         </Control.ToolTip>
-                    </Control>
+                        <mah:FontIcon Glyph="&#xE893;"/>
+                    </Button>
                 </Grid>
                 <Grid Focusable="False" Grid.Row="3">
                     <controls:Seekbar IsMoveToPointEnabled="True" 

@@ -14,18 +14,29 @@
         <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="5 3"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="14"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid >
+    <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.SystemControlBackgroundBaseLow}"/>
+                        <Setter Property="TextBlock.Foreground" Value="{DynamicResource MahApps.Brushes.SystemControlDisabledBaseLow}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <Ellipse Stretch="Uniform" VerticalAlignment="Center" Margin="5,0,0,0" Width="15" 
+        <Ellipse Stretch="Uniform" VerticalAlignment="Center" Margin="5,0,0,0" Width="19" 
                  Stroke="{DynamicResource MahApps.Brushes.Control.Border}"
                  StrokeThickness="1"
                  Height="{Binding Width, RelativeSource={RelativeSource Self}}" >
@@ -34,14 +45,27 @@
                     <Setter Property="Fill" Value="{DynamicResource MahApps.Brushes.Control.Background}"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsLoaded}" Value="True" >
-                            <Setter Property="Fill" Value="{DynamicResource MahApps.Brushes.Accent}"/>
+                            <Setter Property="Fill" Value="{DynamicResource MahApps.Brushes.CheckmarkFill}"/>
+                            <Setter Property="ToolTip" Value="Loaded"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Ellipse.Style>
         </Ellipse>
-        <TextBlock Grid.Column="1" Text="{Binding RundownItem.Media.Name}" />
-        <TextBlock Grid.Column="2" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
-        <TextBlock Grid.Column="3" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
+        <CheckBox Grid.Column="1" IsChecked="{Binding IsDisabled}" Margin="10 0 0 0" VerticalAlignment="Center" >
+            <CheckBox.Style>
+                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                    <Setter Property="ToolTip" Value="Ready to play"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                            <Setter Property="ToolTip" Value="Disabled"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </CheckBox.Style>
+        </CheckBox>
+        <TextBlock Grid.Column="2" Text="{Binding RundownItem.Media.Name}" />
+        <TextBlock Grid.Column="3" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
+        <TextBlock Grid.Column="4" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
     </Grid>
 </UserControl>

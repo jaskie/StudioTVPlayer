@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.Helpers.AttachedProperties
@@ -11,25 +12,30 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
     public class ControlProperties
     {
 
-        public static readonly DependencyProperty IsFocusedProperty =
+        public static readonly DependencyProperty EnableIsKeyboardFocusWithinProperty =
             DependencyProperty.RegisterAttached(
-                "IsFocused", typeof(bool), typeof(ControlProperties),
-                new FrameworkPropertyMetadata(false, OnIsFocusedPropertyChanged));
-
-        private static void OnIsFocusedPropertyChanged(
+                "EnableIsKeyboardFocusWithin", typeof(Binding), typeof(ControlProperties),
+                new FrameworkPropertyMetadata(null, EnableIsKeyboardFocusWithinPropertyChanged));
+                
+        private static void EnableIsKeyboardFocusWithinPropertyChanged(
             DependencyObject d,
             DependencyPropertyChangedEventArgs e)
         {
-            var uie = (UIElement)d;
-            if ((bool)e.NewValue)
-            {
-                uie.Focus(); // Don't care about false values.
-                Keyboard.Focus(uie);
-            }
+            var attachEvents = (bool)e.NewValue;
+            var targetUiElement = (UIElement)d;
+            if (attachEvents)
+                targetUiElement.IsKeyboardFocusWithinChanged += TargetUiElement_IsKeyboardFocusWithinChanged;
+            else
+                targetUiElement.IsKeyboardFocusWithinChanged -= TargetUiElement_IsKeyboardFocusWithinChanged;
         }
 
-        public static bool GetIsFocused(DependencyObject obj) => (bool)obj.GetValue(IsFocusedProperty);
-        public static void SetIsFocused(DependencyObject obj, bool value) => obj.SetValue(IsFocusedProperty, value);
+        private static void TargetUiElement_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            
+        }
+
+        public static Binding GetEnableIsKeyboardFocusWithin(DependencyObject obj) => (Binding)obj.GetValue(EnableIsKeyboardFocusWithinProperty);
+        public static void SetEnableIsKeyboardFocusWithin(DependencyObject obj, Binding value) => obj.SetValue(EnableIsKeyboardFocusWithinProperty, value);
 
     }
 }

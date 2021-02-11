@@ -53,6 +53,7 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TimeEventArgs> Progress;
+        public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
 
         public bool Load(RundownItem item)
@@ -101,9 +102,16 @@ namespace StudioTVPlayer.Model
             MediaSubmitted?.Invoke(this, new RundownItemEventArgs(item));
         }
 
+        public bool Seek(TimeSpan timeSpan)
+        {
+            if (_inputFile == null)
+                return false;
+            return _inputFile.Seek(timeSpan);
+        }
+
         private void InputFile_Stopped(object sender, EventArgs e)
         {
-            
+            Stopped?.Invoke(this, EventArgs.Empty);
         }
 
         private void InputFile_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
@@ -121,6 +129,7 @@ namespace StudioTVPlayer.Model
             _inputFile.Dispose();
             _inputFile = null;
         }
+
 
     }
 

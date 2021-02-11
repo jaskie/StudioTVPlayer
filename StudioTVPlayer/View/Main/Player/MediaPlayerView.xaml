@@ -3,47 +3,51 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"             
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:view="clr-namespace:StudioTVPlayer.View.Main.Player"
              xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              xmlns:controls="clr-namespace:StudioTVPlayer.Controls"
-             xmlns:helpers="clr-namespace:StudioTVPlayer.Helpers"             
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:MediaPlayerViewModel}"
              d:DesignHeight="370" d:DesignWidth="800"
              Height="370"    
              Focusable="True"
-             attachedProp:ControlProperties.IsFocused="{Binding IsFocused}"
-             IsTabStop="True"             
              KeyboardNavigation.TabNavigation="Local"
-             BorderThickness="4"
              attachedProp:EventToCommand.TakesInputBindingPrecedence="True"
+             attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="{Binding IsFocused}"
              dd:DragDrop.IsDropTarget="True"
-             dd:DragDrop.DropHandler="{Binding}"
+             dd:DragDrop.DropHandler="{Binding}"      
              >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />
         <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="1" />
-        <KeyBinding Modifiers="CTRL" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-second" />
-        <KeyBinding Modifiers="CTRL" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="second" />
-        <KeyBinding Key="Space" Command="{Binding PlayPauseCommand}" />
-        <KeyBinding Key="END" Command="{Binding NextCommand}" />
-        <KeyBinding Key="Pause" Command="{Binding StopCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-second" />
+        <KeyBinding Modifiers="Ctrl" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="second" />
+        <KeyBinding Key="Space" Command="{Binding TogglePlayCommand}" />
+        <KeyBinding Key="End" Command="{Binding LoadNextItemCommand}" />
+        <KeyBinding Key="Pause" Command="{Binding UnloadCommand}" />
         <KeyBinding Modifiers="CTRL" Key="Delete" Command="{Binding DeleteDisabledCommand}" />
     </UserControl.InputBindings>
-
-
     
-    <Border KeyboardNavigation.TabNavigation="None" Focusable="False" CornerRadius="5,5,5,5" 
-            BorderThickness="2" 
-            Height="auto">
-        <Grid Margin="5" Focusable="False">
+    
+    <Border KeyboardNavigation.TabNavigation="None" Focusable="False" CornerRadius="5" 
+            BorderThickness="2" Margin="5"
+            >
+        <Border.Style>
+            <Style TargetType="Border">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsFocused}" Value="true">
+                        <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Accent}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid Margin="5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0" KeyboardNavigation.DirectionalNavigation="None">
                 <Grid.RowDefinitions>
@@ -69,10 +73,9 @@
                             <TextBlock Text="Current time" Grid.Row="0" />
 
                             <controls:Timecode Grid.Row="1"
-                                               VideoFormat="{Binding Channel.VideoFormat, UpdateSourceTrigger=PropertyChanged}"
+                                               VideoFormat="{Binding Channel.VideoFormat}"
                                                Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
-                                               Background="Transparent" 
                                                TextAlignment="Right" 
                                                FontSize="20"
                                                BorderThickness="0"    
@@ -81,7 +84,7 @@
                                     <Style TargetType="{x:Type controls:Timecode}" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Visibility" Value="Hidden" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding PlayerItem.IsLoaded}" Value="True">
+                                            <DataTrigger Binding="{Binding CurrentRundownItem.IsLoaded}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -96,10 +99,9 @@
                             </Grid.RowDefinitions>
                             <TextBlock Text="Time left" Grid.Row="0" />
                             <controls:Timecode Grid.Row="1"
-                                               VideoFormat="{Binding Channel.VideoFormat, UpdateSourceTrigger=PropertyChanged}"
-                                               Time="{Binding OutTime, UpdateSourceTrigger=PropertyChanged}"
+                                               VideoFormat="{Binding Channel.VideoFormat}"
+                                               Time="{Binding OutTime}"
                                                IsReadOnly="True"
-                                               Background="Transparent" 
                                                TextAlignment="Right" 
                                                FontSize="20"
                                                BorderThickness="0">
@@ -107,7 +109,7 @@
                                     <Style TargetType="{x:Type controls:Timecode}" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Visibility" Value="Hidden" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding PlayerItem.IsLoaded}" Value="True">
+                                            <DataTrigger Binding="{Binding CurrentRundownItem.IsLoaded}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -117,28 +119,31 @@
                         </Grid>
                     </Grid>
                 </Border>
-                <Grid Margin="10" Grid.Row="2" Width="250">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.Resources>
+                <UniformGrid Margin="10" Grid.Row="2" Columns="4">
+                    <UniformGrid.Resources>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                             <Setter Property="Focusable" Value="False"/>
                             <Setter Property="Margin" Value="5 0"/>
                         </Style>
-                    </Grid.Resources>
+                    </UniformGrid.Resources>
 
-                    <Button Grid.Column="0" Command="{Binding UnloadCommand}" >
+                    <Button Command="{Binding CueCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="PAUSE/BREAK to unload" />
+                            <ToolTip Content="Cue | Ctrl + Space" />
                         </Control.ToolTip>
+                        <mah:FontIcon Glyph="&#xE892;"/>
                     </Button>
 
-                    <Button Grid.Column="1" Command="{Binding TogglePlayCommand}">
+                    <Button Command="{Binding UnloadCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="SPACE to toggle play/pause" />
+                            <ToolTip Content="Clear | Pause/Break" />
+                        </Control.ToolTip>
+                        <mah:FontIcon Glyph="&#xE71A;"/>
+                    </Button>
+
+                    <Button Command="{Binding TogglePlayCommand}">
+                        <Control.ToolTip>
+                            <ToolTip Content="Toggle play/pause | Space" />
                         </Control.ToolTip>
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -160,28 +165,28 @@
                         </Button.Style>
                     </Button>
 
-                    <Button Grid.Column="2" Command="{Binding NextCommand}" >
+                    <Button Command="{Binding LoadNextItemCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="END to cue next item" />
+                            <ToolTip Content="Cue next | End" />
                         </Control.ToolTip>
                         <mah:FontIcon Glyph="&#xE893;"/>
                     </Button>
-                </Grid>
+                </UniformGrid>
                 <Grid Focusable="False" Grid.Row="3">
                     <controls:Seekbar IsMoveToPointEnabled="True" 
                             Margin="5" 
-                            Maximum="{Binding PlayerItem.Duration.TotalMilliseconds, UpdateSourceTrigger=PropertyChanged}" 
+                            Maximum="{Binding CurrentRundownItem.RundownItem.Media.Duration.TotalMilliseconds, UpdateSourceTrigger=PropertyChanged}" 
                             SliderDragStartCommand="{Binding SliderDragStartCommand}"
                             Value="{Binding Seekbar, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=20}">
                     </controls:Seekbar>
                 </Grid>
                 <Border HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="LightGray" BorderThickness="2" Grid.Row="4" >
-                    <Image Margin="5" Source="{Binding PlayerItem.BrowserItem.Thumbnail}" />
+                    <Image Margin="5" Source="{Binding CurrentRundownItem.RundownItem.Media.Thumbnail}" />
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Hidden" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding PlayerItem.IsLoaded}" Value="true">
+                                <DataTrigger Binding="{Binding CurrentRundownItem.IsLoaded}" Value="True">
                                     <Setter Property="Visibility" Value="Visible" />
                                 </DataTrigger>
                             </Style.Triggers>

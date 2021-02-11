@@ -11,6 +11,8 @@ namespace StudioTVPlayer.ViewModel.Main
 {
     public class PlayoutViewModel : ViewModelBase, IDisposable
     {
+        private MediaPlayerViewModel _selectedPlayer;
+
         public PlayoutViewModel()
         {
             Players = GlobalApplicationData.Current.Players.Select(p => new MediaPlayerViewModel(p)).ToArray();
@@ -23,6 +25,21 @@ namespace StudioTVPlayer.ViewModel.Main
         public UiCommand FocusBrowserCommand { get; }
 
         public MediaPlayerViewModel[] Players { get; }
+
+        public MediaPlayerViewModel SelectedPlayer
+        {
+            get => _selectedPlayer; 
+            set
+            {
+                var oldPlayer = _selectedPlayer;
+                if (!Set(ref _selectedPlayer, value))
+                    return;
+                if (oldPlayer != null)
+                    oldPlayer.IsFocused = false;
+                if (value != null)
+                    value.IsFocused = true;
+            }
+        }
 
         public BrowserViewModel[] Browsers { get; }
 

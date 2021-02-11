@@ -32,15 +32,26 @@
             <ColumnDefinition Width="5*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
-        <ScrollViewer Grid.RowSpan="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <ItemsControl IsTabStop="False" Grid.Column="0" ItemsSource="{Binding Players}" >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type playerViewModels:MediaPlayerViewModel}">
-                        <playerViews:MediaPlayerView />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+        <ListBox IsTabStop="False" Grid.Column="0" ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" 
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     >
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
+                    <Setter Property="mah:ItemHelper.DisabledSelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
+                    <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
+                    <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
+                    <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type playerViewModels:MediaPlayerViewModel}">
+                    <playerViews:MediaPlayerView />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ListBox>
         <GridSplitter IsTabStop="False" Grid.Column="1" Width="3" HorizontalAlignment="Left" />
         <TabControl Grid.Column="1" ItemsSource="{Binding Browsers}" Padding="0" DisplayMemberPath="Name" SelectedIndex="0" Margin="3 0 0 0" 
                     mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">

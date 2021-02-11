@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Input;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.Model.Args;
@@ -22,9 +23,9 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
 
 
-        public UiCommand MediaItem_MoveCommand { get;  }
-        public UiCommand QueueToPlayerByIndexCommand { get; }
+        public ICommand QueueToPlayerByIndexCommand { get; }
 
+        public ICommand ChangeDateCommand { get; }
 
 
         public BrowserViewModel(WatchedFolder watchedFolder)
@@ -39,7 +40,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             Name = watchedFolder.Name;
             IsFilteredByDate = watchedFolder.IsFilteredByDate;
             _selectedDate = watchedFolder.FilterDate;
-            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex);
+            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex, index => SelectedMedia != null && int.Parse(index as string) < Providers.GlobalApplicationData.Current.Players.Count);
+            ChangeDateCommand = new UiCommand(ChangeDate, _ => IsFilteredByDate);
         }
 
         #region Properties
@@ -58,11 +60,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public MediaViewModel SelectedMedia
         {
             get => _selectedMedia;
-            set
-            {
-                if (!Set(ref _selectedMedia, value))
-                    return;
-            }
+            set => Set(ref _selectedMedia, value);
         }
 
         public DateTime SelectedDate
@@ -99,42 +97,35 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         private void SortMediaCollection()
         {
+            _mediaFilesView.SortDescriptions.Clear();
             switch (SelectedSorting)
             {
                 case Sorting.Name:
-                    {
-                        _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Name), ListSortDirection.Ascending));
-                        break;
-                    }
-
+                    _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Name), ListSortDirection.Ascending));
+                    break;
                 case Sorting.Duration:
-                    {
-                        _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Duration), ListSortDirection.Ascending));
-                        break;
-                    }
-
-
+                    _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Duration), ListSortDirection.Ascending));
+                    break;
                 case Sorting.CreationTime:
-                    {
-                        _mediaFilesView.SortDescriptions.Clear();
-                        _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
-                        break;
-                    }
+                    _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
+                    break;
             }
         }
 
      
         private void QueueToPlayerByIndex(object obj)
         {
-            if (obj == null || SelectedMedia == null)
-                return;
-            var index = Int32.Parse(obj.ToString());
-
-            //_exchangeService.AddToPlayerQueueByIndex(index, SelectedMedia);
+            var index = int.Parse(obj as string);
+            Providers.GlobalApplicationData.Current.Players[index].Submit(SelectedMedia.Media);
         }
 
+
+        private void ChangeDate(object days)
+        {
+            if (!(days is string str && int.TryParse(str, out var increment)))
+                throw new ArgumentException("Invalid parameter", nameof(days));
+            SelectedDate = SelectedDate.AddDays(increment);
+        }
 
         private void WatchedFolder_MediaChanged(object sender, MediaEventArgs e)
         {

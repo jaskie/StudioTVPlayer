@@ -12,7 +12,7 @@
              dd:DragDrop.IsDragSource="True"
              dd:DragDrop.UseVisualSourceItemSizeForDragAdorner="True"
              dd:DragDrop.UseDefaultDragAdorner="True"
-             Background="{DynamicResource MahApps.Brushes.Control.Background}"
+             Background="Transparent"
              >
     <UserControl.ContextMenu>
         <ContextMenu x:Name="menu" ItemsSource="{Binding Players}">

@@ -36,10 +36,10 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <Ellipse Stretch="Uniform" VerticalAlignment="Center" Margin="5,0,0,0" Width="19" 
+        <Ellipse Stretch="Uniform" Margin="5 3" VerticalAlignment="Stretch" 
                  Stroke="{DynamicResource MahApps.Brushes.Control.Border}"
                  StrokeThickness="1"
-                 Height="{Binding Width, RelativeSource={RelativeSource Self}}" >
+                 Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" >
             <Ellipse.Style>
                 <Style TargetType="Ellipse">
                     <Setter Property="Fill" Value="{DynamicResource MahApps.Brushes.Control.Background}"/>
@@ -58,7 +58,7 @@
                     <Setter Property="ToolTip" Value="Ready to play"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsDisabled}" Value="True">
-                            <Setter Property="ToolTip" Value="Disabled"/>
+                            <Setter Property="ToolTip" Value="Disabled | Right mouse button to re-enable"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>

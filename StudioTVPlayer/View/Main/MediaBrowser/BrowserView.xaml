@@ -3,21 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser" 
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:BrowserViewModel}}"
-             Focusable="True"
-             IsTabStop="True"
              d:DesignHeight="450" d:DesignWidth="300"
              KeyboardNavigation.TabNavigation="Local"
              KeyboardNavigation.IsTabStop="True"
+             Focusable="True"
              FocusManager.IsFocusScope="True"                                       
              >
     <UserControl.InputBindings>
-        <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />
-        <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding ChangeDateCommand}" CommandParameter="-1" />
+        <KeyBinding Modifiers="Alt" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />
+        <KeyBinding Modifiers="Alt" Key="Left" Command="{Binding ChangeDateCommand}" CommandParameter="-1" />
 
         <KeyBinding Modifiers="Shift" Key="D1" Command="{Binding QueueToPlayerByIndexCommand}" CommandParameter="0" />
         <KeyBinding Modifiers="Shift" Key="D2" Command="{Binding QueueToPlayerByIndexCommand}" CommandParameter="1" />
@@ -30,7 +29,7 @@
         <KeyBinding Modifiers="Shift" Key="D9" Command="{Binding QueueToPlayerByIndexCommand}" CommandParameter="8" />
     </UserControl.InputBindings>
     
-    <Grid KeyboardNavigation.TabNavigation="None" Focusable="True" x:Name="rootGrid" >
+    <Grid x:Name="rootGrid" >
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition />
@@ -43,7 +42,7 @@
                             SelectedDate="{Binding SelectedDate}" SelectedDateFormat="Short"
                             Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" 
                             IsTodayHighlighted="True" 
-                            ToolTip="Show only files created this day"
+                            ToolTip="Show only files created this day | Alt + Right/Left arrow key"
                             >
                 </DatePicker>
                 <ComboBox Grid.Column="1" Margin="5" VerticalAlignment="Center"  ItemsSource="{Binding Sortings}" 
@@ -52,15 +51,12 @@
                           />                
         <ListBox Grid.Row="1" Grid.ColumnSpan="2"
                  TabIndex="1"
-                 Focusable="True"
                  ItemsSource="{Binding MediaFiles}" 
-                 SelectedItem="{Binding SelectedMedia, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                 KeyboardNavigation.TabNavigation="Cycle"
-                 FocusManager.IsFocusScope="True"
+                 SelectedItem="{Binding SelectedMedia}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  >
             <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
+                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="Padding" Value="0"/>
                 </Style>

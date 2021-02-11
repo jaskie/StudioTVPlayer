@@ -30,7 +30,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public MediaPlayerViewModel(MediaPlayer player)
         {
             LoadMediaCommand = new UiCommand(LoadMedia);
-            LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia);
+            LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
             CueCommand = new UiCommand(Cue, _ => CurrentRundownItem != null);
             CheckItemCommand = new UiCommand(param => CheckItem(param));
             TogglePlayCommand = new UiCommand(TogglePlay, _ => CurrentRundownItem != null);
@@ -86,6 +86,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
         public IList<RundownItemViewModel> Rundown { get; }
+
+        public RundownItemViewModel SelectedRundownItem { get; set; }
 
         public RundownItemViewModel CurrentRundownItem
         {
@@ -166,6 +168,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadSelectedMedia(object obj)
         {
+            if (SelectedRundownItem == CurrentRundownItem)
+                return;
+            LoadMedia(SelectedRundownItem);
         }
 
 

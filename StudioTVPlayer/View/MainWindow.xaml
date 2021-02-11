@@ -34,7 +34,7 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
-    <ContentControl Focusable="False" IsTabStop="False" Content="{Binding CurrentViewModel}" >
+    <ContentControl Content="{Binding CurrentViewModel}" >
         <ContentControl.Resources>
             <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
                 <mainViews:PlayoutView />

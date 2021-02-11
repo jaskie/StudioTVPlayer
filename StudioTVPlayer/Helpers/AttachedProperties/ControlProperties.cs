@@ -14,8 +14,8 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         public static readonly DependencyProperty EnableIsKeyboardFocusWithinProperty =
             DependencyProperty.RegisterAttached(
-                "EnableIsKeyboardFocusWithin", typeof(Binding), typeof(ControlProperties),
-                new FrameworkPropertyMetadata(null, EnableIsKeyboardFocusWithinPropertyChanged));
+                "EnableIsKeyboardFocusWithin", typeof(bool), typeof(ControlProperties),
+                new FrameworkPropertyMetadata(false, EnableIsKeyboardFocusWithinPropertyChanged));
                 
         private static void EnableIsKeyboardFocusWithinPropertyChanged(
             DependencyObject d,
@@ -31,11 +31,13 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         private static void TargetUiElement_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            
+            var isSelected = (bool)e.NewValue;
+            var targetUiElement = (UIElement)sender;
+            System.Windows.Controls.Primitives.Selector.SetIsSelected(targetUiElement, isSelected);
         }
 
-        public static Binding GetEnableIsKeyboardFocusWithin(DependencyObject obj) => (Binding)obj.GetValue(EnableIsKeyboardFocusWithinProperty);
-        public static void SetEnableIsKeyboardFocusWithin(DependencyObject obj, Binding value) => obj.SetValue(EnableIsKeyboardFocusWithinProperty, value);
+        public static bool GetEnableIsKeyboardFocusWithin(DependencyObject obj) => (bool)obj.GetValue(EnableIsKeyboardFocusWithinProperty);
+        public static void SetEnableIsKeyboardFocusWithin(DependencyObject obj, bool value) => obj.SetValue(EnableIsKeyboardFocusWithinProperty, value);
 
     }
 }

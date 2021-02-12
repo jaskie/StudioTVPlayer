@@ -77,6 +77,8 @@ namespace TVPlayR {
 			TVPlayR::Rational get() { return TVPlayR::Rational((*_nativeSource)->GetFrameRate()); }
 		}
 
+		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
+
 		delegate void FramePlayedDelegate(int64_t);
 		delegate void StoppedDelegate(void);
 		event EventHandler<TimeEventArgs^>^ FramePlayed;

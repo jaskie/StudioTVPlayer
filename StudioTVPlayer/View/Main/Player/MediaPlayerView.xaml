@@ -176,7 +176,7 @@
                             SliderDragStartCommand="{Binding SliderDragStartCommand}"
                             Value="{Binding Seekbar, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=20}">
                 </controls:Seekbar>
-                <Border Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="LightGray" BorderThickness="2"  >
+                <Border Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"  >
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Hidden" />
@@ -201,8 +201,10 @@
                         <TextBlock VerticalAlignment="Center" Margin="5,0,0,0" Text="Remove played" />
                     </StackPanel>
                 </Button>
+                <Label VerticalAlignment="Bottom">Rundown</Label>
 
-                <ListBox x:Name="list" Grid.Row="1" Margin="0 5" ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" >
+                <ListBox x:Name="list" Grid.Row="1" Margin="0 5" ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" 
+                         BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}"  BorderThickness="1">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:RundownItemViewModel}">
                             <view:RundownItemView/>

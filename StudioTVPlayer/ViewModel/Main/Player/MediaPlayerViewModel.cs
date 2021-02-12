@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -354,7 +353,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public void DragOver(IDropInfo dropInfo)
         {
-            if (dropInfo.Data is MediaViewModel mediaViewModel && mediaViewModel.IsVerified)
+            if (dropInfo.Data is MediaViewModel mediaViewModel && mediaViewModel.IsVerified && mediaViewModel.Duration > TimeSpan.Zero)
             {
                 dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                 dropInfo.Effects = DragDropEffects.Move;

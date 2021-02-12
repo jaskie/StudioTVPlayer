@@ -22,6 +22,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public int Height => Media.Height;
         public ScanType ScanType => Media.ScanType;
         public string FrameRate => Media.FrameRate;
+        public int AudioChannelCount => Media.AudioChannelCount;
 
         public ImageSource Thumbnail => Media.Thumbnail;
 

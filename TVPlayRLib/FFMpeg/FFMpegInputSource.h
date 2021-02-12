@@ -29,6 +29,7 @@ public:
 	virtual int GetWidth() override;
 	virtual int GetHeight() override;
 	virtual AVFieldOrder GetFieldOrder() override;
+	virtual int GetAudioChannelCount() override;
 	int64_t GetVideoDecoderTime();
 	virtual void Play() override;
 	virtual void Pause() override;

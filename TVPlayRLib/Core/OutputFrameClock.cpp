@@ -25,7 +25,7 @@ void OutputFrameClock::RequestFrame(int audio_samples_count)
 {
 	if (!channel_)
 		return;
-	auto async = std::async(std::launch::async, [this, audio_samples_count] { channel_->RequestFrame(audio_samples_count); });
+	channel_->RequestFrame(audio_samples_count);
 }
 
 }}

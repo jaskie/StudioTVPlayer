@@ -45,7 +45,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition MinHeight="60"/>
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -53,13 +53,13 @@
         <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}" >
             <Image.ToolTip>
                 <StackPanel>
-                    <TextBlock>Video:</TextBlock>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Width}"/>
+                        <TextBlock Text="{Binding Width, StringFormat={}Video: {0}}"/>
                         <TextBlock Text="{Binding Height, StringFormat={}x{0}}"/>
                         <TextBlock Text="{Binding FrameRate, StringFormat='{} {0} fps '}"/>
                         <TextBlock Text="{Binding ScanType}"/>
                     </StackPanel>
+                    <TextBlock Text="{Binding AudioChannelCount, StringFormat={}Audio: {0} channels}"/>
                 </StackPanel>
             </Image.ToolTip>
             <Image.Effect>

@@ -3,7 +3,7 @@
 namespace TVPlayR {
 	namespace Core {
 
-		enum HwAccel {
+		enum class HwAccel {
 			none,
 			cuvid			
 		};

@@ -218,19 +218,25 @@ struct FFmpegInputSource::implementation
 		return video_decoder_.TimeMax();
 	}
 
-	int GetWidth() 
+	int GetWidth() const
 	{
 		return video_decoder_.stream->codecpar->width;
 	}
 	
-	int GetHeight() 
+	int GetHeight() const
 	{
 		return video_decoder_.stream->codecpar->height;
 	}
 
-	AVFieldOrder GetFieldOrder()
+	AVFieldOrder GetFieldOrder() const
 	{
 		return video_decoder_.stream->codecpar->field_order;
+	}
+
+	int GetAudioChannelCount() const
+	{
+		auto audio = input_.GetAudioStreams();
+		return std::accumulate(audio.begin(), audio.end(), 0, [](int sum, const AVStream* curr) { return sum + curr->codecpar->channels; });
 	}
 
 };
@@ -255,12 +261,12 @@ int64_t FFmpeg::FFmpegInputSource::GetVideoDuration()			{ return impl_->input_.G
 int64_t FFmpeg::FFmpegInputSource::GetAudioDuration()			{ return impl_->input_.GetAudioDuration(); }
 int FFmpeg::FFmpegInputSource::GetWidth()						{ return impl_->GetWidth(); }
 int FFmpeg::FFmpegInputSource::GetHeight()						{ return impl_->GetHeight(); }
-AVFieldOrder FFmpeg::FFmpegInputSource::GetFieldOrder()			{ return impl_->GetFieldOrder(); } 
+AVFieldOrder FFmpeg::FFmpegInputSource::GetFieldOrder()			{ return impl_->GetFieldOrder(); }
+int FFmpeg::FFmpegInputSource::GetAudioChannelCount()			{ return impl_->GetAudioChannelCount(); }
 int64_t FFmpeg::FFmpegInputSource::GetVideoDecoderTime()		{ return impl_->GetVideoDecoderTime(); }
 void FFmpeg::FFmpegInputSource::Play()							{ impl_->Play(); }
 void FFmpeg::FFmpegInputSource::Pause()							{ impl_->Pause(); }
 bool FFmpeg::FFmpegInputSource::IsPlaying()	const				{ return impl_->is_playing_; }
 void FFmpeg::FFmpegInputSource::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
 void FFmpeg::FFmpegInputSource::SetStoppedCallback(STOPPED_CALLBACK stopped_callback) { impl_->stopped_callback_ = stopped_callback; }
-
 }

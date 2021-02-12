@@ -26,6 +26,9 @@ public:
 	virtual void SetupAudio(int channels) override;
 	virtual int64_t GetVideoDuration() override;
 	virtual int64_t GetAudioDuration() override;
+	virtual int GetWidth() override;
+	virtual int GetHeight() override;
+	virtual AVFieldOrder GetFieldOrder() override;
 	int64_t GetVideoDecoderTime();
 	virtual void Play() override;
 	virtual void Pause() override;

@@ -30,8 +30,7 @@ namespace StudioTVPlayer.Model
                 if (_playingQueueItem == value)
                     return;
                 _playingQueueItem = value;
-                InternalLoad(value.Media.FullPath);
-                Loaded?.Invoke(this, new RundownItemEventArgs(value));
+                InternalLoad(value);
             }
         }
 
@@ -81,18 +80,20 @@ namespace StudioTVPlayer.Model
             return null;
         }
 
-        private void InternalLoad(string fullPath)
+        private void InternalLoad(RundownItem rundownItem)
         {
             if (_inputFile != null)
             {
                 _inputFile.FramePlayed -= InputFile_FramePlayed;
                 _inputFile.Stopped -= InputFile_Stopped;
                 _inputFile.Dispose();
+                Stopped?.Invoke(this, EventArgs.Empty);
             }
-            _inputFile = new TVPlayR.InputFile(fullPath, 2);
+            _inputFile = new TVPlayR.InputFile(rundownItem.Media.FullPath, 2);
             _inputFile.FramePlayed += InputFile_FramePlayed;
             _inputFile.Stopped += InputFile_Stopped;
             Channel.Load(_inputFile);
+            Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
         }
 
         internal void Submit(Media media)

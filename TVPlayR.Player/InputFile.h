@@ -2,6 +2,8 @@
 #include "FFMpeg/FFMpegInputSource.h"
 #include "TimeEventArgs.h"
 #include "HardwareAcceleration.h"
+#include "FieldOrder.h"
+#include "Rational.h"
 
 using namespace System;
 using namespace System::Drawing;
@@ -36,9 +38,43 @@ namespace TVPlayR {
 			String^ get() { return _fileName; }
 		}
 
+		property int Width
+		{
+			int get() { return (*_nativeSource)->GetWidth(); }
+		}
+
+		property int Height
+		{
+			int get() { return (*_nativeSource)->GetHeight(); }
+		}
+
 		property bool IsPlaying
 		{
 			bool get() { return (*_nativeSource)->IsPlaying(); }
+		}
+
+		property TVPlayR::FieldOrder FieldOrder
+		{
+			TVPlayR::FieldOrder get() 
+			{
+				auto internalFieldOrder = (*_nativeSource)->GetFieldOrder();
+				switch (internalFieldOrder)
+				{
+				case AVFieldOrder::AV_FIELD_TT:
+				case AVFieldOrder::AV_FIELD_TB:
+					return TVPlayR::FieldOrder::TopFieldFirst;
+				case AVFieldOrder::AV_FIELD_BB:
+				case AVFieldOrder::AV_FIELD_BT:
+					return TVPlayR::FieldOrder::BottomFieldFirst;
+				default:
+					return TVPlayR::FieldOrder::Progressive;
+				}
+			}
+		}
+
+		property TVPlayR::Rational FrameRate
+		{
+			TVPlayR::Rational get() { return TVPlayR::Rational((*_nativeSource)->GetFrameRate()); }
 		}
 
 		delegate void FramePlayedDelegate(int64_t);

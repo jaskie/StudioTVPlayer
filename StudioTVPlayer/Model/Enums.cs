@@ -14,6 +14,17 @@ namespace StudioTVPlayer.Model
         CreationTime
     }
 
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum ScanType
+    {
+        [Description("Progressive")]
+        Progressive,
+        [Description("Top field first")]
+        TopFieldFirst,
+        [Description("Bottom Field First")]
+        BottomFieldFirst
+    }
+
     public enum SortDirection
     {
         Ascending,

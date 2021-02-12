@@ -45,6 +45,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
             _mediaPlayer.Progress += MediaPlayer_Progress;
+            _mediaPlayer.Stopped += MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
@@ -323,6 +324,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             NotifyPropertyChanged(nameof(Seekbar));
         }
 
+        private void MediaPlayer_Stopped(object sender, EventArgs e)
+        {
+            IsPlaying = false;
+        }
+
+
         private void MediaPlayer_Loaded(object sender, Model.Args.RundownItemEventArgs e)
         {
             CurrentRundownItem = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
@@ -341,6 +348,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _isDisposed = true;
             _mediaPlayer.Loaded -= MediaPlayer_Loaded;
             _mediaPlayer.Progress -= MediaPlayer_Progress;
+            _mediaPlayer.Stopped -= MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
         }
 

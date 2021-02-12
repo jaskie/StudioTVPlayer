@@ -26,6 +26,9 @@ public:
 	virtual bool IsPlaying() const = 0;
 	virtual int64_t GetVideoDuration() { return 0LL; }
 	virtual int64_t GetAudioDuration() { return 0LL; }
+	virtual int GetWidth() = 0;
+	virtual int GetHeight() = 0;
+	virtual AVFieldOrder GetFieldOrder() = 0;
 	virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) = 0;
 	virtual void SetStoppedCallback(STOPPED_CALLBACK stopped_callback) = 0;
 };

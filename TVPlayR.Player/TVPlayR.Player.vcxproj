@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="ClrStringHelper.h" />
     <ClInclude Include="DecklinkDevice.h" />
+    <ClInclude Include="FieldOrder.h" />
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="NdiDevice.h" />

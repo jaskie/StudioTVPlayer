@@ -18,8 +18,8 @@ namespace TVPlayR {
 	VideoFormat::VideoFormat(int video_format_id)
 		: _native_fomat(new Core::VideoFormat(static_cast<Core::VideoFormat::Type>(video_format_id)))
 		, _name(gcnew String(_native_fomat->Name().c_str()))
-		, _sample_aspect_ratio(gcnew Rational(_native_fomat->SampleAspectRatio()))
-		, _frame_rate(gcnew Rational(_native_fomat->FrameRate()))
+		, _sample_aspect_ratio(_native_fomat->SampleAspectRatio())
+		, _frame_rate(_native_fomat->FrameRate())
 	{ }
 
 	VideoFormat::~VideoFormat()
@@ -44,12 +44,12 @@ namespace TVPlayR {
 
 	int VideoFormat::TimeToFrameNumber(TimeSpan time)
 	{
-		return static_cast<int>(time.Ticks * _frame_rate->Numerator / (_frame_rate->Denominator * TimeSpan::TicksPerSecond));
+		return static_cast<int>(time.Ticks * ((Rational)_frame_rate).Numerator / (((Rational)_frame_rate).Denominator * TimeSpan::TicksPerSecond));
 	}
 
 	TimeSpan VideoFormat::FrameNumberToTime(int frame_number)
 	{
-		return TimeSpan(frame_number * TimeSpan::TicksPerSecond * _frame_rate->Denominator / _frame_rate->Numerator);
+		return TimeSpan(frame_number * TimeSpan::TicksPerSecond * ((Rational)_frame_rate).Denominator / ((Rational)_frame_rate).Numerator);
 	}
 
 }

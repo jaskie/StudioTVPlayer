@@ -39,7 +39,7 @@
         </ContextMenu>
     </UserControl.ContextMenu>
 
-    <Grid Margin="2" IsHitTestVisible="False">
+    <Grid Margin="2" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="170"/>
             <ColumnDefinition/>
@@ -49,8 +49,19 @@
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <mah:ProgressRing Grid.RowSpan="3" Foreground="{DynamicResource MahApps.Brushes.Accent}" IsActive="{Binding Thumbnail, Converter={StaticResource NotNullToBooleanConverter}}" />
-        <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}">
+        <mah:ProgressRing Grid.RowSpan="3" Foreground="{DynamicResource MahApps.Brushes.Accent}" IsActive="{Binding Thumbnail, Converter={StaticResource NotNullToBooleanConverter}}"/>
+        <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}" >
+            <Image.ToolTip>
+                <StackPanel>
+                    <TextBlock>Video:</TextBlock>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Width}"/>
+                        <TextBlock Text="{Binding Height, StringFormat={}x{0}}"/>
+                        <TextBlock Text="{Binding FrameRate, StringFormat='{} {0} fps '}"/>
+                        <TextBlock Text="{Binding ScanType}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Image.ToolTip>
             <Image.Effect>
                 <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
             </Image.Effect>

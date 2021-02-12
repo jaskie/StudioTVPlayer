@@ -217,6 +217,22 @@ struct FFmpegInputSource::implementation
 	{
 		return video_decoder_.TimeMax();
 	}
+
+	int GetWidth() 
+	{
+		return video_decoder_.stream->codecpar->width;
+	}
+	
+	int GetHeight() 
+	{
+		return video_decoder_.stream->codecpar->height;
+	}
+
+	AVFieldOrder GetFieldOrder()
+	{
+		return video_decoder_.stream->codecpar->field_order;
+	}
+
 };
 
 }
@@ -237,6 +253,9 @@ void FFmpeg::FFmpegInputSource::RemoveFromOutput(Core::OutputDeviceSource * sour
 void FFmpeg::FFmpegInputSource::SetupAudio(int channels)		{ impl_->SetupAudio(channels); }
 int64_t FFmpeg::FFmpegInputSource::GetVideoDuration()			{ return impl_->input_.GetVideoDuration(); }
 int64_t FFmpeg::FFmpegInputSource::GetAudioDuration()			{ return impl_->input_.GetAudioDuration(); }
+int FFmpeg::FFmpegInputSource::GetWidth()						{ return impl_->GetWidth(); }
+int FFmpeg::FFmpegInputSource::GetHeight()						{ return impl_->GetHeight(); }
+AVFieldOrder FFmpeg::FFmpegInputSource::GetFieldOrder()			{ return impl_->GetFieldOrder(); } 
 int64_t FFmpeg::FFmpegInputSource::GetVideoDecoderTime()		{ return impl_->GetVideoDecoderTime(); }
 void FFmpeg::FFmpegInputSource::Play()							{ impl_->Play(); }
 void FFmpeg::FFmpegInputSource::Pause()							{ impl_->Pause(); }

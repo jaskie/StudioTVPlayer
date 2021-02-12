@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using TVPlayR;
 
 namespace StudioTVPlayer.Model
@@ -51,9 +52,22 @@ namespace StudioTVPlayer.Model
             using (var file = new InputFile(media.FullPath, 0))
             {
                 media.Duration = file.VideoDuration;
+                media.Width = file.Width;
+                media.Height = file.Height;
+                switch(file.FieldOrder)
+                {
+                    case FieldOrder.TopFieldFirst:
+                        media.ScanType = ScanType.TopFieldFirst;
+                        break;
+                    case FieldOrder.BottomFieldFirst:
+                        media.ScanType = ScanType.BottomFieldFirst;
+                        break;
+                }
+                var frameRate = file.FrameRate;
+                media.FrameRate = $"{frameRate.Numerator}/{frameRate.Denominator}";
                 if (thumbnailHeight > 0)
                 {
-                    var thumb = file.GetBitmapSource(thumbnailHeight);
+                    var thumb = file.GetBitmapSource(thumbnailHeight) ?? new BitmapImage();
                     thumb.Freeze();
                     media.Thumbnail = thumb;
                 }

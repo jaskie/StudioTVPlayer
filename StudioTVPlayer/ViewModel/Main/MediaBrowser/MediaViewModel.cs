@@ -18,6 +18,10 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
         public DateTime CreationTime => Media.CreationTime;
+        public int Width => Media.Width;
+        public int Height => Media.Height;
+        public ScanType ScanType => Media.ScanType;
+        public string FrameRate => Media.FrameRate;
 
         public ImageSource Thumbnail => Media.Thumbnail;
 

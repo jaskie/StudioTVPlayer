@@ -2,7 +2,7 @@
 #include "Common/rational.h"
 
 namespace TVPlayR {
-	public ref class Rational
+	public value  class Rational
 	{
 	private:
 		const int _numerator;

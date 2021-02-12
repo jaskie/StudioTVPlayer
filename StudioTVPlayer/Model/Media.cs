@@ -20,6 +20,10 @@ namespace StudioTVPlayer.Model
         }
 
         private bool _isVerified;
+        private int _height;
+        private int _width;
+        private ScanType _scanType;
+        private string _frameRate;
         private readonly FileInfo _fileInfo;
 
         public Media(string path)
@@ -80,6 +84,54 @@ namespace StudioTVPlayer.Model
                 if (_creationTime == value)
                     return;
                 _creationTime = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public int Height
+        {
+            get => _height;
+            set
+            {
+                if (_height == value)
+                    return;
+                _height = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public int Width
+        {
+            get => _width;
+            set
+            {
+                if (_width == value)
+                    return;
+                _width = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public ScanType ScanType
+        {
+            get => _scanType;
+            set
+            {
+                if (_scanType == value)
+                    return;
+                _scanType = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string FrameRate
+        {
+            get => _frameRate; 
+            set
+            {
+                if (_frameRate == value)
+                    return;
+                _frameRate = value;
                 RaisePropertyChanged();
             }
         }

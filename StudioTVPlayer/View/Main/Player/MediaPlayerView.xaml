@@ -12,12 +12,11 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:MediaPlayerViewModel}"
              d:DesignHeight="370" d:DesignWidth="800"
-             Focusable="True"
              KeyboardNavigation.TabNavigation="Local"
-             attachedProp:EventToCommand.TakesInputBindingPrecedence="True"
              attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="True"
              dd:DragDrop.IsDropTarget="True"
-             dd:DragDrop.DropHandler="{Binding}"      
+             dd:DragDrop.DropHandler="{Binding}"     
+             Focusable="True" Background="Transparent"
              >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />
@@ -31,7 +30,7 @@
     </UserControl.InputBindings>
     
     
-    <Border KeyboardNavigation.TabNavigation="None" CornerRadius="5" 
+    <Border KeyboardNavigation.TabNavigation="None" CornerRadius="5" FocusManager.IsFocusScope="True" Focusable="True"
             BorderThickness="2" Margin="5"
             >
         <Border.Style>
@@ -43,7 +42,7 @@
                 </Style.Triggers>
             </Style>
         </Border.Style>
-        <Grid Margin="5">
+        <Grid Margin="5" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="3*"/>
@@ -195,13 +194,13 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
+                <Label VerticalAlignment="Bottom" >Rundown</Label>
                 <Button Command="{Binding DeleteDisabledCommand}" VerticalAlignment="Top" HorizontalAlignment="Right" FontSize="14" FontWeight="Normal" >
                     <StackPanel Orientation="Horizontal">
                         <mah:FontIcon Glyph="&#xE74D;"/>
-                        <TextBlock VerticalAlignment="Center" Margin="5,0,0,0" Text="Remove played" />
+                        <TextBlock VerticalAlignment="Center" Margin="5,0,0,0">Remove played</TextBlock>
                     </StackPanel>
                 </Button>
-                <Label VerticalAlignment="Bottom">Rundown</Label>
 
                 <ListBox x:Name="list" Grid.Row="1" Margin="0 5" ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" 
                          BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}"  BorderThickness="1">

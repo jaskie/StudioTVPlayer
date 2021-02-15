@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         {
             var attachEvents = (bool)e.NewValue;
             var targetUiElement = (UIElement)d;
+            Debug.WriteLine("Focus on {0} attached:{1}", targetUiElement, attachEvents);
             if (attachEvents)
                 targetUiElement.IsKeyboardFocusWithinChanged += TargetUiElement_IsKeyboardFocusWithinChanged;
             else
@@ -33,7 +35,8 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         {
             var isSelected = (bool)e.NewValue;
             var targetUiElement = (UIElement)sender;
-            System.Windows.Controls.Primitives.Selector.SetIsSelected(targetUiElement, isSelected);
+            Debug.WriteLine("Focus on {0}:{1}", targetUiElement, isSelected);
+            //System.Windows.Controls.Primitives.Selector.SetIsSelected(targetUiElement, isSelected);
         }
 
         public static bool GetEnableIsKeyboardFocusWithin(DependencyObject obj) => (bool)obj.GetValue(EnableIsKeyboardFocusWithinProperty);

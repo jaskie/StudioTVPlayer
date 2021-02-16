@@ -26,21 +26,6 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public MediaPlayerViewModel[] Players { get; }
 
-        public MediaPlayerViewModel SelectedPlayer
-        {
-            get => _selectedPlayer; 
-            set
-            {
-                var oldPlayer = _selectedPlayer;
-                if (!Set(ref _selectedPlayer, value))
-                    return;
-                if (oldPlayer != null)
-                    oldPlayer.IsFocused = false;
-                if (value != null)
-                    value.IsFocused = true;
-            }
-        }
-
         public BrowserViewModel[] Browsers { get; }
 
         private void FocusBrowser(object obj)

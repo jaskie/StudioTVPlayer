@@ -11,10 +11,8 @@
              xmlns:browserViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser"       
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920"
-             FocusManager.IsFocusScope="True"
-             KeyboardNavigation.TabNavigation="Cycle"
              d:DataContext="{d:DesignInstance {x:Type vm:PlayoutViewModel}}"
-             Loaded="UserControl_Loaded">
+             >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="D0" Command="{Binding FocusBrowserCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="D1" Command="{Binding FocusPlayerCommand}" CommandParameter="1" />
@@ -32,27 +30,28 @@
             <ColumnDefinition Width="5*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
-        <ListBox IsTabStop="False" Grid.Column="0" ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" 
+        <ListBox Grid.Column="0" ItemsSource="{Binding Players}" 
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     >
-            <ListBox.ItemContainerStyle>
+                 >
+            <ItemsControl.ItemContainerStyle>
                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Focusable" Value="False"/>
                     <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
                     <Setter Property="mah:ItemHelper.DisabledSelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
                     <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
                     <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
                     <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
                 </Style>
-            </ListBox.ItemContainerStyle>
+            </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type playerViewModels:MediaPlayerViewModel}">
                     <playerViews:MediaPlayerView />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListBox>
-        <GridSplitter IsTabStop="False" Grid.Column="1" Width="3" HorizontalAlignment="Left" />
+        <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Left" />
         <TabControl Grid.Column="1" ItemsSource="{Binding Browsers}" Padding="0" DisplayMemberPath="Name" SelectedIndex="0" Margin="3 0 0 0" 
                     mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">
             <TabControl.ContentTemplate>

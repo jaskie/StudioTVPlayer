@@ -25,10 +25,5 @@ namespace StudioTVPlayer.View.Main
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.Focus();
-            Keyboard.Focus(this);
-        }
     }
 }

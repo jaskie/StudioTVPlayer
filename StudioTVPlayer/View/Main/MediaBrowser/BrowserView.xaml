@@ -9,10 +9,6 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:BrowserViewModel}}"
              d:DesignHeight="450" d:DesignWidth="300"
-             KeyboardNavigation.TabNavigation="Local"
-             KeyboardNavigation.IsTabStop="True"
-             Focusable="True"
-             FocusManager.IsFocusScope="True"                                       
              >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Alt" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />

@@ -16,33 +16,33 @@
              attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="True"
              dd:DragDrop.IsDropTarget="True"
              dd:DragDrop.DropHandler="{Binding}"     
-             Focusable="True" Background="Transparent"
+             Focusable="True" IsTabStop="True"
+             Background="Transparent"
              >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />
         <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="1" />
         <KeyBinding Modifiers="Ctrl" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-second" />
         <KeyBinding Modifiers="Ctrl" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="second" />
+        <KeyBinding Modifiers="Ctrl" Key="PageUp" Command="{Binding CueCommand}" />
         <KeyBinding Key="Space" Command="{Binding TogglePlayCommand}" />
-        <KeyBinding Key="End" Command="{Binding LoadNextItemCommand}" />
+        <KeyBinding Modifiers="Alt" Key="PageDown" Command="{Binding LoadNextItemCommand}" />
         <KeyBinding Key="Pause" Command="{Binding UnloadCommand}" />
-        <KeyBinding Modifiers="CTRL" Key="Delete" Command="{Binding DeleteDisabledCommand}" />
+        <KeyBinding Modifiers="Alt" Key="Delete" Command="{Binding DeleteDisabledCommand}" />
     </UserControl.InputBindings>
     
     
-    <Border KeyboardNavigation.TabNavigation="None" CornerRadius="5" FocusManager.IsFocusScope="True" Focusable="True"
-            BorderThickness="2" Margin="5"
-            >
+    <Border CornerRadius="5" BorderThickness="2" Margin="5" >
         <Border.Style>
             <Style TargetType="Border">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsFocused}" Value="true">
+                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
                         <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Accent}" />
-                    </DataTrigger>
+                    </Trigger>
                 </Style.Triggers>
             </Style>
         </Border.Style>
-        <Grid Margin="5" >
+        <Grid Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="3*"/>
@@ -121,12 +121,13 @@
                     <UniformGrid.Resources>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                             <Setter Property="Margin" Value="5 0"/>
+                            <Setter Property="Focusable" Value="False"/>
                         </Style>
                     </UniformGrid.Resources>
 
                     <Button Command="{Binding CueCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="Cue | Ctrl + Space" />
+                            <ToolTip Content="Cue | Alt+PageUp" />
                         </Control.ToolTip>
                         <mah:FontIcon Glyph="&#xE892;"/>
                     </Button>
@@ -164,7 +165,7 @@
 
                     <Button Command="{Binding LoadNextItemCommand}" >
                         <Control.ToolTip>
-                            <ToolTip Content="Cue next | End" />
+                            <ToolTip Content="Cue next | Alt+PageDown" />
                         </Control.ToolTip>
                         <mah:FontIcon Glyph="&#xE893;"/>
                     </Button>
@@ -195,7 +196,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Label VerticalAlignment="Bottom" >Rundown</Label>
-                <Button Command="{Binding DeleteDisabledCommand}" VerticalAlignment="Top" HorizontalAlignment="Right" FontSize="14" FontWeight="Normal" >
+                <Button Command="{Binding DeleteDisabledCommand}" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14" FontWeight="Normal" ToolTip="Alt + Del" >
                     <StackPanel Orientation="Horizontal">
                         <mah:FontIcon Glyph="&#xE74D;"/>
                         <TextBlock VerticalAlignment="Center" Margin="5,0,0,0">Remove played</TextBlock>
@@ -217,7 +218,6 @@
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="attachedProp:EventToCommand.MouseDoubleClickCommand" Value="{Binding DataContext.LoadMediaCommand, ElementName=list}" />
                             <Setter Property="attachedProp:EventToCommand.MouseRightButtonUpCommand" Value="{Binding DataContext.CheckItemCommand, ElementName=list}" />
-                            
                         </Style>
                     </ListBox.ItemContainerStyle>
                 </ListBox>

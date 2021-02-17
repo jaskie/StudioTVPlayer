@@ -12,7 +12,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:MediaPlayerViewModel}"
              d:DesignHeight="370" d:DesignWidth="800"
-             attachedProp:EventToCommand.TakesInputBindingPrecedence="True"
+             attachedProp:ControlProperties.TakesInputBindingPrecedence="True"
              attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="True"
              dd:DragDrop.IsDropTarget="True"
              dd:DragDrop.DropHandler="{Binding}"     
@@ -20,13 +20,13 @@
              Background="Transparent"
              BorderThickness="2"
              Margin="3"
-             mah:ControlsHelper.FocusBorderBrush="Red"
+             FocusVisualStyle="{x:Null}"
              >
     <UserControl.Style>
         <Style TargetType="UserControl">
             <Style.Triggers>
                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Accent}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Control.Validation}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -221,7 +221,7 @@
                     <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="attachedProp:EventToCommand.MouseDoubleClickCommand" Value="{Binding DataContext.LoadMediaCommand, ElementName=list}" />
-                        <Setter Property="attachedProp:EventToCommand.MouseRightButtonUpCommand" Value="{Binding DataContext.CheckItemCommand, ElementName=list}" />
+                        <Setter Property="attachedProp:EventToCommand.MouseRightButtonDownCommand" Value="{Binding DataContext.CheckItemCommand, ElementName=list}" />
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>

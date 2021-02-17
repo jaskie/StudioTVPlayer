@@ -20,8 +20,10 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         private static void MouseDoubleClickCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            Control element = (Control)d;
-            element.MouseDoubleClick += element_MouseDoubleClick;
+            if (e.NewValue != null && e.OldValue == null)
+                ((Control)d).MouseDoubleClick += element_MouseDoubleClick;
+            if (e.NewValue == null && e.OldValue != null)
+                ((Control)d).MouseDoubleClick -= element_MouseDoubleClick;
         }
 
         static void element_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -49,8 +51,10 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         private static void MouseLeftButtonDownCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            FrameworkElement element = (FrameworkElement)d;
-            element.PreviewMouseLeftButtonDown += element_MouseLeftButtonDown;
+            if (e.NewValue != null && e.OldValue == null)
+                ((FrameworkElement)d).PreviewMouseLeftButtonDown += element_MouseLeftButtonDown;
+            if (e.NewValue == null && e.OldValue != null)
+                ((FrameworkElement)d).PreviewMouseLeftButtonDown -= element_MouseLeftButtonDown;
         }
 
         static void element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -74,8 +78,10 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         private static void MouseLeftButtonUpCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            FrameworkElement element = (FrameworkElement)d;
-            element.PreviewMouseLeftButtonUp += element_MouseLeftButtonUp;
+            if (e.NewValue != null && e.OldValue == null)
+                ((FrameworkElement)d).PreviewMouseLeftButtonUp += element_MouseLeftButtonUp;
+            if (e.NewValue == null && e.OldValue != null)
+                ((FrameworkElement)d).PreviewMouseLeftButtonUp -= element_MouseLeftButtonUp;
         }
 
         static void element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -91,30 +97,32 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         public static void SetMouseLeftButtonUpCommand(UIElement element, ICommand value) => element.SetValue(MouseLeftButtonUpCommandProperty, value);
         public static ICommand GetMouseLeftButtonUpCommand(UIElement element) => (ICommand)element.GetValue(MouseLeftButtonUpCommandProperty);
 
-        public static readonly DependencyProperty MouseRightButtonUpCommandProperty =
-        DependencyProperty.RegisterAttached("MouseRightButtonUpCommand", 
+        public static readonly DependencyProperty MouseRightButtonDownCommandProperty =
+        DependencyProperty.RegisterAttached("MouseRightButtonDownCommand", 
             typeof(ICommand), 
             typeof(EventToCommand), 
-            new FrameworkPropertyMetadata(MouseRightButtonUpCommandChanged));
+            new FrameworkPropertyMetadata(MouseRightButtonDownCommandChanged));
 
-        private static void MouseRightButtonUpCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void MouseRightButtonDownCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            FrameworkElement element = (FrameworkElement)d;
-            element.PreviewMouseRightButtonUp += element_MouseRightButtonUp;
+            if (e.NewValue != null && e.OldValue == null)
+                ((FrameworkElement)d).PreviewMouseRightButtonDown += element_MouseRightButtonDown;
+            if (e.NewValue == null && e.OldValue != null)
+                ((FrameworkElement)d).PreviewMouseRightButtonDown -= element_MouseRightButtonDown;
         }
 
-        static void element_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        static void element_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
-            ICommand command = GetMouseRightButtonUpCommand(element);
+            ICommand command = GetMouseRightButtonDownCommand(element);
             object[] param = { sender, e };
 
             command.Execute(param);
         }
 
-        public static void SetMouseRightButtonUpCommand(UIElement element, ICommand value) => element.SetValue(MouseRightButtonUpCommandProperty, value);
-        public static ICommand GetMouseRightButtonUpCommand(UIElement element) => (ICommand)element.GetValue(MouseRightButtonUpCommandProperty);
+        public static void SetMouseRightButtonDownCommand(UIElement element, ICommand value) => element.SetValue(MouseRightButtonDownCommandProperty, value);
+        public static ICommand GetMouseRightButtonDownCommand(UIElement element) => (ICommand)element.GetValue(MouseRightButtonDownCommandProperty);
 
 
         public static readonly DependencyProperty UnloadedCommandProperty =
@@ -125,8 +133,10 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         private static void UnloadedCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            FrameworkElement element = (FrameworkElement)d;
-            element.Unloaded += element_Unloaded;
+            if (e.NewValue != null && e.OldValue == null)
+                ((FrameworkElement)d).Unloaded += element_Unloaded;
+            if (e.NewValue == null && e.OldValue != null)
+                ((FrameworkElement)d).Unloaded -= element_Unloaded;
         }
 
         static void element_Unloaded(object sender, RoutedEventArgs e)
@@ -142,36 +152,6 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         public static void SetUnloadedCommand(UIElement element, ICommand value) => element.SetValue(UnloadedCommandProperty, value);
         public static ICommand GetUnloadedCommand(UIElement element) => (ICommand)element.GetValue(UnloadedCommandProperty);
 
-        public static readonly DependencyProperty TakesInputBindingPrecedenceProperty =
-        DependencyProperty.RegisterAttached("TakesInputBindingPrecedence", 
-            typeof(bool), typeof(EventToCommand), 
-            new FrameworkPropertyMetadata(false, OnTakesInputBindingPrecedenceChanged));
 
-        public static bool GetTakesInputBindingPrecedence(UIElement obj) => (bool)obj.GetValue(TakesInputBindingPrecedenceProperty);
-
-        public static void SetTakesInputBindingPrecedence(UIElement obj, bool value) => obj.SetValue(TakesInputBindingPrecedenceProperty, value);
-
-        private static void OnTakesInputBindingPrecedenceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            ((UIElement)d).PreviewKeyDown += new KeyEventHandler(InputBindingsBehavior_PreviewKeyDown);
-        }
-
-        private static void InputBindingsBehavior_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            var uielement = (UIElement)sender;
-
-            var foundBinding = uielement.InputBindings
-                .OfType<KeyBinding>()
-                .FirstOrDefault(kb => kb.Key == e.Key && kb.Modifiers == e.KeyboardDevice.Modifiers);
-
-            if (foundBinding != null)
-            {
-                e.Handled = true;
-                if (foundBinding.Command.CanExecute(foundBinding.CommandParameter))
-                {
-                    foundBinding.Command.Execute(foundBinding.CommandParameter);
-                }
-            }
-        }
     }
 }

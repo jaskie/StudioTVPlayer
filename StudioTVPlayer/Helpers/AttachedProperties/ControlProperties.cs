@@ -56,5 +56,43 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         public static bool GetEnableIsKeyboardFocusWithin(DependencyObject obj) => (bool)obj.GetValue(EnableIsKeyboardFocusWithinProperty);
         public static void SetEnableIsKeyboardFocusWithin(DependencyObject obj, bool value) => obj.SetValue(EnableIsKeyboardFocusWithinProperty, value);
 
+
+
+        public static readonly DependencyProperty TakesInputBindingPrecedenceProperty =
+            DependencyProperty.RegisterAttached("TakesInputBindingPrecedence",
+            typeof(bool), typeof(ControlProperties),
+            new FrameworkPropertyMetadata(false, OnTakesInputBindingPrecedenceChanged));
+
+        public static bool GetTakesInputBindingPrecedence(UIElement obj) => (bool)obj.GetValue(TakesInputBindingPrecedenceProperty);
+
+        public static void SetTakesInputBindingPrecedence(UIElement obj, bool value) => obj.SetValue(TakesInputBindingPrecedenceProperty, value);
+
+        private static void OnTakesInputBindingPrecedenceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(e.NewValue is bool value))
+                return;
+            if (value)
+                ((UIElement)d).PreviewKeyDown += new KeyEventHandler(InputBindingsBehavior_PreviewKeyDown);
+            else
+                ((UIElement)d).PreviewKeyDown -= new KeyEventHandler(InputBindingsBehavior_PreviewKeyDown);
+        }
+
+        private static void InputBindingsBehavior_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var uielement = (UIElement)sender;
+
+            var foundBinding = uielement.InputBindings
+                .OfType<KeyBinding>()
+                .FirstOrDefault(kb => kb.Key == e.Key && kb.Modifiers == e.KeyboardDevice.Modifiers);
+
+            if (foundBinding != null)
+            {
+                e.Handled = true;
+                if (foundBinding.Command.CanExecute(foundBinding.CommandParameter))
+                {
+                    foundBinding.Command.Execute(foundBinding.CommandParameter);
+                }
+            }
+        }
     }
 }

@@ -99,7 +99,6 @@
     <Compile Include="Converters\DateConverter.cs" />
     <Compile Include="Converters\EnumDescriptionTypeConverter.cs" />
     <Compile Include="Converters\NotNullToBooleanConverter.cs" />
-    <Compile Include="Extensions\MediaExtensions.cs" />
     <Compile Include="Helpers\AttachedProperties\ControlProperties.cs" />
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />
     <Compile Include="Helpers\DataStore.cs" />

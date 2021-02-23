@@ -5,11 +5,11 @@
 /* link this file in with the server and any clients */
 
 
- /* File created by MIDL compiler version 8.01.0622 */
-/* at Tue Jan 19 04:14:07 2038
+ /* File created by MIDL compiler version 8.00.0603 */
+/* at Tue Feb 23 20:37:03 2021
  */
 /* Compiler settings for ..\DecklinkSDK\include\DeckLinkAPI.idl:
-    Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.01.0622 
+    Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0603 
     protocol : all , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
@@ -18,6 +18,7 @@
 */
 /* @@MIDL_FILE_HEADING(  ) */
 
+#pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 #ifdef __cplusplus
@@ -62,9 +63,9 @@ typedef IID CLSID;
 #endif // CLSID_DEFINED
 
 #define MIDL_DEFINE_GUID(type,name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) \
-        EXTERN_C __declspec(selectany) const type name = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
+        const type name = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
 
-#endif // !_MIDL_USE_GUIDDEF_
+#endif !_MIDL_USE_GUIDDEF_
 
 MIDL_DEFINE_GUID(IID, LIBID_DeckLinkAPI,0xD864517A,0xEDD5,0x466D,0x86,0x7D,0xC8,0x19,0xF1,0xC0,0x52,0xBB);
 

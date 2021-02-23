@@ -25,7 +25,7 @@ namespace TVPlayR {
         Executor(const std::wstring& name)
             : thread_(std::thread([this] { run(); }))
         {
-            SetThreadDescription(thread_.native_handle(), name.c_str());
+            //SetThreadDescription(thread_.native_handle(), name.c_str());
         }
 
         ~Executor()

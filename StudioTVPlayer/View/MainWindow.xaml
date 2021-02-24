@@ -15,7 +15,6 @@
                  TitleCharacterCasing="Normal"
                  ShowSystemMenu="True"
                  dialogs:DialogParticipation.Register="{Binding}"
-                 WindowStartupLocation="CenterScreen"
                  Loaded="MetroWindow_Loaded"
                  >
     <mah:MetroWindow.RightWindowCommands>
@@ -34,6 +33,9 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+    <Window.InputBindings>
+        <KeyBinding Gesture="Shift+Ctrl+E" Command="{Binding ConfigurationCommand}"/>
+    </Window.InputBindings>
     <ContentControl Content="{Binding CurrentViewModel}" >
         <ContentControl.Resources>
             <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">

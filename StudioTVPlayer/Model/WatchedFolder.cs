@@ -1,12 +1,11 @@
-﻿using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Providers;
+﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Model.Args;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
 using System.Threading;
 using System.Xml.Serialization;
 
@@ -18,8 +17,8 @@ namespace StudioTVPlayer.Model
         private string _path;
         private bool _isFilteredByDate;
         private string _filter = "*.*";
+        private Wildcard[] _filterWildcards;
         private FileSystemWatcher _fs;
-        private WildcardPattern _wildcardPattern;
         private CancellationTokenSource _cancellationTokenSource;
         private DateTime _filterDate = DateTime.Today;
         private readonly List<Media> _medias = new List<Media>();
@@ -34,7 +33,17 @@ namespace StudioTVPlayer.Model
         public bool IsFilteredByDate { get => _isFilteredByDate; set => Set(ref _isFilteredByDate, value); }
 
         [XmlAttribute]
-        public string Filter { get => _filter; set => Set(ref _filter, value); } 
+        public string Filter
+        {
+            get => _filter; 
+            set
+            {
+                if (!Set(ref _filter, value))
+                    return;
+                var filterParts = value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                _filterWildcards = filterParts.Select(p => new Wildcard(p)).ToArray();
+            }
+        }
 
         public event EventHandler<MediaEventArgs> MediaChanged;
 
@@ -44,7 +53,6 @@ namespace StudioTVPlayer.Model
                 return;
             _cancellationTokenSource?.Cancel();
             _needsInitialization = false;
-            _wildcardPattern = new WildcardPattern(Filter, WildcardOptions.IgnoreCase);
             _cancellationTokenSource = new CancellationTokenSource();
             _fs = new FileSystemWatcher(Path)
             {
@@ -82,10 +90,11 @@ namespace StudioTVPlayer.Model
         }
 
         private bool Accept(string fullPath)
-        {
-            return (!IsFilteredByDate || File.GetCreationTime(fullPath).Date == _filterDate.Date)  && _wildcardPattern.IsMatch(fullPath);
+        {            
+            return (!IsFilteredByDate || File.GetCreationTime(fullPath).Date == _filterDate.Date)  && (_filterWildcards == null || _filterWildcards.Length == 0 || _filterWildcards.Any(w => w.IsMatch(fullPath)));
         }
 
+ 
         [XmlIgnore]
         public DateTime FilterDate
         {

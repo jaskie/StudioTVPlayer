@@ -28,13 +28,14 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>StudioTVPlayer.ico</ApplicationIcon>
@@ -68,7 +69,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Management.Automation" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -103,6 +103,7 @@
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />
     <Compile Include="Helpers\DataStore.cs" />
     <Compile Include="Helpers\FolderHelper.cs" />
+    <Compile Include="Helpers\Wildcard.cs" />
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\ConfigurationChangedEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />

@@ -39,7 +39,7 @@
         </ContextMenu>
     </UserControl.ContextMenu>
 
-    <Grid Margin="2" >
+    <Grid Margin="2" IsHitTestVisible="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="170"/>
             <ColumnDefinition/>

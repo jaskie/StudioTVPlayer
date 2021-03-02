@@ -5,12 +5,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="common">
-      <UniqueIdentifier>{0865f8dc-6fcf-4419-90b8-10b353ef9502}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core">
-      <UniqueIdentifier>{9ef1a49d-643c-45fb-b3ad-5537574bed32}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Decklink">
       <UniqueIdentifier>{3408a765-0c18-41b4-8ee5-64f3be313cf6}</UniqueIdentifier>
     </Filter>
@@ -23,22 +17,28 @@
     <Filter Include="Ndi">
       <UniqueIdentifier>{6f716b27-aa05-4ff3-8292-053665c2c643}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{9ef1a49d-643c-45fb-b3ad-5537574bed32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{0865f8dc-6fcf-4419-90b8-10b353ef9502}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ComInitializer.h">
-      <Filter>common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Decklink\Iterator.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Common\rational.h">
-      <Filter>common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Core\VideoFormat.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Channel.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\Decoder.h">
       <Filter>FFMpeg</Filter>
@@ -53,7 +53,7 @@
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Common\Exceptions.h">
-      <Filter>common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="Decklink\ApiVersion.h">
@@ -63,10 +63,10 @@
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Core\OutputDevice.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Common\NonCopyable.h">
-      <Filter>common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\Utils.h">
       <Filter>FFMpeg</Filter>
@@ -75,13 +75,13 @@
       <Filter>Decklink\Interop</Filter>
     </ClInclude>
     <ClInclude Include="Core\InputSource.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\FFMpegInputSource.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Core\PixelFormat.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Ndi\Ndi.h">
       <Filter>Ndi</Filter>
@@ -90,16 +90,16 @@
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Core\HwAccel.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Common\Executor.h">
-      <Filter>common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\AudioFifo.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Core\StreamInfo.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\FrameSynchronizer.h">
       <Filter>FFMpeg</Filter>
@@ -111,16 +111,16 @@
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Core\AudioChannelMapEntry.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\MediaType.h">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\AVSync.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Common\Semaphore.h">
-      <Filter>common</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Decklink\Utils.h">
       <Filter>Decklink</Filter>
@@ -134,10 +134,10 @@
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="Core\VideoFormat.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Channel.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="FFMpeg\Decoder.cpp">
       <Filter>FFMpeg</Filter>
@@ -156,7 +156,7 @@
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="Core\OutputDevice.cpp">
-      <Filter>core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DeckLinkAPI_i.c">
       <Filter>Decklink\Interop</Filter>

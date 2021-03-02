@@ -30,6 +30,11 @@ namespace TVPlayR {
 
 			~implementation()
 			{
+				if (frame_clock_)
+				{
+					frame_clock_->SetFrameRequestedCallback(nullptr);
+					frame_clock_ = nullptr;
+				}
 				for (auto device : output_devices_)
 					device->ReleaseChannel();
 			}
@@ -61,7 +66,7 @@ namespace TVPlayR {
 				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), &device), output_devices_.end());
 			}
 
-			void SetFrameClock(OutputDevice& clock, Channel* channel)
+			void SetFrameClock(OutputDevice& clock)
 			{
 				if (frame_clock_)
 					frame_clock_->SetFrameRequestedCallback(nullptr);
@@ -103,36 +108,21 @@ namespace TVPlayR {
 			impl_->RemoveOutput(device);
 		}
 
-		void Channel::SetFrameClock(OutputDevice& clock) {
-			impl_->SetFrameClock(clock, this);
-		}
+		void Channel::SetFrameClock(OutputDevice& clock) { impl_->SetFrameClock(clock); }
 
 		void Channel::Load(std::shared_ptr<InputSource>& source) {
 			if (!source->IsAddedToChannel(*this))
 				source->AddToChannel(*this);
 			impl_->Load(source);
 		}
-		void Channel::Clear() {
-			impl_->Clear();
-		}
+		void Channel::Clear() { impl_->Clear(); }
 
-		const VideoFormat & Channel::Format() const
-		{
-			return impl_->format_;
-		}
+		const VideoFormat & Channel::Format() const	{ return impl_->format_; }
 
-		const PixelFormat & Channel::PixelFormat() const
-		{
-			return impl_->pixel_format_;
-		}
+		const PixelFormat Channel::PixelFormat() const { return impl_->pixel_format_;	}
 
-		const int Channel::AudioChannelsCount() const
-		{
-			return impl_->audio_channels_count_;
-		}
+		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
 
-		void Channel::RequestFrame(int audio_samples_count) {
-			impl_->RequestFrame(audio_samples_count);
-		}
+		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 
 }}

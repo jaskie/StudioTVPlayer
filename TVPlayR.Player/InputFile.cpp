@@ -31,13 +31,18 @@ namespace TVPlayR {
 	InputFile::~InputFile()
 	{
 		this->!InputFile();
-		_framePlayedHandle.Free();
-		_stoppedHandle.Free();
 	}
 
 	InputFile::!InputFile()
 	{
+		if (!_nativeSource)
+			return;
+		(*_nativeSource)->SetFramePlayedCallback(nullptr);
+		(*_nativeSource)->SetStoppedCallback(nullptr);
+		_framePlayedHandle.Free();
+		_stoppedHandle.Free();
 		delete _nativeSource;
+		_nativeSource = nullptr;
 	}
 
 	bool InputFile::Seek(TimeSpan time)

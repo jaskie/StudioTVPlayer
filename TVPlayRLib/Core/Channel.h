@@ -20,7 +20,7 @@ public:
 	void Load(std::shared_ptr<InputSource>& source);
 	void Clear();
 	const VideoFormat& Format() const;
-	const PixelFormat& PixelFormat() const;
+	const PixelFormat PixelFormat() const;
 	const int AudioChannelsCount() const;
 private:
 	struct implementation;

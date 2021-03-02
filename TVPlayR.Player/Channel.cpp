@@ -20,7 +20,10 @@ namespace TVPlayR {
 
 	Channel::!Channel()
 	{
+		if (!_channel)
+			return;
 		delete _channel;
+		_channel = nullptr;
 	}
 
 	bool Channel::AddOutput(DecklinkDevice ^ device)

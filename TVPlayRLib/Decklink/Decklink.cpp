@@ -24,7 +24,7 @@ namespace TVPlayR {
 			int64_t scheduled_frames_ = 0;
 			int64_t scheduled_samples_ = 0;
 			int audio_channels_count_ = 2;
-			std::atomic_bool is_playing_;
+			std::atomic_bool is_running_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, int index)
@@ -39,6 +39,7 @@ namespace TVPlayR {
 			~implementation()
 			{
 				output_->SetScheduledFrameCompletionCallback(nullptr);
+				frame_requested_callback_ = nullptr;
 				ReleaseChannel();
 			}
 
@@ -58,7 +59,7 @@ namespace TVPlayR {
 						
 			void Preroll(Core::Channel& channel)
 			{
-				if (is_playing_ || !output_)
+				if (is_running_ || !output_)
 					return;
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
@@ -117,7 +118,7 @@ namespace TVPlayR {
 
 			bool SetBufferSize(int size) 
 			{
-				if (is_playing_)
+				if (is_running_)
 					return false;
 				buffer_size_ = size;
 				return true;
@@ -131,13 +132,13 @@ namespace TVPlayR {
 				audio_channels_count_ = channel.AudioChannelsCount();
 				Preroll(channel);
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
-				is_playing_ = true;
+				is_running_ = true;
 				return true;
 			}
 
 			void ReleaseChannel()
 			{
-				if (!is_playing_.exchange(false))
+				if (!is_running_.exchange(false))
 					return;
 				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				BMDTimeValue actual_stop;
@@ -206,7 +207,7 @@ namespace TVPlayR {
 		}
 
 		void Decklink::ReleaseChannel()	{ impl_->ReleaseChannel(); }
-		bool Decklink::IsPlaying() const { return impl_->is_playing_; }
+		bool Decklink::IsPlaying() const { return impl_->is_running_; }
 		void Decklink::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 		void Decklink::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }
 	}

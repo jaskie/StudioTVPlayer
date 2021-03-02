@@ -20,7 +20,10 @@ namespace TVPlayR {
 
 	DecklinkDevice::!DecklinkDevice()
 	{
+		if (!_decklink)
+			return;
 		delete _decklink;
+		_decklink = nullptr;
 	}
 
 	array<DecklinkDevice^>^ DecklinkDevice::EnumerateDevices()

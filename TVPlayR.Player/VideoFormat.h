@@ -36,7 +36,7 @@ namespace TVPlayR {
 		property Rational FrameRate { Rational get() { return _frame_rate; } }
 		property bool IsInterlaced { bool get() { return _native_fomat->interlaced(); } }
 		property FieldModeEnum FieldMode { FieldModeEnum get() { return static_cast<FieldModeEnum>(_native_fomat->field_mode()); } }
-		property int Id { int get() { return _native_fomat->type(); }}
+		property int Id { int get() { return static_cast<int>(_native_fomat->type()); }}
 		String^ FrameNumberToString(int frame_number, bool drop_frame);
 		int StringToFrameNumber(String^ tc);
 		int TimeToFrameNumber(TimeSpan time);

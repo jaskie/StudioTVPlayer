@@ -39,8 +39,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             DeleteDisabledCommand = new UiCommand(DeleteDisabled, _ => Rundown.Any(i => i.IsDisabled));
             DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
+            Name = player.Channel.Name;
+            VideoFormat = player.Channel.VideoFormat;
 
-            Channel = player.Channel;
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
             _mediaPlayer.Progress += MediaPlayer_Progress;
@@ -48,6 +49,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
+
+        public string Name { get; }
+
+        public TVPlayR.VideoFormat VideoFormat { get; }
 
         public bool IsPlaying
         {
@@ -72,8 +77,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             get => _outTime;
             set => Set(ref _outTime, value);
         }
-
-        public Channel Channel { get; }
 
         public double Seekbar
         {
@@ -132,7 +135,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (param == null)
                 return;
             await Pause();
-            var frameNumber = Channel.VideoFormat.TimeToFrameNumber(_displayTime);
+            var frameNumber = VideoFormat.TimeToFrameNumber(_displayTime);
             switch (param.ToString())
             {
                 case "-1":
@@ -149,19 +152,19 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
                 case "-second":
                     {
-                        frameNumber -= Channel.VideoFormat.FrameRate.Numerator / Channel.VideoFormat.FrameRate.Denominator;
+                        frameNumber -= VideoFormat.FrameRate.Numerator / VideoFormat.FrameRate.Denominator;
                         break;
                     }
 
                 case "second":
                     {
-                        frameNumber += Channel.VideoFormat.FrameRate.Numerator / Channel.VideoFormat.FrameRate.Denominator;
+                        frameNumber += VideoFormat.FrameRate.Numerator / VideoFormat.FrameRate.Denominator;
                         break;
                     }
             }
 
-            Seek(Channel.VideoFormat.FrameNumberToTime(frameNumber));
-            _seekbar = Channel.VideoFormat.FrameNumberToTime(frameNumber).TotalMilliseconds;
+            Seek(VideoFormat.FrameNumberToTime(frameNumber));
+            _seekbar = VideoFormat.FrameNumberToTime(frameNumber).TotalMilliseconds;
             NotifyPropertyChanged(nameof(Seekbar));
             await Pause();
         }
@@ -265,7 +268,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void Unload(object obj = null)
         {
             CurrentRundownItem = null;
-            Channel.Clear();
+            _mediaPlayer.Clear();
         }
 
         private async void TogglePlay(object obj)

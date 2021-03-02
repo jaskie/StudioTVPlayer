@@ -32,6 +32,7 @@ namespace TVPlayR {
 	{
 		this->!InputFile();
 		_framePlayedHandle.Free();
+		_stoppedHandle.Free();
 	}
 
 	InputFile::!InputFile()
@@ -54,12 +55,12 @@ namespace TVPlayR {
 		(*_nativeSource)->Pause();
 	}
 
-	Bitmap ^ InputFile::GetThumbnail(int height)
+	Bitmap ^ InputFile::GetThumbnail(TimeSpan time, int height)
 	{
 		Bitmap^ result = nullptr;
 		try
 		{
-			auto video = (*_nativeSource)->LastVideo();
+			auto video = (*_nativeSource)->GetFrameAt(time.Ticks / 10);
 			if (video == nullptr)
 				return nullptr;
 			FFmpeg::ThumbnailFilter filter(height, video);
@@ -102,12 +103,12 @@ namespace TVPlayR {
 		return result;
 	}
 
-	BitmapSource ^ InputFile::GetBitmapSource(int height)
+	BitmapSource ^ InputFile::GetBitmapSource(TimeSpan time, int height)
 	{
 		BitmapSource^ result = nullptr;
 		try
 		{
-			auto video = (*_nativeSource)->LastVideo();
+			auto video = (*_nativeSource)->GetFrameAt(time.Ticks / 10);
 			if (video == nullptr)
 				return nullptr;
 			FFmpeg::ThumbnailFilter filter(height, video);

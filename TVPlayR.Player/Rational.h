@@ -10,8 +10,8 @@ namespace TVPlayR {
 	
 	internal:
 		Rational(const Common::Rational<int>& rational)
-			: _numerator(rational.numerator())
-			, _denominator(rational.denominator())
+			: _numerator(rational.Numerator())
+			, _denominator(rational.Denominator())
 		{ }
 
 	public:

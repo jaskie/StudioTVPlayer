@@ -9,15 +9,16 @@ class AudioFifo
 {
 public:
 	AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, int64_t seek_time, int64_t fifo_duration);
-	bool TryPush(AVFramePtr frame);
-	AVFramePtr Pull(int nb_samples);
+	bool TryPush(std::shared_ptr<AVFrame> frame);
+	std::shared_ptr<AVFrame> Pull(int nb_samples);
+	void DiscardSamples(int nb_samples);
 	void Reset(int64_t seek_time);
-	int64_t TimeFromTs(int64_t ts) const;
 	int SamplesCount() const;
 	int64_t TimeMax() const;
 	int64_t TimeMin() const;
+	inline AVRational TimeBase() const { return time_base_; }
 private:
-	AVAudioFifoPtr fifo_;
+	AVAudioFifoPtr aduio_fifo_;
 	const AVRational time_base_;
 	const int sample_rate_;
 	const AVSampleFormat sample_fmt_;

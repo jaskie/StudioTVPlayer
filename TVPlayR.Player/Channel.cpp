@@ -25,9 +25,9 @@ namespace TVPlayR {
 
 	bool Channel::AddOutput(OutputDevice ^ device)
 	{
-		if (!_channel->AddOutput(device->GetNativeDevice()))
+		if (!_channel->AddOutput(*device->GetNativeDevice()))
 			return false;
-		_channel->SetFrameClock((device->GetNativeDevice())->OutputFrameClock());
+		_channel->SetFrameClock(*(device->GetNativeDevice()));
 		return true;
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "../Common/NonCopyable.h"
 #include "../FFMpeg/Utils.h"
+#include "../FFMpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -13,11 +14,12 @@ class OutputDevice : public Common::NonCopyable
 private:
 	Channel* channel_ = nullptr;
 public:
-	virtual bool AssignToChannel(Channel* channel);
-	virtual void ReleaseChannel();
-	virtual std::shared_ptr<OutputFrameClock> OutputFrameClock() = 0;
+	typedef std::function<void(int)> FRAME_REQUESTED_CALLBACK;
+	virtual bool AssignToChannel(Channel& channel);
+	virtual void ReleaseChannel() = 0;
 	virtual bool IsPlaying() const = 0;
-	virtual void Push(FFmpeg::AVFramePtr& video, FFmpeg::AVFramePtr& audio) = 0;
+	virtual void Push(FFmpeg::AVSync& sync) = 0;
+	virtual void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) = 0;
 };
 
 }}

@@ -6,10 +6,10 @@ namespace TVPlayR {
 class ComInitializer
 {
 private:
-	HRESULT m_hr;
+	const HRESULT m_hr;
 public:
 	ComInitializer()
-	: m_hr(::CoInitialize(nullptr)) { }
+	: m_hr(::CoInitializeEx(nullptr, COINIT::COINIT_MULTITHREADED)) { }
 	~ComInitializer() { if (SUCCEEDED(m_hr)) ::CoUninitialize(); }
 	operator HRESULT() const { return m_hr; }
 };

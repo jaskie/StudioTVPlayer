@@ -76,7 +76,7 @@ namespace StudioTVPlayer.Model
             _videoFormat = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
             if (device == null || _videoFormat == null)
                 return;
-            _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, 16);
+            _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, 2);
             _channelR.AddOutput(device);
         }
 
@@ -91,7 +91,11 @@ namespace StudioTVPlayer.Model
 
         public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);
         public void Load(InputFile inputFile) => _channelR.Load(inputFile);
-        public void Clear() => _channelR.Clear();
+        public void Clear()
+        {
+            
+            _channelR.Clear();
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void RaisePropertyChanged([CallerMemberName]string propertyname = null)

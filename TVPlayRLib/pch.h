@@ -26,7 +26,10 @@
 #include <atlcom.h>
 #include <atlhost.h>
 #include <mutex>
+#include <condition_variable>
 #include <future>
+#include <thread>
+#include <atomic>
 #include "Decklink/DeckLinkAPI_h.h"
 
 extern "C"
@@ -46,6 +49,7 @@ extern "C"
 #include "libavutil/audio_fifo.h"
 #include "libswscale/swscale.h"
 #include "libavutil/timecode.h"
+#include "libavutil/imgutils.h"
 #include "Processing.NDI.Lib.h"
 }
 

@@ -6,7 +6,7 @@ namespace TVPlayR {
 	namespace Core {
 
 VideoFormat::VideoFormat()
-	: VideoFormat(invalid)
+	: VideoFormat(VideoFormat::Type::invalid)
 {
 }
 
@@ -15,7 +15,7 @@ VideoFormat::VideoFormat(Type type)
 {
 	switch (type)
 	{
-	case ntsc:
+	case VideoFormat::Type::ntsc:
 		width_ = 720;
 		height_ = 480;
 		field_mode_ = FieldMode::lower;
@@ -23,7 +23,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "NTSC 4:3";
 		break;
-	case ntsc_fha:
+	case VideoFormat::Type::ntsc_fha:
 		width_ = 720;
 		height_ = 480;
 		field_mode_ = FieldMode::lower;
@@ -31,7 +31,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "NTSC 16:9";
 		break;
-	case pal:
+	case VideoFormat::Type::pal:
 		width_ = 720;
 		height_ = 576;
 		field_mode_ = FieldMode::upper;
@@ -39,7 +39,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "PAL 4:3";
 		break;
-	case pal_fha:
+	case VideoFormat::Type::pal_fha:
 		width_ = 720;
 		height_ = 576;
 		field_mode_ = FieldMode::upper;
@@ -47,7 +47,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "PAL 16:9";
 		break;
-	case v1080i5000:
+	case VideoFormat::Type::v1080i5000:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::upper;
@@ -55,7 +55,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "1080i50";
 		break;
-	case v1080i5994:
+	case VideoFormat::Type::v1080i5994:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::upper;
@@ -63,7 +63,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "1080i59.94";
 		break;
-	case v1080i6000:
+	case VideoFormat::Type::v1080i6000:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::upper;
@@ -71,7 +71,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30, 1);
 		name_ = "1080i60";
 		break;
-	case v1080p2398:
+	case VideoFormat::Type::v1080p2398:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -79,7 +79,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(24000, 1001);
 		name_ = "1080p23.98";
 		break;
-	case v1080p2400:
+	case VideoFormat::Type::v1080p2400:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -87,7 +87,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(24, 1);
 		name_ = "1080p24";
 		break;
-	case v1080p2500:
+	case VideoFormat::Type::v1080p2500:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -95,7 +95,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "1080p25";
 		break;
-	case v1080p2997:
+	case VideoFormat::Type::v1080p2997:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -103,7 +103,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "1080p29.97";
 		break;
-	case v1080p3000:
+	case VideoFormat::Type::v1080p3000:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -111,7 +111,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30, 1);
 		name_ = "1080p30";
 		break;
-	case v1080p5000:
+	case VideoFormat::Type::v1080p5000:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -119,7 +119,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(50, 1);
 		name_ = "1080p50";
 		break;
-	case v1080p5994:
+	case VideoFormat::Type::v1080p5994:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -127,7 +127,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "1080p59.94";
 		break;
-	case v1080p6000:
+	case VideoFormat::Type::v1080p6000:
 		width_ = 1920;
 		height_ = 1080;
 		field_mode_ = FieldMode::progressive;
@@ -135,7 +135,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(60, 1);
 		name_ = "1080p60";
 		break;
-	case v2160p2398:
+	case VideoFormat::Type::v2160p2398:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;
@@ -143,7 +143,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(24000, 1001);
 		name_ = "2160p23.98";
 		break;
-	case v2160p2400:
+	case VideoFormat::Type::v2160p2400:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;
@@ -151,7 +151,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(24, 1);
 		name_ = "2160p24";
 		break;
-	case v2160p2500:
+	case VideoFormat::Type::v2160p2500:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;
@@ -159,7 +159,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "2160p25";
 		break;
-	case v2160p2997:
+	case VideoFormat::Type::v2160p2997:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;
@@ -167,7 +167,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "2160p29.97";
 		break;
-	case v2160p3000:
+	case VideoFormat::Type::v2160p3000:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;
@@ -175,7 +175,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(30, 1);
 		name_ = "2160p30";
 		break;
-	case v2160p5000:
+	case VideoFormat::Type::v2160p5000:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;
@@ -183,7 +183,7 @@ VideoFormat::VideoFormat(Type type)
 		frame_rate_ = Common::Rational<int>(50, 1);
 		name_ = "2160p50";
 		break;
-	case v2160p6000:
+	case VideoFormat::Type::v2160p6000:
 		width_ = 3840;
 		height_ = 2160;
 		field_mode_ = FieldMode::progressive;

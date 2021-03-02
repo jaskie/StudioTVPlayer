@@ -11,8 +11,6 @@ namespace StudioTVPlayer.ViewModel.Main
 {
     public class PlayoutViewModel : ViewModelBase, IDisposable
     {
-        private MediaPlayerViewModel _selectedPlayer;
-
         public PlayoutViewModel()
         {
             Players = GlobalApplicationData.Current.Players.Select(p => new MediaPlayerViewModel(p)).ToArray();

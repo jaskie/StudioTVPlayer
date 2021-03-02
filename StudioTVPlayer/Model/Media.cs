@@ -25,6 +25,7 @@ namespace StudioTVPlayer.Model
         private ScanType _scanType;
         private string _frameRate;
         private int _audioChannelCount;
+        private TimeSpan _startTime;
         private readonly FileInfo _fileInfo;
 
         public Media(string path)
@@ -61,6 +62,18 @@ namespace StudioTVPlayer.Model
                 if (_name == value)
                     return;
                 _name = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public TimeSpan StartTime
+        {
+            get => _startTime; 
+            set
+            {
+                if (_startTime == value)
+                    return;
+                _startTime = value;
                 RaisePropertyChanged();
             }
         }
@@ -139,7 +152,7 @@ namespace StudioTVPlayer.Model
 
         public int AudioChannelCount
         {
-            get => _audioChannelCount; 
+            get => _audioChannelCount;
             set
             {
                 if (_audioChannelCount == value)

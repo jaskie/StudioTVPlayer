@@ -23,9 +23,9 @@ public:
 
 	Rational() : Rational(0, 1) {}
 			
-	T numerator() const { return numerator_; }
+	T Numerator() const { return numerator_; }
 
-	T denominator() const { return denominator_; }
+	T Denominator() const { return denominator_; }
 
 	bool operator==(const Rational<T>& other) const {
 		return other.numerator_ * denominator_ == other.denominator_ * numerator_;
@@ -34,7 +34,6 @@ public:
 	bool operator!=(const Rational<T>& other) const {
 		return other.numerator_ * denominator_ != other.denominator_ * numerator_;
 	}
-
 
 	Rational<T> operator *(T by) const {
 		return Rational<T>(numerator_ * by, denominator_);

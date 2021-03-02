@@ -16,6 +16,16 @@
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
+            <DataTemplate x:Key="mediaDragTemplate">
+                <Image Height="90" Source="{Binding Thumbnail}">
+                    <Image.OpacityMask>
+                        <LinearGradientBrush StartPoint="0 1" EndPoint="1 0">
+                            <GradientStop Offset="0" Color="Black"/>
+                            <GradientStop Offset="1" Color="Transparent"/>
+                        </LinearGradientBrush>
+                    </Image.OpacityMask>
+                </Image>
+            </DataTemplate>
         </ResourceDictionary>        
     </Application.Resources>
 </Application>

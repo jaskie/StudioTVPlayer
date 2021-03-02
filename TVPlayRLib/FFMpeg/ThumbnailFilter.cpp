@@ -6,8 +6,8 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-ThumbnailFilter::ThumbnailFilter(int height, AVFramePtr frame)
-	:VideoFilter(av_make_q(1, 1), av_make_q(1, 1), AV_PIX_FMT_RGB24)
+ThumbnailFilter::ThumbnailFilter(int height, std::shared_ptr<AVFrame> frame)
+	:VideoFilter(av_make_q(1, 1), AV_PIX_FMT_RGB24)
 	, thumbnail_frame_(frame)
 {
 	std::ostringstream filter;
@@ -25,7 +25,7 @@ ThumbnailFilter::ThumbnailFilter(int height, AVFramePtr frame)
 	VideoFilter::SetFilter(frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, filter.str());
 }
 
-AVFramePtr ThumbnailFilter::Pull()
+std::shared_ptr<AVFrame> ThumbnailFilter::Pull()
 {
 	while (thumbnail_frame_)
 	{

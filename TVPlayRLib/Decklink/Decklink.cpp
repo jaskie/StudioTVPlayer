@@ -1,96 +1,48 @@
 #include "../pch.h"
 #include "Decklink.h"
 #include "../Common/ComInitializer.h"
-#include "../Common/Executor.h"
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
+#include "../Core/PixelFormat.h"
 #include "../Core/Channel.h"
-#include "../Core/OutputFrameClock.h"
-#include "AVDecklinkVideoFrame.h"
-#include "AVDecklinkAudioBuffer.h"
+#include "../Common/Executor.h"
+#include "Utils.h"
+#include "DecklinkVideoFrame.h"
+
+#undef DEBUG
 
 namespace TVPlayR {
 	namespace Decklink {
-
-		static BMDDisplayMode GetDecklinkVideoFormat(Core::VideoFormat::Type fmt)
-		{
-			switch (fmt)
-			{
-			case Core::VideoFormat::pal:
-			case Core::VideoFormat::pal_fha:
-				return bmdModePAL;
-			case Core::VideoFormat::ntsc:
-			case Core::VideoFormat::ntsc_fha:
-				return bmdModeNTSC;
-			case Core::VideoFormat::v1080p2398:		return bmdModeHD1080p2398;
-			case Core::VideoFormat::v1080p2400:		return bmdModeHD1080p24;
-			case Core::VideoFormat::v1080i5000:		return bmdModeHD1080i50;
-			case Core::VideoFormat::v1080i5994:		return bmdModeHD1080i5994;
-			case Core::VideoFormat::v1080i6000:		return bmdModeHD1080i6000;
-			case Core::VideoFormat::v1080p2500:		return bmdModeHD1080p25;
-			case Core::VideoFormat::v1080p2997:		return bmdModeHD1080p2997;
-			case Core::VideoFormat::v1080p3000:		return bmdModeHD1080p30;
-			case Core::VideoFormat::v1080p5000:		return bmdModeHD1080p50;
-			case Core::VideoFormat::v1080p5994:		return bmdModeHD1080p5994;
-			case Core::VideoFormat::v1080p6000:		return bmdModeHD1080p6000;
-			case Core::VideoFormat::v2160p2398:		return bmdMode4K2160p2398;
-			case Core::VideoFormat::v2160p2400:		return bmdMode4K2160p24;
-			case Core::VideoFormat::v2160p2500:		return bmdMode4K2160p25;
-			case Core::VideoFormat::v2160p2997:		return bmdMode4K2160p2997;
-			case Core::VideoFormat::v2160p3000:		return bmdMode4K2160p30;
-			case Core::VideoFormat::v2160p5000:		return bmdMode4K2160p50;
-			case Core::VideoFormat::v2160p6000:		return bmdMode4K2160p60;
-			default:
-				return (BMDDisplayMode)ULONG_MAX;
-			}
-		}
-
-		static BMDPixelFormat BMDPixelFormatFromVideoFormat(const Core::PixelFormat& format)
-		{
-			switch (format)
-			{
-			case Core::PixelFormat::bgra:
-				return BMDPixelFormat::bmdFormat8BitBGRA;
-			case Core::PixelFormat::yuv422:
-				return BMDPixelFormat::bmdFormat8BitYUV;
-			default:
-				break;
-			}
-			return (BMDPixelFormat)0;
-		}
-
+		
 		struct Decklink::implementation : IDeckLinkVideoOutputCallback
 		{
-			Common::ComInitializer com_;
 			const CComPtr<IDeckLink> decklink_;
 			const CComQIPtr<IDeckLinkOutput> output_;
-			CComPtr<IDeckLinkMutableVideoFrame> empty_video_frame_;
-			std::deque<std::pair<AVDecklinkVideoFrame, AVDecklinkAudioBuffer>> frame_buffer_;
+			int index_;
 			Core::VideoFormat format_;
-			BMDPixelFormat pixel_format_ = BMDPixelFormat::bmdFormat8BitYUV;
-			size_t buffer_size_ = 8;
-			int64_t scheduled_frames_ = 0ULL;
-			int64_t scheduled_samples_ = 0ULL;
-			std::shared_ptr<Core::OutputFrameClock> output_frame_clock_;
-			Common::Executor executor_;
-			std::mutex mutex_;
+			int buffer_size_ = 3;
+			int64_t scheduled_frames_ = 0;
+			int64_t scheduled_samples_ = 0;
+			int audio_channels_count_ = 2;
+			std::atomic_bool is_playing_;
+			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
-			implementation(IDeckLink* decklink, const int card_index)
+			implementation(IDeckLink* decklink, int index)
 				: decklink_(decklink)
 				, output_(decklink)
-				, format_(Core::VideoFormat::invalid)
-				, executor_(L"Decklink " + std::to_wstring(card_index) + L" thread")
+				, format_(Core::VideoFormat::Type::invalid)
+				, index_(index)
 			{
-				if (output_)
-					output_frame_clock_.reset(new Core::OutputFrameClock());
+				output_->SetScheduledFrameCompletionCallback(this);
 			}
 
 			~implementation()
 			{
+				output_->SetScheduledFrameCompletionCallback(nullptr);
 				ReleaseChannel();
 			}
 
-			bool OpenOutput(BMDDisplayMode mode, BMDPixelFormat pixel_format)
+			bool OpenOutput(BMDDisplayMode mode, BMDPixelFormat pixel_format, int audio_channels_count)
 			{
 				if (!output_)
 					return false;
@@ -100,78 +52,51 @@ namespace TVPlayR {
 					return false;
 				if (output_->EnableVideoOutput(mode, BMDVideoOutputFlags::bmdVideoOutputFlagDefault) != S_OK)
 					return false;
-				output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, 2, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
+				output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
 				return true;
 			}
 						
-			void Preroll()
+			void Preroll(Core::Channel& channel)
 			{
-				if (IsPlaying() || !output_)
+				if (is_playing_ || !output_)
 					return;
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
 				output_->BeginAudioPreroll();
+				auto empty_video_frame = FFmpeg::CreateEmptyVideoFrame(channel.Format(), channel.PixelFormat());
 				for (size_t i = 0; i < buffer_size_; i++)
 				{
-					ScheduleVideo(*empty_video_frame_);
-					AVDecklinkAudioBuffer audio(AudioSamplesRequired(), 2);
-					ScheduleAudio(audio);
+					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_));
+					ScheduleVideo(empty_video_frame);
 				}
 				output_->EndAudioPreroll();
 			}
 
-			void ScheduleVideo(IDeckLinkVideoFrame& frame)
+			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame)
 			{
-				int64_t frame_time = scheduled_frames_ * format_.FrameRate().denominator();
-				output_->ScheduleVideoFrame(&frame, frame_time, format_.FrameRate().denominator(), format_.FrameRate().numerator());
+				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
+
+				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(frame);
+				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				scheduled_frames_++;
+#ifdef DEBUG
+				std::stringstream msg;
+				msg << "scheduled frame: " << frame->pts << "\n";
+				OutputDebugStringA(msg.str().c_str());
+#endif			
+				return ret == S_OK;
 			}
 
-			void ScheduleAudio(AVDecklinkAudioBuffer& buffer)
+			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
 			{
-				if (!buffer)
-					return;
 				unsigned int samples_written;
-				output_->ScheduleAudioSamples(buffer.GetBytes(), buffer.SamplesCount(), scheduled_samples_, 48000LL, &samples_written);
-				scheduled_samples_ += buffer.SamplesCount();
+				output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
+				scheduled_samples_ += samples_written;
 			}
 
 			int AudioSamplesRequired() const
 			{
-				return static_cast<int>(av_rescale(scheduled_frames_, 48000LL * format_.FrameRate().denominator(), format_.FrameRate().numerator()) - scheduled_samples_);
-			}
-
-			CComPtr<IDeckLinkMutableVideoFrame> CreateEmptyVideoFrame()
-			{
-				CComPtr<IDeckLinkMutableVideoFrame> frame;
-				int bpp;
-				uint32_t black_pattern;
-				switch (pixel_format_)
-				{
-				case bmdFormat8BitYUV:
-					bpp = 2;
-					black_pattern = 0x10801080;
-					break;
-				default:
-					bpp = 4;
-					black_pattern = 0x10101000;
-					break;
-				}
-				if (output_->CreateVideoFrame(format_.width(), format_.height(), format_.width() * bpp, pixel_format_, bmdFrameFlagDefault, &frame) != S_OK)
-					return nullptr;
-
-				uint32_t* nextWord;
-				frame->GetBytes((void**)&nextWord);
-				long wordsRemaining = (frame->GetRowBytes() * frame->GetHeight()) / sizeof(uint32_t);
-				while (wordsRemaining-- > 0)
-					*(nextWord++) = black_pattern;
-				return frame;
-			}
-
-
-			std::shared_ptr<Core::OutputFrameClock> OutputFrameClock()
-			{
-				return output_frame_clock_;
+				return static_cast<int>(av_rescale(scheduled_frames_ + 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - scheduled_samples_);
 			}
 
 			std::wstring GetDisplayName()
@@ -190,85 +115,66 @@ namespace TVPlayR {
 				return std::wstring(pModelName);
 			}
 
-			bool AssignToChannel(Core::Channel* channel)
+			bool SetBufferSize(int size) 
 			{
-				std::lock_guard<std::mutex> lock(mutex_);
-				BMDPixelFormat pixel_format = BMDPixelFormatFromVideoFormat(channel->PixelFormat());
-				if (!OpenOutput(GetDecklinkVideoFormat(channel->Format().type()), pixel_format))
-					return false;
-				format_ = channel->Format();
-				pixel_format_ = pixel_format;
-				empty_video_frame_ = CreateEmptyVideoFrame();
-				Preroll();
-				output_->SetScheduledFrameCompletionCallback(this);
-				output_->StartScheduledPlayback(0LL, format_.FrameRate().numerator(), 1.0);
-				return true;
-			}
-
-			void ReleaseChannel()
-			{
-				BOOL is_playing;
-				if (output_->IsScheduledPlaybackRunning(&is_playing) != S_OK || !is_playing)
-					return;
-				{
-					std::lock_guard<std::mutex> lock(mutex_);
-					output_->SetScheduledFrameCompletionCallback(nullptr);
-					BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().denominator();
-					BMDTimeValue actual_stop;
-					output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().numerator());
-					output_->DisableAudioOutput();
-					output_->DisableVideoOutput();
-					frame_buffer_.clear();
-					format_ = Core::VideoFormat::invalid;
-				}
-			}
-
-			bool IsPlaying() const
-			{
-				BOOL isPlaying;
-				if (output_ && output_->IsScheduledPlaybackRunning(&isPlaying) == S_OK && isPlaying)
-					return true;
-				return false;
-			}
-
-			void Push(FFmpeg::AVFramePtr& video, FFmpeg::AVFramePtr& audio)
-			{
-				std::lock_guard<std::mutex> lock(mutex_);
-				frame_buffer_.emplace_back(std::pair<AVDecklinkVideoFrame, AVDecklinkAudioBuffer>(video, audio));
-			}
-
-			bool SetBufferSize(size_t size)
-			{
-				if (IsPlaying())
+				if (is_playing_)
 					return false;
 				buffer_size_ = size;
 				return true;
 			}
 
-			size_t GetBufferSize() const
+			bool AssignToChannel(Core::Channel& channel)
 			{
-				return buffer_size_;
+				if (!OpenOutput(GetDecklinkVideoFormat(channel.Format().type()), BMDPixelFormatFromVideoFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
+					return false;
+				format_ = channel.Format();
+				audio_channels_count_ = channel.AudioChannelsCount();
+				Preroll(channel);
+				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
+				is_playing_ = true;
+				return true;
+			}
+
+			void ReleaseChannel()
+			{
+				if (!is_playing_.exchange(false))
+					return;
+				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
+				BMDTimeValue actual_stop;
+				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
+				output_->DisableAudioOutput();
+				output_->DisableVideoOutput();
+				format_ = Core::VideoFormat::Type::invalid;
+			}
+
+			void Push(FFmpeg::AVSync& sync)
+			{
+				ScheduleVideo(sync.Video);
+				ScheduleAudio(sync.Audio);
 			}
 
 			//IDeckLinkVideoOutputCallback
-			HRESULT STDMETHODCALLTYPE ScheduledFrameCompleted(IDeckLinkVideoFrame * completedFrame, BMDOutputFrameCompletionResult result) override
+			HRESULT __stdcall ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
 			{
-				int required_samples = AudioSamplesRequired();
-				if (output_frame_clock_)
-					output_frame_clock_->RequestFrame(required_samples);
-				std::lock_guard<std::mutex> lock(mutex_);
-				if (frame_buffer_.empty())
+				if (frame_requested_callback_)
+					frame_requested_callback_(AudioSamplesRequired());
+
+#ifdef DEBUG
+				auto frame = static_cast<DecklinkVideoFrame*>(completedFrame);
+				if (result != BMDOutputFrameCompletionResult::bmdOutputFrameCompleted)
 				{
-					ScheduleVideo(*empty_video_frame_);
-					AVDecklinkAudioBuffer audio(required_samples, 2);
-					ScheduleAudio(audio);
+					std::stringstream msg;
+					msg << "Frame: " << scheduled_frames_ << ": " << ((result == BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate) ? "late" : "dropped") << "\n";
+					OutputDebugStringA(msg.str().c_str());
 				}
 				else
 				{
-					ScheduleVideo(frame_buffer_.front().first);
-					ScheduleAudio(frame_buffer_.front().second);
-					frame_buffer_.pop_front();
+					std::stringstream msg;
+					msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts() << "\n";
+					OutputDebugStringA(msg.str().c_str());
 				}
+#endif
+				//delete frame;
 				return S_OK;
 			}
 
@@ -284,33 +190,25 @@ namespace TVPlayR {
 
 		};
 
-		Decklink::Decklink(IDeckLink * decklink, const int card_index)
-			: impl_(new implementation(decklink, card_index))
+		Decklink::Decklink(IDeckLink * decklink, int index)
+			: impl_(new implementation(decklink, index))
 		{}
 
 		Decklink::~Decklink() { }
 
-		std::shared_ptr<Core::OutputFrameClock> Decklink::OutputFrameClock() { return impl_->OutputFrameClock();	}
 		std::wstring Decklink::GetDisplayName() { return impl_->GetDisplayName(); }
 		std::wstring Decklink::GetModelName() { return impl_->GetModelName(); }
-		bool Decklink::SetBufferSize(size_t size) { return impl_->SetBufferSize(size); }
-		size_t Decklink::GetBufferSize() const { return impl_->GetBufferSize(); }
-		bool Decklink::AssignToChannel(Core::Channel* channel) { 
-			if (Core::OutputDevice::AssignToChannel(channel)
-				&& impl_->AssignToChannel(channel))
-				return true;
-			Core::OutputDevice::ReleaseChannel();
-			return false;
+		bool Decklink::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
+		int Decklink::GetBufferSize() const { return impl_->buffer_size_; }
+		bool Decklink::AssignToChannel(Core::Channel& channel) { 
+			return Core::OutputDevice::AssignToChannel(channel)
+				&& impl_->AssignToChannel(channel);
 		}
 
-		void Decklink::ReleaseChannel()
-		{
-			impl_->ReleaseChannel();
-			Core::OutputDevice::ReleaseChannel();
-		}
-
-		bool Decklink::IsPlaying() const { return impl_->IsPlaying(); }
-		void Decklink::Push(FFmpeg::AVFramePtr & video, FFmpeg::AVFramePtr& audio) { impl_->Push(video, audio);	}
+		void Decklink::ReleaseChannel()	{ impl_->ReleaseChannel(); }
+		bool Decklink::IsPlaying() const { return impl_->is_playing_; }
+		void Decklink::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
+		void Decklink::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }
 	}
 }
 

@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TVPlayRLib", "TVPlayRLib\TV
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TVPlayR.Player", "TVPlayR.Player\TVPlayR.Player.vcxproj", "{8D4BA75E-812D-41E1-8B0F-DE6540D2F84B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{A1D0DDE3-AF4B-4A7E-BC19-F6AE343160FA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestPlayer", "Helpers\TestPlayer\TestPlayer.vcxproj", "{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,9 +55,22 @@ Global
 		{8D4BA75E-812D-41E1-8B0F-DE6540D2F84B}.Release|x64.Build.0 = Release|x64
 		{8D4BA75E-812D-41E1-8B0F-DE6540D2F84B}.Release|x86.ActiveCfg = Release|Win32
 		{8D4BA75E-812D-41E1-8B0F-DE6540D2F84B}.Release|x86.Build.0 = Release|Win32
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Debug|x64.ActiveCfg = Debug|x64
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Debug|x64.Build.0 = Debug|x64
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Debug|x86.ActiveCfg = Debug|Win32
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Debug|x86.Build.0 = Debug|Win32
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Release|Any CPU.ActiveCfg = Release|Win32
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Release|x64.ActiveCfg = Release|x64
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Release|x64.Build.0 = Release|x64
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Release|x86.ActiveCfg = Release|Win32
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945} = {A1D0DDE3-AF4B-4A7E-BC19-F6AE343160FA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4A3B44D3-AF55-47CE-8FC0-B40E9D7CBD35}

@@ -6,17 +6,11 @@
 namespace TVPlayR {
 	namespace Core {
 
-bool OutputDevice::AssignToChannel(Channel* channel)
+bool OutputDevice::AssignToChannel(Channel& channel)
 {
-	if (channel_)
+	if (IsPlaying())
 		return false;
-	channel_ = channel;
 	return true;
-}
-
-void OutputDevice::ReleaseChannel()
-{
-	channel_ = nullptr;
 }
 
 }}

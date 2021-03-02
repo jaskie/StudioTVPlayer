@@ -10,69 +10,49 @@ InputFormat::InputFormat(const std::string& fileName)
 	AVFormatContext* weak_format_context = NULL;
 	THROW_ON_FFMPEG_ERROR(avformat_open_input(&weak_format_context, fileName.c_str(), NULL, NULL) == 0 && weak_format_context);
 	if (!weak_format_context)
-		THROW_EXCEPTION("Format context not created");
+		THROW_EXCEPTION("Format context not created")
 	if (!weak_format_context)
 		return;
+#ifdef DEBUG
+	av_dump_format(weak_format_context, 0, fileName.c_str(), 0);
+#endif // DEBUG
+
 	format_context_ = AVFormatCtxPtr(weak_format_context, [](AVFormatContext * ctx)
 	{
 		avformat_close_input(&ctx);
 	});
-	if (FF(avformat_find_stream_info(weak_format_context, NULL)))
+}
+
+bool InputFormat::LoadStreamData()
+{
+	if (!FF(avformat_find_stream_info(format_context_.get(), NULL)))
+		return false;
+	streams_.clear();
+	int best_video = av_find_best_stream(format_context_.get(), AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+	for (size_t i = 0; i < format_context_->nb_streams; i++)
 	{
-		video_stream_index_ = av_find_best_stream(weak_format_context, AVMEDIA_TYPE_VIDEO, -1, -1, &video_codec_, 0);
-		auto best_audio_stream_index = av_find_best_stream(weak_format_context, AVMEDIA_TYPE_AUDIO, -1, video_stream_index_, &audio_codec_, 0);
-		if (best_audio_stream_index >= 0)
-		{
-			for (unsigned int i = 0; i < weak_format_context->nb_streams; i++)
-				if (weak_format_context->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO
-					&& weak_format_context->streams[i]->codecpar->codec_id == weak_format_context->streams[best_audio_stream_index]->codecpar->codec_id
-					&& weak_format_context->streams[i]->codecpar->sample_rate == weak_format_context->streams[best_audio_stream_index]->codecpar->sample_rate)
-					audio_streams_.push_back(weak_format_context->streams[i]);
-		}
+		AVStream* stream = format_context_->streams[i];
+		if (!stream)
+			continue;
+		AVDictionary* metadata = stream->metadata;
+		AVDictionaryEntry* language = av_dict_get(metadata, "language", NULL, 0);
+		streams_.push_back(Core::StreamInfo{
+			stream->index,
+			stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ? Core::MediaType::audio : stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO ? Core::MediaType::video : Core::MediaType::other,
+			stream->index == best_video,
+			PtsToTime(stream->start_time, stream->time_base),
+			PtsToTime(stream->duration, stream->time_base),
+			stream->codecpar->channels,
+			language ? language->value : "",
+			avcodec_find_decoder(stream->codecpar->codec_id),
+			stream
+			});
 	}
-	is_eof_ = false;
+	is_stream_data_loaded_ = true;
+	return true;
 }
 
-
-int64_t InputFormat::GetVideoDuration() const
-{
-	if (video_stream_index_ == AVERROR_STREAM_NOT_FOUND)
-		return 0L;
-	return av_rescale_q(format_context_->streams[video_stream_index_]->duration, format_context_->streams[video_stream_index_]->time_base, av_get_time_base_q());
-}
-
-int64_t InputFormat::GetAudioDuration() const
-{
-	if (audio_streams_.size() == 0)
-		return 0L;
-	auto stream = audio_streams_.front();
-	return av_rescale_q(stream->duration, stream->time_base, av_get_time_base_q());
-}
-
-const std::vector<AVStream *>& InputFormat::GetAudioStreams() const
-{
-	return audio_streams_;
-}
-
-AVStream * InputFormat::GetVideoStream() const
-{
-	if (video_stream_index_ == AVERROR_STREAM_NOT_FOUND || !format_context_)
-		return NULL;
-	return
-		format_context_->streams[video_stream_index_];
-}
-
-AVCodec * InputFormat::GetAudioCodec() const
-{
-	return audio_codec_;
-}
-
-AVCodec * InputFormat::GetVideoCodec() const
-{
-	return video_codec_;
-}
-
-AVPacketPtr InputFormat::PullPacket()
+std::shared_ptr<AVPacket> InputFormat::PullPacket()
 {
 	if (format_context_)
 	{
@@ -92,17 +72,48 @@ AVPacketPtr InputFormat::PullPacket()
 	return __nullptr;
 }
 
+bool InputFormat::CanSeek() const
+{
+	return (format_context_->flags & AVFMTCTX_UNSEEKABLE) == 0;
+}
+
 bool InputFormat::Seek(int64_t time)
 {
-	AVRational time_base = format_context_->streams[video_stream_index_]->time_base;
-	int64_t seek_time = av_rescale_q(time - AV_TIME_BASE, av_get_time_base_q(), time_base) - format_context_->streams[video_stream_index_]->start_time;
-	if (FF(av_seek_frame(format_context_.get(), video_stream_index_, seek_time, AVSEEK_FLAG_BACKWARD)))
+	if (!CanSeek())
+		return false;
+	if (FF(av_seek_frame(format_context_.get(), -1, time, AVSEEK_FLAG_BACKWARD)))
 	{
 		is_eof_ = false;
 		return true;
 	}
 	return false;
 }
+
+int InputFormat::GetTotalAudioChannelCount() const
+{
+	int result = 0;
+	for (size_t i = 0; i < format_context_->nb_streams; i++)
+		if (format_context_->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+			result += format_context_->streams[i]->codecpar->channels;
+	return result;
+}
+
+std::vector<Core::StreamInfo>& InputFormat::GetStreams()
+{
+	return streams_;
+}
+
+const Core::StreamInfo* InputFormat::GetVideoStream() const
+{
+	auto info_iter = std::find_if(streams_.begin(), streams_.end(), [](const auto& info) { return info.Type == Core::MediaType::video && info.IsPreffered; });
+	if (info_iter == streams_.end())
+		info_iter = std::find_if(streams_.begin(), streams_.end(), [](const auto& info) { return info.Type == Core::MediaType::video; });
+	if (info_iter == streams_.end())
+		return nullptr;
+	return &*info_iter;
+}
+
+
 
 	
 }}

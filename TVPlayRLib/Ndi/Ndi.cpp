@@ -3,85 +3,121 @@
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
-#include "../Core/OutputFrameClock.h"
+#include "Processing.NDI.Lib.h"
 
 namespace TVPlayR {
 	namespace Ndi {
+		
+		static NDIlib_v4* LoadNdi()
+		{
+			HMODULE hNDILib = LoadLibraryA(NDILIB_LIBRARY_NAME);
+			if (!hNDILib)
+			{
+				size_t required_size = 0;
+				if (getenv_s(&required_size, NULL, 0, NDILIB_REDIST_FOLDER) != 0 || required_size == 0)
+					return nullptr;
+				char* p_ndi_runtime_v4 = (char*)malloc(required_size * sizeof(char));
+				if (!p_ndi_runtime_v4
+					|| getenv_s(&required_size, p_ndi_runtime_v4, required_size, NDILIB_REDIST_FOLDER) != 0
+					|| !p_ndi_runtime_v4)
+				{
+					free(p_ndi_runtime_v4);
+					return nullptr;
+				}
+				std::string ndi_path(p_ndi_runtime_v4);
+				free(p_ndi_runtime_v4);
+				ndi_path += "\\" NDILIB_LIBRARY_NAME;
+				hNDILib = LoadLibraryA(ndi_path.c_str());
+				if (!hNDILib)
+					return nullptr;
+			}
+			NDIlib_v4* (*NDIlib_v4_load)(void) = NULL;
+			if (hNDILib)
+				*((FARPROC*)&NDIlib_v4_load) = GetProcAddress(hNDILib, "NDIlib_v4_load");
 
+			// Unable to load NDI from the library
+			if (!NDIlib_v4_load)
+			{
+				if (hNDILib)
+					FreeLibrary(hNDILib);
+				return nullptr;
+			}
+			return NDIlib_v4_load();
+		}
+
+		static NDIlib_v4* ndi_library_ = LoadNdi();
+		
 		struct Ndi::implementation
 		{
-			Core::VideoFormat format_;
-			std::shared_ptr<Core::OutputFrameClock> output_frame_clock_;
+			Core::Channel * channel_ = nullptr;
 			const std::string source_name_;
 			const std::string group_name_;
-			std::deque<FFmpeg::AVFramePtr> video_frame_buffer_;
-			std::deque<FFmpeg::AVFramePtr> audio_frame_buffer_;
-
-			implementation(const std::string& source_name, const std::string& group_name)
-				: format_(Core::VideoFormat::invalid)
+			std::deque<std::shared_ptr<AVFrame>> video_frame_buffer_;
+			std::deque<std::shared_ptr<AVFrame>> audio_frame_buffer_;
+			const NDIlib_send_instance_t send_instance_;
+			
+			implementation(const std::string& source_name, const std::string& group_names)
+				: send_instance_(CreateSend(source_name, group_names))
 			{
-				output_frame_clock_.reset(new Core::OutputFrameClock());
 			}
 
 			~implementation()
 			{
-				ReleaseChannel();
+				if (send_instance_)
+					ndi_library_->send_destroy(send_instance_);
 			}
 
-			bool OpenOutput(BMDDisplayMode mode, BMDPixelFormat pixel_format)
+			NDIlib_send_instance_t CreateSend(const std::string& source_name, const std::string& group_names)
 			{
-				return true;
+				NDIlib_send_create_t send_create_description;
+				send_create_description.p_ndi_name = source_name.c_str();
+				send_create_description.p_groups = group_names.c_str();
+				return ndi_library_->send_create(&send_create_description);
 			}
 
-			std::shared_ptr<Core::OutputFrameClock> OutputFrameClock()
+			bool AssignToChannel(Core::Channel& channel)
 			{
-				return output_frame_clock_;
-			}
-
-
-			bool AssignToChannel(Core::Channel * channel)
-			{
+				channel_ = &channel;
 				return true;
 			}
 
 			void ReleaseChannel()
 			{
-
+				if (!channel_)
+					return;
+				channel_ = nullptr;
 			}
 
 			bool IsPlaying() const
 			{
 				return false;
 			}
-
-			void Push(FFmpeg::AVFramePtr& video, FFmpeg::AVFramePtr & audio)
+			
+			void Push(FFmpeg::AVSync& sync)
 			{
-				video_frame_buffer_.emplace_back(video);
-				audio_frame_buffer_.emplace_back(audio);
+				//video_frame_buffer_.emplace_back(sync.Video);
+				//audio_frame_buffer_.emplace_back(sync.Audio);
 			}
-
 		};
 			
 		Ndi::Ndi(const std::string& source_name, const std::string& group_name) : impl_(new implementation(source_name, group_name)) { }
 		Ndi::~Ndi() { }
-		std::shared_ptr<Core::OutputFrameClock> Ndi::OutputFrameClock() { return impl_->OutputFrameClock();	}
-		
-		bool Ndi::AssignToChannel(Core::Channel * channel) { 
-			if (Core::OutputDevice::AssignToChannel(channel)
-				&& impl_->AssignToChannel(channel))
-				return true;
-			Core::OutputDevice::ReleaseChannel();
-			return false;
+
+		bool Ndi::AssignToChannel(Core::Channel& channel) { 
+			return Core::OutputDevice::AssignToChannel(channel)
+				&& impl_->AssignToChannel(channel);
 		}
 
 		void Ndi::ReleaseChannel()
 		{
 			impl_->ReleaseChannel();
-			Core::OutputDevice::ReleaseChannel();
 		}
 
 		bool Ndi::IsPlaying() const { return impl_->IsPlaying(); }
-		void Ndi::Push(FFmpeg::AVFramePtr & video, FFmpeg::AVFramePtr& audio) { impl_->Push(video, audio); }
+		void Ndi::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
+		void Ndi::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
+		{
+		}
 	}
 }
 

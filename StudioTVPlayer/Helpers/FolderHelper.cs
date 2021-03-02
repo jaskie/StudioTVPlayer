@@ -9,14 +9,14 @@ namespace StudioTVPlayer.Helpers
     internal static class FolderHelper
     {
         public static bool Browse(ref string currentFolder, string description = "")
-        {
-            
+        {            
             using (var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog(description) 
             { 
                 IsFolderPicker = true,
                 ShowPlacesList = true,
                 Multiselect = false,
-                DefaultDirectory = currentFolder 
+                DefaultDirectory = currentFolder, 
+
             })
             {
                 var result = dialog.ShowDialog();

@@ -1,32 +1,54 @@
 #pragma once
 
 #include "Exceptions.h"
-#include "blockingconcurrentqueue.h"
-#include <thread>
-#include <atomic>
-#include <functional>
-#include <future>
+#include "Semaphore.h"
 
 namespace TVPlayR {
     namespace Common {
 
+        typedef struct tagTHREADNAME_INFO
+        {
+            DWORD dwType; // must be 0x1000
+            LPCSTR szName; // pointer to name (in user addr space)
+            DWORD dwThreadID; // thread ID (-1=caller thread)
+            DWORD dwFlags; // reserved for future use, must be zero
+        } THREADNAME_INFO;
+
+        static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
+        {
+            THREADNAME_INFO info;
+            {
+                info.dwType = 0x1000;
+                info.szName = szThreadName;
+                info.dwThreadID = dwThreadID;
+                info.dwFlags = 0;
+            }
+            __try
+            {
+                RaiseException(0x406D1388, 0, sizeof(info) / sizeof(DWORD), (ULONG_PTR*)&info);
+            }
+            __except (EXCEPTION_CONTINUE_EXECUTION) {}
+        }
+
     class Executor final
     {
+    private:
         Executor(const Executor&);
 
         using task_t = std::function<void()>;
-        using queue_t = moodycamel::BlockingConcurrentQueue<task_t>;
+        using queue_t = std::deque<task_t>;
 
-        std::atomic<bool> is_running_{ true };
+        const std::string name_;
+        std::atomic<bool> is_running_ = true;
         queue_t           queue_;
         std::thread       thread_;
+        Common::Semaphore semaphore_;
 
     public:
-        Executor(const std::wstring& name)
+        Executor(const std::string& name)
             : thread_(std::thread([this] { run(); }))
-        {
-            //SetThreadDescription(thread_.native_handle(), name.c_str());
-        }
+            , name_(name)
+        { }
 
         ~Executor()
         {
@@ -45,7 +67,8 @@ namespace TVPlayR {
 
             auto task = std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func));
 
-            queue_.try_enqueue([=]() mutable { (*task)(); });
+            queue_.push_back([=]() mutable { (*task)(); });
+            semaphore_.notify();
 
             return task->get_future();
         }
@@ -77,7 +100,8 @@ namespace TVPlayR {
                 return;
             }
             is_running_ = false;
-            queue_.try_enqueue(nullptr);
+            queue_.push_back(nullptr);
+            semaphore_.notify();
         }
 
         void wait()
@@ -92,17 +116,17 @@ namespace TVPlayR {
     private:
         void run()
         {
+            SetThreadName(::GetCurrentThreadId(), name_.c_str());
             task_t task;
-
             while (is_running_) {
                 try {
-                    queue_.wait_dequeue(task);
-                    do {
-                        if (!task) {
-                            return;
-                        }
-                        task();
-                    } while (queue_.try_dequeue(task));
+                    semaphore_.wait();
+                    task = queue_.front();
+                    queue_.pop_front();
+                    if (!task) {
+                        return;
+                    }
+                    task();
                 }
                 catch (...) {
                     //LOG_CURRENT_EXCEPTION();

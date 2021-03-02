@@ -24,3 +24,5 @@
 /StudioTVPlayer/obj
 /StudioTVPlayer/bin
 /packages
+/Helpers/TestPlayer/x64
+/Helpers/TestPlayer/Debug

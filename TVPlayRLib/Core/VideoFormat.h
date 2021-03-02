@@ -1,5 +1,5 @@
 #pragma once
-#include "../Common/rational.h"
+#include "../Common/Rational.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -7,7 +7,7 @@ namespace TVPlayR {
 class VideoFormat
 {
 public:
-	enum Type {
+	enum class Type {
 		invalid,
 		pal,
 		pal_fha,
@@ -33,7 +33,7 @@ public:
 		v2160p6000,
 		count
 	};
-	enum FieldMode {
+	enum class FieldMode {
 		unknown,
 		progressive,
 		lower,

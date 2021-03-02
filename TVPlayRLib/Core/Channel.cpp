@@ -1,8 +1,6 @@
 #include "../pch.h"
 #include "Channel.h"
 #include "InputSource.h"
-#include "OutputDeviceSource.h"
-#include "OutputFrameClock.h"
 #include "OutputDevice.h"
 
 namespace TVPlayR {
@@ -10,20 +8,22 @@ namespace TVPlayR {
 
 		struct Channel::implementation
 		{
-			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
-			std::shared_ptr<OutputFrameClock> frame_clock_;
-			std::shared_ptr<OutputDeviceSource> playing_source_;
+			std::vector<OutputDevice*> output_devices_;
+			OutputDevice* frame_clock_;
+			std::shared_ptr<InputSource> playing_source_;
 			std::mutex mutex_;
 
 			const VideoFormat format_;
 			const Core::PixelFormat pixel_format_;
 			const int audio_channels_count_;
+			const std::shared_ptr<AVFrame> empty_video_;
 
-			implementation(const VideoFormat::Type& Format, const Core::PixelFormat pixel_format, const int audio_channels_count)
-				: format_(Format)
+			implementation(const VideoFormat::Type& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+				: format_(format)
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
 				, frame_clock_(nullptr)
+				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
 			{
 			}
 
@@ -35,39 +35,51 @@ namespace TVPlayR {
 
 			void RequestFrame(int audio_samples_count)
 			{
-				std::lock_guard<std::mutex> guard(mutex_);
-				if (!playing_source_)
-					return;
-				auto video = playing_source_->PullVideo();
-				auto audio = playing_source_->PullAudio(audio_samples_count);
-				for (auto device : output_devices_)
-					device->Push(video, audio);
+				std::lock_guard<std::mutex> lock(mutex_);
+				if (playing_source_)
+				{
+					auto sync = playing_source_->PullSync(audio_samples_count);
+					for (auto device : output_devices_)
+						device->Push(sync);
+				}
+				else
+				{
+					auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_), empty_video_, 0LL);
+					for (auto device : output_devices_)
+						device->Push(sync);
+				}
 			}
 
-			void AddOutput(std::shared_ptr<OutputDevice> device)
+			void AddOutput(OutputDevice& device)
 			{
-				output_devices_.push_back(device);
+				output_devices_.push_back(&device);
 			}
 
-			void SetFrameClock(std::shared_ptr<OutputFrameClock> clock, Channel* channel)
+			void RemoveOutput(OutputDevice& device)
+			{
+				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), &device), output_devices_.end());
+			}
+
+			void SetFrameClock(OutputDevice& clock, Channel* channel)
 			{
 				if (frame_clock_)
-				{
-					frame_clock_->ReleaseChannel(channel);
-				}
-				frame_clock_ = clock;
-				clock->AssignToChannel(channel);
+					frame_clock_->SetFrameRequestedCallback(nullptr);
+				frame_clock_ = &clock;
+				clock.SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
 			}
 
 			void Load(std::shared_ptr<InputSource>& source)
 			{
 				std::lock_guard<std::mutex> guard(mutex_);
-				playing_source_.reset(new OutputDeviceSource(source, format_, pixel_format_, audio_channels_count_));
+				playing_source_ = source;
 			}
 
 			void Clear()
 			{
 				std::lock_guard<std::mutex> guard(mutex_);
+				if (!playing_source_)
+					return;
+				playing_source_->RemoveFromChannel();
 				playing_source_.reset();
 			}
 		};
@@ -77,18 +89,31 @@ namespace TVPlayR {
 		
 		Channel::~Channel() {}
 
-		bool Channel::AddOutput(std::shared_ptr<OutputDevice> device) {
-			if (!device->AssignToChannel(this))
+		bool Channel::AddOutput(OutputDevice& device) {
+			if (!device.AssignToChannel(*this))
 				return false;
 			impl_->AddOutput(device);
 			return true;
 		}
 
-		void Channel::SetFrameClock(std::shared_ptr<OutputFrameClock> clock) {
+		void Channel::RemoveOutput(OutputDevice& device)
+		{
+			device.ReleaseChannel();
+			impl_->RemoveOutput(device);
+		}
+
+		void Channel::SetFrameClock(OutputDevice& clock) {
 			impl_->SetFrameClock(clock, this);
 		}
 
+		void Channel::Preload(std::shared_ptr<InputSource>& source)
+		{
+			source->AddToChannel(*this);
+		}
+
 		void Channel::Load(std::shared_ptr<InputSource>& source) {
+			if (!source->IsAddedToChannel(*this))
+				source->AddToChannel(*this);
 			impl_->Load(source);
 		}
 		void Channel::Clear() {

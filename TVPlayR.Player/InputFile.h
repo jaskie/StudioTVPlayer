@@ -23,8 +23,8 @@ namespace TVPlayR {
 		bool Seek(TimeSpan time);
 		void Play();
 		void Pause();
-		Bitmap^ GetThumbnail(int height);
-		BitmapSource^ GetBitmapSource(int height);
+		Bitmap^ GetThumbnail(TimeSpan time, int height);
+		BitmapSource^ GetBitmapSource(TimeSpan time, int height);
 		property TimeSpan AudioDuration 
 		{
 			TimeSpan get() { return TimeSpan((*_nativeSource)->GetAudioDuration() * 10); }
@@ -33,6 +33,11 @@ namespace TVPlayR {
 		{
 			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoDuration() * 10); }
 		}
+		property TimeSpan VideoStart
+		{
+			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoStart() * 10); }
+		}
+
 		property String^ FileName
 		{
 			String^ get() { return _fileName; }

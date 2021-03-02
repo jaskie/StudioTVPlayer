@@ -57,7 +57,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Text="{Binding Channel.Name}" FontSize="18" />
+            <TextBlock Text="{Binding Name}" FontSize="18" />
             <Border Grid.Row="1" HorizontalAlignment="Center" MinWidth="200" Margin="5" CornerRadius="1,1,1,1">
                 <Grid Margin="10" Width="auto" >
                     <Grid.RowDefinitions>
@@ -69,11 +69,11 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding Channel.VideoFormat}" />
+                        <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding VideoFormat}" />
                         <TextBlock Text="Current time" Grid.Row="0" />
 
                         <controls:Timecode Grid.Row="1"
-                                               VideoFormat="{Binding Channel.VideoFormat}"
+                                               VideoFormat="{Binding VideoFormat}"
                                                Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
                                                TextAlignment="Right" 
@@ -99,7 +99,7 @@
                         </Grid.RowDefinitions>
                         <TextBlock Text="Time left" Grid.Row="0" />
                         <controls:Timecode Grid.Row="1"
-                                               VideoFormat="{Binding Channel.VideoFormat}"
+                                               VideoFormat="{Binding VideoFormat}"
                                                Time="{Binding OutTime}"
                                                IsReadOnly="True"
                                                TextAlignment="Right" 
@@ -174,7 +174,8 @@
             </UniformGrid>
             <controls:Seekbar Grid.Row="4" IsMoveToPointEnabled="True" 
                             Margin="5" 
-                            Maximum="{Binding CurrentRundownItem.RundownItem.Media.Duration.TotalMilliseconds, UpdateSourceTrigger=PropertyChanged}" 
+                            Minimum="{Binding CurrentRundownItem.RundownItem.Media.StartTime.TotalMilliseconds}"
+                            Maximum="{Binding CurrentRundownItem.RundownItem.Media.Duration.TotalMilliseconds}" 
                             SliderDragStartCommand="{Binding SliderDragStartCommand}"
                             Value="{Binding Seekbar, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=20}">
             </controls:Seekbar>

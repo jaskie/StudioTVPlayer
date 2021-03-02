@@ -11,10 +11,10 @@ class VideoFilter :
 private:
 public:
 	typedef std::unique_ptr<VideoFilter> Ptr;
-	VideoFilter(AVRational input_frame_rate, AVRational input_time_base, AVPixelFormat output_pix_fmt);
+	VideoFilter(AVRational input_time_base, AVPixelFormat output_pix_fmt);
 	virtual ~VideoFilter();
-	virtual bool Push(AVFramePtr frame);
-	virtual AVFramePtr Pull();
+	virtual bool Push(std::shared_ptr<AVFrame> frame);
+	virtual std::shared_ptr<AVFrame> Pull();
 	int OutputWidth();
 	int OutputHeight();
 	AVRational OutputSampleAspectRatio();
@@ -22,7 +22,7 @@ public:
 	AVPixelFormat GetOutputPixelFormat();
 	virtual AVRational OutputTimeBase() const override;
 	virtual void Flush() override;
-	bool IsFlushed() const;
+	virtual bool IsFlushed() const override;
 	virtual void Reset() override;
 	virtual bool IsEof() const override;
 protected:

@@ -51,6 +51,7 @@ namespace StudioTVPlayer.Model
         {
             using (var file = new InputFile(media.FullPath, 0))
             {
+                media.StartTime = file.VideoStart;
                 media.Duration = file.VideoDuration;
                 media.Width = file.Width;
                 media.Height = file.Height;
@@ -68,7 +69,7 @@ namespace StudioTVPlayer.Model
                 media.AudioChannelCount = file.AudioChannelCount;
                 if (thumbnailHeight > 0)
                 {
-                    var thumb = file.GetBitmapSource(thumbnailHeight) ?? new BitmapImage();
+                    var thumb = file.GetBitmapSource(file.VideoStart, thumbnailHeight) ?? new BitmapImage();
                     thumb.Freeze();
                     media.Thumbnail = thumb;
                 }

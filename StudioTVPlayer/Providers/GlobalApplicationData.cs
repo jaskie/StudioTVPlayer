@@ -39,12 +39,12 @@ namespace StudioTVPlayer.Providers
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
-            foreach (var decklink in DecklinkDevice.EnumerateDevices())
-                decklink.Dispose();
             foreach (var player in Players)
                 player.Dispose();
             foreach (var channel in Configuration.Channels)
                 channel.Dispose();
+            foreach (var decklink in DecklinkDevice.EnumerateDevices())
+                decklink.Dispose();
         }
 
         public void UpdateChannels(List<Model.Channel> channels)

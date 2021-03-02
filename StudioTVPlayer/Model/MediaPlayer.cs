@@ -24,7 +24,7 @@ namespace StudioTVPlayer.Model
 
         public RundownItem PlayingQueueItem
         {
-            get => _playingQueueItem; 
+            get => _playingQueueItem;
             private set
             {
                 if (_playingQueueItem == value)
@@ -89,6 +89,8 @@ namespace StudioTVPlayer.Model
                 _inputFile.Dispose();
                 Stopped?.Invoke(this, EventArgs.Empty);
             }
+            if (rundownItem == null)
+                return;
             _inputFile = new TVPlayR.InputFile(rundownItem.Media.FullPath, 2);
             _inputFile.FramePlayed += InputFile_FramePlayed;
             _inputFile.Stopped += InputFile_Stopped;
@@ -110,6 +112,13 @@ namespace StudioTVPlayer.Model
             return _inputFile.Seek(timeSpan);
         }
 
+        public void Clear()
+        {
+            PlayingQueueItem = null;
+            Channel.Clear();
+        }
+
+
         private void InputFile_Stopped(object sender, EventArgs e)
         {
             Stopped?.Invoke(this, EventArgs.Empty);
@@ -130,7 +139,6 @@ namespace StudioTVPlayer.Model
             _inputFile.Dispose();
             _inputFile = null;
         }
-
 
     }
 

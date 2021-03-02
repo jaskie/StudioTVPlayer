@@ -6,7 +6,7 @@ namespace TVPlayR {
 
 int64_t FilterBase::TimeFromTs(int64_t ts) const
 {
-	return av_rescale_q(ts, OutputTimeBase(), av_get_time_base_q());
+	return PtsToTime(ts, OutputTimeBase());
 }
 
 }}

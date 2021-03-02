@@ -5,7 +5,7 @@
 namespace TVPlayR {
 
 	NdiDevice::NdiDevice(String^ sourceName, String^ groupName)
-		: _ndi(new std::shared_ptr<Ndi::Ndi>(new Ndi::Ndi(ClrStringToStdString(sourceName), ClrStringToStdString(groupName))))
+		: _ndi(new Ndi::Ndi(ClrStringToStdString(sourceName), ClrStringToStdString(groupName)))
 		, _sourceName(sourceName)
 		, _groupName(groupName)
 	{

@@ -27,15 +27,15 @@ namespace TVPlayR {
 		BitmapSource^ GetBitmapSource(TimeSpan time, int height);
 		property TimeSpan AudioDuration 
 		{
-			TimeSpan get() { return TimeSpan(_nativeSource->GetAudioDuration() * 10); }
+			TimeSpan get() { return TimeSpan((*_nativeSource)->GetAudioDuration() * 10); }
 		}
 		property TimeSpan VideoDuration 
 		{
-			TimeSpan get() { return TimeSpan(_nativeSource->GetVideoDuration() * 10); }
+			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoDuration() * 10); }
 		}
 		property TimeSpan VideoStart
 		{
-			TimeSpan get() { return TimeSpan(_nativeSource->GetVideoStart() * 10); }
+			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoStart() * 10); }
 		}
 
 		property String^ FileName
@@ -45,24 +45,24 @@ namespace TVPlayR {
 
 		property int Width
 		{
-			int get() { return _nativeSource->GetWidth(); }
+			int get() { return (*_nativeSource)->GetWidth(); }
 		}
 
 		property int Height
 		{
-			int get() { return _nativeSource->GetHeight(); }
+			int get() { return (*_nativeSource)->GetHeight(); }
 		}
 
 		property bool IsPlaying
 		{
-			bool get() { return _nativeSource->IsPlaying(); }
+			bool get() { return (*_nativeSource)->IsPlaying(); }
 		}
 
 		property TVPlayR::FieldOrder FieldOrder
 		{
 			TVPlayR::FieldOrder get() 
 			{
-				auto internalFieldOrder = _nativeSource->GetFieldOrder();
+				auto internalFieldOrder = (*_nativeSource)->GetFieldOrder();
 				switch (internalFieldOrder)
 				{
 				case AVFieldOrder::AV_FIELD_TT:
@@ -79,10 +79,10 @@ namespace TVPlayR {
 
 		property TVPlayR::Rational FrameRate
 		{
-			TVPlayR::Rational get() { return TVPlayR::Rational(_nativeSource->GetFrameRate()); }
+			TVPlayR::Rational get() { return TVPlayR::Rational((*_nativeSource)->GetFrameRate()); }
 		}
 
-		property int AudioChannelCount { int get() { return _nativeSource->GetAudioChannelCount(); }}
+		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
 
 		delegate void FramePlayedDelegate(int64_t);
 		delegate void StoppedDelegate(void);
@@ -91,7 +91,7 @@ namespace TVPlayR {
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
-		FFmpeg::FFmpegInputSource * _nativeSource;
+		std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
 		StoppedDelegate^ _stoppedDelegate;
@@ -100,7 +100,7 @@ namespace TVPlayR {
 		void FramePlayedCallback(int64_t time);
 		void StoppedCallback();
 	internal:
-		FFmpeg::FFmpegInputSource* GetNativeSource() { return _nativeSource; }
+		std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }
 	};
 
 }

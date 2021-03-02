@@ -10,7 +10,7 @@ namespace TVPlayR {
 		{
 			std::vector<OutputDevice*> output_devices_;
 			OutputDevice* frame_clock_ ;
-			InputSource* playing_source_;
+			std::shared_ptr<InputSource> playing_source_;
 			std::mutex mutex_;
 
 			const VideoFormat format_;
@@ -69,10 +69,10 @@ namespace TVPlayR {
 				clock.SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
 			}
 
-			void Load(InputSource& source)
+			void Load(std::shared_ptr<InputSource>& source)
 			{
 				std::lock_guard<std::mutex> guard(mutex_);
-				playing_source_ = &source;
+				playing_source_ = source;
 			}
 
 			void Clear()
@@ -107,14 +107,9 @@ namespace TVPlayR {
 			impl_->SetFrameClock(clock, this);
 		}
 
-		void Channel::Preload(InputSource& source)
-		{
-			source.AddToChannel(*this);
-		}
-
-		void Channel::Load(InputSource& source) {
-			if (!source.IsAddedToChannel(*this))
-				source.AddToChannel(*this);
+		void Channel::Load(std::shared_ptr<InputSource>& source) {
+			if (!source->IsAddedToChannel(*this))
+				source->AddToChannel(*this);
 			impl_->Load(source);
 		}
 		void Channel::Clear() {

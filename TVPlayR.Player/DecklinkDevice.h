@@ -1,16 +1,11 @@
 #pragma once
 #include "Decklink/Decklink.h"
-#include "OutputDevice.h"
-
 
 using namespace System;
 
 namespace TVPlayR {
-	namespace Core {
-		class OutputDevice;
-	}
 
-	public ref class DecklinkDevice : public OutputDevice
+	public ref class DecklinkDevice 
 	{
 	private:
 		const int _index;
@@ -19,7 +14,7 @@ namespace TVPlayR {
 		static array<DecklinkDevice^>^ _devices;
 
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return *_decklink; }
+		virtual Core::OutputDevice* GetNativeDevice() { return _decklink->get(); }
 
 	public:
 		~DecklinkDevice();

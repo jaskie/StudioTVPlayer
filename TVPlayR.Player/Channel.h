@@ -2,8 +2,8 @@
 #include "Core/Channel.h"
 #include "VideoFormat.h"
 #include "PixelFormat.h"
-#include "OutputDevice.h"
 #include "InputFile.h"
+#include "DecklinkDevice.h"
 
 using namespace System;
 
@@ -18,7 +18,7 @@ namespace TVPlayR {
 		Channel(int formatId, PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();
 		!Channel();
-		bool AddOutput(OutputDevice^ device);
+		bool AddOutput(DecklinkDevice^ device);
 		void Load(InputFile^ file);
 		void Clear();
 	};

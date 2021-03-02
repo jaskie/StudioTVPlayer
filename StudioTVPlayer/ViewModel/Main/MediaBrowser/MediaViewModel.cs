@@ -17,6 +17,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
+        public TimeSpan StartTime => Media.StartTime;
         public DateTime CreationTime => Media.CreationTime;
         public int Width => Media.Width;
         public int Height => Media.Height;

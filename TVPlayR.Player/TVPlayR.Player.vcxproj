@@ -150,7 +150,6 @@
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="NdiDevice.h" />
-    <ClInclude Include="OutputDevice.h" />
     <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="Rational.h" />
     <ClInclude Include="Resource.h" />

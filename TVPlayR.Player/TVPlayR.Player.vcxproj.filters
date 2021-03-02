@@ -45,9 +45,6 @@
     <ClInclude Include="TimeEventArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OutputDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NdiDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>

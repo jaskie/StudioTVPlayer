@@ -23,7 +23,7 @@ namespace TVPlayR {
 		struct Iterator::implementation {
 			Common::ComInitializer com_;
 			CComPtr<IDeckLinkIterator> decklink_iterator_;
-			std::vector< std::shared_ptr<Decklink>> decklink_list_;
+			std::vector<std::shared_ptr<Decklink>> decklink_list_;
 			implementation()
 			{
 				Refresh();

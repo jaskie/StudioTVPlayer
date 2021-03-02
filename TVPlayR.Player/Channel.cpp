@@ -23,17 +23,17 @@ namespace TVPlayR {
 		delete _channel;
 	}
 
-	bool Channel::AddOutput(OutputDevice ^ device)
+	bool Channel::AddOutput(DecklinkDevice ^ device)
 	{
 		if (!_channel->AddOutput(*device->GetNativeDevice()))
 			return false;
-		_channel->SetFrameClock(*(device->GetNativeDevice()));
+		_channel->SetFrameClock(*device->GetNativeDevice());
 		return true;
 	}
 
 	void Channel::Load(InputFile ^ file)
 	{
-		_channel->Load(*file->GetNativeSource());
+		_channel->Load(std::dynamic_pointer_cast<Core::InputSource>(file->GetNativeSource()));
 	}
 
 	void Channel::Clear()

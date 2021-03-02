@@ -1,15 +1,13 @@
 #pragma once
-#include "OutputDevice.h"
 #include "Ndi/Ndi.h"
 using namespace System;
 
 namespace TVPlayR {
 
-	public ref class NdiDevice :
-		public OutputDevice
+	public ref class NdiDevice 
 	{
 	private:
-		std::shared_ptr<Ndi::Ndi>* _ndi;
+		Ndi::Ndi* _ndi;
 		String^ _sourceName;
 		String^ _groupName;		
 	public:
@@ -25,7 +23,7 @@ namespace TVPlayR {
 			String^ get() { return _groupName; }
 		}
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return *_ndi; }
+		virtual Ndi::Ndi& GetNativeDevice() { return *_ndi; }
 	};
 
 }

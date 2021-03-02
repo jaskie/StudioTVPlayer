@@ -9,8 +9,8 @@ namespace TVPlayR {
 		struct Channel::implementation
 		{
 			std::vector<OutputDevice*> output_devices_;
-			OutputDevice* frame_clock_;
-			std::shared_ptr<InputSource> playing_source_;
+			OutputDevice* frame_clock_ ;
+			InputSource* playing_source_;
 			std::mutex mutex_;
 
 			const VideoFormat format_;
@@ -23,6 +23,7 @@ namespace TVPlayR {
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
 				, frame_clock_(nullptr)
+				, playing_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
 			{
 			}
@@ -68,10 +69,10 @@ namespace TVPlayR {
 				clock.SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
 			}
 
-			void Load(std::shared_ptr<InputSource>& source)
+			void Load(InputSource& source)
 			{
 				std::lock_guard<std::mutex> guard(mutex_);
-				playing_source_ = source;
+				playing_source_ = &source;
 			}
 
 			void Clear()
@@ -80,7 +81,7 @@ namespace TVPlayR {
 				if (!playing_source_)
 					return;
 				playing_source_->RemoveFromChannel();
-				playing_source_.reset();
+				playing_source_ = nullptr;
 			}
 		};
 
@@ -106,14 +107,14 @@ namespace TVPlayR {
 			impl_->SetFrameClock(clock, this);
 		}
 
-		void Channel::Preload(std::shared_ptr<InputSource>& source)
+		void Channel::Preload(InputSource& source)
 		{
-			source->AddToChannel(*this);
+			source.AddToChannel(*this);
 		}
 
-		void Channel::Load(std::shared_ptr<InputSource>& source) {
-			if (!source->IsAddedToChannel(*this))
-				source->AddToChannel(*this);
+		void Channel::Load(InputSource& source) {
+			if (!source.IsAddedToChannel(*this))
+				source.AddToChannel(*this);
 			impl_->Load(source);
 		}
 		void Channel::Clear() {

@@ -43,10 +43,10 @@ int main()
 		auto device = iterator[device_index];
 		channel.SetFrameClock(*device);
 		channel.AddOutput(*device);
-		std::shared_ptr<Core::InputSource> input(new FFmpeg::FFmpegInputSource("D:\\VIDEO\\Test5.mov", Core::HwAccel::none, "", 2));
+		FFmpeg::FFmpegInputSource input("D:\\VIDEO\\Test5.mov", Core::HwAccel::none, "", 2);
 		//std::shared_ptr<Core::InputSource> input(new FFmpeg::FFmpegInputSource("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2));
 		channel.Load(input);
-		input->Play();
+		input.Play();
 		//Ndi::Ndi ndi("NDI_SOURCE", "");
 		//channel.SetFrameClock(ndi.OutputFrameClock());
 		//channel.AddOutput(ndi);
@@ -58,12 +58,14 @@ int main()
 			if (i == 'c')
 				channel.Clear();
 			if (i == 's')
-				input->Seek(AV_TIME_BASE * 2);
+				input.Seek(AV_TIME_BASE * 2);
+			if (i == 'l')
+				channel.Load(input);
 			if (i == ' ')
-				if (input->IsPlaying())
-					input->Pause();
-				else
-					input->Play();
+				if (input.IsPlaying())
+					input.Pause();
+				else	 
+					input.Play();
 
 
 		}

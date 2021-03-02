@@ -33,7 +33,7 @@ namespace TVPlayR {
 
 	void Channel::Load(InputFile ^ file)
 	{
-		_channel->Load(std::dynamic_pointer_cast<Core::InputSource>(file->GetNativeSource()));
+		_channel->Load(*file->GetNativeSource());
 	}
 
 	void Channel::Clear()

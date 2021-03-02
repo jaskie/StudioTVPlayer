@@ -12,7 +12,7 @@ namespace TVPlayR {
 	{ }
 
 	InputFile::InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount)
-		: _nativeSource(new std::shared_ptr<FFmpeg::FFmpegInputSource>(new FFmpeg::FFmpegInputSource(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice), audioChannelCount)))
+		: _nativeSource(new FFmpeg::FFmpegInputSource(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice), audioChannelCount))
 		, _fileName(fileName)
 		, _acceleration(acceleration)
 		, _hwDevice(hwDevice)
@@ -20,12 +20,12 @@ namespace TVPlayR {
 		_framePlayedDelegate = gcnew FramePlayedDelegate(this, &InputFile::FramePlayedCallback);
 		_framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
 		IntPtr framePlayedIp =  Marshal::GetFunctionPointerForDelegate(_framePlayedDelegate);
-		(*_nativeSource)->SetFramePlayedCallback(static_cast<Core::InputSource::TIME_CALLBACK>(framePlayedIp.ToPointer()));
+		_nativeSource->SetFramePlayedCallback(static_cast<Core::InputSource::TIME_CALLBACK>(framePlayedIp.ToPointer()));
 		
 		_stoppedDelegate = gcnew StoppedDelegate(this, &InputFile::StoppedCallback);
 		_stoppedHandle = GCHandle::Alloc(_stoppedDelegate);
 		IntPtr stoppedIp = Marshal::GetFunctionPointerForDelegate(_stoppedDelegate);
-		(*_nativeSource)->SetStoppedCallback(static_cast<Core::InputSource::STOPPED_CALLBACK>(stoppedIp.ToPointer()));
+		_nativeSource->SetStoppedCallback(static_cast<Core::InputSource::STOPPED_CALLBACK>(stoppedIp.ToPointer()));
 	}
 
 	InputFile::~InputFile()
@@ -42,17 +42,17 @@ namespace TVPlayR {
 
 	bool InputFile::Seek(TimeSpan time)
 	{
-		return (*_nativeSource)->Seek(time.Ticks / 10);
+		return _nativeSource->Seek(time.Ticks / 10);
 	}
 
 	void InputFile::Play()
 	{
-		(*_nativeSource)->Play();
+		_nativeSource->Play();
 	}
 
 	void InputFile::Pause()
 	{
-		(*_nativeSource)->Pause();
+		_nativeSource->Pause();
 	}
 
 	Bitmap ^ InputFile::GetThumbnail(TimeSpan time, int height)
@@ -60,7 +60,7 @@ namespace TVPlayR {
 		Bitmap^ result = nullptr;
 		try
 		{
-			auto video = (*_nativeSource)->GetFrameAt(time.Ticks / 10);
+			auto video = _nativeSource->GetFrameAt(time.Ticks / 10);
 			if (video == nullptr)
 				return nullptr;
 			FFmpeg::ThumbnailFilter filter(height, video);
@@ -108,7 +108,7 @@ namespace TVPlayR {
 		BitmapSource^ result = nullptr;
 		try
 		{
-			auto video = (*_nativeSource)->GetFrameAt(time.Ticks / 10);
+			auto video = _nativeSource->GetFrameAt(time.Ticks / 10);
 			if (video == nullptr)
 				return nullptr;
 			FFmpeg::ThumbnailFilter filter(height, video);

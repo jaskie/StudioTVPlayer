@@ -17,8 +17,8 @@ public:
 	bool AddOutput(OutputDevice& device);
 	void RemoveOutput(OutputDevice& device);
 	void SetFrameClock(OutputDevice& clock);
-	void Preload(std::shared_ptr<InputSource>& source);
-	void Load(std::shared_ptr<InputSource>& source);
+	void Preload(InputSource& source);
+	void Load(InputSource& source);
 	void Clear();
 	const VideoFormat& Format() const;
 	const PixelFormat& PixelFormat() const;

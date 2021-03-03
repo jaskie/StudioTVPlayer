@@ -20,7 +20,7 @@ public:
 	virtual FFmpeg::AVSync PullSync(int audio_samples_count);
 	virtual bool Seek(const int64_t time) override;
 	virtual bool IsEof() const;
-	virtual bool IsAddedToChannel(Core::Channel& channel);
+	virtual bool IsAddedToChannel(Core::Channel& channel) override;
 	virtual void AddToChannel(Core::Channel& channel) override;
 	virtual void RemoveFromChannel() override;
 	virtual void Play() override;

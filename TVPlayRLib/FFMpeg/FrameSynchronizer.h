@@ -26,6 +26,8 @@ public:
 	bool IsFlushed() const;
 	bool IsEof() const;
 	void Flush();
+	const Core::VideoFormat& Format() const;
+	const Core::PixelFormat& PixelFormat() const;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

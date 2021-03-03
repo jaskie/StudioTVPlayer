@@ -17,9 +17,9 @@ namespace TVPlayR {
 			   		 
 struct FFmpegInputSource::implementation
 {
-	bool is_eof_ = false;
+	std::atomic_bool is_eof_ = false;
 	const std::string file_name_;
-	std::atomic<bool> is_playing_ = false;
+	std::atomic_bool is_playing_ = false;
 	int64_t seek_time_ = 0LL;
 	InputFormat input_;
 	const bool is_stream_;
@@ -34,8 +34,7 @@ struct FFmpegInputSource::implementation
 	std::unique_ptr<FrameSynchronizer> frame_synchronizer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
-	std::condition_variable frame_synchronizer_create_cv_;
-	std::atomic<bool> is_finalizing_ = false;
+	std::condition_variable frame_synchronizer_created_cv_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
@@ -64,18 +63,29 @@ struct FFmpegInputSource::implementation
 	void ProducerThreadProc()
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
-		output_scaler_.reset(new OutputVideoScaler(video_decoder_->FrameRate(), video_decoder_->TimeBase(), channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat())));
-		audio_muxer_.reset(new AudioMuxer(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount()));
-		frame_synchronizer_.reset(new FrameSynchronizer(
-			channel_->Format(),
-			channel_->PixelFormat(),
-			channel_->AudioChannelsCount(),
-			AV_SAMPLE_FMT_S32,
-			48000,
-			is_playing_,
-			0));
+		if (!output_scaler_ || 
+			output_scaler_->GetOutputPixelFormat() != PixelFormatToFFmpegFormat(channel_->PixelFormat()) ||
+			channel_->Format().type() != output_scaler_->Format().type()
+			)
+			output_scaler_.reset(new OutputVideoScaler(video_decoder_->FrameRate(), video_decoder_->TimeBase(), channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat())));
+		if (!audio_muxer_ ||
+			audio_muxer_->OutputChannelsCount() != channel_->AudioChannelsCount()
+			)
+			audio_muxer_.reset(new AudioMuxer(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount()));
+		if (!frame_synchronizer_ ||
+			frame_synchronizer_->Format().type() != channel_->Format().type() ||
+			frame_synchronizer_->PixelFormat() != channel_->PixelFormat()
+			)
+			frame_synchronizer_.reset(new FrameSynchronizer(
+				channel_->Format(),
+				channel_->PixelFormat(),
+				channel_->AudioChannelsCount(),
+				AV_SAMPLE_FMT_S32,
+				48000,
+				is_playing_,
+				0));
 		frame_synchronizer_->SetTimebases(audio_muxer_->OutputTimeBase(), output_scaler_->OutputTimeBase());
-		frame_synchronizer_create_cv_.notify_all();
+		frame_synchronizer_created_cv_.notify_all();
 		while (channel_)
 		{
 			{
@@ -92,9 +102,6 @@ struct FFmpegInputSource::implementation
 			}
 			producer_semaphore_.wait();
 		}
-		audio_muxer_.reset();
-		output_scaler_.reset();
-		frame_synchronizer_.reset();
 	}
 
 	void PushNextPacketToDecoders()
@@ -143,6 +150,12 @@ struct FFmpegInputSource::implementation
 			{
 				if (video_decoder_->IsEof())
 				{
+					if (output_scaler_->IsEof())
+					{
+						if (!frame_synchronizer_->IsFlushed())
+							frame_synchronizer_->Flush();
+					}
+					else
 					if (!output_scaler_->IsFlushed())
 						output_scaler_->Flush();
 				}
@@ -177,14 +190,26 @@ struct FFmpegInputSource::implementation
 
 
 	AVSync PullSync(int audio_samples_count)
-	{		
+	{	
+		if (is_eof_)
+		{
+			std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+			return frame_synchronizer_->PullSync(audio_samples_count);
+		}
+		bool finished = false;
 		AVSync sync(nullptr, nullptr, 0LL);
 		{
 			std::lock_guard<std::mutex> lock(synchronizer_mutex_);
 			sync = frame_synchronizer_->PullSync(audio_samples_count); 
+			finished = frame_synchronizer_->IsEof();
 		}
-		if (frame_played_callback_)
+		if (sync && frame_played_callback_)
 			frame_played_callback_(sync.Time);
+		if (finished)
+		{
+			is_eof_ = true;
+			Pause();
+		}
 		producer_semaphore_.notify();
 		return sync;
 	}
@@ -202,7 +227,7 @@ struct FFmpegInputSource::implementation
 		producer_thread_ = std::make_unique<std::thread>(&FFmpegInputSource::implementation::ProducerThreadProc, this);
 		std::mutex mutex;
 		std::unique_lock<std::mutex> lock(mutex);
-		frame_synchronizer_create_cv_.wait(lock);
+		frame_synchronizer_created_cv_.wait(lock);
 	}
 
 	void RemoveFromChannel()

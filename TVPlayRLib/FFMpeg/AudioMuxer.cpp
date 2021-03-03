@@ -18,8 +18,8 @@ struct AudioMuxer::implementation
 	const AVSampleFormat sample_format_;
 	AVFilterContext* sink_ctx_ = NULL;
 	AVFilterGraphPtr graph_;
-	bool is_eof_ = false;
-	bool is_flushed_ = false;
+	bool is_eof_;
+	bool is_flushed_;
 	std::string filter_str_;
 	std::mutex mutex_;
 	
@@ -30,6 +30,8 @@ struct AudioMuxer::implementation
 		, output_channel_layout_(output_channel_layout)
 		, sample_format_(sample_format)
 		, graph_(nullptr, [](AVFilterGraph * g) { avfilter_graph_free(&g); })
+		, is_eof_(false)
+		, is_flushed_(false)
 
 	{
 		filter_str_ = GetAudioMuxerString(sample_rate);
@@ -219,10 +221,6 @@ struct AudioMuxer::implementation
 	void Reset()
 	{
 		std::lock_guard<std::mutex> guard(mutex_);
-		if (!is_eof_)
-			return;
-		is_eof_ = false;
-		is_flushed_ = false;
 		CreateFilterChain();
 	}
 

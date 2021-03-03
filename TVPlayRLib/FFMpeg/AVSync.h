@@ -25,6 +25,10 @@ namespace TVPlayR {
 				Time = other.Time;
 				return *this;
 			}
+			operator bool() const noexcept
+			{
+				return Audio || Video;
+			}
 		};
 
 

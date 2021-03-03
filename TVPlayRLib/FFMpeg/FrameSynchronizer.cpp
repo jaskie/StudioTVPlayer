@@ -202,6 +202,7 @@ namespace TVPlayR {
 			{
 				audio_time_base_ = audio_time_base;
 				video_time_base_ = video_time_base;
+				is_flushed_ = false;
 			}
 
 			void SetSynchro(int64_t time)
@@ -232,4 +233,6 @@ namespace TVPlayR {
 	bool FrameSynchronizer::IsFlushed() const { return impl_->is_flushed_; }
 	bool FrameSynchronizer::IsEof() const { return impl_->IsEof(); }
 	void FrameSynchronizer::Flush() { impl_->Flush(); }
+	const Core::VideoFormat& FrameSynchronizer::Format() const { return impl_->format_; }
+	const Core::PixelFormat& FrameSynchronizer::PixelFormat() const { return impl_->pix_fmt_; }
 }}

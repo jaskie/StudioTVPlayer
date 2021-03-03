@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Tue Mar 02 18:13:02 2021
+/* at Wed Mar 03 19:59:47 2021
  */
 /* Compiler settings for ..\DecklinkSDK\include\DeckLinkAPI.idl:
     Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0603 

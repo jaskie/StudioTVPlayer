@@ -23,7 +23,7 @@ namespace TVPlayR {
 		const Rational _frame_rate;
 		static array<VideoFormat^>^ _videoFormats;
 	internal:
-		Core::VideoFormat::Type GetNativeEnumType() { return _native_fomat->type(); }
+		Core::VideoFormatType GetNativeEnumType() { return _native_fomat->type(); }
 	public:
 		VideoFormat(int video_format_id);
 		!VideoFormat();

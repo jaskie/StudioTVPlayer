@@ -184,6 +184,11 @@ struct FFmpegInputSource::implementation
 
 #pragma endregion
 
+	bool Ready() 
+	{
+		std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+		return frame_synchronizer_->Ready();
+	}
 
 	AVSync PullSync(int audio_samples_count)
 	{	
@@ -422,6 +427,7 @@ FFmpegInputSource::~FFmpegInputSource(){}
 std::shared_ptr<AVFrame> FFmpegInputSource::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
 AVSync FFmpegInputSource::PullSync(int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInputSource::Seek(const int64_t time)        { return impl_->Seek(time); }
+bool FFmpegInputSource::Ready() { return impl_->Ready(); }
 bool FFmpegInputSource::IsEof() const					{ return impl_->is_eof_; }
 bool FFmpegInputSource::IsAddedToChannel(Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
 void FFmpegInputSource::AddToChannel(Core::Channel& channel) { impl_->AddToChannel(channel); }

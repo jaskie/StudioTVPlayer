@@ -93,6 +93,7 @@ namespace TVPlayR {
 
 			AVSync PullSync(int audio_samples_count)
 			{
+				std::shared_ptr<AVFrame> audio;
 				if (is_playing_)
 				{
 					int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
@@ -105,58 +106,34 @@ namespace TVPlayR {
 #endif // DEBUG
 					if (time_delta <= AV_TIME_BASE / 30)
 					{
-						PullVideo();
+						if (!video_queue_.empty())
+						{
+							last_video_ = video_queue_.front();
+							video_queue_.pop_front();
+						}
 					}
 #ifdef DEBUG
 					else
 						OutputDebugStringA("Video frame repeated\n");
 #endif // DEBUG
 
-
 					if (time_delta >= AV_TIME_BASE / 20 && fifo_ && fifo_->SamplesCount() > 0)
 					{
 						int samples_to_discard = static_cast<int>(av_rescale(time_delta, sample_rate_, AV_TIME_BASE));
 						fifo_->DiscardSamples(samples_to_discard);
 					}
+					if (fifo_)
+						audio = fifo_->Pull(audio_samples_count);
 				}
-
-				auto audio = PullAudio(audio_samples_count);
+				if (!audio)
+					audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_);
+				if (!last_video_)
+					last_video_ = video_queue_.front();
+				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, video_time_base_));
 #ifdef DEBUG
 				//if (audio->pts != AV_NOPTS_VALUE && last_video_->pts != AV_NOPTS_VALUE)
 				//OutputDebugStringA(("Output video " + std::to_string(PtsToTime(last_video_->pts, video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + "\n").c_str());
 #endif // DEBUG
-				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, video_time_base_));
-			}
-
-			void PullVideo()
-			{
-				first_frame_available_.wait();
-				if (!video_queue_.empty())
-				{
-					last_video_ = video_queue_.front();
-					video_queue_.pop_front();
-				}
-			}
-
-			std::shared_ptr<AVFrame> PullAudio(int audio_samples_count)
-			{
-				std::shared_ptr<AVFrame> audio;
-				if (is_playing_ && fifo_ && fifo_->SamplesCount() >= audio_samples_count)
-					audio = fifo_->Pull(audio_samples_count);
-				if (!audio)
-				{
-					audio = AllocFrame();
-					audio->nb_samples = audio_samples_count;
-					audio->channels = audio_channel_count_;
-					audio->format = SAMPLE_FORMAT;
-					audio->channel_layout = AV_CH_LAYOUT_STEREO;
-					av_frame_get_buffer(audio.get(), 0);
-					av_samples_set_silence(audio->data, 0, audio_samples_count, audio_channel_count_, SAMPLE_FORMAT);
-#ifdef DEBUG
-					OutputDebugStringA(("Got silent audio samples:" + std::to_string(audio->nb_samples) + "\n").c_str());
-#endif // DEBUG
-				}
-				return audio;
 			}
 
 			bool Ready() const

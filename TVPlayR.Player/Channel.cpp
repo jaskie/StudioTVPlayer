@@ -10,7 +10,7 @@ namespace TVPlayR {
 	{ }
 
 	Channel::Channel(int formatId, PixelFormat pixelFormat, int audioChannelCount)
-		: _channel(new Core::Channel(static_cast<Core::VideoFormat::Type>(formatId), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
+		: _channel(new Core::Channel(static_cast<Core::VideoFormatType>(formatId), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
 	{ }
 
 	Channel::~Channel()

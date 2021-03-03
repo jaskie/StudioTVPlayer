@@ -8,15 +8,15 @@ namespace TVPlayR {
 	{
 		if (_videoFormats == nullptr)
 		{
-			_videoFormats = gcnew array<VideoFormat^>(static_cast<int>(Core::VideoFormat::Type::count) - 1);
-			for (int type = static_cast<int>(Core::VideoFormat::Type::pal); type != static_cast<int>(Core::VideoFormat::Type::count); type++)
+			_videoFormats = gcnew array<VideoFormat^>(static_cast<int>(Core::VideoFormatType::count) - 1);
+			for (int type = static_cast<int>(Core::VideoFormatType::pal); type != static_cast<int>(Core::VideoFormatType::count); type++)
 				_videoFormats[type - 1] = gcnew VideoFormat(type);
 		}
 		return _videoFormats;
 	}
 
 	VideoFormat::VideoFormat(int video_format_id)
-		: _native_fomat(new Core::VideoFormat(static_cast<Core::VideoFormat::Type>(video_format_id)))
+		: _native_fomat(new Core::VideoFormat(static_cast<Core::VideoFormatType>(video_format_id)))
 		, _name(gcnew String(_native_fomat->Name().c_str()))
 		, _sample_aspect_ratio(_native_fomat->SampleAspectRatio())
 		, _frame_rate(_native_fomat->FrameRate())

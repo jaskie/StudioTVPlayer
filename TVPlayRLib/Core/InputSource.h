@@ -23,6 +23,7 @@ public:
 	virtual bool IsAddedToChannel(Channel& channel) = 0;
 	virtual void AddToChannel(Channel& channel) = 0;
 	virtual void RemoveFromChannel() = 0;
+	virtual bool Ready() = 0;
 	virtual void Play() = 0;
 	virtual void Pause() = 0;
 	virtual bool IsPlaying() const = 0;

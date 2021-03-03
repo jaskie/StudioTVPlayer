@@ -42,7 +42,7 @@ namespace TVPlayR {
 			void RequestFrame(int audio_samples_count)
 			{
 				std::lock_guard<std::mutex> lock(mutex_);
-				if (playing_source_)
+				if (playing_source_ && playing_source_->Ready())
 				{
 					auto sync = playing_source_->PullSync(audio_samples_count);
 					for (auto device : output_devices_)

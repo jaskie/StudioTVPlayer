@@ -8,8 +8,8 @@ namespace TVPlayR {
 
 		struct Channel::implementation
 		{
-			std::vector<OutputDevice*> output_devices_;
-			OutputDevice* frame_clock_ ;
+			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
+			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
 			std::mutex mutex_;
 
@@ -56,22 +56,22 @@ namespace TVPlayR {
 				}
 			}
 
-			void AddOutput(OutputDevice& device)
+			void AddOutput(std::shared_ptr<OutputDevice>& device)
 			{
-				output_devices_.push_back(&device);
+				output_devices_.push_back(device);
 			}
 
-			void RemoveOutput(OutputDevice& device)
+			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
 			{
-				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), &device), output_devices_.end());
+				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
 			}
 
-			void SetFrameClock(OutputDevice& clock)
+			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
 			{
 				if (frame_clock_)
 					frame_clock_->SetFrameRequestedCallback(nullptr);
-				frame_clock_ = &clock;
-				clock.SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
+				frame_clock_ = clock;
+				clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
 			}
 
 			void Load(std::shared_ptr<InputSource>& source)
@@ -95,22 +95,22 @@ namespace TVPlayR {
 		
 		Channel::~Channel() {}
 
-		bool Channel::AddOutput(OutputDevice& device) {
-			if (!device.AssignToChannel(*this))
+		bool Channel::AddOutput(std::shared_ptr<OutputDevice> device) {
+			if (!device->AssignToChannel(*this))
 				return false;
 			impl_->AddOutput(device);
 			return true;
 		}
 
-		void Channel::RemoveOutput(OutputDevice& device)
+		void Channel::RemoveOutput(std::shared_ptr<OutputDevice> device)
 		{
-			device.ReleaseChannel();
+			device->ReleaseChannel();
 			impl_->RemoveOutput(device);
 		}
 
-		void Channel::SetFrameClock(OutputDevice& clock) { impl_->SetFrameClock(clock); }
+		void Channel::SetFrameClock(std::shared_ptr<OutputDevice> clock) { impl_->SetFrameClock(clock); }
 
-		void Channel::Load(std::shared_ptr<InputSource>& source) {
+		void Channel::Load(std::shared_ptr<InputSource> source) {
 			if (!source->IsAddedToChannel(*this))
 				source->AddToChannel(*this);
 			impl_->Load(source);

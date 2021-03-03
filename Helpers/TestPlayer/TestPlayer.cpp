@@ -41,12 +41,14 @@ int main()
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto device = iterator[device_index];
-		channel.SetFrameClock(*device);
-		channel.AddOutput(*device);
-		FFmpeg::FFmpegInputSource input("D:\\VIDEO\\Test5.mov", Core::HwAccel::none, "", 2);
+		channel.SetFrameClock(device);
+		channel.AddOutput(device);
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\VIDEO\\Test5.mov", Core::HwAccel::none, "", 2);
 		//std::shared_ptr<Core::InputSource> input(new FFmpeg::FFmpegInputSource("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2));
+		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
+		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		channel.Load(input);
-		input.Play();
+		input->Play();
 		//Ndi::Ndi ndi("NDI_SOURCE", "");
 		//channel.SetFrameClock(ndi.OutputFrameClock());
 		//channel.AddOutput(ndi);
@@ -58,18 +60,16 @@ int main()
 			if (i == 'c')
 				channel.Clear();
 			if (i == 's')
-				input.Seek(AV_TIME_BASE * 2);
+				input->Seek(AV_TIME_BASE * 2);
 			if (i == 'l')
 				channel.Load(input);
 			if (i == ' ')
-				if (input.IsPlaying())
-					input.Pause();
+				if (input->IsPlaying())
+					input->Pause();
 				else	 
-					input.Play();
-
-
+					input->Play();
 		}
-		channel.RemoveOutput(*device);
+		channel.RemoveOutput(device);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

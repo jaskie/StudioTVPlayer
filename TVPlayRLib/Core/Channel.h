@@ -14,10 +14,10 @@ class Channel : public Common::NonCopyable
 public:
 	Channel(const VideoFormat::Type& format, const Core::PixelFormat pixel_format, const int audio_channels_count);
 	~Channel();
-	bool AddOutput(OutputDevice& device);
-	void RemoveOutput(OutputDevice& device);
-	void SetFrameClock(OutputDevice& clock);
-	void Load(std::shared_ptr<InputSource>& source);
+	bool AddOutput(std::shared_ptr<OutputDevice> device);
+	void RemoveOutput(std::shared_ptr<OutputDevice> device);
+	void SetFrameClock(std::shared_ptr<OutputDevice> clock);
+	void Load(std::shared_ptr<InputSource> source);
 	void Clear();
 	const VideoFormat& Format() const;
 	const PixelFormat PixelFormat() const;

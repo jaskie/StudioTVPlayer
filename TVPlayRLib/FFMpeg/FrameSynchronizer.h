@@ -6,14 +6,14 @@
 namespace TVPlayR {
 	namespace Core 
 	{
-		class VideoFormat;
+		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
 
 class FrameSynchronizer
 {
 public:
-	FrameSynchronizer(const Core::VideoFormat& format, Core::PixelFormat pix_fmt, int audio_channel_count, AVSampleFormat sample_format, int sample_rate, bool is_playing, int64_t initial_sync);
+	FrameSynchronizer(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t initial_sync);
 	~FrameSynchronizer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame);
@@ -26,8 +26,7 @@ public:
 	bool IsFlushed() const;
 	bool IsEof() const;
 	void Flush();
-	const Core::VideoFormat& Format() const;
-	const Core::PixelFormat& PixelFormat() const;
+	const Core::VideoFormatType VideoFormat();
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

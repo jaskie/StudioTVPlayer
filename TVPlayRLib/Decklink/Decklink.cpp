@@ -30,7 +30,7 @@ namespace TVPlayR {
 			implementation(IDeckLink* decklink, int index)
 				: decklink_(decklink)
 				, output_(decklink)
-				, format_(Core::VideoFormat::Type::invalid)
+				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
@@ -145,7 +145,7 @@ namespace TVPlayR {
 				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
 				output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
-				format_ = Core::VideoFormat::Type::invalid;
+				format_ = Core::VideoFormatType::invalid;
 			}
 
 			void Push(FFmpeg::AVSync& sync)

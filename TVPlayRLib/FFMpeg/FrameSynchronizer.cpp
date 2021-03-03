@@ -2,19 +2,20 @@
 #include "FrameSynchronizer.h"
 #include "AudioFifo.h"
 #include "../Core/VideoFormat.h"
+#include "../Common/Semaphore.h"
 
 #undef DEBUG 
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
+#define SAMPLE_RATE 48000
+#define SAMPLE_FORMAT AV_SAMPLE_FMT_S32
+
 		struct FrameSynchronizer::implementation {
-			const Core::PixelFormat pix_fmt_;
-			const Core::VideoFormat& format_;
 			AVRational video_time_base_;
 			AVRational audio_time_base_;
 			const AVRational video_frame_rate_;
-			const AVSampleFormat sample_format_;
 			const int sample_rate_;
 			const int audio_channel_count_;
 			const bool have_video_;
@@ -24,17 +25,16 @@ namespace TVPlayR {
 			int64_t sync_;
 			std::deque<std::shared_ptr<AVFrame>> video_queue_;
 			std::unique_ptr<AudioFifo> fifo_;
-			std::shared_ptr<AVFrame> empty_video_;
 			std::shared_ptr<AVFrame> last_video_;
+			const Core::VideoFormatType video_format_;
+			Common::Semaphore first_frame_available_;
 
-			implementation(const Core::VideoFormat& format, Core::PixelFormat pix_fmt, int audio_channel_count, AVSampleFormat sample_format, int sample_rate, bool is_playing, int64_t initial_sync)
-				: format_(format)
-				, pix_fmt_(pix_fmt)
+			implementation(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t initial_sync)
+				: video_format_(format.type())
 				, video_time_base_(av_inv_q(format.FrameRate().av()))
 				, video_frame_rate_(format.FrameRate().av())
-				, sample_format_(sample_format)
-				, sample_rate_(sample_rate)
-				, audio_time_base_(av_make_q(1, sample_rate))
+				, sample_rate_(SAMPLE_RATE)
+				, audio_time_base_(av_make_q(1, SAMPLE_RATE))
 				, audio_channel_count_(audio_channel_count)
 				, have_video_(true)
 				, have_audio_(audio_channel_count)
@@ -49,7 +49,7 @@ namespace TVPlayR {
 					return;
 				Sweep();
 				if (!fifo_)
-					fifo_.reset(new AudioFifo(sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), AV_TIME_BASE * 10));
+					fifo_.reset(new AudioFifo(SAMPLE_FORMAT, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), AV_TIME_BASE * 10));
 				if (!fifo_->TryPush(frame))
 				{
 					fifo_->Reset(PtsToTime(frame->pts, audio_time_base_));
@@ -75,6 +75,7 @@ namespace TVPlayR {
 				}
 #endif // DEBUG
 				video_queue_.push_back(frame);
+				first_frame_available_.notify();
 			}
 
 			void Sweep()
@@ -104,11 +105,7 @@ namespace TVPlayR {
 #endif // DEBUG
 					if (time_delta <= AV_TIME_BASE / 30)
 					{
-						if (!video_queue_.empty())
-						{
-							last_video_ = video_queue_.front();
-							video_queue_.pop_front();
-						}
+						PullVideo();
 					}
 #ifdef DEBUG
 					else
@@ -121,21 +118,24 @@ namespace TVPlayR {
 						int samples_to_discard = static_cast<int>(av_rescale(time_delta, sample_rate_, AV_TIME_BASE));
 						fifo_->DiscardSamples(samples_to_discard);
 					}
-
 				}
-				else
-					if (!last_video_)
-						last_video_ = video_queue_.empty() ? EmptyVideo() : video_queue_.back();
-					else if (last_video_ == empty_video_ && !video_queue_.empty())
-						last_video_ = video_queue_.back();
+
 				auto audio = PullAudio(audio_samples_count);
 #ifdef DEBUG
 				//if (audio->pts != AV_NOPTS_VALUE && last_video_->pts != AV_NOPTS_VALUE)
 				//OutputDebugStringA(("Output video " + std::to_string(PtsToTime(last_video_->pts, video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + "\n").c_str());
 #endif // DEBUG
-				if (!last_video_)
-					last_video_ = EmptyVideo();
 				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, video_time_base_));
+			}
+
+			void PullVideo()
+			{
+				first_frame_available_.wait();
+				if (!video_queue_.empty())
+				{
+					last_video_ = video_queue_.front();
+					video_queue_.pop_front();
+				}
 			}
 
 			std::shared_ptr<AVFrame> PullAudio(int audio_samples_count)
@@ -148,25 +148,15 @@ namespace TVPlayR {
 					audio = AllocFrame();
 					audio->nb_samples = audio_samples_count;
 					audio->channels = audio_channel_count_;
-					audio->format = sample_format_;
+					audio->format = SAMPLE_FORMAT;
 					audio->channel_layout = AV_CH_LAYOUT_STEREO;
 					av_frame_get_buffer(audio.get(), 0);
-					av_samples_set_silence(audio->data, 0, audio_samples_count, audio_channel_count_, sample_format_);
+					av_samples_set_silence(audio->data, 0, audio_samples_count, audio_channel_count_, SAMPLE_FORMAT);
 #ifdef DEBUG
 					OutputDebugStringA(("Got silent audio samples:" + std::to_string(audio->nb_samples) + "\n").c_str());
 #endif // DEBUG
 				}
 				return audio;
-			}
-
-			std::shared_ptr<AVFrame> EmptyVideo()
-			{
-				if (!empty_video_)
-					empty_video_ = CreateEmptyVideoFrame(format_, pix_fmt_);
-#ifdef DEBUG
-				OutputDebugStringA("Got empty video\n");
-#endif // DEBUG
-				return empty_video_;
 			}
 
 			bool Ready() const
@@ -215,8 +205,8 @@ namespace TVPlayR {
 
 		};
 
-	FrameSynchronizer::FrameSynchronizer(const Core::VideoFormat& format, Core::PixelFormat pix_fmt, int audio_channel_count, AVSampleFormat sample_format, int sample_rate, bool is_playing, int64_t initial_sync)
-		: impl_(new implementation(format, pix_fmt, audio_channel_count, sample_format, sample_rate, is_playing, initial_sync))
+	FrameSynchronizer::FrameSynchronizer(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t initial_sync)
+		: impl_(new implementation(format, audio_channel_count, is_playing, initial_sync))
 	{
 	}
 
@@ -233,6 +223,5 @@ namespace TVPlayR {
 	bool FrameSynchronizer::IsFlushed() const { return impl_->is_flushed_; }
 	bool FrameSynchronizer::IsEof() const { return impl_->IsEof(); }
 	void FrameSynchronizer::Flush() { impl_->Flush(); }
-	const Core::VideoFormat& FrameSynchronizer::Format() const { return impl_->format_; }
-	const Core::PixelFormat& FrameSynchronizer::PixelFormat() const { return impl_->pix_fmt_; }
+	const Core::VideoFormatType FrameSynchronizer::VideoFormat() { return impl_->video_format_; }
 }}

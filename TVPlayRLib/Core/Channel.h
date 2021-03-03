@@ -12,7 +12,7 @@ namespace TVPlayR {
 class Channel : public Common::NonCopyable
 {
 public:
-	Channel(const VideoFormat::Type& format, const Core::PixelFormat pixel_format, const int audio_channels_count);
+	Channel(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count);
 	~Channel();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);
 	void RemoveOutput(std::shared_ptr<OutputDevice> device);

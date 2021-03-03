@@ -18,7 +18,7 @@ namespace TVPlayR {
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
 
-			implementation(const VideoFormat::Type& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+			implementation(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
 				: format_(format)
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
@@ -90,7 +90,7 @@ namespace TVPlayR {
 			}
 		};
 
-		Channel::Channel(const VideoFormat::Type& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+		Channel::Channel(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
 			: impl_(new implementation(format, pixel_format, audio_channels_count)) {}
 		
 		Channel::~Channel() {}

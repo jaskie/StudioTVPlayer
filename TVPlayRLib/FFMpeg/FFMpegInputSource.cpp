@@ -73,17 +73,13 @@ struct FFmpegInputSource::implementation
 			)
 			audio_muxer_.reset(new AudioMuxer(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount()));
 		if (!frame_synchronizer_ ||
-			frame_synchronizer_->Format().type() != channel_->Format().type() ||
-			frame_synchronizer_->PixelFormat() != channel_->PixelFormat()
+			frame_synchronizer_->VideoFormat() != channel_->Format().type()
 			)
-			frame_synchronizer_.reset(new FrameSynchronizer(
+			frame_synchronizer_ = std::make_unique<FrameSynchronizer>(
 				channel_->Format(),
-				channel_->PixelFormat(),
 				channel_->AudioChannelsCount(),
-				AV_SAMPLE_FMT_S32,
-				48000,
 				is_playing_,
-				0));
+				0);
 		frame_synchronizer_->SetTimebases(audio_muxer_->OutputTimeBase(), output_scaler_->OutputTimeBase());
 		frame_synchronizer_created_cv_.notify_all();
 		while (channel_)

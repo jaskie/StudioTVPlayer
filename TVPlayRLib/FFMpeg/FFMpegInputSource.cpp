@@ -28,13 +28,13 @@ struct FFmpegInputSource::implementation
 	std::unique_ptr<Decoder> video_decoder_;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	Core::Channel* channel_ = nullptr;
-	std::mutex synchronizer_mutex_;
+	std::mutex buffer_mutex_;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<OutputVideoScaler> output_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
-	std::condition_variable frame_synchronizer_created_cv_;
+	std::condition_variable buffer_created_cv_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
@@ -79,20 +79,20 @@ struct FFmpegInputSource::implementation
 				channel_->Format(),
 				channel_->AudioChannelsCount(),
 				is_playing_,
-				AV_TIME_BASE / 2, // 0.5 sec
+				AV_TIME_BASE * 5, // 0.5 sec
 				0);
 		buffer_->SetTimebases(audio_muxer_->OutputTimeBase(), output_scaler_->OutputTimeBase());
-		frame_synchronizer_created_cv_.notify_all();
+		buffer_created_cv_.notify_all();
 		while (channel_)
 		{
 			{
-				std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+				std::lock_guard<std::mutex> lock(buffer_mutex_);
 				while (!buffer_->Full())
 				{
 					if (!channel_)
 						break;
 					bool neeed_packet = false;
-					PushToSynchronizer(neeed_packet);
+					PushToBuffer(neeed_packet);
 					if (neeed_packet)
 						PushNextPacketToDecoders();
 				}
@@ -132,7 +132,7 @@ struct FFmpegInputSource::implementation
 		}
 	}
 
-	void PushToSynchronizer(bool& need_packet)
+	void PushToBuffer(bool& need_packet)
 	{
 		// video
 		auto scaled = output_scaler_->Pull();
@@ -187,7 +187,7 @@ struct FFmpegInputSource::implementation
 
 	bool Ready(int audio_samples_count)
 	{
-		std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		return buffer_->FrameReady(audio_samples_count);
 	}
 
@@ -195,13 +195,13 @@ struct FFmpegInputSource::implementation
 	{	
 		if (is_eof_)
 		{
-			std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
 			return buffer_->PullSync(audio_samples_count);
 		}
 		bool finished = false;
 		AVSync sync(nullptr, nullptr, 0LL);
 		{
-			std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
 			sync = buffer_->PullSync(audio_samples_count); 
 			finished = buffer_->IsEof();
 		}
@@ -229,7 +229,7 @@ struct FFmpegInputSource::implementation
 		producer_thread_ = std::make_unique<std::thread>(&FFmpegInputSource::implementation::ProducerThreadProc, this);
 		std::mutex mutex;
 		std::unique_lock<std::mutex> lock(mutex);
-		frame_synchronizer_created_cv_.wait(lock);
+		buffer_created_cv_.wait(lock);
 	}
 
 	void RemoveFromChannel()
@@ -246,7 +246,7 @@ struct FFmpegInputSource::implementation
 	bool Seek(const int64_t time)
 	{
 		seek_time_ = time;
-		std::lock_guard<std::mutex> lock(synchronizer_mutex_);
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (input_.Seek(time))
 		{
 #ifdef DEBUG
@@ -264,6 +264,7 @@ struct FFmpegInputSource::implementation
 			if (buffer_)
 				buffer_->Seek(time);
 			is_eof_ = false;
+			producer_semaphore_.notify();
 			return true;
 		}
 		return false;

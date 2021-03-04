@@ -43,8 +43,8 @@ int main()
 		auto device = iterator[device_index];
 		channel.SetFrameClock(device);
 		channel.AddOutput(device);
-		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\VIDEO\\Tests\\Timecode_synchro_12s.mxf", Core::HwAccel::none, "", 2);
-		//std::shared_ptr<Core::InputSource> input(new FFmpeg::FFmpegInputSource("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2));
+		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\VIDEO\\Tests\\Timecode_synchro_12s.mxf", Core::HwAccel::none, "", 2);
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		channel.Load(input);

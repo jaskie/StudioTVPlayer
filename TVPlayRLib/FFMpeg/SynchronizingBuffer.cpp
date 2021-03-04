@@ -89,8 +89,8 @@ namespace TVPlayR {
 				if (min_audio == AV_NOPTS_VALUE)
 					while (video_queue_.size() > 3)
 						video_queue_.pop_front();
-				if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > AV_TIME_BASE)
-					fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - AV_TIME_BASE, sample_rate_, AV_TIME_BASE)));
+				if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > 2 * duration_)
+					fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * duration_, sample_rate_, AV_TIME_BASE)));
 			}
 
 			AVSync PullSync(int audio_samples_count)
@@ -151,6 +151,8 @@ namespace TVPlayR {
 
 			bool Full() const
 			{
+				if (is_flushed_)
+					return true;
 				int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
 				int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, video_time_base_);
 				int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;

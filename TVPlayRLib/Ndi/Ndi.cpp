@@ -100,7 +100,7 @@ namespace TVPlayR {
 			}
 		};
 			
-		Ndi::Ndi(const std::string& source_name, const std::string& group_name) : impl_(new implementation(source_name, group_name)) { }
+		Ndi::Ndi(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		Ndi::~Ndi() { }
 
 		bool Ndi::AssignToChannel(Core::Channel& channel) { 

@@ -227,7 +227,7 @@ struct AudioMuxer::implementation
 };
 
 AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
-	: impl_(new implementation(decoders, output_channel_layout, sample_format, sample_rate, nb_channels))
+	: impl_(std::make_unique<implementation>(decoders, output_channel_layout, sample_format, sample_rate, nb_channels))
 { }
 
 AudioMuxer::~AudioMuxer() { }

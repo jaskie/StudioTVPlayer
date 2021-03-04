@@ -211,7 +211,7 @@ namespace TVPlayR {
 		};
 
 VideoFilter::VideoFilter(AVRational input_time_base, AVPixelFormat output_pix_fmt)
-	: impl_(new implementation(input_time_base, output_pix_fmt))
+	: impl_(std::make_unique<implementation>(input_time_base, output_pix_fmt))
 { }
 VideoFilter::~VideoFilter() { }
 bool VideoFilter::Push(std::shared_ptr<AVFrame> frame) { return impl_->Push(frame); }

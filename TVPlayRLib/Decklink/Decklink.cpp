@@ -192,7 +192,7 @@ namespace TVPlayR {
 		};
 
 		Decklink::Decklink(IDeckLink * decklink, int index)
-			: impl_(new implementation(decklink, index))
+			: impl_(std::make_unique<implementation>(decklink, index))
 		{}
 
 		Decklink::~Decklink() { }

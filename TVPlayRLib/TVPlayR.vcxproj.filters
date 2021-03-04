@@ -101,9 +101,6 @@
     <ClInclude Include="Core\StreamInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="FFMpeg\FrameSynchronizer.h">
-      <Filter>FFMpeg</Filter>
-    </ClInclude>
     <ClInclude Include="FFMpeg\OutputVideoScaler.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
@@ -127,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="Decklink\DecklinkVideoFrame.h">
       <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\SynchronizingBuffer.h">
+      <Filter>FFMpeg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,9 +173,6 @@
     <ClCompile Include="FFMpeg\AudioFifo.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
-    <ClCompile Include="FFMpeg\FrameSynchronizer.cpp">
-      <Filter>FFMpeg</Filter>
-    </ClCompile>
     <ClCompile Include="FFMpeg\OutputVideoScaler.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
@@ -187,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkVideoFrame.cpp">
       <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\SynchronizingBuffer.cpp">
+      <Filter>FFMpeg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

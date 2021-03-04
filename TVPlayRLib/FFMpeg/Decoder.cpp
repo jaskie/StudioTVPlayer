@@ -191,7 +191,7 @@ struct Decoder::implementation
 };
 
 Decoder::Decoder(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
-	: impl_(new implementation(codec, stream, seek_time, acceleration, hw_device_index))
+	: impl_(std::make_unique<implementation>(codec, stream, seek_time, acceleration, hw_device_index))
 { }
 
 Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_time)

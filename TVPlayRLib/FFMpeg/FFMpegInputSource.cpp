@@ -7,7 +7,7 @@
 #include "Decoder.h"
 #include "../Core/Channel.h"
 #include "AudioMuxer.h"
-#include "FrameSynchronizer.h"
+#include "SynchronizingBuffer.h"
 #include "OutputVideoScaler.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
@@ -31,7 +31,7 @@ struct FFmpegInputSource::implementation
 	std::mutex synchronizer_mutex_;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<OutputVideoScaler> output_scaler_;
-	std::unique_ptr<FrameSynchronizer> frame_synchronizer_;
+	std::unique_ptr<SynchronizingBuffer> buffer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
 	std::condition_variable frame_synchronizer_created_cv_;
@@ -67,26 +67,27 @@ struct FFmpegInputSource::implementation
 			output_scaler_->GetOutputPixelFormat() != PixelFormatToFFmpegFormat(channel_->PixelFormat()) ||
 			channel_->Format().type() != output_scaler_->Format().type()
 			)
-			output_scaler_.reset(new OutputVideoScaler(video_decoder_->FrameRate(), video_decoder_->TimeBase(), channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat())));
+			output_scaler_ = std::make_unique<OutputVideoScaler>(video_decoder_->FrameRate(), video_decoder_->TimeBase(), channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
 		if (!audio_muxer_ ||
 			audio_muxer_->OutputChannelsCount() != channel_->AudioChannelsCount()
 			)
-			audio_muxer_.reset(new AudioMuxer(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount()));
-		if (!frame_synchronizer_ ||
-			frame_synchronizer_->VideoFormat() != channel_->Format().type()
+			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount());
+		if (!buffer_ ||
+			buffer_->VideoFormat() != channel_->Format().type()
 			)
-			frame_synchronizer_ = std::make_unique<FrameSynchronizer>(
+			buffer_ = std::make_unique<SynchronizingBuffer>(
 				channel_->Format(),
 				channel_->AudioChannelsCount(),
 				is_playing_,
+				AV_TIME_BASE / 2, // 0.5 sec
 				0);
-		frame_synchronizer_->SetTimebases(audio_muxer_->OutputTimeBase(), output_scaler_->OutputTimeBase());
+		buffer_->SetTimebases(audio_muxer_->OutputTimeBase(), output_scaler_->OutputTimeBase());
 		frame_synchronizer_created_cv_.notify_all();
 		while (channel_)
 		{
 			{
 				std::lock_guard<std::mutex> lock(synchronizer_mutex_);
-				while (!frame_synchronizer_->Ready())
+				while (!buffer_->Full())
 				{
 					if (!channel_)
 						break;
@@ -136,7 +137,7 @@ struct FFmpegInputSource::implementation
 		// video
 		auto scaled = output_scaler_->Pull();
 		if (scaled)
-			frame_synchronizer_->PushVideo(scaled);
+			buffer_->PushVideo(scaled);
 		else
 		{
 			auto decoded = video_decoder_->Pull();
@@ -148,8 +149,8 @@ struct FFmpegInputSource::implementation
 				{
 					if (output_scaler_->IsEof())
 					{
-						if (!frame_synchronizer_->IsFlushed())
-							frame_synchronizer_->Flush();
+						if (!buffer_->IsFlushed())
+							buffer_->Flush();
 					}
 					else
 					if (!output_scaler_->IsFlushed())
@@ -171,7 +172,7 @@ struct FFmpegInputSource::implementation
 				{
 					audio_muxer_->Push(decoder->StreamIndex(), decoded);
 					while (auto muxed = audio_muxer_->Pull())
-						frame_synchronizer_->PushAudio(muxed);
+						buffer_->PushAudio(muxed);
 				}
 				else
 					if (!decoder->IsEof())
@@ -184,10 +185,10 @@ struct FFmpegInputSource::implementation
 
 #pragma endregion
 
-	bool Ready() 
+	bool Ready(int audio_samples_count)
 	{
 		std::lock_guard<std::mutex> lock(synchronizer_mutex_);
-		return frame_synchronizer_->Ready();
+		return buffer_->FrameReady(audio_samples_count);
 	}
 
 	AVSync PullSync(int audio_samples_count)
@@ -195,14 +196,14 @@ struct FFmpegInputSource::implementation
 		if (is_eof_)
 		{
 			std::lock_guard<std::mutex> lock(synchronizer_mutex_);
-			return frame_synchronizer_->PullSync(audio_samples_count);
+			return buffer_->PullSync(audio_samples_count);
 		}
 		bool finished = false;
 		AVSync sync(nullptr, nullptr, 0LL);
 		{
 			std::lock_guard<std::mutex> lock(synchronizer_mutex_);
-			sync = frame_synchronizer_->PullSync(audio_samples_count); 
-			finished = frame_synchronizer_->IsEof();
+			sync = buffer_->PullSync(audio_samples_count); 
+			finished = buffer_->IsEof();
 		}
 		if (sync && frame_played_callback_)
 			frame_played_callback_(sync.Time);
@@ -260,8 +261,8 @@ struct FFmpegInputSource::implementation
 				audio_muxer_->Reset();
 			if (output_scaler_)
 				output_scaler_->Reset();
-			if (frame_synchronizer_)
-				frame_synchronizer_->Seek(time);
+			if (buffer_)
+				buffer_->Seek(time);
 			is_eof_ = false;
 			return true;
 		}
@@ -271,15 +272,15 @@ struct FFmpegInputSource::implementation
 	void Play()
 	{
 		is_playing_ = true;
-		if (frame_synchronizer_)
-			frame_synchronizer_->SetIsPlaying(true);
+		if (buffer_)
+			buffer_->SetIsPlaying(true);
 	}
 
 	void Pause()
 	{
 		is_playing_ = false;
-		if (frame_synchronizer_)
-			frame_synchronizer_->SetIsPlaying(false);
+		if (buffer_)
+			buffer_->SetIsPlaying(false);
 		if (stopped_callback_)
 			stopped_callback_();
 	}
@@ -291,7 +292,7 @@ struct FFmpegInputSource::implementation
 		const Core::StreamInfo* stream = input_.GetVideoStream();
 		if (stream == nullptr)
 			return;
-		video_decoder_.reset(new Decoder(stream->Codec, stream->Stream, seek_time_, acceleration_, hw_device_));
+		video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, seek_time_, acceleration_, hw_device_);
 	}
 
 	void InitializeAudioDecoders()
@@ -302,7 +303,7 @@ struct FFmpegInputSource::implementation
 			info_iter = std::find_if(streams.begin(), streams.end(), [](const auto& info) { return info.Type == Core::MediaType::audio; });
 		if (info_iter == streams.end())
 			return;
-		audio_decoders_.emplace_back(new Decoder(info_iter->Codec, info_iter->Stream, seek_time_));
+		audio_decoders_.emplace_back(std::make_unique<Decoder>(info_iter->Codec, info_iter->Stream, seek_time_));
 	}
 
 	bool IsStream(const std::string& fileName)
@@ -399,7 +400,7 @@ struct FFmpegInputSource::implementation
 
 	std::shared_ptr<AVFrame> GetFrameAt(int64_t time)
 	{
-		if (frame_synchronizer_)
+		if (buffer_)
 			return nullptr;
 		input_.Seek(time);
 		video_decoder_->Seek(time);
@@ -420,14 +421,14 @@ struct FFmpegInputSource::implementation
 
 
 FFmpegInputSource::FFmpegInputSource(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
-	: impl_(new implementation(file_name, acceleration, hw_device, audioChannelCount))
+	: impl_(std::make_unique<implementation>(file_name, acceleration, hw_device, audioChannelCount))
 { }
 
 FFmpegInputSource::~FFmpegInputSource(){}
 std::shared_ptr<AVFrame> FFmpegInputSource::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
 AVSync FFmpegInputSource::PullSync(int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInputSource::Seek(const int64_t time)        { return impl_->Seek(time); }
-bool FFmpegInputSource::Ready() { return impl_->Ready(); }
+bool FFmpegInputSource::Ready(int audio_samples_count) { return impl_->Ready(audio_samples_count); }
 bool FFmpegInputSource::IsEof() const					{ return impl_->is_eof_; }
 bool FFmpegInputSource::IsAddedToChannel(Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
 void FFmpegInputSource::AddToChannel(Core::Channel& channel) { impl_->AddToChannel(channel); }

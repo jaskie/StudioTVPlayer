@@ -11,6 +11,7 @@ namespace TVPlayR {
 				, Video(video)
 				, Time(time)
 			{ }
+			AVSync() : AVSync(nullptr, nullptr, 0LL) {}
 			AVSync(AVSync&& other) = default;
 			AVSync(const AVSync& other) = default;
 			std::shared_ptr<AVFrame> Audio;

@@ -47,8 +47,8 @@ int main()
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		channel.Load(input);
 		input->Play();
+		channel.Load(input);
 		//Ndi::Ndi ndi("NDI_SOURCE", "");
 		//channel.SetFrameClock(ndi.OutputFrameClock());
 		//channel.AddOutput(ndi);

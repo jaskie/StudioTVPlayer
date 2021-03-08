@@ -9,7 +9,7 @@
 #include "Utils.h"
 #include "DecklinkVideoFrame.h"
 
-#undef DEBUG
+//#undef DEBUG
 
 namespace TVPlayR {
 	namespace Decklink {

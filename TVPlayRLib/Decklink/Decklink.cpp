@@ -20,7 +20,7 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkOutput> output_;
 			int index_;
 			Core::VideoFormat format_;
-			int buffer_size_ = 3;
+			int buffer_size_ = 4;
 			int64_t scheduled_frames_ = 0;
 			int64_t scheduled_samples_ = 0;
 			int audio_channels_count_ = 2;
@@ -92,7 +92,12 @@ namespace TVPlayR {
 			{
 				unsigned int samples_written;
 				output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
-				scheduled_samples_ += samples_written;
+				scheduled_samples_ += buffer->nb_samples;
+#ifdef DEBUG
+				std::stringstream msg;
+				msg << "Audio samples written: " << samples_written << " from buffer of " << buffer->nb_samples <<"\n";
+				OutputDebugStringA(msg.str().c_str());
+#endif	
 			}
 
 			int AudioSamplesRequired() const

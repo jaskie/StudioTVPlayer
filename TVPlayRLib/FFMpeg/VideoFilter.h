@@ -18,7 +18,6 @@ public:
 	int OutputWidth();
 	int OutputHeight();
 	AVRational OutputSampleAspectRatio();
-	AVRational OutputFrameRate();
 	AVPixelFormat GetOutputPixelFormat();
 	virtual AVRational OutputTimeBase() const override;
 	virtual void Flush() override;

@@ -69,7 +69,7 @@ std::shared_ptr<AVPacket> InputFormat::PullPacket()
 			break;
 		}
 	}
-	return __nullptr;
+	return nullptr;
 }
 
 bool InputFormat::CanSeek() const

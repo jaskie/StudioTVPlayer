@@ -3,6 +3,8 @@
 #include "InputSource.h"
 #include "OutputDevice.h"
 
+#undef DEBUG
+
 namespace TVPlayR {
 	namespace Core {
 
@@ -44,6 +46,9 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(mutex_);
 				if (playing_source_)
 				{
+#ifdef DEBUG
+					OutputDebugStringA(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio\n").c_str());
+#endif // DEBUG
 					auto sync = playing_source_->PullSync(audio_samples_count);
 					assert(sync.Audio->nb_samples == audio_samples_count);
 					for (auto device : output_devices_)
@@ -112,7 +117,8 @@ namespace TVPlayR {
 
 		void Channel::SetFrameClock(std::shared_ptr<OutputDevice> clock) { impl_->SetFrameClock(clock); }
 
-		void Channel::Load(std::shared_ptr<InputSource> source) {
+		void Channel::Load(std::shared_ptr<InputSource> source) 
+		{
 			if (!source->IsAddedToChannel(*this))
 				source->AddToChannel(*this);
 			impl_->Load(source);

@@ -54,7 +54,7 @@ namespace TVPlayR {
 				if (!sink_ctx_)
 				{
 					auto ret = direct_path_frame_;
-					direct_path_frame_ = __nullptr;
+					direct_path_frame_ = nullptr;
 					return ret;
 				}
 				auto frame = AllocFrame();
@@ -63,11 +63,11 @@ namespace TVPlayR {
 				{
 				case AVERROR_EOF:
 					is_eof_ = true;
-					return __nullptr;
+					return nullptr;
 				case AVERROR(EAGAIN):
-					return __nullptr;
+					return nullptr;
 				case AVERROR(EINVAL):
-					return __nullptr;
+					return nullptr;
 				}
 				if (FF(ret))
 				{
@@ -80,7 +80,7 @@ namespace TVPlayR {
 #endif
 					return frame;
 				}
-				return __nullptr;
+				return nullptr;
 			}
 
 			int OutputWidth()
@@ -98,7 +98,7 @@ namespace TVPlayR {
 				return sink_ctx_ ? av_buffersink_get_sample_aspect_ratio(sink_ctx_) : input_sar_;
 			}
 
-			AVRational OutputFrameRate()
+			AVRational OutputFrameRate() const
 			{
 				if (sink_ctx_)
 				{
@@ -114,7 +114,7 @@ namespace TVPlayR {
 				return sink_ctx_ ? static_cast<AVPixelFormat>(av_buffersink_get_format(sink_ctx_)) : input_pixel_format_;
 			}
 
-			AVRational OutputTimeBase() 
+			AVRational OutputTimeBase() const
 			{
 				if (!sink_ctx_)
 					return (input_time_base_);
@@ -220,7 +220,6 @@ std::shared_ptr<AVFrame> VideoFilter::Pull() { return impl_->Pull(); }
 int VideoFilter::OutputWidth() { return impl_->OutputWidth(); }
 int VideoFilter::OutputHeight() { return impl_->OutputHeight(); }
 AVRational VideoFilter::OutputSampleAspectRatio() { return impl_->OutputSampleAspectRatio(); }
-AVRational VideoFilter::OutputFrameRate() { return impl_->OutputFrameRate(); }
 AVPixelFormat VideoFilter::GetOutputPixelFormat() { return impl_->OutputPixelFormat(); }
 AVRational VideoFilter::OutputTimeBase() const { return impl_->OutputTimeBase(); }
 void VideoFilter::Flush() { return impl_->Flush(); }

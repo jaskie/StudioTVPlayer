@@ -87,7 +87,7 @@ namespace TVPlayR {
 				int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
 				int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
 				if (min_audio == AV_NOPTS_VALUE)
-					while (video_queue_.size() > 3)
+					while (video_queue_.size() > av_rescale(duration_, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 						video_queue_.pop_front();
 				if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > 2 * duration_)
 					fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * duration_, sample_rate_, AV_TIME_BASE)));
@@ -96,42 +96,17 @@ namespace TVPlayR {
 			AVSync PullSync(int audio_samples_count)
 			{
 				std::lock_guard<std::mutex> lock(mutex_);
-				std::shared_ptr<AVFrame> audio;
+				std::shared_ptr<AVFrame> audio = is_playing_ && fifo_ 
+					? fifo_->Pull(audio_samples_count)
+					: FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_);
 				if (is_playing_)
 				{
-					int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
-					int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
-					int64_t time_delta = min_video == AV_NOPTS_VALUE || min_audio == AV_NOPTS_VALUE ? 0LL : min_video - min_audio + sync_;
-#ifdef DEBUG
-					//OutputDebugStringA(("Min audio:" + std::to_string(min_audio / 1000) + "\n").c_str());
-					//OutputDebugStringA(("Min video:" + std::to_string(min_video / 1000) + "\n").c_str());
-					//OutputDebugStringA(("Time delta:" + std::to_string(time_delta / 1000) + "\n").c_str());
-#endif // DEBUG
-					if (time_delta <= AV_TIME_BASE / 30)
-					{
-						if (!video_queue_.empty())
-						{
-							last_video_ = video_queue_.front();
-							video_queue_.pop_front();
-						}
-					}
-#ifdef DEBUG
-					else
-						OutputDebugStringA("Video frame repeated\n");
-#endif // DEBUG
-
-					if (time_delta >= AV_TIME_BASE / 20 && fifo_ && fifo_->SamplesCount() > 0)
-					{
-						int samples_to_discard = static_cast<int>(av_rescale(time_delta, sample_rate_, AV_TIME_BASE));
-						fifo_->DiscardSamples(samples_to_discard);
-					}
-					if (fifo_)
-						audio = fifo_->Pull(audio_samples_count);
-				}
-				if (!audio)
-					audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_);
-				if (!last_video_)
 					last_video_ = video_queue_.front();
+					video_queue_.pop_front();
+				}
+				else
+					if (!last_video_)
+						last_video_ = video_queue_.front();
 				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, video_time_base_));
 #ifdef DEBUG
 				//if (audio->pts != AV_NOPTS_VALUE && last_video_->pts != AV_NOPTS_VALUE)

@@ -13,7 +13,6 @@ OutputVideoScaler::OutputVideoScaler(AVRational input_frame_rate, AVRational inp
 	, pixel_format_(output_pixel_format)
 	, input_frame_rate_(input_frame_rate)
 	, input_time_base_(input_time_base)
-	, output_time_base_(av_inv_q(output_format.FrameRate().av()))
 {
 }
 

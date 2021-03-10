@@ -12,6 +12,8 @@
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
 
+#undef DEBUG
+
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
@@ -77,17 +79,18 @@ struct FFmpegInputSource::implementation
 			)
 			buffer_ = std::make_unique<SynchronizingBuffer>(
 				channel_->Format(),
+				output_scaler_->OutputTimeBase(),
 				channel_->AudioChannelsCount(),
 				is_playing_,
 				AV_TIME_BASE / 2, // 0.5 sec
 				0);
-		buffer_->SetTimebases(audio_muxer_->OutputTimeBase(), output_scaler_->OutputTimeBase());
 		while (channel_)
 		{
 			while (!buffer_->Full())
 			{
 				if (!channel_)
 					break;
+				std::lock_guard<std::mutex> lock(buffer_mutex_);
 				bool neeed_packet = false;
 				PushToBuffer(neeed_packet);
 				if (neeed_packet)
@@ -187,24 +190,21 @@ struct FFmpegInputSource::implementation
 	AVSync PullSync(int audio_samples_count)
 	{	
 		std::unique_lock<std::mutex> lock(buffer_mutex_);
-		if (!(buffer_ && buffer_->Ready()))
+		while (!(buffer_ && buffer_->Ready()))
 			buffer_cv_.wait(lock);
+		producer_semaphore_.notify();
 		if (is_eof_)
 			return buffer_->PullSync(audio_samples_count);
 		bool finished = false;
-		AVSync sync(nullptr, nullptr, 0LL);
-		{
-			sync = buffer_->PullSync(audio_samples_count); 
-			finished = buffer_->IsEof();
-		}
-		if (sync && frame_played_callback_)
+		auto sync = buffer_->PullSync(audio_samples_count);
+		finished = buffer_->IsEof();
+		if (frame_played_callback_)
 			frame_played_callback_(sync.Time);
 		if (finished)
 		{
 			is_eof_ = true;
 			Pause();
 		}
-		producer_semaphore_.notify();
 		return sync;
 	}
 
@@ -269,8 +269,7 @@ struct FFmpegInputSource::implementation
 	void Pause()
 	{
 		is_playing_ = false;
-		if (buffer_)
-			buffer_->SetIsPlaying(false);
+		buffer_->SetIsPlaying(false);
 		if (stopped_callback_)
 			stopped_callback_();
 	}

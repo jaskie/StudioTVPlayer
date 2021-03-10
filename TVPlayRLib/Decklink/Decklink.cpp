@@ -9,7 +9,7 @@
 #include "Utils.h"
 #include "DecklinkVideoFrame.h"
 
-#undef DEBUG
+//#undef DEBUG
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -38,8 +38,8 @@ namespace TVPlayR {
 
 			~implementation()
 			{
-				output_->SetScheduledFrameCompletionCallback(nullptr);
 				frame_requested_callback_ = nullptr;
+				output_->SetScheduledFrameCompletionCallback(nullptr);
 				ReleaseChannel();
 			}
 
@@ -73,19 +73,21 @@ namespace TVPlayR {
 				output_->EndAudioPreroll();
 			}
 
-			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame)
+			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame)
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 
 				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(frame);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
-				scheduled_frames_++;
+				if (ret == S_OK)
+					scheduled_frames_++;
+				else
+					decklink_frame->Release();
 #ifdef DEBUG
-				std::stringstream msg;
+			/*	std::stringstream msg;
 				msg << "scheduled frame: " << frame->pts << "\n";
-				OutputDebugStringA(msg.str().c_str());
+				OutputDebugStringA(msg.str().c_str());*/
 #endif			
-				return ret == S_OK;
 			}
 
 			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
@@ -94,9 +96,9 @@ namespace TVPlayR {
 				output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
 #ifdef DEBUG
-				std::stringstream msg;
+				/*std::stringstream msg;
 				msg << "Audio samples written: " << samples_written << " from buffer of " << buffer->nb_samples <<"\n";
-				OutputDebugStringA(msg.str().c_str());
+				OutputDebugStringA(msg.str().c_str());*/
 #endif	
 			}
 
@@ -162,6 +164,8 @@ namespace TVPlayR {
 			//IDeckLinkVideoOutputCallback
 			HRESULT __stdcall ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
 			{
+				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
+					return S_OK;
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 
@@ -175,9 +179,9 @@ namespace TVPlayR {
 				}
 				else
 				{
-					std::stringstream msg;
-					msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts() << "\n";
-					OutputDebugStringA(msg.str().c_str());
+					//std::stringstream msg;
+					//msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts() << "\n";
+					//OutputDebugStringA(msg.str().c_str());
 				}
 #endif
 				//delete frame;
@@ -191,8 +195,8 @@ namespace TVPlayR {
 
 			//IUnknown
 			HRESULT STDMETHODCALLTYPE QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
-			ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
-			ULONG STDMETHODCALLTYPE Release() override { return 1; }
+			ULONG STDMETHODCALLTYPE AddRef() override { return S_OK; }
+			ULONG STDMETHODCALLTYPE Release() override { return S_OK; }
 
 		};
 

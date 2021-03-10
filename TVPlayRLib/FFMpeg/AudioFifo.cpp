@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "AudioFifo.h"
 
-//#undef DEBUG
+#undef DEBUG
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -81,10 +81,10 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 #endif 
 		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channels_count_, sample_fmt_);
 #ifdef DEBUG
-		OutputDebugStringA(("Filled audio with silence: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
+		OutputDebugStringA(("Filled audio with silence at time: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
 	}
 //	else
-//		OutputDebugStringA(("Pulled audio frame from fifo: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
+//		OutputDebugStringA(("Pulled audio frame from fifo at time: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
 #endif 
 	return frame;
 }

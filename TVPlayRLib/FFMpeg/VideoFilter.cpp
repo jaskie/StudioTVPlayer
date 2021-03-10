@@ -185,8 +185,6 @@ namespace TVPlayR {
 
 			void Reset()
 			{
-				if (!is_flushed_)
-					return;
 				is_flushed_ = false;
 				is_eof_ = false;
 				CreateFilterChain();

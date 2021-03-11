@@ -21,8 +21,8 @@ namespace TVPlayR {
 			int index_;
 			Core::VideoFormat format_;
 			int buffer_size_ = 4;
-			int64_t scheduled_frames_ = 0;
-			int64_t scheduled_samples_ = 0;
+			volatile int64_t scheduled_frames_ = 0;
+			volatile int64_t scheduled_samples_ = 0;
 			int audio_channels_count_ = 2;
 			std::atomic_bool is_running_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
@@ -69,36 +69,41 @@ namespace TVPlayR {
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_));
 					ScheduleVideo(empty_video_frame);
+					scheduled_frames_++;
 				}
 				output_->EndAudioPreroll();
 			}
 
-			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame)
+			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame)
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
-
 				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(frame);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
-				if (ret == S_OK)
-					scheduled_frames_++;
-				else
+				if (ret != S_OK)
 					decklink_frame->Release();
 #ifdef DEBUG
-			/*	std::stringstream msg;
-				msg << "scheduled frame: " << frame->pts << "\n";
-				OutputDebugStringA(msg.str().c_str());*/
+				if (ret != S_OK)
+				{
+					std::stringstream msg;
+					msg << "Unable to schedule frame: " << frame->pts << "\n";
+					OutputDebugStringA(msg.str().c_str());
+				}
 #endif			
+				return ret == S_OK;
 			}
 
 			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
 			{
 				unsigned int samples_written;
 				output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
-				scheduled_samples_ += buffer->nb_samples;
+				scheduled_samples_ += samples_written;
 #ifdef DEBUG
-				/*std::stringstream msg;
-				msg << "Audio samples written: " << samples_written << " from buffer of " << buffer->nb_samples <<"\n";
-				OutputDebugStringA(msg.str().c_str());*/
+				if (samples_written != buffer->nb_samples)
+				{
+					std::stringstream msg;
+					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples << "\n";
+					OutputDebugStringA(msg.str().c_str());
+				}
 #endif	
 			}
 
@@ -157,8 +162,8 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				ScheduleVideo(sync.Video);
-				ScheduleAudio(sync.Audio);
+				if (ScheduleVideo(sync.Video))
+					ScheduleAudio(sync.Audio);
 			}
 
 			//IDeckLinkVideoOutputCallback
@@ -166,6 +171,7 @@ namespace TVPlayR {
 			{
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
 					return S_OK;
+				scheduled_frames_++;
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 

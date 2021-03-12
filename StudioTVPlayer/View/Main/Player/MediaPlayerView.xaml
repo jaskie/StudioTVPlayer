@@ -172,13 +172,12 @@
                     <mah:FontIcon Glyph="&#xE893;"/>
                 </Button>
             </UniformGrid>
-            <controls:Seekbar Grid.Row="4" IsMoveToPointEnabled="True" 
-                            Margin="5" 
-                            Minimum="{Binding CurrentRundownItem.RundownItem.Media.StartTime.TotalMilliseconds}"
-                            Maximum="{Binding CurrentRundownItem.RundownItem.Media.Duration.TotalMilliseconds}" 
-                            SliderDragStartCommand="{Binding SliderDragStartCommand}"
-                            Value="{Binding Seekbar, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=20}">
-            </controls:Seekbar>
+            <Slider Grid.Row="4" IsMoveToPointEnabled="True" 
+                    Margin="5" 
+                    Minimum="{Binding CurrentRundownItem.RundownItem.Media.StartTime.TotalMilliseconds}"
+                    Maximum="{Binding CurrentRundownItem.RundownItem.Media.Duration.TotalMilliseconds}" 
+                    Value="{Binding SliderPosition, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=20}">
+            </Slider>
             <Border Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"  >
                 <Border.Style>
                     <Style TargetType="Border">

@@ -20,7 +20,7 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkOutput> output_;
 			int index_;
 			Core::VideoFormat format_;
-			int buffer_size_ = 4;
+			int buffer_size_ = 3;
 			volatile int64_t scheduled_frames_ = 0;
 			volatile int64_t scheduled_samples_ = 0;
 			int audio_channels_count_ = 2;

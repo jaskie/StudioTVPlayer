@@ -22,7 +22,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private bool _isFocused;
         private TimeSpan _displayTime;
         private TimeSpan _outTime;
-        private double _seekbar;
+        private double _sliderPosition;
         private bool _isDisposed;
         private RundownItemViewModel _currentRundownItem;
 
@@ -78,12 +78,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _outTime, value);
         }
 
-        public double Seekbar
+        public double SliderPosition
         {
-            get => _seekbar;
+            get => _sliderPosition;
             set
             {
-                Set(ref _seekbar, value);
+                if (!Set(ref _sliderPosition, value))
+                    return;
                 SeekMedia();
             }
         }
@@ -164,8 +165,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
 
             Seek(VideoFormat.FrameNumberToTime(frameNumber));
-            _seekbar = VideoFormat.FrameNumberToTime(frameNumber).TotalMilliseconds;
-            NotifyPropertyChanged(nameof(Seekbar));
+            _sliderPosition = VideoFormat.FrameNumberToTime(frameNumber).TotalMilliseconds;
+            NotifyPropertyChanged(nameof(SliderPosition));
             await Pause();
         }
 
@@ -216,7 +217,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {            
             if (usingSeekbar)
             {
-                Seek(TimeSpan.FromMilliseconds(_seekbar));
+                Seek(TimeSpan.FromMilliseconds(_sliderPosition));
             }
             else
             {
@@ -322,8 +323,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             DisplayTime = e.Time;
             OutTime = CurrentRundownItem?.RundownItem.Media.Duration - e.Time ?? TimeSpan.Zero;
-            _seekbar = e.Time.TotalMilliseconds;
-            NotifyPropertyChanged(nameof(Seekbar));
+            _sliderPosition = e.Time.TotalMilliseconds;
+            NotifyPropertyChanged(nameof(SliderPosition));
         }
 
         private void MediaPlayer_Stopped(object sender, EventArgs e)

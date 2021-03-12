@@ -19,8 +19,8 @@ namespace StudioTVPlayer.Controls
 
         private static void SliderDragStartCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var element = (FrameworkElement)d;
-            element.GotMouseCapture += SliderDragStart;
+            var slider = (Slider)d;
+            slider.GotMouseCapture += SliderDragStart;
         }       
       
         private static void SliderDragStart(object sender, MouseEventArgs e)
@@ -29,7 +29,6 @@ namespace StudioTVPlayer.Controls
 
             ICommand command = GetSliderDragStartCommand(element);
             object[] param = { sender, e };
-
             command.Execute(param);
         }
 

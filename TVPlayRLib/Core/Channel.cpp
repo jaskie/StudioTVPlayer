@@ -2,6 +2,7 @@
 #include "Channel.h"
 #include "InputSource.h"
 #include "OutputDevice.h"
+#include "../Common/Executor.h"
 
 #undef DEBUG
 
@@ -19,6 +20,7 @@ namespace TVPlayR {
 			const Core::PixelFormat pixel_format_;
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
+			Common::Executor frame_requester_;
 
 			implementation(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
 				: format_(format)
@@ -27,6 +29,7 @@ namespace TVPlayR {
 				, frame_clock_(nullptr)
 				, playing_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
+				, frame_requester_("Frame requester")
 			{
 			}
 
@@ -43,24 +46,27 @@ namespace TVPlayR {
 
 			void RequestFrame(int audio_samples_count)
 			{
-				std::lock_guard<std::mutex> lock(mutex_);
-				if (playing_source_)
+				frame_requester_.begin_invoke([this, audio_samples_count]
 				{
+					std::lock_guard<std::mutex> lock(mutex_);
+					if (playing_source_)
+					{
 #ifdef DEBUG
-					OutputDebugStringA(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio\n").c_str());
+						OutputDebugStringA(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio\n").c_str());
 #endif // DEBUG
-					auto sync = playing_source_->PullSync(audio_samples_count);
-					assert(sync.Audio->nb_samples == audio_samples_count);
-					for (auto device : output_devices_)
-						device->Push(sync);
-				}
-				else
-				{
-					auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_), empty_video_, 0LL);
-					assert(sync.Audio->nb_samples == audio_samples_count);
-					for (auto device : output_devices_)
-						device->Push(sync);
-				}
+						auto sync = playing_source_->PullSync(audio_samples_count);
+						assert(sync.Audio->nb_samples == audio_samples_count);
+						for (auto device : output_devices_)
+							device->Push(sync);
+					}
+					else
+					{
+						auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_), empty_video_, 0LL);
+						assert(sync.Audio->nb_samples == audio_samples_count);
+						for (auto device : output_devices_)
+							device->Push(sync);
+					}
+				});
 			}
 
 			void AddOutput(std::shared_ptr<OutputDevice>& device)

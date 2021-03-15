@@ -25,6 +25,9 @@ namespace TVPlayR {
 			volatile int64_t scheduled_samples_ = 0;
 			int audio_channels_count_ = 2;
 			std::atomic_bool is_running_;
+			std::mutex buffer_mutex_;
+			std::shared_ptr<FFmpeg::AVSync> buffer_frame_;
+			std::shared_ptr<AVFrame> last_video_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, int index)
@@ -79,6 +82,7 @@ namespace TVPlayR {
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(frame);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
+				last_video_ = frame;
 				if (ret != S_OK)
 					decklink_frame->Release();
 #ifdef DEBUG
@@ -162,8 +166,12 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				if (ScheduleVideo(sync.Video))
-					ScheduleAudio(sync.Audio);
+				std::lock_guard<std::mutex> lock(buffer_mutex_);
+#ifdef DEBUG
+				if (buffer_frame_)
+					OutputDebugStringA("Frame dropped when pushed\n");
+#endif
+				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
 			}
 
 			//IDeckLinkVideoOutputCallback
@@ -171,9 +179,22 @@ namespace TVPlayR {
 			{
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
 					return S_OK;
-				scheduled_frames_++;
+				std::shared_ptr<FFmpeg::AVSync> sync;
+				{
+					std::lock_guard<std::mutex> lock(buffer_mutex_);
+					if (buffer_frame_)
+					{
+						sync = buffer_frame_;
+						buffer_frame_.reset();
+					}
+				}
+				if (!sync)
+					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_), last_video_, 0LL);
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
+
+				if (ScheduleVideo(sync->Video))
+					ScheduleAudio(sync->Audio);
 
 #ifdef DEBUG
 				auto frame = static_cast<DecklinkVideoFrame*>(completedFrame);
@@ -190,7 +211,8 @@ namespace TVPlayR {
 					//OutputDebugStringA(msg.str().c_str());
 				}
 #endif
-				//delete frame;
+
+				scheduled_frames_++;
 				return S_OK;
 			}
 

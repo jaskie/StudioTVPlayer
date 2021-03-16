@@ -12,7 +12,13 @@ namespace StudioTVPlayer.View.Main.Player
         public MediaPlayerView()
         {
             InitializeComponent();           
-        }     
+        }
 
+        private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            if (!(DataContext is ViewModel.Main.Player.MediaPlayerViewModel vm))
+                return;
+            vm.SeekToSliderPosition();
+        }
     }
 }

@@ -58,6 +58,11 @@ namespace TVPlayR {
 			bool get() { return (*_nativeSource)->IsPlaying(); }
 		}
 
+		property bool IsEof
+		{
+			bool get() { return (*_nativeSource)->IsEof(); }
+		}
+
 		property TVPlayR::FieldOrder FieldOrder
 		{
 			TVPlayR::FieldOrder get() 

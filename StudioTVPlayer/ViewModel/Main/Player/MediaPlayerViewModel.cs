@@ -25,6 +25,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private double _sliderPosition;
         private bool _isDisposed;
         private RundownItemViewModel _currentRundownItem;
+        private bool _isLoaded;
 
         public MediaPlayerViewModel(MediaPlayer player)
         {
@@ -32,12 +33,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
             CueCommand = new UiCommand(Cue, _ => CurrentRundownItem != null);
             CheckItemCommand = new UiCommand(param => CheckItem(param));
-            TogglePlayCommand = new UiCommand(TogglePlay, _ => CurrentRundownItem != null);
-            SliderDragStartCommand = new UiCommand(param => SldierDragStart(param));
+            TogglePlayCommand = new UiCommand(TogglePlay, CanTogglePlay);
             UnloadCommand = new UiCommand(Unload, _ => CurrentRundownItem != null);
             LoadNextItemCommand = new UiCommand(LoadNextItem, CanLoadNextItem);
             DeleteDisabledCommand = new UiCommand(DeleteDisabled, _ => Rundown.Any(i => i.IsDisabled));
-            DisplayTimecodeEditCommand = new UiCommand(param => SeekMedia(false));
+            DisplayTimecodeEditCommand = new UiCommand(_ => Seek(DisplayTime));
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Channel.Name;
             VideoFormat = player.Channel.VideoFormat;
@@ -48,6 +48,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.Stopped += MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
+        }
+
+        private bool CanTogglePlay(object obj)
+        {
+            var item = _mediaPlayer.PlayingQueueItem;
+            if (item == null)
+                return false;
+            if (!IsPlaying && _mediaPlayer.IsEof)
+                return false;
+            return true;
         }
 
         public string Name { get; }
@@ -72,6 +82,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _displayTime, value);
         }
 
+        public TimeSpan CurrentItemStartTime => CurrentRundownItem?.RundownItem.Media.StartTime ?? TimeSpan.Zero;
+
+        public TimeSpan CurrentItemDuration => CurrentRundownItem?.RundownItem.Media.Duration ?? TimeSpan.Zero;
+
+
         public TimeSpan OutTime
         {
             get => _outTime;
@@ -81,13 +96,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public double SliderPosition
         {
             get => _sliderPosition;
-            set
-            {
-                if (!Set(ref _sliderPosition, value))
-                    return;
-                SeekMedia();
-            }
+            set => Set(ref _sliderPosition, value);
         }
+
+        public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
         public IList<RundownItemViewModel> Rundown { get; }
 
@@ -95,7 +107,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public RundownItemViewModel CurrentRundownItem
         {
-            get => _currentRundownItem; 
+            get => _currentRundownItem;
             private set
             {
                 var oldItem = _currentRundownItem;
@@ -108,6 +120,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     oldItem.IsLoaded = false;
                     oldItem.IsDisabled = true;
                 }
+                IsLoaded = value != null;
+                SliderPosition = CurrentItemStartTime.TotalMilliseconds;
+                NotifyPropertyChanged(nameof(CurrentItemStartTime));
+                NotifyPropertyChanged(nameof(CurrentItemDuration));
             }
         }
 
@@ -115,11 +131,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public ICommand LoadSelectedMediaCommand { get; }
         public ICommand CueCommand { get; }
         public ICommand CheckItemCommand { get; }
-        public ICommand SliderDragStartCommand { get; }
         public ICommand DisplayTimecodeEditCommand { get; }
         public ICommand DeleteDisabledCommand { get; }
         public ICommand SeekFramesCommand { get; }
-               
+
         public ICommand TogglePlayCommand { get; }
         public ICommand UnloadCommand { get; }
         public ICommand LoadNextItemCommand { get; }
@@ -129,7 +144,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             IsPlaying = false;
         }
-
 
         private async void SeekFrames(object param)
         {
@@ -163,11 +177,17 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                         break;
                     }
             }
-
             Seek(VideoFormat.FrameNumberToTime(frameNumber));
-            _sliderPosition = VideoFormat.FrameNumberToTime(frameNumber).TotalMilliseconds;
-            NotifyPropertyChanged(nameof(SliderPosition));
             await Pause();
+        }
+
+        private void Seek(TimeSpan time)
+        {
+            if (!_mediaPlayer.Seek(time))
+                return;
+            SliderPosition = time.TotalMilliseconds;
+            DisplayTime = time;
+            OutTime = CurrentItemDuration - time;
         }
 
         private void LoadSelectedMedia(object obj)
@@ -182,7 +202,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             if (!await Pause())
                 return;
-            Seek(TimeSpan.Zero);
+            Seek(CurrentItemStartTime);
         }
 
         private void DeleteDisabled(object obj)
@@ -195,34 +215,19 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             } while (item != null);
         }
 
-        private async void SldierDragStart(object _)
-        {
-            //if (_inputFile == null)
-            //    return;
-            await Pause();
-        }
-
         private void CheckItem(object param)
         {
             if (param == null)
                 return;
-
             object[] parameters = param as object[];
             FrameworkElement element = (FrameworkElement)parameters[0];
             RundownItemViewModel m = (RundownItemViewModel)element.DataContext;
             m.IsDisabled = !m.IsDisabled;
         }
 
-        private void SeekMedia(bool usingSeekbar = true)
-        {            
-            if (usingSeekbar)
-            {
-                Seek(TimeSpan.FromMilliseconds(_sliderPosition));
-            }
-            else
-            {
-                _mediaPlayer.Seek(DisplayTime);
-            }         
+        public void SeekToSliderPosition()
+        {
+            Seek(TimeSpan.FromMilliseconds(_sliderPosition));
         }
 
         private void LoadMedia(object param)
@@ -248,7 +253,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 if (Rundown[currentIndex].IsDisabled)
                     continue;
-                LoadMedia(Rundown[currentIndex]);             
+                LoadMedia(Rundown[currentIndex]);
                 return;
             }
         }
@@ -311,25 +316,19 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             return true;
         }
 
-        public bool Seek(TimeSpan timeSpan)
-        {
-            if (_mediaPlayer.PlayingQueueItem == null)
-                return false;
-            return _mediaPlayer.Seek(timeSpan);
-        }
-
-
         private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
         {
+            if (!IsPlaying)
+                return;
             DisplayTime = e.Time;
             OutTime = CurrentRundownItem?.RundownItem.Media.Duration - e.Time ?? TimeSpan.Zero;
-            _sliderPosition = e.Time.TotalMilliseconds;
-            NotifyPropertyChanged(nameof(SliderPosition));
+            SliderPosition = e.Time.TotalMilliseconds;
         }
 
         private void MediaPlayer_Stopped(object sender, EventArgs e)
         {
             IsPlaying = false;
+            Refresh();
         }
 
 

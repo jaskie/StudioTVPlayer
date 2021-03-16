@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.Helpers.AttachedProperties
@@ -41,7 +42,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
 
         public static void SetMouseDoubleClickCommand(UIElement element, ICommand value) => element.SetValue(MouseDoubleClickCommandProperty, value);
         public static ICommand GetMouseDoubleClickCommand(UIElement element) => (ICommand)element.GetValue(MouseDoubleClickCommandProperty);
-
+        
         public static readonly DependencyProperty MouseLeftButtonDownCommandProperty =
             DependencyProperty.RegisterAttached(
                 "MouseLeftButtonDownCommand",

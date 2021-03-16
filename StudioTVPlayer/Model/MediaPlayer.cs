@@ -34,7 +34,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public TimeSpan Position { get; internal set; }
+        public bool IsEof => _inputFile?.IsEof ?? true;
 
         public bool Play()
         {

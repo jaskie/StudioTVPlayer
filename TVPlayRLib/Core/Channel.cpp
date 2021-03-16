@@ -38,7 +38,7 @@ namespace TVPlayR {
 				if (frame_clock_)
 				{
 					frame_clock_->SetFrameRequestedCallback(nullptr);
-					frame_clock_ = nullptr;
+					frame_clock_.reset();
 				}
 				for (auto device : output_devices_)
 					device->ReleaseChannel();

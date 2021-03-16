@@ -27,6 +27,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private RundownItemViewModel _currentRundownItem;
         private bool _isLoaded;
 
+        private bool _isSliderDrag;
+
         public MediaPlayerViewModel(MediaPlayer player)
         {
             LoadMediaCommand = new UiCommand(LoadMedia);
@@ -96,7 +98,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public double SliderPosition
         {
             get => _sliderPosition;
-            set => Set(ref _sliderPosition, value);
+            set
+            {
+                if (!Set(ref _sliderPosition, value))
+                    return;
+                if (!_isSliderDrag)
+                    Seek(TimeSpan.FromMilliseconds(value));
+            }
         }
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
@@ -186,8 +194,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (!_mediaPlayer.Seek(time))
                 return;
             SliderPosition = time.TotalMilliseconds;
-            DisplayTime = time;
-            OutTime = CurrentItemDuration - time;
         }
 
         private void LoadSelectedMedia(object obj)
@@ -225,9 +231,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             m.IsDisabled = !m.IsDisabled;
         }
 
-        public void SeekToSliderPosition()
+        public void EndSliderThumbDrag()
         {
-            Seek(TimeSpan.FromMilliseconds(_sliderPosition));
+            Seek(TimeSpan.FromMilliseconds(SliderPosition));
+            _isSliderDrag = false;
+        }
+
+        public void BeginSliderThumbDrag()
+        {
+            _isSliderDrag = true;
         }
 
         private void LoadMedia(object param)
@@ -318,11 +330,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
         {
-            if (!IsPlaying)
-                return;
             DisplayTime = e.Time;
-            OutTime = CurrentRundownItem?.RundownItem.Media.Duration - e.Time ?? TimeSpan.Zero;
-            SliderPosition = e.Time.TotalMilliseconds;
+            OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
+            if (!_isSliderDrag && IsPlaying)
+            {
+                _sliderPosition = e.Time.TotalMilliseconds;
+                NotifyPropertyChanged(nameof(SliderPosition));
+            }
         }
 
         private void MediaPlayer_Stopped(object sender, EventArgs e)

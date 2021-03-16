@@ -14,11 +14,19 @@ namespace StudioTVPlayer.View.Main.Player
             InitializeComponent();           
         }
 
-        private void Slider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        private void Slider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
             if (!(DataContext is ViewModel.Main.Player.MediaPlayerViewModel vm))
                 return;
-            vm.SeekToSliderPosition();
+            vm.BeginSliderThumbDrag();
         }
+
+        private void Slider_DragCompleted(object sender, RoutedEventArgs e)
+        {
+            if (!(DataContext is ViewModel.Main.Player.MediaPlayerViewModel vm))
+                return;
+            vm.EndSliderThumbDrag();
+        }
+
     }
 }

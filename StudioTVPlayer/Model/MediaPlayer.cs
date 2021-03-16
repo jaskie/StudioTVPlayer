@@ -36,6 +36,8 @@ namespace StudioTVPlayer.Model
 
         public bool IsEof => _inputFile?.IsEof ?? true;
 
+        public TimeSpan OneFrame => Channel.VideoFormat.FrameNumberToTime(1);
+
         public bool Play()
         {
             if (_inputFile == null)

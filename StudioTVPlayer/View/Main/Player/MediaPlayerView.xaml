@@ -149,9 +149,9 @@
                     IsEnabled="{Binding IsLoaded}"
                     Minimum="{Binding CurrentItemStartTime.TotalMilliseconds}"
                     Maximum="{Binding CurrentItemDuration.TotalMilliseconds}" 
+                    Thumb.DragStarted="Slider_DragStarted"
                     Thumb.DragCompleted="Slider_DragCompleted"
-                    mah:SliderHelper.EnableMouseWheel="MouseHover"
-                    Value="{Binding SliderPosition, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=100}">
+                    Value="{Binding SliderPosition, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             </Slider>
             <Border Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"  >
                 <Border.Style>

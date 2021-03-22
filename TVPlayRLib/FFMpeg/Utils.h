@@ -56,7 +56,7 @@ inline int64_t TimeToPts(int64_t time, AVRational time_base)
 
 std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, Core::PixelFormat pix_fmt);
 
-std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels);
+std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format);
 
 void dump_filter(const std::string& filter_str, const AVFilterGraphPtr& graph);
 

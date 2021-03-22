@@ -70,6 +70,10 @@ int main()
 					input->Pause();
 				else	 
 					input->Play();
+			if (i == 'u')
+				channel.SetVolume(channel.GetVolume() * 1.5f);
+			if (i == 'd')
+				channel.SetVolume(channel.GetVolume() / 1.5f);
 		}
 		channel.RemoveOutput(device);
 #ifdef _DEBUG

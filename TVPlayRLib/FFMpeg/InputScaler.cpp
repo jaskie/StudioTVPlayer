@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "OutputVideoScaler.h"
+#include "InputScaler.h"
 #include "../Core/InputSource.h"
 #include "../Core/PixelFormat.h"
 #include "Decoder.h"
@@ -8,7 +8,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 
-OutputVideoScaler::OutputVideoScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
+InputScaler::InputScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
 	: VideoFilter(output_pixel_format)
 	, output_format_(output_format)
 	, output_pixel_format_(output_pixel_format)
@@ -17,14 +17,14 @@ OutputVideoScaler::OutputVideoScaler(const Decoder& decoder, const Core::VideoFo
 }
 
 
-bool OutputVideoScaler::Push(std::shared_ptr<AVFrame> frame)
+bool InputScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
 		VideoFilter::CreateFilterChain(frame, decoder_.TimeBase(), Setup(frame));
 	return VideoFilter::Push(frame);
 }
 
-std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)
+std::string InputScaler::Setup(std::shared_ptr<AVFrame>& frame)
 {
 	std::ostringstream filter;
 	int height = frame->height;

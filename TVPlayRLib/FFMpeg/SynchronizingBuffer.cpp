@@ -9,7 +9,6 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 #define SAMPLE_RATE 48000
-#define SAMPLE_FORMAT AV_SAMPLE_FMT_S32
 
 		struct SynchronizingBuffer::implementation {
 			const AVRational audio_time_base_;
@@ -27,8 +26,9 @@ namespace TVPlayR {
 			std::unique_ptr<AudioFifo> fifo_;
 			std::shared_ptr<AVFrame> last_video_;
 			const Core::VideoFormatType video_format_;
+			const AVSampleFormat audio_sample_format_;
 
-			implementation(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync)
+			implementation(const Core::VideoFormat& format, int audio_channel_count, AVSampleFormat audio_sample_format, bool is_playing, int64_t duration, int64_t initial_sync)
 				: video_format_(format.type())
 				, video_frame_rate_(format.FrameRate().av())
 				, sample_rate_(SAMPLE_RATE)
@@ -40,6 +40,7 @@ namespace TVPlayR {
 				, duration_(duration)
 				, sync_(initial_sync)
 				, is_flushed_(false)
+				, audio_sample_format_(audio_sample_format)
 			{}
 
 			void PushAudio(const std::shared_ptr<AVFrame>& frame)
@@ -49,7 +50,7 @@ namespace TVPlayR {
 				assert(!is_flushed_);
 				Sweep();
 				if (!fifo_)
-					fifo_ = std::make_unique<AudioFifo>(SAMPLE_FORMAT, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), AV_TIME_BASE * 10);
+					fifo_ = std::make_unique<AudioFifo>(audio_sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), AV_TIME_BASE * 10);
 				if (!fifo_->TryPush(frame))
 				{
 					fifo_->Reset(PtsToTime(frame->pts, audio_time_base_));
@@ -100,7 +101,7 @@ namespace TVPlayR {
 			{
 				std::shared_ptr<AVFrame> audio = is_playing_ && fifo_ 
 					? fifo_->Pull(audio_samples_count)
-					: FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_);
+					: FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_, audio_sample_format_);
 				if ((is_playing_ || !last_video_) && !video_queue_.empty())
 					last_video_ = video_queue_.front();
 				if (is_playing_ && !video_queue_.empty())
@@ -177,8 +178,8 @@ namespace TVPlayR {
 
 		};
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync)
-		: impl_(std::make_unique<implementation>(format, audio_channel_count, is_playing, duration, initial_sync))
+	SynchronizingBuffer::SynchronizingBuffer(const Core::VideoFormat& format, int audio_channel_count, AVSampleFormat audio_sample_format, bool is_playing, int64_t duration, int64_t initial_sync)
+		: impl_(std::make_unique<implementation>(format, audio_channel_count, audio_sample_format, is_playing, duration, initial_sync))
 	{
 	}
 

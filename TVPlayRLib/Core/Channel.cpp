@@ -2,6 +2,7 @@
 #include "Channel.h"
 #include "InputSource.h"
 #include "OutputDevice.h"
+#include "AudioVolume.h"
 #include "../Common/Executor.h"
 
 #undef DEBUG
@@ -15,12 +16,14 @@ namespace TVPlayR {
 			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
 			std::mutex mutex_;
-
+			AudioVolume audio_volume_;
 			const VideoFormat format_;
 			const Core::PixelFormat pixel_format_;
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
+			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			Common::Executor frame_requester_;
+			
 
 			implementation(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
 				: format_(format)
@@ -56,12 +59,13 @@ namespace TVPlayR {
 #endif // DEBUG
 						auto sync = playing_source_->PullSync(audio_samples_count);
 						assert(sync.Audio->nb_samples == audio_samples_count);
+						audio_volume_.ProcessVolume(sync.Audio);
 						for (auto device : output_devices_)
 							device->Push(sync);
 					}
 					else
 					{
-						auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_), empty_video_, 0LL);
+						auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_), empty_video_, 0LL);
 						assert(sync.Audio->nb_samples == audio_samples_count);
 						for (auto device : output_devices_)
 							device->Push(sync);
@@ -136,6 +140,10 @@ namespace TVPlayR {
 		const PixelFormat Channel::PixelFormat() const { return impl_->pixel_format_;	}
 
 		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
+
+		void Channel::SetVolume(float volume) { impl_->audio_volume_.SetVolume(volume); }
+
+		float Channel::GetVolume() const { return impl_->audio_volume_.GetVolume(); }
 
 		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 

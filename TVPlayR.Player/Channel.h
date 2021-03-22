@@ -21,5 +21,10 @@ namespace TVPlayR {
 		bool AddOutput(DecklinkDevice^ device);
 		void Load(InputFile^ file);
 		void Clear();
+		property float Volume
+		{
+			float get() { return _channel->GetVolume(); }
+			void set(float volume) { _channel->SetVolume(volume); }
+		}
 	};
 }

@@ -8,7 +8,7 @@
 #include "../Core/Channel.h"
 #include "AudioMuxer.h"
 #include "SynchronizingBuffer.h"
-#include "OutputVideoScaler.h"
+#include "InputScaler.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
 
@@ -31,7 +31,7 @@ struct FFmpegInputSource::implementation
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
-	std::unique_ptr<OutputVideoScaler> output_scaler_;
+	std::unique_ptr<InputScaler> output_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
@@ -65,11 +65,12 @@ struct FFmpegInputSource::implementation
 	void ProducerThreadProc()
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
-		output_scaler_ = std::make_unique<OutputVideoScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
-		audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount());
+		output_scaler_ = std::make_unique<InputScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
+		audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, channel_->AudioSampleFormat(), 48000, channel_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
 			channel_->Format(),
 			channel_->AudioChannelsCount(),
+			channel_->AudioSampleFormat(),
 			is_playing_,
 			AV_TIME_BASE / 2, // 0.5 sec
 			0);

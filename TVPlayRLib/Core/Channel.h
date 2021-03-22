@@ -22,6 +22,9 @@ public:
 	const VideoFormat& Format() const;
 	const PixelFormat PixelFormat() const;
 	const int AudioChannelsCount() const;
+	const AVSampleFormat AudioSampleFormat() const { return AVSampleFormat::AV_SAMPLE_FMT_S32; }
+	void SetVolume(float volume);
+	float GetVolume() const;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

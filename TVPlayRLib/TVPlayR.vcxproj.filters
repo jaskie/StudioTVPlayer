@@ -101,7 +101,7 @@
     <ClInclude Include="Core\StreamInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="FFMpeg\OutputVideoScaler.h">
+    <ClInclude Include="FFMpeg\InputScaler.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\AudioMuxer.h">
@@ -127,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="FFMpeg\SynchronizingBuffer.h">
       <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AudioVolume.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +176,7 @@
     <ClCompile Include="FFMpeg\AudioFifo.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
-    <ClCompile Include="FFMpeg\OutputVideoScaler.cpp">
+    <ClCompile Include="FFMpeg\InputScaler.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
     <ClCompile Include="FFMpeg\AudioMuxer.cpp">
@@ -187,6 +190,9 @@
     </ClCompile>
     <ClCompile Include="FFMpeg\SynchronizingBuffer.cpp">
       <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\AudioVolume.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

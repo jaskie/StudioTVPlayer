@@ -15,7 +15,7 @@ struct AudioMuxer::implementation
 	const AVRational input_time_base_;
 	const int nb_channels_;
 	const int64_t output_channel_layout_;
-	const AVSampleFormat sample_format_;
+	const AVSampleFormat audio_sample_format_;
 	AVFilterContext* sink_ctx_ = NULL;
 	AVFilterGraphPtr graph_;
 	bool is_eof_;
@@ -28,7 +28,7 @@ struct AudioMuxer::implementation
 		, input_time_base_(decoders.empty() ? av_make_q(1, sample_rate) : decoders[0]->TimeBase())
 		, nb_channels_(nb_channels)
 		, output_channel_layout_(output_channel_layout)
-		, sample_format_(sample_format)
+		, audio_sample_format_(sample_format)
 		, graph_(nullptr, [](AVFilterGraph * g) { avfilter_graph_free(&g); })
 		, is_eof_(false)
 		, is_flushed_(false)
@@ -61,7 +61,7 @@ struct AudioMuxer::implementation
 			//if (total_nb_channels == 2)
 				filter << "[a0]";
 		}
-		filter << "aresample=out_sample_fmt=" << av_get_sample_fmt_name(sample_format_) << ":out_sample_rate=" << sample_rate;
+		filter << "aresample=out_sample_fmt=" << av_get_sample_fmt_name(audio_sample_format_) << ":out_sample_rate=" << sample_rate;
 		return filter.str();
 	}
 
@@ -87,7 +87,7 @@ struct AudioMuxer::implementation
 
 	AVSampleFormat GetSampleFormat()
 	{
-		return sample_format_;
+		return audio_sample_format_;
 	}
 
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame)
@@ -150,7 +150,7 @@ struct AudioMuxer::implementation
 		is_flushed_ = false;
 		graph_.reset(avfilter_graph_alloc());
 
-		AVSampleFormat out_sample_fmts[] = { sample_format_, AV_SAMPLE_FMT_NONE };
+		AVSampleFormat out_sample_fmts[] = { audio_sample_format_, AV_SAMPLE_FMT_NONE };
 		int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
 		int out_sample_rates[] = { decoders_[0]->AudioSampleRate(), -1 };
 

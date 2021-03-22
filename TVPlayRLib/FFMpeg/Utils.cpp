@@ -19,11 +19,11 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels)
+		std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format)
 		{
 			assert(num_channels <= 63);
 			auto frame = AllocFrame();
-			frame->format = AV_SAMPLE_FMT_S32;
+			frame->format = format;
 			frame->channels = num_channels;
 			frame->channel_layout = 0x7FFFFFFFFFFFFFFFULL >> (63 - num_channels);
 			frame->nb_samples = samples_count;

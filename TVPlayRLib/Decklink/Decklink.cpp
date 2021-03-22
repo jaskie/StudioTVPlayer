@@ -70,7 +70,7 @@ namespace TVPlayR {
 				auto empty_video_frame = FFmpeg::CreateEmptyVideoFrame(channel.Format(), channel.PixelFormat());
 				for (size_t i = 0; i < buffer_size_; i++)
 				{
-					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_));
+					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
 					ScheduleVideo(empty_video_frame);
 					scheduled_frames_++;
 				}
@@ -142,6 +142,8 @@ namespace TVPlayR {
 
 			bool AssignToChannel(Core::Channel& channel)
 			{
+				if (channel.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
+					return false;
 				if (!OpenOutput(GetDecklinkVideoFormat(channel.Format().type()), BMDPixelFormatFromVideoFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
 					return false;
 				format_ = channel.Format();
@@ -189,7 +191,7 @@ namespace TVPlayR {
 					}
 				}
 				if (!sync)
-					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_), last_video_, 0LL);
+					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, 0LL);
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 

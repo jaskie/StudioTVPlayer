@@ -26,3 +26,5 @@
 /packages
 /Helpers/TestPlayer/x64
 /Helpers/TestPlayer/Debug
+/TVPlayRLib/Decklink/DeckLinkAPI_h.h
+/TVPlayRLib/Decklink/DeckLinkAPI_i.c

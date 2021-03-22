@@ -217,13 +217,6 @@ struct AudioMuxer::implementation
 			avfilter_inout_free(&outputs);
 		}
 	}
-
-	void Reset()
-	{
-		std::lock_guard<std::mutex> guard(mutex_);
-		CreateFilterChain();
-	}
-
 };
 
 AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
@@ -240,7 +233,6 @@ AVSampleFormat AudioMuxer::OutputSampleFormat() { return impl_->GetSampleFormat(
 void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame) { impl_->Push(stream_index, frame); }
 std::shared_ptr<AVFrame> AudioMuxer::Pull() { return impl_->Pull(); }
 void AudioMuxer::Flush() { impl_->Flush(); }
-void AudioMuxer::Reset() { impl_->Reset(); }
 bool AudioMuxer::IsEof() const { return impl_->is_eof_; }
 bool AudioMuxer::IsFlushed() const { return impl_->is_flushed_; }
 

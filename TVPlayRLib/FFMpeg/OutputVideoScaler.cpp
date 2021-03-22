@@ -7,21 +7,20 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 
-OutputVideoScaler::OutputVideoScaler(AVRational input_frame_rate, AVRational input_time_base, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
-	: VideoFilter(input_time_base, output_pixel_format)
+OutputVideoScaler::OutputVideoScaler(AVRational input_frame_rate, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
+	: VideoFilter(output_pixel_format)
 	, output_format_(output_format)
 	, pixel_format_(output_pixel_format)
 	, input_frame_rate_(input_frame_rate)
-	, input_time_base_(input_time_base)
 {
 }
 
 
-bool OutputVideoScaler::Push(std::shared_ptr<AVFrame> frame)
+bool OutputVideoScaler::Push(std::shared_ptr<AVFrame> frame, const AVRational& time_base)
 {
 	if (!IsInitialized())
-		VideoFilter::SetFilter(frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, Setup(frame));
-	return VideoFilter::Push(frame);
+		VideoFilter::SetFilter(frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, time_base, Setup(frame));
+	return VideoFilter::Push(frame, time_base);
 }
 
 std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)

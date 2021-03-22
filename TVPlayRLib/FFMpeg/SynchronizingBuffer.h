@@ -13,10 +13,10 @@ namespace TVPlayR {
 class SynchronizingBuffer
 {
 public:
-	SynchronizingBuffer(const Core::VideoFormat& format, const AVRational& video_time_base, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync);
+	SynchronizingBuffer(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync);
 	~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
-	void PushVideo(const std::shared_ptr<AVFrame>& frame);
+	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
 	AVSync PullSync(int audio_samples_count);
 	bool Full() const;
 	bool Ready();

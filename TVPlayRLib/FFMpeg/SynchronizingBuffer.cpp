@@ -12,9 +12,9 @@ namespace TVPlayR {
 #define SAMPLE_FORMAT AV_SAMPLE_FMT_S32
 
 		struct SynchronizingBuffer::implementation {
-			const AVRational video_time_base_;
 			const AVRational audio_time_base_;
 			const AVRational video_frame_rate_;
+			AVRational input_video_time_base_;
 			const int sample_rate_;
 			const int audio_channel_count_;
 			const bool have_video_;
@@ -28,9 +28,8 @@ namespace TVPlayR {
 			std::shared_ptr<AVFrame> last_video_;
 			const Core::VideoFormatType video_format_;
 
-			implementation(const Core::VideoFormat& format, const AVRational& video_time_base, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync)
+			implementation(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync)
 				: video_format_(format.type())
-				, video_time_base_(video_time_base)
 				, video_frame_rate_(format.FrameRate().av())
 				, sample_rate_(SAMPLE_RATE)
 				, audio_time_base_(av_make_q(1, SAMPLE_RATE))
@@ -61,12 +60,13 @@ namespace TVPlayR {
 				}
 			}
 
-			void PushVideo(const std::shared_ptr<AVFrame>& frame)
+			void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base)
 			{
 				if (!(frame && have_video_))
 					return;
+				input_video_time_base_ = time_base;
 #ifdef DEBUG
-				OutputDebugStringA(("Push video " + std::to_string(PtsToTime(frame->pts, video_time_base_)) + "\n").c_str());
+				OutputDebugStringA(("Push video " + std::to_string(PtsToTime(frame->pts, input_video_time_base_)) + "\n").c_str());
 #endif // DEBUG
 				assert(!is_flushed_);
 				Sweep();
@@ -85,8 +85,8 @@ namespace TVPlayR {
 			void Sweep()
 			{
 				return;
-				int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
-				int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, video_time_base_);
+				int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, input_video_time_base_);
+				int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, input_video_time_base_);
 				int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
 				int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
 				if (min_audio == AV_NOPTS_VALUE) 
@@ -109,7 +109,7 @@ namespace TVPlayR {
 				if (audio->pts != AV_NOPTS_VALUE && last_video_->pts != AV_NOPTS_VALUE)
 					OutputDebugStringA(("Output video " + std::to_string(PtsToTime(last_video_->pts, video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + "\n").c_str());
 #endif // DEBUG
-				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, video_time_base_));
+				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, input_video_time_base_));
 			}
 
 			bool Ready() 
@@ -117,7 +117,7 @@ namespace TVPlayR {
 				if (is_flushed_)
 					return true;
 				if (is_playing_)
-					return !video_queue_.empty() && (!fifo_ || fifo_->SamplesCount() > av_rescale(sample_rate_, video_time_base_.num, video_time_base_.den));
+					return !video_queue_.empty() && (!fifo_ || fifo_->SamplesCount() > av_rescale(sample_rate_, input_video_time_base_.num, input_video_time_base_.den));
 				else
 					return !!last_video_ || !video_queue_.empty();
 			}
@@ -177,15 +177,15 @@ namespace TVPlayR {
 
 		};
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::VideoFormat& format, const AVRational& video_time_base, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync)
-		: impl_(std::make_unique<implementation>(format, video_time_base, audio_channel_count, is_playing, duration, initial_sync))
+	SynchronizingBuffer::SynchronizingBuffer(const Core::VideoFormat& format, int audio_channel_count, bool is_playing, int64_t duration, int64_t initial_sync)
+		: impl_(std::make_unique<implementation>(format, audio_channel_count, is_playing, duration, initial_sync))
 	{
 	}
 
 	SynchronizingBuffer::~SynchronizingBuffer() { }
 	
 	void SynchronizingBuffer::PushAudio(const std::shared_ptr<AVFrame>& frame) { impl_->PushAudio(frame); }
-	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame) { impl_->PushVideo(frame); }
+	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base) { impl_->PushVideo(frame, time_base); }
 	AVSync SynchronizingBuffer::PullSync(int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 	bool SynchronizingBuffer::Full() const { return impl_->Full(); }
 	bool SynchronizingBuffer::Ready() { return impl_->Ready(); }

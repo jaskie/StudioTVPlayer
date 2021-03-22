@@ -19,21 +19,19 @@ namespace TVPlayR {
 			int input_height_ = 0;
 			AVRational input_sar_ = {1, 1};
 			AVPixelFormat input_pixel_format_ = AV_PIX_FMT_NONE;
-			const AVRational input_time_base_;
 			const AVPixelFormat output_pix_fmt_;
 			bool is_flushed_ = false;
 			bool is_eof_ = false;
 			std::string filter_str_;
 
 		public:
-			implementation(AVRational input_time_base, AVPixelFormat output_pix_fmt)
-				: input_time_base_(input_time_base)
-				, output_pix_fmt_(output_pix_fmt)
+			implementation(AVPixelFormat output_pix_fmt)
+				: output_pix_fmt_(output_pix_fmt)
 				, graph_(nullptr, [](AVFilterGraph * g) { avfilter_graph_free(&g); })
 			{
 			}
 
-			bool Push(std::shared_ptr<AVFrame> frame)
+			bool Push(std::shared_ptr<AVFrame> frame, const AVRational time_base)
 			{
 				if (!source_ctx_)
 				{
@@ -85,41 +83,40 @@ namespace TVPlayR {
 
 			int OutputWidth()
 			{
-				return sink_ctx_ ? av_buffersink_get_w(sink_ctx_) : input_width_;
+				assert(sink_ctx_);
+				return av_buffersink_get_w(sink_ctx_);
 			}
 
 			int OutputHeight()
 			{
-				return sink_ctx_ ? av_buffersink_get_h(sink_ctx_) : input_height_;
+				assert(sink_ctx_);
+				return av_buffersink_get_h(sink_ctx_);
 			}
 
 			AVRational OutputSampleAspectRatio()
 			{
-				return sink_ctx_ ? av_buffersink_get_sample_aspect_ratio(sink_ctx_) : input_sar_;
+				assert(sink_ctx_);
+				return av_buffersink_get_sample_aspect_ratio(sink_ctx_);
 			}
 
 			AVRational OutputFrameRate() const
 			{
-				if (sink_ctx_)
-				{
-					AVRational frame_rate = av_buffersink_get_frame_rate(sink_ctx_);
-					if (frame_rate.num > 0)
-						return frame_rate;
-				}
-				return av_inv_q(input_time_base_);
+				assert(sink_ctx_);
+				AVRational frame_rate = av_buffersink_get_frame_rate(sink_ctx_);
+				if (frame_rate.num > 0)
+					return frame_rate;
 			}
 
 			AVPixelFormat OutputPixelFormat()
 			{
-				return sink_ctx_ ? static_cast<AVPixelFormat>(av_buffersink_get_format(sink_ctx_)) : input_pixel_format_;
+				assert(sink_ctx_);
+				return static_cast<AVPixelFormat>(av_buffersink_get_format(sink_ctx_));
 			}
 
 			AVRational OutputTimeBase() const
 			{
-				if (!sink_ctx_)
-					return (input_time_base_);
-				AVRational ret = av_buffersink_get_time_base(sink_ctx_);
-				return ret;
+				assert(sink_ctx_);
+				return av_buffersink_get_time_base(sink_ctx_);
 			}
 
 			void Flush()
@@ -129,7 +126,7 @@ namespace TVPlayR {
 				is_flushed_ = true;
 			}
 
-			void CreateFilterChain()
+			void CreateFilterChain(const AVRational& input_time_base)
 			{
 				if (filter_str_.empty() || output_pix_fmt_ == AV_PIX_FMT_NONE)
 					return;
@@ -150,7 +147,7 @@ namespace TVPlayR {
 					snprintf(args, sizeof(args),
 						"video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
 						input_width_, input_height_, input_pixel_format_,
-						input_time_base_.num, input_time_base_.den,
+						input_time_base.num, input_time_base.den,
 						input_sar_.num, input_sar_.den);
 					THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args, NULL, graph_.get()));
 					enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
@@ -183,21 +180,14 @@ namespace TVPlayR {
 				av_free(buffersink_params);
 			}
 
-			void Reset()
-			{
-				is_flushed_ = false;
-				is_eof_ = false;
-				CreateFilterChain();
-			}
-
-			void SetFilter(int width, int height, AVPixelFormat pix_fmt, AVRational input_sar, const std::string& filter_string)
+			void SetFilter(int width, int height, AVPixelFormat pix_fmt, const AVRational& input_sar, const AVRational& input_time_base, const std::string& filter_string)
 			{
 				filter_str_ = filter_string;
 				input_width_ = width;
 				input_height_ = height;
 				input_pixel_format_ = pix_fmt;
 				input_sar_ = input_sar;
-				CreateFilterChain();
+				CreateFilterChain(input_time_base);
 			}
 
 			bool IsFlushed() const { return is_flushed_; }
@@ -208,12 +198,12 @@ namespace TVPlayR {
 
 		};
 
-VideoFilter::VideoFilter(AVRational input_time_base, AVPixelFormat output_pix_fmt)
-	: impl_(std::make_unique<implementation>(input_time_base, output_pix_fmt))
+VideoFilter::VideoFilter(AVPixelFormat output_pix_fmt)
+	: impl_(std::make_unique<implementation>(output_pix_fmt))
 { }
 VideoFilter::~VideoFilter() { }
-bool VideoFilter::Push(std::shared_ptr<AVFrame> frame) { return impl_->Push(frame); }
-void VideoFilter::SetFilter(int width, int height, AVPixelFormat pix_fmt, AVRational input_sar, const std::string& filter_string) { impl_->SetFilter(width, height, pix_fmt, input_sar, filter_string); }
+bool VideoFilter::Push(std::shared_ptr<AVFrame> frame, const AVRational& time_base) { return impl_->Push(frame, time_base); }
+void VideoFilter::SetFilter(int width, int height, AVPixelFormat pix_fmt, const AVRational& input_sar, const AVRational& input_time_base, const std::string& filter_string) { impl_->SetFilter(width, height, pix_fmt, input_sar, input_time_base, filter_string); }
 std::shared_ptr<AVFrame> VideoFilter::Pull() { return impl_->Pull(); }
 int VideoFilter::OutputWidth() { return impl_->OutputWidth(); }
 int VideoFilter::OutputHeight() { return impl_->OutputHeight(); }
@@ -221,8 +211,7 @@ AVRational VideoFilter::OutputSampleAspectRatio() { return impl_->OutputSampleAs
 AVPixelFormat VideoFilter::GetOutputPixelFormat() { return impl_->OutputPixelFormat(); }
 AVRational VideoFilter::OutputTimeBase() const { return impl_->OutputTimeBase(); }
 void VideoFilter::Flush() { return impl_->Flush(); }
-void VideoFilter::CreateFilterChain() { impl_->CreateFilterChain(); }
-void VideoFilter::Reset() { impl_->Reset(); }
+void VideoFilter::CreateFilterChain(const AVRational& input_time_base) { impl_->CreateFilterChain(input_time_base); }
 bool VideoFilter::IsInitialized() const { return impl_->IsInitializded(); }
 bool VideoFilter::IsEof() const { return impl_->IsEof(); }
 bool VideoFilter::IsFlushed() const { return impl_->IsFlushed(); }

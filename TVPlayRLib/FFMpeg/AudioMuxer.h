@@ -21,7 +21,6 @@ public:
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
 	virtual std::shared_ptr<AVFrame> Pull() ;
 	virtual void Flush() override;
-	virtual void Reset() override;
 	virtual bool IsEof() const override;
 	virtual bool IsFlushed() const override;
 private:

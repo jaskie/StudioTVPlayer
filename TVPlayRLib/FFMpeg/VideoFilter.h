@@ -11,9 +11,9 @@ class VideoFilter :
 private:
 public:
 	typedef std::unique_ptr<VideoFilter> Ptr;
-	VideoFilter(AVRational input_time_base, AVPixelFormat output_pix_fmt);
+	VideoFilter(AVPixelFormat output_pix_fmt);
 	virtual ~VideoFilter();
-	virtual bool Push(std::shared_ptr<AVFrame> frame);
+	virtual bool Push(std::shared_ptr<AVFrame> frame, const AVRational& time_base);
 	virtual std::shared_ptr<AVFrame> Pull();
 	int OutputWidth();
 	int OutputHeight();
@@ -22,12 +22,11 @@ public:
 	virtual AVRational OutputTimeBase() const override;
 	virtual void Flush() override;
 	virtual bool IsFlushed() const override;
-	virtual void Reset() override;
 	virtual bool IsEof() const override;
 protected:
-	void SetFilter(int width, int height, AVPixelFormat pix_fmt, AVRational input_sar, const std::string& filter_string);
+	void SetFilter(int width, int height, AVPixelFormat pix_fmt, const AVRational& input_sar, const AVRational& input_time_base, const std::string& filter_string);
 	bool IsInitialized() const;
-	void CreateFilterChain();
+	void CreateFilterChain(const AVRational& input_time_base);
 
 private:
 	class implementation;

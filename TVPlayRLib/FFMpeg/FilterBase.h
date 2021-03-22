@@ -12,7 +12,6 @@ public:
 	virtual bool IsFlushed() const = 0;
 	virtual bool IsEof() const = 0;
 	int64_t TimeFromTs(int64_t ts) const;
-	virtual void Reset() = 0;
 };
 	
 }}

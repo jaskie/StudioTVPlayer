@@ -4,23 +4,23 @@
 #include "../Core/PixelFormat.h"
 
 
+
 namespace TVPlayR {
-	namespace Core {
-		class InputSource;
-	}
 	namespace FFmpeg {
+
+class Decoder;
 
 class OutputVideoScaler :
 	public VideoFilter
 {
 public:
-	OutputVideoScaler(AVRational input_frame_rate, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format);
-	virtual bool Push(std::shared_ptr<AVFrame> frame, const AVRational& time_base) override;
+	OutputVideoScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format);
+	bool Push(std::shared_ptr<AVFrame> frame);
 	const Core::VideoFormat& Format() const { return output_format_; }
 private:
 	const Core::VideoFormat output_format_;
-	const Common::Rational<int> input_frame_rate_;
-	const AVPixelFormat pixel_format_;
+	const AVPixelFormat output_pixel_format_;
+	const Decoder& decoder_;
 	std::string Setup(std::shared_ptr<AVFrame>& frame);
 };
 

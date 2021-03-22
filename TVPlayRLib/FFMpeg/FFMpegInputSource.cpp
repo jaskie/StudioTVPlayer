@@ -65,7 +65,7 @@ struct FFmpegInputSource::implementation
 	void ProducerThreadProc()
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
-		output_scaler_ = std::make_unique<OutputVideoScaler>(video_decoder_->FrameRate(), channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
+		output_scaler_ = std::make_unique<OutputVideoScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
 		audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
 			channel_->Format(),
@@ -132,7 +132,7 @@ struct FFmpegInputSource::implementation
 		{
 			auto decoded = video_decoder_->Pull();
 			if (decoded)
-				output_scaler_->Push(decoded, video_decoder_->TimeBase());
+				output_scaler_->Push(decoded);
 			else
 			{
 				if (video_decoder_->IsEof())
@@ -235,8 +235,10 @@ struct FFmpegInputSource::implementation
 				video_decoder_->Seek(time);
 			for (auto& decoder : audio_decoders_)
 				decoder->Seek(time);
-			output_scaler_ = std::make_unique<OutputVideoScaler>(video_decoder_->FrameRate(), channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
-			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_S32, 48000, channel_->AudioChannelsCount());
+			if (output_scaler_)
+				output_scaler_->Reset();
+			if (audio_muxer_)
+				audio_muxer_->Reset();
 			if (buffer_)
 				buffer_->Seek(time);
 			is_eof_ = false;

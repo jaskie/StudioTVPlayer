@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "../Core/HwAccel.h"
 
+
 namespace TVPlayR {
 	namespace FFmpeg {
 
@@ -13,6 +14,7 @@ public:
 	~Decoder();
 	bool Push(const std::shared_ptr<AVPacket>& packet);
 	std::shared_ptr<AVFrame> Pull();
+	const AVRational& TimeBase() const;
 	bool Flush();
 	void Seek(const int64_t seek_time);
 	bool IsEof() const;
@@ -21,8 +23,7 @@ public:
 	uint64_t AudioChannelLayout() const;
 	AVSampleFormat AudioSampleFormat() const;
 	AVMediaType MediaType() const;
-	AVRational TimeBase() const;
-	AVRational FrameRate() const;
+	const AVRational& FrameRate() const;
 	int StreamIndex() const;
 private:
 	struct implementation;

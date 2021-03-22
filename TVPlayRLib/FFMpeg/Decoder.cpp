@@ -223,9 +223,9 @@ AVSampleFormat Decoder::AudioSampleFormat() const { return impl_->ctx_ ? impl_->
 
 AVMediaType Decoder::MediaType() const { return impl_->media_type_; }
 
-AVRational Decoder::TimeBase() const { return impl_->time_base_; }
+const AVRational& Decoder::TimeBase() const { return impl_->time_base_; }
 
-AVRational Decoder::FrameRate() const { return impl_->stream_->r_frame_rate; }
+const AVRational& Decoder::FrameRate() const { return impl_->stream_->r_frame_rate; }
 
 
 }}

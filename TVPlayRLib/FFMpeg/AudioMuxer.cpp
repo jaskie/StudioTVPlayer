@@ -235,5 +235,6 @@ std::shared_ptr<AVFrame> AudioMuxer::Pull() { return impl_->Pull(); }
 void AudioMuxer::Flush() { impl_->Flush(); }
 bool AudioMuxer::IsEof() const { return impl_->is_eof_; }
 bool AudioMuxer::IsFlushed() const { return impl_->is_flushed_; }
+void AudioMuxer::Reset() { impl_->CreateFilterChain(); }
 
 }}

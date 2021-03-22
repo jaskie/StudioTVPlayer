@@ -2,34 +2,30 @@
 #include "OutputVideoScaler.h"
 #include "../Core/InputSource.h"
 #include "../Core/PixelFormat.h"
+#include "Decoder.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
 
-OutputVideoScaler::OutputVideoScaler(AVRational input_frame_rate, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
+OutputVideoScaler::OutputVideoScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
 	: VideoFilter(output_pixel_format)
 	, output_format_(output_format)
-	, pixel_format_(output_pixel_format)
-	, input_frame_rate_(input_frame_rate)
+	, output_pixel_format_(output_pixel_format)
+	, decoder_(decoder)
 {
 }
 
 
-bool OutputVideoScaler::Push(std::shared_ptr<AVFrame> frame, const AVRational& time_base)
+bool OutputVideoScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
-		VideoFilter::SetFilter(frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, time_base, Setup(frame));
-	return VideoFilter::Push(frame, time_base);
+		VideoFilter::CreateFilterChain(frame, decoder_.TimeBase(), Setup(frame));
+	return VideoFilter::Push(frame);
 }
 
 std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)
 {
-	if (frame->width == output_format_.width() && frame->height == output_format_.height()
-		&& static_cast<AVPixelFormat>(frame->format) == pixel_format_
-		&& output_format_.FrameRate() == input_frame_rate_)
-		return "";
-
 	std::ostringstream filter;
 	int height = frame->height;
 	if (frame->width == 720 && frame->height == 608)
@@ -40,7 +36,8 @@ std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)
 		else
 			filter << "setsar=64/45,";
 	}
-	if (input_frame_rate_ == output_format_.FrameRate())
+	Common::Rational<int> input_frame_rate = decoder_.FrameRate();
+	if (input_frame_rate == output_format_.FrameRate())
 	{
 		if (height != output_format_.height())
 			if (frame->interlaced_frame && output_format_.field_mode() != Core::VideoFormat::FieldMode::progressive && height < output_format_.height()) // only when upscaling
@@ -48,7 +45,7 @@ std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)
 			else
 				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=-1,";
 	}
-	else if (input_frame_rate_ == output_format_.FrameRate() * 2)
+	else if (input_frame_rate == output_format_.FrameRate() * 2)
 	{
 		if (height != output_format_.height())
 			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
@@ -57,7 +54,7 @@ std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)
 		else if (frame->interlaced_frame && !output_format_.interlaced())
 			filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 	}
-	else if (input_frame_rate_ != output_format_.FrameRate())
+	else if (input_frame_rate != output_format_.FrameRate())
 	{
 		filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 		if (frame->interlaced_frame && output_format_.field_mode() == Core::VideoFormat::FieldMode::progressive)
@@ -70,7 +67,7 @@ std::string OutputVideoScaler::Setup(std::shared_ptr<AVFrame>& frame)
 				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",interlace,";
 		}
 	}
-	filter << "format=" << static_cast<int>(pixel_format_);
+	filter << "format=" << static_cast<int>(output_pixel_format_);
 	return filter.str();
 }
 

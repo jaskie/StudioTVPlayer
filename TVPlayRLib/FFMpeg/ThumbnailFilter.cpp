@@ -30,11 +30,11 @@ std::shared_ptr<AVFrame> ThumbnailFilter::Pull()
 			filter << "setsar=64/45,";
 	}
 	filter << "scale=trunc(" << height_ << "*dar):" << height_ << ",setsar=1/1";
-	VideoFilter::SetFilter(input_frame_->width, input_frame_->height, static_cast<AVPixelFormat>(input_frame_->format), input_frame_->sample_aspect_ratio, time_base, filter.str());
+	VideoFilter::CreateFilterChain(input_frame_, time_base, filter.str());
 	int frame_push_count = 3; // send max 3 frames to the filter
 	while (!result_frame_ && --frame_push_count)
 	{
-		Push(input_frame_, time_base);
+		Push(input_frame_);
 		result_frame_ = VideoFilter::Pull();
 	}
 	return result_frame_;

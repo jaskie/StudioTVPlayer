@@ -23,6 +23,7 @@ public:
 	virtual void Flush() override;
 	virtual bool IsEof() const override;
 	virtual bool IsFlushed() const override;
+	virtual void Reset() override;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

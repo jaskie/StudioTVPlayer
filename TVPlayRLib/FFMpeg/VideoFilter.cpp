@@ -1,7 +1,5 @@
 #include "../pch.h"
-#include <mutex>
 #include "VideoFilter.h"
-#include "Decoder.h"
 
 #undef DEBUG
 
@@ -14,15 +12,9 @@ namespace TVPlayR {
 			AVFilterContext* source_ctx_ = NULL;
 			AVFilterContext* sink_ctx_ = NULL;
 			AVFilterGraphPtr graph_;
-			std::shared_ptr<AVFrame> direct_path_frame_;
-			int input_width_ = 0;
-			int input_height_ = 0;
-			AVRational input_sar_ = {1, 1};
-			AVPixelFormat input_pixel_format_ = AV_PIX_FMT_NONE;
 			const AVPixelFormat output_pix_fmt_;
 			bool is_flushed_ = false;
 			bool is_eof_ = false;
-			std::string filter_str_;
 
 		public:
 			implementation(AVPixelFormat output_pix_fmt)
@@ -31,30 +23,15 @@ namespace TVPlayR {
 			{
 			}
 
-			bool Push(std::shared_ptr<AVFrame> frame, const AVRational time_base)
+			bool Push(std::shared_ptr<AVFrame> frame)
 			{
-				if (!source_ctx_)
-				{
-					if (direct_path_frame_)
-						return false;
-					frame->pict_type = AV_PICTURE_TYPE_NONE;
-					frame->key_frame = 0;
-					direct_path_frame_ = frame;
-					return true;
-				}
-				if (av_buffersrc_write_frame(source_ctx_, frame.get()) < 0)
-					return false;
-				return true;
+				return av_buffersrc_write_frame(source_ctx_, frame.get()) >= 0;
 			}
 
 			std::shared_ptr<AVFrame> Pull()
 			{
 				if (!sink_ctx_)
-				{
-					auto ret = direct_path_frame_;
-					direct_path_frame_ = nullptr;
-					return ret;
-				}
+					return nullptr;
 				auto frame = AllocFrame();
 				auto ret = av_buffersink_get_frame(sink_ctx_, frame.get());
 				switch (ret)
@@ -126,10 +103,8 @@ namespace TVPlayR {
 				is_flushed_ = true;
 			}
 
-			void CreateFilterChain(const AVRational& input_time_base)
+			void CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational& input_time_base, const std::string& filter_str)
 			{
-				if (filter_str_.empty() || output_pix_fmt_ == AV_PIX_FMT_NONE)
-					return;
 				source_ctx_ = NULL;
 				sink_ctx_ = NULL;
 				is_eof_ = false;
@@ -146,9 +121,9 @@ namespace TVPlayR {
 					char args[512];
 					snprintf(args, sizeof(args),
 						"video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
-						input_width_, input_height_, input_pixel_format_,
+						frame->width, frame->height, frame->format,
 						input_time_base.num, input_time_base.den,
-						input_sar_.num, input_sar_.den);
+						frame->sample_aspect_ratio.num, frame->sample_aspect_ratio.den);
 					THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args, NULL, graph_.get()));
 					enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
 					buffersink_params->pixel_fmts = pix_fmts;
@@ -164,7 +139,7 @@ namespace TVPlayR {
 					inputs->filter_ctx = sink_ctx_;
 					inputs->pad_idx = 0;
 					inputs->next = NULL;
-					THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_str_.c_str(), inputs, outputs, NULL));
+					THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_str.c_str(), inputs, outputs, NULL));
 					THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
 #ifdef DEBUG
 					OutputDebugStringA(args);
@@ -180,21 +155,20 @@ namespace TVPlayR {
 				av_free(buffersink_params);
 			}
 
-			void SetFilter(int width, int height, AVPixelFormat pix_fmt, const AVRational& input_sar, const AVRational& input_time_base, const std::string& filter_string)
-			{
-				filter_str_ = filter_string;
-				input_width_ = width;
-				input_height_ = height;
-				input_pixel_format_ = pix_fmt;
-				input_sar_ = input_sar;
-				CreateFilterChain(input_time_base);
-			}
-
 			bool IsFlushed() const { return is_flushed_; }
 
 			bool IsInitializded() const { return !!graph_; }
 
 			bool IsEof() const { return is_eof_; }
+
+			void Reset()
+			{
+				source_ctx_ = NULL;
+				sink_ctx_ = NULL;
+				is_eof_ = false;
+				is_flushed_ = false;
+				graph_.reset();
+			}
 
 		};
 
@@ -202,8 +176,7 @@ VideoFilter::VideoFilter(AVPixelFormat output_pix_fmt)
 	: impl_(std::make_unique<implementation>(output_pix_fmt))
 { }
 VideoFilter::~VideoFilter() { }
-bool VideoFilter::Push(std::shared_ptr<AVFrame> frame, const AVRational& time_base) { return impl_->Push(frame, time_base); }
-void VideoFilter::SetFilter(int width, int height, AVPixelFormat pix_fmt, const AVRational& input_sar, const AVRational& input_time_base, const std::string& filter_string) { impl_->SetFilter(width, height, pix_fmt, input_sar, input_time_base, filter_string); }
+bool VideoFilter::Push(std::shared_ptr<AVFrame> frame) { return impl_->Push(frame); }
 std::shared_ptr<AVFrame> VideoFilter::Pull() { return impl_->Pull(); }
 int VideoFilter::OutputWidth() { return impl_->OutputWidth(); }
 int VideoFilter::OutputHeight() { return impl_->OutputHeight(); }
@@ -211,8 +184,9 @@ AVRational VideoFilter::OutputSampleAspectRatio() { return impl_->OutputSampleAs
 AVPixelFormat VideoFilter::GetOutputPixelFormat() { return impl_->OutputPixelFormat(); }
 AVRational VideoFilter::OutputTimeBase() const { return impl_->OutputTimeBase(); }
 void VideoFilter::Flush() { return impl_->Flush(); }
-void VideoFilter::CreateFilterChain(const AVRational& input_time_base) { impl_->CreateFilterChain(input_time_base); }
+void VideoFilter::CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational& input_time_base, const std::string& filter_str) { impl_->CreateFilterChain(frame, input_time_base, filter_str); }
 bool VideoFilter::IsInitialized() const { return impl_->IsInitializded(); }
 bool VideoFilter::IsEof() const { return impl_->IsEof(); }
+void VideoFilter::Reset() { impl_->Reset(); }
 bool VideoFilter::IsFlushed() const { return impl_->IsFlushed(); }
 }}

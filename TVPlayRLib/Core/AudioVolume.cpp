@@ -11,7 +11,7 @@ AudioVolume::AudioVolume()
 {
 }
 
-void TVPlayR::Core::AudioVolume::SetVolume(float volume)
+void TVPlayR::Core::AudioVolume::SetVolume(double volume)
 {
 	new_volume_ = static_cast<uint32_t>(volume * ZERO);
 }
@@ -24,20 +24,10 @@ void TVPlayR::Core::AudioVolume::ProcessVolume(const std::shared_ptr<AVFrame>& f
 	int samples_count = frame->nb_samples * frame->channels;
 	for (int i = 0; i < samples_count; i++)
 	{
-		if (old_volume_ == new_volume_)
-			samples[i] = av_clipl_int32((((int64_t)samples[i] * new_volume_ / ZERO)));
-		else // wait for sign change with old volume
-		{
-			if (i > 0 && (samples[i] * samples[i - 1]) < 0) // sign of sample was changed
-				old_volume_ = new_volume_;
-			samples[i] = av_clipl_int32((((int64_t)samples[i] * old_volume_ / ZERO)));
-		}
+		if (old_volume_ != new_volume_ && i > 0 && (samples[i] * samples[i - 1]) < 0) // sign of sample was changed
+			old_volume_ = new_volume_;
+		samples[i] = av_clipl_int32((((int64_t)samples[i] * old_volume_ / ZERO)));
 	}
-}
-
-float AudioVolume::GetVolume() const
-{
-	return static_cast<float>(new_volume_)/ZERO;
 }
 
 }}

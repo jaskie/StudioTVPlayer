@@ -141,9 +141,7 @@ namespace TVPlayR {
 
 		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
 
-		void Channel::SetVolume(float volume) { impl_->audio_volume_.SetVolume(volume); }
-
-		float Channel::GetVolume() const { return impl_->audio_volume_.GetVolume(); }
+		void Channel::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
 
 		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 

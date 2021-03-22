@@ -80,6 +80,14 @@ namespace StudioTVPlayer.Model
             _channelR.AddOutput(device);
         }
 
+        internal void SetVolume(double value)
+        {
+            if (_channelR == null)
+                throw new ApplicationException($"Channel {Name} not initialized");
+            _channelR.Volume = Math.Pow(10, value / 20);
+        }
+
+
         public void Uninitialize()
         {
             if (_channelR == null)
@@ -117,5 +125,6 @@ namespace StudioTVPlayer.Model
             }
             
         }
+
     }
 }

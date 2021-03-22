@@ -114,6 +114,12 @@ namespace StudioTVPlayer.Model
             return _inputFile.Seek(timeSpan);
         }
 
+
+        public void SetVolume(double value)
+        {
+            Channel.SetVolume(value);
+        }
+
         public void Clear()
         {
             PlayingQueueItem = null;

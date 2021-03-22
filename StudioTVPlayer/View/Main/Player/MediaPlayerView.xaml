@@ -58,40 +58,43 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <TextBlock Text="{Binding Name}" FontSize="18" />
-            <Border Grid.Row="1" HorizontalAlignment="Center" MinWidth="200" Margin="5" CornerRadius="1,1,1,1">
-                <Grid Margin="10" Width="auto" >
+            <Grid Grid.Row="1" Margin="10" MinWidth="200">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" MinWidth="200"/>
+                </Grid.ColumnDefinitions>
+                <Slider Orientation="Vertical" Grid.RowSpan="2" Minimum="-15" Maximum="15" Value="{Binding Volume}" ToolTip="{Binding Volume}"/>
+                <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding VideoFormat}" />
-                        <TextBlock Text="Current time" Grid.Row="0" />
+                    <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding VideoFormat}" />
+                    <TextBlock Text="Current time" Grid.Row="0" />
 
-                        <controls:Timecode Grid.Row="1" FontSize="20" BorderThickness="0" TextAlignment="Right"
+                    <controls:Timecode Grid.Row="1" FontSize="20" TextAlignment="Right"
                                            VideoFormat="{Binding VideoFormat}"
                                            Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                            EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
                                            />
-                    </Grid>
-                    <Grid Margin="0,5,0,0" Grid.Row="1" Width="auto">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="Time left" Grid.Row="0" />
-                        <controls:Timecode Grid.Row="1" FontSize="20" BorderThickness="0" TextAlignment="Right"
+                </Grid>
+                <Grid Margin="0,5,0,0" Grid.Column="1" Grid.Row="1" Width="auto">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Time left" Grid.Row="0" />
+                    <controls:Timecode Grid.Row="1" FontSize="20" BorderThickness="0" TextAlignment="Right"
                                            VideoFormat="{Binding VideoFormat}"
                                            Time="{Binding OutTime}"
                                            IsReadOnly="True"
                                            />
-                    </Grid>
                 </Grid>
-            </Border>
+            </Grid>
             <UniformGrid Margin="10" Grid.Row="2" Columns="4">
                 <UniformGrid.Resources>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

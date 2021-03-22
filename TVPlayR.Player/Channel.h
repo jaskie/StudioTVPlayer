@@ -13,6 +13,7 @@ namespace TVPlayR {
 	{
 	private:
 		Core::Channel* _channel;
+		double _volume = 1.0f;
 	public:
 		Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
 		Channel(int formatId, PixelFormat pixelFormat, int audioChannelCount);
@@ -21,10 +22,14 @@ namespace TVPlayR {
 		bool AddOutput(DecklinkDevice^ device);
 		void Load(InputFile^ file);
 		void Clear();
-		property float Volume
+		property double Volume
 		{
-			float get() { return _channel->GetVolume(); }
-			void set(float volume) { _channel->SetVolume(volume); }
+			double get() { return _volume; }
+			void set(double volume) 
+			{
+				_volume = volume;
+				_channel->SetVolume(volume);
+			}
 		}
 	};
 }

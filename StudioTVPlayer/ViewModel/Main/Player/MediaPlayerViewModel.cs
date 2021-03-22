@@ -28,6 +28,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private bool _isLoaded;
 
         private bool _isSliderDrag;
+        private double _volume;
 
         public MediaPlayerViewModel(MediaPlayer player)
         {
@@ -104,6 +105,17 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     return;
                 if (!_isSliderDrag)
                     Seek(TimeSpan.FromMilliseconds(value));
+            }
+        }
+
+        public double Volume
+        {
+            get => _volume; 
+            set
+            {
+                if (!Set(ref _volume, value))
+                    return;
+                _mediaPlayer.SetVolume(value);
             }
         }
 

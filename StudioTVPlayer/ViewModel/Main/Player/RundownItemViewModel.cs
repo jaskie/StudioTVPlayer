@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Model;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
@@ -25,6 +26,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
         public RundownItem RundownItem { get; }
+
+        public ImageSource Thumbnail => RundownItem.Media.Thumbnail;
 
     }
 }

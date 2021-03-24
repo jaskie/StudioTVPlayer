@@ -393,8 +393,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             if (dropInfo.Data is MediaViewModel mediaViewModel)
             {
-                var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, 0);
-                Rundown.Add(new RundownItemViewModel(rundownItem));
+                var index = dropInfo.InsertIndex;
+                var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, index);
+                Rundown.Insert(index, new RundownItemViewModel(rundownItem));
                 Refresh();
             }
         }

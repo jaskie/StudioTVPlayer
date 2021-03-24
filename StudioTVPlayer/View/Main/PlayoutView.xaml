@@ -52,8 +52,22 @@
             </ItemsControl.ItemTemplate>
         </ListBox>
         <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Left" />
-        <TabControl Grid.Column="1" ItemsSource="{Binding Browsers}" Padding="0" DisplayMemberPath="Name" SelectedIndex="0" Margin="3 0 0 0" 
+        <TabControl Grid.Column="1" ItemsSource="{Binding Browsers}" Padding="0" SelectedIndex="0" Margin="3 0 0 0" 
                     mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">
+            <TabControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type browserViewModels:BrowserViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" />
+                        <Button Command="{Binding ExploreFolderCommand}"
+                            Style="{DynamicResource MahApps.Styles.Button.Reveal}" Margin="5" VerticalAlignment="Bottom">
+                            <Button.ToolTip>
+                                <TextBlock Text="{Binding Path, StringFormat={}Explore {0}}"/>
+                            </Button.ToolTip>
+                            <mah:FontIcon FontSize="16" Glyph="&#xE838;"/>
+                        </Button>
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate DataType="{x:Type browserViewModels:BrowserViewModel}">
                     <browserViews:BrowserView />

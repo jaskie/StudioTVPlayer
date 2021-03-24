@@ -27,6 +27,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public ICommand ChangeDateCommand { get; }
 
+        public ICommand ExploreFolderCommand { get; }
+
 
         public BrowserViewModel(WatchedFolder watchedFolder)
         {
@@ -38,16 +40,20 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
             _selectedSorting = Sorting.CreationTime;
             Name = watchedFolder.Name;
+            Path = watchedFolder.Path;
             IsFilteredByDate = watchedFolder.IsFilteredByDate;
             _selectedDate = watchedFolder.FilterDate;
             QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex, index => SelectedMedia != null && int.Parse(index as string) < Providers.GlobalApplicationData.Current.Players.Count);
             ChangeDateCommand = new UiCommand(ChangeDate, _ => IsFilteredByDate);
+            ExploreFolderCommand = new UiCommand(ExploreFolder);
         }
+
 
         #region Properties
 
         public IList<MediaViewModel> MediaFiles => _mediaFiles;
         public string Name { get; }
+        public string Path { get; }
         public bool IsFilteredByDate { get; }
 
         private bool _isFocused;
@@ -119,12 +125,16 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             Providers.GlobalApplicationData.Current.Players[index].Submit(SelectedMedia.Media);
         }
 
-
         private void ChangeDate(object days)
         {
             if (!(days is string str && int.TryParse(str, out var increment)))
                 throw new ArgumentException("Invalid parameter", nameof(days));
             SelectedDate = SelectedDate.AddDays(increment);
+        }
+
+        private void ExploreFolder(object obj)
+        {
+            Process.Start("explorer.exe", Path);
         }
 
         private void WatchedFolder_MediaChanged(object sender, MediaEventArgs e)

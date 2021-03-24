@@ -14,8 +14,6 @@
              d:DesignHeight="370" d:DesignWidth="800"
              attachedProp:ControlProperties.TakesInputBindingPrecedence="True"
              attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="True"
-             dd:DragDrop.IsDropTarget="True"
-             dd:DragDrop.DropHandler="{Binding}"     
              Focusable="True" IsTabStop="True"
              Background="Transparent"
              BorderThickness="2"
@@ -31,7 +29,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Style>
-    
+
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />
         <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding SeekFramesCommand}" CommandParameter="1" />
@@ -59,15 +57,31 @@
             </Grid.RowDefinitions>
             <TextBlock Text="{Binding Name}" FontSize="18" />
             <Grid Grid.Row="1" Margin="10" MinWidth="200">
+                <Grid.Resources>
+                    <Style TargetType="controls:TimecodeEdit" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="TextAlignment" Value="Center"/>
+                        <Setter Property="VideoFormat" Value="{Binding VideoFormat}"/>
+                        <Setter Property="Padding" Value="2"/>
+                    </Style>
+                </Grid.Resources>
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" MinWidth="200"/>
+                    <ColumnDefinition Width="115"/>
                 </Grid.ColumnDefinitions>
-                <Slider Orientation="Vertical" Grid.RowSpan="2" Minimum="-15" Maximum="15" Value="{Binding Volume}" ToolTip="{Binding Volume}"/>
+                <Slider Orientation="Vertical" Grid.RowSpan="2" Minimum="-15" Maximum="15" HorizontalAlignment="Left" 
+                        AutoToolTipPlacement="BottomRight"
+                        AutoToolTipPrecision="1"
+                        Value="{Binding Volume}" 
+                        >
+                    <Slider.ToolTip>
+                        <TextBlock Text="{Binding Volume, StringFormat={}Volume: {0:F1}}"/>
+                    </Slider.ToolTip>
+                </Slider>
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -75,9 +89,7 @@
                     </Grid.RowDefinitions>
                     <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding VideoFormat}" />
                     <TextBlock Text="Current time" Grid.Row="0" />
-
-                    <controls:Timecode Grid.Row="1" FontSize="20" TextAlignment="Right"
-                                           VideoFormat="{Binding VideoFormat}"
+                    <controls:TimecodeEdit Grid.Row="1" BorderThickness="0.7" mah:ControlsHelper.CornerRadius="3" 
                                            Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                            EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
                                            />
@@ -88,8 +100,7 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Time left" Grid.Row="0" />
-                    <controls:Timecode Grid.Row="1" FontSize="20" BorderThickness="0" TextAlignment="Right"
-                                           VideoFormat="{Binding VideoFormat}"
+                    <controls:TimecodeEdit Grid.Row="1" BorderThickness="0" 
                                            Time="{Binding OutTime}"
                                            IsReadOnly="True"
                                            />
@@ -167,7 +178,7 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <Image Margin="5" Height="90" Source="{Binding CurrentRundownItem.RundownItem.Media.Thumbnail}" />
+                <Image Margin="5" Height="110" Source="{Binding CurrentRundownItem.RundownItem.Media.Thumbnail}" />
             </Border>
         </Grid>
         <Grid Grid.Column="1">
@@ -183,10 +194,13 @@
                 </StackPanel>
             </Button>
 
-            <ListBox x:Name="list" Grid.Row="1" Margin="0 5" 
-                         ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" 
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}"  BorderThickness="1">
+            <ListBox x:Name="list" Grid.Row="1" Margin="0 5" BorderThickness="1"
+                     ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" 
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" 
+                     dd:DragDrop.IsDropTarget="True"
+                     dd:DragDrop.IsDragSource="True"
+                     dd:DragDrop.DropHandler="{Binding}" >
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:RundownItemViewModel}">
                         <view:RundownItemView/>

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser" 
+             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"
              mc:Ignorable="d" 
@@ -50,6 +51,9 @@
                  ItemsSource="{Binding MediaFiles}" 
                  SelectedItem="{Binding SelectedMedia}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 dd:DragDrop.IsDragSource="True"
+                 dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
+                 dd:DragDrop.UseDefaultDragAdorner="True"
                  >
             <ListBox.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">

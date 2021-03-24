@@ -82,6 +82,13 @@ namespace StudioTVPlayer.Model
             return null;
         }
 
+        public void MoveItem(int srcIndex, int destIndex)
+        {
+            var item = _rundown[srcIndex];
+            _rundown.RemoveAt(srcIndex);
+            _rundown.Insert(destIndex, item);
+        }
+
         private void InternalLoad(RundownItem rundownItem)
         {
             if (_inputFile != null)

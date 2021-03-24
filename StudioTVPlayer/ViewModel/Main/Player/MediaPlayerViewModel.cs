@@ -121,7 +121,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
-        public IList<RundownItemViewModel> Rundown { get; }
+        public ObservableCollection<RundownItemViewModel> Rundown { get; }
 
         public RundownItemViewModel SelectedRundownItem { get; set; }
 
@@ -382,19 +382,24 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public void DragOver(IDropInfo dropInfo)
         {
-            if (dropInfo.Data is MediaViewModel mediaViewModel && mediaViewModel.IsVerified && mediaViewModel.Duration > TimeSpan.Zero)
+            if (dropInfo.Data is MediaViewModel mediaViewModel)
             {
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-                dropInfo.Effects = DragDropEffects.Move;
+                if (!mediaViewModel.IsVerified || mediaViewModel.Duration <= TimeSpan.Zero)
+                    return;
             }
-
-            if (dropInfo.Data is RundownItemViewModel rundownItemViewModel && 
-                dropInfo.DragInfo.SourceCollection == dropInfo.TargetCollection && 
-                dropInfo.DragInfo.SourceIndex != dropInfo.InsertIndex)
+            else if (dropInfo.Data is RundownItemViewModel)
             {
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-                dropInfo.Effects = DragDropEffects.Move;
+                if (dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex || dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex + 1)
+                    return;
+                if (dropInfo.DragInfo.SourceCollection != Rundown)
+                    return;
+                if (dropInfo.InsertPosition == RelativeInsertPosition.None)
+                    return;
             }
+            else
+                return;
+            dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+            dropInfo.Effects = DragDropEffects.Move;
         }
 
         public void Drop(IDropInfo dropInfo)
@@ -404,6 +409,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                 var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, index);
                 Rundown.Insert(index, new RundownItemViewModel(rundownItem));
+                Refresh();
+            }
+            else if (dropInfo.Data is RundownItemViewModel)
+            {
+                var srcIndex = dropInfo.DragInfo.SourceIndex;
+                var destIndex = dropInfo.InsertIndex;
+                if (destIndex > srcIndex)
+                    destIndex--;
+                _mediaPlayer.MoveItem(srcIndex, destIndex);
+                Rundown.Move(srcIndex, destIndex);
                 Refresh();
             }
         }

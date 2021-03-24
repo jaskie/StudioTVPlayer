@@ -10,14 +10,11 @@
              xmlns:controls="clr-namespace:StudioTVPlayer.Controls"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
              mc:Ignorable="d" 
-             dd:DragDrop.IsDropTarget="True"
-             dd:DragDrop.DropHandler="{Binding}" 
              d:DataContext="{d:DesignInstance vm:MediaPlayerViewModel}"
              d:DesignHeight="370" d:DesignWidth="800"
              attachedProp:ControlProperties.TakesInputBindingPrecedence="True"
              attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="True"
              Focusable="True" IsTabStop="True"
-             Background="Transparent"
              BorderThickness="2"
              Margin="3"
              FocusVisualStyle="{x:Null}"
@@ -49,7 +46,11 @@
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0" KeyboardNavigation.DirectionalNavigation="None">
+        <Grid Grid.Column="0" KeyboardNavigation.DirectionalNavigation="None"
+              dd:DragDrop.IsDropTarget="True"
+              dd:DragDrop.DropHandler="{Binding}" 
+              Background="Transparent"
+              >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -201,7 +202,11 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" 
                      dd:DragDrop.IsDropTarget="True"
-                     dd:DragDrop.DropHandler="{Binding}" >
+                     dd:DragDrop.IsDragSource="True"
+                     dd:DragDrop.DropHandler="{Binding}" 
+                     dd:DragDrop.UseDefaultDragAdorner="True"
+                     dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
+                     >
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:RundownItemViewModel}">
                         <view:RundownItemView/>

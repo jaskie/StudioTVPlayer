@@ -4,14 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance {x:Type vm:MediaViewModel}}"
              d:DesignHeight="100" d:DesignWidth="800"
-             dd:DragDrop.IsDragSource="True"
-             dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
-             dd:DragDrop.UseDefaultDragAdorner="True"
              Background="Transparent"
              >
 

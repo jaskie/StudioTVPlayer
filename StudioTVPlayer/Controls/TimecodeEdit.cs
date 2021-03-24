@@ -49,6 +49,7 @@ namespace StudioTVPlayer.Controls
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Cut, null, DoNothingCommand));
         }
 
+
         private void DoNothingCommand(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = false;
@@ -63,14 +64,12 @@ namespace StudioTVPlayer.Controls
 
         private static void EnterPressed(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && sender is TimecodeEdit element)
+            if (e.Key == Key.Enter && sender is TimecodeEdit element && element.VideoFormat is TVPlayR.VideoFormat vf)
             {
-                var vf = element.VideoFormat;
-
+                element.Time = vf.FrameNumberToTime(vf.StringToFrameNumber(element.Text));
                 ICommand command = GetEnterPressedCommand((TextBox)sender);
                 object[] param = { sender, e };
-
-                command.Execute(param);
+                command?.Execute(param);
             }
         }
 

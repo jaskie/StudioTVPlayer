@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -396,6 +397,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 if (dropInfo.InsertPosition == RelativeInsertPosition.None)
                     return;
             }
+            else if (dropInfo.Data is IDataObject dataObject)
+            {
+                if ((dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f)) is null)
+                    return;
+            }
             else
                 return;
             dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
@@ -419,6 +425,19 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     destIndex--;
                 _mediaPlayer.MoveItem(srcIndex, destIndex);
                 Rundown.Move(srcIndex, destIndex);
+                Refresh();
+            }
+            else if (dropInfo.Data is IDataObject dataObject)
+            {
+                var fileName = (dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f));
+                if (fileName is null)
+                    return;
+                var media = new Media(fileName);
+                if (!MediaVerifier.Current.Verify(media))
+                    return;
+                var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
+                var rundownItem = _mediaPlayer.AddToQueue(media, index);
+                Rundown.Insert(index, new RundownItemViewModel(rundownItem));
                 Refresh();
             }
         }

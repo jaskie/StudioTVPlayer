@@ -22,6 +22,7 @@ namespace StudioTVPlayer.Model
         private readonly Task _verificationTask;
         private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private const int DefaultThumbnailHeight = 90;
         private MediaVerifier()
         {
             _verificationTask = Task.Factory.StartNew(MediaVerifierTask, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -41,13 +42,13 @@ namespace StudioTVPlayer.Model
 
         public static MediaVerifier Current { get; } = new MediaVerifier();
 
-        public void Queue(Media media, int thumbnailHeight, CancellationToken cancellationToken)
+        public void Queue(Media media, CancellationToken cancellationToken)
         {
             media.IsVerified = false;
-            _mediaQueue.Add(new MediaVerifyData { Media = media, Height = thumbnailHeight, CancellationToken = cancellationToken });
+            _mediaQueue.Add(new MediaVerifyData { Media = media, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
         }
 
-        public void Verify(Media media, int thumbnailHeight )
+        public void Verify(Media media, int thumbnailHeight)
         {
             using (var file = new InputFile(media.FullPath, 0))
             {
@@ -75,6 +76,19 @@ namespace StudioTVPlayer.Model
                 }
             }
             media.IsVerified = true;
+        }
+
+        public bool Verify(Media media)
+        {
+            try
+            {
+                Verify(media, DefaultThumbnailHeight);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void MediaVerifierTask()

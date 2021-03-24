@@ -54,7 +54,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="50" />
+                <RowDefinition Height="52" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -109,12 +109,13 @@
                                            />
                 </Grid>
             </Grid>
-            <UniformGrid Margin="10" Grid.Row="2" Columns="4">
+            <UniformGrid Margin="10 9" Grid.Row="2" Columns="4">
                 <UniformGrid.Resources>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Setter Property="Margin" Value="5 0"/>
                         <Setter Property="Focusable" Value="False"/>
                     </Style>
+
                 </UniformGrid.Resources>
 
                 <Button Command="{Binding CueCommand}" >

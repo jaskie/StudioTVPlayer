@@ -387,13 +387,21 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                 dropInfo.Effects = DragDropEffects.Move;
             }
+
+            if (dropInfo.Data is RundownItemViewModel rundownItemViewModel && 
+                dropInfo.DragInfo.SourceCollection == dropInfo.TargetCollection && 
+                dropInfo.DragInfo.SourceIndex != dropInfo.InsertIndex)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Move;
+            }
         }
 
         public void Drop(IDropInfo dropInfo)
         {
             if (dropInfo.Data is MediaViewModel mediaViewModel)
             {
-                var index = dropInfo.InsertIndex;
+                var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                 var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, index);
                 Rundown.Insert(index, new RundownItemViewModel(rundownItem));
                 Refresh();

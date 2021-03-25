@@ -18,6 +18,8 @@ namespace TVPlayR {
 		{
 			const CComPtr<IDeckLink> decklink_;
 			const CComQIPtr<IDeckLinkOutput> output_;
+			const CComQIPtr<IDeckLinkKeyer> keyer_;
+			const CComQIPtr<IDeckLinkAttributes> attributes_;
 			int index_;
 			Core::VideoFormat format_;
 			int buffer_size_ = 3;
@@ -33,6 +35,8 @@ namespace TVPlayR {
 			implementation(IDeckLink* decklink, int index)
 				: decklink_(decklink)
 				, output_(decklink)
+				, attributes_(decklink)
+				, keyer_(decklink)
 				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
 			{
@@ -51,10 +55,20 @@ namespace TVPlayR {
 				if (!output_)
 					return false;
 				BMDDisplayModeSupport modeSupport;
-				if (output_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputFlags::bmdVideoOutputFlagDefault, &modeSupport, NULL) != S_OK
+				if (FAILED(output_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputFlags::bmdVideoOutputFlagDefault, &modeSupport, NULL))
 					|| modeSupport == bmdDisplayModeNotSupported)
 					return false;
-				if (output_->EnableVideoOutput(mode, BMDVideoOutputFlags::bmdVideoOutputFlagDefault) != S_OK)
+				if (pixel_format == BMDPixelFormat::bmdFormat8BitBGRA)
+				{
+					BOOL support = FALSE;
+					if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) && support)
+						keyer_->Enable(TRUE);
+					else if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) && support)
+						keyer_->Enable(FALSE);
+					if (support)
+						keyer_->SetLevel(255);
+				}
+				if (FAILED(output_->EnableVideoOutput(mode, BMDVideoOutputFlags::bmdVideoOutputFlagDefault)))
 					return false;
 				output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
 				return true;
@@ -83,17 +97,17 @@ namespace TVPlayR {
 				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(frame);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_ = frame;
-				if (ret != S_OK)
-					decklink_frame->Release();
 #ifdef DEBUG
-				if (ret != S_OK)
+				if (FAILED(ret))
 				{
 					std::stringstream msg;
 					msg << "Unable to schedule frame: " << frame->pts << "\n";
 					OutputDebugStringA(msg.str().c_str());
 				}
 #endif			
-				return ret == S_OK;
+				if (FAILED(ret))
+					decklink_frame->Release();
+				return SUCCEEDED(ret);
 			}
 
 			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
@@ -119,7 +133,7 @@ namespace TVPlayR {
 			std::wstring GetDisplayName()
 			{
 				BSTR pModelName;
-				if (decklink_->GetDisplayName(&pModelName) != S_OK)
+				if (FAILED(decklink_->GetDisplayName(&pModelName)))
 					return L"";
 				return std::wstring(pModelName);
 			}
@@ -127,7 +141,7 @@ namespace TVPlayR {
 			std::wstring GetModelName()
 			{
 				BSTR pModelName;
-				if (decklink_->GetModelName(&pModelName) != S_OK)
+				if (FAILED(decklink_->GetModelName(&pModelName)))
 					return L"";
 				return std::wstring(pModelName);
 			}

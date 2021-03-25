@@ -165,7 +165,7 @@ namespace TVPlayR {
 
 			bool IsEof() 
 			{
-				return is_flushed_ && video_queue_.empty() && fifo_->SamplesCount() == 0;
+				return is_flushed_ && video_queue_.empty() && fifo_ != nullptr && fifo_->SamplesCount() == 0;
 			}
 
 			void SetSynchro(int64_t time)

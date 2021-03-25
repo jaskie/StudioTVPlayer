@@ -143,7 +143,7 @@ namespace TVPlayR {
 					THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
 #ifdef DEBUG
 					OutputDebugStringA(args);
-					dump_filter(filter_str_, graph_);
+					dump_filter(filter_str, graph_);
 #endif // DEBUG
 				}
 				catch (const std::exception& e)

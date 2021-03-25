@@ -75,8 +75,7 @@ namespace StudioTVPlayer.Controls
 
         private static void OnTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (!(d is TimecodeEdit element)) return;
-            var vf = element.VideoFormat;
+            if (!(d is TimecodeEdit element && element.VideoFormat is TVPlayR.VideoFormat vf)) return;
             element.Text = vf.FrameNumberToString(vf.TimeToFrameNumber(element.Time), element.IsDropFrame);
         }
 

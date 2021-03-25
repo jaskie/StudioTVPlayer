@@ -14,8 +14,16 @@ namespace TVPlayR {
 			frame->format = Core::PixelFormatToFFmpegFormat(pix_fmt);
 			frame->pict_type = AV_PICTURE_TYPE_I;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
-			ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };
-			THROW_ON_FFMPEG_ERROR(av_image_fill_black(frame->data, linesize, static_cast<AVPixelFormat>(frame->format), AVColorRange::AVCOL_RANGE_MPEG, frame->width, frame->height));
+			if (pix_fmt == Core::PixelFormat::bgra)
+			{
+				// to make transparent alpha
+				memset(frame->data[0], 0x10101000, frame->linesize[0] * frame->height);
+			}
+			else
+			{
+				ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };
+				THROW_ON_FFMPEG_ERROR(av_image_fill_black(frame->data, linesize, static_cast<AVPixelFormat>(frame->format), AVColorRange::AVCOL_RANGE_MPEG, frame->width, frame->height));
+			}
 			return frame;
 		}
 

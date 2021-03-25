@@ -23,6 +23,9 @@
     <Filter Include="Common">
       <UniqueIdentifier>{0865f8dc-6fcf-4419-90b8-10b353ef9502}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Preview">
+      <UniqueIdentifier>{ae7e9ee7-b676-4819-a1cc-bd9444134abb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ComInitializer.h">
@@ -131,6 +134,9 @@
     <ClInclude Include="Core\AudioVolume.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Preview\Preview.h">
+      <Filter>Preview</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">
@@ -193,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="Core\AudioVolume.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Preview\Preview.cpp">
+      <Filter>Preview</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

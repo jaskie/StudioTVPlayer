@@ -151,6 +151,7 @@
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="NdiDevice.h" />
     <ClInclude Include="PixelFormat.h" />
+    <ClInclude Include="PreviewDevice.h" />
     <ClInclude Include="Rational.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="DecklinkDevice.cpp" />
     <ClCompile Include="InputFile.cpp" />
     <ClCompile Include="NdiDevice.cpp" />
+    <ClCompile Include="PreviewDevice.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

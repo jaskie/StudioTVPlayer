@@ -2,6 +2,8 @@
 #include "InputFormat.h"
 #include "Utils.h"
 
+#undef DEBUG
+
 namespace TVPlayR {
 	namespace FFmpeg {
 

@@ -18,6 +18,7 @@ public:
 	void RemoveOutput(std::shared_ptr<OutputDevice> device);
 	void SetFrameClock(std::shared_ptr<OutputDevice> clock);
 	void Load(std::shared_ptr<InputSource> source);
+	void Preload(std::shared_ptr<InputSource> source);
 	void Clear();
 	const VideoFormat& Format() const;
 	const PixelFormat PixelFormat() const;

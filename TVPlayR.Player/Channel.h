@@ -21,6 +21,7 @@ namespace TVPlayR {
 		!Channel();
 		bool AddOutput(DecklinkDevice^ device);
 		void Load(InputFile^ file);
+		void Preload(InputFile^ file);
 		void Clear();
 		property double Volume
 		{

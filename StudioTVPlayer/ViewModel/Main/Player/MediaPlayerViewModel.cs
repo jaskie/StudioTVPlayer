@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -56,7 +55,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private bool CanTogglePlay(object obj)
         {
-            var item = _mediaPlayer.PlayingQueueItem;
+            var item = _mediaPlayer.PlayingRundownItem;
             if (item == null)
                 return false;
             if (!IsPlaying && _mediaPlayer.IsEof)
@@ -227,11 +226,14 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void DeleteDisabled(object obj)
         {
             RundownItemViewModel item = null;
-            do
+            while (true)
             {
                 item = Rundown.FirstOrDefault(i => i.IsDisabled);
-                Rundown.Remove(item);
-            } while (item != null);
+                if (item is null)
+                    break;
+                if (_mediaPlayer.RemoveItem(item.RundownItem))
+                    Rundown.Remove(item);
+            }
         }
 
         private void CheckItem(object param)
@@ -264,9 +266,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             if (playerItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
                 return;
-            if (!_mediaPlayer.Load(playerItem.RundownItem))
-                return;
-            CurrentRundownItem = playerItem;
+            _mediaPlayer.Load(playerItem.RundownItem);
         }
 
         private void LoadNextItem(object obj)
@@ -320,7 +320,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting clip {_mediaPlayer.PlayingQueueItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting clip {_mediaPlayer.PlayingRundownItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
             return true;
@@ -335,7 +335,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingQueueItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
             return true;

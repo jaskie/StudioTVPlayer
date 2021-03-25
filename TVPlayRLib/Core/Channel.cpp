@@ -133,6 +133,13 @@ namespace TVPlayR {
 				source->AddToChannel(*this);
 			impl_->Load(source);
 		}
+
+		void Channel::Preload(std::shared_ptr<InputSource> source)
+		{
+			if (!source->IsAddedToChannel(*this))
+				source->AddToChannel(*this);
+		}
+
 		void Channel::Clear() { impl_->Clear(); }
 
 		const VideoFormat & Channel::Format() const	{ return impl_->format_; }

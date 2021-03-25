@@ -7,10 +7,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     {
         private bool _isLoaded;
         private bool _isDisabled;
+        private bool _isAutoStart;
 
         public RundownItemViewModel(RundownItem rundownItem)
         {
             RundownItem = rundownItem;
+            IsDisabled = !rundownItem.Enabled;
+            IsAutoStart = rundownItem.IsAutoStart;
         }
 
         public bool IsLoaded
@@ -22,7 +25,23 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public bool IsDisabled
         {
             get => _isDisabled;
-            set => Set(ref _isDisabled, value);
+            set
+            {
+                if (!Set(ref _isDisabled, value))
+                    return;
+                RundownItem.Enabled = !value;
+            }
+        }
+
+        public bool IsAutoStart
+        {
+            get => _isAutoStart; 
+            set
+            {
+                if (!Set(ref _isAutoStart, value))
+                    return;
+                RundownItem.IsAutoStart = value;
+            }
         }
 
         public RundownItem RundownItem { get; }

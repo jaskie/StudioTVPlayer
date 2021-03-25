@@ -10,8 +10,8 @@ namespace StudioTVPlayer.Model
     public class MediaPlayer : IDisposable
     {
         private readonly List<RundownItem> _rundown = new List<RundownItem>();
-        private RundownItem _playingQueueItem;
-        private TVPlayR.InputFile _inputFile;
+        private RundownItem _playingRundownItem;
+        private RundownItem _nextRundownItem;
 
         public MediaPlayer(Channel channel)
         {
@@ -22,33 +22,52 @@ namespace StudioTVPlayer.Model
 
         public Channel Channel { get; }
 
-        public RundownItem PlayingQueueItem
+        public RundownItem NextRundownItem
         {
-            get => _playingQueueItem;
+            get => _nextRundownItem; 
+            set
+            {
+                var oldItem = _nextRundownItem;
+                if (_nextRundownItem == value)
+                    return;
+                _nextRundownItem = value;
+                if (oldItem != null && oldItem != _playingRundownItem)
+                    oldItem.Unload();
+                value.Preload(Channel.AudioChannelCount);                    
+            }
+        }
+
+
+
+        public RundownItem PlayingRundownItem
+        {
+            get => _playingRundownItem;
             private set
             {
-                if (_playingQueueItem == value)
+                var oldItem = _playingRundownItem;
+                if (_playingRundownItem == value)
                     return;
-                _playingQueueItem = value;
+                _playingRundownItem = value;
+                InternalUnload(oldItem);
                 InternalLoad(value);
             }
         }
 
-        public bool IsEof => _inputFile?.IsEof ?? true;
+        public bool IsEof => PlayingRundownItem?.InputFile?.IsEof ?? true;
 
         public TimeSpan OneFrame => Channel.VideoFormat.FrameNumberToTime(1);
 
         public bool Play()
         {
-            if (_inputFile == null)
+            if (PlayingRundownItem is null)
                 return false;
-            _inputFile?.Play();
+            PlayingRundownItem.Play();
             return true;
         }
 
         public void Pause()
         {
-            _inputFile?.Pause();
+            PlayingRundownItem?.Pause();
         }
 
 
@@ -57,12 +76,11 @@ namespace StudioTVPlayer.Model
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
 
-        public bool Load(RundownItem item)
+        public void Load(RundownItem item)
         {
             if (!_rundown.Contains(item))
-                return false;
-            PlayingQueueItem = item;
-            return true;
+                return;
+            PlayingRundownItem = item;
         }
 
         public RundownItem AddToQueue(Media media, int index)
@@ -82,6 +100,14 @@ namespace StudioTVPlayer.Model
             return null;
         }
 
+        public bool RemoveItem(RundownItem rundownItem)
+        {
+            if (!_rundown.Remove(rundownItem))
+                return false;
+            rundownItem.Dispose();
+            return true;
+        }
+
         public void MoveItem(int srcIndex, int destIndex)
         {
             var item = _rundown[srcIndex];
@@ -89,21 +115,25 @@ namespace StudioTVPlayer.Model
             _rundown.Insert(destIndex, item);
         }
 
-        private void InternalLoad(RundownItem rundownItem)
+        private void InternalUnload(RundownItem rundownItem)
         {
-            if (_inputFile != null)
-            {
-                _inputFile.FramePlayed -= InputFile_FramePlayed;
-                _inputFile.Stopped -= InputFile_Stopped;
-                _inputFile.Dispose();
-                Stopped?.Invoke(this, EventArgs.Empty);
-            }
             if (rundownItem == null)
                 return;
-            _inputFile = new TVPlayR.InputFile(rundownItem.Media.FullPath, 2);
-            _inputFile.FramePlayed += InputFile_FramePlayed;
-            _inputFile.Stopped += InputFile_Stopped;
-            Channel.Load(_inputFile);
+            rundownItem.Pause();
+            rundownItem.FramePlayed -= PlaiyngRundownItem_FramePlayed;
+            rundownItem.Stopped -= PlaiyngRundownItem_Stopped;
+            rundownItem.Unload();
+            Stopped?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void InternalLoad(RundownItem rundownItem)
+        {
+            if (rundownItem == null)
+                return;
+            rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
+            rundownItem.Stopped += PlaiyngRundownItem_Stopped;
+            rundownItem.Preload(Channel.AudioChannelCount);
+            Channel.Load(rundownItem);
             Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
         }
 
@@ -116,11 +146,10 @@ namespace StudioTVPlayer.Model
 
         public bool Seek(TimeSpan timeSpan)
         {
-            if (_inputFile == null)
+            if (PlayingRundownItem == null)
                 return false;
-            return _inputFile.Seek(timeSpan);
+            return PlayingRundownItem.Seek(timeSpan);
         }
-
 
         public void SetVolume(double value)
         {
@@ -129,33 +158,62 @@ namespace StudioTVPlayer.Model
 
         public void Clear()
         {
-            PlayingQueueItem = null;
+            PlayingRundownItem = null;
             Channel.Clear();
         }
 
-
-        private void InputFile_Stopped(object sender, EventArgs e)
+        private void PlaiyngRundownItem_Stopped(object sender, EventArgs e)
         {
-            Stopped?.Invoke(this, EventArgs.Empty);
+            var nextItem = FindNextAutoPlayItem();
+            if (nextItem is null)
+            {
+                Stopped?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+            PlayingRundownItem = nextItem;
+            nextItem.Play();
         }
 
-        private void InputFile_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
+        private RundownItem FindNextAutoPlayItem()
+        {
+            var currentItem = PlayingRundownItem;
+            RundownItem next = null;
+            using (var iterator = _rundown.GetEnumerator())
+            {
+                bool found = false;
+                while (iterator.MoveNext())
+                {
+                    if (found)
+                    {
+                        if (iterator.Current != null && iterator.Current.IsAutoStart && iterator.Current.Enabled)
+                            return iterator.Current;
+                        else
+                            return null;
+                    }
+                    if (iterator.Current == currentItem)
+                        found = true;
+                }
+            }
+            if (next != null && next.IsAutoStart && next.Enabled)
+                return next;
+            else NextRundownItem = null;
+            return null;
+        }
+
+        private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
             Progress?.Invoke(this, new TimeEventArgs(e.Time));
         }
 
         public void Dispose()
         {
-            if (_inputFile == null)
-                return;
-            _inputFile.FramePlayed -= InputFile_FramePlayed;
-            _inputFile.Stopped -= InputFile_Stopped;
+            PlayingRundownItem = null;
+            foreach (var item in _rundown)
+                item.Dispose();
             _rundown.Clear();
-            _inputFile.Dispose();
-            _inputFile = null;
         }
 
     }
 
-    
+
 }

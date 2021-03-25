@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -11,6 +12,7 @@ namespace StudioTVPlayer.Model
     public class Channel : INotifyPropertyChanged, IDisposable
     {
         private string _name = string.Empty;
+
         private VideoFormat _videoFormat;
         private string _videoFormatName;
         private PixelFormat _pixelFormat;
@@ -68,6 +70,9 @@ namespace StudioTVPlayer.Model
 
         public bool IsInitialized => _channelR != null;
 
+        [XmlIgnore]
+        public int AudioChannelCount { get; } = 2;
+
         public void Initialize()
         {
             if (_channelR != null) 
@@ -76,7 +81,7 @@ namespace StudioTVPlayer.Model
             _videoFormat = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
             if (device == null || _videoFormat == null)
                 return;
-            _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, 2);
+            _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, AudioChannelCount);
             _channelR.AddOutput(device);
         }
 
@@ -98,10 +103,21 @@ namespace StudioTVPlayer.Model
         }
 
         public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);
-        public void Load(InputFile inputFile) => _channelR.Load(inputFile);
-        public void Clear()
+
+        public void Load(RundownItem item)
         {
-            
+            Debug.Assert(item.InputFile != null);
+            _channelR.Load(item.InputFile);
+        }
+
+        public void Preload(RundownItem item)
+        {
+            Debug.Assert(item.InputFile != null);
+            _channelR.Preload(item.InputFile);
+        }
+
+        public void Clear()
+        {            
             _channelR.Clear();
         }
 

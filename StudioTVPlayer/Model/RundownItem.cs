@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
-    public class RundownItem: IDisposable
+    public class RundownItem : IDisposable
     {
+        private bool _isAutoStart;
+        private bool _enabled = true;
+        private int _preloaded;
+
         public RundownItem(Media media)
         {
             Media = media;
@@ -17,13 +22,37 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
 
+        public event EventHandler AutoStartChanged;
+
         public Media Media { get; }
 
         internal TVPlayR.InputFile InputFile { get; private set; }
 
-        public bool IsAutoStart { get; set; }
+        public bool IsAutoStart
+        {
+            get => _isAutoStart;
+            set
+            {
+                if (_isAutoStart == value)
+                    return;
+                _isAutoStart = value;
+                AutoStartChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
 
-        public bool Enabled { get; set; } = true;
+        public bool Enabled
+        {
+            get => _enabled;
+            set
+            {
+                if (_enabled == value)
+                    return;
+                _enabled = value;
+                AutoStartChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public bool Preloaded { get; internal set; }
 
         public void Unload()
         {
@@ -36,6 +65,8 @@ namespace StudioTVPlayer.Model
 
         public void Preload(int audioChannelCount)
         {
+            if (Interlocked.Exchange(ref _preloaded, 1) != default)
+                return;
             InputFile = new TVPlayR.InputFile(Media.FullPath, audioChannelCount);
             InputFile.FramePlayed += InputFile_FramePlayed;
             InputFile.Stopped += InputFile_Stopped;

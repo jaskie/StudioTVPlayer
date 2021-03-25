@@ -10,6 +10,7 @@ namespace StudioTVPlayer.Model
     public class MediaPlayer : IDisposable
     {
         private readonly List<RundownItem> _rundown = new List<RundownItem>();
+        private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
         private RundownItem _playingRundownItem;
         private RundownItem _nextRundownItem;
 
@@ -21,23 +22,6 @@ namespace StudioTVPlayer.Model
         public IReadOnlyCollection<RundownItem> Rundown => _rundown;
 
         public Channel Channel { get; }
-
-        public RundownItem NextRundownItem
-        {
-            get => _nextRundownItem; 
-            set
-            {
-                var oldItem = _nextRundownItem;
-                if (_nextRundownItem == value)
-                    return;
-                _nextRundownItem = value;
-                if (oldItem != null && oldItem != _playingRundownItem)
-                    oldItem.Unload();
-                value.Preload(Channel.AudioChannelCount);                    
-            }
-        }
-
-
 
         public RundownItem PlayingRundownItem
         {
@@ -72,7 +56,7 @@ namespace StudioTVPlayer.Model
 
 
         public event EventHandler<RundownItemEventArgs> Loaded;
-        public event EventHandler<TimeEventArgs> Progress;
+        public event EventHandler<TimeEventArgs> FramePlayed;
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
 
@@ -89,12 +73,14 @@ namespace StudioTVPlayer.Model
             {
                 var item = new RundownItem(media);
                 _rundown.Insert(index, item);
+                item.AutoStartChanged += RundownItem_AutoStartChanged;
                 return item;
             }
             if (index == Rundown.Count)
             {
                 var item = new RundownItem(media);
                 _rundown.Add(item);
+                item.AutoStartChanged += RundownItem_AutoStartChanged;
                 return item;
             }
             return null;
@@ -104,6 +90,7 @@ namespace StudioTVPlayer.Model
         {
             if (!_rundown.Remove(rundownItem))
                 return false;
+            rundownItem.AutoStartChanged -= RundownItem_AutoStartChanged;
             rundownItem.Dispose();
             return true;
         }
@@ -164,14 +151,17 @@ namespace StudioTVPlayer.Model
 
         private void PlaiyngRundownItem_Stopped(object sender, EventArgs e)
         {
-            var nextItem = FindNextAutoPlayItem();
-            if (nextItem is null)
+            Task.Run(() => // do not block incoming thread
             {
-                Stopped?.Invoke(this, EventArgs.Empty);
-                return;
-            }
-            PlayingRundownItem = nextItem;
-            nextItem.Play();
+                var nextItem = FindNextAutoPlayItem();
+                if (nextItem is null)
+                {
+                    Stopped?.Invoke(this, EventArgs.Empty);
+                    return;
+                }
+                PlayingRundownItem = nextItem;
+                nextItem.Play();
+            });
         }
 
         private RundownItem FindNextAutoPlayItem()
@@ -196,20 +186,39 @@ namespace StudioTVPlayer.Model
             }
             if (next != null && next.IsAutoStart && next.Enabled)
                 return next;
-            else NextRundownItem = null;
-            return null;
+            else 
+                return null;
         }
 
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
-            Progress?.Invoke(this, new TimeEventArgs(e.Time));
+            FramePlayed?.Invoke(this, new TimeEventArgs(e.Time));
+            var current = sender as RundownItem ?? throw new ArgumentException(nameof(sender));
+            var nextItem = _nextRundownItem;
+            if (nextItem is null)
+                return;
+            if (current.Media.Duration - e.Time < PreloadTime)
+                return;
+            if (!nextItem.Preloaded)
+            {
+                nextItem.Preload(Channel.AudioChannelCount);
+                Channel.Preload(nextItem);
+            }
+        }
+
+        private void RundownItem_AutoStartChanged(object sender, EventArgs e)
+        {
+            _nextRundownItem = FindNextAutoPlayItem();
         }
 
         public void Dispose()
         {
             PlayingRundownItem = null;
             foreach (var item in _rundown)
+            {
+                item.AutoStartChanged -= RundownItem_AutoStartChanged;
                 item.Dispose();
+            }
             _rundown.Clear();
         }
 

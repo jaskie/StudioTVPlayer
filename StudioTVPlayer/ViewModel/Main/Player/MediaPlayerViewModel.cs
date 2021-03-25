@@ -47,7 +47,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
-            _mediaPlayer.Progress += MediaPlayer_Progress;
+            _mediaPlayer.FramePlayed += MediaPlayer_Progress;
             _mediaPlayer.Stopped += MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
@@ -376,7 +376,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             _isDisposed = true;
             _mediaPlayer.Loaded -= MediaPlayer_Loaded;
-            _mediaPlayer.Progress -= MediaPlayer_Progress;
+            _mediaPlayer.FramePlayed -= MediaPlayer_Progress;
             _mediaPlayer.Stopped -= MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
         }

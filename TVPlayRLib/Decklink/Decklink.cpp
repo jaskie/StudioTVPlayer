@@ -254,13 +254,8 @@ namespace TVPlayR {
 		std::wstring Decklink::GetModelName() { return impl_->GetModelName(); }
 		bool Decklink::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int Decklink::GetBufferSize() const { return impl_->buffer_size_; }
-		bool Decklink::AssignToChannel(Core::Channel& channel) { 
-			return Core::OutputDevice::AssignToChannel(channel)
-				&& impl_->AssignToChannel(channel);
-		}
-
+		bool Decklink::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 		void Decklink::ReleaseChannel()	{ impl_->ReleaseChannel(); }
-		bool Decklink::IsPlaying() const { return impl_->is_running_; }
 		void Decklink::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 		void Decklink::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }
 	}

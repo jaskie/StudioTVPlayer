@@ -88,11 +88,6 @@ namespace TVPlayR {
 				channel_ = nullptr;
 			}
 
-			bool IsPlaying() const
-			{
-				return false;
-			}
-			
 			void Push(FFmpeg::AVSync& sync)
 			{
 				//video_frame_buffer_.emplace_back(sync.Video);
@@ -103,18 +98,12 @@ namespace TVPlayR {
 		Ndi::Ndi(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		Ndi::~Ndi() { }
 
-		bool Ndi::AssignToChannel(Core::Channel& channel) { 
-			return Core::OutputDevice::AssignToChannel(channel)
-				&& impl_->AssignToChannel(channel);
-		}
+		bool Ndi::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 
-		void Ndi::ReleaseChannel()
-		{
-			impl_->ReleaseChannel();
-		}
+		void Ndi::ReleaseChannel() { impl_->ReleaseChannel(); }
 
-		bool Ndi::IsPlaying() const { return impl_->IsPlaying(); }
 		void Ndi::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
+		
 		void Ndi::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
 		{
 		}

@@ -2,6 +2,10 @@
 #include "Channel.h"
 #include "Core/Channel.h"
 #include "Decklink/Iterator.h"
+#include "DecklinkDevice.h"
+#include "PreviewDevice.h"
+#include "InputFile.h"
+
 
 namespace TVPlayR {
 	
@@ -32,6 +36,11 @@ namespace TVPlayR {
 			return false;
 		_channel->SetFrameClock(device->GetNativeDevice());
 		return true;
+	}
+
+	bool Channel::AddPreview(PreviewDevice^ preview)
+	{
+		return _channel->AddOutput(preview->GetNativeDevice());
 	}
 
 	void Channel::Load(InputFile ^ file)

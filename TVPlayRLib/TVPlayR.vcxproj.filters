@@ -164,9 +164,6 @@
     <ClCompile Include="Decklink\Decklink.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
-    <ClCompile Include="Core\OutputDevice.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Decklink\DeckLinkAPI_i.c">
       <Filter>Decklink\Interop</Filter>
     </ClCompile>

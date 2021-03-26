@@ -49,7 +49,6 @@
         <Grid Grid.Column="0" KeyboardNavigation.DirectionalNavigation="None"
               dd:DragDrop.IsDropTarget="True"
               dd:DragDrop.DropHandler="{Binding}" 
-              Background="Transparent"
               >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -120,7 +119,7 @@
 
                 <Button Command="{Binding CueCommand}" >
                     <Control.ToolTip>
-                        <ToolTip Content="Cue | Alt+PageUp" />
+                        <ToolTip Content="Cue | Ctrl+PageUp" />
                     </Control.ToolTip>
                     <mah:FontIcon Glyph="&#xE892;"/>
                 </Button>
@@ -172,17 +171,29 @@
                     Value="{Binding SliderPosition, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             </Slider>
             <Border Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"  >
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Hidden" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsLoaded}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <Image Margin="5" Height="110" Source="{Binding CurrentRundownItem.RundownItem.Media.Thumbnail}" />
+                <Grid Width="224" Height="126" Background="DarkGray">
+                    <Rectangle>
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="Fill" Value="Black"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAlpha}" Value="True">
+                                        <Setter Property="Fill">
+                                            <Setter.Value>
+                                                <DrawingBrush TileMode="Tile" Viewport="0,0,8,8" ViewportUnits="Absolute">
+                                                    <DrawingBrush.Drawing>
+                                                        <GeometryDrawing Geometry="M0,0 H4 V4 H8 V8 H4 V4 H0Z" Brush="LightGray"/>
+                                                    </DrawingBrush.Drawing>
+                                                </DrawingBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
+                    <Image Source="{Binding Preview}" Stretch="None" />
+                </Grid>
             </Border>
         </Grid>
         <Grid Grid.Column="1">

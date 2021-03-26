@@ -2,12 +2,13 @@
 #include "Core/Channel.h"
 #include "VideoFormat.h"
 #include "PixelFormat.h"
-#include "InputFile.h"
-#include "DecklinkDevice.h"
 
 using namespace System;
 
 namespace TVPlayR {
+	ref class DecklinkDevice;
+	ref class PreviewDevice;
+	ref class InputFile;
 
 	public ref class Channel
 	{
@@ -20,6 +21,7 @@ namespace TVPlayR {
 		~Channel();
 		!Channel();
 		bool AddOutput(DecklinkDevice^ device);
+		bool AddPreview(PreviewDevice^ preview);
 		void Load(InputFile^ file);
 		void Preload(InputFile^ file);
 		void Clear();

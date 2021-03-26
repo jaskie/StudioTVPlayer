@@ -6,8 +6,6 @@
 
 namespace TVPlayR {
 
-
-
 	InputFile::InputFile(String^ fileName, int audioChannelCount) : InputFile(fileName, HardwareAcceleration::None, String::Empty, audioChannelCount)
 	{ }
 

@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Media;
 using System.Xml.Serialization;
-using TVPlayR;
 
 namespace StudioTVPlayer.Model
 {
@@ -13,18 +13,19 @@ namespace StudioTVPlayer.Model
     {
         private string _name = string.Empty;
 
-        private VideoFormat _videoFormat;
+        private TVPlayR.VideoFormat _videoFormat;
         private string _videoFormatName;
-        private PixelFormat _pixelFormat;
+        private TVPlayR.PixelFormat _pixelFormat;
         private int _deviceIndex;
 
         private TVPlayR.Channel _channelR;
+        private TVPlayR.PreviewDevice _previewDevice;
         
         [XmlAttribute]
         public string Name { get => _name; set => _name = value; }
 
         [XmlIgnore]
-        public VideoFormat VideoFormat
+        public TVPlayR.VideoFormat VideoFormat
         {
             get => _videoFormat;
             set
@@ -42,7 +43,7 @@ namespace StudioTVPlayer.Model
         public string VideoFormatName { get => _videoFormatName; set => _videoFormatName = value; }
 
         [XmlAttribute]
-        public PixelFormat PixelFormat
+        public TVPlayR.PixelFormat PixelFormat
         {
             get => _pixelFormat;
             set
@@ -77,21 +78,33 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR != null) 
                 throw new ApplicationException($"Channel {Name} already initialized");
-            var device = DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
-            _videoFormat = VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
+            var device = TVPlayR.DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
+            _videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
             if (device == null || _videoFormat == null)
                 return;
             _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, AudioChannelCount);
             _channelR.AddOutput(device);
         }
 
-        internal void SetVolume(double value)
+        public void SetVolume(double value)
         {
             if (_channelR == null)
                 throw new ApplicationException($"Channel {Name} not initialized");
             _channelR.Volume = Math.Pow(10, value / 20);
         }
 
+        public ImageSource GetPreview(int width, int height)
+        {
+            if (_channelR == null)
+                throw new ApplicationException($"Channel {Name} not initialized");
+            if (_previewDevice is null)
+            {
+                _previewDevice = new TVPlayR.PreviewDevice();
+                _channelR.AddPreview(_previewDevice);
+            }
+            _previewDevice.CreatePreview(width, height);
+            return _previewDevice.PreviewSource;
+        }
 
         public void Uninitialize()
         {
@@ -101,8 +114,6 @@ namespace StudioTVPlayer.Model
             _channelR.Dispose();
             _channelR = null;
         }
-
-        public void AddOutput(DecklinkDevice device) => _channelR.AddOutput(device);
 
         public void Load(RundownItem item)
         {

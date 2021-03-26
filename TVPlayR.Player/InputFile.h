@@ -10,7 +10,6 @@ using namespace System::Drawing;
 using namespace System::Windows::Media::Imaging;
 using namespace System::Runtime::InteropServices;
 
-
 namespace TVPlayR {
 
 	public ref class InputFile

@@ -12,7 +12,6 @@ public:
 	//OutputDevice
 	virtual bool AssignToChannel(Core::Channel& channel) override;
 	virtual void ReleaseChannel() override;
-	virtual bool IsPlaying() const override;
 	virtual void Push(FFmpeg::AVSync& sync) override;
 	virtual void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) override;
 private:

@@ -212,7 +212,7 @@ struct FFmpegInputSource::implementation
 		if (channel_)
 			THROW_EXCEPTION("Already added to another channel");
 		channel_ = &channel;
-		producer_thread_ = std::make_unique<std::thread>(&FFmpegInputSource::implementation::ProducerThreadProc, this);
+		producer_thread_ = std::make_unique<std::thread>(&implementation::ProducerThreadProc, this);
 	}
 
 	void RemoveFromChannel()

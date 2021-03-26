@@ -40,7 +40,6 @@ public:
 		lower,
 		upper
 	};
-
 	VideoFormat();
 	VideoFormat(enum VideoFormatType type);
 	VideoFormat& operator=(const VideoFormat&) = default;

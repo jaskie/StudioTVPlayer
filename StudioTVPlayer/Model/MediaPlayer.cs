@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
@@ -84,6 +85,13 @@ namespace StudioTVPlayer.Model
                 return item;
             }
             return null;
+        }
+
+        public bool IsAplha => Channel.PixelFormat == TVPlayR.PixelFormat.bgra;
+
+        public ImageSource GetPreview(int width, int height)
+        {
+            return Channel.GetPreview(width, height);
         }
 
         public bool RemoveItem(RundownItem rundownItem)

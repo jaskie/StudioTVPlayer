@@ -14,7 +14,7 @@ namespace TVPlayR {
 		static array<DecklinkDevice^>^ _devices;
 
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() { return *_decklink; }
+		std::shared_ptr<Core::OutputDevice> GetNativeDevice() { return *_decklink; }
 
 	public:
 		~DecklinkDevice();

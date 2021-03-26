@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
@@ -14,7 +15,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class MediaPlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
-        private readonly MediaPlayer _mediaPlayer;
+        private readonly Model.MediaPlayer _mediaPlayer;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
 
 
@@ -30,7 +31,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private bool _isSliderDrag;
         private double _volume;
 
-        public MediaPlayerViewModel(MediaPlayer player)
+        public MediaPlayerViewModel(Model.MediaPlayer player)
         {
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
@@ -44,24 +45,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Channel.Name;
             VideoFormat = player.Channel.VideoFormat;
-
             _mediaPlayer = player;
             _mediaPlayer.Loaded += MediaPlayer_Loaded;
             _mediaPlayer.FramePlayed += MediaPlayer_Progress;
             _mediaPlayer.Stopped += MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
+            Preview = _mediaPlayer.GetPreview(112, 63);
+            IsAlpha = _mediaPlayer.IsAplha;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
 
-        private bool CanTogglePlay(object obj)
-        {
-            var item = _mediaPlayer.PlayingRundownItem;
-            if (item == null)
-                return false;
-            if (!IsPlaying && _mediaPlayer.IsEof)
-                return false;
-            return true;
-        }
 
         public string Name { get; }
 
@@ -121,6 +114,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
+        public ImageSource Preview { get; }
+
+        public bool IsAlpha { get; }
+
         public ObservableCollection<RundownItemViewModel> Rundown { get; }
 
         public RundownItemViewModel SelectedRundownItem { get; set; }
@@ -158,7 +155,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public ICommand TogglePlayCommand { get; }
         public ICommand UnloadCommand { get; }
         public ICommand LoadNextItemCommand { get; }
-
 
         private void InputFileStopped(object sender, EventArgs e)
         {
@@ -246,13 +242,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             m.IsDisabled = !m.IsDisabled;
         }
 
-        public void EndSliderThumbDrag()
+        internal void EndSliderThumbDrag()
         {
             Seek(TimeSpan.FromMilliseconds(SliderPosition));
             _isSliderDrag = false;
         }
 
-        public void BeginSliderThumbDrag()
+        internal void BeginSliderThumbDrag()
         {
             _isSliderDrag = true;
         }
@@ -370,6 +366,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Refresh();
         }
 
+        private bool CanTogglePlay(object obj)
+        {
+            var item = _mediaPlayer.PlayingRundownItem;
+            if (item == null)
+                return false;
+            if (!IsPlaying && _mediaPlayer.IsEof)
+                return false;
+            return true;
+        }
+
         public void Dispose()
         {
             if (_isDisposed)
@@ -381,6 +387,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
         }
 
+        #region drag&drop
         public void DragOver(IDropInfo dropInfo)
         {
             if (dropInfo.Data is MediaViewModel mediaViewModel)
@@ -441,5 +448,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 Refresh();
             }
         }
+        #endregion //drag&drop
     }
 }

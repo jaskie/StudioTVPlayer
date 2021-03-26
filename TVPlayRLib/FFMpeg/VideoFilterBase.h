@@ -5,14 +5,14 @@ namespace TVPlayR {
 
 	namespace FFmpeg {
 
-class VideoFilter :
+class VideoFilterBase :
 	public FilterBase
 {
 private:
 public:
-	typedef std::unique_ptr<VideoFilter> Ptr;
-	VideoFilter(AVPixelFormat output_pix_fmt);
-	virtual ~VideoFilter();
+	typedef std::unique_ptr<VideoFilterBase> Ptr;
+	VideoFilterBase(AVPixelFormat output_pix_fmt);
+	virtual ~VideoFilterBase();
 	virtual std::shared_ptr<AVFrame> Pull();
 	int OutputWidth();
 	int OutputHeight();

@@ -34,11 +34,11 @@ namespace TVPlayR
         WriteableBitmap^ target = _target;
         if (target == nullptr)
             return;
-        if (target->Width != frame->width || target->Height != frame->height)
-            return;
         target->Lock();
         try
         {
+            if (target->Width != frame->width || target->Height != frame->height)
+                return;
             int linesize = frame->linesize[0];
             auto rect = System::Windows::Int32Rect((target->PixelWidth - frame->width) / 2, (target->PixelHeight - frame->height) / 2, frame->width, frame->height);
             auto datalength = frame->height * linesize;

@@ -52,7 +52,7 @@
     <ClInclude Include="FFMpeg\InputFormat.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
-    <ClInclude Include="FFMpeg\VideoFilter.h">
+    <ClInclude Include="FFMpeg\VideoFilterBase.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Common\Exceptions.h">
@@ -137,6 +137,9 @@
     <ClInclude Include="Preview\Preview.h">
       <Filter>Preview</Filter>
     </ClInclude>
+    <ClInclude Include="FFMpeg\OputputScaler.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">
@@ -157,7 +160,7 @@
     <ClCompile Include="FFMpeg\InputFormat.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
-    <ClCompile Include="FFMpeg\VideoFilter.cpp">
+    <ClCompile Include="FFMpeg\VideoFilterBase.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
@@ -199,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="Preview\Preview.cpp">
       <Filter>Preview</Filter>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\OputputScaler.cpp">
+      <Filter>FFMpeg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

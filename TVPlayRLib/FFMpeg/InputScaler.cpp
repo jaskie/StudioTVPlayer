@@ -9,7 +9,7 @@ namespace TVPlayR {
 
 
 InputScaler::InputScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
-	: VideoFilter(output_pixel_format)
+	: VideoFilterBase(output_pixel_format)
 	, output_format_(output_format)
 	, output_pixel_format_(output_pixel_format)
 	, decoder_(decoder)
@@ -20,8 +20,8 @@ InputScaler::InputScaler(const Decoder& decoder, const Core::VideoFormat& output
 bool InputScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
-		VideoFilter::CreateFilterChain(frame, decoder_.TimeBase(), Setup(frame));
-	return VideoFilter::Push(frame);
+		VideoFilterBase::CreateFilterChain(frame, decoder_.TimeBase(), Setup(frame));
+	return VideoFilterBase::Push(frame);
 }
 
 std::string InputScaler::Setup(std::shared_ptr<AVFrame>& frame)
@@ -48,7 +48,7 @@ std::string InputScaler::Setup(std::shared_ptr<AVFrame>& frame)
 	else if (input_frame_rate == output_format_.FrameRate() * 2)
 	{
 		if (height != output_format_.height())
-			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
+			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=-1,";
 		if (!frame->interlaced_frame && output_format_.interlaced())
 			filter << "interlace,";
 		else if (frame->interlaced_frame && !output_format_.interlaced())

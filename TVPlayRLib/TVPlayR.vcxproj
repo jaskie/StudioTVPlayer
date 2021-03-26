@@ -180,10 +180,11 @@
     <ClInclude Include="Common\NonCopyable.h" />
     <ClInclude Include="FFMpeg\InputScaler.h" />
     <ClInclude Include="Ndi\Ndi.h" />
+    <ClInclude Include="FFMpeg\OputputScaler.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\Rational.h" />
     <ClInclude Include="FFMpeg\Utils.h" />
-    <ClInclude Include="FFMpeg\VideoFilter.h" />
+    <ClInclude Include="FFMpeg\VideoFilterBase.h" />
     <ClInclude Include="Core\VideoFormat.h" />
     <ClInclude Include="Core\PixelFormat.h" />
     <ClInclude Include="FFMpeg\ThumbnailFilter.h" />
@@ -287,13 +288,19 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="FFMpeg\OputputScaler.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="FFMpeg\VideoFilter.cpp">
+    <ClCompile Include="FFMpeg\VideoFilterBase.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>

@@ -1,5 +1,5 @@
 #pragma once
-#include "VideoFilter.h"
+#include "VideoFilterBase.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/PixelFormat.h"
 
@@ -11,7 +11,7 @@ namespace TVPlayR {
 class Decoder;
 
 class InputScaler :
-	public VideoFilter
+	public VideoFilterBase
 {
 public:
 	InputScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format);

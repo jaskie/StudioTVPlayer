@@ -1,11 +1,11 @@
 #pragma once
-#include "VideoFilter.h"
+#include "VideoFilterBase.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
 class ThumbnailFilter :
-	public VideoFilter
+	public VideoFilterBase
 {
 public:
 	ThumbnailFilter(int height, std::shared_ptr<AVFrame> frame);

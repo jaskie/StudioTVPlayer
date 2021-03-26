@@ -7,7 +7,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 ThumbnailFilter::ThumbnailFilter(int height, std::shared_ptr<AVFrame> frame)
-	: VideoFilter(AV_PIX_FMT_RGB24)
+	: VideoFilterBase(AV_PIX_FMT_RGB24)
 	, input_frame_(frame)
 	, height_(height)
 { }
@@ -30,12 +30,12 @@ std::shared_ptr<AVFrame> ThumbnailFilter::Pull()
 			filter << "setsar=64/45,";
 	}
 	filter << "scale=trunc(" << height_ << "*dar):" << height_ << ",setsar=1/1";
-	VideoFilter::CreateFilterChain(input_frame_, time_base, filter.str());
+	VideoFilterBase::CreateFilterChain(input_frame_, time_base, filter.str());
 	int frame_push_count = 3; // send max 3 frames to the filter
 	while (!result_frame_ && --frame_push_count)
 	{
 		Push(input_frame_);
-		result_frame_ = VideoFilter::Pull();
+		result_frame_ = VideoFilterBase::Pull();
 	}
 	return result_frame_;
 }

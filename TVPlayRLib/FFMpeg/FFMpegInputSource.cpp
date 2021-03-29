@@ -8,7 +8,7 @@
 #include "../Core/Channel.h"
 #include "AudioMuxer.h"
 #include "SynchronizingBuffer.h"
-#include "InputScaler.h"
+#include "ChannelScaler.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
 
@@ -31,7 +31,7 @@ struct FFmpegInputSource::implementation
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
-	std::unique_ptr<InputScaler> output_scaler_;
+	std::unique_ptr<ChannelScaler> channel_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
@@ -65,7 +65,7 @@ struct FFmpegInputSource::implementation
 	void ProducerThreadProc()
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
-		output_scaler_ = std::make_unique<InputScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
+		channel_scaler_ = std::make_unique<ChannelScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
 		if (!audio_decoders_.empty())
 			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, channel_->AudioSampleFormat(), 48000, channel_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
@@ -127,26 +127,26 @@ struct FFmpegInputSource::implementation
 	void PushToBuffer(bool& need_packet)
 	{
 		// video
-		auto scaled = output_scaler_->Pull();
+		auto scaled = channel_scaler_->Pull();
 		if (scaled)
-			buffer_->PushVideo(scaled, output_scaler_->OutputTimeBase());
+			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
 		else
 		{
 			auto decoded = video_decoder_->Pull();
 			if (decoded)
-				output_scaler_->Push(decoded);
+				channel_scaler_->Push(decoded);
 			else
 			{
 				if (video_decoder_->IsEof())
 				{
-					if (output_scaler_->IsEof())
+					if (channel_scaler_->IsEof())
 					{
 						if (!buffer_->IsFlushed())
 							buffer_->Flush();
 					}
 					else
-					if (!output_scaler_->IsFlushed())
-						output_scaler_->Flush();
+					if (!channel_scaler_->IsFlushed())
+						channel_scaler_->Flush();
 				}
 				else
 					need_packet = true;
@@ -240,8 +240,8 @@ struct FFmpegInputSource::implementation
 				video_decoder_->Seek(time);
 			for (auto& decoder : audio_decoders_)
 				decoder->Seek(time);
-			if (output_scaler_)
-				output_scaler_->Reset();
+			if (channel_scaler_)
+				channel_scaler_->Reset();
 			if (audio_muxer_)
 				audio_muxer_->Reset();
 			if (buffer_)

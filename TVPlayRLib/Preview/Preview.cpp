@@ -5,7 +5,7 @@
 #include "../Common/Executor.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
-#include "../FFMpeg/OputputScaler.h"
+#include "../FFMpeg/PreviewScaler.h"
 
 
 namespace TVPlayR {
@@ -16,7 +16,7 @@ namespace TVPlayR {
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
 		Core::VideoFormat format_;
 		std::mutex filter_creation_mutex_;
-		std::unique_ptr<FFmpeg::OputputScaler> output_scaler_;
+		std::unique_ptr<FFmpeg::PreviewScaler> preview_scaler_;
 		Common::Semaphore frame_ready_semaphore_;
 		std::shared_ptr<AVFrame> buffer_frame_;
 		std::thread consumer_thread_;
@@ -43,11 +43,11 @@ namespace TVPlayR {
 				if (buffer_frame_)
 				{
 					std::lock_guard<std::mutex> lock(filter_creation_mutex_);
-					if (!output_scaler_)
+					if (!preview_scaler_)
 						continue;
-					output_scaler_->Push(buffer_frame_);
+					preview_scaler_->Push(buffer_frame_);
 					std::shared_ptr<AVFrame> frame;
-					while (frame = output_scaler_->Pull())
+					while (frame = preview_scaler_->Pull())
 						if (frame_played_callback_)
 							frame_played_callback_(frame);
 				}
@@ -69,7 +69,7 @@ namespace TVPlayR {
 		void CreateFilter(int width, int height)
 		{
 			std::lock_guard<std::mutex> lock(filter_creation_mutex_);
-			output_scaler_ = std::make_unique<FFmpeg::OputputScaler>(format_, width, height);
+			preview_scaler_ = std::make_unique<FFmpeg::PreviewScaler>(format_, width, height);
 		}
 
 	};

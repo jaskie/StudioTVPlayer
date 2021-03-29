@@ -10,11 +10,11 @@ namespace TVPlayR {
 
 class Decoder;
 
-class InputScaler :
+class ChannelScaler :
 	public VideoFilterBase
 {
 public:
-	InputScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format);
+	ChannelScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format);
 	bool Push(std::shared_ptr<AVFrame> frame);
 	const Core::VideoFormat& Format() const { return output_format_; }
 private:

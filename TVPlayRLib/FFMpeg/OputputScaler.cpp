@@ -7,8 +7,6 @@ namespace TVPlayR {
 std::string OputputScaler::GetFilterString(const Core::VideoFormat& channel_format, int width, int height)
 {
 	std::ostringstream filter_str;
-	if (channel_format.interlaced())
-		filter_str << "yadif,";
 	filter_str << "scale=" << width << ":" << height;
 	return filter_str.str();
 }

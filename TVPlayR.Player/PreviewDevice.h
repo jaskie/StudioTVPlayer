@@ -11,10 +11,15 @@ namespace TVPlayR {
 	private:
 		std::shared_ptr<Preview::Preview>* _preview;
 		WriteableBitmap^ _target;
+		std::shared_ptr<AVFrame>* _buffer_frame = nullptr;
 		delegate void FramePlayedDelegate(std::shared_ptr<AVFrame>);
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
+		Action^ _callback_action;
+		System::Threading::SemaphoreSlim^ _frame_played_semaphore;
+		System::Windows::Threading::Dispatcher^ _ui_dispatcher;
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
+		void DrawFrame();
 	internal:
 		std::shared_ptr<Preview::Preview> GetNativeDevice() { return *_preview; }
 	public:
@@ -23,7 +28,7 @@ namespace TVPlayR {
 			WriteableBitmap^ get() { return _target; }
 		}
 		void CreatePreview(int width, int height);
-		PreviewDevice();
+		PreviewDevice(System::Windows::Threading::Dispatcher^ ui_dispatcher);
 		~PreviewDevice();
 		!PreviewDevice();
 	};

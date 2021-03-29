@@ -46,9 +46,10 @@ namespace TVPlayR {
 					if (!output_scaler_)
 						continue;
 					output_scaler_->Push(buffer_frame_);
-					auto frame = output_scaler_->Pull();
-					if (frame && frame_played_callback_)
-						frame_played_callback_(frame);
+					std::shared_ptr<AVFrame> frame;
+					while (frame = output_scaler_->Pull())
+						if (frame_played_callback_)
+							frame_played_callback_(frame);
 				}
 			}
 		}

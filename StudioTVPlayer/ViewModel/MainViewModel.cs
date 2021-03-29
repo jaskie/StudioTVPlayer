@@ -5,7 +5,7 @@ using System;
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ViewModelBase, IDisposable
     {
         private ViewModelBase _currentViewModel;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
@@ -58,5 +58,9 @@ namespace StudioTVPlayer.ViewModel
             CurrentViewModel = new ConfigurationViewModel();
         }
 
+        public void Dispose()
+        {
+            CurrentViewModel = null;
+        }
     }
 }

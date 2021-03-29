@@ -123,12 +123,13 @@ namespace StudioTVPlayer.Model
 
         private void InternalLoad(RundownItem rundownItem)
         {
-            if (rundownItem == null)
-                return;
-            rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
-            rundownItem.Stopped += PlaiyngRundownItem_Stopped;
-            rundownItem.Preload(Channel.AudioChannelCount);
-            Channel.Load(rundownItem);
+            if (rundownItem != null)
+            {
+                rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
+                rundownItem.Stopped += PlaiyngRundownItem_Stopped;
+                rundownItem.Preload(Channel.AudioChannelCount);
+                Channel.Load(rundownItem);
+            }
             Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
         }
 

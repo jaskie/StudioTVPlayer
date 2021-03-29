@@ -6,8 +6,11 @@ using namespace System::Threading;
 
 namespace TVPlayR
 {
-    PreviewDevice::PreviewDevice()
+    PreviewDevice::PreviewDevice(System::Windows::Threading::Dispatcher^ ui_dispatcher)
         : _preview(new std::shared_ptr<Preview::Preview>(std::make_shared<Preview::Preview>()))
+        , _ui_dispatcher(ui_dispatcher)
+        , _callback_action(gcnew Action(this, &PreviewDevice::DrawFrame))
+        , _frame_played_semaphore(gcnew System::Threading::SemaphoreSlim(1))
     {
         _framePlayedDelegate = gcnew FramePlayedDelegate(this, &PreviewDevice::FramePlayedCallback);
         _framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
@@ -24,13 +27,27 @@ namespace TVPlayR
     {
         if (!_preview)
             return;
+        (*_preview)->SetFramePlayedCallback(nullptr);
         delete _preview;
         _preview = nullptr;
         _framePlayedHandle.Free();
+        delete _frame_played_semaphore;
     }
 
     void PreviewDevice::FramePlayedCallback(std::shared_ptr<AVFrame> frame)
     {
+        _frame_played_semaphore->Wait();
+        assert(!_buffer_frame);
+        _buffer_frame = new std::shared_ptr<AVFrame>(std::move(frame));
+        _ui_dispatcher->BeginInvoke(_callback_action);
+    }
+
+    void PreviewDevice::DrawFrame()
+    {
+        std::shared_ptr<AVFrame> frame = *_buffer_frame;
+        delete _buffer_frame;
+        _buffer_frame = nullptr;
+        _frame_played_semaphore->Release();
         WriteableBitmap^ target = _target;
         if (target == nullptr)
             return;
@@ -40,7 +57,7 @@ namespace TVPlayR
             if (target->Width != frame->width || target->Height != frame->height)
                 return;
             int linesize = frame->linesize[0];
-            auto rect = System::Windows::Int32Rect((target->PixelWidth - frame->width) / 2, (target->PixelHeight - frame->height) / 2, frame->width, frame->height);
+            auto rect = System::Windows::Int32Rect(0, 0, frame->width, frame->height);
             auto datalength = frame->height * linesize;
             auto data = IntPtr(frame->data[0]);
             target->WritePixels(rect, data, datalength, linesize);

@@ -56,6 +56,7 @@
                 <DataGridComboBoxColumn Header="Output device" Width="2*" ItemsSource="{Binding Source={StaticResource devices}}" DisplayMemberPath="DisplayName" SelectedItemBinding="{Binding SelectedDevice, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridComboBoxColumn Header="Video format"  Width="*" ItemsSource="{Binding Source={StaticResource videoFormats}}" DisplayMemberPath="Name" SelectedItemBinding="{Binding SelectedVideoFormat, UpdateSourceTrigger=PropertyChanged}" />
                 <DataGridComboBoxColumn Header="Pixel format"  Width="*" ItemsSource="{Binding Source={StaticResource pixelFormats}}" SelectedItemBinding="{Binding SelectedPixelFormat, UpdateSourceTrigger=PropertyChanged}" />
+                <DataGridCheckBoxColumn Header="Live preview" Binding="{Binding LivePreview, UpdateSourceTrigger=PropertyChanged}"/>
                 <DataGridTemplateColumn Width="50" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

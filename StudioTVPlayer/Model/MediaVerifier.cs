@@ -22,7 +22,7 @@ namespace StudioTVPlayer.Model
         private readonly Task _verificationTask;
         private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private const int DefaultThumbnailHeight = 90;
+        private const int DefaultThumbnailHeight = 126;
         private MediaVerifier()
         {
             _verificationTask = Task.Factory.StartNew(MediaVerifierTask, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);

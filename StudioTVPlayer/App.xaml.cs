@@ -29,22 +29,27 @@ namespace StudioTVPlayer
         }
         protected override void OnExit(ExitEventArgs e)
         {
+            ViewModel.MainViewModel.Instance.Dispose();
             GlobalApplicationData.Current.Shutdown();
             base.OnExit(e);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+#if !DEBUG
             if (e.IsTerminating)
                 MessageBox.Show(e.ExceptionObject.ToString(), "Error - terminating application", MessageBoxButton.OK, MessageBoxImage.Error);
             else
                 MessageBox.Show(e.ExceptionObject.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+#endif
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
+#if !DEBUG
             MessageBox.Show(e.Exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
+#endif
         }
 
     }

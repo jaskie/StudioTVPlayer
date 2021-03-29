@@ -10,6 +10,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private DecklinkDevice _selectedDevice;
         private VideoFormat _selectedVideoFormat;
         private PixelFormat _selectedPixelFormat;
+        private bool _livePreview;
 
         public ChannelViewModel(Model.Channel channel)
         {
@@ -18,6 +19,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _selectedDevice = DecklinkDevice.EnumerateDevices().FirstOrDefault(dd => dd.Index == channel.DeviceIndex);
             _selectedVideoFormat = VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
             _selectedPixelFormat = channel.PixelFormat;
+            _livePreview = channel.LivePreview;
         }
 
         public Model.Channel Channel { get; }
@@ -34,16 +36,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public PixelFormat SelectedPixelFormat { get => _selectedPixelFormat; set => Set(ref _selectedPixelFormat, value); }
 
+        public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
+
         public override void Apply()
         {
             if (!IsModified)
                 return;
-            if (Channel.DeviceIndex != SelectedDevice.Index || Channel.PixelFormat != SelectedPixelFormat || Channel.VideoFormat != SelectedVideoFormat)
+            if (Channel.DeviceIndex != SelectedDevice.Index || Channel.PixelFormat != SelectedPixelFormat || Channel.VideoFormat != SelectedVideoFormat || Channel.LivePreview != LivePreview)
                 Channel.Uninitialize();
             Channel.Name = Name;
             Channel.DeviceIndex = SelectedDevice.Index;
             Channel.PixelFormat = SelectedPixelFormat;
             Channel.VideoFormat = SelectedVideoFormat;
+            Channel.LivePreview = LivePreview;
             IsModified = false;
         }
 

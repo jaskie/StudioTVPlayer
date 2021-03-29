@@ -30,6 +30,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private bool _isSliderDrag;
         private double _volume;
+        private ImageSource _preview;
 
         public MediaPlayerViewModel(Model.MediaPlayer player)
         {
@@ -50,7 +51,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.FramePlayed += MediaPlayer_Progress;
             _mediaPlayer.Stopped += MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
-            Preview = _mediaPlayer.GetPreview(112, 63);
+            if (player.Channel.LivePreview)
+                _preview = _mediaPlayer.GetPreview(224, 126);
             IsAlpha = _mediaPlayer.IsAplha;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
         }
@@ -103,7 +105,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public double Volume
         {
-            get => _volume; 
+            get => _volume;
             set
             {
                 if (!Set(ref _volume, value))
@@ -114,7 +116,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
-        public ImageSource Preview { get; }
+        public ImageSource Preview { get => _preview; private set => Set(ref _preview, value); }
 
         public bool IsAlpha { get; }
 
@@ -358,6 +360,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void MediaPlayer_Loaded(object sender, Model.Args.RundownItemEventArgs e)
         {
             CurrentRundownItem = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
+            if (!_mediaPlayer.Channel.LivePreview)
+                Preview = CurrentRundownItem?.Thumbnail;
         }
 
         private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)

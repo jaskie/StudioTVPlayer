@@ -20,7 +20,8 @@ namespace StudioTVPlayer.Model
 
         private TVPlayR.Channel _channelR;
         private TVPlayR.PreviewDevice _previewDevice;
-        
+        private bool _livePreview;
+
         [XmlAttribute]
         public string Name { get => _name; set => _name = value; }
 
@@ -54,8 +55,8 @@ namespace StudioTVPlayer.Model
                 RaisePropertyChanged();
             }
         }
-        
-       
+
+
         [XmlAttribute]
         public int DeviceIndex
         {
@@ -69,6 +70,18 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        public bool LivePreview
+        {
+            get => _livePreview;
+            set
+            {
+               if (_livePreview == value)
+                    return;
+                _livePreview = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public bool IsInitialized => _channelR != null;
 
         [XmlIgnore]
@@ -76,7 +89,7 @@ namespace StudioTVPlayer.Model
 
         public void Initialize()
         {
-            if (_channelR != null) 
+            if (_channelR != null)
                 throw new ApplicationException($"Channel {Name} already initialized");
             var device = TVPlayR.DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
             _videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
@@ -99,7 +112,7 @@ namespace StudioTVPlayer.Model
                 throw new ApplicationException($"Channel {Name} not initialized");
             if (_previewDevice is null)
             {
-                _previewDevice = new TVPlayR.PreviewDevice();
+                _previewDevice = new TVPlayR.PreviewDevice(Application.Current.Dispatcher);
                 _channelR.AddPreview(_previewDevice);
             }
             _previewDevice.CreatePreview(width, height);
@@ -110,6 +123,7 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR == null)
                 return;
+            _previewDevice?.Dispose();
             _channelR.Clear();
             _channelR.Dispose();
             _channelR = null;
@@ -128,12 +142,12 @@ namespace StudioTVPlayer.Model
         }
 
         public void Clear()
-        {            
+        {
             _channelR.Clear();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private void RaisePropertyChanged([CallerMemberName]string propertyname = null)
+        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
@@ -150,7 +164,7 @@ namespace StudioTVPlayer.Model
             {
                 MessageBox.Show("Błąd zwalniania zasobów");
             }
-            
+
         }
 
     }

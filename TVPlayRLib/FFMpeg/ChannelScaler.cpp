@@ -57,14 +57,21 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame)
 	else if (input_frame_rate != output_format_.FrameRate())
 	{
 		filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
-		if (frame->interlaced_frame && output_format_.field_mode() == Core::VideoFormat::FieldMode::progressive)
-			filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
-		if (frame->interlaced_frame && output_format_.field_mode() != Core::VideoFormat::FieldMode::progressive)
+		if (frame->interlaced_frame)
 		{
-			if (height > output_format_.height())
-				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=0,";// interlace, ";
-			if (height < output_format_.height())
-				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",interlace,";
+			if (output_format_.field_mode() == Core::VideoFormat::FieldMode::progressive)
+				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
+			else
+			{
+				if (height > output_format_.height())
+					filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=0,";// interlace, ";
+				if (height < output_format_.height())
+					filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",interlace,";
+			}
+		} 
+		else // input progressive
+		{
+			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
 		}
 	}
 	filter << "format=" << static_cast<int>(output_pixel_format_);

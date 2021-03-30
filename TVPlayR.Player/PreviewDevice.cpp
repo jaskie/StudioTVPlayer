@@ -9,8 +9,8 @@ namespace TVPlayR
     PreviewDevice::PreviewDevice(System::Windows::Threading::Dispatcher^ ui_dispatcher)
         : _preview(new std::shared_ptr<Preview::Preview>(std::make_shared<Preview::Preview>()))
         , _ui_dispatcher(ui_dispatcher)
-        , _callback_action(gcnew Action(this, &PreviewDevice::DrawFrame))
-        , _frame_played_semaphore(gcnew System::Threading::SemaphoreSlim(1))
+        , _draw_frame_action(gcnew Action(this, &PreviewDevice::DrawFrame))
+        , _frame_played_semaphore(1)
     {
         _framePlayedDelegate = gcnew FramePlayedDelegate(this, &PreviewDevice::FramePlayedCallback);
         _framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
@@ -27,19 +27,24 @@ namespace TVPlayR
     {
         if (!_preview)
             return;
+        _shutdown_cts.Cancel();
         (*_preview)->SetFramePlayedCallback(nullptr);
+        _framePlayedHandle.Free();
         delete _preview;
         _preview = nullptr;
-        _framePlayedHandle.Free();
-        delete _frame_played_semaphore;
     }
 
     void PreviewDevice::FramePlayedCallback(std::shared_ptr<AVFrame> frame)
     {
-        _frame_played_semaphore->Wait();
-        assert(!_buffer_frame);
-        _buffer_frame = new std::shared_ptr<AVFrame>(std::move(frame));
-        _ui_dispatcher->BeginInvoke(_callback_action);
+        try
+        {
+            _frame_played_semaphore.Wait(_shutdown_cts.Token);
+            assert(!_buffer_frame);
+            _buffer_frame = new std::shared_ptr<AVFrame>(std::move(frame));
+            _ui_dispatcher->BeginInvoke(_draw_frame_action);
+        }
+        catch (System::OperationCanceledException^ _)
+        { }
     }
 
     void PreviewDevice::DrawFrame()
@@ -47,7 +52,7 @@ namespace TVPlayR
         std::shared_ptr<AVFrame> frame = *_buffer_frame;
         delete _buffer_frame;
         _buffer_frame = nullptr;
-        _frame_played_semaphore->Release();
+        _frame_played_semaphore.Release();
         WriteableBitmap^ target = _target;
         if (target == nullptr)
             return;

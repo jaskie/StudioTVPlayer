@@ -1,7 +1,6 @@
 #include "../pch.h"
 #include "Preview.h"
 #include "../Common/Exceptions.h"
-#include "../Common/Semaphore.h"
 #include "../Common/Executor.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
@@ -15,49 +14,33 @@ namespace TVPlayR {
 	{
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
 		Core::VideoFormat format_;
-		std::mutex filter_creation_mutex_;
+		std::mutex mutex_;
 		std::unique_ptr<FFmpeg::PreviewScaler> preview_scaler_;
-		Common::Semaphore frame_ready_semaphore_;
-		std::shared_ptr<AVFrame> buffer_frame_;
-		std::thread consumer_thread_;
-		std::atomic_bool shutdown_thread_ = false;
+		Common::Executor consumer_executor_;
 
 		implementation()
-			: consumer_thread_(&implementation::ConsumerThreadProc, this)
+			: consumer_executor_("Preview thread")
 		{
-		}
-
-		~implementation()
-		{
-			shutdown_thread_ = true;
-			frame_ready_semaphore_.notify();
-			consumer_thread_.join();
-		}
-
-		void ConsumerThreadProc()
-		{
-			Common::SetThreadName(::GetCurrentThreadId(), "Preview thread");
-			while (!shutdown_thread_)
-			{
-				frame_ready_semaphore_.wait();
-				if (buffer_frame_)
-				{
-					std::lock_guard<std::mutex> lock(filter_creation_mutex_);
-					if (!preview_scaler_)
-						continue;
-					preview_scaler_->Push(buffer_frame_);
-					std::shared_ptr<AVFrame> frame;
-					while (frame = preview_scaler_->Pull())
-						if (frame_played_callback_)
-							frame_played_callback_(frame);
-				}
-			}
 		}
 
 		void Push(FFmpeg::AVSync& sync)
 		{
-			buffer_frame_ = sync.Video;
-			frame_ready_semaphore_.notify();
+			auto& frame = sync.Video;
+			consumer_executor_.begin_invoke([frame, this] {
+				ProcessFrame(frame);
+			});
+		}
+
+		void ProcessFrame(std::shared_ptr<AVFrame> frame)
+		{
+			std::lock_guard<std::mutex> lock(mutex_);
+			if (!preview_scaler_ || !frame_played_callback_)
+				return;
+			preview_scaler_->Push(frame);
+			std::shared_ptr<AVFrame> received_frame;
+			while (received_frame = preview_scaler_->Pull())
+					frame_played_callback_(received_frame);
+
 		}
 
 		bool AssignToChannel(Core::Channel& channel)
@@ -68,8 +51,14 @@ namespace TVPlayR {
 
 		void CreateFilter(int width, int height)
 		{
-			std::lock_guard<std::mutex> lock(filter_creation_mutex_);
+			std::lock_guard<std::mutex> lock(mutex_);
 			preview_scaler_ = std::make_unique<FFmpeg::PreviewScaler>(format_, width, height);
+		}
+
+		void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback)
+		{
+			std::lock_guard<std::mutex> lock(mutex_);
+			frame_played_callback_ = frame_played_callback;
 		}
 
 	};
@@ -91,7 +80,7 @@ namespace TVPlayR {
 		THROW_EXCEPTION("The preview cannot act as clock source");
 	}
 
-	void Preview::SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
+	void Preview::SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback) { impl_->SetFramePlayedCallback(frame_played_callback); }
 
 	void Preview::CreateFilter(int width, int height) { impl_->CreateFilter(width, height); }
 }}

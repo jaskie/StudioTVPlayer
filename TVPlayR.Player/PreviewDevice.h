@@ -15,8 +15,9 @@ namespace TVPlayR {
 		delegate void FramePlayedDelegate(std::shared_ptr<AVFrame>);
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
-		Action^ _callback_action;
-		System::Threading::SemaphoreSlim^ _frame_played_semaphore;
+		Action^ _draw_frame_action;
+		System::Threading::SemaphoreSlim _frame_played_semaphore;
+		System::Threading::CancellationTokenSource _shutdown_cts;
 		System::Windows::Threading::Dispatcher^ _ui_dispatcher;
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
 		void DrawFrame();

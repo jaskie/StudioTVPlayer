@@ -9,7 +9,7 @@ namespace TVPlayR {
 class InputFormat
 {
 private:
-	AVFormatCtxPtr format_context_;
+	std::unique_ptr<AVFormatContext, void(*)(AVFormatContext*)> format_context_;
 	std::vector<Core::StreamInfo> streams_;
 	bool is_eof_ = false;
 	bool is_stream_data_loaded_ = false;

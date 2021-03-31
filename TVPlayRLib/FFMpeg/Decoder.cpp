@@ -3,24 +3,24 @@
 #include "Decoder.h"
 #include "AudioFifo.h"
 
-#undef DEBUG
+//#undef DEBUG
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
 struct Decoder::implementation
 {
-
 	const int64_t start_ts_;
 	const Core::HwAccel acceleration_;
 	const std::string hw_device_index_;
-	AVBufferRefPtr hw_device_ctx_;
+	std::unique_ptr<AVBufferRef, void(*)(AVBufferRef*)> hw_device_ctx_;
 	bool is_eof_ = false;
 	bool is_flushed_ = false;
 	const int stream_index_;
 	const int channels_count_;
 	const int sample_rate_;
-	const AVCodecContextPtr ctx_;
+	const std::unique_ptr<AVCodecContext, void(*)(AVCodecContext*)>  ctx_;
+	std::deque<std::shared_ptr<AVPacket>> packet_queue_;
 	const AVRational time_base_;
 	AVStream* const stream_;
 	const AVMediaType media_type_;
@@ -41,6 +41,7 @@ struct Decoder::implementation
 		, acceleration_(acceleration)
 		, hw_device_index_(hw_device_index)
 		, media_type_(codec ? codec->type : AVMediaType::AVMEDIA_TYPE_UNKNOWN)
+		, hw_device_ctx_(NULL, [](AVBufferRef* p) { av_buffer_unref(&p); })
 	{
 		if (!ctx_ || !stream || !codec)
 			return;
@@ -83,7 +84,7 @@ struct Decoder::implementation
 			AVBufferRef* weak_hw_device_ctx = NULL;
 			if (FF(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
 			{
-				hw_device_ctx_ = AVBufferRefPtr(weak_hw_device_ctx, [](AVBufferRef* p) { av_buffer_unref(&p); });
+				hw_device_ctx_.reset(weak_hw_device_ctx);
 				ctx_->hw_device_ctx = av_buffer_ref(weak_hw_device_ctx);
 			}
 		}
@@ -117,6 +118,7 @@ struct Decoder::implementation
 		case 0:
 			return true;
 		case AVERROR(EAGAIN):
+			packet_queue_.push_back(packet);
 			return false;
 		case AVERROR_EOF:
 			return false;

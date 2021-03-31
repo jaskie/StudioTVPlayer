@@ -6,6 +6,8 @@ namespace TVPlayR {
 
 class FilterBase
 {
+protected:
+	typedef std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)> AVFilterGraphPtr;
 public:
 	virtual AVRational OutputTimeBase() const = 0;
 	virtual void Flush() = 0;

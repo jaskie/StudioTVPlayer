@@ -22,14 +22,6 @@ if (error_code < 0) \
 	throw TVPlayR::Common::TVPlayRException(exception_message);\
 	}
 
-typedef std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext *)>> AVCodecContextPtr;
-typedef std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext *)>> AVFormatCtxPtr;
-typedef std::unique_ptr<SwsContext, std::function<void(SwsContext *)>> SwsContextPtr;
-typedef std::unique_ptr<AVFilterGraph, std::function<void(AVFilterGraph *)>> AVFilterGraphPtr;
-typedef std::unique_ptr<AVBufferRef, std::function<void(AVBufferRef *)>> AVBufferRefPtr;
-typedef std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo *)>> AVAudioFifoPtr;
-
-
 inline std::shared_ptr<AVPacket> AllocPacket()
 {
 	return std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* p) { av_packet_free(&p); });
@@ -40,14 +32,14 @@ inline std::shared_ptr<AVFrame> AllocFrame()
 	return std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* ptr) { av_frame_free(&ptr); });
 }
 
-inline int64_t PtsToTime(int64_t pts, AVRational time_base)
+inline int64_t PtsToTime(int64_t pts, const AVRational time_base)
 {
 	if (pts == AV_NOPTS_VALUE)
 		return pts;
 	return av_rescale(pts * AV_TIME_BASE, time_base.num, time_base.den);
 }
 
-inline int64_t TimeToPts(int64_t time, AVRational time_base)
+inline int64_t TimeToPts(int64_t time, const AVRational time_base)
 {
 	if (time == AV_NOPTS_VALUE || time == 0)
 		return time;
@@ -58,6 +50,6 @@ std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, 
 
 std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format);
 
-void dump_filter(const std::string& filter_str, const AVFilterGraphPtr& graph);
+void dump_filter(const std::string& filter_str, AVFilterGraph* graph);
 
 }}

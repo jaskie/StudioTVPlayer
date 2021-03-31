@@ -61,6 +61,8 @@ namespace StudioTVPlayer.Model
             InputFile.FramePlayed -= InputFile_FramePlayed;
             InputFile.Stopped -= InputFile_Stopped;
             InputFile.Dispose();
+            InputFile = null;
+            Interlocked.Exchange(ref _preloaded, default);
         }
 
         public void Preload(int audioChannelCount)

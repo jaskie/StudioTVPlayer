@@ -40,12 +40,12 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		void dump_filter(const std::string& filter_str, const AVFilterGraphPtr& graph)
+		void dump_filter(const std::string& filter_str, AVFilterGraph* graph)
 		{
 			OutputDebugStringA("\nFilter: ");
 			OutputDebugStringA(filter_str.c_str());
 			OutputDebugStringA("\n");
-			char* filter_dump = avfilter_graph_dump(graph.get(), NULL);
+			char* filter_dump = avfilter_graph_dump(graph, NULL);
 			OutputDebugStringA(filter_dump);
 			av_free(filter_dump);
 		}

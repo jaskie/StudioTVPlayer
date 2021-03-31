@@ -8,6 +8,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 InputFormat::InputFormat(const std::string& fileName)
+	: format_context_(NULL, [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
 {
 	AVFormatContext* weak_format_context = NULL;
 	THROW_ON_FFMPEG_ERROR(avformat_open_input(&weak_format_context, fileName.c_str(), NULL, NULL) == 0 && weak_format_context);
@@ -19,10 +20,7 @@ InputFormat::InputFormat(const std::string& fileName)
 	av_dump_format(weak_format_context, 0, fileName.c_str(), 0);
 #endif // DEBUG
 
-	format_context_ = AVFormatCtxPtr(weak_format_context, [](AVFormatContext * ctx)
-	{
-		avformat_close_input(&ctx);
-	});
+	format_context_.reset(weak_format_context);
 }
 
 bool InputFormat::LoadStreamData()
@@ -36,8 +34,7 @@ bool InputFormat::LoadStreamData()
 		AVStream* stream = format_context_->streams[i];
 		if (!stream)
 			continue;
-		AVDictionary* metadata = stream->metadata;
-		AVDictionaryEntry* language = av_dict_get(metadata, "language", NULL, 0);
+		AVDictionaryEntry* language = av_dict_get(stream->metadata, "language", NULL, 0);
 		streams_.push_back(Core::StreamInfo{
 			stream->index,
 			stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ? Core::MediaType::audio : stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO ? Core::MediaType::video : Core::MediaType::other,

@@ -15,6 +15,7 @@ struct AudioMuxer::implementation
 	const AVRational input_time_base_;
 	const int nb_channels_;
 	const int64_t output_channel_layout_;
+	const int output_sample_rate_;
 	const AVSampleFormat audio_sample_format_;
 	AVFilterContext* sink_ctx_ = NULL;
 	AVFilterGraphPtr graph_;
@@ -26,6 +27,7 @@ struct AudioMuxer::implementation
 	implementation(const std::vector<std::unique_ptr<Decoder>>& decoders, int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
 		: decoders_(decoders)
 		, input_time_base_(decoders.empty() ? av_make_q(1, sample_rate) : decoders[0]->TimeBase())
+		, output_sample_rate_(sample_rate)
 		, nb_channels_(nb_channels)
 		, output_channel_layout_(output_channel_layout)
 		, audio_sample_format_(sample_format)
@@ -152,7 +154,7 @@ struct AudioMuxer::implementation
 
 		AVSampleFormat out_sample_fmts[] = { audio_sample_format_, AV_SAMPLE_FMT_NONE };
 		int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
-		int out_sample_rates[] = { decoders_[0]->AudioSampleRate(), -1 };
+		int out_sample_rates[] = { output_sample_rate_, -1 };
 
 		AVFilterInOut * inputs = avfilter_inout_alloc();
 		AVFilterInOut * outputs = avfilter_inout_alloc();

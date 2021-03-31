@@ -20,7 +20,7 @@ namespace TVPlayR {
 		delegate void AudioVolumeDelegate(double);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
-		void AudioVolumeCallback(double audio_volume);
+		void AudioVolumeCallback(std::vector<double> audio_volume);
 	public:
 		Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();

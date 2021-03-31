@@ -53,7 +53,7 @@ namespace TVPlayR {
 				frame_requester_.begin_invoke([this, audio_samples_count]
 				{
 					std::lock_guard<std::mutex> lock(mutex_);
-					double volume = 0.0;
+					std::vector<double> volume;
 					if (playing_source_)
 					{
 #ifdef DEBUG

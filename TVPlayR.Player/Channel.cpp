@@ -8,7 +8,7 @@
 
 
 namespace TVPlayR {
-	void Channel::AudioVolumeCallback(double audio_volume)
+	void Channel::AudioVolumeCallback(std::vector<double>audio_volume)
 	{
 		AudioVolume(this, gcnew AudioVolumeEventArgs(audio_volume));
 	}

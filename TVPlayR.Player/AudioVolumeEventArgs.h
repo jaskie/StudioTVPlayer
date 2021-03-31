@@ -7,7 +7,7 @@ namespace TVPlayR {
 	private:
 		initonly double audio_volume_;
 	public:
-		AudioVolumeEventArgs(double audio_volume) {
+		AudioVolumeEventArgs(double[]^ audio_volume) {
 			audio_volume_ = audio_volume;
 		}
 		property double AudioVolume {

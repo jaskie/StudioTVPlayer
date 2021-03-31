@@ -15,7 +15,7 @@ public:
 	/// </summary>
 	/// <param name="frame">frame to process</param>
 	/// <returns>average volume</returns>
-	double ProcessVolume(const std::shared_ptr<AVFrame>& frame);
+	std::vector<double> ProcessVolume(const std::shared_ptr<AVFrame>& frame);
 private:
 	uint32_t old_volume_;
 	uint32_t new_volume_;

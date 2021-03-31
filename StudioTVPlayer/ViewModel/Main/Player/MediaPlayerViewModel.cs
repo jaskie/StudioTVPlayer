@@ -46,17 +46,17 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Channel.Name;
             VideoFormat = player.Channel.VideoFormat;
-            _mediaPlayer = player;
-            _mediaPlayer.Loaded += MediaPlayer_Loaded;
-            _mediaPlayer.FramePlayed += MediaPlayer_Progress;
-            _mediaPlayer.Stopped += MediaPlayer_Stopped;
-            _mediaPlayer.MediaSubmitted += MediaPlayer_MediaSubmitted;
+            player.Loaded += MediaPlayer_Loaded;
+            player.FramePlayed += MediaPlayer_Progress;
+            player.Stopped += MediaPlayer_Stopped;
+            player.MediaSubmitted += MediaPlayer_MediaSubmitted;
+            player.AudioVolume += Player_AudioVolume;
             if (player.Channel.LivePreview)
-                _preview = _mediaPlayer.GetPreview(224, 126);
-            IsAlpha = _mediaPlayer.IsAplha;
+                _preview = player.GetPreview(224, 126);
+            IsAlpha = player.IsAplha;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
+            _mediaPlayer = player;
         }
-
 
         public string Name { get; }
 
@@ -368,6 +368,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             Rundown.Add(new RundownItemViewModel(e.RundownItem));
             Refresh();
+        }
+
+        private void Player_AudioVolume(object sender, Model.Args.AudioVolumeEventArgs e)
+        {
+
         }
 
         private bool CanTogglePlay(object obj)

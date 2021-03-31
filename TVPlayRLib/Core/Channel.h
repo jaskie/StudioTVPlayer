@@ -12,6 +12,7 @@ namespace TVPlayR {
 class Channel : public Common::NonCopyable
 {
 public:
+	typedef void(*AUDIO_VOLUME_CALLBACK) (double);
 	Channel(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count);
 	~Channel();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);
@@ -25,6 +26,7 @@ public:
 	const int AudioChannelsCount() const;
 	const AVSampleFormat AudioSampleFormat() const { return AVSampleFormat::AV_SAMPLE_FMT_S32; }
 	void SetVolume(double volume);
+	void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback);
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

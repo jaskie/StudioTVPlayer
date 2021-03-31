@@ -11,7 +11,7 @@ namespace TVPlayR {
 		private:
 			AVFilterContext* source_ctx_ = NULL;
 			AVFilterContext* sink_ctx_ = NULL;
-			AVFilterGraphPtr graph_;
+			std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)> graph_;
 			const AVPixelFormat output_pix_fmt_;
 			bool is_flushed_ = false;
 			bool is_eof_ = false;

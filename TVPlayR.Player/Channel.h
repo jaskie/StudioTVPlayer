@@ -2,8 +2,10 @@
 #include "Core/Channel.h"
 #include "VideoFormat.h"
 #include "PixelFormat.h"
+#include "AudioVolumeEventArgs.h"
 
 using namespace System;
+using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
 	ref class DecklinkDevice;
@@ -15,9 +17,12 @@ namespace TVPlayR {
 	private:
 		Core::Channel* _channel;
 		double _volume = 1.0f;
+		delegate void AudioVolumeDelegate(double);
+		AudioVolumeDelegate^ _audioVolumeDelegate;
+		GCHandle _audioVolumeHandle;
+		void AudioVolumeCallback(double audio_volume);
 	public:
 		Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
-		Channel(int formatId, PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();
 		!Channel();
 		bool AddOutput(DecklinkDevice^ device);
@@ -34,5 +39,6 @@ namespace TVPlayR {
 				_channel->SetVolume(volume);
 			}
 		}
+		event EventHandler<AudioVolumeEventArgs^>^ AudioVolume;
 	};
 }

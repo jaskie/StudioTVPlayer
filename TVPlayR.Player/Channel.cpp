@@ -8,14 +8,20 @@
 
 
 namespace TVPlayR {
-	
+	void Channel::AudioVolumeCallback(double audio_volume)
+	{
+		AudioVolume(this, gcnew AudioVolumeEventArgs(audio_volume));
+	}
+
 	Channel::Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount)
 		: _channel(new Core::Channel(videoFormat->GetNativeEnumType(), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
-	{ }
+	{ 
+		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Channel::AudioVolumeCallback);
+		_audioVolumeHandle = GCHandle::Alloc(_audioVolumeDelegate);
+		IntPtr audioVolumeIp = Marshal::GetFunctionPointerForDelegate(_audioVolumeDelegate);
+		_channel->SetAudioVolumeCallback(static_cast<Core::Channel::AUDIO_VOLUME_CALLBACK>(audioVolumeIp.ToPointer()));
 
-	Channel::Channel(int formatId, PixelFormat pixelFormat, int audioChannelCount)
-		: _channel(new Core::Channel(static_cast<Core::VideoFormatType>(formatId), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
-	{ }
+	}
 
 	Channel::~Channel()
 	{
@@ -57,6 +63,5 @@ namespace TVPlayR {
 	{
 		_channel->Clear();
 	}
-
 
 }

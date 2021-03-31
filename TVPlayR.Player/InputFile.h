@@ -88,20 +88,22 @@ namespace TVPlayR {
 
 		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
 
-		delegate void FramePlayedDelegate(int64_t);
-		delegate void StoppedDelegate(void);
 		event EventHandler<TimeEventArgs^>^ FramePlayed;
 		event EventHandler^ Stopped;
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
 		std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
+		String^ _fileName;
+
+		delegate void FramePlayedDelegate(int64_t);
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
+		void FramePlayedCallback(int64_t time);
+
+		delegate void StoppedDelegate(void);
 		StoppedDelegate^ _stoppedDelegate;
 		GCHandle _stoppedHandle;
-		String^ _fileName;
-		void FramePlayedCallback(int64_t time);
 		void StoppedCallback();
 	internal:
 		std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }

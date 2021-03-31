@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudioTVPlayer.Model.Args;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -97,7 +98,9 @@ namespace StudioTVPlayer.Model
                 return;
             _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, AudioChannelCount);
             _channelR.AddOutput(device);
+            _channelR.AudioVolume += ChannelR_AudioVolume;
         }
+
 
         public void SetVolume(double value)
         {
@@ -126,6 +129,7 @@ namespace StudioTVPlayer.Model
             _previewDevice?.Dispose();
             _channelR.Clear();
             _channelR.Dispose();
+            _channelR.AudioVolume -= ChannelR_AudioVolume;
             _channelR = null;
         }
 
@@ -147,9 +151,15 @@ namespace StudioTVPlayer.Model
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
         private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
+
+        private void ChannelR_AudioVolume(object sender, TVPlayR.AudioVolumeEventArgs e)
+        {
+            AudioVolume?.Invoke(this, new AudioVolumeEventArgs(e.AudioVolume));
         }
 
         public void Dispose()

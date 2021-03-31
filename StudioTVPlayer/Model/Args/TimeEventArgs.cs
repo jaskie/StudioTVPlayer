@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Model.Args
 {
-    public class TimeEventArgs
+    public class TimeEventArgs: EventArgs
     {
         public TimeEventArgs(TimeSpan time)
         {

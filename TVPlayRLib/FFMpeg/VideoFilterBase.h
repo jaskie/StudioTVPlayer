@@ -10,7 +10,6 @@ class VideoFilterBase :
 {
 private:
 public:
-	typedef std::unique_ptr<VideoFilterBase> Ptr;
 	VideoFilterBase(AVPixelFormat output_pix_fmt);
 	virtual ~VideoFilterBase();
 	virtual std::shared_ptr<AVFrame> Pull() override;

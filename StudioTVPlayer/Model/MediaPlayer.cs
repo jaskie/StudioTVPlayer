@@ -18,6 +18,7 @@ namespace StudioTVPlayer.Model
         public MediaPlayer(Channel channel)
         {
             Channel = channel;
+            Channel.AudioVolume += Channel_AudioVolume;
         }
 
         public IReadOnlyCollection<RundownItem> Rundown => _rundown;
@@ -60,6 +61,7 @@ namespace StudioTVPlayer.Model
         public event EventHandler<TimeEventArgs> FramePlayed;
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
+        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
 
         public void Load(RundownItem item)
         {
@@ -220,8 +222,14 @@ namespace StudioTVPlayer.Model
             _nextRundownItem = FindNextAutoPlayItem();
         }
 
+        private void Channel_AudioVolume(object sender, AudioVolumeEventArgs e)
+        {
+            AudioVolume?.Invoke(this, e);
+        }
+        
         public void Dispose()
         {
+            Channel.AudioVolume -= Channel_AudioVolume;
             PlayingRundownItem = null;
             foreach (var item in _rundown)
             {

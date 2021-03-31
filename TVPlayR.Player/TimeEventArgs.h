@@ -4,6 +4,7 @@ using namespace System;
 namespace TVPlayR {
 
 	public ref class TimeEventArgs : EventArgs {
+	private:
 		initonly TimeSpan time_;
 	public:
 		TimeEventArgs(TimeSpan time) {

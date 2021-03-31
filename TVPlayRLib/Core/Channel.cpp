@@ -22,6 +22,7 @@ namespace TVPlayR {
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
+			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor frame_requester_;
 			
 
@@ -52,6 +53,7 @@ namespace TVPlayR {
 				frame_requester_.begin_invoke([this, audio_samples_count]
 				{
 					std::lock_guard<std::mutex> lock(mutex_);
+					double volume = 0.0;
 					if (playing_source_)
 					{
 #ifdef DEBUG
@@ -59,9 +61,10 @@ namespace TVPlayR {
 #endif // DEBUG
 						auto sync = playing_source_->PullSync(audio_samples_count);
 						assert(sync.Audio->nb_samples == audio_samples_count);
-						audio_volume_.ProcessVolume(sync.Audio);
+						volume = audio_volume_.ProcessVolume(sync.Audio);
 						for (auto device : output_devices_)
 							device->Push(sync);
+					
 					}
 					else
 					{
@@ -70,6 +73,8 @@ namespace TVPlayR {
 						for (auto device : output_devices_)
 							device->Push(sync);
 					}
+					if (audio_volume_callback_)
+						audio_volume_callback_(volume);
 				});
 			}
 
@@ -149,6 +154,8 @@ namespace TVPlayR {
 		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
 
 		void Channel::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
+
+		void Channel::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->audio_volume_callback_ = callback; }
 
 		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 

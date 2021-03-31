@@ -18,7 +18,7 @@ struct AudioMuxer::implementation
 	const int output_sample_rate_;
 	const AVSampleFormat audio_sample_format_;
 	AVFilterContext* sink_ctx_ = NULL;
-	AVFilterGraphPtr graph_;
+	std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)> graph_;
 	bool is_eof_;
 	bool is_flushed_;
 	std::string filter_str_;

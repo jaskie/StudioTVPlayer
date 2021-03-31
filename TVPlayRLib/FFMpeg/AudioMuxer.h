@@ -19,7 +19,7 @@ public:
 	uint64_t OutputChannelLayout();
 	AVSampleFormat OutputSampleFormat();
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
-	virtual std::shared_ptr<AVFrame> Pull() ;
+	virtual std::shared_ptr<AVFrame> Pull() override;
 	virtual void Flush() override;
 	virtual bool IsEof() const override;
 	virtual bool IsFlushed() const override;

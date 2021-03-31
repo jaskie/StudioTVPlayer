@@ -22,7 +22,6 @@ struct AudioMuxer::implementation
 	bool is_eof_;
 	bool is_flushed_;
 	std::string filter_str_;
-	std::mutex mutex_;
 	
 	implementation(const std::vector<std::unique_ptr<Decoder>>& decoders, int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
 		: decoders_(decoders)
@@ -94,7 +93,6 @@ struct AudioMuxer::implementation
 
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	{
-		std::lock_guard<std::mutex> guard(mutex_);
 		auto dest = std::find_if(std::begin(source_ctx_), std::end(source_ctx_), [&stream_index](const std::pair<int, AVFilterContext*>& ctx) {return ctx.first == stream_index; });
 		if (dest == std::end(source_ctx_))
 			THROW_EXCEPTION("AudioMuxer: stream not found");
@@ -117,14 +115,10 @@ struct AudioMuxer::implementation
 
 	std::shared_ptr<AVFrame> Pull()
 	{
-		std::lock_guard<std::mutex> guard(mutex_);
 		auto frame = AllocFrame();
 		int ret = av_buffersink_get_frame(sink_ctx_, frame.get());
 		if (ret < 0)
 			return nullptr;
-		//if (frame->pts == AV_NOPTS_VALUE)
-		//	frame->pts = frame->best_effort_timestamp;
-		//frame->pts = av_rescale_q(frame->pts, input_time_base_, OutputTimeBase());
 #ifdef DEBUG
 		auto tb = av_buffersink_get_time_base(sink_ctx_);
 		OutputDebugStringA(("Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, tb) / 1000) + "\n").c_str());

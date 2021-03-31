@@ -3,7 +3,7 @@
 #include "Decoder.h"
 #include "AudioFifo.h"
 
-//#undef DEBUG
+#undef DEBUG
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -94,7 +94,7 @@ struct Decoder::implementation
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(ctx_.get(), codec, NULL));
 	}
 
-	bool Push(const std::shared_ptr<AVPacket>& packet)
+	void Push(const std::shared_ptr<AVPacket>& packet)
 	{
 #ifdef DEBUG
 		if (packet)
@@ -112,27 +112,51 @@ struct Decoder::implementation
 				OutputDebugStringA("Pushed flush packet to audio decoder\n");
 		}
 #endif 
+		TryToPushFromQueue();
+
+		if (!InternalPush(packet))
+#ifdef DEBUG
+		{
+#endif
+			packet_queue_.push_back(packet);
+#ifdef DEBUG
+			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
+				OutputDebugStringA(("Queued video packet: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+		}
+#endif
+	}
+
+	bool InternalPush(const std::shared_ptr<AVPacket>& packet)
+	{
+#ifdef DEBUG
+		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
+			OutputDebugStringA(("Pushed video packet to decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+#endif
 		int ret = avcodec_send_packet(ctx_.get(), packet.get());
 		switch (ret)
 		{
 		case 0:
 			return true;
 		case AVERROR(EAGAIN):
-			packet_queue_.push_back(packet);
 			return false;
 		case AVERROR_EOF:
-			return false;
+			THROW_EXCEPTION("Packet pushed after flush");
+			break;
 		default:
-#ifdef DEBUG
-			char buf[AV_ERROR_MAX_STRING_SIZE] { 0 };
-			av_make_error_string(buf, AV_ERROR_MAX_STRING_SIZE, ret);
-			OutputDebugStringA(buf);
-			OutputDebugStringA("\n");
-#endif
-			return true;
 			break;
 		}
-		return true;
+		return false;
+	}
+
+	bool TryToPushFromQueue() 
+	{
+		if (packet_queue_.empty())
+			return false;
+		if (InternalPush(packet_queue_.front()))
+		{
+			packet_queue_.pop_front();
+			return true;
+		}
 	}
 
 	std::shared_ptr<AVFrame> Pull()
@@ -142,6 +166,7 @@ struct Decoder::implementation
 		switch (ret)
 		{
 		case 0:
+			TryToPushFromQueue();
 			if (frame->pts == AV_NOPTS_VALUE)
 				frame->pts = frame->best_effort_timestamp;
 			if (frame->pts >= seek_pts_ || frame->pts + frame->pkt_duration > seek_pts_)
@@ -167,6 +192,8 @@ struct Decoder::implementation
 			is_eof_ = true;
 			break;
 		case AVERROR(EAGAIN):
+			if (TryToPushFromQueue())
+				return Pull();
 			break;
 		default:
 			THROW_ON_FFMPEG_ERROR(ret);
@@ -174,12 +201,12 @@ struct Decoder::implementation
 		return nullptr;
 	}
 	
-	bool Flush()
+	void Flush()
 	{
 		if (is_flushed_)
-			return false;
+			return;
 		is_flushed_ = true; 
-		return Push(nullptr);
+		Push(nullptr);
 	}
 
 	void Seek(const int64_t seek_time)
@@ -187,6 +214,7 @@ struct Decoder::implementation
 		avcodec_flush_buffers(ctx_.get());
 		is_eof_ = false;
 		is_flushed_ = false;
+		packet_queue_.clear();
 		seek_pts_ = TimeToPts(seek_time, time_base_);
 	}
 
@@ -202,11 +230,11 @@ Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_ti
 
 Decoder::~Decoder() { }
 
-bool Decoder::Push(const std::shared_ptr<AVPacket>& packet) { return impl_->Push(packet); }
+void Decoder::Push(const std::shared_ptr<AVPacket>& packet) { impl_->Push(packet); }
 
 std::shared_ptr<AVFrame> Decoder::Pull() { return impl_->Pull(); }
 
-bool Decoder::Flush() { return impl_->Flush(); }
+void Decoder::Flush() { impl_->Flush(); }
 
 void Decoder::Seek(const int64_t seek_time) { impl_->Seek(seek_time); }
 

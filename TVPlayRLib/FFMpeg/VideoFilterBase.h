@@ -13,7 +13,7 @@ public:
 	typedef std::unique_ptr<VideoFilterBase> Ptr;
 	VideoFilterBase(AVPixelFormat output_pix_fmt);
 	virtual ~VideoFilterBase();
-	virtual std::shared_ptr<AVFrame> Pull();
+	virtual std::shared_ptr<AVFrame> Pull() override;
 	int OutputWidth();
 	int OutputHeight();
 	AVRational OutputSampleAspectRatio();

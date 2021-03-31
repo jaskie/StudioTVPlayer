@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "AudioFifo.h"
 
-#undef DEBUG
+//#undef DEBUG
 
 namespace TVPlayR {
 	namespace FFmpeg {

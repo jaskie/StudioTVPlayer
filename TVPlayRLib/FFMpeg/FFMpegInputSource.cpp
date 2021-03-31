@@ -73,7 +73,7 @@ struct FFmpegInputSource::implementation
 			channel_->AudioChannelsCount(),
 			channel_->AudioSampleFormat(),
 			is_playing_,
-			AV_TIME_BASE / 2, // 0.5 sec
+			AV_TIME_BASE / 5, // 0.5 sec
 			0);
 		while (channel_)
 		{

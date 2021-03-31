@@ -22,6 +22,8 @@ if (error_code < 0) \
 	throw TVPlayR::Common::TVPlayRException(exception_message);\
 	}
 
+typedef std::function<void()> action;
+
 inline std::shared_ptr<AVPacket> AllocPacket()
 {
 	return std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* p) { av_packet_free(&p); });

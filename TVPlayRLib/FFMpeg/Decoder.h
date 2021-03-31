@@ -12,10 +12,10 @@ public:
 	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& device_index);
 	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time);
 	~Decoder();
-	bool Push(const std::shared_ptr<AVPacket>& packet);
+	void Push(const std::shared_ptr<AVPacket>& packet);
 	std::shared_ptr<AVFrame> Pull();
 	const AVRational& TimeBase() const;
-	bool Flush();
+	void Flush();
 	void Seek(const int64_t seek_time);
 	bool IsEof() const;
 	int AudioChannelsCount() const;

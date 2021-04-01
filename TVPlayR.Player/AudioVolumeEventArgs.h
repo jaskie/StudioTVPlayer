@@ -5,13 +5,13 @@ namespace TVPlayR {
 
 	public ref class AudioVolumeEventArgs: EventArgs{
 	private:
-		initonly double audio_volume_;
+		initonly array<double>^ audio_volume_;
 	public:
-		AudioVolumeEventArgs(double[]^ audio_volume) {
+		AudioVolumeEventArgs(array<double>^ audio_volume) {
 			audio_volume_ = audio_volume;
 		}
-		property double AudioVolume {
-			double get() { return audio_volume_; }
+		property array<double>^ AudioVolume {
+			array<double>^ get() { return audio_volume_; }
 		}
 	};
 

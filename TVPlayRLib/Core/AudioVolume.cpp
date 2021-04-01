@@ -30,7 +30,7 @@ std::vector<double> AudioVolume::ProcessVolume(const std::shared_ptr<AVFrame>& f
 		samples[i] = av_clipl_int32((((int64_t)samples[i] * old_volume_ / ZERO)));
 		sum_volume[i % frame->channels] += abs(samples[i]);
 	}
-	std::vector<double> avg_volume;
+	std::vector<double> avg_volume(frame->channels, 0);
 	std::transform(sum_volume.begin(), sum_volume.end(), avg_volume.begin(), [&frame](int64_t volume) { return static_cast<double>(volume) / frame->nb_samples; });
 	return avg_volume;
 }

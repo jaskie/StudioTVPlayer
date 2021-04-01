@@ -17,7 +17,7 @@ namespace TVPlayR {
 	private:
 		Core::Channel* _channel;
 		double _volume = 1.0f;
-		delegate void AudioVolumeDelegate(double);
+		delegate void AudioVolumeDelegate(std::vector<double>);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
 		void AudioVolumeCallback(std::vector<double> audio_volume);

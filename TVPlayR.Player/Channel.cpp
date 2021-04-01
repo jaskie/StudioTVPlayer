@@ -10,7 +10,13 @@
 namespace TVPlayR {
 	void Channel::AudioVolumeCallback(std::vector<double>audio_volume)
 	{
-		AudioVolume(this, gcnew AudioVolumeEventArgs(audio_volume));
+		array<double>^ result = gcnew array<double>(static_cast<int>(audio_volume.size()));
+		if (audio_volume.size())
+		{
+			pin_ptr<double> dest = &result[0];
+			std::memcpy(dest, &audio_volume[0], audio_volume.size() * sizeof(double));
+		}
+		AudioVolume(this, gcnew AudioVolumeEventArgs(result));
 	}
 
 	Channel::Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount)

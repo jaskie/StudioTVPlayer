@@ -166,15 +166,7 @@ namespace StudioTVPlayer.Model
         {
             if (!IsInitialized)
                 return;
-            try
-            {
-                Uninitialize();
-            }
-            catch
-            {
-                MessageBox.Show("Błąd zwalniania zasobów");
-            }
-
+            Uninitialize();
         }
 
     }

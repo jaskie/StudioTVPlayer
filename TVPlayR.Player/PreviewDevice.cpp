@@ -43,7 +43,7 @@ namespace TVPlayR
             _buffer_frame = new std::shared_ptr<AVFrame>(std::move(frame));
             _ui_dispatcher->BeginInvoke(_draw_frame_action);
         }
-        catch (System::OperationCanceledException^ _)
+        catch (System::OperationCanceledException^)
         { }
     }
 

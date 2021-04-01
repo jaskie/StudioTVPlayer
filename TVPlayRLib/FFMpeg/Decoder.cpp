@@ -26,8 +26,9 @@ struct Decoder::implementation
 	const AVMediaType media_type_;
 	int64_t seek_pts_;
 	const int64_t duration_;
+	const std::function<bool()> send_packet_callback_;
 
-	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
+	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, std::function<bool()> send_packet_callback, Core::HwAccel acceleration, const std::string& hw_device_index)
 		: ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
 		, start_ts_(stream ? stream->start_time : 0LL)
 		, duration_(stream ? stream->duration: 0LL)
@@ -42,6 +43,7 @@ struct Decoder::implementation
 		, hw_device_index_(hw_device_index)
 		, media_type_(codec ? codec->type : AVMediaType::AVMEDIA_TYPE_UNKNOWN)
 		, hw_device_ctx_(NULL, [](AVBufferRef* p) { av_buffer_unref(&p); })
+		, send_packet_callback_(send_packet_callback)
 	{
 		if (!ctx_ || !stream || !codec)
 			return;
@@ -112,9 +114,6 @@ struct Decoder::implementation
 				OutputDebugStringA("Pushed flush packet to audio decoder\n");
 		}
 #endif 
-		TryToPushFromQueue();
-
-		if (!InternalPush(packet))
 #ifdef DEBUG
 		{
 #endif
@@ -126,8 +125,14 @@ struct Decoder::implementation
 #endif
 	}
 
-	bool InternalPush(const std::shared_ptr<AVPacket>& packet)
+	void PushNextPacket()
 	{
+		while (packet_queue_.empty())
+		{
+			if (!send_packet_callback_())
+				return;
+		}
+		auto packet = packet_queue_.front();
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			OutputDebugStringA(("Pushed video packet to decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
@@ -136,67 +141,56 @@ struct Decoder::implementation
 		switch (ret)
 		{
 		case 0:
-			return true;
+			packet_queue_.pop_front();
+			break;
 		case AVERROR(EAGAIN):
-			return false;
+			break;
 		case AVERROR_EOF:
 			THROW_EXCEPTION("Packet pushed after flush");
 			break;
 		default:
 			break;
 		}
-		return false;
-	}
-
-	bool TryToPushFromQueue() 
-	{
-		if (packet_queue_.empty())
-			return false;
-		if (InternalPush(packet_queue_.front()))
-		{
-			packet_queue_.pop_front();
-			return true;
-		}
 	}
 
 	std::shared_ptr<AVFrame> Pull()
 	{
-		auto frame = AllocFrame();
-		auto ret = avcodec_receive_frame(ctx_.get(), frame.get());
-		switch (ret)
+		while (true)
 		{
-		case 0:
-			TryToPushFromQueue();
-			if (frame->pts == AV_NOPTS_VALUE)
-				frame->pts = frame->best_effort_timestamp;
-			if (frame->pts >= seek_pts_ || frame->pts + frame->pkt_duration > seek_pts_)
+			auto frame = AllocFrame();
+			auto ret = avcodec_receive_frame(ctx_.get(), frame.get());
+			switch (ret)
 			{
-				if (hw_device_ctx_)
+			case 0:
+				if (frame->pts == AV_NOPTS_VALUE)
+					frame->pts = frame->best_effort_timestamp;
+				if (frame->pts >= seek_pts_ || frame->pts + frame->pkt_duration > seek_pts_)
 				{
-					auto sw_frame = AllocFrame();
-					THROW_ON_FFMPEG_ERROR(av_hwframe_transfer_data(sw_frame.get(), frame.get(), 0));
-					sw_frame->pts = frame->pts;
-					sw_frame->pict_type = frame->pict_type;
-					frame = sw_frame;
-				}
+					if (hw_device_ctx_)
+					{
+						auto sw_frame = AllocFrame();
+						THROW_ON_FFMPEG_ERROR(av_hwframe_transfer_data(sw_frame.get(), frame.get(), 0));
+						THROW_ON_FFMPEG_ERROR(av_frame_copy_props(sw_frame.get(), frame.get()));
+						frame = sw_frame;
+					}
 #ifdef DEBUG
-				if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-					OutputDebugStringA(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type) + "\n").c_str());
-				if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-					OutputDebugStringA(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
+					if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
+						OutputDebugStringA(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type) + "\n").c_str());
+					if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
+						OutputDebugStringA(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
 #endif 
-				return frame;
+					return frame;
+				}
+				return nullptr;
+			case AVERROR_EOF:
+				is_eof_ = true;
+				break;
+			case AVERROR(EAGAIN):
+				PushNextPacket();
+				break;
+			default:
+				THROW_ON_FFMPEG_ERROR(ret);
 			}
-			return nullptr;
-		case AVERROR_EOF:
-			is_eof_ = true;
-			break;
-		case AVERROR(EAGAIN):
-			if (TryToPushFromQueue())
-				return Pull();
-			break;
-		default:
-			THROW_ON_FFMPEG_ERROR(ret);
 		}
 		return nullptr;
 	}
@@ -220,12 +214,12 @@ struct Decoder::implementation
 
 };
 
-Decoder::Decoder(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
-	: impl_(std::make_unique<implementation>(codec, stream, seek_time, acceleration, hw_device_index))
+Decoder::Decoder(const AVCodec* codec, AVStream* const stream, int64_t seek_time, std::function<bool()> send_packet_callback, Core::HwAccel acceleration, const std::string& hw_device_index)
+	: impl_(std::make_unique<implementation>(codec, stream, seek_time, send_packet_callback, acceleration, hw_device_index))
 { }
 
-Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_time)
-	: Decoder(codec, stream, seek_time, Core::HwAccel::none, "")
+Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_time, std::function<bool()> send_packet_callback)
+	: Decoder(codec, stream, seek_time, send_packet_callback, Core::HwAccel::none, "")
 { }
 
 Decoder::~Decoder() { }

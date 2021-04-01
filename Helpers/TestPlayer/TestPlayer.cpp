@@ -35,7 +35,7 @@ int main()
 #else
 		av_log_set_callback(NULL);
 #endif
-		Core::Channel channel(Core::VideoFormatType::v1080i5000, Core::PixelFormat::yuv422, 2);
+		Core::Channel channel(Core::VideoFormatType::v1080p3000, Core::PixelFormat::yuv422, 2);
 		Decklink::Iterator iterator;
 		size_t device_index = 0;
 		for (size_t i = 0; i < iterator.Size(); i++)

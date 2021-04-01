@@ -3,7 +3,7 @@
 #include "AudioFifo.h"
 #include "../Core/VideoFormat.h"
 
-#undef DEBUG 
+//#undef DEBUG 
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -108,7 +108,7 @@ namespace TVPlayR {
 					video_queue_.pop_front();
 #ifdef DEBUG
 				if (audio->pts != AV_NOPTS_VALUE && last_video_->pts != AV_NOPTS_VALUE)
-					OutputDebugStringA(("Output video " + std::to_string(PtsToTime(last_video_->pts, video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + "\n").c_str());
+					OutputDebugStringA(("Output video " + std::to_string(PtsToTime(last_video_->pts, input_video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + "\n").c_str());
 #endif // DEBUG
 				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, input_video_time_base_));
 			}
@@ -153,6 +153,10 @@ namespace TVPlayR {
 				video_queue_.clear();
 				last_video_.reset();
 				is_flushed_ = false;
+#ifdef DEBUG
+				OutputDebugStringA(("Seek: " + std::to_string(time/1000) + "\n").c_str());
+
+#endif // DEBUG
 			}
 
 			void Flush()
@@ -172,7 +176,7 @@ namespace TVPlayR {
 			{
 				sync_ = time;
 #ifdef DEBUG
-				OutputDebugStringA(("Sync set to " + std::to_string(time / 1000) + "\n").c_str());
+				OutputDebugStringA(("Sync set to: " + std::to_string(time / 1000) + "\n").c_str());
 #endif // DEBUG
 			}
 

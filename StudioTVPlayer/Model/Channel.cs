@@ -127,6 +127,7 @@ namespace StudioTVPlayer.Model
             if (_channelR == null)
                 return;
             _previewDevice?.Dispose();
+            _previewDevice = null;
             _channelR.Clear();
             _channelR.Dispose();
             _channelR.AudioVolume -= ChannelR_AudioVolume;

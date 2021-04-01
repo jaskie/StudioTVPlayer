@@ -140,7 +140,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     oldItem.IsDisabled = true;
                 }
                 IsLoaded = value != null;
-                SliderPosition = CurrentItemStartTime.TotalMilliseconds;
+                _sliderPosition = CurrentItemStartTime.TotalMilliseconds;
+                NotifyPropertyChanged(nameof(SliderPosition));
                 NotifyPropertyChanged(nameof(CurrentItemStartTime));
                 NotifyPropertyChanged(nameof(CurrentItemDuration));
             }

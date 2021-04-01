@@ -46,7 +46,7 @@ namespace TVPlayR {
 
     public:
         Executor(const std::string& name)
-            : thread_(std::thread([this] { run(); }))
+            : thread_(&Executor::run, this)
             , name_(name)
         { }
 

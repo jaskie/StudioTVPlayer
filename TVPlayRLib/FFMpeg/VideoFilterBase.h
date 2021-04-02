@@ -11,27 +11,24 @@ class VideoFilterBase :
 private:
 public:
 	VideoFilterBase(AVPixelFormat output_pix_fmt);
-	virtual ~VideoFilterBase();
 	virtual std::shared_ptr<AVFrame> Pull() override;
 	int OutputWidth();
 	int OutputHeight();
 	AVRational OutputSampleAspectRatio();
-	AVPixelFormat GetOutputPixelFormat();
+	AVPixelFormat OutputPixelFormat();
 	virtual AVRational OutputTimeBase() const override;
 	virtual void Flush() override;
-	virtual bool IsFlushed() const override;
-	virtual bool IsEof() const override;
-	virtual void Reset() override;
-
+	void Reset();
 protected:
 	bool Push(std::shared_ptr<AVFrame> frame);
 	bool IsInitialized() const;
+	virtual void Initialize() override;
+	virtual void PushMoreFrames() = 0;
 	void CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational& input_time_base, const std::string& filter_str);
-
 private:
-	class implementation;
-	std::unique_ptr<implementation> impl_;
-
+	AVFilterContext* source_ctx_ = NULL;
+	AVFilterContext* sink_ctx_ = NULL;
+	const AVPixelFormat output_pix_fmt_;
 };
 	
 }}

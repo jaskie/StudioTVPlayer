@@ -4,7 +4,7 @@
 #include "../Common/Executor.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
-#include "../FFMpeg/PreviewScaler.h"
+#include "PreviewScaler.h"
 
 
 namespace TVPlayR {
@@ -13,13 +13,14 @@ namespace TVPlayR {
 	struct Preview::implementation
 	{
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
-		Core::VideoFormat format_;
+		Core::Channel* channel_;
 		std::mutex mutex_;
-		std::unique_ptr<FFmpeg::PreviewScaler> preview_scaler_;
+		std::unique_ptr<PreviewScaler> preview_scaler_;
 		Common::Executor consumer_executor_;
 
 		implementation()
 			: consumer_executor_("Preview thread")
+			, channel_(nullptr)
 		{
 		}
 
@@ -45,14 +46,15 @@ namespace TVPlayR {
 
 		bool AssignToChannel(Core::Channel& channel)
 		{
-			format_ = channel.Format();
+			channel_ = &channel;
 			return true;
 		}
 
 		void CreateFilter(int width, int height)
 		{
+			assert(channel_);
 			std::lock_guard<std::mutex> lock(mutex_);
-			preview_scaler_ = std::make_unique<FFmpeg::PreviewScaler>(format_, width, height);
+			preview_scaler_ = std::make_unique<PreviewScaler>(*channel_, width, height);
 		}
 
 		void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback)

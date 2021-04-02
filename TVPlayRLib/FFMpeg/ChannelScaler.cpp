@@ -8,7 +8,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 
-ChannelScaler::ChannelScaler(const Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
+ChannelScaler::ChannelScaler(Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format)
 	: VideoFilterBase(output_pixel_format)
 	, output_format_(output_format)
 	, output_pixel_format_(output_pixel_format)
@@ -16,12 +16,18 @@ ChannelScaler::ChannelScaler(const Decoder& decoder, const Core::VideoFormat& ou
 {
 }
 
-
 bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
 		VideoFilterBase::CreateFilterChain(frame, decoder_.TimeBase(), Setup(frame));
 	return VideoFilterBase::Push(frame);
+}
+
+void ChannelScaler::PushMoreFrames()
+{
+	auto frame = decoder_.Pull();
+	if (frame)
+		Push(frame);
 }
 
 std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame)

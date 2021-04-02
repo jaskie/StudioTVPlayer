@@ -137,8 +137,8 @@
     <ClInclude Include="Preview\Preview.h">
       <Filter>Preview</Filter>
     </ClInclude>
-    <ClInclude Include="FFMpeg\PreviewScaler.h">
-      <Filter>FFMpeg</Filter>
+    <ClInclude Include="Preview\PreviewScaler.h">
+      <Filter>Preview</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -203,8 +203,8 @@
     <ClCompile Include="Preview\Preview.cpp">
       <Filter>Preview</Filter>
     </ClCompile>
-    <ClCompile Include="FFMpeg\PreviewScaler.cpp">
-      <Filter>FFMpeg</Filter>
+    <ClCompile Include="Preview\PreviewScaler.cpp">
+      <Filter>Preview</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

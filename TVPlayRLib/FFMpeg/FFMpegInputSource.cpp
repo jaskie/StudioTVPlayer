@@ -64,8 +64,8 @@ struct FFmpegInputSource::implementation
 	void ProducerThreadProc()
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
-		channel_scaler_ = std::make_unique<ChannelScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
 		InitializeAudioDecoders();
+		channel_scaler_ = std::make_unique<ChannelScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
 		if (!audio_decoders_.empty())
 			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, channel_->AudioSampleFormat(), 48000, channel_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
@@ -128,34 +128,15 @@ struct FFmpegInputSource::implementation
 	void PushToBuffer()
 	{
 		// video
-			if (!video_decoder_->IsEof())
-			{
-				auto decoded = video_decoder_->Pull();
-				if (decoded)
-					channel_scaler_->Push(decoded);
-			}
-			else if (!channel_scaler_->IsEof() && !channel_scaler_->IsFlushed())
-				channel_scaler_->Flush();
-
-			while(auto scaled = channel_scaler_->Pull())
-				buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
+		auto scaled = channel_scaler_->Pull();
+		if (scaled)
+			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
 	
 		// audio
 		if (!audio_decoders_.empty())
 		{
-			bool flush_muxer = true;
-			for (auto& decoder : audio_decoders_)
-			{
-				if (!decoder->IsEof())
-				{
-					flush_muxer = false;
-					auto decoded = decoder->Pull();
-						audio_muxer_->Push(decoder->StreamIndex(), decoded);
-				}
-			}
-			if (flush_muxer && !audio_muxer_->IsEof() && !audio_muxer_->IsFlushed())
-				audio_muxer_->Flush();
-			while (auto muxed = audio_muxer_->Pull())
+			auto muxed = audio_muxer_->Pull();
+			if (muxed)
 				buffer_->PushAudio(muxed);
 		}
 		if (!buffer_->IsEof() && !buffer_->IsFlushed() && channel_scaler_->IsEof() && audio_muxer_->IsEof())

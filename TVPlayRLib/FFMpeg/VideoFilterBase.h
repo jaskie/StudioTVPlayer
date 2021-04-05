@@ -22,8 +22,6 @@ public:
 protected:
 	bool Push(std::shared_ptr<AVFrame> frame);
 	bool IsInitialized() const;
-	virtual void Initialize() override;
-	virtual void PushMoreFrames() = 0;
 	void CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational& input_time_base, const std::string& filter_str);
 private:
 	AVFilterContext* source_ctx_ = NULL;

@@ -23,13 +23,6 @@ bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame)
 	return VideoFilterBase::Push(frame);
 }
 
-void ChannelScaler::PushMoreFrames()
-{
-	auto frame = decoder_.Pull();
-	if (frame)
-		Push(frame);
-}
-
 std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame)
 {
 	std::ostringstream filter;

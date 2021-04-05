@@ -83,7 +83,7 @@ struct FFmpegInputSource::implementation
 					break;
 				std::lock_guard<std::mutex> lock(buffer_mutex_);
 				bool neeed_packet = false;
-				PushToBuffer();
+				ProcessNextInputPacket();
 				if (buffer_->Ready())
 					buffer_cv_.notify_all();
 			}
@@ -91,11 +91,7 @@ struct FFmpegInputSource::implementation
 		}
 	}
 
-	/// <summary>
-	/// function called from decoder's callback
-	/// </summary>
-	/// <returns>false if no more packets will be available (EOF)</returns>
-	bool PushNextPacketToDecoders()
+	bool ProcessNextInputPacket()
 	{
 		if (input_.IsEof())
 			return false;
@@ -104,25 +100,86 @@ struct FFmpegInputSource::implementation
 		{
 			assert(input_.IsEof());
 			for (auto& decoder : audio_decoders_)
+			{
 				decoder->Flush();
+				ProcessAudio(decoder);
+			}
+			FlushAudioMuxerIfNeeded();
 			if (video_decoder_)
+			{
 				video_decoder_->Flush();
+				ProcessVideo();
+				FlushChannelScalerIfNeeded();
+			}
 		}
-		else
+		else 	// there is no need to flush if packets are comming
 		{
 			if (video_decoder_ && packet->stream_index == video_decoder_->StreamIndex())
+			{
 				video_decoder_->Push(packet);
+				ProcessVideo();
+			}
 			else
 				for (auto& audio_decoder : audio_decoders_)
 				{
 					if (packet->stream_index == audio_decoder->StreamIndex())
 					{
 						audio_decoder->Push(packet);
+						ProcessAudio(audio_decoder);
 						break;
 					}
 				}
 		}
 		return true;
+	}
+
+	void ProcessVideo()
+	{
+		while (auto decoded = video_decoder_->Pull())
+		{
+			channel_scaler_->Push(decoded);
+			while (auto scaled = channel_scaler_->Pull())
+			{
+				std::unique_lock<std::mutex> lock(buffer_mutex_);
+				buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
+			}
+			FlushBufferIfNeeded();
+		}
+	}
+
+	void ProcessAudio(const std::unique_ptr<Decoder>& decoder)
+	{
+		while (auto decoded = decoder->Pull())
+		{
+			audio_muxer_->Push(decoder->StreamIndex(), decoded);
+			while (auto muxed = audio_muxer_->Pull())
+			{
+				std::unique_lock<std::mutex> lock(buffer_mutex_);
+				buffer_->PushAudio(muxed);
+			}
+			FlushBufferIfNeeded();
+		}
+	}
+
+	void FlushChannelScalerIfNeeded()
+	{
+		if (video_decoder_->IsEof() && !channel_scaler_->IsFlushed())
+			channel_scaler_->Flush();
+	}
+
+	void FlushAudioMuxerIfNeeded()
+	{
+		if (audio_muxer_->IsFlushed())
+			return;
+		auto need_flush = std::all_of(audio_decoders_.begin(), audio_decoders_.end(), [](const std::unique_ptr<Decoder>& decoder) { return decoder->IsEof(); });
+		if (need_flush)
+			audio_muxer_->Flush();
+	}
+
+	void FlushBufferIfNeeded()
+	{
+		if (!buffer_->IsFlushed() && channel_scaler_->IsEof() && audio_muxer_->IsEof())
+			buffer_->Flush();
 	}
 
 	void PushToBuffer()
@@ -139,8 +196,6 @@ struct FFmpegInputSource::implementation
 			if (muxed)
 				buffer_->PushAudio(muxed);
 		}
-		if (!buffer_->IsEof() && !buffer_->IsFlushed() && channel_scaler_->IsEof() && audio_muxer_->IsEof())
-			buffer_->Flush();
 	}
 
 #pragma endregion
@@ -240,7 +295,7 @@ struct FFmpegInputSource::implementation
 		const Core::StreamInfo* stream = input_.GetVideoStream();
 		if (stream == nullptr)
 			return;
-		video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, seek_time_, std::bind(&implementation::PushNextPacketToDecoders, this), acceleration_, hw_device_);
+		video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, seek_time_, acceleration_, hw_device_);
 	}
 
 	void InitializeAudioDecoders()
@@ -251,7 +306,7 @@ struct FFmpegInputSource::implementation
 			info_iter = std::find_if(streams.begin(), streams.end(), [](const auto& info) { return info.Type == Core::MediaType::audio; });
 		if (info_iter == streams.end())
 			return;
-		audio_decoders_.emplace_back(std::make_unique<Decoder>(info_iter->Codec, info_iter->Stream, seek_time_, std::bind(&implementation::PushNextPacketToDecoders, this)));
+		audio_decoders_.emplace_back(std::make_unique<Decoder>(info_iter->Codec, info_iter->Stream, seek_time_));
 	}
 
 	bool IsStream(const std::string& fileName)

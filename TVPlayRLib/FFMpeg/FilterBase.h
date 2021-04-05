@@ -15,7 +15,6 @@ public:
 	bool IsEof() { return is_eof_; };
 	int64_t TimeFromTs(int64_t ts) const;
 protected:
-	virtual void Initialize() = 0;
 	std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)> graph_;
 	bool is_flushed_ = false;
 	bool is_eof_ = false;

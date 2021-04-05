@@ -26,9 +26,8 @@ struct Decoder::implementation
 	const AVMediaType media_type_;
 	int64_t seek_pts_;
 	const int64_t duration_;
-	const std::function<bool()> send_packet_callback_;
 
-	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, std::function<bool()> send_packet_callback, Core::HwAccel acceleration, const std::string& hw_device_index)
+	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
 		: ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
 		, start_ts_(stream ? stream->start_time : 0LL)
 		, duration_(stream ? stream->duration: 0LL)
@@ -43,7 +42,6 @@ struct Decoder::implementation
 		, hw_device_index_(hw_device_index)
 		, media_type_(codec ? codec->type : AVMediaType::AVMEDIA_TYPE_UNKNOWN)
 		, hw_device_ctx_(NULL, [](AVBufferRef* p) { av_buffer_unref(&p); })
-		, send_packet_callback_(send_packet_callback)
 	{
 		if (!ctx_ || !stream || !codec)
 			return;
@@ -125,13 +123,10 @@ struct Decoder::implementation
 #endif
 	}
 
-	void PushNextPacket()
+	bool PushNextPacket()
 	{
-		while (packet_queue_.empty())
-		{
-			if (!send_packet_callback_())
-				return;
-		}
+		if (packet_queue_.empty())
+			return false;
 		auto packet = packet_queue_.front();
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
@@ -142,7 +137,7 @@ struct Decoder::implementation
 		{
 		case 0:
 			packet_queue_.pop_front();
-			break;
+			return true;
 		case AVERROR(EAGAIN):
 			break;
 		case AVERROR_EOF:
@@ -151,12 +146,14 @@ struct Decoder::implementation
 		default:
 			break;
 		}
+		return false;
 	}
 
 	std::shared_ptr<AVFrame> Pull()
 	{
 		while (true)
 		{
+			PushNextPacket();
 			auto frame = AllocFrame();
 			auto ret = avcodec_receive_frame(ctx_.get(), frame.get());
 			switch (ret)
@@ -186,7 +183,6 @@ struct Decoder::implementation
 				is_eof_ = true;
 				break;
 			case AVERROR(EAGAIN):
-				PushNextPacket();
 				break;
 			default:
 				THROW_ON_FFMPEG_ERROR(ret);
@@ -214,12 +210,12 @@ struct Decoder::implementation
 
 };
 
-Decoder::Decoder(const AVCodec* codec, AVStream* const stream, int64_t seek_time, std::function<bool()> send_packet_callback, Core::HwAccel acceleration, const std::string& hw_device_index)
-	: impl_(std::make_unique<implementation>(codec, stream, seek_time, send_packet_callback, acceleration, hw_device_index))
+Decoder::Decoder(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
+	: impl_(std::make_unique<implementation>(codec, stream, seek_time, acceleration, hw_device_index))
 { }
 
-Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_time, std::function<bool()> send_packet_callback)
-	: Decoder(codec, stream, seek_time, send_packet_callback, Core::HwAccel::none, "")
+Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_time)
+	: Decoder(codec, stream, seek_time, Core::HwAccel::none, "")
 { }
 
 Decoder::~Decoder() { }
@@ -239,7 +235,6 @@ int Decoder::AudioChannelsCount() const { return impl_->channels_count_; }
 int Decoder::AudioSampleRate() const { return impl_->sample_rate_; }
 
 int Decoder::StreamIndex() const { return impl_->stream_index_; }
-
 
 uint64_t Decoder::AudioChannelLayout() const { return impl_->ctx_ ? impl_->ctx_->channel_layout : 0ULL; }
 

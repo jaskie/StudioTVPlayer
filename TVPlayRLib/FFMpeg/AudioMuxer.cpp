@@ -97,16 +97,6 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	}		
 }
 
-void AudioMuxer::PushMoreFrames()
-{
-	for (auto& decoder : decoders_)
-	{
-		auto frame = decoder->Pull();
-		if (frame)
-			Push(decoder->StreamIndex(), frame);
-	}
-}
-
 std::shared_ptr<AVFrame> AudioMuxer::Pull()
 {
 	auto frame = AllocFrame();
@@ -120,7 +110,6 @@ std::shared_ptr<AVFrame> AudioMuxer::Pull()
 #endif
 			return frame;
 		case AVERROR(EAGAIN):
-			PushMoreFrames();
 			break;
 		case AVERROR_EOF:
 			is_eof_ = true;

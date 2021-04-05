@@ -17,8 +17,6 @@ VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
 { }
 
 std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
-	if (!IsInitialized())
-		Initialize();
 	auto frame = AllocFrame();
 	auto ret = av_buffersink_get_frame(sink_ctx_, frame.get());
 	switch (ret)
@@ -27,7 +25,6 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
 		is_eof_ = true;
 		return nullptr;
 	case AVERROR(EAGAIN):
-		PushMoreFrames();
 		break;
 	case AVERROR(EINVAL):
 		return nullptr;
@@ -141,12 +138,6 @@ void VideoFilterBase::Reset()
 	is_eof_ = false;
 	is_flushed_ = false;
 	graph_.reset();
-}
-
-void VideoFilterBase::Initialize()
-{
-	while (!IsInitialized())
-		PushMoreFrames();
 }
 
 }}

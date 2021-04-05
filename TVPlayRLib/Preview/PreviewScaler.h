@@ -17,8 +17,6 @@ private:
 public:
 	PreviewScaler(Core::Channel& channel, int width, int height);
 	void Push(std::shared_ptr<AVFrame> frame);
-protected:
-	virtual void PushMoreFrames() override {};
 };
 
 }}

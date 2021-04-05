@@ -9,8 +9,8 @@ namespace TVPlayR {
 class Decoder
 {
 public:
-	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time, std::function<bool()> send_packet_callback, Core::HwAccel acceleration, const std::string& device_index);
-	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time, std::function<bool()> send_packet_callback);
+	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& device_index);
+	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time);
 	~Decoder();
 	void Push(const std::shared_ptr<AVPacket>& packet);
 	std::shared_ptr<AVFrame> Pull();

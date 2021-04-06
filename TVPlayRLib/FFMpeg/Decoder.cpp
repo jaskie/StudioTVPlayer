@@ -8,6 +8,17 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
+AVPixelFormat GetHwPixelFormat(AVCodecContext* ctx, const enum AVPixelFormat* pix_fmts)
+{
+	const AVPixelFormat* p;
+	for (p = pix_fmts; *p != -1; p++)
+	{
+		if (*p == AV_PIX_FMT_CUDA)
+			return *p;
+	}
+	return AV_PIX_FMT_NONE;
+}
+
 struct Decoder::implementation
 {
 	const int64_t start_ts_;
@@ -69,18 +80,7 @@ struct Decoder::implementation
 				}
 			}
 			if (hw_pix_format == AV_PIX_FMT_CUDA)
-			{
-				ctx_->get_format = [](AVCodecContext* ctx, const enum AVPixelFormat* pix_fmts)
-				{
-					const AVPixelFormat* p;
-					for (p = pix_fmts; *p != -1; p++)
-					{
-						if (*p == AV_PIX_FMT_CUDA)
-							return *p;
-					}
-					return AV_PIX_FMT_NONE;
-				};
-			}
+				ctx_->get_format = GetHwPixelFormat;
 			AVBufferRef* weak_hw_device_ctx = NULL;
 			if (FF(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
 			{
@@ -96,6 +96,7 @@ struct Decoder::implementation
 
 	void Push(const std::shared_ptr<AVPacket>& packet)
 	{
+		assert(!packet || packet->stream_index == stream_index_);
 #ifdef DEBUG
 		if (packet)
 		{
@@ -151,7 +152,7 @@ struct Decoder::implementation
 
 	std::shared_ptr<AVFrame> Pull()
 	{
-		while (true)
+		while (!packet_queue_.empty())
 		{
 			PushNextPacket();
 			auto frame = AllocFrame();

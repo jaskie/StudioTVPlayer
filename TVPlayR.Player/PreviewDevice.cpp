@@ -39,7 +39,7 @@ namespace TVPlayR
         try
         {
             _frame_played_semaphore.Wait(_shutdown_cts.Token);
-            assert(!_buffer_frame);
+            System::Diagnostics::Debug::Assert(!_buffer_frame);
             _buffer_frame = new std::shared_ptr<AVFrame>(std::move(frame));
             _ui_dispatcher->BeginInvoke(_draw_frame_action);
         }

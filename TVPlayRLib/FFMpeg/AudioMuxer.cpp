@@ -204,7 +204,7 @@ void AudioMuxer::Initialize()
 			THROW_EXCEPTION("avfilter_graph_config failed")
 #ifdef DEBUG
 
-		dump_filter(filter_str_, graph_);
+		dump_filter(filter_str_, graph_.get());
 
 #endif // DEBUG
 	}

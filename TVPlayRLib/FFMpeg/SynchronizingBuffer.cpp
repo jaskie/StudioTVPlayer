@@ -3,7 +3,7 @@
 #include "AudioFifo.h"
 #include "../Core/VideoFormat.h"
 
-//#undef DEBUG 
+#undef DEBUG 
 
 namespace TVPlayR {
 	namespace FFmpeg {

@@ -9,7 +9,7 @@
 #include "Utils.h"
 #include "DecklinkVideoFrame.h"
 
-#undef DEBUG
+//#undef DEBUG
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -22,7 +22,7 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkAttributes> attributes_;
 			int index_;
 			Core::VideoFormat format_;
-			int buffer_size_ = 3;
+			int buffer_size_ = 4;
 			volatile int64_t scheduled_frames_ = 0;
 			volatile int64_t scheduled_samples_ = 0;
 			int audio_channels_count_ = 2;
@@ -127,7 +127,9 @@ namespace TVPlayR {
 
 			int AudioSamplesRequired() const
 			{
-				return static_cast<int>(av_rescale(scheduled_frames_ + 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - scheduled_samples_);
+				int64_t samples_required = av_rescale(scheduled_frames_ + 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - scheduled_samples_;
+				assert(samples_required > 0);
+				return static_cast<int>(samples_required);
 			}
 
 			std::wstring GetDisplayName()
@@ -205,7 +207,14 @@ namespace TVPlayR {
 					}
 				}
 				if (!sync)
+#ifdef DEBUG
+				{
+#endif
 					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, 0LL);
+#ifdef DEBUG
+					OutputDebugStringA("Frame not received\n");
+				}
+#endif
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 

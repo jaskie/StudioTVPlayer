@@ -89,7 +89,7 @@ struct Decoder::implementation
 			}
 		}
 
-		av_opt_set_int(ctx_.get(), "refcounted_frames", 1, 0);
+		av_opt_set_int(ctx_.get(), "refcounted_frames", 0, 0);
 		av_opt_set_int(ctx_.get(), "threads", 4, 0);
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(ctx_.get(), codec, NULL));
 	}

@@ -73,7 +73,7 @@ struct FFmpegInputSource::implementation
 			channel_->AudioChannelsCount(),
 			channel_->AudioSampleFormat(),
 			is_playing_,
-			AV_TIME_BASE / 5, // 0.5 sec
+			AV_TIME_BASE / 2, // 0.5 sec
 			0);
 		while (channel_)
 		{
@@ -91,10 +91,10 @@ struct FFmpegInputSource::implementation
 		}
 	}
 
-	bool ProcessNextInputPacket()
+	void ProcessNextInputPacket()
 	{
 		if (input_.IsEof())
-			return false;
+			return;
 		auto packet = input_.PullPacket();
 		if (!packet)
 		{
@@ -130,7 +130,6 @@ struct FFmpegInputSource::implementation
 					}
 				}
 		}
-		return true;
 	}
 
 	void ProcessVideo()
@@ -174,22 +173,6 @@ struct FFmpegInputSource::implementation
 	{
 		if (!buffer_->IsFlushed() && channel_scaler_->IsEof() && audio_muxer_->IsEof())
 			buffer_->Flush();
-	}
-
-	void PushToBuffer()
-	{
-		// video
-		auto scaled = channel_scaler_->Pull();
-		if (scaled)
-			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
-	
-		// audio
-		if (!audio_decoders_.empty())
-		{
-			auto muxed = audio_muxer_->Pull();
-			if (muxed)
-				buffer_->PushAudio(muxed);
-		}
 	}
 
 #pragma endregion

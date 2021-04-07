@@ -19,7 +19,7 @@ public:
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
 	AVSync PullSync(int audio_samples_count);
 	bool Full() const;
-	bool Ready();
+	bool Ready() const;
 	void SetIsPlaying(bool is_playing);
 	void Seek(int64_t time);
 	void SetSynchro(int64_t time);

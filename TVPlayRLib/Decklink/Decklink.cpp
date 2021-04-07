@@ -114,7 +114,7 @@ namespace TVPlayR {
 			{
 				unsigned int samples_written;
 				output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
-				scheduled_samples_ += samples_written;
+				scheduled_samples_ += buffer->nb_samples;
 #ifdef DEBUG
 				if (samples_written != buffer->nb_samples)
 				{

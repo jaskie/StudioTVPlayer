@@ -49,6 +49,8 @@ namespace TVPlayR
 
     void PreviewDevice::DrawFrame()
     {
+        if (!_preview) // when disposed
+            return;
         std::shared_ptr<AVFrame> frame = *_buffer_frame;
         delete _buffer_frame;
         _buffer_frame = nullptr;

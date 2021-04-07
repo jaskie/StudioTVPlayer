@@ -81,8 +81,6 @@ struct FFmpegInputSource::implementation
 			{
 				if (!channel_)
 					break;
-				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				bool neeed_packet = false;
 				ProcessNextInputPacket();
 				if (buffer_->Ready())
 					buffer_cv_.notify_all();
@@ -111,6 +109,7 @@ struct FFmpegInputSource::implementation
 				ProcessVideo();
 				FlushChannelScalerIfNeeded();
 			}
+			FlushBufferIfNeeded();
 		}
 		else 	// there is no need to flush if packets are comming
 		{
@@ -136,10 +135,12 @@ struct FFmpegInputSource::implementation
 	{
 		while (auto decoded = video_decoder_->Pull())
 		{
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
 			channel_scaler_->Push(decoded);
 			while (auto scaled = channel_scaler_->Pull())
+			{
 				buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
-			FlushBufferIfNeeded();
+			}
 		}
 	}
 
@@ -147,21 +148,25 @@ struct FFmpegInputSource::implementation
 	{
 		while (auto decoded = decoder->Pull())
 		{
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
 			audio_muxer_->Push(decoder->StreamIndex(), decoded);
 			while (auto muxed = audio_muxer_->Pull())
+			{
 				buffer_->PushAudio(muxed);
-			FlushBufferIfNeeded();
+			}
 		}
 	}
 
 	void FlushChannelScalerIfNeeded()
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (video_decoder_->IsEof() && !channel_scaler_->IsFlushed())
 			channel_scaler_->Flush();
 	}
 
 	void FlushAudioMuxerIfNeeded()
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (!audio_muxer_ || audio_muxer_->IsFlushed())
 			return;
 		auto need_flush = std::all_of(audio_decoders_.begin(), audio_decoders_.end(), [](const std::unique_ptr<Decoder>& decoder) { return decoder->IsEof(); });
@@ -171,7 +176,8 @@ struct FFmpegInputSource::implementation
 
 	void FlushBufferIfNeeded()
 	{
-		if (!buffer_->IsFlushed() && channel_scaler_->IsEof() && audio_muxer_->IsEof())
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
+		if (!buffer_->IsFlushed() && channel_scaler_->IsEof() && (!audio_muxer_ || audio_muxer_->IsEof()))
 			buffer_->Flush();
 	}
 
@@ -180,15 +186,18 @@ struct FFmpegInputSource::implementation
 
 	AVSync PullSync(int audio_samples_count)
 	{	
-		std::unique_lock<std::mutex> lock(buffer_mutex_);
-		while (!(buffer_ && buffer_->Ready()))
-			buffer_cv_.wait(lock);
-		producer_semaphore_.notify();
-		if (is_eof_)
-			return buffer_->PullSync(audio_samples_count);
 		bool finished = false;
-		auto sync = buffer_->PullSync(audio_samples_count);
-		finished = buffer_->IsEof();
+		AVSync sync;
+		{
+			std::unique_lock<std::mutex> lock(buffer_mutex_);
+			while (!(buffer_ && buffer_->Ready()))
+				buffer_cv_.wait(lock);
+			producer_semaphore_.notify();
+			if (is_eof_)
+				return buffer_->PullSync(audio_samples_count);
+			sync = buffer_->PullSync(audio_samples_count);
+			finished = buffer_->IsEof();
+		}
 		if (frame_played_callback_)
 			frame_played_callback_(sync.Time);
 		if (finished)

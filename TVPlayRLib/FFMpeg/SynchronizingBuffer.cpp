@@ -113,7 +113,7 @@ namespace TVPlayR {
 				return AVSync(audio, last_video_, PtsToTime(last_video_->pts, input_video_time_base_));
 			}
 
-			bool Ready() 
+			bool Ready() const
 			{
 				if (is_flushed_)
 					return true;
@@ -169,7 +169,7 @@ namespace TVPlayR {
 
 			bool IsEof() 
 			{
-				return is_flushed_ && video_queue_.empty() && fifo_ != nullptr && fifo_->SamplesCount() == 0;
+				return is_flushed_ && video_queue_.empty() && (!fifo_ || fifo_->SamplesCount() == 0);
 			}
 
 			void SetSynchro(int64_t time)
@@ -193,7 +193,7 @@ namespace TVPlayR {
 	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base) { impl_->PushVideo(frame, time_base); }
 	AVSync SynchronizingBuffer::PullSync(int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 	bool SynchronizingBuffer::Full() const { return impl_->Full(); }
-	bool SynchronizingBuffer::Ready() { return impl_->Ready(); }
+	bool SynchronizingBuffer::Ready() const { return impl_->Ready(); }
 	void SynchronizingBuffer::SetIsPlaying(bool is_playing) { impl_->SetIsPlaying(is_playing); }
 	void SynchronizingBuffer::Seek(int64_t time) { impl_->Seek(time); }
 	void SynchronizingBuffer::SetSynchro(int64_t time) { impl_->SetSynchro(time); }

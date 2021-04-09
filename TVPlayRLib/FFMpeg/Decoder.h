@@ -15,6 +15,7 @@ public:
 	void Push(const std::shared_ptr<AVPacket>& packet);
 	std::shared_ptr<AVFrame> Pull();
 	const AVRational& TimeBase() const;
+	bool IsFlushed() const;
 	void Flush();
 	void Seek(const int64_t seek_time);
 	bool IsEof() const;

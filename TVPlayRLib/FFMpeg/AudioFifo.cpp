@@ -1,5 +1,6 @@
 #include "../pch.h"
 #include "AudioFifo.h"
+#include "../Common/Debug.h"
 
 //#undef DEBUG
 
@@ -19,9 +20,7 @@ AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_r
 bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 {
 	assert(frame->format == sample_fmt_);
-#ifdef DEBUG
-		//OutputDebugStringA(("Pushed audio frame to fifo: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
-#endif 
+    //DebugPrint(("Pushed audio frame to fifo: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
 	int fifo_space = av_audio_fifo_space(aduio_fifo_.get());
 	int fifo_size = av_audio_fifo_size(aduio_fifo_.get());
 	if (frame->nb_samples * 2 > fifo_space + fifo_size)
@@ -50,10 +49,8 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 			}
 		}
 	}
-#ifdef DEBUG
 	else
-	OutputDebugStringA("Frame ignored \n");
-#endif 
+	DebugPrint("Frame ignored \n");
 	return true;
 }
 
@@ -76,16 +73,12 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 		start_sample_ += readed;
 	assert(readed == samples_from_fifo);
 	if (samples_from_fifo < nb_samples)
-#ifdef DEBUG
 	{
-#endif 
 		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channels_count_, sample_fmt_);
-#ifdef DEBUG
-		OutputDebugStringA(("Filled audio with silence at time: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
+		DebugPrint(("Filled audio with silence at time: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
 	}
 //	else
-//		OutputDebugStringA(("Pulled audio frame from fifo at time: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
-#endif 
+//		DebugPrint(("Pulled audio frame from fifo at time: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + "\n").c_str());
 	return frame;
 }
 
@@ -96,9 +89,7 @@ void AudioFifo::DiscardSamples(int nb_samples)
 		nb_samples = samples_in_fifo;
 	if (nb_samples <= 0)
 		return;
-#ifdef DEBUG
-	OutputDebugStringA(("Audio samples discarded: " + std::to_string(nb_samples) +"\n").c_str());
-#endif // DEBUG
+	DebugPrint(("Audio samples discarded: " + std::to_string(nb_samples) +"\n").c_str());
 	if (av_audio_fifo_drain(aduio_fifo_.get(), nb_samples) == 0)
 		start_sample_ += nb_samples;
 }

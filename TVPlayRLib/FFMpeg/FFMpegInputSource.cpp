@@ -11,6 +11,7 @@
 #include "ChannelScaler.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
+#include "../Common/Debug.h"
 
 #undef DEBUG
 
@@ -91,7 +92,7 @@ struct FFmpegInputSource::implementation
 
 	void ProcessNextInputPacket()
 	{
-		if (input_.IsEof())
+		if (buffer_->IsEof())
 			return;
 		auto packet = input_.PullPacket();
 		if (!packet)
@@ -99,13 +100,15 @@ struct FFmpegInputSource::implementation
 			assert(input_.IsEof());
 			for (auto& decoder : audio_decoders_)
 			{
-				decoder->Flush();
+				if (!decoder->IsFlushed())
+					decoder->Flush();
 				ProcessAudio(decoder);
 			}
 			FlushAudioMuxerIfNeeded();
 			if (video_decoder_)
 			{
-				video_decoder_->Flush();
+				if (!video_decoder_->IsFlushed())
+					video_decoder_->Flush();
 				ProcessVideo();
 				FlushChannelScalerIfNeeded();
 			}
@@ -133,28 +136,24 @@ struct FFmpegInputSource::implementation
 
 	void ProcessVideo()
 	{
-		while (auto decoded = video_decoder_->Pull())
-		{
-			std::lock_guard<std::mutex> lock(buffer_mutex_);
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
+		auto decoded = video_decoder_->Pull();
+		if (decoded)
 			channel_scaler_->Push(decoded);
-			while (auto scaled = channel_scaler_->Pull())
-			{
-				buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
-			}
-		}
+		if (!channel_scaler_->IsInitialized())
+			return;
+		while (auto scaled = channel_scaler_->Pull())
+			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
 	}
 
 	void ProcessAudio(const std::unique_ptr<Decoder>& decoder)
 	{
-		while (auto decoded = decoder->Pull())
-		{
-			std::lock_guard<std::mutex> lock(buffer_mutex_);
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
+		auto decoded = decoder->Pull();
+		if (decoded)
 			audio_muxer_->Push(decoder->StreamIndex(), decoded);
-			while (auto muxed = audio_muxer_->Pull())
-			{
-				buffer_->PushAudio(muxed);
-			}
-		}
+		while (auto muxed = audio_muxer_->Pull())
+			buffer_->PushAudio(muxed);
 	}
 
 	void FlushChannelScalerIfNeeded()
@@ -238,9 +237,7 @@ struct FFmpegInputSource::implementation
 		seek_time_ = time;
 		if (input_.Seek(time))
 		{
-#ifdef DEBUG
-			OutputDebugStringA(("Seek: " + std::to_string(time / 1000) + "\n").c_str());
-#endif // DEBUG
+			DebugPrint(("Seek: " + std::to_string(time / 1000) + "\n").c_str());
 			seek_time_ = time;
 			if (video_decoder_)
 				video_decoder_->Seek(time);

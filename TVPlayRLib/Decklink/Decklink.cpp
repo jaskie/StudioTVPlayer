@@ -8,8 +8,7 @@
 #include "../Common/Executor.h"
 #include "Utils.h"
 #include "DecklinkVideoFrame.h"
-
-//#undef DEBUG
+#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -102,7 +101,7 @@ namespace TVPlayR {
 				{
 					std::stringstream msg;
 					msg << "Unable to schedule frame: " << frame->pts << "\n";
-					OutputDebugStringA(msg.str().c_str());
+					DebugPrint(msg.str().c_str());
 				}
 #endif			
 				if (FAILED(ret))
@@ -120,7 +119,7 @@ namespace TVPlayR {
 				{
 					std::stringstream msg;
 					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples << "\n";
-					OutputDebugStringA(msg.str().c_str());
+					DebugPrint(msg.str().c_str());
 				}
 #endif	
 			}
@@ -185,10 +184,7 @@ namespace TVPlayR {
 			void Push(FFmpeg::AVSync& sync)
 			{
 				std::lock_guard<std::mutex> lock(buffer_mutex_);
-#ifdef DEBUG
-				if (buffer_frame_)
-					OutputDebugStringA("Frame dropped when pushed\n");
-#endif
+				DebugPrintIf(buffer_frame_, "Frame dropped when pushed\n");
 				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
 			}
 
@@ -206,15 +202,9 @@ namespace TVPlayR {
 						buffer_frame_.reset();
 					}
 				}
+				DebugPrintIf(!sync, "Frame not received\n");
 				if (!sync)
-#ifdef DEBUG
-				{
-#endif
 					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, 0LL);
-#ifdef DEBUG
-					OutputDebugStringA("Frame not received\n");
-				}
-#endif
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 
@@ -227,13 +217,13 @@ namespace TVPlayR {
 				{
 					std::stringstream msg;
 					msg << "Frame: " << scheduled_frames_ << ": " << ((result == BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate) ? "late" : "dropped") << "\n";
-					OutputDebugStringA(msg.str().c_str());
+					DebugPrint(msg.str().c_str());
 				}
 				else
 				{
 					//std::stringstream msg;
 					//msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts() << "\n";
-					//OutputDebugStringA(msg.str().c_str());
+					//DebugPrint(msg.str().c_str());
 				}
 #endif
 

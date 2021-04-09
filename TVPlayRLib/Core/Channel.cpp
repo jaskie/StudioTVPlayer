@@ -4,6 +4,7 @@
 #include "OutputDevice.h"
 #include "AudioVolume.h"
 #include "../Common/Executor.h"
+#include "../Common/Debug.h"
 
 #undef DEBUG
 
@@ -57,7 +58,7 @@ namespace TVPlayR {
 					if (playing_source_)
 					{
 #ifdef DEBUG
-						OutputDebugStringA(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio\n").c_str());
+						DebugPrint(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio\n").c_str());
 #endif // DEBUG
 						auto sync = playing_source_->PullSync(audio_samples_count);
 						assert(sync.Audio->nb_samples == audio_samples_count);

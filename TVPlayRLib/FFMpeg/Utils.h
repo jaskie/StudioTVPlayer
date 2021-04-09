@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common/Exceptions.h"
+#include "../Common/Debug.h"
 
 #define FF(value) (value >= 0)
 
@@ -18,7 +19,7 @@ if (error_code < 0) \
 	char error_str[ERROR_STRING_LENGTH];\
 	av_make_error_string(error_str, ERROR_STRING_LENGTH, error_code);\
 	std::string exception_message = std::string(error_str) + std::string(" in ") + std::string(__FUNCTION__) + std::string(" at ") + std::string(__FILE__) + std::string(" in line ") + std::to_string(__LINE__);\
-	OutputDebugStringA((exception_message + "\n").c_str());\
+	DebugPrint((exception_message + "\n").c_str());\
 	throw TVPlayR::Common::TVPlayRException(exception_message);\
 	}
 

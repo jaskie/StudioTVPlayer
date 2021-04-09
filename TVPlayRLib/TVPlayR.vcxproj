@@ -152,6 +152,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Debug.h" />
     <ClInclude Include="Common\Executor.h" />
     <ClInclude Include="Common\Semaphore.h" />
     <ClInclude Include="Core\AudioChannelMapEntry.h" />

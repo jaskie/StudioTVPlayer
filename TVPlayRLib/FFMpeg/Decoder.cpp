@@ -2,8 +2,9 @@
 #include "Utils.h"
 #include "Decoder.h"
 #include "AudioFifo.h"
+#include "../Common/Debug.h"
 
-#undef DEBUG
+//#undef DEBUG
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -97,48 +98,43 @@ struct Decoder::implementation
 	void Push(const std::shared_ptr<AVPacket>& packet)
 	{
 		assert(!packet || packet->stream_index == stream_index_);
+		packet_queue_.push_back(packet);
 #ifdef DEBUG
 		if (packet)
 		{
 			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				OutputDebugStringA(("Pushed video packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+				DebugPrint(("Queued video packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
 			if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-				OutputDebugStringA(("Pushed audio packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+				DebugPrint(("Queued audio packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
 		}
 		else
 		{
 			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				OutputDebugStringA("Pushed flush packet to video decoder\n");
+				DebugPrint("Queued flush packet to video decoder\n");
 			if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-				OutputDebugStringA("Pushed flush packet to audio decoder\n");
+				DebugPrint("Queued flush packet to audio decoder\n");
 		}
 #endif 
-#ifdef DEBUG
-		{
-#endif
-			packet_queue_.push_back(packet);
-#ifdef DEBUG
-			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				OutputDebugStringA(("Queued video packet: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
-		}
-#endif
 	}
 
-	bool PushNextPacket()
+	void PushNextPacket()
 	{
 		if (packet_queue_.empty())
-			return false;
+			return;
 		auto packet = packet_queue_.front();
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-			OutputDebugStringA(("Pushed video packet to decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+			if (packet)
+				DebugPrint(("Pushed video packet to video decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+			else
+				DebugPrint("Pushed flush packet to video decoder\n");
 #endif
 		int ret = avcodec_send_packet(ctx_.get(), packet.get());
 		switch (ret)
 		{
 		case 0:
 			packet_queue_.pop_front();
-			return true;
+			break;
 		case AVERROR(EAGAIN):
 			break;
 		case AVERROR_EOF:
@@ -147,57 +143,52 @@ struct Decoder::implementation
 		default:
 			break;
 		}
-		return false;
 	}
 
 	std::shared_ptr<AVFrame> Pull()
 	{
-		while (!packet_queue_.empty())
+		PushNextPacket();
+		auto frame = AllocFrame();
+		auto ret = avcodec_receive_frame(ctx_.get(), frame.get());
+		switch (ret)
 		{
-			PushNextPacket();
-			auto frame = AllocFrame();
-			auto ret = avcodec_receive_frame(ctx_.get(), frame.get());
-			switch (ret)
+		case 0:
+			if (frame->pts == AV_NOPTS_VALUE)
+				frame->pts = frame->best_effort_timestamp;
+			if (frame->pts >= seek_pts_ || frame->pts + frame->pkt_duration > seek_pts_)
 			{
-			case 0:
-				if (frame->pts == AV_NOPTS_VALUE)
-					frame->pts = frame->best_effort_timestamp;
-				if (frame->pts >= seek_pts_ || frame->pts + frame->pkt_duration > seek_pts_)
+				if (hw_device_ctx_)
 				{
-					if (hw_device_ctx_)
-					{
-						auto sw_frame = AllocFrame();
-						THROW_ON_FFMPEG_ERROR(av_hwframe_transfer_data(sw_frame.get(), frame.get(), 0));
-						THROW_ON_FFMPEG_ERROR(av_frame_copy_props(sw_frame.get(), frame.get()));
-						frame = sw_frame;
-					}
-#ifdef DEBUG
-					if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-						OutputDebugStringA(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type) + "\n").c_str());
-					if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-						OutputDebugStringA(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
-#endif 
-					return frame;
+					auto sw_frame = AllocFrame();
+					THROW_ON_FFMPEG_ERROR(av_hwframe_transfer_data(sw_frame.get(), frame.get(), 0));
+					THROW_ON_FFMPEG_ERROR(av_frame_copy_props(sw_frame.get(), frame.get()));
+					return sw_frame;
 				}
-				return nullptr;
-			case AVERROR_EOF:
-				is_eof_ = true;
-				break;
-			case AVERROR(EAGAIN):
-				break;
-			default:
-				THROW_ON_FFMPEG_ERROR(ret);
+#ifdef DEBUG
+				if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
+					DebugPrint(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type) + "\n").c_str());
+				if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
+					DebugPrint(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
+#endif 
+				return frame;
 			}
+			return nullptr;
+		case AVERROR_EOF:
+			is_eof_ = true;
+			break;
+		case AVERROR(EAGAIN):
+			break;
+		default:
+			THROW_ON_FFMPEG_ERROR(ret);
 		}
 		return nullptr;
 	}
 	
 	void Flush()
 	{
-		if (is_flushed_)
-			return;
 		is_flushed_ = true; 
 		Push(nullptr);
+		DebugPrint("Decoder flushed\n");
 	}
 
 	void Seek(const int64_t seek_time)
@@ -224,6 +215,8 @@ Decoder::~Decoder() { }
 void Decoder::Push(const std::shared_ptr<AVPacket>& packet) { impl_->Push(packet); }
 
 std::shared_ptr<AVFrame> Decoder::Pull() { return impl_->Pull(); }
+
+bool Decoder::IsFlushed() const { return impl_->is_flushed_; }
 
 void Decoder::Flush() { impl_->Flush(); }
 

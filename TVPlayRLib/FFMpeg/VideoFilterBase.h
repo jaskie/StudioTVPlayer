@@ -19,9 +19,9 @@ public:
 	virtual AVRational OutputTimeBase() const override;
 	virtual void Flush() override;
 	void Reset();
+	bool IsInitialized() const;
 protected:
 	bool Push(std::shared_ptr<AVFrame> frame);
-	bool IsInitialized() const;
 	void CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational& input_time_base, const std::string& filter_str);
 private:
 	AVFilterContext* source_ctx_ = NULL;

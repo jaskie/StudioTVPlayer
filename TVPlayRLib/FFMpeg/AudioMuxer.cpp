@@ -2,6 +2,7 @@
 #include "AudioMuxer.h"
 #include "Decoder.h"
 #include "AudioFifo.h"
+#include "../Common/Debug.h"
 
 #undef DEBUG
 
@@ -16,8 +17,6 @@ AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, in
 	, nb_channels_(nb_channels)
 	, output_channel_layout_(output_channel_layout)
 	, audio_sample_format_(sample_format)
-	, is_eof_(false)
-	, is_flushed_(false)
 { 
 	filter_str_ = GetAudioMuxerString(sample_rate);
 	Reset();
@@ -80,9 +79,7 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	auto dest = std::find_if(std::begin(source_ctx_), std::end(source_ctx_), [&stream_index](const std::pair<int, AVFilterContext*>& ctx) {return ctx.first == stream_index; });
 	if (dest == std::end(source_ctx_))
 	THROW_EXCEPTION("AudioMuxer: stream not found");
-#ifdef DEBUG
-	OutputDebugStringA(("Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000) + "\n").c_str());
-#endif
+	DebugPrint(("Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000) + "\n").c_str());
 	int ret = av_buffersrc_write_frame(dest->second, frame.get());
 	switch (ret)
 	{
@@ -104,10 +101,7 @@ std::shared_ptr<AVFrame> AudioMuxer::Pull()
 	switch (ret)
 	{
 		case 0: 
-#ifdef DEBUG
-			auto tb = av_buffersink_get_time_base(sink_ctx_);
-			OutputDebugStringA(("Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, tb) / 1000) + "\n").c_str());
-#endif
+			DebugPrint(("Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n").c_str());
 			return frame;
 		case AVERROR(EAGAIN):
 			break;

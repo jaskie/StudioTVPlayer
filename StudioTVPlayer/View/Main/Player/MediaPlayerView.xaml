@@ -170,31 +170,48 @@
                     Thumb.DragCompleted="Slider_DragCompleted"
                     Value="{Binding SliderPosition, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
             </Slider>
-            <Border Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"  >
-                <Grid Width="224" Height="126" Background="DarkGray">
-                    <Rectangle>
-                        <Rectangle.Style>
-                            <Style TargetType="Rectangle">
-                                <Setter Property="Fill" Value="Black"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsAlpha}" Value="True">
-                                        <Setter Property="Fill">
-                                            <Setter.Value>
-                                                <DrawingBrush TileMode="Tile" Viewport="0,0,8,8" ViewportUnits="Absolute">
-                                                    <DrawingBrush.Drawing>
-                                                        <GeometryDrawing Geometry="M0,0 H4 V4 H8 V8 H4 V4 H0Z" Brush="LightGray"/>
-                                                    </DrawingBrush.Drawing>
-                                                </DrawingBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Rectangle.Style>
-                    </Rectangle>
-                    <Image Source="{Binding Preview}" Stretch="None" />
-                </Grid>
-            </Border>
+            <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center">
+                <ItemsControl ItemsSource="{Binding AudioLevelBars}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" IsItemsHost="True"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:AudioLevelBarViewModel}">
+                            <ProgressBar Value="{Binding AudioLevel, Mode=OneWay}" 
+                                         Style="{StaticResource VolumeGaugeStyle}" 
+                                         Orientation="Vertical"
+                                         Width="10" Margin="0 0 5 0" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Border BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"  >
+                    <Grid Width="224" Height="126" Background="DarkGray">
+                        <Rectangle>
+                            <Rectangle.Style>
+                                <Style TargetType="Rectangle">
+                                    <Setter Property="Fill" Value="Black"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAlpha}" Value="True">
+                                            <Setter Property="Fill">
+                                                <Setter.Value>
+                                                    <DrawingBrush TileMode="Tile" Viewport="0,0,8,8" ViewportUnits="Absolute">
+                                                        <DrawingBrush.Drawing>
+                                                            <GeometryDrawing Geometry="M0,0 H4 V4 H8 V8 H4 V4 H0Z" Brush="LightGray"/>
+                                                        </DrawingBrush.Drawing>
+                                                    </DrawingBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Rectangle.Style>
+                        </Rectangle>
+                        <Image Source="{Binding Preview}" Stretch="None" />
+                    </Grid>
+                </Border>
+            </StackPanel>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>

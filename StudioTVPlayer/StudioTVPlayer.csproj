@@ -120,6 +120,7 @@
     <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
+    <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
@@ -159,10 +160,6 @@
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Resources\VolumeGauge.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

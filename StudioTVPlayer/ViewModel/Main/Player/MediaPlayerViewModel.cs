@@ -47,6 +47,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Channel.Name;
             VideoFormat = player.Channel.VideoFormat;
+            AudioLevelBars = Enumerable.Repeat(new AudioLevelBarViewModel(), player.Channel.AudioChannelCount).ToArray();
             player.Loaded += MediaPlayer_Loaded;
             player.FramePlayed += MediaPlayer_Progress;
             player.Stopped += MediaPlayer_Stopped;
@@ -114,6 +115,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 _mediaPlayer.SetVolume(value);
             }
         }
+
+        public AudioLevelBarViewModel[] AudioLevelBars { get; }
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
@@ -377,7 +380,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void Player_AudioVolume(object sender, Model.Args.AudioVolumeEventArgs e)
         {
-
+            if (e.AudioVolume.Length == 0)
+            {
+                foreach (var bar in AudioLevelBars)
+                    bar.AudioLevel = AudioLevelBarViewModel.MinValue;
+                return;
+            }
+            Debug.Assert(e.AudioVolume.Length == AudioLevelBars.Length);
+            for (int i = 0; i < e.AudioVolume.Length; i++)
+                AudioLevelBars[i].AudioLevel = Math.Max(AudioLevelBarViewModel.MinValue, 20 * Math.Log10(e.AudioVolume[i]) + double.Epsilon);
         }
 
         private bool CanTogglePlay(object obj)

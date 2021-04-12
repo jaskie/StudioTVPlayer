@@ -12,10 +12,12 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <!-- Theme setting -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
+                <!-- Application local settings -->
                 <ResourceDictionary Source="Resources/AppStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
+
             <DataTemplate x:Key="mediaDragTemplate">
                 <Image Height="90" Source="{Binding Thumbnail}">
                     <Image.OpacityMask>

@@ -116,11 +116,10 @@ namespace StudioTVPlayer.Model
         {
             if (rundownItem == null)
                 return;
-            rundownItem.Pause();
             rundownItem.FramePlayed -= PlaiyngRundownItem_FramePlayed;
             rundownItem.Stopped -= PlaiyngRundownItem_Stopped;
+            rundownItem.Pause();
             rundownItem.Unload();
-            Stopped?.Invoke(this, EventArgs.Empty);
         }
 
         private void InternalLoad(RundownItem rundownItem)
@@ -129,8 +128,8 @@ namespace StudioTVPlayer.Model
             {
                 rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
                 rundownItem.Stopped += PlaiyngRundownItem_Stopped;
-                rundownItem.Preload(Channel.AudioChannelCount);
-                Channel.Load(rundownItem);
+                if (rundownItem.Preload(Channel.AudioChannelCount))
+                    Channel.Load(rundownItem);
             }
             Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
         }
@@ -210,11 +209,8 @@ namespace StudioTVPlayer.Model
                 return;
             if (current.Media.Duration - e.Time < PreloadTime)
                 return;
-            if (!nextItem.Preloaded)
-            {
-                nextItem.Preload(Channel.AudioChannelCount);
+            if (nextItem.Preload(Channel.AudioChannelCount))
                 Channel.Preload(nextItem);
-            }
         }
 
         private void RundownItem_AutoStartChanged(object sender, EventArgs e)

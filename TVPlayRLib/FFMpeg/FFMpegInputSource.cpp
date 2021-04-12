@@ -36,6 +36,7 @@ struct FFmpegInputSource::implementation
 	std::unique_ptr<SynchronizingBuffer> buffer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
+	//std::mutex 
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
@@ -258,6 +259,7 @@ struct FFmpegInputSource::implementation
 
 	void Play()
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		is_playing_ = true;
 		if (buffer_)
 			buffer_->SetIsPlaying(true);
@@ -265,8 +267,10 @@ struct FFmpegInputSource::implementation
 
 	void Pause()
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
+		if(buffer_)
+			buffer_->SetIsPlaying(false);
 		is_playing_ = false;
-		buffer_->SetIsPlaying(false);
 		if (stopped_callback_)
 			stopped_callback_();
 	}

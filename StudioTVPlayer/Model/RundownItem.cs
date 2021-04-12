@@ -52,26 +52,26 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public bool Preloaded { get; internal set; }
+        public bool Preloaded => _preloaded != default;
 
         public void Unload()
         {
-            if (InputFile is null)
+            if (Interlocked.Exchange(ref _preloaded, default) == default)
                 return;
             InputFile.FramePlayed -= InputFile_FramePlayed;
             InputFile.Stopped -= InputFile_Stopped;
             InputFile.Dispose();
             InputFile = null;
-            Interlocked.Exchange(ref _preloaded, default);
         }
 
-        public void Preload(int audioChannelCount)
+        public bool Preload(int audioChannelCount)
         {
             if (Interlocked.Exchange(ref _preloaded, 1) != default)
-                return;
+                return false;
             InputFile = new TVPlayR.InputFile(Media.FullPath, audioChannelCount);
             InputFile.FramePlayed += InputFile_FramePlayed;
             InputFile.Stopped += InputFile_Stopped;
+            return true;
         }
 
         public void Play()

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
+ 
+    [DebuggerDisplay(nameof(FullPath))]
     public class Media : INotifyPropertyChanged
     {
         private string _directoryName;

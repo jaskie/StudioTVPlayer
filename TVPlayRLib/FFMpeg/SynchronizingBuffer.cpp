@@ -143,13 +143,13 @@ namespace TVPlayR {
 				video_queue_.clear();
 				last_video_.reset();
 				is_flushed_ = false;
-				DebugPrint(("Seek: " + std::to_string(time/1000) + "\n").c_str());
+				DebugPrint(("Buffer seek: " + std::to_string(time/1000) + "\n").c_str());
 			}
 
 			void Flush()
 			{
 				is_flushed_ = true;
-				DebugPrint("Flushed\n");
+				DebugPrint("Buffer flushed\n");
 			}
 
 			bool IsEof() 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -266,6 +267,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (playerItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
                 return;
             _mediaPlayer.Load(playerItem.RundownItem);
+            IsPlaying = false;
         }
 
         private void LoadNextItem(object obj)
@@ -298,6 +300,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void Unload(object obj = null)
         {
             CurrentRundownItem = null;
+            IsPlaying = false;
             _mediaPlayer.Clear();
         }
 
@@ -353,6 +356,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_Stopped(object sender, EventArgs e)
         {
+            Debug.WriteLine("Stopped");
             IsPlaying = false;
             Refresh();
         }

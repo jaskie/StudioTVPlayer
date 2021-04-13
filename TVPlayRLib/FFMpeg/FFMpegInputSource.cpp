@@ -29,6 +29,7 @@ struct FFmpegInputSource::implementation
 	const Core::HwAccel acceleration_;
 	const std::string hw_device_;
 	std::unique_ptr<Decoder> video_decoder_;
+	std::atomic_bool is_loop_ = false;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
@@ -99,7 +100,7 @@ struct FFmpegInputSource::implementation
 		if (!packet)
 		{
 			assert(input_.IsEof());
-			for (auto& decoder : audio_decoders_)
+			for (const auto& decoder : audio_decoders_)
 			{
 				if (!decoder->IsFlushed())
 					decoder->Flush();
@@ -113,7 +114,7 @@ struct FFmpegInputSource::implementation
 				ProcessVideo();
 				FlushChannelScalerIfNeeded();
 			}
-			FlushBufferIfNeeded();
+			FlushBufferOrLoopIfNeeded();
 		}
 		else 	// there is no need to flush if packets are comming
 		{
@@ -123,7 +124,7 @@ struct FFmpegInputSource::implementation
 				ProcessVideo();
 			}
 			else
-				for (auto& audio_decoder : audio_decoders_)
+				for (const auto& audio_decoder : audio_decoders_)
 				{
 					if (packet->stream_index == audio_decoder->StreamIndex())
 					{
@@ -174,11 +175,24 @@ struct FFmpegInputSource::implementation
 			audio_muxer_->Flush();
 	}
 
-	void FlushBufferIfNeeded()
+	void FlushBufferOrLoopIfNeeded()
 	{
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (!buffer_->IsFlushed() && channel_scaler_->IsEof() && (!audio_muxer_ || audio_muxer_->IsEof()))
-			buffer_->Flush();
+			if (is_loop_)
+			{
+				input_.Seek(0LL);
+				video_decoder_->Seek(0LL);
+				for (const auto& decoder : audio_decoders_)
+					decoder->Seek(0LL);
+				if (audio_muxer_)
+					audio_muxer_->Reset();
+				if (channel_scaler_)
+					channel_scaler_->Reset();
+				DebugPrint("Loop\n");
+			}
+			else
+				buffer_->Flush();
 	}
 
 #pragma endregion
@@ -273,6 +287,11 @@ struct FFmpegInputSource::implementation
 		is_playing_ = false;
 		if (stopped_callback_)
 			stopped_callback_();
+	}
+
+	void SetIsLoop(bool is_loop)
+	{
+		is_loop_ = is_loop;
 	}
 
 	void InitializeVideoDecoder()
@@ -425,6 +444,7 @@ void FFmpegInputSource::RemoveFromChannel()				{ impl_->RemoveFromChannel();}
 void FFmpegInputSource::Play()							{ impl_->Play(); }
 void FFmpegInputSource::Pause()							{ impl_->Pause(); }
 bool FFmpegInputSource::IsPlaying()	const				{ return impl_->is_playing_; }
+void FFmpegInputSource::SetIsLoop(bool is_loop) { impl_->SetIsLoop(is_loop); }
 int64_t FFmpegInputSource::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
 int64_t FFmpegInputSource::GetVideoStart() const		{ return impl_->GetVideoStart(); }
 int64_t FFmpegInputSource::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }

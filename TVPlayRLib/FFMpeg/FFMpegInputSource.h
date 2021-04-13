@@ -26,6 +26,7 @@ public:
 	virtual void Play() override;
 	virtual void Pause() override;
 	virtual bool IsPlaying() const override;
+	void SetIsLoop(bool is_loop);
 	virtual AVRational GetTimeBase() const override;
 	virtual AVRational GetFrameRate() const override;
 	int64_t GetAudioDuration() const override;

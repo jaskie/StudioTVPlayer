@@ -310,9 +310,11 @@ struct FFmpegInputSource::implementation
 		auto info_iter = std::find_if(streams.begin(), streams.end(), [](const auto& info) { return info.Type == Core::MediaType::audio && info.Language == "pol"; });
 		if (info_iter == streams.end())
 			info_iter = std::find_if(streams.begin(), streams.end(), [](const auto& info) { return info.Type == Core::MediaType::audio; });
-		if (info_iter == streams.end())
-			return;
-		audio_decoders_.emplace_back(std::make_unique<Decoder>(info_iter->Codec, info_iter->Stream, seek_time_));
+		while (info_iter != streams.end())
+		{
+			audio_decoders_.emplace_back(std::make_unique<Decoder>(info_iter->Codec, info_iter->Stream, seek_time_));
+			info_iter++;
+		}
 	}
 
 	bool IsStream(const std::string& fileName)

@@ -44,8 +44,8 @@ int main()
 		channel.SetFrameClock(device);
 		channel.AddOutput(device);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\MajaPoniatowska.wmv", Core::HwAccel::none, "", 2);
-		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\bbb_sunflower_2160p_30fps_normal.mp4", Core::HwAccel::none, "", 2);
-		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Temp\\25i.mov", Core::HwAccel::none, "", 2);
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\2021-04-06_KORONAWIRUS.mxf", Core::HwAccel::none, "", 2);
+		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Temp\\25i.mov", Core::HwAccel::none, "", 2);
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		input->Seek(AV_TIME_BASE * 8);

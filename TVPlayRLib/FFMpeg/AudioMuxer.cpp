@@ -33,16 +33,16 @@ std::string AudioMuxer::GetAudioMuxerString(const int sample_rate)
 		filter << "amerge=inputs=" << decoders_.size() << ",";
 		if (total_nb_channels > 2)
 			filter << "channelmap=0|1:stereo,";
-		//if (total_nb_channels == 1)
-		//	filter << "channelmap=0|0:stereo,";
+		if (total_nb_channels == 1)
+			filter << "channelmap=0|0:stereo,";
 	}
 	else
 	{
-		//if (total_nb_channels > 2)
-		//	filter << "[a0]channelmap=0|1:stereo,";
-		//if (total_nb_channels == 1)
-		//	filter << "[a0]channelmap=0|0:stereo,";
-		//if (total_nb_channels == 2)
+		if (total_nb_channels > 2)
+			filter << "[a0]channelmap=0|1:stereo,";
+		if (total_nb_channels == 1)
+			filter << "[a0]channelmap=0|0:stereo,";
+		if (total_nb_channels == 2)
 			filter << "[a0]";
 	}
 	filter << "aresample=out_sample_fmt=" << av_get_sample_fmt_name(audio_sample_format_) << ":out_sample_rate=" << sample_rate;

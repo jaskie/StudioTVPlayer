@@ -31,7 +31,7 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
 		//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
 		//	frame->best_effort_timestamp = frame->pts;
 		//frame->pts = av_rescale_q(frame->best_effort_timestamp, input_time_base_, av_buffersink_get_time_base(sink_ctx_));
-		DebugPrint(("Pulled from VideoFilterBase: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n"));
+		DebugPrintLine(("Pulled from VideoFilterBase: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n"));
 		return frame;
 	}
 	return nullptr;
@@ -109,7 +109,7 @@ void VideoFilterBase::CreateFilterChain(std::shared_ptr<AVFrame> frame, const AV
 		inputs->next = NULL;
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_str.c_str(), inputs, outputs, NULL));
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
-		DebugPrint(args);
+		DebugPrintLine(args);
 #ifdef DEBUG
 		dump_filter(filter_str, graph_.get());
 #endif // DEBUG

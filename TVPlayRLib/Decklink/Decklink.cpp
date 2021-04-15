@@ -100,8 +100,8 @@ namespace TVPlayR {
 				if (FAILED(ret))
 				{
 					std::stringstream msg;
-					msg << "Unable to schedule frame: " << frame->pts << "\n";
-					DebugPrint(msg.str());
+					msg << "Unable to schedule frame: " << frame->pts;
+					DebugPrintLine(msg.str());
 				}
 #endif			
 				if (FAILED(ret))
@@ -118,8 +118,8 @@ namespace TVPlayR {
 				if (samples_written != buffer->nb_samples)
 				{
 					std::stringstream msg;
-					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples << "\n";
-					DebugPrint(msg.str());
+					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples;
+					DebugPrintLine(msg.str());
 				}
 #endif	
 			}
@@ -202,7 +202,7 @@ namespace TVPlayR {
 						buffer_frame_.reset();
 					}
 				}
-				DebugPrintIf(!sync, "Decklink: frame not received\n");
+				DebugPrintIf(!sync, "Decklink: frame not received");
 				if (!sync)
 					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, 0LL);
 				if (frame_requested_callback_)
@@ -216,14 +216,14 @@ namespace TVPlayR {
 				if (result != BMDOutputFrameCompletionResult::bmdOutputFrameCompleted)
 				{
 					std::stringstream msg;
-					msg << "Frame: " << scheduled_frames_ << ": " << ((result == BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate) ? "late" : "dropped") << "\n";
-					DebugPrint(msg.str());
+					msg << "Frame: " << scheduled_frames_ << ": " << ((result == BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate) ? "late" : "dropped");
+					DebugPrintLine(msg.str());
 				}
 				else
 				{
 					//std::stringstream msg;
-					//msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts() << "\n";
-					//DebugPrint(msg.str());
+					//msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts();
+					//DebugPrintLine(msg.str());
 				}
 #endif
 

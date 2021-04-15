@@ -189,7 +189,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 					audio_muxer_->Reset();
 				if (channel_scaler_)
 					channel_scaler_->Reset();
-				DebugPrint("Loop\n");
+				DebugPrintLine("Loop");
 			}
 			else
 				buffer_->Flush();
@@ -252,7 +252,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 		seek_time_ = time;
 		if (input_.Seek(time))
 		{
-			DebugPrint(("Seek: " + std::to_string(time / 1000) + "\n"));
+			DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
 			seek_time_ = time;
 			if (video_decoder_)
 				video_decoder_->Seek(time);

@@ -76,7 +76,7 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	auto dest = std::find_if(std::begin(source_ctx_), std::end(source_ctx_), [&stream_index](const std::pair<int, AVFilterContext*>& ctx) {return ctx.first == stream_index; });
 	if (dest == std::end(source_ctx_))
 	THROW_EXCEPTION("AudioMuxer: stream not found");
-	DebugPrint(("Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000) + "\n"));
+	DebugPrintLine(("Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000)));
 	int ret = av_buffersrc_write_frame(dest->second, frame.get());
 	switch (ret)
 	{
@@ -98,7 +98,7 @@ std::shared_ptr<AVFrame> AudioMuxer::Pull()
 	switch (ret)
 	{
 		case 0: 
-			DebugPrint(("Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n"));
+			DebugPrintLine(("Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000)));
 			return frame;
 		case AVERROR(EAGAIN):
 			break;

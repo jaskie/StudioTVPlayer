@@ -54,7 +54,7 @@ namespace TVPlayR {
 				if (!fifo_->TryPush(frame))
 				{
 					fifo_->Reset(PtsToTime(frame->pts, audio_time_base_));
-					DebugPrint("Audio fifo overflow. Flushing.\n");
+					DebugPrintLine("Audio fifo overflow. Flushing.");
 					fifo_->TryPush(frame);
 				}
 			}
@@ -64,13 +64,13 @@ namespace TVPlayR {
 				if (!(frame && have_video_))
 					return;
 				input_video_time_base_ = time_base;
-				DebugPrint(("Push video " + std::to_string(PtsToTime(frame->pts, input_video_time_base_)) + "\n"));
+				DebugPrintLine(("Push video " + std::to_string(PtsToTime(frame->pts, input_video_time_base_))));
 				assert(!is_flushed_);
 				Sweep();
 				if (video_queue_.size() > video_frame_rate_.num * 10 / video_frame_rate_.den) // approx. 10 seconds
 				{
 					video_queue_.clear();
-					DebugPrint("Video queue overflow. Flushing.\n");
+					DebugPrintLine("Video queue overflow. Flushing.");
 				}
 				video_queue_.push_back(frame);
 			}
@@ -100,7 +100,7 @@ namespace TVPlayR {
 					video_queue_.pop_front();
 #ifdef DEBUG
 				if (audio->pts != AV_NOPTS_VALUE && last_video_->pts != AV_NOPTS_VALUE)
-					DebugPrint(("Output video " + std::to_string(PtsToTime(last_video_->pts, input_video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + "\n"));
+					DebugPrintLine(("Output video " + std::to_string(PtsToTime(last_video_->pts, input_video_time_base_)) + ", audio: " +  std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000)));
 #endif // DEBUG
 				return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_));
 			}
@@ -132,7 +132,7 @@ namespace TVPlayR {
 			void SetIsPlaying(bool is_playing)
 			{
 				is_playing_ = is_playing;
-				DebugPrint(is_playing ? "Playing\n" : "Paused\n");
+				DebugPrintLine(is_playing ? "Playing" : "Paused");
 			}
 
 			void Seek(int64_t time)
@@ -142,13 +142,13 @@ namespace TVPlayR {
 				video_queue_.clear();
 				last_video_.reset();
 				is_flushed_ = false;
-				DebugPrint(("Buffer seek: " + std::to_string(time/1000) + "\n"));
+				DebugPrintLine(("Buffer seek: " + std::to_string(time/1000)));
 			}
 
 			void Flush()
 			{
 				is_flushed_ = true;
-				DebugPrint("Buffer flushed\n");
+				DebugPrintLine("Buffer flushed");
 			}
 
 			bool IsEof() 
@@ -159,7 +159,7 @@ namespace TVPlayR {
 			void SetSynchro(int64_t time)
 			{
 				sync_ = time;
-				DebugPrint(("Sync set to: " + std::to_string(time / 1000) + "\n"));
+				DebugPrintLine(("Sync set to: " + std::to_string(time / 1000)));
 			}
 
 		};

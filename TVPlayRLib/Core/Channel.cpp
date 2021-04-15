@@ -62,6 +62,8 @@ namespace TVPlayR {
 #endif // DEBUG
 						auto sync = playing_source_->PullSync(audio_samples_count);
 						assert(sync.Audio->nb_samples == audio_samples_count);
+						if (!sync.Video)
+							sync.Video = empty_video_;
 						volume = audio_volume_.ProcessVolume(sync.Audio);
 						for (auto device : output_devices_)
 							device->Push(sync);

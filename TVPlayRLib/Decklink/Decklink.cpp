@@ -184,7 +184,7 @@ namespace TVPlayR {
 			void Push(FFmpeg::AVSync& sync)
 			{
 				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				DebugPrintIf(buffer_frame_, "Frame dropped when pushed\n");
+				DebugPrintIf(buffer_frame_, "Decklink: Frame dropped when pushed\n");
 				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
 			}
 
@@ -202,7 +202,7 @@ namespace TVPlayR {
 						buffer_frame_.reset();
 					}
 				}
-				DebugPrintIf(!sync, "Frame not received\n");
+				DebugPrintIf(!sync, "Decklink: frame not received\n");
 				if (!sync)
 					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, 0LL);
 				if (frame_requested_callback_)

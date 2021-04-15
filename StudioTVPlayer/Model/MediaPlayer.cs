@@ -101,7 +101,8 @@ namespace StudioTVPlayer.Model
             if (!_rundown.Remove(rundownItem))
                 return false;
             rundownItem.AutoStartChanged -= RundownItem_AutoStartChanged;
-            rundownItem.Dispose();
+            if (rundownItem != PlayingRundownItem)
+                rundownItem.Dispose();
             return true;
         }
 

@@ -178,7 +178,9 @@ struct FFmpegInputSource::implementation
 	void FlushBufferOrLoopIfNeeded()
 	{
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (!buffer_->IsFlushed() && channel_scaler_->IsEof() && (!audio_muxer_ || audio_muxer_->IsEof()))
+		if (!buffer_->IsFlushed() && // not flushed yet
+			(channel_scaler_->IsEof() || (video_decoder_->IsEof() && !channel_scaler_->IsInitialized())) && // scaler will provide no more frames
+			(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
 			if (is_loop_)
 			{
 				input_.Seek(0LL);
@@ -307,14 +309,18 @@ struct FFmpegInputSource::implementation
 	void InitializeAudioDecoders()
 	{
 		auto& streams = input_.GetStreams();
-		auto info_iter = std::find_if(streams.begin(), streams.end(), [](const auto& info) { return info.Type == Core::MediaType::audio && info.Language == "pol"; });
-		if (info_iter == streams.end())
-			info_iter = std::find_if(streams.begin(), streams.end(), [](const auto& info) { return info.Type == Core::MediaType::audio; });
-		while (info_iter != streams.end())
-		{
-			audio_decoders_.emplace_back(std::make_unique<Decoder>(info_iter->Codec, info_iter->Stream, seek_time_));
-			info_iter++;
-		}
+		if (std::any_of(streams.begin(), streams.end(), [](const auto& stream) { return stream.Type == Core::MediaType::audio && stream.Language == "pol"; }))
+			for (const auto& stream : streams)
+			{
+				if (stream.Type == Core::MediaType::audio && stream.Language == "pol")
+					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek_time_));
+			}
+		else
+			for (const auto& stream : streams)
+			{
+				if (stream.Type == Core::MediaType::audio)
+					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek_time_));
+			}
 	}
 
 	bool IsStream(const std::string& fileName)

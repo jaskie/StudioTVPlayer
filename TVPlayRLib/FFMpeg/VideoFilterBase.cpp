@@ -1,6 +1,5 @@
 #include "../pch.h"
 #include "VideoFilterBase.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -32,7 +31,7 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
 		//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
 		//	frame->best_effort_timestamp = frame->pts;
 		//frame->pts = av_rescale_q(frame->best_effort_timestamp, input_time_base_, av_buffersink_get_time_base(sink_ctx_));
-		DebugPrint(("Pulled from VideoFilterBase: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n").c_str());
+		DebugPrint(("Pulled from VideoFilterBase: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n"));
 		return frame;
 	}
 	return nullptr;

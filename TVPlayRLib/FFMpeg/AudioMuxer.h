@@ -1,5 +1,6 @@
 #pragma once
 #include "FilterBase.h"
+#include "../Common/Debug.h"
 
 
 namespace TVPlayR {

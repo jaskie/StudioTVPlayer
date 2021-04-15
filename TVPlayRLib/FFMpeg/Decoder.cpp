@@ -101,9 +101,9 @@ struct Decoder::implementation : Common::DebugTarget<false>
 		if (packet)
 		{
 			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				DebugPrint(("Queued video packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+				DebugPrint(("Queued video packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n"));
 			if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-				DebugPrint(("Queued audio packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+				DebugPrint(("Queued audio packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n"));
 		}
 		else
 		{
@@ -123,7 +123,7 @@ struct Decoder::implementation : Common::DebugTarget<false>
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			if (packet)
-				DebugPrint(("Pushed video packet to video decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n").c_str());
+				DebugPrint(("Pushed video packet to video decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000) + "\n"));
 			else
 				DebugPrint("Pushed flush packet to video decoder\n");
 #endif
@@ -164,9 +164,9 @@ struct Decoder::implementation : Common::DebugTarget<false>
 				}
 #ifdef DEBUG
 				if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-					DebugPrint(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type) + "\n").c_str());
+					DebugPrint(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type) + "\n"));
 				if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-					DebugPrint(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n").c_str());
+					DebugPrint(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + "\n"));
 #endif 
 				return frame;
 			}

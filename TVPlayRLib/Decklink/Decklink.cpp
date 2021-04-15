@@ -101,7 +101,7 @@ namespace TVPlayR {
 				{
 					std::stringstream msg;
 					msg << "Unable to schedule frame: " << frame->pts << "\n";
-					DebugPrint(msg.str().c_str());
+					DebugPrint(msg.str());
 				}
 #endif			
 				if (FAILED(ret))
@@ -119,7 +119,7 @@ namespace TVPlayR {
 				{
 					std::stringstream msg;
 					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples << "\n";
-					DebugPrint(msg.str().c_str());
+					DebugPrint(msg.str());
 				}
 #endif	
 			}
@@ -217,13 +217,13 @@ namespace TVPlayR {
 				{
 					std::stringstream msg;
 					msg << "Frame: " << scheduled_frames_ << ": " << ((result == BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate) ? "late" : "dropped") << "\n";
-					DebugPrint(msg.str().c_str());
+					DebugPrint(msg.str());
 				}
 				else
 				{
 					//std::stringstream msg;
 					//msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts() << "\n";
-					//DebugPrint(msg.str().c_str());
+					//DebugPrint(msg.str());
 				}
 #endif
 

@@ -7,9 +7,14 @@ if (c) \
 namespace TVPlayR {
 	namespace Common {
 
-template <bool debug_output> class DebugTarget
+template <const bool debug_output> class DebugTarget
 {
 protected:
+
+	inline void DebugPrint(const std::string& s)
+	{
+		DebugPrint(s.c_str());
+	}
 
 	inline void DebugPrint(const char * s)
 	{

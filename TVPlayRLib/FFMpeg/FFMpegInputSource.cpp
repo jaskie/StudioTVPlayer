@@ -252,7 +252,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 		seek_time_ = time;
 		if (input_.Seek(time))
 		{
-			DebugPrint(("Seek: " + std::to_string(time / 1000) + "\n").c_str());
+			DebugPrint(("Seek: " + std::to_string(time / 1000) + "\n"));
 			seek_time_ = time;
 			if (video_decoder_)
 				video_decoder_->Seek(time);

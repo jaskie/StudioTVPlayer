@@ -45,8 +45,8 @@ int main()
 		channel.AddOutput(device);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\MajaPoniatowska.wmv", Core::HwAccel::none, "", 2);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("C:\\public\\JB 810.mov", Core::HwAccel::none, "", 2);
-		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Temp\\test5.mov", Core::HwAccel::none, "", 2);
-		//input->SetIsLoop(true);
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Temp\\timecode.mov", Core::HwAccel::none, "", 2);
+		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//input->Seek(600080000);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });

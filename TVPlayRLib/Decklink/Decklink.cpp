@@ -13,7 +13,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 		
-		struct Decklink::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget<false>
+		struct Decklink::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget<true>
 		{
 			const CComPtr<IDeckLink> decklink_;
 			const CComQIPtr<IDeckLinkOutput> output_;

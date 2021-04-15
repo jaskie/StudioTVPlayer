@@ -16,7 +16,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
-struct FFmpegInputSource::implementation : Common::DebugTarget<false>
+struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 {
 	std::atomic_bool is_eof_ = false;
 	const std::string file_name_;

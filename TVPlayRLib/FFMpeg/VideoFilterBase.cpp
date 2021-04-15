@@ -2,9 +2,6 @@
 #include "VideoFilterBase.h"
 #include "../Common/Debug.h"
 
-#undef DEBUG
-
-
 namespace TVPlayR {
 	namespace FFmpeg {
 
@@ -113,9 +110,9 @@ void VideoFilterBase::CreateFilterChain(std::shared_ptr<AVFrame> frame, const AV
 		inputs->next = NULL;
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_str.c_str(), inputs, outputs, NULL));
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
-#ifdef DEBUG
 		DebugPrint(args);
-		dump_filter(filter_str, graph_);
+#ifdef DEBUG
+		dump_filter(filter_str, graph_.get());
 #endif // DEBUG
 	}
 	catch (const std::exception& e)

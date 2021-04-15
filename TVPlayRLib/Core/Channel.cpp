@@ -6,12 +6,10 @@
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
 
-#undef DEBUG
-
 namespace TVPlayR {
 	namespace Core {
 
-		struct Channel::implementation
+		struct Channel::implementation : Common::DebugTarget<false>
 		{
 			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
 			std::shared_ptr<OutputDevice> frame_clock_;

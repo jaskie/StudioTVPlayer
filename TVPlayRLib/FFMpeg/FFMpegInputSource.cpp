@@ -13,12 +13,10 @@
 #include "../Core/StreamInfo.h"
 #include "../Common/Debug.h"
 
-#undef DEBUG
-
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
-struct FFmpegInputSource::implementation
+struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 {
 	std::atomic_bool is_eof_ = false;
 	const std::string file_name_;

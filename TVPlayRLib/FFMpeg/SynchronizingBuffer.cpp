@@ -4,14 +4,13 @@
 #include "../Core/VideoFormat.h"
 #include "../Common/Debug.h"
 
-//#undef DEBUG 
-
 namespace TVPlayR {
 	namespace FFmpeg {
 
 #define SAMPLE_RATE 48000
 
-		struct SynchronizingBuffer::implementation {
+		struct SynchronizingBuffer::implementation : Common::DebugTarget<false>
+		{
 			const AVRational audio_time_base_;
 			const AVRational video_frame_rate_;
 			AVRational input_video_time_base_;

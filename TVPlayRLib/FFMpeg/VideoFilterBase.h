@@ -6,7 +6,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 class VideoFilterBase :
-	public FilterBase
+	public FilterBase, Common::DebugTarget<false>
 {
 private:
 public:

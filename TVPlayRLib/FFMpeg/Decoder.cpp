@@ -4,8 +4,6 @@
 #include "AudioFifo.h"
 #include "../Common/Debug.h"
 
-//#undef DEBUG
-
 namespace TVPlayR {
 	namespace FFmpeg {
 
@@ -20,7 +18,7 @@ AVPixelFormat GetHwPixelFormat(AVCodecContext* ctx, const enum AVPixelFormat* pi
 	return AV_PIX_FMT_NONE;
 }
 
-struct Decoder::implementation
+struct Decoder::implementation : Common::DebugTarget<false>
 {
 	const int64_t start_ts_;
 	const Core::HwAccel acceleration_;

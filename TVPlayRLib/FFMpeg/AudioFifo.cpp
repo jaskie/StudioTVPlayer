@@ -2,8 +2,6 @@
 #include "AudioFifo.h"
 #include "../Common/Debug.h"
 
-//#undef DEBUG
-
 namespace TVPlayR {
 	namespace FFmpeg {
 

@@ -140,7 +140,9 @@
     <ClInclude Include="Preview\PreviewScaler.h">
       <Filter>Preview</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Debug.h" />
+    <ClInclude Include="Common\Debug.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">

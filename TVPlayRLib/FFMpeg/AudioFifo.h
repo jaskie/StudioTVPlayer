@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class AudioFifo
+class AudioFifo: Common::DebugTarget<false>
 {
 public:
 	AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, int64_t seek_time, int64_t fifo_duration);

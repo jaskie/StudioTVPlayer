@@ -37,7 +37,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
             CueCommand = new UiCommand(Cue, _ => CurrentRundownItem != null);
-            CheckItemCommand = new UiCommand(param => CheckItem(param));
             TogglePlayCommand = new UiCommand(TogglePlay, CanTogglePlay);
             UnloadCommand = new UiCommand(Unload, _ => CurrentRundownItem != null);
             LoadNextItemCommand = new UiCommand(LoadNextItem, CanLoadNextItem);
@@ -153,7 +152,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public ICommand LoadMediaCommand { get; }
         public ICommand LoadSelectedMediaCommand { get; }
         public ICommand CueCommand { get; }
-        public ICommand CheckItemCommand { get; }
         public ICommand DisplayTimecodeEditCommand { get; }
         public ICommand DeleteDisabledCommand { get; }
         public ICommand SeekFramesCommand { get; }

@@ -35,8 +35,10 @@ namespace TVPlayR {
 			double get() { return _volume; }
 			void set(double volume) 
 			{
-				_volume = volume;
+				if (volume == _volume)
+					return;
 				_channel->SetVolume(volume);
+				_volume = volume;
 			}
 		}
 		event EventHandler<AudioVolumeEventArgs^>^ AudioVolume;

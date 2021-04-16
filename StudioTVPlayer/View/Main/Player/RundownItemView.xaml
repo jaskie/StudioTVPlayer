@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
-             xmlns:dd="urn:gong-wpf-dragdrop"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              d:DataContext="{d:DesignInstance vm:RundownItemViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="500"
@@ -17,6 +17,16 @@
             <Setter Property="Margin" Value="5 3"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
+        <Style TargetType="ToggleButton" BasedOn="{StaticResource MahApps.Styles.ToggleButton.Circle}">
+            <Setter Property="Padding" Value="3"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+        <Style TargetType="mah:FontIcon">
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+        <SolidColorBrush x:Key="MahApps.Brushes.Accent" Color="BlueViolet"/>
     </UserControl.Resources>
 
     <Grid>
@@ -31,6 +41,7 @@
             </Style>
         </Grid.Style>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
@@ -54,21 +65,27 @@
                 </Style>
             </Ellipse.Style>
         </Ellipse>
-        <CheckBox Grid.Column="1" IsChecked="{Binding IsDisabled}" Margin="10 0 0 0" VerticalAlignment="Center" >
-            <CheckBox.Style>
-                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-                    <Setter Property="ToolTip" Value="Ready to play"/>
+        <ToggleButton Grid.Column="1" IsChecked="{Binding IsDisabled}" VerticalAlignment="Center" >
+            <ToggleButton.Style>
+                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                    <Setter Property="ToolTip" Value="Ready to play | Click to disable"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
-                            <Setter Property="ToolTip" Value="Disabled | Right mouse button to re-enable"/>
-                        </DataTrigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="ToolTip" Value="Disabled | Click to enable"/>
+                        </Trigger>
                     </Style.Triggers>
                 </Style>
-            </CheckBox.Style>
-        </CheckBox>
-        <CheckBox Grid.Column="2" IsChecked="{Binding IsAutoStart}" ToolTip="Auto start this clip when previous ends" VerticalAlignment="Center" Margin="10 0"/>
-        <TextBlock Grid.Column="3" Text="{Binding RundownItem.Media.Name}" />
-        <TextBlock Grid.Column="4" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
-        <TextBlock Grid.Column="5" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
+            </ToggleButton.Style>
+            <mah:FontIcon Glyph="&#xE74D;"/>
+        </ToggleButton>
+        <ToggleButton Grid.Column="2" IsChecked="{Binding IsAutoStart}" ToolTip="Auto start this clip when previous ends" >
+            <mah:FontIcon Glyph="&#xE768;"/>
+        </ToggleButton>
+        <ToggleButton Grid.Column="3" IsChecked="{Binding IsLoop}" ToolTip="Loop">
+            <mah:FontIcon Glyph="&#xEF3B;"/>
+        </ToggleButton>
+        <TextBlock Grid.Column="4" Text="{Binding RundownItem.Media.Name}" />
+        <TextBlock Grid.Column="5" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
+        <TextBlock Grid.Column="6" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
     </Grid>
 </UserControl>

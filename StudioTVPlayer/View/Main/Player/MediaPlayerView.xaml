@@ -240,7 +240,7 @@
                      >
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:RundownItemViewModel}">
-                        <view:RundownItemView/>
+                        <view:RundownItemView />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
                 <ListBox.InputBindings>
@@ -250,7 +250,6 @@
                     <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="attachedProp:EventToCommand.MouseDoubleClickCommand" Value="{Binding DataContext.LoadMediaCommand, ElementName=list}" />
-                        <Setter Property="attachedProp:EventToCommand.MouseRightButtonDownCommand" Value="{Binding DataContext.CheckItemCommand, ElementName=list}" />
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>

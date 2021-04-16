@@ -12,6 +12,7 @@ namespace StudioTVPlayer.Model
         private bool _isAutoStart;
         private bool _enabled = true;
         private int _preloaded;
+        private bool _isLoop;
 
         public RundownItem(Media media)
         {
@@ -52,6 +53,20 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        public bool IsLoop
+        {
+            get => _isLoop; 
+            set
+            {
+                if (_isLoop == value)
+                    return;
+                _isLoop = value;
+                if (InputFile is null)
+                    return;
+                InputFile.IsLoop = value;
+            }
+        }
+
         public bool Preloaded => _preloaded != default;
 
         public void Unload()
@@ -69,6 +84,7 @@ namespace StudioTVPlayer.Model
             if (Interlocked.Exchange(ref _preloaded, 1) != default)
                 return false;
             InputFile = new TVPlayR.InputFile(Media.FullPath, audioChannelCount);
+            InputFile.IsLoop = IsLoop;
             InputFile.FramePlayed += InputFile_FramePlayed;
             InputFile.Stopped += InputFile_Stopped;
             return true;

@@ -88,6 +88,18 @@ namespace TVPlayR {
 
 		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
 
+		property bool IsLoop 
+		{
+			bool get() { return _isLoop; }
+			void set(bool isLoop)
+			{
+				if (isLoop == _isLoop)
+					return;
+				(*_nativeSource)->SetIsLoop(isLoop);
+				_isLoop = isLoop;
+			}
+		}
+
 		event EventHandler<TimeEventArgs^>^ FramePlayed;
 		event EventHandler^ Stopped;
 	private:
@@ -95,6 +107,7 @@ namespace TVPlayR {
 		const String^ _hwDevice;
 		std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
 		String^ _fileName;
+		bool _isLoop;
 
 		delegate void FramePlayedDelegate(int64_t);
 		FramePlayedDelegate^ _framePlayedDelegate;

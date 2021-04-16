@@ -125,7 +125,6 @@
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
-    <Compile Include="ViewModel\Main\InfoViewModel.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\BrowserViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />

@@ -26,14 +26,21 @@ namespace StudioTVPlayer.ViewModel
 
         private MainViewModel() 
         {
-            ConfigurationCommand = new UiCommand(SwitchToConfiguration);
+            ConfigurationCommand = new UiCommand(_ => 
+            {
+                if (CurrentViewModel is ConfigurationViewModel)
+                    return;
+                CurrentViewModel = new ConfigurationViewModel();
+            });
         }
 
-        public async void LoadConfiguraion()
+        public async void Initialize()
         {
             try
             {
-                SwitchToPlayout();
+                if (CurrentViewModel is PlayoutViewModel)
+                    return;
+                CurrentViewModel = new PlayoutViewModel();
             }
             catch 
             {
@@ -44,19 +51,7 @@ namespace StudioTVPlayer.ViewModel
 
         public UiCommand ConfigurationCommand { get; }
 
-        public void SwitchToPlayout()
-        {
-            if (CurrentViewModel is PlayoutViewModel)
-                return;
-            CurrentViewModel = new PlayoutViewModel();
-        }
-
-        private void SwitchToConfiguration(object _)
-        {
-            if (CurrentViewModel is ConfigurationViewModel)
-                return;
-            CurrentViewModel = new ConfigurationViewModel();
-        }
+        public UiCommand AboutCommand { get; }
 
         public void Dispose()
         {

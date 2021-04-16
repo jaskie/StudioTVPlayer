@@ -22,7 +22,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             Apply();
             GlobalApplicationData.Current.SaveConfiguration();
-            MainViewModel.Instance.SwitchToPlayout();
+            MainViewModel.Instance.Initialize();
         }
 
         public UiCommand SaveConfigurationCommand { get; }
@@ -36,7 +36,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         
         private void Cancel(object obj)
         {
-            MainViewModel.Instance.SwitchToPlayout();
+            MainViewModel.Instance.Initialize();
         }
 
         public override void Apply()

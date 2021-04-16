@@ -19,17 +19,22 @@
                  >
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Button ToolTip="Settings" Command="{Binding ConfigurationCommand}" Opacity="0.9" Width="45">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Button.Flat.Background.MouseOver}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-                <mah:FontIcon  Glyph="&#xE713;" />
+            <mah:WindowCommands.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}">
+                    <Setter Property="Opacity" Value="0.9"/>
+                    <Setter Property="Width" Value="45"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Button.Flat.Background.MouseOver}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </mah:WindowCommands.Resources>
+            <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
+                <mah:FontIcon Glyph="&#xE713;" />
+            </Button>
+            <Button ToolTip="About" Command="{Binding AboutCommand}">
+                <mah:FontIcon Glyph="&#xE946;" />
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>

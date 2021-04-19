@@ -66,6 +66,9 @@
       <AdditionalDependencies>avformat.lib;avdevice.lib;avcodec.lib;avutil.lib;swscale.lib;avfilter.lib;postproc.lib;swresample.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>;$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\lib;$(SolutionDir)..\TVPlayR\dependencies\Ndi\lib</AdditionalLibraryDirectories>
     </Link>
+    <ResourceCompile>
+      <Culture>0x007f</Culture>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -79,6 +82,9 @@
       <AdditionalDependencies>avformat.lib;avdevice.lib;avcodec.lib;avutil.lib;swscale.lib;avfilter.lib;postproc.lib;swresample.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>;$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\lib;$(SolutionDir)..\TVPlayR\dependencies\Ndi\lib</AdditionalLibraryDirectories>
     </Link>
+    <ResourceCompile>
+      <Culture>0x007f</Culture>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AudioVolumeEventArgs.h" />
@@ -112,9 +118,6 @@
     </ClCompile>
     <ClCompile Include="Channel.cpp" />
     <ClCompile Include="VideoFormat.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />

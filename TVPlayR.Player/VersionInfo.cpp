@@ -8,7 +8,7 @@ namespace TVPlayR {
 	public ref class VersionInfo sealed
 	{
 	public:
-		static property String^ WrapperVersion 
+		static property String^ Wrapper 
 		{
 			String^ get() 
 			{
@@ -16,7 +16,7 @@ namespace TVPlayR {
 				return 	String::Format("{0}.{1}.{2}", version->Major, version->Minor, version->Build);
 			}
 		}
-		static property String^ FFmpegAVFormatVersion 
+		static property String^ FFmpegAVFormat
 		{
 			String^ get() 
 			{

@@ -27,6 +27,7 @@ namespace StudioTVPlayer
             Dispatcher.UnhandledException += App_DispatcherUnhandledException;
             GlobalApplicationData.Current.Initialize();
         }
+
         protected override void OnExit(ExitEventArgs e)
         {
             ViewModel.MainViewModel.Instance.Dispose();

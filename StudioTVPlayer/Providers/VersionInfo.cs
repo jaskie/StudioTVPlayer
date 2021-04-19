@@ -9,7 +9,11 @@ namespace StudioTVPlayer.Providers
 {
     public class VersionInfo
     {
-        public string ApplicationVersion
+        private VersionInfo() { }
+
+        public static VersionInfo Current { get; } = new VersionInfo();
+
+        public string Application
         {
             get
             {
@@ -17,6 +21,8 @@ namespace StudioTVPlayer.Providers
                 return $"{version.Major}.{version.Minor}.{version.Build}";
             }
         }
-        public string TVPlayRVersion => TVPlayR.VersionInfo.WrapperVersion;
+        public string Wrapper => TVPlayR.VersionInfo.Wrapper;
+
+        public string FFmpegAVFormat => TVPlayR.VersionInfo.FFmpegAVFormat;
     }
 }

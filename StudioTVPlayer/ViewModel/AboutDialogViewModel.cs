@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace StudioTVPlayer.ViewModel
         {
             CloseCommand = new UiCommand(_ => closeHandler(this));
         }
+
+        public VersionInfo VersionInfo => VersionInfo.Current;
 
         public UiCommand CloseCommand { get; }
     }

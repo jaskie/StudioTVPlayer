@@ -97,7 +97,6 @@
     <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="PreviewDevice.h" />
     <ClInclude Include="Rational.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Channel.h" />
     <ClInclude Include="TimeEventArgs.h" />

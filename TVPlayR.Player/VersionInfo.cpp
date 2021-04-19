@@ -16,6 +16,7 @@ namespace TVPlayR {
 				return 	String::Format("{0}.{1}.{2}", version->Major, version->Minor, version->Build);
 			}
 		}
+
 		static property String^ FFmpegAVFormat
 		{
 			String^ get() 
@@ -24,5 +25,24 @@ namespace TVPlayR {
 				return 	String::Format("{0}.{1}.{2}", version >> 16, (version >> 8) & 0xFF, version & 0xFF);
 			}
 		}
+
+		static property String^ FFmpegAVCodec
+		{
+			String^ get() 
+			{
+				unsigned int version = avcodec_version();
+				return 	String::Format("{0}.{1}.{2}", version >> 16, (version >> 8) & 0xFF, version & 0xFF);
+			}
+		}
+		
+		static property String^ FFmpegAVFilter
+		{
+			String^ get() 
+			{
+				unsigned int version = avfilter_version();
+				return 	String::Format("{0}.{1}.{2}", version >> 16, (version >> 8) & 0xFF, version & 0xFF);
+			}
+		}
+
 	};
 }

@@ -10,6 +10,19 @@ namespace StudioTVPlayer.ViewModel
         private ViewModelBase _currentViewModel;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
 
+        private MainViewModel()
+        {
+            ConfigurationCommand = new UiCommand(_ =>
+            {
+                if (CurrentViewModel is ConfigurationViewModel)
+                    return;
+                CurrentViewModel = new ConfigurationViewModel();
+            });
+            AboutCommand = new UiCommand(About);
+        }
+
+        public static readonly MainViewModel Instance = new MainViewModel();
+
         public ViewModelBase CurrentViewModel
         {
             get => _currentViewModel;
@@ -22,19 +35,8 @@ namespace StudioTVPlayer.ViewModel
             }
         }
 
-        public static readonly MainViewModel Instance = new MainViewModel();
 
-        private MainViewModel() 
-        {
-            ConfigurationCommand = new UiCommand(_ => 
-            {
-                if (CurrentViewModel is ConfigurationViewModel)
-                    return;
-                CurrentViewModel = new ConfigurationViewModel();
-            });
-        }
-
-        public async void Initialize()
+        public async void ShowPlayoutView()
         {
             try
             {
@@ -57,5 +59,14 @@ namespace StudioTVPlayer.ViewModel
         {
             CurrentViewModel = null;
         }
+
+        private async void About(object _)
+        {
+            var dialog = new MahApps.Metro.Controls.Dialogs.CustomDialog { Title = "About Studio TVPlayer" };
+            var dialogVm = new AboutDialogViewModel(instance => _dialogCoordinator.HideMetroDialogAsync(this, dialog));
+            dialog.Content = new View.AboutDialog { DataContext = dialogVm };
+            await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
+        }
+
     }
 }

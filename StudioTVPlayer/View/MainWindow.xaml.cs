@@ -30,7 +30,7 @@ namespace StudioTVPlayer.View
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.MainViewModel.Instance.Initialize();
+            ViewModel.MainViewModel.Instance.ShowPlayoutView();
         }
     }
 }

@@ -14,5 +14,4 @@ namespace TVPlayR {
 			array<double>^ get() { return audio_volume_; }
 		}
 	};
-
 }

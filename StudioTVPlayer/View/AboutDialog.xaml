@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel"
+             xmlns:attached="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:AboutDialogViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <Separator Height="5" />
-        <TextBlock>Studio TV Player - an application created in <Hyperlink>TVP</Hyperlink>, based on <Hyperlink>FFmpeg</Hyperlink> (core player), <Hyperlink>MahApps.Metro</Hyperlink> (UI)</TextBlock>
-        <Label>Versions</Label>
+        <TextBlock>Studio TV Player - application created in <Hyperlink attached:HyperlinkClick.ClickCommand="{Binding OpenHyperlinkCommand}" attached:HyperlinkClick.ClickCommandParameter="http://www.tvp.pl">TVP</Hyperlink>, based on <Hyperlink>FFmpeg</Hyperlink> (core player), <Hyperlink>MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
+        <TextBlock >Versions:</TextBlock>
         <Grid HorizontalAlignment="Left">
             <Grid.Resources>
                 <Style TargetType="TextBlock">

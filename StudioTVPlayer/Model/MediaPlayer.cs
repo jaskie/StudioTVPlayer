@@ -1,8 +1,7 @@
 ﻿using StudioTVPlayer.Model.Args;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -115,6 +114,7 @@ namespace StudioTVPlayer.Model
 
         private void InternalUnload(RundownItem rundownItem)
         {
+            Debug.WriteLine(rundownItem, "InternalUnload:");
             if (rundownItem == null)
                 return;
             rundownItem.FramePlayed -= PlaiyngRundownItem_FramePlayed;
@@ -125,12 +125,15 @@ namespace StudioTVPlayer.Model
 
         private void InternalLoad(RundownItem rundownItem)
         {
+            Debug.WriteLine(rundownItem, "InternalLoad:");
             if (rundownItem != null)
             {
                 rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
                 rundownItem.Stopped += PlaiyngRundownItem_Stopped;
-                if (rundownItem.Preload(Channel.AudioChannelCount))
-                    Channel.Load(rundownItem);
+                rundownItem.Preload(Channel.AudioChannelCount);
+                Channel.Load(rundownItem);
+                if (rundownItem.IsAutoStart)
+                    rundownItem.Play();
             }
             Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
         }

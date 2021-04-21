@@ -65,6 +65,8 @@ namespace StudioTVPlayer.Model
 
         public bool Preloaded => _preloaded != default;
 
+        public bool IsPlaying => InputFile?.IsPlaying == true;
+
         public void Unload()
         {
             if (Interlocked.Exchange(ref _preloaded, default) == default)

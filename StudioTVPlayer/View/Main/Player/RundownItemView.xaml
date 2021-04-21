@@ -78,7 +78,7 @@
             </ToggleButton.Style>
             <mah:FontIcon Glyph="&#xE74D;"/>
         </ToggleButton>
-        <ToggleButton Grid.Column="2" IsChecked="{Binding IsAutoStart}" ToolTip="Auto start this clip when previous ends" >
+        <ToggleButton Grid.Column="2" IsChecked="{Binding IsAutoStart}" ToolTip="Auto start" >
             <mah:FontIcon Glyph="&#xE768;"/>
         </ToggleButton>
         <ToggleButton Grid.Column="3" IsChecked="{Binding IsLoop}" ToolTip="Loop">

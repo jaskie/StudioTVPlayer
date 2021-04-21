@@ -17,8 +17,8 @@ public:
 	/// <returns>average volume</returns>
 	std::vector<double> ProcessVolume(const std::shared_ptr<AVFrame>& frame);
 private:
-	uint32_t old_volume_;
-	uint32_t new_volume_;
+	uint32_t volume_;
+	std::atomic_int32_t new_volume_;
 };
 
 }}

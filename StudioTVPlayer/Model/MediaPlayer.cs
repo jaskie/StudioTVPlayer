@@ -90,6 +90,8 @@ namespace StudioTVPlayer.Model
 
         public bool IsAplha => Channel.PixelFormat == TVPlayR.PixelFormat.bgra;
 
+        public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
+
         public ImageSource GetPreview(int width, int height)
         {
             return Channel.GetPreview(width, height);

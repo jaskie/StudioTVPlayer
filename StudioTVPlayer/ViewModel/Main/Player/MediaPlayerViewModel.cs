@@ -19,7 +19,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private readonly Model.MediaPlayer _mediaPlayer;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
         private const double AudioHeadroom = 9.0;
-        private bool _isPlaying;
         private bool _isFocused;
         private TimeSpan _displayTime;
         private TimeSpan _outTime;
@@ -62,12 +61,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public TVPlayR.VideoFormat VideoFormat { get; }
 
-        public bool IsPlaying
-        {
-            get => _isPlaying;
-            set => Set(ref _isPlaying, value);
-        }
-
+        public bool IsPlaying => _mediaPlayer.IsPlaying;
+        
         public bool IsFocused
         {
             get => _isFocused;
@@ -162,7 +157,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void InputFileStopped(object sender, EventArgs e)
         {
-            IsPlaying = false;
+            NotifyPropertyChanged(nameof(IsPlaying));
         }
 
         private async void SeekFrames(object param)
@@ -236,16 +231,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        private void CheckItem(object param)
-        {
-            if (param == null)
-                return;
-            object[] parameters = param as object[];
-            FrameworkElement element = (FrameworkElement)parameters[0];
-            RundownItemViewModel m = (RundownItemViewModel)element.DataContext;
-            m.IsDisabled = !m.IsDisabled;
-        }
-
         internal void EndSliderThumbDrag()
         {
             Seek(TimeSpan.FromMilliseconds(SliderPosition));
@@ -267,7 +252,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (playerItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
                 return;
             _mediaPlayer.Load(playerItem.RundownItem);
-            IsPlaying = false;
         }
 
         private void LoadNextItem(object obj)
@@ -299,7 +283,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void Unload(object obj = null)
         {
             CurrentRundownItem = null;
-            IsPlaying = false;
             _mediaPlayer.Clear();
         }
 
@@ -316,8 +299,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             try
             {
-                if (_mediaPlayer.Play())
-                    IsPlaying = true;
+                _mediaPlayer.Play();
+                NotifyPropertyChanged(nameof(IsPlaying));
+
             }
             catch
             {
@@ -332,7 +316,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             try
             {
                 _mediaPlayer.Pause();
-                IsPlaying = false;
+                NotifyPropertyChanged(nameof(IsPlaying));
             }
             catch
             {
@@ -356,7 +340,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void MediaPlayer_Stopped(object sender, EventArgs e)
         {
             Debug.WriteLine("Stopped");
-            IsPlaying = false;
             Refresh();
         }
 

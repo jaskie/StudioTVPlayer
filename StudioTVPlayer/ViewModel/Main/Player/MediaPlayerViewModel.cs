@@ -138,6 +138,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 }
                 IsLoaded = value != null;
                 _sliderPosition = CurrentItemStartTime.TotalMilliseconds;
+                NotifyPropertyChanged(nameof(IsPlaying));
                 NotifyPropertyChanged(nameof(SliderPosition));
                 NotifyPropertyChanged(nameof(CurrentItemStartTime));
                 NotifyPropertyChanged(nameof(CurrentItemDuration));
@@ -340,6 +341,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void MediaPlayer_Stopped(object sender, EventArgs e)
         {
             Debug.WriteLine("Stopped");
+            NotifyPropertyChanged(nameof(IsPlaying));
             Refresh();
         }
 

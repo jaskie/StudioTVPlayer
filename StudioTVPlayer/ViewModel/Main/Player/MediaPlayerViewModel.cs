@@ -39,7 +39,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             TogglePlayCommand = new UiCommand(TogglePlay, CanTogglePlay);
             UnloadCommand = new UiCommand(Unload, _ => CurrentRundownItem != null);
             LoadNextItemCommand = new UiCommand(LoadNextItem, CanLoadNextItem);
-            DeleteDisabledCommand = new UiCommand(DeleteDisabled, _ => Rundown.Any(i => i.IsDisabled));
+            DeleteDisabledCommand = new UiCommand(DeleteDisabled, _ => Rundown.Any(i => i.RundownItem.IsDisabled));
             DisplayTimecodeEditCommand = new UiCommand(_ => Seek(DisplayTime));
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Channel.Name;
@@ -114,6 +114,28 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
+        public bool IsLoop { 
+            get => _mediaPlayer.IsLoop;
+            set
+            {
+                if (_mediaPlayer.IsLoop == value)
+                    return;
+                _mediaPlayer.IsLoop = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public bool DisableAfterUnload { 
+            get => _mediaPlayer.DisableAfterUnload;
+            set
+            {
+                if (_mediaPlayer.DisableAfterUnload == value)
+                    return;
+                _mediaPlayer.DisableAfterUnload = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public ImageSource Preview { get => _preview; private set => Set(ref _preview, value); }
 
         public bool IsAlpha { get; }
@@ -133,10 +155,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 if (value != null)
                     value.IsLoaded = true;
                 if (oldItem != null)
-                {
                     oldItem.IsLoaded = false;
-                    oldItem.IsDisabled = true;
-                }
                 IsLoaded = value != null;
                 _sliderPosition = CurrentItemStartTime.TotalMilliseconds;
                 NotifyPropertyChanged(nameof(IsPlaying));
@@ -156,11 +175,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public ICommand TogglePlayCommand { get; }
         public ICommand UnloadCommand { get; }
         public ICommand LoadNextItemCommand { get; }
-
-        private void InputFileStopped(object sender, EventArgs e)
-        {
-            NotifyPropertyChanged(nameof(IsPlaying));
-        }
 
         private async void SeekFrames(object param)
         {
@@ -243,7 +257,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(RundownItemViewModel playerItem)
         {
-            if (playerItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
+            if (playerItem.RundownItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
                 return;
             _mediaPlayer.Load(playerItem.RundownItem);
         }
@@ -255,7 +269,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             while (++currentIndex < Rundown.Count)
             {
-                if (Rundown[currentIndex].IsDisabled)
+                if (Rundown[currentIndex].RundownItem.IsDisabled)
                     continue;
                 LoadMedia(Rundown[currentIndex]);
                 return;
@@ -267,7 +281,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             var currentIndex = Rundown.IndexOf(CurrentRundownItem);
             while (++currentIndex < Rundown.Count)
             {
-                if (Rundown[currentIndex].IsDisabled)
+                if (Rundown[currentIndex].RundownItem.IsDisabled)
                     continue;
                 return true;
             }

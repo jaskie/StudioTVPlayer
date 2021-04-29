@@ -33,7 +33,7 @@
         <Grid.Style>
             <Style TargetType="Grid">
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                    <DataTrigger Binding="{Binding RundownItem.IsDisabled}" Value="True">
                         <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.SystemControlBackgroundBaseLow}"/>
                         <Setter Property="TextBlock.Foreground" Value="{DynamicResource MahApps.Brushes.SystemControlDisabledBaseLow}"/>
                     </DataTrigger>
@@ -66,7 +66,7 @@
                 </Style>
             </Ellipse.Style>
         </Ellipse>
-        <ToggleButton Grid.Column="1" IsChecked="{Binding IsDisabled}" VerticalAlignment="Center" >
+        <ToggleButton Grid.Column="1" IsChecked="{Binding RundownItem.IsDisabled}" VerticalAlignment="Center" >
             <ToggleButton.Style>
                 <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
                     <Setter Property="ToolTip" Value="Ready to play | Click to disable"/>
@@ -79,10 +79,10 @@
             </ToggleButton.Style>
             <mah:FontIcon Glyph="&#xE73E;"/>
         </ToggleButton>
-        <ToggleButton Grid.Column="2" IsChecked="{Binding IsAutoStart}" ToolTip="Auto start" >
+        <ToggleButton Grid.Column="2" IsChecked="{Binding RundownItem.IsAutoStart}" ToolTip="Auto start" >
             <mah:FontIcon Glyph="&#xE768;"/>
         </ToggleButton>
-        <ToggleButton Grid.Column="3" IsChecked="{Binding IsLoop}" ToolTip="Loop">
+        <ToggleButton Grid.Column="3" IsChecked="{Binding RundownItem.IsLoop}" ToolTip="Loop">
             <mah:FontIcon Glyph="&#xEF3B;"/>
         </ToggleButton>
         <TextBlock Grid.Column="4" Text="{Binding RundownItem.Media.Name}" />

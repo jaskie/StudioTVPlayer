@@ -1,6 +1,7 @@
 ﻿using StudioTVPlayer.Model.Args;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,6 +39,10 @@ namespace StudioTVPlayer.Model
                 InternalLoad(value);
             }
         }
+
+        public bool IsLoop { get; set; }
+
+        public bool DisableAfterUnload { get; set; }
 
         public bool IsEof => PlayingRundownItem?.InputFile?.IsEof ?? true;
 
@@ -77,7 +82,7 @@ namespace StudioTVPlayer.Model
             {
                 var item = new RundownItem(media);
                 _rundown.Insert(index, item);
-                item.AutoStartChanged += RundownItem_AutoStartChanged;
+                item.PropertyChanged += RundownItem_PropertyChanged;
                 item.RemoveRequested += RundownItem_RemoveRequested;
                 return item;
             }
@@ -85,7 +90,7 @@ namespace StudioTVPlayer.Model
             {
                 var item = new RundownItem(media);
                 _rundown.Add(item);
-                item.AutoStartChanged += RundownItem_AutoStartChanged;
+                item.PropertyChanged += RundownItem_PropertyChanged;
                 item.RemoveRequested += RundownItem_RemoveRequested;
                 return item;
             }
@@ -110,11 +115,13 @@ namespace StudioTVPlayer.Model
 
         private void InternalUnload(RundownItem rundownItem)
         {
-            Debug.WriteLine(rundownItem, "InternalUnload:");
             if (rundownItem == null)
                 return;
+            Debug.WriteLine(rundownItem, "InternalUnload:");
             rundownItem.FramePlayed -= PlaiyngRundownItem_FramePlayed;
             rundownItem.Stopped -= PlaiyngRundownItem_Stopped;
+            if (DisableAfterUnload)
+                rundownItem.IsDisabled = true;
             rundownItem.Pause();
             rundownItem.Unload();
         }
@@ -164,7 +171,7 @@ namespace StudioTVPlayer.Model
             RundownItem item = null;
             while (true)
             {
-                item = Rundown.FirstOrDefault(i => !i.Enabled);
+                item = Rundown.FirstOrDefault(i => i.IsDisabled);
                 if (item is null)
                     break;
                 RemoveItem(item);
@@ -175,7 +182,7 @@ namespace StudioTVPlayer.Model
         {
             if (!_rundown.Remove(rundownItem))
                 return false;
-            rundownItem.AutoStartChanged -= RundownItem_AutoStartChanged;
+            rundownItem.PropertyChanged -= RundownItem_PropertyChanged;
             rundownItem.RemoveRequested -= RundownItem_RemoveRequested;
             if (rundownItem != PlayingRundownItem)
                 rundownItem.Dispose();
@@ -201,7 +208,6 @@ namespace StudioTVPlayer.Model
         private RundownItem FindNextAutoPlayItem()
         {
             var currentItem = PlayingRundownItem;
-            RundownItem next = null;
             using (var iterator = _rundown.GetEnumerator())
             {
                 bool found = false;
@@ -209,17 +215,15 @@ namespace StudioTVPlayer.Model
                 {
                     if (found)
                     {
-                        if (iterator.Current != null && iterator.Current.IsAutoStart && iterator.Current.Enabled)
+                        if (iterator.Current != null && iterator.Current.IsAutoStart && !iterator.Current.IsDisabled)
                             return iterator.Current;
-                        else
-                            return null;
                     }
                     if (iterator.Current == currentItem)
                         found = true;
                 }
             }
-            if (next != null && next.IsAutoStart && next.Enabled)
-                return next;
+            if (IsLoop)
+                return _rundown.FirstOrDefault(i => i != currentItem && i.IsAutoStart && !i.IsDisabled);
             else 
                 return null;
         }
@@ -237,9 +241,11 @@ namespace StudioTVPlayer.Model
                 Channel.Preload(nextItem);
         }
 
-        private void RundownItem_AutoStartChanged(object sender, EventArgs e)
+        private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            _nextRundownItem = FindNextAutoPlayItem();
+            if (e.PropertyName == nameof(RundownItem.IsAutoStart) || 
+                e.PropertyName == nameof(RundownItem.IsDisabled))
+                _nextRundownItem = FindNextAutoPlayItem();
         }
 
         private void Channel_AudioVolume(object sender, AudioVolumeEventArgs e)
@@ -260,7 +266,7 @@ namespace StudioTVPlayer.Model
             PlayingRundownItem = null;
             foreach (var item in _rundown)
             {
-                item.AutoStartChanged -= RundownItem_AutoStartChanged;
+                item.PropertyChanged -= RundownItem_PropertyChanged;
                 item.RemoveRequested -= RundownItem_RemoveRequested;
                 item.Dispose();
             }

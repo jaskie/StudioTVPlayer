@@ -1,12 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace StudioTVPlayer.Model
 {
-    public class RundownItem : IDisposable
+    public class RundownItem : INotifyPropertyChanged, IDisposable
     {
         private bool _isAutoStart;
-        private bool _enabled = true;
+        private bool _isDisabled;
         private int _preloaded;
         private bool _isLoop;
 
@@ -19,9 +21,9 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
 
-        public event EventHandler AutoStartChanged;
-
         public event EventHandler RemoveRequested;
+        
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Media Media { get; }
 
@@ -35,19 +37,19 @@ namespace StudioTVPlayer.Model
                 if (_isAutoStart == value)
                     return;
                 _isAutoStart = value;
-                AutoStartChanged?.Invoke(this, EventArgs.Empty);
+                RaisePropertyChanged();
             }
         }
 
-        public bool Enabled
+        public bool IsDisabled
         {
-            get => _enabled;
+            get => _isDisabled;
             set
             {
-                if (_enabled == value)
+                if (_isDisabled == value)
                     return;
-                _enabled = value;
-                AutoStartChanged?.Invoke(this, EventArgs.Empty);
+                _isDisabled = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -59,9 +61,9 @@ namespace StudioTVPlayer.Model
                 if (_isLoop == value)
                     return;
                 _isLoop = value;
-                if (InputFile is null)
-                    return;
-                InputFile.IsLoop = value;
+                if (!(InputFile is null))
+                    InputFile.IsLoop = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -125,5 +127,9 @@ namespace StudioTVPlayer.Model
             FramePlayed?.Invoke(this, e);
         }
 
+        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
     }
 }

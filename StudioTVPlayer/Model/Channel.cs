@@ -71,6 +71,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        [XmlAttribute]
         public bool LivePreview
         {
             get => _livePreview;
@@ -83,6 +84,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        [XmlIgnore]
         public bool IsInitialized => _channelR != null;
 
         [XmlIgnore]

@@ -220,15 +220,28 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Label VerticalAlignment="Bottom" >Rundown</Label>
-            <Button Command="{Binding DeleteDisabledCommand}" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14" FontWeight="Normal" ToolTip="Alt + Del" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" VerticalAlignment="Bottom" >Rundown</Label>
+            <ToggleButton Grid.Column="1" IsChecked="{Binding IsLoop}" Margin="10 0" ToolTip="Loop whole rundown">
+                <mah:FontIcon Glyph="&#xF71A;"/>
+            </ToggleButton>
+            <ToggleButton Grid.Column="2" IsChecked="{Binding DisableAfterUnload}" ToolTip="Disable after unload">
+                <mah:FontIcon Glyph="&#xE8D8;"/>
+            </ToggleButton>
+            <Button Grid.Column="4" Command="{Binding DeleteDisabledCommand}" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14" FontWeight="Normal" ToolTip="Alt + Del" >
                 <StackPanel Orientation="Horizontal">
                     <mah:FontIcon Glyph="&#xE74D;"/>
                     <TextBlock VerticalAlignment="Center" Margin="5,0,0,0">Remove played</TextBlock>
                 </StackPanel>
             </Button>
 
-            <ListBox x:Name="list" Grid.Row="1" Margin="0 5" BorderThickness="1"
+            <ListBox x:Name="list" Grid.Row="1" Grid.ColumnSpan="5" Margin="0 5" BorderThickness="1"
                      ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" 
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" 

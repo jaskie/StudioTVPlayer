@@ -48,6 +48,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Ellipse Stretch="Uniform" Margin="5 3" VerticalAlignment="Stretch" 
                  Stroke="{DynamicResource MahApps.Brushes.Control.Border}"
@@ -76,7 +77,7 @@
                     </Style.Triggers>
                 </Style>
             </ToggleButton.Style>
-            <mah:FontIcon Glyph="&#xE74D;"/>
+            <mah:FontIcon Glyph="&#xE73E;"/>
         </ToggleButton>
         <ToggleButton Grid.Column="2" IsChecked="{Binding IsAutoStart}" ToolTip="Auto start" >
             <mah:FontIcon Glyph="&#xE768;"/>
@@ -87,5 +88,12 @@
         <TextBlock Grid.Column="4" Text="{Binding RundownItem.Media.Name}" />
         <TextBlock Grid.Column="5" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
         <TextBlock Grid.Column="6" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
+        <Button Grid.Column="7" Style="{DynamicResource MahApps.Styles.Button.Square.Accent}" BorderThickness="0" 
+                Width="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}"
+                Command="{Binding CommandRemove}"
+                ToolTip="Remove"
+                >
+            <mah:FontIcon Glyph="&#xE74D;"/>
+        </Button>
     </Grid>
 </UserControl>

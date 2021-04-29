@@ -21,6 +21,8 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler AutoStartChanged;
 
+        public event EventHandler RemoveRequested;
+
         public Media Media { get; }
 
         internal TVPlayR.InputFile InputFile { get; private set; }
@@ -75,6 +77,11 @@ namespace StudioTVPlayer.Model
             InputFile.Stopped -= InputFile_Stopped;
             InputFile.Dispose();
             InputFile = null;
+        }
+
+        public void RemoveFromRundown()
+        {
+            RemoveRequested?.Invoke(this, EventArgs.Empty);
         }
 
         public bool Preload(int audioChannelCount)

@@ -50,6 +50,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             player.Stopped += MediaPlayer_Stopped;
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
+            player.Removed += MediaPlayer_Removed;
             if (player.Channel.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
@@ -221,15 +222,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void DeleteDisabled(object obj)
         {
-            RundownItemViewModel item = null;
-            while (true)
-            {
-                item = Rundown.FirstOrDefault(i => i.IsDisabled);
-                if (item is null)
-                    break;
-                if (_mediaPlayer.RemoveItem(item.RundownItem))
-                    Rundown.Remove(item);
-            }
+            _mediaPlayer.DeleteDisabled();
         }
 
         internal void EndSliderThumbDrag()
@@ -359,6 +352,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Refresh();
         }
 
+        private void MediaPlayer_Removed(object sender, Model.Args.RundownItemEventArgs e)
+        {
+            var vm = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
+            Debug.Assert(vm != null);
+            Rundown.Remove(vm);
+        }
+
         private void Player_AudioVolume(object sender, Model.Args.AudioVolumeEventArgs e)
         {
             if (e.AudioVolume.Length == 0)
@@ -391,6 +391,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.FramePlayed -= MediaPlayer_Progress;
             _mediaPlayer.Stopped -= MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
+            _mediaPlayer.Removed -= MediaPlayer_Removed;
         }
 
         #region drag&drop

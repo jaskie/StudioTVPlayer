@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -61,6 +62,7 @@ namespace StudioTVPlayer.Model
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
+        public event EventHandler<RundownItemEventArgs> Removed;
 
         public void Load(RundownItem item)
         {
@@ -76,6 +78,7 @@ namespace StudioTVPlayer.Model
                 var item = new RundownItem(media);
                 _rundown.Insert(index, item);
                 item.AutoStartChanged += RundownItem_AutoStartChanged;
+                item.RemoveRequested += RundownItem_RemoveRequested;
                 return item;
             }
             if (index == Rundown.Count)
@@ -83,6 +86,7 @@ namespace StudioTVPlayer.Model
                 var item = new RundownItem(media);
                 _rundown.Add(item);
                 item.AutoStartChanged += RundownItem_AutoStartChanged;
+                item.RemoveRequested += RundownItem_RemoveRequested;
                 return item;
             }
             return null;
@@ -95,16 +99,6 @@ namespace StudioTVPlayer.Model
         public ImageSource GetPreview(int width, int height)
         {
             return Channel.GetPreview(width, height);
-        }
-
-        public bool RemoveItem(RundownItem rundownItem)
-        {
-            if (!_rundown.Remove(rundownItem))
-                return false;
-            rundownItem.AutoStartChanged -= RundownItem_AutoStartChanged;
-            if (rundownItem != PlayingRundownItem)
-                rundownItem.Dispose();
-            return true;
         }
 
         public void MoveItem(int srcIndex, int destIndex)
@@ -163,6 +157,30 @@ namespace StudioTVPlayer.Model
         {
             PlayingRundownItem = null;
             Channel.Clear();
+        }
+
+        public void DeleteDisabled()
+        {
+            RundownItem item = null;
+            while (true)
+            {
+                item = Rundown.FirstOrDefault(i => !i.Enabled);
+                if (item is null)
+                    break;
+                RemoveItem(item);
+            }
+        }
+
+        private bool RemoveItem(RundownItem rundownItem)
+        {
+            if (!_rundown.Remove(rundownItem))
+                return false;
+            rundownItem.AutoStartChanged -= RundownItem_AutoStartChanged;
+            rundownItem.RemoveRequested -= RundownItem_RemoveRequested;
+            if (rundownItem != PlayingRundownItem)
+                rundownItem.Dispose();
+            Removed?.Invoke(this, new RundownItemEventArgs(rundownItem));
+            return true;
         }
 
         private void PlaiyngRundownItem_Stopped(object sender, EventArgs e)
@@ -228,7 +246,14 @@ namespace StudioTVPlayer.Model
         {
             AudioVolume?.Invoke(this, e);
         }
-        
+
+        private void RundownItem_RemoveRequested(object sender, EventArgs e)
+        {
+            var item = sender as RundownItem ?? throw new ArgumentException(nameof(sender));
+            RemoveItem(item);
+        }
+
+
         public void Dispose()
         {
             Channel.AudioVolume -= Channel_AudioVolume;
@@ -236,6 +261,7 @@ namespace StudioTVPlayer.Model
             foreach (var item in _rundown)
             {
                 item.AutoStartChanged -= RundownItem_AutoStartChanged;
+                item.RemoveRequested -= RundownItem_RemoveRequested;
                 item.Dispose();
             }
             _rundown.Clear();

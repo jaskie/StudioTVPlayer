@@ -1,4 +1,7 @@
-﻿using StudioTVPlayer.Model;
+﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Model;
+using System;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
@@ -16,6 +19,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             IsDisabled = !rundownItem.Enabled;
             IsAutoStart = rundownItem.IsAutoStart;
             IsLoop = rundownItem.IsLoop;
+            CommandRemove = new UiCommand(Remove, _ => !IsLoaded);
         }
 
         public bool IsLoaded
@@ -57,9 +61,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
+        public ICommand CommandRemove { get; }
+
         public RundownItem RundownItem { get; }
 
         public ImageSource Thumbnail => RundownItem.Media.Thumbnail;
+
+        private void Remove(object _)
+        {
+            RundownItem.RemoveFromRundown();
+        }
 
     }
 }

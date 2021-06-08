@@ -134,6 +134,7 @@ struct Decoder::implementation : Common::DebugTarget<false>
 			packet_queue_.pop_front();
 			break;
 		case AVERROR(EAGAIN):
+			DebugPrintLine("PushNextPacket: error EAGAIN");
 			break;
 		case AVERROR_EOF:
 			THROW_EXCEPTION("Packet pushed after flush");

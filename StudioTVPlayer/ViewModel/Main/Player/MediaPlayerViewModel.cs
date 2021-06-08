@@ -27,7 +27,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private RundownItemViewModel _currentRundownItem;
         private bool _isLoaded;
 
-        private bool _isSliderDrag;
+        //private bool _isSliderDrag;
         private double _volume;
         private ImageSource _preview;
 
@@ -55,6 +55,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
             Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
+            _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
             _mediaPlayer = player;
         }
 
@@ -94,7 +95,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 if (!Set(ref _sliderPosition, value))
                     return;
-                if (!_isSliderDrag)
+                //if (!_isSliderDrag)
                     Seek(TimeSpan.FromMilliseconds(value));
             }
         }
@@ -241,13 +242,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         internal void EndSliderThumbDrag()
         {
-            Seek(TimeSpan.FromMilliseconds(SliderPosition));
-            _isSliderDrag = false;
+            //Seek(TimeSpan.FromMilliseconds(SliderPosition));
+            //_isSliderDrag = false;
         }
 
         internal void BeginSliderThumbDrag()
         {
-            _isSliderDrag = true;
+            //_isSliderDrag = true;
         }
 
         private void LoadMedia(object param)
@@ -338,7 +339,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             DisplayTime = e.Time;
             OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
-            if (!_isSliderDrag && IsPlaying)
+            if (/*!_isSliderDrag && */IsPlaying)
             {
                 _sliderPosition = e.Time.TotalMilliseconds;
                 NotifyPropertyChanged(nameof(SliderPosition));

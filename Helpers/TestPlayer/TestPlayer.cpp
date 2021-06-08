@@ -43,12 +43,11 @@ int main()
 		auto device = iterator[device_index];
 		channel.SetFrameClock(device);
 		channel.AddOutput(device);
-		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\MajaPoniatowska.wmv", Core::HwAccel::none, "", 2);
-		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("C:\\public\\JB 810.mov", Core::HwAccel::none, "", 2);
-		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Temp\\timecode.mov", Core::HwAccel::none, "", 2);
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\TVP INFO 1 marzec 2021 12_01_30.mp4", Core::HwAccel::none, "", 2);
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
-		//input->Seek(600080000);
+		auto seek = input->GetVideoDuration() - AV_TIME_BASE;
+		input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();

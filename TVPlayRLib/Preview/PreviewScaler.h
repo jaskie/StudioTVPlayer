@@ -13,9 +13,9 @@ class PreviewScaler : public FFmpeg::VideoFilterBase
 private:
 	Core::Channel& channel_;
 	const std::string filter_str_;
-	std::string GetFilterString(const Core::VideoFormat& channel_format, int width, int height);
+	std::string GetFilterString(const Core::VideoFormat& channel_format, const Core::PixelFormat pix_fmt, int width, int height);
 public:
-	PreviewScaler(Core::Channel& channel, int width, int height);
+	PreviewScaler(Core::Channel& channel,  int width, int height);
 	void Push(std::shared_ptr<AVFrame> frame);
 };
 

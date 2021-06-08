@@ -21,7 +21,6 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 	std::atomic_bool is_eof_ = false;
 	const std::string file_name_;
 	std::atomic_bool is_playing_ = false;
-	int64_t seek_time_ = 0LL;
 	InputFormat input_;
 	const bool is_stream_;
 	const Core::HwAccel acceleration_;
@@ -49,8 +48,6 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 		, hw_device_(hw_device)
 		, is_stream_(IsStream(fileName))
 	{ 
-		if (seek_time_)
-			input_.Seek(seek_time_);
 		input_.LoadStreamData();
 		InitializeVideoDecoder();
 	}
@@ -181,15 +178,18 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 			(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
 			if (is_loop_)
 			{
-				input_.Seek(0LL);
-				video_decoder_->Seek(0LL);
+				int64_t seek_time = input_.GetVideoStream()->StartTime;
+				input_.Seek(seek_time);
+				video_decoder_->Seek(seek_time);
 				for (const auto& decoder : audio_decoders_)
-					decoder->Seek(0LL);
+					decoder->Seek(seek_time);
 				if (audio_muxer_)
 					audio_muxer_->Reset();
 				if (channel_scaler_)
 					channel_scaler_->Reset();
-				DebugPrintLine("Loop");
+				if (buffer_)
+					buffer_->Seek(seek_time);
+				DebugPrintLine("FFmpegInputSource: Loop");
 			}
 			else
 				buffer_->Flush();
@@ -229,6 +229,11 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 
 	void AddToChannel(Core::Channel& channel)
 	{
+		if (&channel == channel_)
+		{
+			DebugPrintLine("Already added to this channel");
+			return;
+		}
 		if (channel_)
 			THROW_EXCEPTION("Already added to another channel");
 		channel_ = &channel;
@@ -249,11 +254,9 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 	bool Seek(const int64_t time)
 	{
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		seek_time_ = time;
 		if (input_.Seek(time))
 		{
 			DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
-			seek_time_ = time;
 			if (video_decoder_)
 				video_decoder_->Seek(time);
 			for (auto& decoder : audio_decoders_)
@@ -298,26 +301,28 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 	{
 		if (video_decoder_)
 			return;
-		const Core::StreamInfo* stream = input_.GetVideoStream();
+		auto stream = input_.GetVideoStream();
 		if (stream == nullptr)
 			return;
-		video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, seek_time_, acceleration_, hw_device_);
+		video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, stream->StartTime, acceleration_, hw_device_);
 	}
 
 	void InitializeAudioDecoders()
 	{
 		auto& streams = input_.GetStreams();
+		auto stream = input_.GetVideoStream();
+		int64_t seek = stream ? stream->StartTime : 0;
 		if (std::any_of(streams.begin(), streams.end(), [](const auto& stream) { return stream.Type == Core::MediaType::audio && stream.Language == "pol"; }))
 			for (const auto& stream : streams)
 			{
 				if (stream.Type == Core::MediaType::audio && stream.Language == "pol")
-					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek_time_));
+					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
 			}
 		else
 			for (const auto& stream : streams)
 			{
 				if (stream.Type == Core::MediaType::audio)
-					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek_time_));
+					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
 			}
 	}
 

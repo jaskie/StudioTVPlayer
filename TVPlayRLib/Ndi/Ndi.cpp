@@ -45,27 +45,30 @@ namespace TVPlayR {
 			return NDIlib_v4_load();
 		}
 
-		static NDIlib_v4* ndi_library_ = LoadNdi();
-		
 		struct Ndi::implementation
 		{
 			Core::Channel * channel_ = nullptr;
 			const std::string source_name_;
 			const std::string group_name_;
-			std::deque<std::shared_ptr<AVFrame>> video_frame_buffer_;
-			std::deque<std::shared_ptr<AVFrame>> audio_frame_buffer_;
+			std::deque<FFmpeg::AVSync> buffer_;
 			const NDIlib_send_instance_t send_instance_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			
 			implementation(const std::string& source_name, const std::string& group_names)
-				: send_instance_(CreateSend(source_name, group_names))
+				: send_instance_(GetNdi() ? CreateSend(source_name, group_names) : nullptr)
 			{
 			}
 
 			~implementation()
 			{
 				if (send_instance_)
-					ndi_library_->send_destroy(send_instance_);
+					GetNdi()->send_destroy(send_instance_);
+			}
+
+			NDIlib_v4* GetNdi()
+			{
+				static NDIlib_v4* ndi_lib = LoadNdi();
+				return ndi_lib;
 			}
 
 			NDIlib_send_instance_t CreateSend(const std::string& source_name, const std::string& group_names)
@@ -75,7 +78,7 @@ namespace TVPlayR {
 				send_create_description.p_groups = group_names.c_str();
 				send_create_description.clock_audio = false;
 				send_create_description.clock_video = true;
-				return ndi_library_->send_create(&send_create_description);
+				return GetNdi()->send_create(&send_create_description);
 			}
 
 			bool AssignToChannel(Core::Channel& channel)

@@ -25,7 +25,7 @@ std::string PreviewScaler::GetFilterString(const Core::VideoFormat& channel_form
 }
 
 PreviewScaler::PreviewScaler(Core::Channel& channel, int width, int height)
-	: VideoFilterBase(Core::PixelFormatToFFmpegFormat(channel.PixelFormat()))
+	: VideoFilterBase(AV_PIX_FMT_BGRA)
 	, channel_(channel)
 	, filter_str_(GetFilterString(channel.Format(), channel.PixelFormat(), width, height))
 {

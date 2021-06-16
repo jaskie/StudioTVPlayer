@@ -427,6 +427,11 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 		while (!video_decoder_->IsEof())
 		{
 			auto packet = input_.PullPacket();
+			if (!packet)
+				if (input_.IsEof())
+					return nullptr;
+				else 
+					continue;
 			if (packet->stream_index != video_decoder_->StreamIndex())
 				continue;
 			video_decoder_->Push(packet);

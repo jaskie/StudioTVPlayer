@@ -71,7 +71,13 @@ std::shared_ptr<AVPacket> InputFormat::PullPacket()
 
 bool InputFormat::CanSeek() const
 {
-	return (format_context_->flags & AVFMTCTX_UNSEEKABLE) == 0;
+	if (format_context_->ctx_flags & AVFMTCTX_UNSEEKABLE)
+		return false;
+	// hack to correctly determine seekability in case of .jpg files
+	auto stream = GetVideoStream();
+	if (!stream)
+		return true;
+	return stream->Stream->nb_frames > 1;
 }
 
 bool InputFormat::Seek(int64_t time)

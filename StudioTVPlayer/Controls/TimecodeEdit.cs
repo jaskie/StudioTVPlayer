@@ -23,13 +23,6 @@ namespace StudioTVPlayer.Controls
                 typeof(TimecodeEdit),
                 new PropertyMetadata(OnTimeChanged));
 
-        public static readonly DependencyProperty IsDropFrameProperty =
-            DependencyProperty.Register(
-                nameof(IsDropFrame),
-                typeof(bool),
-                typeof(TimecodeEdit),
-                new PropertyMetadata(OnTimeChanged));
-
         public static readonly DependencyProperty EnterPressedCommandProperty =
            DependencyProperty.Register(
                "EnterPressedCommand",
@@ -76,7 +69,7 @@ namespace StudioTVPlayer.Controls
         private static void OnTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (!(d is TimecodeEdit element && element.VideoFormat is TVPlayR.VideoFormat vf)) return;
-            element.Text = vf.FrameNumberToString(vf.TimeToFrameNumber(element.Time), element.IsDropFrame);
+            element.Text = vf.FrameNumberToString(vf.TimeToFrameNumber(element.Time));
         }
 
         public static void SetEnterPressedCommand(UIElement element, ICommand value) => element.SetValue(EnterPressedCommandProperty, value);
@@ -95,13 +88,6 @@ namespace StudioTVPlayer.Controls
             set => SetValue(VideoFormatProperty, value);
         }
 
-        public bool IsDropFrame
-        {
-            get => (bool)GetValue(IsDropFrameProperty);
-            set => SetValue(IsDropFrameProperty, value);
-        }
-
-
         /// <summary>
         /// override this method to replace the characters enetered with the mask
         /// </summary>
@@ -116,14 +102,15 @@ namespace StudioTVPlayer.Controls
                 {
                     var sb = new StringBuilder(Text);
                     Debug.Assert(sb.Length == 11);
+                    bool isDropFrame = VideoFormat?.IsDropFrame ?? false;
                     for (int i = 0; i < e.Text.Length; i++)
                     {
-                        if (IsValidCharAt(e.Text[i], position))
+                        if (IsValidCharAt(e.Text[i], position, isDropFrame))
                         {
                             sb.Remove(position, 1);
                             sb.Insert(position++, e.Text[i]);
                         }
-                        else if ((position == 2 || position == 5 || position == 8) && IsValidCharAt(e.Text[i], position + 1)) // separators
+                        else if ((position == 2 || position == 5 || position == 8) && IsValidCharAt(e.Text[i], position + 1, isDropFrame)) // separators
                         {
                             position++;
                             sb.Remove(position, 1);
@@ -215,7 +202,7 @@ namespace StudioTVPlayer.Controls
         /// <summary>
         /// Determines if a char can be entered at hours, minutes and seconds place
         /// </summary>
-        private bool IsValidCharAt(char c, int position)
+        private bool IsValidCharAt(char c, int position, bool isDropFrame)
         {
             switch (position)
             {
@@ -231,7 +218,7 @@ namespace StudioTVPlayer.Controls
                 case 6:
                     return c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5';
                 case 8:
-                    return IsDropFrame ? c == ';' : c == ':';
+                    return isDropFrame ? c == ';' : c == ':';
                 default:
                     return false;
             }
@@ -250,7 +237,7 @@ namespace StudioTVPlayer.Controls
 
         private string Zero()
         {
-            return VideoFormat.FrameNumberToString(0, IsDropFrame);
+            return VideoFormat.FrameNumberToString(0);
         }
     }
 }

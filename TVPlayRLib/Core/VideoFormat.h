@@ -51,8 +51,12 @@ public:
 	std::string Name() const;
 	FieldMode field_mode() const;
 	bool interlaced() const;
-	std::string FrameNumberToString(int frame_number, bool drop_frame);
+	bool IsDropFrame() const;
+	std::string FrameNumberToString(int frame_number);
 	int StringToFrameNumber(const std::string& tc);
+	uint32_t FrameNumberToSmpteTimecode(int frame_number);
+	int TimeToFrameNumber(int64_t time);
+
 private:
 	enum VideoFormatType type_;
 	int width_;
@@ -61,6 +65,9 @@ private:
 	Common::Rational<int> sample_aspect_ratio_;
 	Common::Rational<int> frame_rate_;
 	FieldMode field_mode_;
+	bool timecode_is_supported_;
+	bool is_drop_frame_;
+	AVTimecode timecode_;
 };
 
 

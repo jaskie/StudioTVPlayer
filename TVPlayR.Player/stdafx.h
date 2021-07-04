@@ -38,6 +38,7 @@ extern "C"
 #include "libavutil/samplefmt.h"
 #include "libavutil/audio_fifo.h"
 #include "libswscale/swscale.h"
+#include "libavutil/timecode.h"
 #include "Processing.NDI.Lib.h"
 }
 #endif //PCH_H

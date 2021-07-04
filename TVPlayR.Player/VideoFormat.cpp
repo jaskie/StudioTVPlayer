@@ -35,9 +35,9 @@ namespace TVPlayR {
 		_native_fomat = nullptr;
 	}
 		
-	String^ VideoFormat::FrameNumberToString(int frame_number, bool drop_frame)
+	String^ VideoFormat::FrameNumberToString(int frame_number)
 	{
-		return gcnew String(_native_fomat->FrameNumberToString(frame_number, drop_frame).c_str());
+		return gcnew String(_native_fomat->FrameNumberToString(frame_number).c_str());
 	}
 
 	int VideoFormat::StringToFrameNumber(String^ tc)

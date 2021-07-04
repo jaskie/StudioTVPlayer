@@ -36,6 +36,7 @@ struct Decoder::implementation : Common::DebugTarget<false>
 	const AVMediaType media_type_;
 	int64_t seek_pts_;
 	const int64_t duration_;
+	std::mutex mutex_;
 
 	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
 		: ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
@@ -96,6 +97,7 @@ struct Decoder::implementation : Common::DebugTarget<false>
 	void Push(const std::shared_ptr<AVPacket>& packet)
 	{
 		assert(!packet || packet->stream_index == stream_index_);
+		std::lock_guard<std::mutex> lock(mutex_);
 		packet_queue_.push_back(packet);
 #ifdef DEBUG
 		if (packet)
@@ -146,6 +148,7 @@ struct Decoder::implementation : Common::DebugTarget<false>
 
 	std::shared_ptr<AVFrame> Pull()
 	{
+		std::lock_guard<std::mutex> lock(mutex_);
 		PushNextPacket();
 		auto frame = AllocFrame();
 		auto ret = avcodec_receive_frame(ctx_.get(), frame.get());
@@ -192,6 +195,7 @@ struct Decoder::implementation : Common::DebugTarget<false>
 
 	void Seek(const int64_t seek_time)
 	{
+		std::lock_guard<std::mutex> lock(mutex_);
 		avcodec_flush_buffers(ctx_.get());
 		is_eof_ = false;
 		is_flushed_ = false;

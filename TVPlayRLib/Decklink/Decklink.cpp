@@ -29,6 +29,8 @@ namespace TVPlayR {
 			std::mutex buffer_mutex_;
 			std::shared_ptr<FFmpeg::AVSync> buffer_frame_;
 			std::shared_ptr<AVFrame> last_video_;
+			int64_t last_video_time_ = 0LL;
+
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, int index)
@@ -54,7 +56,7 @@ namespace TVPlayR {
 				if (!output_)
 					return false;
 				BMDDisplayModeSupport modeSupport;
-				if (FAILED(output_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputFlags::bmdVideoOutputFlagDefault, &modeSupport, NULL))
+				if (FAILED(output_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputFlags::bmdVideoOutputRP188, &modeSupport, NULL))
 					|| modeSupport == bmdDisplayModeNotSupported)
 					return false;
 				if (pixel_format == BMDPixelFormat::bmdFormat8BitBGRA)
@@ -67,7 +69,7 @@ namespace TVPlayR {
 					if (support)
 						keyer_->SetLevel(255);
 				}
-				if (FAILED(output_->EnableVideoOutput(mode, BMDVideoOutputFlags::bmdVideoOutputFlagDefault)))
+				if (FAILED(output_->EnableVideoOutput(mode, static_cast<BMDVideoOutputFlags>(6 /*bmdVideoOutputRP188 | bmdVideoOutputVITC*/))))
 					return false;
 				output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
 				return true;
@@ -84,16 +86,17 @@ namespace TVPlayR {
 				for (size_t i = 0; i < buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
-					ScheduleVideo(empty_video_frame);
+					ScheduleVideo(empty_video_frame, 0LL);
 					scheduled_frames_++;
 				}
 				output_->EndAudioPreroll();
 			}
 
-			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame)
+			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t time)
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
-				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(frame);
+				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(format_, frame, time);
+				last_video_time_ = time;
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_ = frame;
 #ifdef DEBUG
@@ -204,11 +207,11 @@ namespace TVPlayR {
 				}
 				DebugPrintIf(!sync, "Decklink: frame not received");
 				if (!sync)
-					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, 0LL);
+					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 
-				if (ScheduleVideo(sync->Video))
+				if (ScheduleVideo(sync->Video, sync->Time))
 					ScheduleAudio(sync->Audio);
 
 #ifdef DEBUG

@@ -9,9 +9,11 @@ namespace TVPlayR {
 		{
 		private:
 			const std::shared_ptr<AVFrame> frame_;
+			const int64_t time_;
 			ULONG ref_count_;
+			Core::VideoFormat& format_;
 		public:
-			DecklinkVideoFrame(std::shared_ptr<AVFrame> frame);
+			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t time);
 
 			//IUnknown
 			STDMETHOD(QueryInterface(REFIID, LPVOID*));
@@ -25,10 +27,10 @@ namespace TVPlayR {
 			STDMETHOD_(BMDPixelFormat, GetPixelFormat());
 			STDMETHOD_(BMDFrameFlags, GetFlags());
 			STDMETHOD(GetBytes(void** buffer));
-			STDMETHOD(GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode)) { return E_FAIL; }
+			STDMETHOD(GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode));
 			STDMETHOD(GetAncillaryData(IDeckLinkVideoFrameAncillary** ancillary)) { return E_FAIL; }
 
-			//inne
+			//other
 			STDMETHOD_(int64_t, GetPts()) { return frame_->pts; }
 		};
 

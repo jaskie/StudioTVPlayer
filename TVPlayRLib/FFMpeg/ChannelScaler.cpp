@@ -34,6 +34,7 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame)
 			filter << "setsar=16/15,";
 		else
 			filter << "setsar=64/45,";
+		height = 576;
 	}
 	Common::Rational<int> input_frame_rate = decoder_.FrameRate();
 	if (input_frame_rate == output_format_.FrameRate())

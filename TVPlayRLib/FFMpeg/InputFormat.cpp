@@ -77,7 +77,7 @@ bool InputFormat::CanSeek() const
 	auto stream = GetVideoStream();
 	if (!stream)
 		return true;
-	return stream->Stream->nb_frames > 1;
+	return stream->Duration > AV_TIME_BASE/10 || stream->Stream->nb_frames > 1 ;
 }
 
 bool InputFormat::Seek(int64_t time)

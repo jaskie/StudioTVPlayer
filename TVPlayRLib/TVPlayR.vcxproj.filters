@@ -143,6 +143,9 @@
     <ClInclude Include="Common\Debug.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Decklink\DecklinkTimecode.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">
@@ -208,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="Preview\PreviewScaler.cpp">
       <Filter>Preview</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\DecklinkTimecode.cpp">
+      <Filter>Decklink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

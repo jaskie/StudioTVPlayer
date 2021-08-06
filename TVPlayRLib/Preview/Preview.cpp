@@ -12,9 +12,10 @@ namespace TVPlayR {
 
 	struct Preview::implementation
 	{
+		std::mutex callback_mutex_;
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
 		Core::Channel* channel_;
-		std::mutex mutex_;
+		std::mutex scaler_mutex_;
 		std::unique_ptr<PreviewScaler> preview_scaler_;
 		Common::Executor consumer_executor_;
 
@@ -34,14 +35,18 @@ namespace TVPlayR {
 
 		void ProcessFrame(std::shared_ptr<AVFrame> frame)
 		{
-			std::lock_guard<std::mutex> lock(mutex_);
-			if (!preview_scaler_ || !frame_played_callback_)
+			std::lock_guard<std::mutex> lock(scaler_mutex_);
+			if (!preview_scaler_)
 				return;
 			preview_scaler_->Push(frame);
 			std::shared_ptr<AVFrame> received_frame;
 			while (received_frame = preview_scaler_->Pull())
-					frame_played_callback_(received_frame);
-
+			{
+				std::lock_guard<std::mutex> lock(callback_mutex_);
+				if (!frame_played_callback_)
+					continue;
+				frame_played_callback_(received_frame);
+			}
 		}
 
 		bool AssignToChannel(Core::Channel& channel)
@@ -53,13 +58,13 @@ namespace TVPlayR {
 		void CreateFilter(int width, int height)
 		{
 			assert(channel_);
-			std::lock_guard<std::mutex> lock(mutex_);
+			std::lock_guard<std::mutex> lock(scaler_mutex_);
 			preview_scaler_ = std::make_unique<PreviewScaler>(*channel_, width, height);
 		}
 
 		void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback)
 		{
-			std::lock_guard<std::mutex> lock(mutex_);
+			std::lock_guard<std::mutex> lock(callback_mutex_);
 			frame_played_callback_ = frame_played_callback;
 		}
 

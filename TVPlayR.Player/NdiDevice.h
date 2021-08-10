@@ -7,7 +7,7 @@ namespace TVPlayR {
 	public ref class NdiDevice 
 	{
 	private:
-		Ndi::Ndi* _ndi;
+		Ndi::Ndi* const _ndi;
 		String^ _sourceName;
 		String^ _groupName;		
 	public:

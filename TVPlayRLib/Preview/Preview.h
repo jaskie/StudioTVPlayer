@@ -11,7 +11,7 @@ namespace TVPlayR {
 class Preview: public Core::OutputDevice
 {
 public:
-	explicit Preview();
+	explicit Preview(int width, int height);
 	~Preview();
 	typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
 	virtual bool AssignToChannel(Core::Channel& channel) override;
@@ -19,7 +19,6 @@ public:
 	virtual void Push(FFmpeg::AVSync& sync) override;
 	virtual void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) override;
 	void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback);
-	void CreateFilter(int width, int height);
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

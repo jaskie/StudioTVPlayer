@@ -17,7 +17,7 @@ namespace TVPlayR {
 	public ref class VideoFormat
 	{
 	private:
-		Core::VideoFormat* _native_fomat;
+		Core::VideoFormat* const _native_fomat;
 		const String^ _name;
 		const Rational _sample_aspect_ratio;
 		const Rational _frame_rate;

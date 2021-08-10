@@ -105,7 +105,7 @@ namespace TVPlayR {
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
-		std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
+		const std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
 		String^ _fileName;
 		bool _isLoop;
 
@@ -119,7 +119,7 @@ namespace TVPlayR {
 		GCHandle _stoppedHandle;
 		void StoppedCallback();
 	internal:
-		std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }
+		const std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }
 	};
 
 }

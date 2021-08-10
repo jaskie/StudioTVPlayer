@@ -117,10 +117,9 @@ namespace StudioTVPlayer.Model
                 throw new ApplicationException($"Channel {Name} not initialized");
             if (_previewDevice is null)
             {
-                _previewDevice = new TVPlayR.PreviewDevice(Application.Current.Dispatcher);
+                _previewDevice = new TVPlayR.PreviewDevice(Application.Current.Dispatcher, width, height);
                 _channelR.AddPreview(_previewDevice);
             }
-            _previewDevice.CreatePreview(width, height);
             return _previewDevice.PreviewSource;
         }
 
@@ -128,10 +127,10 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR == null)
                 return;
-            _previewDevice?.Dispose();
-            _previewDevice = null;
             _channelR.Clear();
             _channelR.Dispose();
+            _previewDevice?.Dispose();
+            _previewDevice = null;
             _channelR.AudioVolume -= ChannelR_AudioVolume;
             _channelR = null;
         }

@@ -11,15 +11,17 @@ namespace TVPlayR {
 	ref class DecklinkDevice;
 	ref class PreviewDevice;
 	ref class InputFile;
+	ref class OutputDevice;
 
 	public ref class Channel
 	{
 	private:
-		Core::Channel* _channel;
+		Core::Channel* const _channel;
 		double _volume = 1.0f;
 		delegate void AudioVolumeDelegate(std::vector<double>);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
+		System::Collections::Generic::List<OutputDevice^>^ _outputs = gcnew System::Collections::Generic::List<OutputDevice^>();
 		void AudioVolumeCallback(std::vector<double> audio_volume);
 	public:
 		Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);

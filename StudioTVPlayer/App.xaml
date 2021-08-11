@@ -16,6 +16,7 @@
                 <ResourceDictionary Source="Resources/AppStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
             <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
 
             <DataTemplate x:Key="mediaDragTemplate">

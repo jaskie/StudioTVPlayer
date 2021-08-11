@@ -29,6 +29,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public bool IsVerified => Media.IsVerified;
 
+        public bool IsValid => Media.IsValid;
+
         public UiCommand QueueToPlayerCommand { get; }
 
         public MediaViewModel(Media media)

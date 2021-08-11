@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
- 
+
     [DebuggerDisplay(nameof(FullPath))]
     public class Media : INotifyPropertyChanged
     {
@@ -29,6 +29,7 @@ namespace StudioTVPlayer.Model
         private string _frameRate;
         private int _audioChannelCount;
         private TimeSpan _startTime;
+        private bool _isValid;
         private readonly FileInfo _fileInfo;
 
         public Media(string path)
@@ -71,7 +72,7 @@ namespace StudioTVPlayer.Model
 
         public TimeSpan StartTime
         {
-            get => _startTime; 
+            get => _startTime;
             set
             {
                 if (_startTime == value)
@@ -188,6 +189,19 @@ namespace StudioTVPlayer.Model
                 RaisePropertyChanged();
             }
         }
+
+        public bool IsValid
+        {
+            get => _isValid;
+            internal set
+            {
+                if (_isValid == value)
+                    return;
+                _isValid = value;
+                RaisePropertyChanged();
+            }
+        }
+
 
         public void Refresh()
         {

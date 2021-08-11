@@ -462,7 +462,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 if (fileName is null)
                     return;
                 var media = new Media(fileName);
-                if (!MediaVerifier.Current.Verify(media))
+                MediaVerifier.Current.Verify(media);
+                if (!media.IsValid)
                     return;
                 var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                 var rundownItem = _mediaPlayer.AddToQueue(media, index);

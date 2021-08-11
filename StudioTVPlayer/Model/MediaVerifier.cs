@@ -50,45 +50,45 @@ namespace StudioTVPlayer.Model
 
         public void Verify(Media media, int thumbnailHeight)
         {
-            using (var file = new InputFile(media.FullPath, 0))
+            try
             {
-                media.StartTime = file.VideoStart;
-                media.Duration = file.VideoDuration;
-                media.Width = file.Width;
-                media.Height = file.Height;
-                switch(file.FieldOrder)
+                using (var file = new InputFile(media.FullPath, 0))
                 {
-                    case FieldOrder.TopFieldFirst:
-                        media.ScanType = ScanType.TopFieldFirst;
-                        break;
-                    case FieldOrder.BottomFieldFirst:
-                        media.ScanType = ScanType.BottomFieldFirst;
-                        break;
+                    media.StartTime = file.VideoStart;
+                    media.Duration = file.VideoDuration;
+                    media.Width = file.Width;
+                    media.Height = file.Height;
+                    switch (file.FieldOrder)
+                    {
+                        case FieldOrder.TopFieldFirst:
+                            media.ScanType = ScanType.TopFieldFirst;
+                            break;
+                        case FieldOrder.BottomFieldFirst:
+                            media.ScanType = ScanType.BottomFieldFirst;
+                            break;
+                    }
+                    var frameRate = file.FrameRate;
+                    media.FrameRate = $"{frameRate.Numerator}/{frameRate.Denominator}";
+                    media.AudioChannelCount = file.AudioChannelCount;
+                    if (thumbnailHeight > 0)
+                    {
+                        var thumb = file.GetBitmapSource(file.VideoStart, thumbnailHeight) ?? new BitmapImage();
+                        thumb.Freeze();
+                        media.Thumbnail = thumb;
+                    }
                 }
-                var frameRate = file.FrameRate;
-                media.FrameRate = $"{frameRate.Numerator}/{frameRate.Denominator}";
-                media.AudioChannelCount = file.AudioChannelCount;
-                if (thumbnailHeight > 0)
-                {
-                    var thumb = file.GetBitmapSource(file.VideoStart, thumbnailHeight) ?? new BitmapImage();
-                    thumb.Freeze();
-                    media.Thumbnail = thumb;
-                }
+                media.IsValid = true;
+            }
+            catch
+            {
+                media.IsValid = false;
             }
             media.IsVerified = true;
         }
 
-        public bool Verify(Media media)
+        public void Verify(Media media)
         {
-            try
-            {
-                Verify(media, DefaultThumbnailHeight);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            Verify(media, DefaultThumbnailHeight);
         }
 
         private void MediaVerifierTask()

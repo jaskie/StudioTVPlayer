@@ -9,12 +9,13 @@ using TVPlayR;
 
 namespace StudioTVPlayer.Model
 {
-    internal class MediaVerifier: IDisposable
+    internal class MediaVerifier : IDisposable
     {
         private struct MediaVerifyData
         {
             public Media Media;
             public int Height;
+            public int Width;
             public CancellationToken CancellationToken;
             public DateTime FirstVerification;
         }
@@ -23,6 +24,7 @@ namespace StudioTVPlayer.Model
         private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private const int DefaultThumbnailHeight = 126;
+        private const int DefaultThumbnailWidth = 224;
         private MediaVerifier()
         {
             _verificationTask = Task.Factory.StartNew(MediaVerifierTask, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -35,7 +37,7 @@ namespace StudioTVPlayer.Model
             {
                 _verificationTask.Wait();
             }
-            catch (OperationCanceledException) 
+            catch (OperationCanceledException)
             { }
             _mediaQueue.Dispose();
         }
@@ -45,10 +47,10 @@ namespace StudioTVPlayer.Model
         public void Queue(Media media, CancellationToken cancellationToken)
         {
             media.IsVerified = false;
-            _mediaQueue.Add(new MediaVerifyData { Media = media, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
+            _mediaQueue.Add(new MediaVerifyData { Media = media, Width = DefaultThumbnailWidth, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
         }
 
-        public void Verify(Media media, int thumbnailHeight)
+        public void Verify(Media media, int thumbnailWidth, int thumbnailHeight)
         {
             try
             {
@@ -73,7 +75,7 @@ namespace StudioTVPlayer.Model
                     media.HaveAlphaChannel = file.HaveAlphaChannel;
                     if (thumbnailHeight > 0)
                     {
-                        var thumb = file.GetBitmapSource(file.VideoStart, thumbnailHeight) ?? new BitmapImage();
+                        var thumb = file.GetBitmapSource(file.VideoStart, thumbnailWidth, thumbnailHeight) ?? new BitmapImage();
                         thumb.Freeze();
                         media.Thumbnail = thumb;
                     }
@@ -89,7 +91,7 @@ namespace StudioTVPlayer.Model
 
         public void Verify(Media media)
         {
-            Verify(media, DefaultThumbnailHeight);
+            Verify(media, DefaultThumbnailWidth, DefaultThumbnailHeight);
         }
 
         private void MediaVerifierTask()
@@ -108,18 +110,20 @@ namespace StudioTVPlayer.Model
                         vd.FirstVerification = DateTime.Now;
                     try
                     {
-                        Verify(vd.Media, vd.Height);
+                        Verify(vd.Media, vd.Width, vd.Height);
                     }
                     catch (Exception e)
                     {
                         if (DateTime.Now > vd.FirstVerification + TimeSpan.FromMinutes(30))
                             Debug.WriteLine("Verification of {0} unsuccessfull in 30 minutes. Error: {1}", vd.Media.FullPath, e);
                         else
+                        {
                             Task.Run(async () =>
                             {
                                 await Task.Delay(TimeSpan.FromSeconds(5), vd.CancellationToken);
                                 _mediaQueue.Add(vd);
                             }, _cancellationTokenSource.Token);
+                        }
                     }
                 }
                 catch (OperationCanceledException)

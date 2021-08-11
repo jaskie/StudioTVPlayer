@@ -36,6 +36,7 @@ public:
 	virtual int GetHeight() override;
 	virtual AVFieldOrder GetFieldOrder() override;
 	virtual int GetAudioChannelCount() override;
+	virtual bool HaveAlphaChannel() const override;
 	virtual int StreamCount() const override;
 	virtual Core::StreamInfo& GetStreamInfo(int index) override;
 	virtual void SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map) override;

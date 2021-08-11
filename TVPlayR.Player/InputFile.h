@@ -88,6 +88,8 @@ namespace TVPlayR {
 
 		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
 
+		property bool HaveAlphaChannel { bool get() { return (*_nativeSource)->HaveAlphaChannel(); }}
+
 		property bool IsLoop 
 		{
 			bool get() { return _isLoop; }

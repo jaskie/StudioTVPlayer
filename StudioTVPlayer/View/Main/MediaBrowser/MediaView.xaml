@@ -59,6 +59,7 @@
                             <TextBlock Text="{Binding Height, StringFormat={}x{0}}"/>
                             <TextBlock Text="{Binding FrameRate, StringFormat='{} {0} fps '}"/>
                             <TextBlock Text="{Binding ScanType}"/>
+                            <TextBlock Visibility="{Binding HaveAlphaChannel, Converter={StaticResource BoolToVisibilityConverter}}">, alpha</TextBlock>
                         </StackPanel>
                         <TextBlock Text="{Binding AudioChannelCount, StringFormat={}Audio: {0} channels}"/>
                     </StackPanel>

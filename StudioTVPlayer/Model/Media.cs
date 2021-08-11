@@ -30,6 +30,7 @@ namespace StudioTVPlayer.Model
         private int _audioChannelCount;
         private TimeSpan _startTime;
         private bool _isValid;
+        private bool _haveAlphaChannel;
         private readonly FileInfo _fileInfo;
 
         public Media(string path)
@@ -41,15 +42,11 @@ namespace StudioTVPlayer.Model
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
-        }
 
         public string DirectoryName
         {
             get => _directoryName;
-            set
+            private set
             {
                 if (_directoryName == value)
                     return;
@@ -61,7 +58,7 @@ namespace StudioTVPlayer.Model
         public string Name
         {
             get => _name;
-            set
+            private set
             {
                 if (_name == value)
                     return;
@@ -73,7 +70,7 @@ namespace StudioTVPlayer.Model
         public TimeSpan StartTime
         {
             get => _startTime;
-            set
+            internal set
             {
                 if (_startTime == value)
                     return;
@@ -85,7 +82,7 @@ namespace StudioTVPlayer.Model
         public TimeSpan Duration
         {
             get => _duration;
-            set
+            internal set
             {
                 if (_duration == value)
                     return;
@@ -97,7 +94,7 @@ namespace StudioTVPlayer.Model
         public DateTime CreationTime
         {
             get => _creationTime;
-            set
+            private set
             {
                 if (_creationTime == value)
                     return;
@@ -109,7 +106,7 @@ namespace StudioTVPlayer.Model
         public int Height
         {
             get => _height;
-            set
+            internal set
             {
                 if (_height == value)
                     return;
@@ -121,7 +118,7 @@ namespace StudioTVPlayer.Model
         public int Width
         {
             get => _width;
-            set
+            internal set
             {
                 if (_width == value)
                     return;
@@ -133,7 +130,7 @@ namespace StudioTVPlayer.Model
         public ScanType ScanType
         {
             get => _scanType;
-            set
+            internal set
             {
                 if (_scanType == value)
                     return;
@@ -145,7 +142,7 @@ namespace StudioTVPlayer.Model
         public string FrameRate
         {
             get => _frameRate;
-            set
+            internal set
             {
                 if (_frameRate == value)
                     return;
@@ -157,11 +154,23 @@ namespace StudioTVPlayer.Model
         public int AudioChannelCount
         {
             get => _audioChannelCount;
-            set
+            internal set
             {
                 if (_audioChannelCount == value)
                     return;
                 _audioChannelCount = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool HaveAlphaChannel
+        {
+            get => _haveAlphaChannel;
+            internal set
+            {
+                if (_haveAlphaChannel == value)
+                    return;
+                _haveAlphaChannel = value;
                 RaisePropertyChanged();
             }
         }
@@ -202,11 +211,15 @@ namespace StudioTVPlayer.Model
             }
         }
 
-
         public void Refresh()
         {
             _fileInfo.Refresh();
             ReadFileInfo();
+        }
+
+        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
         private void ReadFileInfo()

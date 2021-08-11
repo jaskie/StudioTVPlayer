@@ -70,6 +70,7 @@ namespace StudioTVPlayer.Model
                     var frameRate = file.FrameRate;
                     media.FrameRate = $"{frameRate.Numerator}/{frameRate.Denominator}";
                     media.AudioChannelCount = file.AudioChannelCount;
+                    media.HaveAlphaChannel = file.HaveAlphaChannel;
                     if (thumbnailHeight > 0)
                     {
                         var thumb = file.GetBitmapSource(file.VideoStart, thumbnailHeight) ?? new BitmapImage();

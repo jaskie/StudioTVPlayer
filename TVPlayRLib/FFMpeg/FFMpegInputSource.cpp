@@ -362,7 +362,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 		const Core::StreamInfo* stream = input_.GetVideoStream();
 		if (stream == nullptr)
 			return 0LL;
-		return PtsToTime(stream->Stream->start_time, stream->Stream->time_base);
+		return stream->StartTime;
 	}
 
 	int64_t GetVideoDuration() const
@@ -370,7 +370,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 		const Core::StreamInfo* stream = input_.GetVideoStream();
 		if (stream == nullptr)
 			return 0LL;
-		return PtsToTime(stream->Stream->duration, stream->Stream->time_base);
+		return stream->Duration;
 	}
 
 	AVRational GetTimeBase() const

@@ -98,6 +98,7 @@ namespace TVPlayR {
 			{
 
 				buffer_ = sync;
+				SendVideo();
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 			}
@@ -114,13 +115,12 @@ namespace TVPlayR {
 					frame_requested_callback(AudioSamplesRequired());
 			}
 
-
 			void SendVideo()
 			{
-
+				GetNdi()->send_send_video_v2(send_instance_, CreateVideoFrame(buffer_.Video, buffer_.Time));
 			}
 
-			NDIlib_video_frame_t* CreateVideoFrame(std::shared_ptr<AVFrame> avframe)
+			NDIlib_video_frame_v2_t* CreateVideoFrame(std::shared_ptr<AVFrame> avframe, int64_t time)
 			{
 				assert(avframe);
 				NDIlib_FourCC_video_type_e fourcc;
@@ -129,13 +129,13 @@ namespace TVPlayR {
 				case AV_PIX_FMT_BGRA:
 					fourcc = NDIlib_FourCC_type_BGRA;
 					break;
-				case AV_PIX_FMT_YUV420P:
+				case AV_PIX_FMT_UYVY422:
 					fourcc = NDIlib_FourCC_type_UYVY;
 					break;
 				default:
 					return nullptr;
 				}
-				NDIlib_video_frame_t* frame = new NDIlib_video_frame_t();
+				NDIlib_video_frame_v2_t* frame = new NDIlib_video_frame_v2_t();
 				assert(channel_);
 				frame->xres = avframe->width;
 				frame->yres = avframe->height;
@@ -154,9 +154,11 @@ namespace TVPlayR {
 					frame->frame_format_type = NDIlib_frame_format_type_progressive;
 					break;
 				}
-				frame->timecode = NDIlib_send_timecode_synthesize;
+				frame->timecode = time*10;
 				frame->p_data = avframe->data[0];
 				frame->line_stride_in_bytes = avframe->linesize[0];
+				frame->timestamp = NDIlib_recv_timestamp_undefined;
+				frame->p_metadata = NULL;
 				return frame;
 			}
 		};

@@ -43,5 +43,6 @@ extern "C"
 #include "libavutil/audio_fifo.h"
 #include "libswscale/swscale.h"
 #include "libavutil/timecode.h"
+#include "../dependencies/Ndi/Include/Processing.NDI.Lib.h"
 }
 #endif //PCH_H

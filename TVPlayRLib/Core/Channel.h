@@ -25,6 +25,7 @@ public:
 	const PixelFormat PixelFormat() const;
 	const int AudioChannelsCount() const;
 	const AVSampleFormat AudioSampleFormat() const { return AVSampleFormat::AV_SAMPLE_FMT_S32; }
+	const int AudioSampleRate() const { return 48000; }
 	void SetVolume(double volume);
 	void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback);
 private:

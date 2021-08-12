@@ -36,17 +36,21 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Core::Channel channel(Core::VideoFormatType::v1080i5000, Core::PixelFormat::yuv422, 2);
+		/*
 		Decklink::Iterator iterator;
 		size_t device_index = 0;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto device = iterator[device_index];
+		*/
+		auto device = std::make_shared<Ndi::Ndi>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(device);
 		channel.AddOutput(device);
-		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\Wilno\\TVP INFO 1 marzec 2021 12_01_30.mp4", Core::HwAccel::none, "", 2);
+
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\TEMP\\test5.mov", Core::HwAccel::none, "", 2);
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
-		auto seek = input->GetVideoDuration() - AV_TIME_BASE;
+		auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
 		input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });

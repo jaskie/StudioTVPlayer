@@ -1,21 +1,20 @@
 #include "../pch.h"
 #include "SynchronizingBuffer.h"
 #include "AudioFifo.h"
-#include "../Core/VideoFormat.h"
+#include "../Core/Channel.h"
 #include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-#define SAMPLE_RATE 48000
 
 		struct SynchronizingBuffer::implementation : Common::DebugTarget<false>
 		{
-			const AVRational audio_time_base_;
-			const AVRational video_frame_rate_;
-			AVRational input_video_time_base_;
 			const int sample_rate_;
 			const int audio_channel_count_;
+			const AVRational audio_time_base_;
+			const AVRational video_frame_rate_;
+			AVRational input_video_time_base_ = { 0, 1 };
 			const bool have_video_;
 			const bool have_audio_;
 			std::atomic_bool is_playing_;
@@ -28,19 +27,19 @@ namespace TVPlayR {
 			const Core::VideoFormatType video_format_;
 			const AVSampleFormat audio_sample_format_;
 
-			implementation(const Core::VideoFormat& format, int audio_channel_count, AVSampleFormat audio_sample_format, bool is_playing, int64_t duration, int64_t initial_sync)
-				: video_format_(format.type())
-				, video_frame_rate_(format.FrameRate().av())
-				, sample_rate_(SAMPLE_RATE)
-				, audio_time_base_(av_make_q(1, SAMPLE_RATE))
-				, audio_channel_count_(audio_channel_count)
+			implementation(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync)
+				: video_format_(channel->Format().type())
+				, video_frame_rate_(channel->Format().FrameRate().av())
+				, sample_rate_(channel->AudioSampleRate())
+				, audio_time_base_(av_make_q(1, sample_rate_))
+				, audio_channel_count_(channel->AudioChannelsCount())
 				, have_video_(true)
-				, have_audio_(audio_channel_count)
+				, have_audio_(channel->AudioChannelsCount() > 0)
 				, is_playing_(is_playing)
 				, duration_(duration)
 				, sync_(initial_sync)
 				, is_flushed_(false)
-				, audio_sample_format_(audio_sample_format)
+				, audio_sample_format_(channel->AudioSampleFormat())
 			{}
 
 			void PushAudio(const std::shared_ptr<AVFrame>& frame)
@@ -164,8 +163,8 @@ namespace TVPlayR {
 
 		};
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::VideoFormat& format, int audio_channel_count, AVSampleFormat audio_sample_format, bool is_playing, int64_t duration, int64_t initial_sync)
-		: impl_(std::make_unique<implementation>(format, audio_channel_count, audio_sample_format, is_playing, duration, initial_sync))
+	SynchronizingBuffer::SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync)
+		: impl_(std::make_unique<implementation>(channel, is_playing, duration, initial_sync))
 	{
 	}
 

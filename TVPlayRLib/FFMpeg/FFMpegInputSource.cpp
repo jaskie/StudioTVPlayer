@@ -67,9 +67,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<true>
 		if (!audio_decoders_.empty())
 			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, channel_->AudioSampleFormat(), 48000, channel_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
-			channel_->Format(),
-			channel_->AudioChannelsCount(),
-			channel_->AudioSampleFormat(),
+			channel_,
 			is_playing_,
 			AV_TIME_BASE / 2, // 0.5 sec
 			0);

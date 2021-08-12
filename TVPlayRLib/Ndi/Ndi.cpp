@@ -50,7 +50,7 @@ namespace TVPlayR {
 			Core::Channel * channel_ = nullptr;
 			const std::string source_name_;
 			const std::string group_name_;
-			std::deque<FFmpeg::AVSync> buffer_;
+			FFmpeg::AVSync buffer_;
 			const NDIlib_send_instance_t send_instance_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			
@@ -96,8 +96,8 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				//video_frame_buffer_.emplace_back(sync.Video);
-				//audio_frame_buffer_.emplace_back(sync.Audio);
+
+				buffer_ = sync;
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 			}
@@ -114,6 +114,51 @@ namespace TVPlayR {
 					frame_requested_callback(AudioSamplesRequired());
 			}
 
+
+			void SendVideo()
+			{
+
+			}
+
+			NDIlib_video_frame_t* CreateVideoFrame(std::shared_ptr<AVFrame> avframe)
+			{
+				assert(avframe);
+				NDIlib_FourCC_video_type_e fourcc;
+				switch (avframe->format)
+				{
+				case AV_PIX_FMT_BGRA:
+					fourcc = NDIlib_FourCC_type_BGRA;
+					break;
+				case AV_PIX_FMT_YUV420P:
+					fourcc = NDIlib_FourCC_type_UYVY;
+					break;
+				default:
+					return nullptr;
+				}
+				NDIlib_video_frame_t* frame = new NDIlib_video_frame_t();
+				assert(channel_);
+				frame->xres = avframe->width;
+				frame->yres = avframe->height;
+				frame->FourCC = fourcc;
+				const Core::VideoFormat& format = channel_->Format();
+				frame->frame_rate_N = format.FrameRate().Numerator();
+				frame->frame_rate_D = format.FrameRate().Denominator();
+				frame->picture_aspect_ratio = static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Numerator() * format.height());
+				switch (format.field_mode())
+				{
+				case Core::VideoFormat::FieldMode::lower:
+				case Core::VideoFormat::FieldMode::upper:
+					frame->frame_format_type = NDIlib_frame_format_type_interleaved;
+					break;
+				default:
+					frame->frame_format_type = NDIlib_frame_format_type_progressive;
+					break;
+				}
+				frame->timecode = NDIlib_send_timecode_synthesize;
+				frame->p_data = avframe->data[0];
+				frame->line_stride_in_bytes = avframe->linesize[0];
+				return frame;
+			}
 		};
 			
 		Ndi::Ndi(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }

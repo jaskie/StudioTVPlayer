@@ -22,8 +22,8 @@ namespace TVPlayR {
 		bool Seek(TimeSpan time);
 		void Play();
 		void Pause();
-		Bitmap^ GetThumbnail(TimeSpan time, int height);
-		BitmapSource^ GetBitmapSource(TimeSpan time, int height);
+		Bitmap^ GetThumbnail(TimeSpan time, int width, int height);
+		BitmapSource^ GetBitmapSource(TimeSpan time, int width, int height);
 		property TimeSpan AudioDuration 
 		{
 			TimeSpan get() { return TimeSpan((*_nativeSource)->GetAudioDuration() * 10); }
@@ -88,6 +88,8 @@ namespace TVPlayR {
 
 		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
 
+		property bool HaveAlphaChannel { bool get() { return (*_nativeSource)->HaveAlphaChannel(); }}
+
 		property bool IsLoop 
 		{
 			bool get() { return _isLoop; }
@@ -105,7 +107,7 @@ namespace TVPlayR {
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
-		std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
+		const std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
 		String^ _fileName;
 		bool _isLoop;
 
@@ -119,7 +121,7 @@ namespace TVPlayR {
 		GCHandle _stoppedHandle;
 		void StoppedCallback();
 	internal:
-		std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }
+		const std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }
 	};
 
 }

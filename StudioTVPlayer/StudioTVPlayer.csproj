@@ -96,6 +96,7 @@
     </ApplicationDefinition>
     <Compile Include="Controls\TimecodeEdit.cs" />
     <Compile Include="Converters\EnumDescriptionTypeConverter.cs" />
+    <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\NotNullToBooleanConverter.cs" />
     <Compile Include="Helpers\AttachedProperties\ControlProperties.cs" />
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />
@@ -238,9 +239,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\LoadingThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
     <SplashScreen Include="StudioTVPlayer.ico" />

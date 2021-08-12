@@ -56,7 +56,7 @@ int main()
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();
 		channel.Load(input);
-		//Ndi::Ndi ndi("NDI_SOURCE", "");
+		Ndi::Ndi ndi("NDI_SOURCE", "");
 		//channel.SetFrameClock(ndi.OutputFrameClock());
 		//channel.AddOutput(ndi);
 		while (true)

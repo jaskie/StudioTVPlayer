@@ -36,6 +36,7 @@ public:
 	virtual int GetHeight() = 0;
 	virtual AVFieldOrder GetFieldOrder() = 0;
 	virtual int GetAudioChannelCount() = 0;
+	virtual bool HaveAlphaChannel() const = 0;
 	virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) = 0;
 	virtual void SetStoppedCallback(STOPPED_CALLBACK stopped_callback) = 0;
 	virtual void SetLoadedCallback(LOADED_CALLBACK loaded_callback) = 0;

@@ -26,6 +26,15 @@ namespace TVPlayR {
 				Time = other.Time;
 				return *this;
 			}
+			
+			AVSync operator=(const AVSync& other)
+			{
+				Audio = other.Audio;
+				Video = other.Video;
+				Time = other.Time;
+				return *this;
+			}
+
 			operator bool() const noexcept
 			{
 				return Audio || Video;

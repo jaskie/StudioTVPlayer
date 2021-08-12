@@ -94,6 +94,7 @@
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="NdiDevice.h" />
+    <ClInclude Include="OutputDevice.h" />
     <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="PreviewDevice.h" />
     <ClInclude Include="Rational.h" />

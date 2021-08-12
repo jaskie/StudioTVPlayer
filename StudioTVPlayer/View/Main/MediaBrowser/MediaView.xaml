@@ -46,23 +46,29 @@
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <mah:ProgressRing Grid.RowSpan="3" Foreground="{DynamicResource MahApps.Brushes.Accent}" IsActive="{Binding Thumbnail, Converter={StaticResource NotNullToBooleanConverter}}"/>
-        <Image Height="90" Grid.RowSpan="3" Source="{Binding Thumbnail}" >
-            <Image.ToolTip>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Width, StringFormat={}Video: {0}}"/>
-                        <TextBlock Text="{Binding Height, StringFormat={}x{0}}"/>
-                        <TextBlock Text="{Binding FrameRate, StringFormat='{} {0} fps '}"/>
-                        <TextBlock Text="{Binding ScanType}"/>
+        <mah:ProgressRing Grid.RowSpan="3" Foreground="{DynamicResource MahApps.Brushes.Accent}" Visibility="{Binding IsVerified, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+        <Grid Grid.RowSpan="3" Visibility="{Binding IsVerified,Converter={StaticResource BoolToVisibilityConverter}}">
+            <mah:FontIcon FontSize="40" Foreground="{StaticResource MahApps.Brushes.SemiTransparent}" Glyph="&#xE9CE;" 
+                          Visibility="{Binding IsValid, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
+                          ToolTip="This file isn't identified as able to play"/>
+            <Image Height="90" Source="{Binding Thumbnail}" Visibility="{Binding IsValid, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Image.ToolTip>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Width, StringFormat={}Video: {0}}"/>
+                            <TextBlock Text="{Binding Height, StringFormat={}x{0}}"/>
+                            <TextBlock Text="{Binding FrameRate, StringFormat='{} {0} fps '}"/>
+                            <TextBlock Text="{Binding ScanType}"/>
+                            <TextBlock Visibility="{Binding HaveAlphaChannel, Converter={StaticResource BoolToVisibilityConverter}}">, alpha</TextBlock>
+                        </StackPanel>
+                        <TextBlock Text="{Binding AudioChannelCount, StringFormat={}Audio: {0} channels}"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding AudioChannelCount, StringFormat={}Audio: {0} channels}"/>
-                </StackPanel>
-            </Image.ToolTip>
-            <Image.Effect>
-                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
-            </Image.Effect>
-        </Image>
+                </Image.ToolTip>
+                <Image.Effect>
+                    <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
+                </Image.Effect>
+            </Image>
+        </Grid>
         <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="18" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="Wrap"/>
         <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Duration}" FontSize="10" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center"/>
         <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding CreationTime}" FontSize="10" Margin="5 0 0 5" FontWeight="Bold" VerticalAlignment="Center"/>

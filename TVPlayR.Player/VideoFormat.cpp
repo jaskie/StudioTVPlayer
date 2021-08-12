@@ -29,10 +29,7 @@ namespace TVPlayR {
 
 	VideoFormat::!VideoFormat()
 	{
-		if (!_native_fomat)
-			return;
 		delete _native_fomat;
-		_native_fomat = nullptr;
 	}
 		
 	String^ VideoFormat::FrameNumberToString(int frame_number)

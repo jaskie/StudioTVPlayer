@@ -58,7 +58,7 @@ namespace TVPlayR {
 		(*_nativeSource)->Pause();
 	}
 
-	Bitmap ^ InputFile::GetThumbnail(TimeSpan time, int height)
+	Bitmap ^ InputFile::GetThumbnail(TimeSpan time, int width, int height)
 	{
 		Bitmap^ result = nullptr;
 		try
@@ -66,7 +66,7 @@ namespace TVPlayR {
 			auto video = (*_nativeSource)->GetFrameAt(time.Ticks / 10);
 			if (video == nullptr)
 				return nullptr;
-			FFmpeg::ThumbnailFilter filter(height, video);
+			FFmpeg::ThumbnailFilter filter(width, height, video);
 			video = filter.Pull();
 			if (video == nullptr)
 				return nullptr;
@@ -106,7 +106,7 @@ namespace TVPlayR {
 		return result;
 	}
 
-	BitmapSource ^ InputFile::GetBitmapSource(TimeSpan time, int height)
+	BitmapSource ^ InputFile::GetBitmapSource(TimeSpan time, int width, int height)
 	{
 		BitmapSource^ result = nullptr;
 		try
@@ -114,7 +114,7 @@ namespace TVPlayR {
 			auto video = (*_nativeSource)->GetFrameAt(time.Ticks / 10);
 			if (video == nullptr)
 				return nullptr;
-			FFmpeg::ThumbnailFilter filter(height, video);
+			FFmpeg::ThumbnailFilter filter(width, height, video);
 			video = filter.Pull();
 			if (video == nullptr)
 				return nullptr;

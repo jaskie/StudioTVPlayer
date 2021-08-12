@@ -24,10 +24,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public ScanType ScanType => Media.ScanType;
         public string FrameRate => Media.FrameRate;
         public int AudioChannelCount => Media.AudioChannelCount;
+        public bool HaveAlphaChannel => Media.HaveAlphaChannel;
 
         public ImageSource Thumbnail => Media.Thumbnail;
 
         public bool IsVerified => Media.IsVerified;
+
+        public bool IsValid => Media.IsValid;
 
         public UiCommand QueueToPlayerCommand { get; }
 

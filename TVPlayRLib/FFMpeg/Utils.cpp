@@ -35,6 +35,7 @@ namespace TVPlayR {
 			frame->channels = num_channels;
 			frame->channel_layout = 0x7FFFFFFFFFFFFFFFULL >> (63 - num_channels);
 			frame->nb_samples = samples_count;
+			frame->sample_rate = 48000;
 			av_frame_get_buffer(frame.get(), 0);
 			av_samples_set_silence(frame->data, 0, frame->nb_samples, frame->channels, static_cast<AVSampleFormat>(frame->format));
 			return frame;

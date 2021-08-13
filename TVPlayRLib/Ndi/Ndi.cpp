@@ -3,6 +3,7 @@
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
+#include "../Common/Executor.h"
 #include "Processing.NDI.Lib.h"
 
 namespace TVPlayR {
@@ -50,17 +51,21 @@ namespace TVPlayR {
 			Core::Channel * channel_ = nullptr;
 			const std::string source_name_;
 			const std::string group_name_;
-			FFmpeg::AVSync buffer_;
 			const NDIlib_send_instance_t send_instance_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
+			Common::Executor send_executor_;
+			std::atomic_int64_t video_frames_pushed_;
+			std::atomic_int64_t audio_samples_pushed_;
 			
 			implementation(const std::string& source_name, const std::string& group_names)
 				: send_instance_(GetNdi() ? CreateSend(source_name, group_names) : nullptr)
-			{
+				, send_executor_("Send thread for " + source_name, 1)
+			{				
 			}
 
 			~implementation()
 			{
+				send_executor_.stop();
 				if (send_instance_)
 					GetNdi()->send_destroy(send_instance_);
 			}
@@ -83,7 +88,11 @@ namespace TVPlayR {
 
 			bool AssignToChannel(Core::Channel& channel)
 			{
+				if (channel_)
+					return false;
 				channel_ = &channel;
+				video_frames_pushed_ = 0;
+				audio_samples_pushed_ = 0;
 				return true;
 			}
 
@@ -96,16 +105,21 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-
-				buffer_ = sync;
-				SendVideo();
-				if (frame_requested_callback_)
-					frame_requested_callback_(AudioSamplesRequired());
+				video_frames_pushed_++;
+				audio_samples_pushed_ += sync.Audio->nb_samples;
+				send_executor_.begin_invoke([this, sync] {
+					NDIlib_video_frame_v2_t video = CreateVideoFrame(sync.Video, sync.Time);
+					GetNdi()->send_send_video_v2(send_instance_, &video);
+					NDIlib_audio_frame_interleaved_32s_t audio = CreateAudioFrame(sync.Audio, sync.Time);
+					GetNdi()->util_send_send_audio_interleaved_32s(send_instance_, &audio);
+					if (frame_requested_callback_)
+						frame_requested_callback_(AudioSamplesRequired());
+				});
 			}
 
 			int AudioSamplesRequired() const
 			{
-				return 1920;
+				return static_cast<int>((video_frames_pushed_ + 1LL) * channel_->AudioSampleRate() - audio_samples_pushed_);
 			}
 
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
@@ -115,12 +129,7 @@ namespace TVPlayR {
 					frame_requested_callback(AudioSamplesRequired());
 			}
 
-			void SendVideo()
-			{
-				GetNdi()->send_send_video_v2(send_instance_, CreateVideoFrame(buffer_.Video, buffer_.Time));
-			}
-
-			NDIlib_video_frame_v2_t* CreateVideoFrame(std::shared_ptr<AVFrame> avframe, int64_t time)
+			NDIlib_video_frame_v2_t CreateVideoFrame(const std::shared_ptr<AVFrame>& avframe, int64_t time)
 			{
 				assert(avframe);
 				NDIlib_FourCC_video_type_e fourcc;
@@ -133,33 +142,46 @@ namespace TVPlayR {
 					fourcc = NDIlib_FourCC_type_UYVY;
 					break;
 				default:
-					return nullptr;
+					THROW_EXCEPTION("Invalid format of video frame");
 				}
-				NDIlib_video_frame_v2_t* frame = new NDIlib_video_frame_v2_t();
 				assert(channel_);
-				frame->xres = avframe->width;
-				frame->yres = avframe->height;
-				frame->FourCC = fourcc;
 				const Core::VideoFormat& format = channel_->Format();
-				frame->frame_rate_N = format.FrameRate().Numerator();
-				frame->frame_rate_D = format.FrameRate().Denominator();
-				frame->picture_aspect_ratio = static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Numerator() * format.height());
+				NDIlib_frame_format_type_e frame_format_type;
 				switch (format.field_mode())
 				{
 				case Core::VideoFormat::FieldMode::lower:
 				case Core::VideoFormat::FieldMode::upper:
-					frame->frame_format_type = NDIlib_frame_format_type_interleaved;
+					frame_format_type = NDIlib_frame_format_type_interleaved;
 					break;
 				default:
-					frame->frame_format_type = NDIlib_frame_format_type_progressive;
+					frame_format_type = NDIlib_frame_format_type_progressive;
 					break;
 				}
-				frame->timecode = time*10;
-				frame->p_data = avframe->data[0];
-				frame->line_stride_in_bytes = avframe->linesize[0];
-				frame->timestamp = NDIlib_recv_timestamp_undefined;
-				frame->p_metadata = NULL;
-				return frame;
+				return NDIlib_video_frame_v2_t(
+					avframe->width,
+					avframe->height,
+					fourcc,
+					format.FrameRate().Numerator(),
+					format.FrameRate().Denominator(),
+					static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Numerator() * format.height()),
+					frame_format_type,
+					time * 10,
+					avframe->data[0],
+					avframe->linesize[0]					
+				);
+			}
+
+			NDIlib_audio_frame_interleaved_32s_t CreateAudioFrame(std::shared_ptr<AVFrame> avframe, int64_t time)
+			{
+				assert(avframe->format == AV_SAMPLE_FMT_S32);
+				return NDIlib_audio_frame_interleaved_32s_t(
+					avframe->sample_rate,
+					avframe->channels,
+					avframe->nb_samples,
+					time*10,
+					0,
+					reinterpret_cast<int32_t*>(avframe->data[0])
+				);
 			}
 		};
 			

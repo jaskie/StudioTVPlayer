@@ -43,11 +43,20 @@ namespace TVPlayR {
         queue_t           queue_;
         std::thread       thread_;
         Common::Semaphore semaphore_;
+        std::mutex        queue_mutex_;
+        size_t            max_queue_size_;
 
     public:
         Executor(const std::string& name)
             : thread_(&Executor::run, this)
             , name_(name)
+            , max_queue_size_(0)
+        { }
+
+        Executor(const std::string& name, size_t max_queue_size)
+            : thread_(&Executor::run, this)
+            , name_(name)
+            , max_queue_size_(max_queue_size)
         { }
 
         ~Executor()
@@ -66,7 +75,7 @@ namespace TVPlayR {
             using result_type = decltype(func());
 
             auto task = std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func));
-
+            std::lock_guard<std::mutex> lock(queue_mutex_);
             queue_.push_back([=]() mutable { (*task)(); });
             semaphore_.notify();
 
@@ -76,9 +85,8 @@ namespace TVPlayR {
         template <typename Func>
         auto invoke(Func&& func)
         {
-            if (is_current()) { // Avoids potential deadlock.
+            if (is_current())  // Avoids potential deadlock.
                 return func();
-            }
 
             return begin_invoke(std::forward<Func>(func)).get();
         }
@@ -96,10 +104,10 @@ namespace TVPlayR {
 
         void stop()
         {
-            if (!is_running_) {
+            if (!is_running_) 
                 return;
-            }
             is_running_ = false;
+            std::lock_guard<std::mutex> lock(queue_mutex_);
             queue_.push_back(nullptr);
             semaphore_.notify();
         }
@@ -121,12 +129,16 @@ namespace TVPlayR {
             while (is_running_) {
                 try {
                     semaphore_.wait();
-                    task = queue_.front();
-                    queue_.pop_front();
-                    if (!task) {
-                        return;
-                    }
-                    task();
+                    std::lock_guard<std::mutex> lock(queue_mutex_);
+                    do 
+                    {
+                        task = queue_.front();
+                        queue_.pop_front();
+                        if (!task) {
+                            return;
+                        }
+                        task();
+                    } while (max_queue_size_ > 0 && queue_.size() >= max_queue_size_);
                 }
                 catch (...) {
                     //LOG_CURRENT_EXCEPTION();

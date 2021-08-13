@@ -21,6 +21,23 @@ InputFormat::InputFormat(const std::string& fileName)
 	format_context_.reset(weak_format_context);
 }
 
+int64_t InputFormat::ReadStartTimecode() const
+{
+	for (const Core::StreamInfo& stream : streams_)
+	{
+		if (stream.Stream->codecpar->codec_type != AVMEDIA_TYPE_VIDEO)
+			continue;
+		AVDictionaryEntry* tcr = av_dict_get(stream.Stream->metadata, "timecode", NULL, 0);
+		if (tcr)
+		{
+			AVTimecode tc;
+			if (FF(av_timecode_init_from_string(&tc, stream.Stream->r_frame_rate, tcr->value, NULL)))
+				return av_rescale((int64_t)tc.start * AV_TIME_BASE, tc.rate.den, tc.rate.num);
+		}
+	}
+	return 0LL;
+}
+
 bool InputFormat::LoadStreamData()
 {
 	if (!FF(avformat_find_stream_info(format_context_.get(), NULL)))
@@ -45,6 +62,7 @@ bool InputFormat::LoadStreamData()
 			stream
 			});
 	}
+	start_timecode_ = ReadStartTimecode();
 	is_stream_data_loaded_ = true;
 	return true;
 }
@@ -101,16 +119,11 @@ int InputFormat::GetTotalAudioChannelCount() const
 	return result;
 }
 
-std::vector<Core::StreamInfo>& InputFormat::GetStreams()
-{
-	return streams_;
-}
-
 const Core::StreamInfo* InputFormat::GetVideoStream() const
 {
-	auto info_iter = std::find_if(streams_.begin(), streams_.end(), [](const auto& info) { return info.Type == Core::MediaType::video && info.IsPreffered; });
+	auto info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo& info) { return info.Type == Core::MediaType::video && info.IsPreffered; });
 	if (info_iter == streams_.end())
-		info_iter = std::find_if(streams_.begin(), streams_.end(), [](const auto& info) { return info.Type == Core::MediaType::video; });
+		info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo& info) { return info.Type == Core::MediaType::video; });
 	if (info_iter == streams_.end())
 		return nullptr;
 	return &*info_iter;

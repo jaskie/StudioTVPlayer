@@ -13,6 +13,8 @@ private:
 	std::vector<Core::StreamInfo> streams_;
 	bool is_eof_ = false;
 	bool is_stream_data_loaded_ = false;
+	int64_t start_timecode_;
+	int64_t ReadStartTimecode() const;
 public:
 	InputFormat(const std::string& fileName);
 	bool LoadStreamData();
@@ -23,7 +25,8 @@ public:
 	inline bool IsEof() const { return is_eof_; }
 	inline bool IsStreamDataLoaded() const { return is_stream_data_loaded_; }
 	int GetTotalAudioChannelCount() const;
-	std::vector<Core::StreamInfo>& GetStreams();
+	int64_t GetStartTimecode() const { return start_timecode_; };
+	std::vector<Core::StreamInfo>& GetStreams() { return streams_; };
 	const Core::StreamInfo* GetVideoStream() const;
 };
 

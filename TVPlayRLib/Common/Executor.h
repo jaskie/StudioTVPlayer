@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Exceptions.h"
-#include "Semaphore.h"
+#include "BlockingCollection.h"
 
 namespace TVPlayR {
     namespace Common {
@@ -36,27 +36,24 @@ namespace TVPlayR {
         Executor(const Executor&);
 
         using task_t = std::function<void()>;
-        using queue_t = std::deque<task_t>;
+        using queue_t = BlockingCollection<task_t>;
 
         const std::string name_;
         std::atomic<bool> is_running_ = true;
         queue_t           queue_;
         std::thread       thread_;
-        Common::Semaphore semaphore_;
-        std::mutex        queue_mutex_;
-        size_t            max_queue_size_;
 
     public:
         Executor(const std::string& name)
             : thread_(&Executor::run, this)
             , name_(name)
-            , max_queue_size_(0)
+            , queue_(SIZE_MAX)
         { }
 
         Executor(const std::string& name, size_t max_queue_size)
             : thread_(&Executor::run, this)
             , name_(name)
-            , max_queue_size_(max_queue_size)
+            , queue_(max_queue_size)
         { }
 
         ~Executor()
@@ -75,10 +72,7 @@ namespace TVPlayR {
             using result_type = decltype(func());
 
             auto task = std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func));
-            std::lock_guard<std::mutex> lock(queue_mutex_);
-            queue_.push_back([=]() mutable { (*task)(); });
-            semaphore_.notify();
-
+            queue_.add([=]() mutable { (*task)(); });
             return task->get_future();
         }
 
@@ -107,9 +101,7 @@ namespace TVPlayR {
             if (!is_running_) 
                 return;
             is_running_ = false;
-            std::lock_guard<std::mutex> lock(queue_mutex_);
-            queue_.push_back(nullptr);
-            semaphore_.notify();
+            queue_.complete_adding();
         }
 
         void wait()
@@ -128,17 +120,11 @@ namespace TVPlayR {
             task_t task;
             while (is_running_) {
                 try {
-                    semaphore_.wait();
-                    std::lock_guard<std::mutex> lock(queue_mutex_);
-                    do 
-                    {
-                        task = queue_.front();
-                        queue_.pop_front();
-                        if (!task) {
-                            return;
-                        }
-                        task();
-                    } while (max_queue_size_ > 0 && queue_.size() >= max_queue_size_);
+                    task_t task;
+                    auto status = queue_.take(task);
+                    if (status == BlockingCollectionStatus::AddingCompleted)
+                        return;
+                    task();
                 }
                 catch (...) {
                     //LOG_CURRENT_EXCEPTION();

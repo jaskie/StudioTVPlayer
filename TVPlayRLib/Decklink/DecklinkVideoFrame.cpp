@@ -1,13 +1,12 @@
 #include "../pch.h"
-#include "DecklinkTimecode.h"
 #include "DecklinkVideoFrame.h"
 
 namespace TVPlayR {
 	namespace Decklink {
 				
-		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t time)
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t timecode)
 			: frame_(frame)
-			, time_(time)
+			, timecode_(format, timecode)
 			, ref_count_(0)
 			, format_(format)
 		{ }
@@ -57,7 +56,7 @@ namespace TVPlayR {
 		{
 			if (timecode == nullptr)
 				return E_FAIL;
-			*timecode = new DecklinkTimecode(format_, time_);
+			*timecode = &timecode_;
 			return S_OK;
 		}
 

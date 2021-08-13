@@ -146,6 +146,9 @@
     <ClInclude Include="Decklink\DecklinkTimecode.h">
       <Filter>Decklink</Filter>
     </ClInclude>
+    <ClInclude Include="Common\BlockingCollection.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">

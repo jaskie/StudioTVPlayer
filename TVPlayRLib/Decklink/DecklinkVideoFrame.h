@@ -1,6 +1,7 @@
 #pragma once
 #include "../FFMpeg/Utils.h"
 #include "../Core/VideoFormat.h"
+#include "DecklinkTimecode.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -9,12 +10,11 @@ namespace TVPlayR {
 		{
 		private:
 			const std::shared_ptr<AVFrame> frame_;
-			const int64_t time_;
 			ULONG ref_count_;
 			Core::VideoFormat& format_;
+			DecklinkTimecode timecode_;
 		public:
-			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t time);
-
+			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t timecode);
 			//IUnknown
 			STDMETHOD(QueryInterface(REFIID, LPVOID*));
 			STDMETHOD_(ULONG, AddRef());

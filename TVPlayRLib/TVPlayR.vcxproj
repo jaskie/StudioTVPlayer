@@ -84,6 +84,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\BlockingCollection.h" />
     <ClInclude Include="Common\Debug.h" />
     <ClInclude Include="Common\Executor.h" />
     <ClInclude Include="Common\Semaphore.h" />

@@ -22,14 +22,14 @@ namespace TVPlayR {
 			int index_;
 			Core::VideoFormat format_;
 			int buffer_size_ = 4;
-			volatile int64_t scheduled_frames_ = 0;
-			volatile int64_t scheduled_samples_ = 0;
+			std::atomic_int64_t scheduled_frames_;
+			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 2;
 			std::atomic_bool is_running_;
 			std::mutex buffer_mutex_;
 			std::shared_ptr<FFmpeg::AVSync> buffer_frame_;
 			std::shared_ptr<AVFrame> last_video_;
-			int64_t last_video_time_ = 0LL;
+			std::atomic_int64_t last_video_time_;
 
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
@@ -130,7 +130,8 @@ namespace TVPlayR {
 			int AudioSamplesRequired() const
 			{
 				int64_t samples_required = av_rescale(scheduled_frames_ + 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - scheduled_samples_;
-				assert(samples_required > 0);
+				if (samples_required < 0)
+					samples_required = 0;
 				return static_cast<int>(samples_required);
 			}
 

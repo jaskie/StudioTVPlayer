@@ -4,7 +4,9 @@
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
 #include "../Common/Executor.h"
+#include "../Common/Debug.h"
 #include "Processing.NDI.Lib.h"
+
 
 namespace TVPlayR {
 	namespace Ndi {
@@ -46,7 +48,7 @@ namespace TVPlayR {
 			return NDIlib_v4_load();
 		}
 
-		struct Ndi::implementation
+		struct Ndi::implementation: Common::DebugTarget<false>
 		{
 			Core::Channel * channel_ = nullptr;
 			const std::string source_name_;
@@ -93,6 +95,8 @@ namespace TVPlayR {
 				channel_ = &channel;
 				video_frames_pushed_ = 0;
 				audio_samples_pushed_ = 0;
+				if (frame_requested_callback_)
+					frame_requested_callback_(AudioSamplesRequired());
 				return true;
 			}
 
@@ -117,16 +121,20 @@ namespace TVPlayR {
 				});
 			}
 
-			int AudioSamplesRequired() const
+			int AudioSamplesRequired() 
 			{
-				return static_cast<int>((video_frames_pushed_ + 1LL) * channel_->AudioSampleRate() - audio_samples_pushed_);
+				int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, channel_->AudioSampleRate() * channel_->Format().FrameRate().Denominator(), channel_->Format().FrameRate().Numerator()) - audio_samples_pushed_;
+#ifdef DEBUG
+				std::stringstream msg;
+				msg << "Requested " << samples_required << " samples";
+				DebugPrintLine(msg.str());
+#endif
+				return static_cast<int>(samples_required);
 			}
 
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
 			{
 				frame_requested_callback_ = frame_requested_callback;
-				if (frame_requested_callback)
-					frame_requested_callback(AudioSamplesRequired());
 			}
 
 			NDIlib_video_frame_v2_t CreateVideoFrame(const std::shared_ptr<AVFrame>& avframe, int64_t time)

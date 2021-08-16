@@ -36,22 +36,23 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Core::Channel channel(Core::VideoFormatType::v1080i5000, Core::PixelFormat::yuv422, 2);
-		/*
 		Decklink::Iterator iterator;
-		size_t device_index = 0;
+		size_t device_index = 1;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto device = iterator[device_index];
-		*/
-		auto device = std::make_shared<Ndi::Ndi>("STUDIO_TVPLAYER", "");
-		channel.SetFrameClock(device);
-		channel.AddOutput(device);
+		auto decklink = iterator[device_index];
+		//channel.SetFrameClock(decklink);
+		channel.AddOutput(decklink);
+		
+		auto ndi = std::make_shared<Ndi::Ndi>("STUDIO_TVPLAYER", "");
+		channel.SetFrameClock(ndi);
+		channel.AddOutput(ndi);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\TEMP\\test5.mov", Core::HwAccel::none, "", 2);
-		input->SetIsLoop(true);
+		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "", 2);
+		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
-		auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
-		input->Seek(seek);
+		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
+		//input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();
@@ -64,7 +65,7 @@ int main()
 			if (i == 'c')
 				channel.Clear();
 			if (i == 's')
-				input->Seek(AV_TIME_BASE * 2);
+				input->Seek(AV_TIME_BASE * 0);
 			if (i == 'l')
 				channel.Load(input);
 			if (i == ' ')
@@ -73,7 +74,7 @@ int main()
 				else	 
 					input->Play();
 		}
-		channel.RemoveOutput(device);
+		channel.RemoveOutput(decklink);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

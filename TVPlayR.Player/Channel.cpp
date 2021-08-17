@@ -2,9 +2,9 @@
 #include "Channel.h"
 #include "Core/Channel.h"
 #include "Decklink/Iterator.h"
-#include "OutputDevice.h"
-#include "DecklinkDevice.h"
-#include "PreviewDevice.h"
+#include "OutputBase.h"
+#include "DecklinkOutput.h"
+#include "PreviewOutput.h"
 #include "InputFile.h"
 
 
@@ -38,24 +38,19 @@ namespace TVPlayR {
 	Channel::!Channel()
 	{
 		_channel->SetAudioVolumeCallback(nullptr);
-		for each (OutputDevice^ output in _outputs)
+		for each (OutputBase^ output in _outputs)
 			_channel->RemoveOutput(output->GetNativeDevice());
 		delete _channel;
 	}
 
-	bool Channel::AddOutput(DecklinkDevice ^ device)
+	bool Channel::AddOutput(OutputBase ^ device, bool setAsClockBase)
 	{
 		if (!_channel->AddOutput(device->GetNativeDevice()))
 			return false;
 		_outputs->Add(device);
-		_channel->SetFrameClock(device->GetNativeDevice());
+		if (setAsClockBase)
+			_channel->SetFrameClock(device->GetNativeDevice());
 		return true;
-	}
-
-	bool Channel::AddPreview(PreviewDevice^ preview)
-	{
-		_outputs->Add(preview);
-		return _channel->AddOutput(preview->GetNativeDevice());
 	}
 
 	void Channel::Load(InputFile ^ file)

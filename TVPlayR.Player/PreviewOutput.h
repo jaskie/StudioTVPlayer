@@ -1,5 +1,5 @@
 #pragma once
-#include "OutputDevice.h"
+#include "OutputBase.h"
 #include "Preview/Preview.h"
 
 using namespace System;
@@ -7,7 +7,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Media::Imaging;
 namespace TVPlayR {
 	
-	public ref class PreviewDevice : public OutputDevice
+	public ref class PreviewOutput : public OutputBase
 	{
 	private:
 		const std::shared_ptr<Preview::Preview>* _preview;
@@ -29,9 +29,9 @@ namespace TVPlayR {
 		{
 			WriteableBitmap^ get() { return _target; }
 		}
-		PreviewDevice(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
-		~PreviewDevice();
-		!PreviewDevice();
+		PreviewOutput(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
+		~PreviewOutput();
+		!PreviewOutput();
 	};
 
 }

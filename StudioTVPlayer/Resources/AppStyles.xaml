@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     >
+
     <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource {x:Type TabItem}}" >
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Padding" Value="10 5"/>

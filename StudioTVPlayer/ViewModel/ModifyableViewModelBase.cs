@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace StudioTVPlayer.ViewModel
 {
@@ -14,6 +15,8 @@ namespace StudioTVPlayer.ViewModel
                 if (_isModified == value)
                     return;
                 _isModified = value;
+                if (value)
+                    Modified?.Invoke(this, EventArgs.Empty);
                 NotifyPropertyChanged();
             }
         }
@@ -31,5 +34,7 @@ namespace StudioTVPlayer.ViewModel
         public abstract bool IsValid();
 
         public abstract void Apply();
+
+        public event EventHandler Modified;
     }
 }

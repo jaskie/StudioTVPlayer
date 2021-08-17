@@ -1,19 +1,22 @@
 #pragma once
+
+#include "OutputBase.h"
 #include "Ndi/Ndi.h"
+
 using namespace System;
 
 namespace TVPlayR {
 
-	public ref class NdiDevice 
+	public ref class NdiOutput : public OutputBase
 	{
 	private:
-		Ndi::Ndi* const _ndi;
+		const std::shared_ptr<Ndi::Ndi>* _ndi;
 		String^ _sourceName;
 		String^ _groupName;		
 	public:
-		NdiDevice(String^ sourceName, String^ groupName);
-		!NdiDevice();
-		~NdiDevice();
+		NdiOutput(String^ sourceName, String^ groupName);
+		~NdiOutput();
+		!NdiOutput();
 		property String^ SourceName
 		{
 			String^ get() { return _sourceName; }
@@ -23,7 +26,7 @@ namespace TVPlayR {
 			String^ get() { return _groupName; }
 		}
 	internal:
-		virtual Ndi::Ndi& GetNativeDevice() { return *_ndi; }
+		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return *_ndi; }
 	};
 
 }

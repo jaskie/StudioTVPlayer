@@ -30,24 +30,10 @@
                         </Trigger>
                     </Style.Triggers>
                 </Style>
-                <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox.DataGrid.Editing}">
-                    <Setter Property="mah:TextBoxHelper.ClearTextButton" Value="False"/>
-                    <Setter Property="FontSize" Value="16"/>
-                </Style>
             </DataGrid.Resources>
             <DataGrid.Columns >
-                <DataGridTemplateColumn Header="Name" Width="*" SortMemberPath="Name">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="4 0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" EditingElementStyle="{DynamicResource MahApps.Styles.TextBox}"/>
+
                 <DataGridTemplateColumn Header="Path" Width="*" SortMemberPath="Path">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -70,7 +56,7 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                                <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.TextBox}"/>
                                 <Button Grid.Column="1" Command="{Binding BrowseCommand}" ToolTip="Change folder">
                                     <mah:FontIcon Glyph="&#xED25;"/>
                                 </Button>
@@ -79,21 +65,10 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Header="Filter by date" Binding="{Binding IsFilteredByDate, UpdateSourceTrigger=PropertyChanged}"                                    
-                                        ElementStyle="{StaticResource MahApps.Styles.CheckBox.DataGrid.Win10}"
-                                        EditingElementStyle="{StaticResource MahApps.Styles.CheckBox.DataGrid.Win10}"
+                                        ElementStyle="{DynamicResource MahApps.Styles.CheckBox.DataGrid.Win10}"
+                                        EditingElementStyle="{DynamicResource MahApps.Styles.CheckBox.DataGrid.Win10}"
                                         />
-                <DataGridTemplateColumn Header="File match filter" Width="*" SortMemberPath="Filter">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Filter}" VerticalAlignment="Center" Margin="4 0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="File match filter" Width="*" Binding="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"/>
                 <DataGridTemplateColumn Width="*" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

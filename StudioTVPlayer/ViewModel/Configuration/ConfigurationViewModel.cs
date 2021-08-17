@@ -1,5 +1,6 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Providers;
+using System;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -9,9 +10,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public ConfigurationViewModel()
         {
             WatchedFolders = new WatchedFoldersViewModel();
-            WatchedFolders.PropertyChanged += Item_PropertyChanged;
+            WatchedFolders.Modified += Item_Modified;
             Channels = new ChannelsViewModel();
-            Channels.PropertyChanged += Item_PropertyChanged;
+            Channels.Modified += Item_Modified;
 
             SaveConfigurationCommand = new UiCommand(SaveConfiguration, _ => IsModified && IsValid());
             CancelCommand = new UiCommand(Cancel);
@@ -46,11 +47,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             IsModified = false;
         }
 
-        private void Item_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IsModified))
-                IsModified = true;
-        }
+        private void Item_Modified(object sender, EventArgs e) => IsModified = true;
 
         public override bool IsValid()
         {

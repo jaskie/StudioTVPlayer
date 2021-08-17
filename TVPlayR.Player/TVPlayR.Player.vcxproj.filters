@@ -18,7 +18,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DecklinkDevice.h">
+    <ClInclude Include="DecklinkOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Channel.h">
@@ -42,7 +42,7 @@
     <ClInclude Include="TimeEventArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NdiDevice.h">
+    <ClInclude Include="NdiOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HardwareAcceleration.h">
@@ -51,13 +51,13 @@
     <ClInclude Include="FieldOrder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PreviewDevice.h">
+    <ClInclude Include="PreviewOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AudioVolumeEventArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OutputDevice.h">
+    <ClInclude Include="OutputBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,7 +68,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DecklinkDevice.cpp">
+    <ClCompile Include="DecklinkOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Channel.cpp">
@@ -80,10 +80,10 @@
     <ClCompile Include="VideoFormat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NdiDevice.cpp">
+    <ClCompile Include="NdiOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PreviewDevice.cpp">
+    <ClCompile Include="PreviewOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VersionInfo.cpp">

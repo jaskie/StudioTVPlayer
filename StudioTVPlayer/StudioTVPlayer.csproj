@@ -41,15 +41,15 @@
     <ApplicationIcon>StudioTVPlayer.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
-      <HintPath>..\packages\ControlzEx.4.4.0\lib\net45\ControlzEx.dll</HintPath>
+    <Reference Include="ControlzEx, Version=5.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.5.0.1\lib\net452\ControlzEx.dll</HintPath>
     </Reference>
     <Reference Include="CustomMarshalers" />
     <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
       <HintPath>..\packages\gong-wpf-dragdrop.2.3.2\lib\net45\GongSolutions.WPF.DragDrop.dll</HintPath>
     </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.2.4.3\lib\net452\MahApps.Metro.dll</HintPath>
+      <HintPath>..\packages\MahApps.Metro.2.4.7\lib\net452\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
@@ -109,9 +109,12 @@
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
     <Compile Include="Model\Channel.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Model\DecklinkOutput.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\MediaPlayer.cs" />
     <Compile Include="Model\Args\TimeEventArgs.cs" />
+    <Compile Include="Model\NdiOutput.cs" />
+    <Compile Include="Model\OutputBase.cs" />
     <Compile Include="Model\RundownItem.cs" />
     <Compile Include="Model\Args\RundownItemEventArgs.cs" />
     <Compile Include="Model\MediaVerifier.cs" />
@@ -121,6 +124,9 @@
     <Compile Include="Providers\VersionInfo.cs" />
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\DecklinkOutputViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\NdiOutputViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\OutputViewModelBase.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
@@ -139,6 +145,12 @@
     </Compile>
     <Compile Include="View\Configuration\ChannelsView.xaml.cs">
       <DependentUpon>ChannelsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Configuration\ChannelView.xaml.cs">
+      <DependentUpon>ChannelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Configuration\DecklinkOutputView.xaml.cs">
+      <DependentUpon>DecklinkOutputView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
@@ -166,6 +178,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\AboutDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\ChannelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\DecklinkOutputView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -234,6 +254,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

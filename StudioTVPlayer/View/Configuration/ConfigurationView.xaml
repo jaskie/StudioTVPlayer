@@ -21,7 +21,7 @@
 
         <TabControl Grid.Row="1" mah:TabControlHelper.Underlined="SelectedTabItem">
             <TabItem Header="Channels">
-                <views:ChannelsView HorizontalAlignment="Center" Grid.Column="2" Margin="5" DataContext="{Binding Channels}"/>
+                <views:ChannelsView Margin="5" DataContext="{Binding Channels}"/>
             </TabItem>
             <TabItem Header="Watched folders">
                 <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />

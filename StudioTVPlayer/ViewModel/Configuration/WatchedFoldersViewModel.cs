@@ -20,17 +20,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             WatchedFolders = new ObservableCollection<WatchedFolderViewModel>(GlobalApplicationData.Current.Configuration.WatchedFolders.Select(f =>
             {
                 var vm = new WatchedFolderViewModel(f);
-                vm.PropertyChanged += WatchedFolder_PropertyChanged;
+                vm.Modified += (o, e) => IsModified = true;
                 vm.RemoveRequested += WatchedFolder_RemoveRequested;
                 return vm;
             }));
             AddWatchedFolderCommand = new UiCommand(AddWatchedFolder);
-        }
-
-        private void WatchedFolder_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IsModified))
-                IsModified = true;
         }
 
         private void AddWatchedFolder(object obj)

@@ -8,10 +8,10 @@ using namespace System;
 using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
-	ref class DecklinkDevice;
-	ref class PreviewDevice;
+	ref class DecklinkOutput;
+	ref class PreviewOutput;
 	ref class InputFile;
-	ref class OutputDevice;
+	ref class OutputBase;
 
 	public ref class Channel
 	{
@@ -21,14 +21,13 @@ namespace TVPlayR {
 		delegate void AudioVolumeDelegate(std::vector<double>);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
-		System::Collections::Generic::List<OutputDevice^>^ _outputs = gcnew System::Collections::Generic::List<OutputDevice^>();
+		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
 		void AudioVolumeCallback(std::vector<double> audio_volume);
 	public:
 		Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();
 		!Channel();
-		bool AddOutput(DecklinkDevice^ device);
-		bool AddPreview(PreviewDevice^ preview);
+		bool AddOutput(OutputBase^ device, bool setAsClockBase);
 		void Load(InputFile^ file);
 		void Preload(InputFile^ file);
 		void Clear();

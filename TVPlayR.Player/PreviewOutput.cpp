@@ -1,35 +1,35 @@
 #include "stdafx.h"
-#include "PreviewDevice.h"
+#include "PreviewOutput.h"
 
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
 
 namespace TVPlayR
 {
-    PreviewDevice::PreviewDevice(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height)
+    PreviewOutput::PreviewOutput(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height)
         : _preview(new std::shared_ptr<Preview::Preview>(std::make_shared<Preview::Preview>(width, height)))
         , _ui_dispatcher(ui_dispatcher)
-        , _draw_frame_action(gcnew Action(this, &PreviewDevice::DrawFrame))
+        , _draw_frame_action(gcnew Action(this, &PreviewOutput::DrawFrame))
         , _frame_played_semaphore(gcnew System::Threading::SemaphoreSlim(1))
         , _shutdown_cts(gcnew System::Threading::CancellationTokenSource())
     {
-        _framePlayedDelegate = gcnew FramePlayedDelegate(this, &PreviewDevice::FramePlayedCallback);
+        _framePlayedDelegate = gcnew FramePlayedDelegate(this, &PreviewOutput::FramePlayedCallback);
         _framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
         IntPtr framePlayedIp = Marshal::GetFunctionPointerForDelegate(_framePlayedDelegate);
         _target = gcnew WriteableBitmap(width, height, 96, 96, Windows::Media::PixelFormats::Pbgra32, nullptr);
         (*_preview)->SetFramePlayedCallback(static_cast<Preview::Preview::FRAME_PLAYED_CALLBACK>(framePlayedIp.ToPointer()));
     }
 
-    PreviewDevice::~PreviewDevice()
+    PreviewOutput::~PreviewOutput()
     {
-        this->!PreviewDevice();
+        this->!PreviewOutput();
         delete _preview;
         _preview = nullptr;
         delete _buffer_frame;
         _buffer_frame = nullptr;
     }
 
-    PreviewDevice::!PreviewDevice()
+    PreviewOutput::!PreviewOutput()
     {
         if (!_preview)
             return;
@@ -37,7 +37,7 @@ namespace TVPlayR
         _framePlayedHandle.Free();
     }
 
-    void PreviewDevice::FramePlayedCallback(std::shared_ptr<AVFrame> frame)
+    void PreviewOutput::FramePlayedCallback(std::shared_ptr<AVFrame> frame)
     {
         if (_shutdown_cts->IsCancellationRequested)
             return;
@@ -54,7 +54,7 @@ namespace TVPlayR
         { }
     }
 
-    void PreviewDevice::DrawFrame()
+    void PreviewOutput::DrawFrame()
     {
         if (!_buffer_frame)
             return;

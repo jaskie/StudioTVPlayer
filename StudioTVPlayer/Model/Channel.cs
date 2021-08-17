@@ -1,5 +1,6 @@
 ﻿using StudioTVPlayer.Model.Args;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -18,10 +19,12 @@ namespace StudioTVPlayer.Model
         private string _videoFormatName;
         private TVPlayR.PixelFormat _pixelFormat;
         private int _deviceIndex;
+        private bool _livePreview;
 
         private TVPlayR.Channel _channelR;
-        private TVPlayR.PreviewDevice _previewDevice;
-        private bool _livePreview;
+        private TVPlayR.PreviewOutput _previewOutput;
+
+        private List<OutputBase> _outputs = new List<OutputBase>();
 
         [XmlAttribute]
         public string Name { get => _name; set => _name = value; }
@@ -57,6 +60,18 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        [XmlElement]
+        public OutputBase[] Outputs
+        {
+            get => _outputs.ToArray();
+            set
+            {
+                _outputs.Clear();
+                if (value is null)
+                    return;
+                _outputs.AddRange(value);
+            }
+        }
 
         [XmlAttribute]
         public int DeviceIndex
@@ -94,12 +109,12 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR != null)
                 throw new ApplicationException($"Channel {Name} already initialized");
-            var device = TVPlayR.DecklinkDevice.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
+            var device = TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
             _videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
             if (device == null || _videoFormat == null)
                 return;
             _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, AudioChannelCount);
-            _channelR.AddOutput(device);
+            _channelR.AddOutput(device, true);
             _channelR.AudioVolume += ChannelR_AudioVolume;
         }
 
@@ -115,12 +130,12 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR == null)
                 throw new ApplicationException($"Channel {Name} not initialized");
-            if (_previewDevice is null)
+            if (_previewOutput is null)
             {
-                _previewDevice = new TVPlayR.PreviewDevice(Application.Current.Dispatcher, width, height);
-                _channelR.AddPreview(_previewDevice);
+                _previewOutput = new TVPlayR.PreviewOutput(Application.Current.Dispatcher, width, height);
+                _channelR.AddOutput(_previewOutput, false);
             }
-            return _previewDevice.PreviewSource;
+            return _previewOutput.PreviewSource;
         }
 
         public void Uninitialize()
@@ -129,8 +144,8 @@ namespace StudioTVPlayer.Model
                 return;
             _channelR.Clear();
             _channelR.Dispose();
-            _previewDevice?.Dispose();
-            _previewDevice = null;
+            _previewOutput?.Dispose();
+            _previewOutput = null;
             _channelR.AudioVolume -= ChannelR_AudioVolume;
             _channelR = null;
         }

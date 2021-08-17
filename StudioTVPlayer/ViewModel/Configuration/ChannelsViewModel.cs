@@ -22,9 +22,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Channels = new ObservableCollection<ChannelViewModel>(GlobalApplicationData.Current.Configuration.Channels.Select(c => new ChannelViewModel(c)));
             foreach (var channel in Channels)
             {
-                channel.PropertyChanged += Channel_PropertyChanged;
+                channel.Modified += (o, e) => IsModified = true;
                 channel.RemoveRequested += Channel_RemoveRequested;
             }
+            _selectedChannel = Channels.FirstOrDefault();
         }
 
         private async void Channel_RemoveRequested(object sender, EventArgs e)
@@ -36,27 +37,20 @@ namespace StudioTVPlayer.ViewModel.Configuration
             IsModified = true;
         }
 
-        private void Channel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IsModified))
-                IsModified = true;
-        }
-
         public UiCommand AddChannelCommand { get; }
         public UiCommand DeleteChannelCommand { get; }
         public UiCommand UnloadedCommand { get; }
         public ChannelViewModel SelectedChannel
         {
             get => _selectedChannel;
-            set => Set(ref _selectedChannel, value);
+            set
+            {
+                if (_selectedChannel == value)
+                    return;
+                _selectedChannel = value;
+                NotifyPropertyChanged();
+            }
         }
-
-        public static TVPlayR.DecklinkDevice[] Devices { get; } = TVPlayR.DecklinkDevice.EnumerateDevices();
-
-        public static TVPlayR.VideoFormat[] VideoFormats { get; } = TVPlayR.VideoFormat.EnumVideoFormats();
-
-        public static TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422 };
-
 
         public ObservableCollection<ChannelViewModel> Channels { get; }
 
@@ -88,6 +82,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var vm = new ChannelViewModel(channel);
             vm.RemoveRequested += Channel_RemoveRequested;
             Channels.Add(vm);
+            SelectedChannel = vm;
             IsModified = true;
         }
 

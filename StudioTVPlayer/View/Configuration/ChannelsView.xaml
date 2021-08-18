@@ -16,7 +16,7 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Grid VerticalAlignment="Top">
+        <Grid VerticalAlignment="Top" Margin="0 0 5 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
@@ -27,17 +27,14 @@
                       VerticalAlignment="Top"
                       CanUserAddRows="False" CanUserDeleteRows="False" 
                       IsReadOnly="True"
-                      x:Name="dg"
                       >
                 <DataGrid.Resources>
                     <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.ToolBar}"/>
                 </DataGrid.Resources>
                 <DataGrid.Columns >
                     <DataGridTextColumn Header="Name" MinWidth="80" Width="2*" Binding="{Binding Name}" />
-                    <DataGridTextColumn Header="Video format" Width="*" Binding="{Binding SelectedVideoFormat.Name}" />
-                    <DataGridTextColumn Header="Pixel format" Width="*" Binding="{Binding SelectedPixelFormat}" />
-                    <DataGridCheckBoxColumn Header="Live preview" Binding="{Binding LivePreview, UpdateSourceTrigger=PropertyChanged}"/>
-                    <DataGridTemplateColumn Width="50" CanUserSort="False" CanUserResize="False">
+                    <DataGridTextColumn Header="Video format" Width="Auto" Binding="{Binding SelectedVideoFormat.Name}" />
+                    <DataGridTemplateColumn Width="45" CanUserSort="False" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button Command="{Binding RequestRemoveCommand}" ToolTip="Remove this channel">
@@ -55,7 +52,7 @@
                 </StackPanel>
             </Button>
         </Grid>
-        <GridSplitter HorizontalAlignment="Right" Width="3" Background="{DynamicResource MahApps.Brushes.Separator}"/>
+        <GridSplitter HorizontalAlignment="Right" Width="3" Margin="2 0" Background="{DynamicResource MahApps.Brushes.Separator}"/>
         <ContentControl Grid.Column="1" Content="{Binding SelectedChannel}">
             <ContentControl.Resources>
                 <DataTemplate DataType="{x:Type vm:ChannelViewModel}">

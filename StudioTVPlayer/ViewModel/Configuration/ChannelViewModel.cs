@@ -14,6 +14,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private TVPlayR.VideoFormat _selectedVideoFormat;
         private TVPlayR.PixelFormat _selectedPixelFormat;
         private bool _livePreview;
+        private OutputViewModelBase _frameClockSource;
 
         public ChannelViewModel(Model.Channel channel)
         {
@@ -36,7 +37,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             {
                 output.Modified += (o, e) => IsModified = true;
                 output.RemoveRequested += Output_RemoveRequested;
-
+                if (output.IsFrameClock)
+                    _frameClockSource = output;
             }
             _selectedVideoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
             _selectedPixelFormat = channel.PixelFormat;
@@ -55,6 +57,21 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public IList<OutputViewModelBase> Outputs => _outputs;
 
+        public OutputViewModelBase FrameClockSource
+        {
+            get => _frameClockSource; 
+            set
+            {
+                var oldClockSource = _frameClockSource;
+                if (!Set(ref _frameClockSource, value))
+                    return;
+                if (!(oldClockSource is null))
+                    oldClockSource.IsFrameClock = false;
+                if (!(value is null))
+                    value.IsFrameClock = true;
+            }
+        }
+
         public static TVPlayR.VideoFormat[] VideoFormats { get; } = TVPlayR.VideoFormat.EnumVideoFormats();
 
         public static TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422 };
@@ -66,9 +83,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
 
         public ICommand AddDecklinkOutputCommand { get; }
-        
-        public ICommand AddNdiOutputCommand { get; }
 
+        public ICommand AddNdiOutputCommand { get; }
 
         public override void Apply()
         {
@@ -90,17 +106,26 @@ namespace StudioTVPlayer.ViewModel.Configuration
             return Outputs.All(o => o.IsValid()) && SelectedVideoFormat != null;
         }
 
-        private void AddNdiOutput(object obj)
+        private void AddNdiOutput(object _)
         {
-            var vm = new NdiOutputViewModel(new Model.NdiOutput());
-            Outputs.Add(vm);
-            vm.RemoveRequested += Output_RemoveRequested;
+            var vm = new NdiOutputViewModel(new Model.NdiOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock), SourceName = Name });
+            AddOutput(vm);
         }
 
-        private void AddDecklinkOutput(object obj)
+        private void AddDecklinkOutput(object _)
         {
-            var vm = new DecklinkOutputViewModel(new Model.DecklinkOutput());
+            var vm = new DecklinkOutputViewModel(new Model.DecklinkOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock) });
+            AddOutput(vm);
+        }
+
+        private void AddOutput(OutputViewModelBase vm)
+        {
             Outputs.Add(vm);
+            if (vm.IsFrameClock)
+            {
+                _frameClockSource = vm;
+                NotifyPropertyChanged(nameof(FrameClockSource));
+            }
             vm.RemoveRequested += Output_RemoveRequested;
         }
 

@@ -7,6 +7,12 @@
         <Setter Property="Padding" Value="10 5"/>
     </Style>
 
+    <Style x:Key="ConfigurationLabelStyle" TargetType="Label" BasedOn="{StaticResource MahApps.Styles.Label}">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray5}"/>
+        <Setter Property="Margin" Value="0 5 0 0"/>
+    </Style>
+
     <Style x:Key="VolumeGaugeStyle" TargetType="{x:Type ProgressBar}">
         <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Gray5}" />
         <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Control.Border}" />

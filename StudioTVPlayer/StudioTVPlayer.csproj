@@ -152,6 +152,9 @@
     <Compile Include="View\Configuration\DecklinkOutputView.xaml.cs">
       <DependentUpon>DecklinkOutputView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Configuration\NdiOutputView.xaml.cs">
+      <DependentUpon>NdiOutputView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
     </Compile>
@@ -186,6 +189,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Configuration\DecklinkOutputView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\NdiOutputView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

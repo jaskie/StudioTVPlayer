@@ -31,8 +31,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override bool IsValid()
         {
-            return base.IsValid() 
-                && !string.IsNullOrWhiteSpace(_sourceName) && _sourceName.All(b => b < 127) // is not empty and all chars are ascii
+            return !string.IsNullOrWhiteSpace(_sourceName) && _sourceName.All(b => b < 127) // is not empty and all chars are ascii
                 && (string.IsNullOrEmpty(_groupName) ||  _groupName.All(b =>  b < 127)); // can be empty, otherwise all chars should be ascii
         }
     }

@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ChannelViewModel : RemovableViewModelBase
+    public class ChannelViewModel : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
         private readonly ObservableCollection<OutputViewModelBase> _outputs;
         private string _name;
@@ -37,6 +38,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             {
                 output.Modified += (o, e) => IsModified = true;
                 output.RemoveRequested += Output_RemoveRequested;
+                output.CheckErrorInfo += Output_CheckErrorInfo;
                 if (output.IsFrameClock)
                     _frameClockSource = output;
             }
@@ -59,7 +61,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public OutputViewModelBase FrameClockSource
         {
-            get => _frameClockSource; 
+            get => _frameClockSource;
             set
             {
                 var oldClockSource = _frameClockSource;
@@ -85,6 +87,26 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public ICommand AddDecklinkOutputCommand { get; }
 
         public ICommand AddNdiOutputCommand { get; }
+
+        public string Error => string.Empty;
+
+        public string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(FrameClockSource) when FrameClockSource is null:
+                        return "You have to add Decklink or NDI output to provide clock source for the channel";
+                    case nameof(SelectedVideoFormat) when SelectedVideoFormat is null:
+                        return "A video format is required";
+                    default:
+                        return string.Empty;
+                }
+            }
+        }
+
+        public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
         public override void Apply()
         {
@@ -127,14 +149,20 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 NotifyPropertyChanged(nameof(FrameClockSource));
             }
             vm.RemoveRequested += Output_RemoveRequested;
+            vm.CheckErrorInfo += Output_CheckErrorInfo;
         }
 
         private void Output_RemoveRequested(object sender, EventArgs e)
         {
             var output = sender as OutputViewModelBase ?? throw new ArgumentException(nameof(sender));
             output.RemoveRequested -= Output_RemoveRequested;
+            output.CheckErrorInfo -= Output_CheckErrorInfo;
             Outputs.Remove(output);
         }
 
+        private void Output_CheckErrorInfo(object sender, CheckErrorEventArgs e)
+        {
+            CheckErrorInfo?.Invoke(sender, e); // forward the query
+        }
     }
 }

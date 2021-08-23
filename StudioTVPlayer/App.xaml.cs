@@ -30,9 +30,14 @@ namespace StudioTVPlayer
 
         protected override void OnExit(ExitEventArgs e)
         {
-            ViewModel.MainViewModel.Instance.Dispose();
-            GlobalApplicationData.Current.Shutdown();
             base.OnExit(e);
+            try
+            {
+                GlobalApplicationData.Current.Shutdown();
+                ViewModel.MainViewModel.Instance.Dispose();
+            } 
+            catch(OperationCanceledException)
+            { }
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

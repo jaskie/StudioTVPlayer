@@ -125,6 +125,7 @@
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
     <Compile Include="ViewModel\Configuration\DecklinkOutputViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\ICheckErrorInfo.cs" />
     <Compile Include="ViewModel\Configuration\NdiOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\OutputViewModelBase.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />

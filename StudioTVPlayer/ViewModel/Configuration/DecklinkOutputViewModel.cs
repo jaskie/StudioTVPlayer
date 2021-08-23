@@ -28,7 +28,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override bool IsValid()
         {
-            return !(SelectedDevice is null);
+            return !(SelectedDevice is null) && string.IsNullOrEmpty(this[nameof(SelectedDevice)]);
         }
     }
 }

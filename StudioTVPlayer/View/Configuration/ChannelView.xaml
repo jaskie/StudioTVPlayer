@@ -37,7 +37,7 @@
                     <Label Grid.Column="0" Grid.Row="0">Channel name</Label>
                     <TextBox Grid.Column="0" Grid.Row="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
                     <Label Grid.Column="1" Grid.Row="0">Video format</Label>
-                    <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding SelectedVideoFormat}" DisplayMemberPath="Name" />
+                    <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding SelectedVideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name" Style="{StaticResource ValidatedComboBox}"/>
                     <Label Grid.Column="0" Grid.Row="2">Pixel format</Label>
                     <ComboBox Grid.Column="0" Grid.Row="3" ItemsSource="{Binding PixelFormats}" SelectedItem="{Binding SelectedPixelFormat}"/>
                     <CheckBox Grid.Column="1" Grid.Row="3" Margin="5 0" IsChecked="{Binding LivePreview}" >
@@ -50,7 +50,7 @@
                         Live preview
                     </CheckBox>
                     <Label Grid.Column="0" Grid.Row="4">Channel clock source</Label>
-                    <ComboBox Grid.Column="0" Grid.Row="5" ItemsSource="{Binding Outputs}" SelectedItem="{Binding FrameClockSource}">
+                    <ComboBox Grid.Column="0" Grid.Row="5" ItemsSource="{Binding Outputs}" SelectedItem="{Binding FrameClockSource, ValidatesOnDataErrors=True}" Style="{StaticResource ValidatedComboBox}">
                         <ComboBox.Resources>
                             <DataTemplate DataType="{x:Type vm:DecklinkOutputViewModel}">
                                 <TextBlock Text="{Binding SelectedDevice.DisplayName, StringFormat={}Blackmagic {0:s}}"/>

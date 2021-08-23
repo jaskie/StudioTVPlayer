@@ -24,6 +24,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             {
                 channel.Modified += (o, e) => IsModified = true;
                 channel.RemoveRequested += Channel_RemoveRequested;
+                channel.CheckErrorInfo += Channel_CheckErrorInfo;
             }
             _selectedChannel = Channels.FirstOrDefault();
         }
@@ -81,6 +82,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var channel = new Channel { DeviceIndex = -1, Name = $"Channel {Channels.Count + 1}" };
             var vm = new ChannelViewModel(channel);
             vm.RemoveRequested += Channel_RemoveRequested;
+            vm.CheckErrorInfo += Channel_CheckErrorInfo;
             Channels.Add(vm);
             SelectedChannel = vm;
             IsModified = true;
@@ -97,5 +99,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             return Channels.All(c => c.IsValid());
         }
+
+        private void Channel_CheckErrorInfo(object sender, CheckErrorEventArgs e)
+        {
+            if (e.Source is DecklinkOutputViewModel decklink)
+            {
+                if (Channels.Any(c => c.Outputs.Any(o => o is DecklinkOutputViewModel decklinkToCompare && decklinkToCompare != decklink && decklink.SelectedDevice == decklinkToCompare.SelectedDevice)))
+                {
+                    e.Message = "This device is already in use";
+                    return;
+                }
+            }
+
+        }
+
     }
 }

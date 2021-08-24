@@ -30,11 +30,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _output.IsFrameClock = _isFrameClock;
         }
 
-        protected string ReadErrorInfo(string propertyName)
+        protected virtual string ReadErrorInfo(string propertyName)
         {
-            var checkErrorInfo = new CheckErrorEventArgs(this, propertyName);
             if (CheckErrorInfo is null)
                 return string.Empty;
+            var checkErrorInfo = new CheckErrorEventArgs(this, propertyName);
             CheckErrorInfo.Invoke(this, checkErrorInfo);
             return checkErrorInfo.Message;
         }

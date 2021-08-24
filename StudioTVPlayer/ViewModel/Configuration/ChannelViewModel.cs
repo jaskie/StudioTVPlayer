@@ -100,6 +100,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         return "You have to add Decklink or NDI output to provide clock source for the channel";
                     case nameof(SelectedVideoFormat) when SelectedVideoFormat is null:
                         return "A video format is required";
+                    case nameof(Name) when string.IsNullOrWhiteSpace(Name):
+                        return "Channel name can not be empty";
+                    case nameof(Name):
+                        if (CheckErrorInfo is null)
+                            return string.Empty;
+                        var ea = new CheckErrorEventArgs(this, nameof(Name));
+                        CheckErrorInfo.Invoke(this, ea);
+                        return ea.Message;
                     default:
                         return string.Empty;
                 }

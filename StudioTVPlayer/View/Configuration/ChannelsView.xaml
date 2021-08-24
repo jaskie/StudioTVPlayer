@@ -53,7 +53,7 @@
             </Button>
         </Grid>
         <GridSplitter HorizontalAlignment="Right" Width="3" Margin="2 0" Background="{DynamicResource MahApps.Brushes.Separator}"/>
-        <ContentControl Grid.Column="1" Content="{Binding SelectedChannel}">
+        <ContentControl Grid.Column="1" Content="{Binding SelectedChannel}" Margin="4 0 0 0">
             <ContentControl.Resources>
                 <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
                     <local:ChannelView/>

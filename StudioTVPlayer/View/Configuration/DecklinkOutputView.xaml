@@ -20,9 +20,7 @@
         </Grid.RowDefinitions>
         <TextBlock HorizontalAlignment="Center" FontSize="14">Decklink output</TextBlock>
         <Label Style="{StaticResource ConfigurationLabelStyle}">Selected decklink device</Label>
-        <ComboBox Grid.Row="3" Margin="5 0" VerticalAlignment="Center" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" ItemsSource="{Binding Devices}" DisplayMemberPath="DisplayName" 
-                  Style="{StaticResource ValidatedComboBox}"
-                  >
+        <ComboBox Grid.Row="3" Margin="5 0" VerticalAlignment="Center" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" ItemsSource="{Binding Devices}" DisplayMemberPath="DisplayName" >
         </ComboBox>
         <Button Grid.Row="2" Grid.Column="1" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
             <mah:FontIcon Glyph="&#xE74D;"/>

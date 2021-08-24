@@ -29,10 +29,23 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _ndi.SourceName = SourceName;
         }
 
+        protected override string ReadErrorInfo(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case nameof(SourceName) when string.IsNullOrWhiteSpace(SourceName):
+                    return "Source name can't be empty";
+                case nameof(SourceName) when SourceName.Any(b => b >= 127):
+                    return "Source name can contain only alphanumeric characters";
+                case nameof(GroupName) when GroupName?.Any(b => b >= 127) == true:
+                    return "Group name can contain only alphanumeric characters";
+            }
+            return base.ReadErrorInfo(propertyName);
+        }
+
         public override bool IsValid()
         {
-            return !string.IsNullOrWhiteSpace(_sourceName) && _sourceName.All(b => b < 127) // is not empty and all chars are ascii
-                && (string.IsNullOrEmpty(_groupName) ||  _groupName.All(b =>  b < 127)); // can be empty, otherwise all chars should be ascii
+            return string.IsNullOrEmpty(this[nameof(SourceName)]) && string.IsNullOrEmpty(this[nameof(GroupName)]);
         }
     }
 }

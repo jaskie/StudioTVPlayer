@@ -102,15 +102,23 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Channel_CheckErrorInfo(object sender, CheckErrorEventArgs e)
         {
-            if (e.Source is DecklinkOutputViewModel decklink)
+            switch (e.Source)
             {
-                if (Channels.Any(c => c.Outputs.Any(o => o is DecklinkOutputViewModel decklinkToCompare && decklinkToCompare != decklink && decklink.SelectedDevice == decklinkToCompare.SelectedDevice)))
-                {
+                case ChannelViewModel channel 
+                when e.PropertyName == nameof(ChannelViewModel.Name) && Channels.Any(c => c != channel && c.Name == channel.Name):
+                    e.Message = "Channel of that name already exists";
+                    break;
+                case DecklinkOutputViewModel decklink 
+                when e.PropertyName == nameof(DecklinkOutputViewModel.SelectedDevice) &&
+                Channels.Any(c => c.Outputs.Any(o => o is DecklinkOutputViewModel decklinkToCompare && decklinkToCompare != decklink && decklink.SelectedDevice == decklinkToCompare.SelectedDevice)):
                     e.Message = "This device is already in use";
-                    return;
-                }
+                    break;
+                case NdiOutputViewModel ndi when 
+                e.PropertyName == nameof(NdiOutputViewModel.SourceName) &&
+                Channels.Any(c => c.Outputs.Any(o => o is NdiOutputViewModel ndiToCompare && ndiToCompare != ndi && ndi.SourceName == ndiToCompare.SourceName)):
+                    e.Message = "This source name is in use";
+                    break;
             }
-
         }
 
     }

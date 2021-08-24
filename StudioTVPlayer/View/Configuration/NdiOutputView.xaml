@@ -28,9 +28,9 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="14">NDI output</TextBlock>
         <Label Grid.Row="1" Grid.Column="0">Group name</Label>
-        <TextBox Grid.Row="2" Text="{Binding GroupName}" ToolTip="NDI group name (optional)"/>
+        <TextBox Grid.Row="2" Text="{Binding GroupName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group name (optional)"/>
         <Label Grid.Row="1" Grid.Column="1">Source name</Label>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SourceName}" ToolTip="NDI source name (mandatory)"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SourceName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI source name (mandatory)"/>
         <Button Grid.Row="2" Grid.Column="2" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
             <mah:FontIcon Glyph="&#xE74D;"/>
         </Button>

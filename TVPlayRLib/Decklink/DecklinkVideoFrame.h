@@ -1,5 +1,4 @@
 #pragma once
-#include "../FFMpeg/Utils.h"
 #include "../Core/VideoFormat.h"
 #include "DecklinkTimecode.h"
 

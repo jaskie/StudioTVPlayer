@@ -1,5 +1,5 @@
 #pragma once
-#include "../FFMpeg/Utils.h"
+#include "../Common/Exceptions.h"
 
 namespace TVPlayR {
 	namespace Core {

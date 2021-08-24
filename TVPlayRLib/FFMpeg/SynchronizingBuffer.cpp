@@ -3,6 +3,7 @@
 #include "AudioFifo.h"
 #include "../Core/Channel.h"
 #include "../Common/Debug.h"
+#include "FFMpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

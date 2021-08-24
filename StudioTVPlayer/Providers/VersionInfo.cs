@@ -28,5 +28,7 @@ namespace StudioTVPlayer.Providers
         public string FFmpegAVCodec => TVPlayR.VersionInfo.FFmpegAVCodec;
         
         public string FFmpegAVFilter => TVPlayR.VersionInfo.FFmpegAVFilter;
+
+        public string Ndi => TVPlayR.VersionInfo.Ndi;
     }
 }

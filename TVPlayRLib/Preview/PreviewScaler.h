@@ -1,9 +1,11 @@
 #pragma once
 #include "../FFMpeg/VideoFilterBase.h"
+#include "../Core/PixelFormat.h"
 
 namespace TVPlayR {
 	namespace Core {
 		class Channel;
+		class VideoFormat;
 	}
 	
 	namespace Preview {

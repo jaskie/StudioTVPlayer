@@ -71,7 +71,7 @@
     <ClInclude Include="Common\NonCopyable.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="FFMpeg\Utils.h">
+    <ClInclude Include="FFMpeg\FFMpegUtils.h">
       <Filter>FFMpeg</Filter>
     </ClInclude>
     <ClInclude Include="Decklink\DeckLinkAPI_h.h">
@@ -86,7 +86,7 @@
     <ClInclude Include="Core\PixelFormat.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Ndi\Ndi.h">
+    <ClInclude Include="Ndi\NdiOutput.h">
       <Filter>Ndi</Filter>
     </ClInclude>
     <ClInclude Include="FFMpeg\ThumbnailFilter.h">
@@ -149,6 +149,9 @@
     <ClInclude Include="Common\BlockingCollection.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Ndi\NdiUtils.h">
+      <Filter>Ndi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\Iterator.cpp">
@@ -182,7 +185,7 @@
     <ClCompile Include="FFMpeg\FFMpegInputSource.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
-    <ClCompile Include="Ndi\Ndi.cpp">
+    <ClCompile Include="Ndi\NdiOutput.cpp">
       <Filter>Ndi</Filter>
     </ClCompile>
     <ClCompile Include="FFMpeg\ThumbnailFilter.cpp">
@@ -197,7 +200,7 @@
     <ClCompile Include="FFMpeg\AudioMuxer.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
-    <ClCompile Include="FFMpeg\Utils.cpp">
+    <ClCompile Include="FFMpeg\FFMpegUtils.cpp">
       <Filter>FFMpeg</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkVideoFrame.cpp">
@@ -217,6 +220,9 @@
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
       <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="Ndi\NdiUtils.cpp">
+      <Filter>Ndi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

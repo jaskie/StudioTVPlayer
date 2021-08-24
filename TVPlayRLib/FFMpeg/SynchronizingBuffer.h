@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Utils.h"
 #include "AVSync.h"
 
 namespace TVPlayR {

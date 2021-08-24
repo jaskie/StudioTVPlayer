@@ -4,11 +4,11 @@
 namespace TVPlayR {
 	namespace Ndi {
 
-class Ndi : public Core::OutputDevice
+class NdiOutput : public Core::OutputDevice
 {
 public:
-	Ndi(const std::string& source_name, const std::string& group_names);
-	~Ndi();
+	NdiOutput(const std::string& source_name, const std::string& group_names);
+	~NdiOutput();
 	//OutputDevice
 	virtual bool AssignToChannel(Core::Channel& channel) override;
 	virtual void ReleaseChannel() override;

@@ -114,17 +114,18 @@
     <ClInclude Include="FFMpeg\FFMpegInputSource.h" />
     <ClInclude Include="Common\NonCopyable.h" />
     <ClInclude Include="FFMpeg\ChannelScaler.h" />
-    <ClInclude Include="Ndi\Ndi.h" />
+    <ClInclude Include="Ndi\NdiOutput.h" />
     <ClInclude Include="Preview\PreviewScaler.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\Rational.h" />
-    <ClInclude Include="FFMpeg\Utils.h" />
+    <ClInclude Include="FFMpeg\FFMpegUtils.h" />
     <ClInclude Include="FFMpeg\VideoFilterBase.h" />
     <ClInclude Include="Core\VideoFormat.h" />
     <ClInclude Include="Core\PixelFormat.h" />
     <ClInclude Include="FFMpeg\ThumbnailFilter.h" />
     <ClInclude Include="Decklink\Utils.h" />
     <ClInclude Include="Preview\Preview.h" />
+    <ClInclude Include="Ndi\NdiUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
@@ -187,13 +188,17 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="FFMpeg\Utils.cpp">
+    <ClCompile Include="FFMpeg\FFMpegUtils.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Ndi\Ndi.cpp">
+    <ClCompile Include="Ndi\NdiOutput.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="Ndi\NdiUtils.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Preview\PreviewScaler.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>

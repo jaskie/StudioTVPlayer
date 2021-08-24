@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "Ndi/NdiUtils.h"
 using namespace System;
 using namespace System::Reflection;
 
@@ -41,6 +42,18 @@ namespace TVPlayR {
 			{
 				unsigned int version = avfilter_version();
 				return 	String::Format("{0}.{1}.{2}", version >> 16, (version >> 8) & 0xFF, version & 0xFF);
+			}
+		}
+
+		static property String^ Ndi
+		{
+			String^ get()
+			{
+				NDIlib_v4* ndi = TVPlayR::Ndi::LoadNdi();
+				if (!ndi)
+					return "not found";
+				const char* version = ndi->version();
+				return gcnew System::String(version);
 			}
 		}
 

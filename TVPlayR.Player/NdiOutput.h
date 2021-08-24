@@ -1,7 +1,7 @@
 #pragma once
 
 #include "OutputBase.h"
-#include "Ndi/Ndi.h"
+#include "Ndi/NdiOutput.h"
 
 using namespace System;
 
@@ -10,7 +10,7 @@ namespace TVPlayR {
 	public ref class NdiOutput : public OutputBase
 	{
 	private:
-		const std::shared_ptr<Ndi::Ndi>* _ndi;
+		const std::shared_ptr<Ndi::NdiOutput>* _ndi;
 		String^ _sourceName;
 		String^ _groupName;		
 	public:

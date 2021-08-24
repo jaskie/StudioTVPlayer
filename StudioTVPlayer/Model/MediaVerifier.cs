@@ -37,7 +37,7 @@ namespace StudioTVPlayer.Model
             {
                 _verificationTask.Wait();
             }
-            catch (OperationCanceledException)
+            catch (TaskCanceledException)
             { }
             _mediaQueue.Dispose();
         }

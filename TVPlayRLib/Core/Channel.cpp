@@ -14,7 +14,6 @@ namespace TVPlayR {
 			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
 			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
-			std::mutex mutex_;
 			AudioVolume audio_volume_;
 			const VideoFormat format_;
 			const Core::PixelFormat pixel_format_;
@@ -51,7 +50,6 @@ namespace TVPlayR {
 			{
 				frame_requester_.begin_invoke([this, audio_samples_count]
 				{
-					std::lock_guard<std::mutex> lock(mutex_);
 					std::vector<double> volume;
 					if (playing_source_)
 					{
@@ -79,35 +77,48 @@ namespace TVPlayR {
 
 			void AddOutput(std::shared_ptr<OutputDevice>& device)
 			{
-				output_devices_.push_back(device);
+				frame_requester_.invoke([this, &device]
+				{
+					output_devices_.push_back(device);
+				});
 			}
 
 			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
 			{
-				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
+				frame_requester_.invoke([this, &device]
+				{
+					output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
+				});
 			}
 
 			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
 			{
-				if (frame_clock_)
-					frame_clock_->SetFrameRequestedCallback(nullptr);
-				frame_clock_ = clock;
-				clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
+				frame_requester_.invoke([this, &clock]
+				{
+					if (frame_clock_)
+						frame_clock_->SetFrameRequestedCallback(nullptr);
+					frame_clock_ = clock;
+					clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
+				});
 			}
 
 			void Load(std::shared_ptr<InputSource>& source)
 			{
-				std::lock_guard<std::mutex> guard(mutex_);
-				playing_source_ = source;
+				frame_requester_.invoke([this, &source]
+				{
+					playing_source_ = source;
+				});
 			}
 
 			void Clear()
 			{
-				std::lock_guard<std::mutex> guard(mutex_);
-				if (!playing_source_)
-					return;
-				playing_source_->RemoveFromChannel();
-				playing_source_ = nullptr;
+				frame_requester_.invoke([this]
+				{
+					if (!playing_source_)
+						return;
+					playing_source_->RemoveFromChannel();
+					playing_source_ = nullptr;
+				});
 			}
 		};
 

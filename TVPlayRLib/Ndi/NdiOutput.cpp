@@ -56,11 +56,14 @@ namespace TVPlayR {
 			{
 				if (channel_)
 					return false;
-				channel_ = &channel;
-				video_frames_pushed_ = 0;
-				audio_samples_pushed_ = 0;
-				if (frame_requested_callback_)
-					frame_requested_callback_(AudioSamplesRequired());
+				send_executor_.invoke([this, &channel]
+				{
+					channel_ = &channel;
+					video_frames_pushed_ = 0;
+					audio_samples_pushed_ = 0;
+					if (frame_requested_callback_)
+						frame_requested_callback_(AudioSamplesRequired());
+				});
 				return true;
 			}
 
@@ -68,20 +71,20 @@ namespace TVPlayR {
 			{
 				if (!channel_)
 					return;
-				channel_ = nullptr;
+				send_executor_.invoke([this] { channel_ = nullptr; });
 			}
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				video_frames_pushed_++;
-				audio_samples_pushed_ += sync.Audio->nb_samples;
 				send_executor_.begin_invoke([this, sync] {
+					video_frames_pushed_++;
+					audio_samples_pushed_ += sync.Audio->nb_samples;
+					if (frame_requested_callback_)
+						frame_requested_callback_(AudioSamplesRequired());
 					NDIlib_video_frame_v2_t video = CreateVideoFrame(sync.Video, sync.Time);
 					GetNdi()->send_send_video_v2(send_instance_, &video);
 					NDIlib_audio_frame_interleaved_32s_t audio = CreateAudioFrame(sync.Audio, sync.Time);
 					GetNdi()->util_send_send_audio_interleaved_32s(send_instance_, &audio);
-					if (frame_requested_callback_)
-						frame_requested_callback_(AudioSamplesRequired());
 				});
 			}
 
@@ -98,7 +101,11 @@ namespace TVPlayR {
 
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
 			{
-				frame_requested_callback_ = frame_requested_callback;
+				send_executor_.invoke(
+					[this, frame_requested_callback]
+				{
+					frame_requested_callback_ = frame_requested_callback;
+				});
 			}
 
 			NDIlib_video_frame_v2_t CreateVideoFrame(const std::shared_ptr<AVFrame>& avframe, int64_t time)

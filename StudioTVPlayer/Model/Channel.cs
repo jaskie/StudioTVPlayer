@@ -18,7 +18,6 @@ namespace StudioTVPlayer.Model
         private TVPlayR.VideoFormat _videoFormat;
         private string _videoFormatName;
         private TVPlayR.PixelFormat _pixelFormat;
-        private int _deviceIndex;
         private bool _livePreview;
 
         private TVPlayR.Channel _channelR;
@@ -76,19 +75,6 @@ namespace StudioTVPlayer.Model
         }
 
         [XmlAttribute]
-        public int DeviceIndex
-        {
-            get => _deviceIndex;
-            set
-            {
-                if (_deviceIndex == value)
-                    return;
-                _deviceIndex = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        [XmlAttribute]
         public bool LivePreview
         {
             get => _livePreview;
@@ -111,12 +97,25 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR != null)
                 throw new ApplicationException($"Channel {Name} already initialized");
-            var device = TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
             _videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
-            if (device == null || _videoFormat == null)
+            if (_videoFormat == null)
                 return;
             _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, AudioChannelCount);
-            _channelR.AddOutput(device, true);
+            foreach (var output in Outputs)
+            {
+                TVPlayR.OutputBase outputDevice = null;
+                switch (output)
+                {
+                    case DecklinkOutput decklink:
+                        outputDevice = TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(decklink.DeviceIndex);
+                        break;
+                    case NdiOutput ndi:
+                        outputDevice = new TVPlayR.NdiOutput(ndi.SourceName, ndi.GroupName);
+                        break;
+                }
+                if (!(outputDevice is null))
+                    _channelR.AddOutput(outputDevice, output.IsFrameClock);
+            }
             _channelR.AudioVolume += ChannelR_AudioVolume;
         }
 

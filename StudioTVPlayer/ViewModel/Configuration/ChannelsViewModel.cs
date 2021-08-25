@@ -79,7 +79,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddChannel(object obj)
         {
-            var channel = new Channel { DeviceIndex = -1, Name = $"Channel {Channels.Count + 1}" };
+            var channel = new Channel { Name = $"Channel {Channels.Count + 1}" };
             var vm = new ChannelViewModel(channel);
             vm.RemoveRequested += Channel_RemoveRequested;
             vm.CheckErrorInfo += Channel_CheckErrorInfo;

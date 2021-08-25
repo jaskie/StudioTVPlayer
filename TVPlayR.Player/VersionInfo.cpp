@@ -1,6 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "Ndi/NdiUtils.h"
+#include "Decklink/Iterator.h"
+#include "Decklink/ApiVersion.h"
+
 using namespace System;
 using namespace System::Reflection;
 
@@ -53,6 +56,16 @@ namespace TVPlayR {
 				if (!ndi)
 					return "not found";				
 				return gcnew String(ndi->version());
+			}
+		}
+
+		static property String^ Decklink
+		{
+			String^ get()
+			{
+				TVPlayR::Decklink::Iterator iterator;
+				TVPlayR::Decklink::ApiVersion version = iterator.GetVersion();
+				return String::Format("{0}.{1}.{2}", version.Major, version.Minor, version.Point);
 			}
 		}
 

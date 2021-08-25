@@ -15,19 +15,12 @@ namespace TVPlayR {
 			return pDecklinkIterator;
 		}
 
-		static ApiVersion get_version(const CComPtr<IDeckLinkIterator>& iterator)
-		{
-			
-		}
-
 		struct Iterator::implementation {
 			Common::ComInitializer com_;
 			CComPtr<IDeckLinkIterator> decklink_iterator_;
 			std::vector<std::shared_ptr<Decklink>> decklink_list_;
 			implementation()
-			{
-				Refresh();
-			}
+			{ }
 
 			std::shared_ptr<Decklink>& operator[](size_t pos)
 			{
@@ -52,12 +45,14 @@ namespace TVPlayR {
 
 			ApiVersion GetVersion()
 			{
+				if (!decklink_iterator_)
+					decklink_iterator_ = create_iterator();
 				if (decklink_iterator_)
 				{
-				int64_t deckLinkVersion;
-				CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(decklink_iterator_);
-				if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))
-					return ApiVersion((deckLinkVersion & 0xFF000000) >> 24, (deckLinkVersion & 0x00FF0000) >> 16, (deckLinkVersion & 0x0000FF00) >> 8);
+					int64_t deckLinkVersion;
+					CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(decklink_iterator_);
+					if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))
+						return ApiVersion((deckLinkVersion & 0xFF000000) >> 24, (deckLinkVersion & 0x00FF0000) >> 16, (deckLinkVersion & 0x0000FF00) >> 8);
 				}
 				return ApiVersion(0, 0, 0);
 			}

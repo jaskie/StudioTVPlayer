@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
 namespace StudioTVPlayer.Providers
 {
@@ -30,5 +25,7 @@ namespace StudioTVPlayer.Providers
         public string FFmpegAVFilter => TVPlayR.VersionInfo.FFmpegAVFilter;
 
         public string Ndi => TVPlayR.VersionInfo.Ndi;
+
+        public string Decklink => TVPlayR.VersionInfo.Decklink;
     }
 }

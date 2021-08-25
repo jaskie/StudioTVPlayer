@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel"
-             xmlns:attached="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:AboutDialogViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -33,6 +32,7 @@
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Grid.Row="0">StudioTVPlayer.exe</Label>
             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding VersionInfo.Application}"/>
@@ -44,8 +44,14 @@
             <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding VersionInfo.FFmpegAVCodec}"/>
             <Label Grid.Row="4">avfilter</Label>
             <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VersionInfo.FFmpegAVFilter}"/>
-            <Label Grid.Row="5">NDI</Label>
-            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding VersionInfo.Ndi}"/>
+            <Label Grid.Row="5">
+                <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.blackmagicdesign.com/products/decklink">Decklink</Hyperlink>
+            </Label>
+            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding VersionInfo.Decklink}"/>
+            <Label Grid.Row="6">
+                <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ndi.tv/">NDI</Hyperlink>
+            </Label>
+            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding VersionInfo.Ndi}"/>
         </Grid>
         <Button Grid.Row="1" IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="OK" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
     </StackPanel>

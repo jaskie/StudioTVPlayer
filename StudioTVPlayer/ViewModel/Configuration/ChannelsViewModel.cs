@@ -74,8 +74,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void DeleteChannel(object obj)
         {
             var channel = obj as ChannelViewModel ?? throw new ArgumentException(nameof(obj));
-            Channels.Remove(channel);            
-        }        
+            Channels.Remove(channel);
+        }
 
         private void AddChannel(object obj)
         {

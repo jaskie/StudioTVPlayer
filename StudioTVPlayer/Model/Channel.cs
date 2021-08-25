@@ -60,7 +60,9 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        [XmlElement]
+        [XmlArray]
+        [XmlArrayItem(typeof(DecklinkOutput))]
+        [XmlArrayItem(typeof(NdiOutput))]
         public OutputBase[] Outputs
         {
             get => _outputs.ToArray();

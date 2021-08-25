@@ -39,6 +39,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 output.Modified += (o, e) => IsModified = true;
                 output.RemoveRequested += Output_RemoveRequested;
                 output.CheckErrorInfo += Output_CheckErrorInfo;
+                output.Modified += Output_Modified;
                 if (output.IsFrameClock)
                     _frameClockSource = output;
             }
@@ -49,7 +50,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
         }
 
-        public Model.Channel Channel { get; }
+        internal Model.Channel Channel { get; }
 
         public string Name
         {
@@ -118,7 +119,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override void Apply()
         {
-            if (IsModified)
+            if (!IsModified)
                 return;
             if (Outputs.Any(o => o.IsModified) || Channel.PixelFormat != SelectedPixelFormat || Channel.VideoFormat != SelectedVideoFormat || Channel.LivePreview != LivePreview)
                 Channel.Uninitialize();
@@ -128,6 +129,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Channel.PixelFormat = SelectedPixelFormat;
             Channel.VideoFormat = SelectedVideoFormat;
             Channel.LivePreview = LivePreview;
+            Channel.Outputs = Outputs.Select(o => o.Output).ToArray();
             IsModified = false;
         }
 
@@ -152,12 +154,16 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             Outputs.Add(vm);
             if (vm.IsFrameClock)
-            {
-                _frameClockSource = vm;
-                NotifyPropertyChanged(nameof(FrameClockSource));
-            }
+                FrameClockSource = vm;
             vm.RemoveRequested += Output_RemoveRequested;
             vm.CheckErrorInfo += Output_CheckErrorInfo;
+            vm.Modified += Output_Modified;
+            IsModified = true;
+        }
+
+        private void Output_Modified(object sender, EventArgs e)
+        {
+            IsModified = true;
         }
 
         private void Output_RemoveRequested(object sender, EventArgs e)
@@ -165,7 +171,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var output = sender as OutputViewModelBase ?? throw new ArgumentException(nameof(sender));
             output.RemoveRequested -= Output_RemoveRequested;
             output.CheckErrorInfo -= Output_CheckErrorInfo;
+            output.Modified -= Output_Modified;
             Outputs.Remove(output);
+            IsModified = true;
         }
 
         private void Output_CheckErrorInfo(object sender, CheckErrorEventArgs e)

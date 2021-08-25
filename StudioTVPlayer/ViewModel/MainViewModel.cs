@@ -38,9 +38,6 @@ namespace StudioTVPlayer.ViewModel
 
         public async void ShowPlayoutView()
         {
-            CurrentViewModel = new ConfigurationViewModel();
-            return;
-
             try
             {
                 if (CurrentViewModel is PlayoutViewModel)

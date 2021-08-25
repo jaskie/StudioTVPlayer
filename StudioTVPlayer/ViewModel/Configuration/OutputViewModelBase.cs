@@ -6,12 +6,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public abstract class OutputViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
-        private readonly OutputBase _output;
         private bool _isFrameClock;
 
         public OutputViewModelBase(OutputBase output)
         {
-            _output = output;
+            Output = output;
             _isFrameClock = output.IsFrameClock;
         }
 
@@ -21,13 +20,15 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public string Error => string.Empty;
 
+        internal OutputBase Output { get; }
+
         public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
         public override void Apply()
         {
             if (!IsModified)
                 return;
-            _output.IsFrameClock = _isFrameClock;
+            Output.IsFrameClock = _isFrameClock;
         }
 
         protected virtual string ReadErrorInfo(string propertyName)

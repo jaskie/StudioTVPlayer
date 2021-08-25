@@ -33,7 +33,14 @@ namespace StudioTVPlayer.Providers
         private static Configuration LoadConfig()
         {
             var configurationFile = Path.Combine(ApplicationDataDir, ConfigurationFile);
-            return DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
+            try
+            {
+                return DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
+            }
+            catch
+            {
+                return new Configuration();
+            }
         }
 
         public void Shutdown()

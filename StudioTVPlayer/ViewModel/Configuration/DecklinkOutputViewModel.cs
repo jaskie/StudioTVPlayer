@@ -11,7 +11,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public DecklinkOutputViewModel(DecklinkOutput decklink): base(decklink)
         {
             _decklink = decklink;
-            SelectedDevice = Devices.FirstOrDefault(d => d.Index == decklink.DeviceIndex);
+            _selectedDevice = Devices.FirstOrDefault(d => d.Index == decklink.DeviceIndex);
         }
 
         public static TVPlayR.DecklinkOutput[] Devices { get; } = TVPlayR.DecklinkOutput.EnumerateDevices();

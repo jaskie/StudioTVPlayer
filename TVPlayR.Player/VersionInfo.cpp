@@ -51,9 +51,8 @@ namespace TVPlayR {
 			{
 				NDIlib_v4* ndi = TVPlayR::Ndi::LoadNdi();
 				if (!ndi)
-					return "not found";
-				const char* version = ndi->version();
-				return gcnew System::String(version);
+					return "not found";				
+				return gcnew String(ndi->version());
 			}
 		}
 

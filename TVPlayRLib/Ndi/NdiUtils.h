@@ -5,5 +5,5 @@ namespace TVPlayR {
 	namespace Ndi {
 		
 		NDIlib_v4* LoadNdi();
-
+		void UnloadNdi();
 }}

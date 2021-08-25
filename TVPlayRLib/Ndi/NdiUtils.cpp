@@ -4,12 +4,14 @@
 namespace TVPlayR {
 	namespace Ndi {
 
+		static NDIlib_v4* ndi_library = nullptr;
+		HMODULE hNDILib = nullptr;
+
 		NDIlib_v4* LoadNdi()
 		{
-			static NDIlib_v4* ndi_library = nullptr;
 			if (ndi_library)
 				return ndi_library;
-			HMODULE hNDILib = LoadLibraryA(NDILIB_LIBRARY_NAME);
+			hNDILib = LoadLibraryA(NDILIB_LIBRARY_NAME);
 			if (!hNDILib)
 			{
 				size_t required_size = 0;
@@ -43,6 +45,14 @@ namespace TVPlayR {
 			}
 			ndi_library = NDIlib_v4_load();
 			return ndi_library;
+		}
+
+		void UnloadNdi()
+		{
+			ndi_library = nullptr;
+			if (hNDILib)
+				FreeLibrary(hNDILib);
+			hNDILib = nullptr;
 		}
 
 }}

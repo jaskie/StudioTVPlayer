@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:NdiOutputViewModel}"
-             d:DesignHeight="45" d:DesignWidth="400">
+             d:DesignHeight="75" d:DesignWidth="400">
     <UserControl.Resources>
         <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
             <Setter Property="Margin" Value="5 0"/>
@@ -27,10 +27,10 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBlock Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="14">NDI output</TextBlock>
-        <Label Grid.Row="1" Grid.Column="0">Group name</Label>
-        <TextBox Grid.Row="2" Text="{Binding GroupName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group name (optional)"/>
-        <Label Grid.Row="1" Grid.Column="1">Source name</Label>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SourceName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI source name (mandatory)"/>
+        <Label Grid.Row="1" Grid.Column="0">Source name</Label>
+        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding SourceName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI source name (mandatory)"/>
+        <Label Grid.Row="1" Grid.Column="1">Group names</Label>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding GroupNames, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group names (default - leave empty)"/>
         <Button Grid.Row="2" Grid.Column="2" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
             <mah:FontIcon Glyph="&#xE74D;"/>
         </Button>

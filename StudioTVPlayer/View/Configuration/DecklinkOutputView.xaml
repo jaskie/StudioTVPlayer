@@ -7,7 +7,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:DecklinkOutputViewModel}}"
-             d:DesignHeight="50" d:DesignWidth="300">
+             d:DesignHeight="75" d:DesignWidth="300">
     <Grid Margin="0 5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -19,7 +19,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBlock HorizontalAlignment="Center" FontSize="14">Decklink output</TextBlock>
-        <Label Style="{StaticResource ConfigurationLabelStyle}">Selected decklink device</Label>
+        <Label Grid.Row="1" Style="{StaticResource ConfigurationLabelStyle}">Selected decklink device</Label>
         <ComboBox Grid.Row="3" Margin="5 0" VerticalAlignment="Center" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" ItemsSource="{Binding Devices}" DisplayMemberPath="DisplayName" >
         </ComboBox>
         <Button Grid.Row="2" Grid.Column="1" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">

@@ -8,6 +8,6 @@ namespace StudioTVPlayer.Model
         public string SourceName { get; set; }
 
         [XmlAttribute]
-        public string GroupName { get; set; }
+        public string GroupNames { get; set; }
     }
 }

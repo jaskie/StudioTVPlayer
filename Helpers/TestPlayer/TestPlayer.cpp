@@ -4,7 +4,7 @@
 #include "Core/Channel.h"
 #include "Decklink/Iterator.h"
 #include "Decklink/Decklink.h"
-#include "Ndi/Ndi.h"
+#include "Ndi/NdiOutput.h"
 #include "FFMpeg/FFMpegInputSource.h"
 #include "Core/PixelFormat.h"
 
@@ -35,17 +35,18 @@ int main()
 #else
 		av_log_set_callback(NULL);
 #endif
-		Core::Channel channel(Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
+		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
 		Decklink::Iterator iterator;
+		iterator.Refresh();
 		size_t device_index = 1;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink = iterator[device_index];
-		//channel.SetFrameClock(decklink);
+		channel.SetFrameClock(decklink);
 		channel.AddOutput(decklink);
 		
-		auto ndi = std::make_shared<Ndi::Ndi>("STUDIO_TVPLAYER", "");
-		channel.SetFrameClock(ndi);
+		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		//channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
 
 		auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "", 2);

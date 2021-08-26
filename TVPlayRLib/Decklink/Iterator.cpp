@@ -43,7 +43,7 @@ namespace TVPlayR {
 					decklink_list_.push_back(std::make_shared<Decklink>(decklink, index++));
 			}
 
-			ApiVersion GetVersion()
+			std::shared_ptr<ApiVersion> GetVersion()
 			{
 				if (!decklink_iterator_)
 					decklink_iterator_ = create_iterator();
@@ -52,9 +52,9 @@ namespace TVPlayR {
 					int64_t deckLinkVersion;
 					CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(decklink_iterator_);
 					if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))
-						return ApiVersion((deckLinkVersion & 0xFF000000) >> 24, (deckLinkVersion & 0x00FF0000) >> 16, (deckLinkVersion & 0x0000FF00) >> 8);
+						return std::make_shared<ApiVersion>(static_cast<int>((deckLinkVersion & 0xFF000000) >> 24), static_cast<int>((deckLinkVersion & 0x00FF0000) >> 16), static_cast<int>((deckLinkVersion & 0x0000FF00) >> 8));
 				}
-				return ApiVersion(0, 0, 0);
+				return nullptr;
 			}
 
 		};
@@ -67,7 +67,7 @@ namespace TVPlayR {
 
 		std::shared_ptr<Decklink> Iterator::operator[](size_t pos) { return impl_->operator[](pos); }
 		size_t Iterator::Size() const { return impl_->Size(); }
-		ApiVersion Iterator::GetVersion() { return impl_->GetVersion(); }
+		std::shared_ptr<ApiVersion> Iterator::GetVersion() { return impl_->GetVersion(); }
 		void Iterator::Refresh() { return impl_->Refresh();	}
 	}
 }

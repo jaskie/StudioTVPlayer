@@ -1,5 +1,7 @@
 #include "../pch.h"
 #include "NdiUtils.h"
+#include "../Core/VideoFormat.h"
+#include "../Common/Exceptions.h"
 
 namespace TVPlayR {
 	namespace Ndi {
@@ -54,5 +56,73 @@ namespace TVPlayR {
 				FreeLibrary(hNDILib);
 			hNDILib = nullptr;
 		}
+
+		NDIlib_send_instance_t CreateSend(NDIlib_v4* const ndi, const std::string& source_name, const std::string& group_names)
+		{
+			assert(ndi);
+			NDIlib_send_create_t send_create_description;
+			send_create_description.p_ndi_name = source_name.c_str();
+			send_create_description.p_groups = group_names.empty() ? NULL : group_names.c_str();
+			send_create_description.clock_audio = false;
+			send_create_description.clock_video = true;
+			return ndi->send_create(&send_create_description);
+		}
+
+		NDIlib_video_frame_v2_t CreateVideoFrame(const Core::VideoFormat& format, const std::shared_ptr<AVFrame>& avframe, int64_t time)
+		{
+			if (!avframe)
+				THROW_EXCEPTION("CreateVideoFrame: no frame provided");
+			if (format.type() == Core::VideoFormatType::invalid)
+				THROW_EXCEPTION("CreateVideoFrame: invalid video format");
+			NDIlib_FourCC_video_type_e fourcc;
+			switch (avframe->format)
+			{
+			case AV_PIX_FMT_BGRA:
+				fourcc = NDIlib_FourCC_type_BGRA;
+				break;
+			case AV_PIX_FMT_UYVY422:
+				fourcc = NDIlib_FourCC_type_UYVY;
+				break;
+			default:
+				THROW_EXCEPTION("CreateVideoFrame: Invalid format of video frame");
+			}
+			NDIlib_frame_format_type_e frame_format_type;
+			switch (format.field_mode())
+			{
+			case Core::VideoFormat::FieldMode::lower:
+			case Core::VideoFormat::FieldMode::upper:
+				frame_format_type = NDIlib_frame_format_type_interleaved;
+				break;
+			default:
+				frame_format_type = NDIlib_frame_format_type_progressive;
+				break;
+			}
+			return NDIlib_video_frame_v2_t(
+				avframe->width,
+				avframe->height,
+				fourcc,
+				format.FrameRate().Numerator(),
+				format.FrameRate().Denominator(),
+				static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Numerator() * format.height()),
+				frame_format_type,
+				time * 10,
+				avframe->data[0],
+				avframe->linesize[0]
+			);
+		}
+
+		NDIlib_audio_frame_interleaved_32s_t CreateAudioFrame(std::shared_ptr<AVFrame> avframe, int64_t time)
+		{
+			assert(avframe->format == AV_SAMPLE_FMT_S32);
+			return NDIlib_audio_frame_interleaved_32s_t(
+				avframe->sample_rate,
+				avframe->channels,
+				avframe->nb_samples,
+				time * 10,
+				0,
+				reinterpret_cast<int32_t*>(avframe->data[0])
+			);
+		}
+
 
 }}

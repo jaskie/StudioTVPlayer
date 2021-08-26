@@ -14,7 +14,7 @@ public:
 	~Iterator(); 
 	std::shared_ptr<Decklink> operator [] (size_t pos);
 	size_t Size() const;
-	ApiVersion GetVersion();
+	std::shared_ptr<ApiVersion> GetVersion();
 	void Refresh();
 private:
 	struct implementation;

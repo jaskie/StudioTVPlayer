@@ -14,21 +14,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-
-        <Label FontSize="{DynamicResource MahApps.Font.Size.Header}">Configuration</Label>
-
-        <TabControl Grid.Row="1" mah:TabControlHelper.Underlined="SelectedTabItem">
-            <TabItem Header="Channels">
-                <views:ChannelsView Margin="5" DataContext="{Binding Channels}"/>
-            </TabItem>
-            <TabItem Header="Watched folders">
-                <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
-            </TabItem>
-        </TabControl>
-        
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Height="50" HorizontalAlignment="Right">
+        <Label Grid.Row="0" FontSize="{DynamicResource MahApps.Font.Size.Header}">Configuration</Label>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 15 0 -5">
             <StackPanel.Resources>
                 <Style TargetType="TextBlock" >
                     <Setter Property="FontSize" Value="15"/>
@@ -62,5 +50,13 @@
                 </Grid>
             </Button>
         </StackPanel>
+        <TabControl Grid.Row="1" mah:TabControlHelper.Underlined="SelectedTabItem">
+            <TabItem Header="Channels">
+                <views:ChannelsView Margin="5" DataContext="{Binding Channels}"/>
+            </TabItem>
+            <TabItem Header="Watched folders">
+                <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

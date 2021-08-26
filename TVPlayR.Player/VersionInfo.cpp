@@ -64,8 +64,8 @@ namespace TVPlayR {
 			String^ get()
 			{
 				TVPlayR::Decklink::Iterator iterator;
-				TVPlayR::Decklink::ApiVersion version = iterator.GetVersion();
-				return String::Format("{0}.{1}.{2}", version.Major, version.Minor, version.Point);
+				auto version = iterator.GetVersion();
+				return version ? String::Format("{0}.{1}.{2}", version->Major, version->Minor, version->Point) : "not found";
 			}
 		}
 

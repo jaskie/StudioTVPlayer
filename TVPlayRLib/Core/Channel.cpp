@@ -11,6 +11,7 @@ namespace TVPlayR {
 
 		struct Channel::implementation : Common::DebugTarget<false>
 		{
+			const std::string name_;
 			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
 			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
@@ -21,35 +22,26 @@ namespace TVPlayR {
 			const std::shared_ptr<AVFrame> empty_video_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
-			Common::Executor frame_requester_;
-			
-
-			implementation(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
-				: format_(format)
+			Common::Executor executor_;
+		
+			implementation(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+				: name_(name)
+				, format_(format)
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
 				, frame_clock_(nullptr)
 				, playing_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
-				, frame_requester_("Frame requester")
+				, executor_("Channel: " + name)
 			{
-			}
-
-			~implementation()
-			{
-				if (frame_clock_)
-				{
-					frame_clock_->SetFrameRequestedCallback(nullptr);
-					frame_clock_.reset();
-				}
-				for (auto device : output_devices_)
-					device->ReleaseChannel();
 			}
 
 			void RequestFrame(int audio_samples_count)
 			{
-				frame_requester_.begin_invoke([this, audio_samples_count]
+				executor_.begin_invoke([this, audio_samples_count]() mutable
 				{
+					if (audio_samples_count < 0)
+						audio_samples_count = 0;
 					std::vector<double> volume;
 					if (playing_source_)
 					{
@@ -59,7 +51,7 @@ namespace TVPlayR {
 						if (!sync.Video)
 							sync.Video = empty_video_;
 						volume = audio_volume_.ProcessVolume(sync.Audio);
-						for (auto device : output_devices_)
+						for (auto& device : output_devices_)
 							device->Push(sync);
 					
 					}
@@ -67,7 +59,7 @@ namespace TVPlayR {
 					{
 						auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_), empty_video_, 0LL);
 						assert(sync.Audio->nb_samples == audio_samples_count);
-						for (auto device : output_devices_)
+						for (auto& device : output_devices_)
 							device->Push(sync);
 					}
 					if (audio_volume_callback_)
@@ -77,7 +69,7 @@ namespace TVPlayR {
 
 			void AddOutput(std::shared_ptr<OutputDevice>& device)
 			{
-				frame_requester_.invoke([this, &device]
+				executor_.invoke([this, &device]
 				{
 					output_devices_.push_back(device);
 				});
@@ -85,15 +77,18 @@ namespace TVPlayR {
 
 			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
 			{
-				frame_requester_.invoke([this, &device]
+				executor_.invoke([this, &device]
 				{
 					output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
+					if (device == frame_clock_)
+						frame_clock_->SetFrameRequestedCallback(nullptr);
+					device->ReleaseChannel();
 				});
 			}
 
 			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
 			{
-				frame_requester_.invoke([this, &clock]
+				executor_.invoke([this, &clock]
 				{
 					if (frame_clock_)
 						frame_clock_->SetFrameRequestedCallback(nullptr);
@@ -104,7 +99,7 @@ namespace TVPlayR {
 
 			void Load(std::shared_ptr<InputSource>& source)
 			{
-				frame_requester_.invoke([this, &source]
+				executor_.invoke([this, &source]
 				{
 					playing_source_ = source;
 				});
@@ -112,7 +107,7 @@ namespace TVPlayR {
 
 			void Clear()
 			{
-				frame_requester_.invoke([this]
+				executor_.invoke([this]
 				{
 					if (!playing_source_)
 						return;
@@ -122,8 +117,8 @@ namespace TVPlayR {
 			}
 		};
 
-		Channel::Channel(const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
-			: impl_(std::make_unique<implementation>(format, pixel_format, audio_channels_count)) {}
+		Channel::Channel(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+			: impl_(std::make_unique<implementation>(name, format, pixel_format, audio_channels_count)) {}
 		
 		Channel::~Channel() {}
 

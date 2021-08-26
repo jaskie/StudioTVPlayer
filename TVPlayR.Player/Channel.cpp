@@ -6,6 +6,8 @@
 #include "DecklinkOutput.h"
 #include "PreviewOutput.h"
 #include "InputFile.h"
+#include "ClrStringHelper.h"
+
 
 
 namespace TVPlayR {
@@ -20,8 +22,8 @@ namespace TVPlayR {
 		AudioVolume(this, gcnew AudioVolumeEventArgs(result));
 	}
 
-	Channel::Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount)
-		: _channel(new Core::Channel(videoFormat->GetNativeEnumType(), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
+	Channel::Channel(String^ name, VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount)
+		: _channel(new Core::Channel(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
 	{ 
 		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Channel::AudioVolumeCallback);
 		_audioVolumeHandle = GCHandle::Alloc(_audioVolumeDelegate);
@@ -43,7 +45,7 @@ namespace TVPlayR {
 		delete _channel;
 	}
 
-	bool Channel::AddOutput(OutputBase ^ device, bool setAsClockBase)
+	bool Channel::AddOutput(OutputBase^ device, bool setAsClockBase)
 	{
 		if (setAsClockBase)
 			_channel->SetFrameClock(device->GetNativeDevice());
@@ -53,7 +55,7 @@ namespace TVPlayR {
 		return true;
 	}
 
-	void Channel::Load(InputFile ^ file)
+	void Channel::Load(InputFile^ file)
 	{
 		_channel->Load(file->GetNativeSource());
 	}

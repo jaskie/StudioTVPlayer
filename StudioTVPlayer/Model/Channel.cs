@@ -100,7 +100,7 @@ namespace StudioTVPlayer.Model
             _videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
             if (_videoFormat == null)
                 return;
-            _channelR = new TVPlayR.Channel(_videoFormat, PixelFormat, AudioChannelCount);
+            _channelR = new TVPlayR.Channel(_name, _videoFormat, PixelFormat, AudioChannelCount);
             foreach (var output in Outputs)
             {
                 TVPlayR.OutputBase outputDevice = null;
@@ -110,7 +110,7 @@ namespace StudioTVPlayer.Model
                         outputDevice = TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(decklink.DeviceIndex);
                         break;
                     case NdiOutput ndi:
-                        outputDevice = new TVPlayR.NdiOutput(ndi.SourceName, ndi.GroupName);
+                        outputDevice = new TVPlayR.NdiOutput(ndi.SourceName, ndi.GroupNames);
                         break;
                 }
                 if (!(outputDevice is null))

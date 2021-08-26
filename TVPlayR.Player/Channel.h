@@ -24,7 +24,7 @@ namespace TVPlayR {
 		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
 		void AudioVolumeCallback(std::vector<double> audio_volume);
 	public:
-		Channel(VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
+		Channel(String^ name, VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();
 		!Channel();
 		bool AddOutput(OutputBase^ device, bool setAsClockBase);

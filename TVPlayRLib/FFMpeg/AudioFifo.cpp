@@ -55,7 +55,7 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 {
 	int samples_in_fifo = av_audio_fifo_size(aduio_fifo_.get());
-	if (nb_samples <= 0)
+	if (nb_samples < 0)
 		return nullptr;
 	auto frame(AllocFrame());
 	frame->nb_samples = nb_samples;

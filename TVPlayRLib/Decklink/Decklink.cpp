@@ -96,8 +96,9 @@ namespace TVPlayR {
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(format_, frame, time);
-				last_video_time_ = time;
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
+
+				last_video_time_ = time;
 				last_video_ = frame;
 #ifdef DEBUG
 				if (FAILED(ret))
@@ -167,6 +168,7 @@ namespace TVPlayR {
 					return false;
 				format_ = channel.Format();
 				audio_channels_count_ = channel.AudioChannelsCount();
+				last_video_time_ = 0LL;
 				Preroll(channel);
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
 				is_running_ = true;

@@ -57,7 +57,7 @@ namespace TVPlayR {
 			hNDILib = nullptr;
 		}
 
-		NDIlib_send_instance_t CreateSend(NDIlib_v4* const ndi, const std::string& source_name, const std::string& group_names)
+		const NDIlib_send_instance_t CreateSend(NDIlib_v4* const ndi, const std::string& source_name, const std::string& group_names)
 		{
 			assert(ndi);
 			NDIlib_send_create_t send_create_description;

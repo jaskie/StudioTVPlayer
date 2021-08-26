@@ -23,6 +23,7 @@ namespace TVPlayR {
 			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			std::shared_ptr<AVFrame> last_video_;
 			std::shared_ptr<FFmpeg::AVSync> buffer_frame_;
+			std::mutex buffer_mutex_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			Common::Executor executor_;
 			int64_t video_frames_pushed_ = 0LL;
@@ -74,6 +75,7 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
+				std::lock_guard<std::mutex> lock(buffer_mutex_);
 				DebugPrintIf(buffer_frame_, "NdiOutput: Frame dropped when pushed\n");
 				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
 			}
@@ -81,12 +83,12 @@ namespace TVPlayR {
 			void Tick()
 			{
 				std::shared_ptr<AVFrame> audio;
-				if (buffer_frame_)
+				auto buffer = GetBuffer();
+				if (buffer)
 				{
-					last_video_ = buffer_frame_->Video;
-					last_video_time_ = buffer_frame_->Time;
-					audio = buffer_frame_->Audio;
-					buffer_frame_.reset();
+					last_video_ = buffer->Video;
+					last_video_time_ = buffer->Time;
+					audio = buffer->Audio;
 				}
 				else
 				{
@@ -103,6 +105,14 @@ namespace TVPlayR {
 				ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
 				if (is_running_)
 					executor_.begin_invoke([this] { Tick(); }); // next frame
+			}
+
+			std::shared_ptr<FFmpeg::AVSync> GetBuffer()
+			{
+				std::lock_guard<std::mutex> lock(buffer_mutex_);
+				std::shared_ptr<FFmpeg::AVSync> buffer = buffer_frame_;
+				buffer_frame_.reset();
+				return buffer;
 			}
 
 			int AudioSamplesRequired() 

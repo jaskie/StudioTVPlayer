@@ -10,7 +10,7 @@
 namespace TVPlayR {
 	namespace Ndi {
 		
-		struct NdiOutput::implementation: Common::DebugTarget<false>
+		struct NdiOutput::implementation: Common::DebugTarget<true>
 		{
 			const std::string source_name_;
 			const std::string group_name_;
@@ -58,8 +58,6 @@ namespace TVPlayR {
 					video_frames_pushed_ = 0LL;
 					audio_samples_pushed_ = 0LL;
 					last_video_time_ = 0LL;
-					if (frame_requested_callback_)
-						frame_requested_callback_(AudioSamplesRequired());
 					executor_.begin_invoke([this] { Tick(); }); // first frame
 					return true;
 				});
@@ -83,7 +81,6 @@ namespace TVPlayR {
 			void Tick()
 			{
 				std::shared_ptr<AVFrame> audio;
-				video_frames_pushed_++;
 				if (buffer_frame_)
 				{
 					last_video_ = buffer_frame_->Video;
@@ -93,6 +90,7 @@ namespace TVPlayR {
 				}
 				else
 					audio = FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, audio_sample_format_);
+				video_frames_pushed_++;
 				audio_samples_pushed_ += audio->nb_samples;
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());

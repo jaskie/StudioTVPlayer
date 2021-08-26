@@ -111,9 +111,8 @@ void VideoFilterBase::CreateFilterChain(std::shared_ptr<AVFrame> frame, const AV
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_str.c_str(), inputs, outputs, NULL));
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
 		DebugPrintLine(args);
-#ifdef DEBUG
-		dump_filter(filter_str, graph_.get());
-#endif // DEBUG
+		if (IsDebugOutput())
+			dump_filter(filter_str, graph_.get());
 	}
 	catch (const std::exception& e)
 	{

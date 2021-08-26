@@ -26,6 +26,8 @@ protected:
 		}
 #endif // DEBUG
 	}
+
+	inline bool IsDebugOutput() const { return debug_output; }
 };
 
 }	

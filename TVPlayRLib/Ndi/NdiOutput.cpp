@@ -89,7 +89,10 @@ namespace TVPlayR {
 					buffer_frame_.reset();
 				}
 				else
+				{
 					audio = FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, audio_sample_format_);
+					DebugPrintLine("Frame late");
+				}
 				video_frames_pushed_++;
 				audio_samples_pushed_ += audio->nb_samples;
 				if (frame_requested_callback_)
@@ -105,11 +108,6 @@ namespace TVPlayR {
 			int AudioSamplesRequired() 
 			{
 				int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_pushed_;
-#ifdef DEBUG
-				std::stringstream msg;
-				msg << "Requested " << samples_required << " samples";
-				DebugPrintLine(msg.str());
-#endif
 				return static_cast<int>(samples_required);
 			}
 

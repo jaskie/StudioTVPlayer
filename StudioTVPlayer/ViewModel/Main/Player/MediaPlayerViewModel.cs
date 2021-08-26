@@ -95,8 +95,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 if (!Set(ref _sliderPosition, value))
                     return;
-                //if (!_isSliderDrag)
-                    Seek(TimeSpan.FromMilliseconds(value));
+                Seek(TimeSpan.FromMilliseconds(value));
             }
         }
 
@@ -217,7 +216,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             if (!_mediaPlayer.Seek(time))
                 return;
-            SliderPosition = time.TotalMilliseconds;
+            _sliderPosition = time.TotalMilliseconds;
+            NotifyPropertyChanged(nameof(SliderPosition));
         }
 
         private void LoadSelectedMedia(object obj)

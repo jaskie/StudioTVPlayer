@@ -195,11 +195,8 @@ void AudioMuxer::Initialize()
 			THROW_EXCEPTION("avfilter_graph_parse_ptr failed")
 		if (avfilter_graph_config(graph_.get(), NULL) < 0)
 			THROW_EXCEPTION("avfilter_graph_config failed")
-#ifdef DEBUG
-
-		dump_filter(filter_str_, graph_.get());
-
-#endif // DEBUG
+		if (IsDebugOutput())
+			dump_filter(filter_str_, graph_.get());
 	}
 	catch (const std::exception& e)
 	{

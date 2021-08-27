@@ -91,18 +91,19 @@
     <ClInclude Include="Core\AudioChannelMapEntry.h" />
     <ClInclude Include="Core\MediaType.h" />
     <ClInclude Include="Core\StreamInfo.h" />
+    <ClInclude Include="Decklink\DecklinkInfo.h" />
     <ClInclude Include="Decklink\DecklinkTimecode.h" />
     <ClInclude Include="FFMpeg\AudioFifo.h" />
     <ClInclude Include="Core\HwAccel.h" />
     <ClInclude Include="Core\InputSource.h" />
     <ClInclude Include="Core\OutputDevice.h" />
     <ClInclude Include="Decklink\ApiVersion.h" />
-    <ClInclude Include="Decklink\Decklink.h" />
+    <ClInclude Include="Decklink\DecklinkOutput.h" />
     <ClInclude Include="Decklink\DeckLinkAPI_h.h" />
     <ClInclude Include="Decklink\DecklinkVideoFrame.h" />
     <ClInclude Include="Core\Channel.h" />
     <ClInclude Include="Common\ComInitializer.h" />
-    <ClInclude Include="Decklink\Iterator.h" />
+    <ClInclude Include="Decklink\DecklinkIterator.h" />
     <ClInclude Include="Common\Exceptions.h" />
     <ClInclude Include="FFMpeg\AudioMuxer.h" />
     <ClInclude Include="FFMpeg\AVSync.h" />
@@ -123,11 +124,15 @@
     <ClInclude Include="Core\VideoFormat.h" />
     <ClInclude Include="Core\PixelFormat.h" />
     <ClInclude Include="FFMpeg\ThumbnailFilter.h" />
-    <ClInclude Include="Decklink\Utils.h" />
+    <ClInclude Include="Decklink\DecklinkUtils.h" />
     <ClInclude Include="Preview\Preview.h" />
     <ClInclude Include="Ndi\NdiUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Decklink\DecklinkInfo.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\pch.h</PrecompiledHeaderFile>
@@ -136,7 +141,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Decklink\Decklink.cpp">
+    <ClCompile Include="Decklink\DecklinkOutput.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -152,7 +157,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Decklink\Iterator.cpp">
+    <ClCompile Include="Decklink\DecklinkIterator.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

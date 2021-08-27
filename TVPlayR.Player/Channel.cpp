@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Channel.h"
 #include "Core/Channel.h"
-#include "Decklink/Iterator.h"
 #include "OutputBase.h"
 #include "DecklinkOutput.h"
 #include "PreviewOutput.h"

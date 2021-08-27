@@ -31,7 +31,7 @@
     <ClInclude Include="Common\ComInitializer.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\Iterator.h">
+    <ClInclude Include="Decklink\DecklinkIterator.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Common\rational.h">
@@ -62,7 +62,7 @@
     <ClInclude Include="Decklink\ApiVersion.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\Decklink.h">
+    <ClInclude Include="Decklink\DecklinkOutput.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Core\OutputDevice.h">
@@ -122,7 +122,7 @@
     <ClInclude Include="Common\Semaphore.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\Utils.h">
+    <ClInclude Include="Decklink\DecklinkUtils.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Decklink\DecklinkVideoFrame.h">
@@ -152,9 +152,12 @@
     <ClInclude Include="Ndi\NdiUtils.h">
       <Filter>Ndi</Filter>
     </ClInclude>
+    <ClInclude Include="Decklink\DecklinkInfo.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Decklink\Iterator.cpp">
+    <ClCompile Include="Decklink\DecklinkIterator.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="Core\VideoFormat.cpp">
@@ -176,7 +179,7 @@
       <Filter>FFMpeg</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Decklink\Decklink.cpp">
+    <ClCompile Include="Decklink\DecklinkOutput.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DeckLinkAPI_i.c">
@@ -223,6 +226,9 @@
     </ClCompile>
     <ClCompile Include="Ndi\NdiUtils.cpp">
       <Filter>Ndi</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\DecklinkInfo.cpp">
+      <Filter>Decklink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

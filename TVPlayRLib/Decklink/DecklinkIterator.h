@@ -5,17 +5,18 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-class Decklink;
+class DecklinkOutput;
+class DecklinkInfo;
 
-class Iterator: Common::NonCopyable
+class DecklinkIterator: Common::NonCopyable
 {
 public:
-	Iterator();
-	~Iterator(); 
-	std::shared_ptr<Decklink> operator [] (size_t pos);
+	DecklinkIterator();
+	~DecklinkIterator(); 
+	std::shared_ptr<DecklinkInfo> operator [] (size_t pos);
+	std::shared_ptr<DecklinkOutput> CreateOutput(int index);
 	size_t Size() const;
 	std::shared_ptr<ApiVersion> GetVersion();
-	void Refresh();
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

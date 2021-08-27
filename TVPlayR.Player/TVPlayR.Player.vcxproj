@@ -89,6 +89,7 @@
   <ItemGroup>
     <ClInclude Include="AudioVolumeEventArgs.h" />
     <ClInclude Include="ClrStringHelper.h" />
+    <ClInclude Include="DecklinkIterator.h" />
     <ClInclude Include="DecklinkOutput.h" />
     <ClInclude Include="FieldOrder.h" />
     <ClInclude Include="HardwareAcceleration.h" />
@@ -101,6 +102,8 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Channel.h" />
     <ClInclude Include="TimeEventArgs.h" />
+    <ClCompile Include="DecklinkInfo.h" />
+    <ClCompile Include="DecklinkIterator.cpp" />
     <ClCompile Include="VersionInfo.cpp">
       <FileType>CppHeader</FileType>
     </ClCompile>

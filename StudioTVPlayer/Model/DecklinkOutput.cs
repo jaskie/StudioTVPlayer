@@ -10,7 +10,8 @@ namespace StudioTVPlayer.Model
 
         public override TVPlayR.OutputBase GetDevice()
         {
-            return TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
+            var info = TVPlayR.DecklinkIterator.EnumerateDevices().FirstOrDefault(i => i.Index == DeviceIndex);
+            return info is null ? null :TVPlayR.DecklinkIterator.CreateOutput(info);
         }
 
         public override void Initialize() { }

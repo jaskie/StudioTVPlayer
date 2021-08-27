@@ -50,8 +50,6 @@ namespace StudioTVPlayer.Providers
                 player.Dispose();
             foreach (var channel in Configuration.Channels)
                 channel.Dispose();
-            foreach (var decklink in TVPlayR.DecklinkOutput.EnumerateDevices())
-                decklink.Dispose();
         }
 
         public void UpdateChannels(List<Model.Channel> channels)

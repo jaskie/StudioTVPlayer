@@ -5,13 +5,11 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-class Decklink : public Core::OutputDevice
+class DecklinkOutput : public Core::OutputDevice
 {
 public:
-	explicit Decklink(IDeckLink* decklink, int index);
-	~Decklink();
-	std::wstring GetDisplayName();
-	std::wstring GetModelName();
+	explicit DecklinkOutput(IDeckLink* decklink, int index);
+	~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;
 	//OutputDevice
@@ -22,7 +20,6 @@ public:
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;
-
 };
 
 }}

@@ -1,21 +1,20 @@
 #include "../pch.h"
-#include "Decklink.h"
+#include "DecklinkOutput.h"
 #include "../Common/ComInitializer.h"
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/PixelFormat.h"
 #include "../Core/Channel.h"
 #include "../Common/Executor.h"
-#include "Utils.h"
+#include "DecklinkUtils.h"
 #include "DecklinkVideoFrame.h"
 #include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace Decklink {
 		
-		struct Decklink::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget<false>
+		struct DecklinkOutput::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget<false>
 		{
-			const CComPtr<IDeckLink> decklink_;
 			const CComQIPtr<IDeckLinkOutput> output_;
 			const CComQIPtr<IDeckLinkKeyer> keyer_;
 			const CComQIPtr<IDeckLinkAttributes> attributes_;
@@ -34,8 +33,7 @@ namespace TVPlayR {
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, int index)
-				: decklink_(decklink)
-				, output_(decklink)
+				: output_(decklink)
 				, attributes_(decklink)
 				, keyer_(decklink)
 				, format_(Core::VideoFormatType::invalid)
@@ -136,22 +134,6 @@ namespace TVPlayR {
 				return static_cast<int>(samples_required);
 			}
 
-			std::wstring GetDisplayName()
-			{
-				BSTR pModelName;
-				if (FAILED(decklink_->GetDisplayName(&pModelName)))
-					return L"";
-				return std::wstring(pModelName);
-			}
-
-			std::wstring GetModelName()
-			{
-				BSTR pModelName;
-				if (FAILED(decklink_->GetModelName(&pModelName)))
-					return L"";
-				return std::wstring(pModelName);
-			}
-
 			bool SetBufferSize(int size) 
 			{
 				if (is_running_)
@@ -190,7 +172,7 @@ namespace TVPlayR {
 			void Push(FFmpeg::AVSync& sync)
 			{
 				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				DebugPrintIf(buffer_frame_, "Decklink: Frame dropped when pushed\n");
+				DebugPrintIf(buffer_frame_, "DecklinkOutput: Frame dropped when pushed\n");
 				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
 			}
 
@@ -212,7 +194,7 @@ namespace TVPlayR {
 						buffer_frame_.reset();
 					}
 				}
-				DebugPrintIf(!sync, "Decklink: frame not received");
+				DebugPrintIf(!sync, "DecklinkOutput: frame not received");
 
 				if (!sync)
 					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
@@ -252,20 +234,18 @@ namespace TVPlayR {
 
 		};
 
-		Decklink::Decklink(IDeckLink * decklink, int index)
+		DecklinkOutput::DecklinkOutput(IDeckLink * decklink, int index)
 			: impl_(std::make_unique<implementation>(decklink, index))
 		{}
 
-		Decklink::~Decklink() { }
+		DecklinkOutput::~DecklinkOutput() { }
 
-		std::wstring Decklink::GetDisplayName() { return impl_->GetDisplayName(); }
-		std::wstring Decklink::GetModelName() { return impl_->GetModelName(); }
-		bool Decklink::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
-		int Decklink::GetBufferSize() const { return impl_->buffer_size_; }
-		bool Decklink::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
-		void Decklink::ReleaseChannel()	{ impl_->ReleaseChannel(); }
-		void Decklink::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
-		void Decklink::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }
+		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
+		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
+		bool DecklinkOutput::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
+		void DecklinkOutput::ReleaseChannel()	{ impl_->ReleaseChannel(); }
+		void DecklinkOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
+		void DecklinkOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }
 	}
 }
 

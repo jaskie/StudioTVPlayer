@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Ndi/NdiUtils.h"
-#include "Decklink/Iterator.h"
+#include "Decklink/DecklinkIterator.h"
 #include "Decklink/ApiVersion.h"
 
 using namespace System;
@@ -63,7 +63,7 @@ namespace TVPlayR {
 		{
 			String^ get()
 			{
-				TVPlayR::Decklink::Iterator iterator;
+				TVPlayR::Decklink::DecklinkIterator iterator;
 				auto version = iterator.GetVersion();
 				return version ? String::Format("{0}.{1}.{2}", version->Major, version->Minor, version->Point) : "not found";
 			}

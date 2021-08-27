@@ -2,8 +2,9 @@
 #include <iostream>
 
 #include "Core/Channel.h"
-#include "Decklink/Iterator.h"
-#include "Decklink/Decklink.h"
+#include "Decklink/DecklinkIterator.h"
+#include "Decklink/DecklinkOutput.h"
+#include "Decklink/DecklinkInfo.h"
 #include "Ndi/NdiOutput.h"
 #include "FFMpeg/FFMpegInputSource.h"
 #include "Core/PixelFormat.h"
@@ -36,12 +37,11 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
-		Decklink::Iterator iterator;
-		iterator.Refresh();
-		size_t device_index = 1;
+		Decklink::DecklinkIterator iterator;
+		int device_index = 1;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto decklink = iterator[device_index];
+		auto decklink = iterator.CreateOutput(device_index);
 		channel.SetFrameClock(decklink);
 		channel.AddOutput(decklink);
 		

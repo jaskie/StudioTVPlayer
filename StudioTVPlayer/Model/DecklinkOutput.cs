@@ -5,18 +5,27 @@ namespace StudioTVPlayer.Model
 {
     public class DecklinkOutput: OutputBase
     {
+        private TVPlayR.DecklinkOutput _device;
+
         [XmlAttribute]
         public int DeviceIndex { get; set; }
 
-        public override TVPlayR.OutputBase GetDevice()
+        public override void Dispose()
         {
-            var info = TVPlayR.DecklinkIterator.EnumerateDevices().FirstOrDefault(i => i.Index == DeviceIndex);
-            return info is null ? null :TVPlayR.DecklinkIterator.CreateOutput(info);
+            if (_device is null)
+                return;
+            _device.Dispose();
+            _device = null;
         }
 
-        public override void Initialize() { }
+        public override TVPlayR.OutputBase GetDevice() => _device;
 
-        public override void Uninitialize() { }
+        public override void Initialize()
+        {
+            var info = TVPlayR.DecklinkIterator.EnumerateDevices().FirstOrDefault(i => i.Index == DeviceIndex);
+            _device = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info);
+        }
+
 
     }
 }

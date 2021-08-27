@@ -3,7 +3,7 @@ using namespace System;
 
 namespace TVPlayR {
 
-	public ref class TimeEventArgs : EventArgs {
+	public ref class TimeEventArgs sealed : EventArgs {
 	private:
 		initonly TimeSpan time_;
 	public:

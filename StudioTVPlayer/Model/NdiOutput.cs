@@ -12,11 +12,6 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public string GroupNames { get; set; }
 
-        public override void Uninitialize()
-        {
-            _outputDevice?.Dispose();
-            _outputDevice = null;
-        }
 
         public override TVPlayR.OutputBase GetDevice()
         {
@@ -27,6 +22,14 @@ namespace StudioTVPlayer.Model
         {
             _outputDevice?.Dispose();
             _outputDevice = new TVPlayR.NdiOutput(SourceName, GroupNames);
+        }
+
+        public override void Dispose()
+        {
+            if (_outputDevice is null)
+                return;
+            _outputDevice.Dispose();
+            _outputDevice = null;
         }
     }
 }

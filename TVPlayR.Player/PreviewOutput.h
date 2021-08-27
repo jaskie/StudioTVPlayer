@@ -7,7 +7,7 @@ using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Media::Imaging;
 namespace TVPlayR {
 	
-	public ref class PreviewOutput : public OutputBase
+	public ref class PreviewOutput sealed : public OutputBase
 	{
 	private:
 		const std::shared_ptr<Preview::Preview>* _preview;

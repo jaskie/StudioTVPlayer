@@ -3,7 +3,7 @@ using namespace System;
 
 namespace TVPlayR {
 
-	public ref class AudioVolumeEventArgs: EventArgs{
+	public ref class AudioVolumeEventArgs sealed : EventArgs{
 	private:
 		initonly array<double>^ audio_volume_;
 	public:

@@ -104,7 +104,7 @@
     <ClInclude Include="TimeEventArgs.h" />
     <ClCompile Include="DecklinkInfo.h" />
     <ClCompile Include="DecklinkIterator.cpp" />
-    <ClCompile Include="VersionInfo.cpp">
+    <ClCompile Include="VersionInfo.h">
       <FileType>CppHeader</FileType>
     </ClCompile>
     <ClInclude Include="VideoFormat.h" />

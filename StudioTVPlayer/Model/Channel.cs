@@ -68,7 +68,7 @@ namespace StudioTVPlayer.Model
             set
             {
                 foreach (var output in _outputs)
-                    output.Uninitialize();
+                    output.Dispose();
                 _outputs.Clear();
                 if (value is null)
                     return;

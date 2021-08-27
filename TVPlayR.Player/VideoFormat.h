@@ -14,7 +14,7 @@ namespace TVPlayR {
 	};
 
 	[Diagnostics::DebuggerDisplayAttribute(L"{Name}")]
-	public ref class VideoFormat
+	public ref class VideoFormat sealed
 	{
 	private:
 		Core::VideoFormat* const _native_fomat;

@@ -13,7 +13,7 @@ namespace TVPlayR {
 	ref class InputFile;
 	ref class OutputBase;
 
-	public ref class Channel
+	public ref class Channel sealed
 	{
 	private:
 		Core::Channel* const _channel;

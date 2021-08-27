@@ -89,7 +89,7 @@
     <ClCompile Include="PreviewOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VersionInfo.cpp">
+    <ClCompile Include="VersionInfo.h">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="DecklinkIterator.cpp">

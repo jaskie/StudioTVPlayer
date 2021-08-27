@@ -7,7 +7,7 @@ using namespace System;
 
 namespace TVPlayR {
 
-	public ref class NdiOutput : public OutputBase
+	public ref class NdiOutput sealed : public OutputBase
 	{
 	private:
 		const std::shared_ptr<Ndi::NdiOutput>* _ndi;

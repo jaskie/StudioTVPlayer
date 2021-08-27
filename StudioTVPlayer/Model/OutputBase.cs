@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class OutputBase
+    public abstract class OutputBase: IDisposable
     {
         [XmlAttribute]
         public bool IsFrameClock { get; set; }
@@ -12,6 +12,6 @@ namespace StudioTVPlayer.Model
 
         public abstract TVPlayR.OutputBase GetDevice();
 
-        public abstract void Uninitialize();
+        public abstract void Dispose();
     }
 }

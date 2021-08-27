@@ -67,6 +67,8 @@ namespace StudioTVPlayer.Model
             get => _outputs.ToArray();
             set
             {
+                foreach (var output in _outputs)
+                    output.Uninitialize();
                 _outputs.Clear();
                 if (value is null)
                     return;
@@ -103,18 +105,8 @@ namespace StudioTVPlayer.Model
             _channelR = new TVPlayR.Channel(_name, _videoFormat, PixelFormat, AudioChannelCount);
             foreach (var output in Outputs)
             {
-                TVPlayR.OutputBase outputDevice = null;
-                switch (output)
-                {
-                    case DecklinkOutput decklink:
-                        outputDevice = TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(decklink.DeviceIndex);
-                        break;
-                    case NdiOutput ndi:
-                        outputDevice = new TVPlayR.NdiOutput(ndi.SourceName, ndi.GroupNames);
-                        break;
-                }
-                if (!(outputDevice is null))
-                    _channelR.AddOutput(outputDevice, output.IsFrameClock);
+                output.Initialize();
+                _channelR.AddOutput(output.GetDevice(), output.IsFrameClock);
             }
             _channelR.AudioVolume += ChannelR_AudioVolume;
         }

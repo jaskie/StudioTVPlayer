@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
@@ -11,5 +7,15 @@ namespace StudioTVPlayer.Model
     {
         [XmlAttribute]
         public int DeviceIndex { get; set; }
+
+        public override TVPlayR.OutputBase GetDevice()
+        {
+            return TVPlayR.DecklinkOutput.EnumerateDevices().ElementAtOrDefault(DeviceIndex);
+        }
+
+        public override void Initialize() { }
+
+        public override void Uninitialize() { }
+
     }
 }

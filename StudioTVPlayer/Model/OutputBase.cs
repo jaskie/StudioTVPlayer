@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
@@ -6,5 +7,11 @@ namespace StudioTVPlayer.Model
     {
         [XmlAttribute]
         public bool IsFrameClock { get; set; }
+
+        public abstract void Initialize();
+
+        public abstract TVPlayR.OutputBase GetDevice();
+
+        public abstract void Uninitialize();
     }
 }

@@ -4,10 +4,10 @@
 
 namespace TVPlayR {
 
-	NdiOutput::NdiOutput(String^ sourceName, String^ groupName)
-		: _ndi(new std::shared_ptr<Ndi::NdiOutput>(new Ndi::NdiOutput(ClrStringToStdString(sourceName), ClrStringToStdString(groupName))))
+	NdiOutput::NdiOutput(String^ sourceName, String^ groupNames)
+		: _ndi(new std::shared_ptr<Ndi::NdiOutput>(new Ndi::NdiOutput(ClrStringToStdString(sourceName), ClrStringToStdString(groupNames))))
 		, _sourceName(sourceName)
-		, _groupName(groupName)
+		, _groupNames(groupNames)
 	{
 	}
 

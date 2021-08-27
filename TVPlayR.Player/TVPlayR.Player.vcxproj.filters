@@ -63,6 +63,9 @@
     <ClInclude Include="DecklinkIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StreamOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -96,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DecklinkInfo.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

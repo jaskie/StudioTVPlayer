@@ -116,6 +116,8 @@
     <ClInclude Include="FFMpeg\FFMpegInputSource.h" />
     <ClInclude Include="Common\NonCopyable.h" />
     <ClInclude Include="FFMpeg\ChannelScaler.h" />
+    <ClInclude Include="FFMpeg\FFStreamOutput.h" />
+    <ClInclude Include="FFMpeg\FFStreamOutputParams.h" />
     <ClInclude Include="Ndi\NdiOutput.h" />
     <ClInclude Include="Preview\PreviewScaler.h" />
     <ClInclude Include="pch.h" />
@@ -199,6 +201,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFMpeg\FFMpegUtils.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="FFMpeg\FFStreamOutput.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

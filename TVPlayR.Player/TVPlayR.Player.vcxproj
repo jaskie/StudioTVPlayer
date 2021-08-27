@@ -101,9 +101,11 @@
     <ClInclude Include="Rational.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Channel.h" />
+    <ClInclude Include="StreamOutput.h" />
     <ClInclude Include="TimeEventArgs.h" />
     <ClCompile Include="DecklinkInfo.h" />
     <ClCompile Include="DecklinkIterator.cpp" />
+    <ClCompile Include="StreamOutput.cpp" />
     <ClCompile Include="VersionInfo.h">
       <FileType>CppHeader</FileType>
     </ClCompile>

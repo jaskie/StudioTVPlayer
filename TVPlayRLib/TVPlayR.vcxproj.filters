@@ -155,7 +155,15 @@
     <ClInclude Include="Decklink\DecklinkInfo.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\DecklinkInput.h" />
+    <ClInclude Include="FFMpeg\FFStreamOutput.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFMpeg\FFStreamOutputParams.h">
+      <Filter>FFMpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\DecklinkInput.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -231,7 +239,12 @@
     <ClCompile Include="Decklink\DecklinkInfo.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
-    <ClCompile Include="Decklink\DecklinkInput.cpp" />
+    <ClCompile Include="FFMpeg\FFStreamOutput.cpp">
+      <Filter>FFMpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\DecklinkInput.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

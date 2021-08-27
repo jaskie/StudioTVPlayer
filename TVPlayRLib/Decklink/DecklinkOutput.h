@@ -11,7 +11,7 @@ public:
 	~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;
-	//OutputDevice
+	// Inherited via OutputDevice
 	virtual bool AssignToChannel(Core::Channel& channel) override;
 	virtual void ReleaseChannel() override;
 	virtual void Push(FFmpeg::AVSync& sync) override;

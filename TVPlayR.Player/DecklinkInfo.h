@@ -39,6 +39,7 @@ namespace TVPlayR {
 		DecklinkInfo(std::shared_ptr<Decklink::DecklinkInfo>& info)
 			: native_info_(new std::shared_ptr<Decklink::DecklinkInfo>(info))
 		{ }
+		const std::shared_ptr<Decklink::DecklinkInfo> GetNativeInfo() { return *native_info_; }
 
 	private:
 		std::shared_ptr<Decklink::DecklinkInfo>* native_info_;

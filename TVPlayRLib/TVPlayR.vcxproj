@@ -91,6 +91,7 @@
     <ClInclude Include="Core\AudioChannelMapEntry.h" />
     <ClInclude Include="Core\MediaType.h" />
     <ClInclude Include="Core\StreamInfo.h" />
+    <ClInclude Include="Decklink\DecklinkInput.h" />
     <ClInclude Include="Decklink\DecklinkInfo.h" />
     <ClInclude Include="Decklink\DecklinkTimecode.h" />
     <ClInclude Include="FFMpeg\AudioFifo.h" />
@@ -129,6 +130,10 @@
     <ClInclude Include="Ndi\NdiUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Decklink\DecklinkInput.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="Decklink\DecklinkInfo.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>

@@ -16,7 +16,7 @@ namespace TVPlayR {
 
 	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ info)
 	{
-		auto decklink = _iterator->CreateOutput(info->Index);
+		auto decklink = _iterator->CreateOutput(*info->GetNativeInfo());
 		return gcnew DecklinkOutput(decklink);
 	}
 

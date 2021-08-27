@@ -28,7 +28,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 	std::unique_ptr<Decoder> video_decoder_;
 	std::atomic_bool is_loop_ = false;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
-	Core::Channel* channel_ = nullptr;
+	const Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
@@ -54,7 +54,8 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 
 	~implementation()
 	{
-		RemoveFromChannel();
+		if (channel_)
+			RemoveFromChannel(*channel_);
 	}
 
 #pragma region Input thread methods
@@ -220,12 +221,12 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 		return sync;
 	}
 
-	bool IsAddedToChannel(Core::Channel& channel)
+	bool IsAddedToChannel(const Core::Channel& channel)
 	{
 		return &channel == channel_;
 	}
 
-	void AddToChannel(Core::Channel& channel)
+	void AddToChannel(const Core::Channel& channel)
 	{
 		if (&channel == channel_)
 		{
@@ -238,9 +239,9 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 		producer_thread_ = std::make_unique<std::thread>(&implementation::ProducerThreadProc, this);
 	}
 
-	void RemoveFromChannel()
+	void RemoveFromChannel(const Core::Channel& channel)
 	{
-		if (!channel_)
+		if (channel_ != &channel)
 			return;
 		channel_ = nullptr;
 		producer_semaphore_.notify();
@@ -498,9 +499,9 @@ std::shared_ptr<AVFrame> FFmpegInputSource::GetFrameAt(int64_t time)	{ return im
 AVSync FFmpegInputSource::PullSync(int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInputSource::Seek(const int64_t time)        { return impl_->Seek(time); }
 bool FFmpegInputSource::IsEof() const					{ return impl_->is_eof_; }
-bool FFmpegInputSource::IsAddedToChannel(Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
-void FFmpegInputSource::AddToChannel(Core::Channel& channel) { impl_->AddToChannel(channel); }
-void FFmpegInputSource::RemoveFromChannel()				{ impl_->RemoveFromChannel();}
+bool FFmpegInputSource::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
+void FFmpegInputSource::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
+void FFmpegInputSource::RemoveFromChannel(const Core::Channel& channel)				{ impl_->RemoveFromChannel(channel);}
 void FFmpegInputSource::Play()							{ impl_->Play(); }
 void FFmpegInputSource::Pause()							{ impl_->Pause(); }
 bool FFmpegInputSource::IsPlaying()	const				{ return impl_->is_playing_; }

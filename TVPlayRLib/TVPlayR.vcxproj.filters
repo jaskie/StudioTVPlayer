@@ -155,6 +155,7 @@
     <ClInclude Include="Decklink\DecklinkInfo.h">
       <Filter>Decklink</Filter>
     </ClInclude>
+    <ClInclude Include="Decklink\DecklinkInput.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -230,6 +231,7 @@
     <ClCompile Include="Decklink\DecklinkInfo.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
+    <ClCompile Include="Decklink\DecklinkInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

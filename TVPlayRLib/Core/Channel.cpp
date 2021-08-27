@@ -11,6 +11,7 @@ namespace TVPlayR {
 
 		struct Channel::implementation : Common::DebugTarget<false>
 		{
+			const Channel& channel_;
 			const std::string name_;
 			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
 			std::shared_ptr<OutputDevice> frame_clock_;
@@ -24,8 +25,9 @@ namespace TVPlayR {
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
 		
-			implementation(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
-				: name_(name)
+			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+				: channel_(channel)
+				, name_(name)
 				, format_(format)
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
@@ -111,14 +113,14 @@ namespace TVPlayR {
 				{
 					if (!playing_source_)
 						return;
-					playing_source_->RemoveFromChannel();
+					playing_source_->RemoveFromChannel(channel_);
 					playing_source_ = nullptr;
 				});
 			}
 		};
 
 		Channel::Channel(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
-			: impl_(std::make_unique<implementation>(name, format, pixel_format, audio_channels_count)) {}
+			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count)) {}
 		
 		Channel::~Channel() {}
 

@@ -1,7 +1,6 @@
 #include "../pch.h"
 #include "DecklinkOutput.h"
 #include "../Common/ComInitializer.h"
-#include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/PixelFormat.h"
 #include "../Core/Channel.h"

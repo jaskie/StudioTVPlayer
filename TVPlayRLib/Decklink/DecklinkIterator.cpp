@@ -1,10 +1,11 @@
-#include "..\..\TVPlayR.Player\DecklinkIterator.h"
 #include "../pch.h"
 #include "DecklinkOutput.h"
 #include "DecklinkInfo.h"
 #include "DecklinkIterator.h"
+#include "DecklinkInput.h"
 #include "../Common/Exceptions.h"
 #include "../Common/ComInitializer.h"
+#include "../Core/VideoFormat.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -58,12 +59,14 @@ namespace TVPlayR {
 				return nullptr;
 			}
 
-			std::shared_ptr<DecklinkOutput> CreateOutput(int index)
+			std::shared_ptr<DecklinkOutput> CreateOutput(const DecklinkInfo& info)
 			{
-				if (index >= decklink_list_.size())
-					return nullptr;
-				auto& info = decklink_list_.at(index);
-				return std::make_shared<DecklinkOutput>(info->GetDecklink(), info->Index());
+				return std::make_shared<DecklinkOutput>(info.GetDecklink(), info.Index());
+			}
+
+			std::shared_ptr<DecklinkInput> CreateInput(const DecklinkInfo& info, Core::VideoFormatType format)
+			{
+				return std::make_shared<DecklinkInput>(info.GetDecklink(), format);
 			}
 
 		};
@@ -73,7 +76,8 @@ namespace TVPlayR {
 		{ }
 		DecklinkIterator::~DecklinkIterator() {}
 		std::shared_ptr<DecklinkInfo> DecklinkIterator::operator[](size_t pos) { return impl_->operator[](pos); }
-		std::shared_ptr<DecklinkOutput> DecklinkIterator::CreateOutput(int index) { return impl_->CreateOutput(index); }
+		std::shared_ptr<DecklinkOutput> DecklinkIterator::CreateOutput(const DecklinkInfo& info) { return impl_->CreateOutput(info); }
+		std::shared_ptr<DecklinkInput> DecklinkIterator::CreateInput(const DecklinkInfo& info, Core::VideoFormatType format) { return impl_->CreateInput(info, format); }
 		size_t DecklinkIterator::Size() const { return impl_->Size(); }
 		std::shared_ptr<ApiVersion> DecklinkIterator::GetVersion() { return impl_->GetVersion(); }
 	}

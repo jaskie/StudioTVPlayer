@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../Core/OutputDevice.h"
 
 namespace TVPlayR {

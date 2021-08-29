@@ -6,7 +6,7 @@
 namespace TVPlayR
 {
 
-    StreamOutput::StreamOutput(String^ address, String^ video_codec, String^ audio_codec, int video_bitrate, int audio_bitrate, String^ output_filter, String^ output_metadata, String^ audio_metadata, String^ video_metadata, String^ options, int video_stream_id, int audio_stream_id)
+    StreamOutput::StreamOutput(String^ address, String^ video_codec, String^ audio_codec, int video_bitrate, int audio_bitrate, String^ output_filter, String^ output_metadata, String^ video_metadata, String^ audio_metadata, String^ options, int video_stream_id, int audio_stream_id)
     {
         const FFmpeg::FFStreamOutputParams params {
             ClrStringToStdString(address), 
@@ -16,8 +16,8 @@ namespace TVPlayR
             audio_bitrate,
             ClrStringToStdString(output_filter),
             ClrStringToStdString(output_metadata),
-            ClrStringToStdString(audio_metadata),
             ClrStringToStdString(video_metadata),
+            ClrStringToStdString(audio_metadata),
             ClrStringToStdString(options),
             video_stream_id,
             audio_stream_id

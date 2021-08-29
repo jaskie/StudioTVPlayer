@@ -29,6 +29,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         return new DecklinkOutputViewModel(decklink);
                     case Model.NdiOutput ndi:
                         return new NdiOutputViewModel(ndi);
+                    case Model.StreamOutput stream:
+                        return new StreamOutputViewModel(stream);
                     default:
                         throw new ApplicationException("Invalid type provided");
                 }
@@ -46,6 +48,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _selectedVideoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
             _selectedPixelFormat = channel.PixelFormat;
             _livePreview = channel.LivePreview;
+            AddStreamOutputCommand = new UiCommand(AddStreamOutput);
             AddDecklinkOutputCommand = new UiCommand(AddDecklinkOutput);
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
         }
@@ -85,8 +88,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
 
+        public ICommand AddStreamOutputCommand { get; }
         public ICommand AddDecklinkOutputCommand { get; }
-
         public ICommand AddNdiOutputCommand { get; }
 
         public string Error => string.Empty;
@@ -147,6 +150,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void AddDecklinkOutput(object _)
         {
             var vm = new DecklinkOutputViewModel(new Model.DecklinkOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock) });
+            AddOutput(vm);
+        }
+
+        private void AddStreamOutput(object _)
+        {
+            var vm = new StreamOutputViewModel(new Model.StreamOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock) });
             AddOutput(vm);
         }
 

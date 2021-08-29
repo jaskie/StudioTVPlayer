@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.StreamOutputView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:StreamOutputViewModel}"
+             d:DesignHeight="200" d:DesignWidth="400">
+    <UserControl.Resources>
+        <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
+            <Setter Property="Margin" Value="5 0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
+    </UserControl.Resources>
+    <Grid Margin="0 5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="14">FFmpeg udp/rtmp stream output</TextBlock>
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">Destination address</Label>
+        <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="RTMP server with parameters, or UDP multicast or unicast address"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center">Video</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center">Audio</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center">Output</TextBlock>
+        <Label Grid.Row="4" Grid.Column="0">Codec</Label>
+        <ComboBox Grid.Row="5" Grid.Column="0" ItemsSource="{Binding VideoCodecs}" SelectedItem="{Binding VideoCodec, ValidatesOnDataErrors=True}"/>
+        <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AudioCodecs}" SelectedItem="{Binding AudioCodec, ValidatesOnDataErrors=True}"/>
+        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding GroupNames, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group names (default - leave empty)"/>
+        <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="99" VerticalAlignment="Center" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
+            <mah:FontIcon Glyph="&#xE74D;"/>
+        </Button>
+    </Grid>
+</UserControl>

@@ -17,8 +17,8 @@ namespace TVPlayR {
 			int audio_bitrate,
 			String^ output_filter,
 			String^ output_metadata,
-			String^ audio_metadata,
 			String^ video_metadata,
+			String^ audio_metadata,
 			String^ options,
 			int video_stream_id,
 			int audio_stream_id

@@ -28,12 +28,12 @@ namespace TVPlayR
     {
         this->!StreamOutput();
     }
+
     StreamOutput::!StreamOutput()
     {
         if (!_native_output)
             return;
         delete _native_output;
         _native_output = nullptr;
-
     }
 }

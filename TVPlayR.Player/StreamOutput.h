@@ -2,6 +2,8 @@
 #include "OutputBase.h"
 #include "FFMpeg/FFStreamOutput.h"
 
+using namespace System;
+
 namespace TVPlayR {
 
 	public ref class StreamOutput sealed : public OutputBase
@@ -23,8 +25,12 @@ namespace TVPlayR {
 			);
 		~StreamOutput();
 		!StreamOutput();
+		property static array<String^>^ VideoCodecs { array<String^>^ get() { return _videoCodecs; }};
+		property static array<String^>^ AudioCodecs { array<String^>^ get() { return _audioCodecs; }};
 	private:
 		std::shared_ptr<FFmpeg::FFStreamOutput>* _native_output;
+		static array<String^>^ _videoCodecs = gcnew array<String^> { "mpeg2video", "libx264", "h264_nvenc",	"hevc_nvenc"};
+		static array<String^>^ _audioCodecs = gcnew array<String^> { "aac", "ac3", "libmp3lame", "mp2" };
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return *_native_output; }
 	};

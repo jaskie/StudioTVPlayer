@@ -118,6 +118,7 @@
     <Compile Include="Model\RundownItem.cs" />
     <Compile Include="Model\Args\RundownItemEventArgs.cs" />
     <Compile Include="Model\MediaVerifier.cs" />
+    <Compile Include="Model\StreamOutput.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\Media.cs" />
     <Compile Include="Providers\GlobalApplicationData.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="ViewModel\Configuration\ICheckErrorInfo.cs" />
     <Compile Include="ViewModel\Configuration\NdiOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\OutputViewModelBase.cs" />
+    <Compile Include="ViewModel\Configuration\StreamOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />

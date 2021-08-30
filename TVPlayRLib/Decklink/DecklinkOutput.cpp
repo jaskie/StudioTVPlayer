@@ -145,7 +145,7 @@ namespace TVPlayR {
 			{
 				if (channel.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
 					return false;
-				if (!OpenOutput(GetDecklinkVideoFormat(channel.Format().type()), BMDPixelFormatFromVideoFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
+				if (!OpenOutput(GetDecklinkDisplayMode(channel.Format().type()), BMDPixelFormatFromVideoFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
 					return false;
 				format_ = channel.Format();
 				audio_channels_count_ = channel.AudioChannelsCount();

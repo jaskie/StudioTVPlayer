@@ -59,7 +59,7 @@ int main()
 		//input->Seek(seek);
 		//input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		//input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		input->Play();
+		//input->Play();
 		channel.Load(input);
 		while (true)
 		{

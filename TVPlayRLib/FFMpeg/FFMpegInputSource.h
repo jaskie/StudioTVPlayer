@@ -7,6 +7,7 @@ namespace TVPlayR {
 		class Channel;
 		class AudioChannelMapEntry;
 		class StreamInfo;
+		enum class FieldOrder;
 	}
 		namespace FFmpeg {
 
@@ -16,7 +17,7 @@ public:
 	FFmpegInputSource(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount);
 	~FFmpegInputSource();
 	virtual std::shared_ptr<AVFrame> GetFrameAt(int64_t time);
-	virtual FFmpeg::AVSync PullSync(int audio_samples_count);
+	virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count);
 	virtual bool Seek(const int64_t time);
 	virtual bool IsEof() const;
 	virtual bool IsAddedToChannel(const Core::Channel& channel) override;
@@ -31,9 +32,9 @@ public:
 	int64_t GetAudioDuration() const override;
 	int64_t GetVideoStart() const override;
 	int64_t GetVideoDuration() const override;
-	virtual int GetWidth() override;
-	virtual int GetHeight() override;
-	virtual AVFieldOrder GetFieldOrder() override;
+	virtual int GetWidth() const override;
+	virtual int GetHeight() const override;
+	virtual Core::FieldOrder GetFieldOrder() override;
 	virtual int GetAudioChannelCount() override;
 	virtual bool HaveAlphaChannel() const override;
 	virtual int StreamCount() const;

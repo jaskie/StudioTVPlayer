@@ -84,54 +84,65 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Decklink\DecklinkSynchroProvider.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BlockingCollection.h" />
     <ClInclude Include="Common\Debug.h" />
     <ClInclude Include="Common\Executor.h" />
     <ClInclude Include="Common\Semaphore.h" />
+    <ClInclude Include="Common\ComInitializer.h" />
+    <ClInclude Include="Common\NonCopyable.h" />
+    <ClInclude Include="Common\Exceptions.h" />
+    <ClInclude Include="Common\Rational.h" />
     <ClInclude Include="Core\AudioChannelMapEntry.h" />
+    <ClInclude Include="Core\FieldOrder.h" />
     <ClInclude Include="Core\MediaType.h" />
     <ClInclude Include="Core\StreamInfo.h" />
-    <ClInclude Include="Decklink\DecklinkInput.h" />
-    <ClInclude Include="Decklink\DecklinkInfo.h" />
-    <ClInclude Include="Decklink\DecklinkTimecode.h" />
-    <ClInclude Include="FFMpeg\AudioFifo.h" />
+    <ClInclude Include="Core\AudioVolume.h" />
     <ClInclude Include="Core\HwAccel.h" />
     <ClInclude Include="Core\InputSource.h" />
     <ClInclude Include="Core\OutputDevice.h" />
+    <ClInclude Include="Core\Channel.h" />
+    <ClInclude Include="Core\VideoFormat.h" />
+    <ClInclude Include="Core\PixelFormat.h" />
+    <ClInclude Include="Decklink\DecklinkChannelScaler.h" />
+    <ClInclude Include="Decklink\DecklinkInput.h" />
+    <ClInclude Include="Decklink\DecklinkInfo.h" />
+    <ClInclude Include="Decklink\DecklinkTimecode.h" />
     <ClInclude Include="Decklink\ApiVersion.h" />
     <ClInclude Include="Decklink\DecklinkOutput.h" />
     <ClInclude Include="Decklink\DeckLinkAPI_h.h" />
     <ClInclude Include="Decklink\DecklinkVideoFrame.h" />
-    <ClInclude Include="Core\Channel.h" />
-    <ClInclude Include="Common\ComInitializer.h" />
     <ClInclude Include="Decklink\DecklinkIterator.h" />
-    <ClInclude Include="Common\Exceptions.h" />
+    <ClInclude Include="Decklink\DecklinkUtils.h" />
+    <ClInclude Include="FFMpeg\AudioFifo.h" />
     <ClInclude Include="FFMpeg\AudioMuxer.h" />
     <ClInclude Include="FFMpeg\AVSync.h" />
-    <ClInclude Include="Core\AudioVolume.h" />
     <ClInclude Include="FFMpeg\SynchronizingBuffer.h" />
     <ClInclude Include="FFMpeg\Decoder.h" />
     <ClInclude Include="FFMpeg\FilterBase.h" />
     <ClInclude Include="FFMpeg\InputFormat.h" />
     <ClInclude Include="FFMpeg\FFMpegInputSource.h" />
-    <ClInclude Include="Common\NonCopyable.h" />
     <ClInclude Include="FFMpeg\ChannelScaler.h" />
     <ClInclude Include="FFMpeg\FFStreamOutput.h" />
     <ClInclude Include="FFMpeg\FFStreamOutputParams.h" />
-    <ClInclude Include="Ndi\NdiOutput.h" />
-    <ClInclude Include="Preview\PreviewScaler.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="Common\Rational.h" />
     <ClInclude Include="FFMpeg\FFMpegUtils.h" />
     <ClInclude Include="FFMpeg\VideoFilterBase.h" />
-    <ClInclude Include="Core\VideoFormat.h" />
-    <ClInclude Include="Core\PixelFormat.h" />
     <ClInclude Include="FFMpeg\ThumbnailFilter.h" />
-    <ClInclude Include="Decklink\DecklinkUtils.h" />
     <ClInclude Include="Preview\Preview.h" />
+    <ClInclude Include="Preview\PreviewScaler.h" />
     <ClInclude Include="Ndi\NdiUtils.h" />
+    <ClInclude Include="Ndi\NdiOutput.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="Decklink\DecklinkChannelScaler.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="Decklink\DecklinkInput.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
@@ -141,8 +152,8 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFMpeg\AudioFifo.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>

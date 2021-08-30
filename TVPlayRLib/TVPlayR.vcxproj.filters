@@ -164,6 +164,13 @@
     <ClInclude Include="Decklink\DecklinkInput.h">
       <Filter>Decklink</Filter>
     </ClInclude>
+    <ClInclude Include="Decklink\DecklinkChannelScaler.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\FieldOrder.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\DecklinkSynchroProvider.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -245,6 +252,10 @@
     <ClCompile Include="Decklink\DecklinkInput.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
+    <ClCompile Include="Decklink\DecklinkChannelScaler.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

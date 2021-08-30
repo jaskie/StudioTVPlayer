@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "NdiUtils.h"
 #include "../Core/VideoFormat.h"
+#include "../Core/FieldOrder.h"
 #include "../Common/Exceptions.h"
 
 namespace TVPlayR {
@@ -87,10 +88,10 @@ namespace TVPlayR {
 				THROW_EXCEPTION("CreateVideoFrame: Invalid format of video frame");
 			}
 			NDIlib_frame_format_type_e frame_format_type;
-			switch (format.field_mode())
+			switch (format.field_order())
 			{
-			case Core::VideoFormat::FieldMode::lower:
-			case Core::VideoFormat::FieldMode::upper:
+			case Core::FieldOrder::lower:
+			case Core::FieldOrder::upper:
 				frame_format_type = NDIlib_frame_format_type_interleaved;
 				break;
 			default:

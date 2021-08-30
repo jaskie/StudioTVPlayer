@@ -1,5 +1,6 @@
 #include "../pch.h"
 #include "VideoFormat.h"
+#include "FieldOrder.h"
 #include "../FFMpeg/FFMpegUtils.h"
 
 namespace TVPlayR {
@@ -19,7 +20,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::ntsc:
 		width_ = 720;
 		height_ = 480;
-		field_mode_ = FieldMode::lower;
+		field_order_ = FieldOrder::lower;
 		sample_aspect_ratio_ = Common::Rational<int>(10, 11);
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "NTSC 4:3";
@@ -28,7 +29,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::ntsc_fha:
 		width_ = 720;
 		height_ = 480;
-		field_mode_ = FieldMode::lower;
+		field_order_ = FieldOrder::lower;
 		sample_aspect_ratio_ = Common::Rational<int>(40, 33);
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "NTSC 16:9";
@@ -37,7 +38,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::pal:
 		width_ = 720;
 		height_ = 576;
-		field_mode_ = FieldMode::upper;
+		field_order_ = FieldOrder::upper;
 		sample_aspect_ratio_ = Common::Rational<int>(59, 54);
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "PAL 4:3";
@@ -45,7 +46,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::pal_fha:
 		width_ = 720;
 		height_ = 576;
-		field_mode_ = FieldMode::upper;
+		field_order_ = FieldOrder::upper;
 		sample_aspect_ratio_ = Common::Rational<int>(64, 45);
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "PAL 16:9";
@@ -53,7 +54,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080i5000:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::upper;
+		field_order_ = FieldOrder::upper;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "1080i50";
@@ -61,7 +62,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080i5994:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::upper;
+		field_order_ = FieldOrder::upper;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "1080i59.94";
@@ -70,7 +71,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080i6000:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::upper;
+		field_order_ = FieldOrder::upper;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(30, 1);
 		name_ = "1080i60";
@@ -78,7 +79,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p2398:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(24000, 1001);
 		name_ = "1080p23.98";
@@ -86,7 +87,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p2400:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(24, 1);
 		name_ = "1080p24";
@@ -94,7 +95,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p2500:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "1080p25";
@@ -102,7 +103,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p2997:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "1080p29.97";
@@ -111,7 +112,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p3000:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(30, 1);
 		name_ = "1080p30";
@@ -119,7 +120,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p5000:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(50, 1);
 		name_ = "1080p50";
@@ -127,16 +128,16 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v1080p5994:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
-		frame_rate_ = Common::Rational<int>(30000, 1001);
+		frame_rate_ = Common::Rational<int>(60000, 1001);
 		name_ = "1080p59.94";
 		is_drop_frame_ = true;
 		break;
 	case VideoFormatType::v1080p6000:
 		width_ = 1920;
 		height_ = 1080;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(60, 1);
 		name_ = "1080p60";
@@ -144,7 +145,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v2160p2398:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(24000, 1001);
 		name_ = "2160p23.98";
@@ -152,7 +153,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v2160p2400:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(24, 1);
 		name_ = "2160p24";
@@ -160,7 +161,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v2160p2500:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "2160p25";
@@ -168,7 +169,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v2160p2997:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(30000, 1001);
 		name_ = "2160p29.97";
@@ -177,7 +178,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v2160p3000:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(30, 1);
 		name_ = "2160p30";
@@ -185,15 +186,23 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	case VideoFormatType::v2160p5000:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(50, 1);
 		name_ = "2160p50";
 		break;
+	case VideoFormatType::v2160p5994:
+		width_ = 3840;
+		height_ = 2160;
+		field_order_ = FieldOrder::progressive;
+		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
+		frame_rate_ = Common::Rational<int>(60000, 1001);
+		name_ = "2160p59.94";
+		break;
 	case VideoFormatType::v2160p6000:
 		width_ = 3840;
 		height_ = 2160;
-		field_mode_ = FieldMode::progressive;
+		field_order_ = FieldOrder::progressive;
 		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
 		frame_rate_ = Common::Rational<int>(60, 1);
 		name_ = "2160p60";
@@ -202,7 +211,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 	default:
 		width_ = 0;
 		height_ = 0;
-		field_mode_ = FieldMode::unknown;
+		field_order_ = FieldOrder::unknown;
 		frame_rate_ = Common::Rational<int>();
 		name_ = "invalid";
 		break;
@@ -249,14 +258,14 @@ std::string VideoFormat::Name() const
 	return name_;
 }
 
-VideoFormat::FieldMode VideoFormat::field_mode() const
+FieldOrder VideoFormat::field_order() const
 {
-	return field_mode_;
+	return field_order_;
 }
 
 bool VideoFormat::interlaced() const
 {
-	return field_mode_ == FieldMode::lower || field_mode_ == FieldMode::upper;
+	return field_order_ == FieldOrder::lower || field_order_ == FieldOrder::upper;
 }
 
 bool VideoFormat::IsDropFrame() const

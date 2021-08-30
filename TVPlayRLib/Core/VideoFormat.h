@@ -27,19 +27,16 @@ namespace TVPlayR {
 			v2160p2997,
 			v2160p3000,
 			v2160p5000,
+			v2160p5994,
 			v2160p6000,
 			count
 		};
 
+		enum class FieldOrder;
+
 class VideoFormat
 {
 public:
-	enum class FieldMode {
-		unknown,
-		progressive,
-		lower,
-		upper
-	};
 	VideoFormat();
 	VideoFormat(enum VideoFormatType type);
 	VideoFormat& operator=(const VideoFormat&) = default;
@@ -49,7 +46,7 @@ public:
 	Common::Rational<int> SampleAspectRatio() const;
 	Common::Rational<int> FrameRate() const;
 	std::string Name() const;
-	FieldMode field_mode() const;
+	FieldOrder field_order() const;
 	bool interlaced() const;
 	bool IsDropFrame() const;
 	std::string FrameNumberToString(int frame_number);
@@ -64,7 +61,7 @@ private:
 	std::string name_;
 	Common::Rational<int> sample_aspect_ratio_;
 	Common::Rational<int> frame_rate_;
-	FieldMode field_mode_;
+	FieldOrder field_order_;
 	bool timecode_is_supported_;
 	bool is_drop_frame_;
 	AVTimecode timecode_;

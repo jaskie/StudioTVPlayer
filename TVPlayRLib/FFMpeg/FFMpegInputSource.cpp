@@ -6,6 +6,7 @@
 #include "InputFormat.h"
 #include "Decoder.h"
 #include "../Core/Channel.h"
+#include "../Core/FieldOrder.h"
 #include "AudioMuxer.h"
 #include "SynchronizingBuffer.h"
 #include "ChannelScaler.h"
@@ -404,12 +405,12 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 		return stream->Stream->codecpar->height;
 	}
 
-	AVFieldOrder GetFieldOrder() const
+	Core::FieldOrder GetFieldOrder() const
 	{
 		const Core::StreamInfo* stream = input_.GetVideoStream();
 		if (stream == nullptr)
-			return AVFieldOrder::AV_FIELD_UNKNOWN;
-		return stream->Stream->codecpar->field_order;
+			return Core::FieldOrder::unknown;
+		return Core::FieldOrderFromAVFieldOrder(stream->Stream->codecpar->field_order);
 	}
 
 	bool HaveAlphaChannel() const
@@ -496,7 +497,7 @@ FFmpegInputSource::FFmpegInputSource(const std::string & file_name, Core::HwAcce
 
 FFmpegInputSource::~FFmpegInputSource(){}
 std::shared_ptr<AVFrame> FFmpegInputSource::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
-AVSync FFmpegInputSource::PullSync(int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
+AVSync FFmpegInputSource::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInputSource::Seek(const int64_t time)        { return impl_->Seek(time); }
 bool FFmpegInputSource::IsEof() const					{ return impl_->is_eof_; }
 bool FFmpegInputSource::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
@@ -511,9 +512,9 @@ int64_t FFmpegInputSource::GetVideoStart() const		{ return impl_->GetVideoStart(
 int64_t FFmpegInputSource::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
 AVRational FFmpeg::FFmpegInputSource::GetTimeBase() const { return impl_->GetTimeBase(); }
 AVRational FFmpeg::FFmpegInputSource::GetFrameRate() const { return impl_->GetFrameRate(); }
-int FFmpeg::FFmpegInputSource::GetWidth() { return impl_->GetWidth(); }
-int FFmpeg::FFmpegInputSource::GetHeight() { return impl_->GetHeight(); }
-AVFieldOrder FFmpeg::FFmpegInputSource::GetFieldOrder() { return impl_->GetFieldOrder(); }
+int FFmpeg::FFmpegInputSource::GetWidth() const { return impl_->GetWidth(); }
+int FFmpeg::FFmpegInputSource::GetHeight() const { return impl_->GetHeight(); }
+Core::FieldOrder FFmpeg::FFmpegInputSource::GetFieldOrder() { return impl_->GetFieldOrder(); }
 int FFmpeg::FFmpegInputSource::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
 bool FFmpegInputSource::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
 int FFmpegInputSource::StreamCount() const				{ return impl_->StreamCount(); }

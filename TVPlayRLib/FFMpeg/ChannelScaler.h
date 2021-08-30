@@ -1,11 +1,12 @@
 #pragma once
 #include "VideoFilterBase.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/PixelFormat.h"
-
 
 
 namespace TVPlayR {
+	namespace Core {
+		class VideoFormat;
+	}
 	namespace FFmpeg {
 
 class Decoder;

@@ -35,7 +35,7 @@ namespace TVPlayR {
 		property int Height { int get() { return _native_fomat->height(); } }
 		property Rational FrameRate { Rational get() { return _frame_rate; } }
 		property bool IsInterlaced { bool get() { return _native_fomat->interlaced(); } }
-		property FieldModeEnum FieldMode { FieldModeEnum get() { return static_cast<FieldModeEnum>(_native_fomat->field_mode()); } }
+		property FieldModeEnum FieldMode { FieldModeEnum get() { return static_cast<FieldModeEnum>(_native_fomat->field_order()); } }
 		property int Id { int get() { return static_cast<int>(_native_fomat->type()); }}
 		property bool IsDropFrame { bool get() { return _native_fomat->IsDropFrame(); }}
 		String^ FrameNumberToString(int frame_number);

@@ -2,6 +2,7 @@
 #include "ChannelScaler.h"
 #include "../Core/InputSource.h"
 #include "../Core/PixelFormat.h"
+#include "../Core/FieldOrder.h"
 #include "Decoder.h"
 
 namespace TVPlayR {
@@ -40,7 +41,7 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame)
 	if (input_frame_rate == output_format_.FrameRate())
 	{
 		if (height != output_format_.height())
-			if (frame->interlaced_frame && output_format_.field_mode() != Core::VideoFormat::FieldMode::progressive && height < output_format_.height()) // only when upscaling
+			if (frame->interlaced_frame && output_format_.field_order() != Core::FieldOrder::progressive && height < output_format_.height()) // only when upscaling
 				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",interlace,";
 			else
 				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=-1,";
@@ -59,7 +60,7 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame)
 		filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 		if (frame->interlaced_frame)
 		{
-			if (output_format_.field_mode() == Core::VideoFormat::FieldMode::progressive)
+			if (output_format_.field_order() == Core::FieldOrder::progressive)
 				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
 			else
 			{

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "VideoFormat.h"
+#include "Core\FieldOrder.h"
 #include "ClrStringHelper.h"
 
 namespace TVPlayR {

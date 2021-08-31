@@ -1,26 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StudioTVPlayer.Model
+﻿namespace StudioTVPlayer.Model
 {
     public class StreamOutput : OutputBase
     {
         private TVPlayR.StreamOutput _streamOutput;
 
         public string Address { get; set; }
-		public string VideoCodec { get; set; } 
-		public string AudioCodec { get; set; }
-		public int VideoBitrate { get; set; }
+        public string VideoCodec { get; set; }
+        public string AudioCodec { get; set; }
+        public int VideoBitrate { get; set; }
         public int AudioBitrate { get; set; }
         public string OutputFilter { get; set; }
-		public string OutputMetadata { get; set; }
-		public string AudioMetadata { get; set; }
-		public string VideoMetadata { get; set; }
-		public string Options { get; set; }
-		public int VideoStreamId { get; set; }
+        public string OutputMetadata { get; set; }
+        public string AudioMetadata { get; set; }
+        public string VideoMetadata { get; set; }
+        public string Options { get; set; }
+        public int VideoStreamId { get; set; }
         public int AudioStreamId { get; set; }
 
         public override void Dispose()
@@ -39,11 +33,11 @@ namespace StudioTVPlayer.Model
         public override void Initialize()
         {
             _streamOutput = new TVPlayR.StreamOutput(
-                Address, 
+                Address,
                 VideoCodec,
                 AudioCodec,
-                VideoBitrate,
-                AudioBitrate,
+                VideoBitrate * 1024,
+                AudioBitrate * 1024,
                 OutputFilter,
                 OutputMetadata,
                 VideoMetadata,

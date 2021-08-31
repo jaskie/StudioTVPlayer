@@ -16,9 +16,24 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private string _options;
         private int _videoStreamId;
         private int _audioStreamId;
+        private readonly StreamOutput _streamOutput;
 
-        public StreamOutputViewModel(StreamOutput output) : base(output)
-        { }
+        public StreamOutputViewModel(StreamOutput streamOutput) : base(streamOutput)
+        {
+            _streamOutput = streamOutput;
+            _address = streamOutput.Address;
+            _videoCodec = streamOutput.VideoCodec;
+            _audioCodec = streamOutput.AudioCodec;
+            _videoBitrate = streamOutput.VideoBitrate;
+            _audioBitrate = streamOutput.AudioBitrate;
+            _outputFilter = streamOutput.OutputFilter;
+            _outputMetadata = streamOutput.OutputMetadata;
+            _audioMetadata = streamOutput.AudioMetadata;
+            _videoMetadata = streamOutput.VideoMetadata;
+            _options = streamOutput.Options;
+            _videoStreamId = streamOutput.VideoStreamId;
+            _audioStreamId = streamOutput.AudioStreamId;
+        }
 
         public string Address { get => _address; set => Set(ref _address, value); }
         public string VideoCodec { get => _videoCodec; set => Set(ref _videoCodec, value); }
@@ -36,6 +51,22 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public static string[] VideoCodecs => TVPlayR.StreamOutput.VideoCodecs;
         public static string[] AudioCodecs => TVPlayR.StreamOutput.AudioCodecs;
 
+        public override void Apply()
+        {
+            base.Apply();
+            _streamOutput.Address = _address;
+            _streamOutput.VideoCodec = _videoCodec;
+            _streamOutput.AudioCodec = _audioCodec;
+            _streamOutput.VideoBitrate = _videoBitrate;
+            _streamOutput.AudioBitrate = _audioBitrate;
+            _streamOutput.OutputFilter = _outputFilter;
+            _streamOutput.OutputMetadata = _outputMetadata;
+            _streamOutput.AudioMetadata = _audioMetadata;
+            _streamOutput.VideoMetadata  =_videoMetadata;
+            _streamOutput.Options = _options;
+            _streamOutput.VideoStreamId = _videoStreamId;
+            _streamOutput.AudioStreamId = _audioStreamId;
+        }
         protected override string ReadErrorInfo(string propertyName)
         {
             switch (propertyName)

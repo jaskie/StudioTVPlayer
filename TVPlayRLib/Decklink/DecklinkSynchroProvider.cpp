@@ -48,7 +48,7 @@ namespace TVPlayR {
 			field_dominance_ = field_dominance;
 			time_scale_ = time_scale;
 			frame_duration_ = frame_duration;
-			frame_rate_ = Common::Rational<int>(time_scale, frame_duration);
+			frame_rate_ = Common::Rational<int>(static_cast<int>(time_scale), static_cast<int>(frame_duration));
 		}
 
 }}

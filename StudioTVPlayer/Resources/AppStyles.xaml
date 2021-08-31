@@ -6,9 +6,14 @@
         <Setter Property="Margin" Value="5 0"/>
     </Style>
     
-    <Style x:Key="ConfigurationLabelStyle" TargetType="Label" BasedOn="{StaticResource MahApps.Styles.Label}">
+    <Style x:Key="ConfigurationLabelStyle" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
         <Setter Property="FontSize" Value="10"/>
         <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray5}"/>
+    </Style>
+
+    <Style x:Key="ConfigurationComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Setter Property="Margin" Value="5 0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
     <Style x:Key="VolumeGaugeStyle" TargetType="{x:Type ProgressBar}">

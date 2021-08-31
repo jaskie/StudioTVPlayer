@@ -155,7 +155,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddStreamOutput(object _)
         {
-            var vm = new StreamOutputViewModel(new Model.StreamOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock) });
+            var vm = new StreamOutputViewModel(new Model.StreamOutput { 
+                IsFrameClock = !Outputs.Any(a => a.IsFrameClock),
+                VideoBitrate = 4000,
+                VideoCodec = StreamOutputViewModel.VideoCodecs.FirstOrDefault(),
+                AudioBitrate = 128,
+                AudioCodec = StreamOutputViewModel.AudioCodecs.FirstOrDefault(),
+            });
             AddOutput(vm);
         }
 

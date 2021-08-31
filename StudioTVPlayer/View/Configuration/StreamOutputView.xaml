@@ -7,13 +7,17 @@
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:StreamOutputViewModel}"
-             d:DesignHeight="200" d:DesignWidth="400">
+             d:DesignHeight="250" d:DesignWidth="400">
     <UserControl.Resources>
         <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
             <Setter Property="Margin" Value="5 0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+        <Style TargetType="mah:NumericUpDown">
+            <Setter Property="Margin" Value="5 0"/>
+        </Style>
         <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
+        <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}"/>
     </UserControl.Resources>
     <Grid Margin="0 5">
         <Grid.ColumnDefinitions>
@@ -29,20 +33,31 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBlock Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="14">FFmpeg udp/rtmp stream output</TextBlock>
-        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">Destination address</Label>
-        <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="RTMP server with parameters, or UDP multicast or unicast address"/>
+        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">Destination address</Label>
+        <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="RTMP server with parameters, or UDP multicast or unicast address"/>
         <TextBlock Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center">Video</TextBlock>
         <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center">Audio</TextBlock>
         <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center">Output</TextBlock>
         <Label Grid.Row="4" Grid.Column="0">Codec</Label>
         <ComboBox Grid.Row="5" Grid.Column="0" ItemsSource="{Binding VideoCodecs}" SelectedItem="{Binding VideoCodec, ValidatesOnDataErrors=True}"/>
         <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AudioCodecs}" SelectedItem="{Binding AudioCodec, ValidatesOnDataErrors=True}"/>
-        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding GroupNames, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group names (default - leave empty)"/>
+        <Label Grid.Row="6">Bitrate (kbps)</Label>
+        <mah:NumericUpDown Grid.Row="7" Grid.Column="0" Value="{Binding VideoBitrate}" ParsingNumberStyle="Integer" Interval="100" />
+        <mah:NumericUpDown Grid.Row="7" Grid.Column="1" Value="{Binding AudioBitrate}" ParsingNumberStyle="Integer" Interval="16" />
+        <Label Grid.Row="8">Metadata</Label>
+        <TextBox Grid.Row="9" Grid.Column="0" Text="{Binding VideoMetadata, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
+        <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding AudioMetadata, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
+        <TextBox Grid.Row="9" Grid.Column="2" Text="{Binding OutputMetadata, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
+        <Label Grid.Row="4" Grid.Column="2">Filter</Label>
+        <TextBox Grid.Row="5" Grid.Column="2" Text="{Binding OutputFilter, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
+        <Label Grid.Row="6" Grid.Column="2">Options</Label>
+        <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding Options, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
         <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="99" VerticalAlignment="Center" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
             <mah:FontIcon Glyph="&#xE74D;"/>
         </Button>

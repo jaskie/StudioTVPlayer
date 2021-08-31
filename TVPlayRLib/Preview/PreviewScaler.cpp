@@ -34,7 +34,7 @@ PreviewScaler::PreviewScaler(Core::Channel& channel, int width, int height)
 void PreviewScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
-		VideoFilterBase::CreateFilterChain(frame, av_inv_q(channel_.Format().FrameRate().av()), filter_str_);
+		VideoFilterBase::CreateFilterChain(frame, channel_.Format().FrameRate().invert(), filter_str_);
 	VideoFilterBase::Push(frame);
 }
 

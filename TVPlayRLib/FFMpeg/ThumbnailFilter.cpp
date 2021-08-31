@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "ThumbnailFilter.h"
 #include "FFMpegUtils.h"
+#include "../Common/Rational.h"
 
 
 namespace TVPlayR {

@@ -21,41 +21,55 @@ namespace TVPlayR {
 
 		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget<false>
 		{
-			CComQIPtr<IDeckLinkInput>	input_;
-			Core::VideoFormat requested_format_;
-			CComPtr<IDeckLinkDisplayMode> current_display_mode_;
-			const bool is_autodetection_supported_;
-			const bool is_wide_;
-			std::vector<DecklinkSynchroProvider> channel_prividers_;
+			CComQIPtr<IDeckLinkInput>								input_;
+			const bool												is_autodetection_supported_;
+			const bool												is_wide_;
+			std::vector<std::unique_ptr<DecklinkSynchroProvider>>	channel_prividers_;
+			BMDTimeValue											frame_duration_ = 0LL;
+			BMDTimeScale											time_scale_ = 1LL;
+			BMDFieldDominance										field_dominance_ = BMDFieldDominance::bmdUnknownFieldDominance;
+			long													current_width_, current_height_ = 0L;
+			const													int audio_channels_count_;
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType requestedFormat)
+
+			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType requestedFormat, int audio_channels_count)
 				: input_(decklink)
-				, requested_format_(requestedFormat)
 				, is_wide_(!(requestedFormat == Core::VideoFormatType::ntsc || requestedFormat == Core::VideoFormatType::pal))
 				, is_autodetection_supported_(IsAutodetectionSupprted(decklink))
+				, audio_channels_count_(audio_channels_count)
 			{
 				BMDDisplayMode mode = GetDecklinkDisplayMode(requestedFormat);
 				BMDDisplayModeSupport support;
-				if (FAILED(input_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, bmdVideoInputFlagDefault, &support, &current_display_mode_)))
+				IDeckLinkDisplayMode* initialDisplayMode = nullptr;
+				if (FAILED(input_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, bmdVideoInputFlagDefault, &support, &initialDisplayMode)))
 					THROW_EXCEPTION("DecklinkInput: DoesSupportVideoMode failed");				
 				if (support == BMDDisplayModeSupport::bmdDisplayModeNotSupported)
 					THROW_EXCEPTION("DecklinkInput: Display mode not supported");
-				OpenInput();
+				input_->SetCallback(this);
+				OpenInput(initialDisplayMode);
 			}
 
 			implementation::~implementation()
 			{
+				input_->SetCallback(NULL);
 				CloseInput();
 			}
 
-			void OpenInput()
+			void OpenInput(IDeckLinkDisplayMode* displayMode)
 			{
-				if (FAILED(input_->EnableVideoInput(current_display_mode_->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_autodetection_supported_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
+				field_dominance_ = displayMode->GetFieldDominance();
+				current_width_ = displayMode->GetWidth();
+				current_height_ = displayMode->GetHeight();
+				if (FAILED(displayMode->GetFrameRate(&frame_duration_, &time_scale_)))
+					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
+				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_autodetection_supported_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
-				if (FAILED(input_->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType32bitInteger, 2)))
+				if (FAILED(input_->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType32bitInteger, audio_channels_count_)))
 					THROW_EXCEPTION("DecklinkInput: EnableAudioInput failed");
 				if (FAILED(input_->StartStreams()))
 					THROW_EXCEPTION("DecklinkInput: StartStreams failed");
+				for (auto& provider : channel_prividers_)
+					provider->SetInputParameters(field_dominance_, time_scale_, frame_duration_);
 			}
 
 			void CloseInput()
@@ -74,9 +88,8 @@ namespace TVPlayR {
 			{
 				if (notificationEvents & bmdVideoInputDisplayModeChanged)
 				{
-					current_display_mode_ = newDisplayMode;
 					CloseInput();
-					OpenInput();
+					OpenInput(newDisplayMode);
 				}
 				return S_OK;
 			}
@@ -84,7 +97,7 @@ namespace TVPlayR {
 			virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
 			{
 				for (auto& provider : channel_prividers_)
-					provider.Push(videoFrame, current_display_mode_->GetFieldDominance(), audioPacket);
+					provider->Push(videoFrame, audioPacket);
 				return S_OK;
 			}
 
@@ -94,18 +107,22 @@ namespace TVPlayR {
 
 			bool IsAddedToChannel(const Core::Channel& channel)
 			{
-				return std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const DecklinkSynchroProvider& provider) { return provider.Channel() == &channel; }) != channel_prividers_.end();
+				return std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkSynchroProvider>& provider) { return &provider->Channel() == &channel; }) != channel_prividers_.end();
 			}
 
 			void AddToChannel(const Core::Channel& channel)
 			{
 				if (!IsAddedToChannel(channel))
-					channel_prividers_.emplace_back(&channel);
+				{
+					std::unique_ptr<DecklinkSynchroProvider> newProvider = std::make_unique<DecklinkSynchroProvider>(channel);
+					newProvider->SetInputParameters(field_dominance_, time_scale_, frame_duration_);
+					channel_prividers_.emplace_back(std::move(newProvider));
+				}
 			}
 
 			void RemoveFromChannel(const Core::Channel& channel)
 			{
-				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const DecklinkSynchroProvider& p) { return p.Channel() == &channel; });
+				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkSynchroProvider>& p) { return &p->Channel() == &channel; });
 				if (provider == channel_prividers_.end())
 					return;
 				channel_prividers_.erase(provider);
@@ -113,25 +130,47 @@ namespace TVPlayR {
 
 			int GetWidth() const
 			{
-				return requested_format_.width();
+				return current_width_;
 			}
 
 			int GetHeight() const
 			{
-				return requested_format_.height();
+				return current_height_;
+			}
+
+			int GetAudioChannelsCount() const
+			{
+				return audio_channels_count_;
 			}
 
 			FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count)
 			{
-				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const DecklinkSynchroProvider& p) { return p.Channel() == &channel; });
+				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkSynchroProvider>& p) { return &p->Channel() == &channel; });
 				if (provider == channel_prividers_.end())
 					return FFmpeg::AVSync();
-				return provider->PullSync(audio_samples_count);
+				return (*provider)->PullSync(audio_samples_count);
 			}
+
+			Core::FieldOrder GetFieldOrder() const
+			{
+				switch (field_dominance_)
+				{
+				case BMDFieldDominance::bmdLowerFieldFirst:
+					return Core::FieldOrder::lower;
+				case BMDFieldDominance::bmdUpperFieldFirst:
+					return Core::FieldOrder::upper;
+				case BMDFieldDominance::bmdProgressiveFrame:
+				case BMDFieldDominance::bmdProgressiveSegmentedFrame:
+					return Core::FieldOrder::progressive;
+				default:
+					return Core::FieldOrder::unknown;
+				}
+			}
+
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType requestedFormat)
-			: impl_(std::make_unique<implementation>(decklink, requestedFormat))
+		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType requestedFormat, int audio_channels_count)
+			: impl_(std::make_unique<implementation>(decklink, requestedFormat, audio_channels_count))
 		{ }
 		
 		DecklinkInput::~DecklinkInput()	{ }
@@ -152,19 +191,9 @@ namespace TVPlayR {
 		int DecklinkInput::GetWidth() const { return impl_->GetWidth(); }
 		int DecklinkInput::GetHeight() const { return impl_->GetHeight(); }
 
-		Core::FieldOrder DecklinkInput::GetFieldOrder()
-		{
-			return Core::FieldOrder::unknown;
-		}
-		int DecklinkInput::GetAudioChannelCount()
-		{
-			return 0;
-		}
-		bool DecklinkInput::HaveAlphaChannel() const
-		{
-			return false;
-		}
-
+		Core::FieldOrder DecklinkInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
+		int DecklinkInput::GetAudioChannelCount() { return impl_->GetAudioChannelsCount(); }
+		bool DecklinkInput::HaveAlphaChannel() const { return false; }
 		void DecklinkInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback)
 		{
 		}

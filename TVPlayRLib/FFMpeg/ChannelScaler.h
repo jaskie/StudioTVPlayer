@@ -5,7 +5,7 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class VideoFormat;
+		class Channel;
 	}
 	namespace FFmpeg {
 
@@ -15,14 +15,17 @@ class ChannelScaler :
 	public VideoFilterBase
 {
 public:
-	ChannelScaler(Decoder& decoder, const Core::VideoFormat& output_format, const AVPixelFormat output_pixel_format);
+	ChannelScaler(const Core::Channel& channel);
 	const Core::VideoFormat& Format() const { return output_format_; }
-	bool Push(std::shared_ptr<AVFrame> frame);
+	bool Push(std::shared_ptr<AVFrame> frame, Common::Rational<int> time_base, Common::Rational<int> frame_rate);
 private:
 	const Core::VideoFormat output_format_;
 	const AVPixelFormat output_pixel_format_;
-	Decoder& decoder_;
-	std::string Setup(std::shared_ptr<AVFrame>& frame);
+	std::string Setup(std::shared_ptr<AVFrame>& frame, Common::Rational<int>& time_base, Common::Rational<int>& frame_rate);
+	int current_width_ = 0; 
+	int current_height_ = 0;
+	Common::Rational<int> current_frame_rate_, current_time_base_;
+	AVPixelFormat current_pixel_fomat_ = AVPixelFormat::AV_PIX_FMT_NONE;
 };
 
 }}

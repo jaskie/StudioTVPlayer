@@ -65,7 +65,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
 		InitializeAudioDecoders();
-		channel_scaler_ = std::make_unique<ChannelScaler>(*video_decoder_, channel_->Format(), PixelFormatToFFmpegFormat(channel_->PixelFormat()));
+		channel_scaler_ = std::make_unique<ChannelScaler>(*channel_);
 		if (!audio_decoders_.empty())
 			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, channel_->AudioSampleFormat(), 48000, channel_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
@@ -136,7 +136,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
-			channel_scaler_->Push(decoded);
+			channel_scaler_->Push(decoded, video_decoder_->TimeBase(), video_decoder_->FrameRate());
 		if (!channel_scaler_->IsInitialized())
 			return;
 		while (auto scaled = channel_scaler_->Pull())

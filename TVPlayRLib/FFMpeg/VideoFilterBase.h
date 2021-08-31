@@ -3,6 +3,9 @@
 #include "../Common/Debug.h"
 
 namespace TVPlayR {
+	namespace Common {
+		template <typename> class Rational;
+	}
 
 	namespace FFmpeg {
 
@@ -23,7 +26,7 @@ public:
 	bool IsInitialized() const;
 protected:
 	bool Push(std::shared_ptr<AVFrame> frame);
-	void CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational& input_time_base, const std::string& filter_str);
+	void CreateFilterChain(std::shared_ptr<AVFrame> frame, const Common::Rational<int> input_time_base, const std::string& filter_str);
 private:
 	AVFilterContext* source_ctx_ = NULL;
 	AVFilterContext* sink_ctx_ = NULL;

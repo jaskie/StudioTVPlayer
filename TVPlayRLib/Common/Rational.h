@@ -43,8 +43,8 @@ public:
 		return Rational<T>(numerator_, denominator_ * by);
 	}
 
-	Rational<T> invert(const Rational<T>& other) const {
-		return Rational<T>(other.denominator_, other.numerator_);
+	Rational<T> invert() const {
+		return Rational<T>(denominator_, numerator_);
 	}
 
 	AVRational av() const{

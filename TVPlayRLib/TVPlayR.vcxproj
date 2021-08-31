@@ -65,6 +65,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\include;$(SolutionDir)..\TVPlayR\dependencies\Ndi\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -81,6 +82,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\include;$(SolutionDir)..\TVPlayR\dependencies\Ndi\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -105,7 +107,6 @@
     <ClInclude Include="Core\Channel.h" />
     <ClInclude Include="Core\VideoFormat.h" />
     <ClInclude Include="Core\PixelFormat.h" />
-    <ClInclude Include="Decklink\DecklinkChannelScaler.h" />
     <ClInclude Include="Decklink\DecklinkInput.h" />
     <ClInclude Include="Decklink\DecklinkInfo.h" />
     <ClInclude Include="Decklink\DecklinkTimecode.h" />
@@ -136,10 +137,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Decklink\DecklinkChannelScaler.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

@@ -164,9 +164,6 @@
     <ClInclude Include="Decklink\DecklinkInput.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\DecklinkChannelScaler.h">
-      <Filter>Decklink</Filter>
-    </ClInclude>
     <ClInclude Include="Core\FieldOrder.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -250,9 +247,6 @@
       <Filter>FFMpeg</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkInput.cpp">
-      <Filter>Decklink</Filter>
-    </ClCompile>
-    <ClCompile Include="Decklink\DecklinkChannelScaler.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp" />

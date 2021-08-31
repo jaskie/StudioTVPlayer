@@ -46,11 +46,11 @@ int main()
 		channel.SetFrameClock(decklink_output);
 		channel.AddOutput(decklink_output);
 		
-		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		//auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		//channel.SetFrameClock(ndi);
-		channel.AddOutput(ndi);
+		//channel.AddOutput(ndi);
 
-		auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000);
+		auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
 		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "", 2);
 		//input->SetIsLoop(true);

@@ -1,4 +1,5 @@
 #pragma once
+#include "../FFMpeg/ChannelScaler.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -6,23 +7,30 @@ namespace TVPlayR {
 	}
 	namespace FFmpeg {
 		class AVSync;
+		class ChannelScaler;
+	}
+	namespace Common {
+		template<typename> class Rational;
 	}
 	namespace Decklink {
-		class DecklinkChannelScaler;
 
 class DecklinkSynchroProvider
 {
 public:
-	DecklinkSynchroProvider(const Core::Channel* channel);
-	~DecklinkSynchroProvider();
-	const Core::Channel* Channel() const;
-	void Push(IDeckLinkVideoInputFrame* videoFrame, BMDFieldDominance fieldDominance, IDeckLinkAudioInputPacket* audioPacket);
-	FFmpeg::AVSync PullSync(int audioSamplesCount);
+	DecklinkSynchroProvider(const Core::Channel& channel);
+	const Core::Channel& Channel() const;
+	void Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet);
+	FFmpeg::AVSync PullSync(int audio_samples_count);
+	void SetInputParameters(BMDFieldDominance field_dominance, BMDTimeScale time_scale, BMDTimeValue frame_duration);
 private:
-	const Core::Channel* channel_;
-	//std::unique_ptr<DecklinkChannelScaler> scaler_;
-	std::shared_ptr<AVFrame> last_video_;
-	int64_t frame_pts_;
+	const Core::Channel&					channel_;
+	FFmpeg::ChannelScaler	scaler_;
+	std::shared_ptr<AVFrame>				last_video_;
+	int64_t									frame_pts_ = 0LL;
+	BMDFieldDominance						field_dominance_ = BMDFieldDominance::bmdUnknownFieldDominance;
+	BMDTimeScale							time_scale_ = 1LL;
+	BMDTimeValue							frame_duration_ = 0LL;
+	Common::Rational<int>					frame_rate_;
 };
 
 }}

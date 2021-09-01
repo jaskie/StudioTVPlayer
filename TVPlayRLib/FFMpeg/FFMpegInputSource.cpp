@@ -136,7 +136,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
-			channel_scaler_->Push(decoded, video_decoder_->TimeBase(), video_decoder_->FrameRate());
+			channel_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
 		if (!channel_scaler_->IsInitialized())
 			return;
 		while (auto scaled = channel_scaler_->Pull())

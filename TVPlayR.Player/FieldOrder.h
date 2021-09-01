@@ -2,8 +2,9 @@
 namespace TVPlayR {
 	public enum class FieldOrder
 	{
+		Unknown,
 		Progressive,
-		TopFieldFirst,
-		BottomFieldFirst
+		BottomFieldFirst,
+		TopFieldFirst
 	};
 }

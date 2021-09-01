@@ -1,37 +1,37 @@
 #include "stdafx.h"
-#include "InputFile.h"
+#include "FileInput.h"
 #include "ClrStringHelper.h"
 #include "FFMpeg/ThumbnailFilter.h"
 #include "FFMpeg/FFMpegInputSource.h"
 
 namespace TVPlayR {
 
-	InputFile::InputFile(String^ fileName, int audioChannelCount) : InputFile(fileName, HardwareAcceleration::None, String::Empty, audioChannelCount)
+	FileInput::FileInput(String^ fileName, int audioChannelCount) : FileInput(fileName, HardwareAcceleration::None, String::Empty, audioChannelCount)
 	{ }
 
-	InputFile::InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount)
+	FileInput::FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount)
 		: _nativeSource(new std::shared_ptr<FFmpeg::FFmpegInputSource>(new FFmpeg::FFmpegInputSource(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice), audioChannelCount)))
 		, _fileName(fileName)
 		, _acceleration(acceleration)
 		, _hwDevice(hwDevice)
 	{ 
-		_framePlayedDelegate = gcnew FramePlayedDelegate(this, &InputFile::FramePlayedCallback);
+		_framePlayedDelegate = gcnew FramePlayedDelegate(this, &FileInput::FramePlayedCallback);
 		_framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
 		IntPtr framePlayedIp =  Marshal::GetFunctionPointerForDelegate(_framePlayedDelegate);
 		(*_nativeSource)->SetFramePlayedCallback(static_cast<Core::InputSource::TIME_CALLBACK>(framePlayedIp.ToPointer()));
 		
-		_stoppedDelegate = gcnew StoppedDelegate(this, &InputFile::StoppedCallback);
+		_stoppedDelegate = gcnew StoppedDelegate(this, &FileInput::StoppedCallback);
 		_stoppedHandle = GCHandle::Alloc(_stoppedDelegate);
 		IntPtr stoppedIp = Marshal::GetFunctionPointerForDelegate(_stoppedDelegate);
 		(*_nativeSource)->SetStoppedCallback(static_cast<Core::InputSource::STOPPED_CALLBACK>(stoppedIp.ToPointer()));
 	}
 
-	InputFile::~InputFile()
+	FileInput::~FileInput()
 	{
-		this->!InputFile();
+		this->!FileInput();
 	}
 
-	InputFile::!InputFile()
+	FileInput::!FileInput()
 	{
 		if (!_nativeSource)
 			return;
@@ -43,22 +43,22 @@ namespace TVPlayR {
 		_nativeSource = nullptr;
 	}
 
-	bool InputFile::Seek(TimeSpan time)
+	bool FileInput::Seek(TimeSpan time)
 	{
 		return (*_nativeSource)->Seek(time.Ticks / 10);
 	}
 
-	void InputFile::Play()
+	void FileInput::Play()
 	{
 		(*_nativeSource)->Play();
 	}
 
-	void InputFile::Pause()
+	void FileInput::Pause()
 	{
 		(*_nativeSource)->Pause();
 	}
 
-	Bitmap ^ InputFile::GetThumbnail(TimeSpan time, int width, int height)
+	Bitmap ^ FileInput::GetThumbnail(TimeSpan time, int width, int height)
 	{
 		Bitmap^ result = nullptr;
 		try
@@ -106,7 +106,7 @@ namespace TVPlayR {
 		return result;
 	}
 
-	BitmapSource ^ InputFile::GetBitmapSource(TimeSpan time, int width, int height)
+	BitmapSource ^ FileInput::GetBitmapSource(TimeSpan time, int width, int height)
 	{
 		BitmapSource^ result = nullptr;
 		try
@@ -128,12 +128,12 @@ namespace TVPlayR {
 		return result;
 	}
 
-	void InputFile::FramePlayedCallback(int64_t time)
+	void FileInput::FramePlayedCallback(int64_t time)
 	{
 		FramePlayed(this, gcnew TimeEventArgs(TimeSpan(time * 10)));
 	}
 
-	void InputFile::StoppedCallback()
+	void FileInput::StoppedCallback()
 	{
 		Stopped(this, EventArgs::Empty);
 	}

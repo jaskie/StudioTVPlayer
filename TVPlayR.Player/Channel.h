@@ -10,7 +10,7 @@ using namespace System::Runtime::InteropServices;
 namespace TVPlayR {
 	ref class DecklinkOutput;
 	ref class PreviewOutput;
-	ref class InputFile;
+	ref class FileInput;
 	ref class OutputBase;
 
 	public ref class Channel sealed
@@ -28,8 +28,8 @@ namespace TVPlayR {
 		~Channel();
 		!Channel();
 		bool AddOutput(OutputBase^ device, bool setAsClockBase);
-		void Load(InputFile^ file);
-		void Preload(InputFile^ file);
+		void Load(FileInput^ file);
+		void Preload(FileInput^ file);
 		void Clear();
 		property double Volume
 		{

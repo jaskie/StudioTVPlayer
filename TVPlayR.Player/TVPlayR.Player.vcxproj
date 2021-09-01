@@ -89,11 +89,12 @@
   <ItemGroup>
     <ClInclude Include="AudioVolumeEventArgs.h" />
     <ClInclude Include="ClrStringHelper.h" />
+    <ClInclude Include="DecklinkInput.h" />
     <ClInclude Include="DecklinkIterator.h" />
     <ClInclude Include="DecklinkOutput.h" />
     <ClInclude Include="FieldOrder.h" />
     <ClInclude Include="HardwareAcceleration.h" />
-    <ClInclude Include="InputFile.h" />
+    <ClInclude Include="FileInput.h" />
     <ClInclude Include="NdiOutput.h" />
     <ClInclude Include="OutputBase.h" />
     <ClInclude Include="PixelFormat.h" />
@@ -104,6 +105,7 @@
     <ClInclude Include="StreamOutput.h" />
     <ClInclude Include="TimeEventArgs.h" />
     <ClCompile Include="DecklinkInfo.h" />
+    <ClCompile Include="DecklinkInput.cpp" />
     <ClCompile Include="DecklinkIterator.cpp" />
     <ClCompile Include="StreamOutput.cpp" />
     <ClCompile Include="VersionInfo.h">
@@ -114,7 +116,7 @@
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="DecklinkOutput.cpp" />
-    <ClCompile Include="InputFile.cpp" />
+    <ClCompile Include="FileInput.cpp" />
     <ClCompile Include="NdiOutput.cpp" />
     <ClCompile Include="PreviewOutput.cpp" />
     <ClCompile Include="stdafx.cpp">

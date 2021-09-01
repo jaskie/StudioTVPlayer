@@ -44,7 +44,7 @@ namespace StudioTVPlayer.Model
 
         public bool DisableAfterUnload { get; set; }
 
-        public bool IsEof => PlayingRundownItem?.InputFile?.IsEof ?? true;
+        public bool IsEof => PlayingRundownItem?.FileInput?.IsEof ?? true;
 
         public TimeSpan OneFrame => Channel.VideoFormat.FrameNumberToTime(1);
 

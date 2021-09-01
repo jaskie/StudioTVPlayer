@@ -4,7 +4,7 @@
 #include "OutputBase.h"
 #include "DecklinkOutput.h"
 #include "PreviewOutput.h"
-#include "InputFile.h"
+#include "FileInput.h"
 #include "ClrStringHelper.h"
 
 
@@ -56,12 +56,12 @@ namespace TVPlayR {
 		return true;
 	}
 
-	void Channel::Load(InputFile^ file)
+	void Channel::Load(FileInput^ file)
 	{
 		_channel->Load(file->GetNativeSource());
 	}
 
-	void Channel::Preload(InputFile^ file)
+	void Channel::Preload(FileInput^ file)
 	{
 		_channel->Preload(file->GetNativeSource());
 	}

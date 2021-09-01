@@ -27,7 +27,7 @@
     <ClInclude Include="PixelFormat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InputFile.h">
+    <ClInclude Include="FileInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VideoFormat.h">
@@ -66,6 +66,9 @@
     <ClInclude Include="StreamOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DecklinkInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -80,7 +83,7 @@
     <ClCompile Include="Channel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputFile.cpp">
+    <ClCompile Include="FileInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VideoFormat.cpp">
@@ -102,6 +105,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StreamOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DecklinkInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

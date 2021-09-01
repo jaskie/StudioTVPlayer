@@ -12,13 +12,13 @@ using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
 
-	public ref class InputFile
+	public ref class FileInput
 	{
 	public:
-		InputFile(String^ fileName, int audioChannelCount);
-		InputFile(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount);
-		~InputFile();
-		!InputFile();
+		FileInput(String^ fileName, int audioChannelCount);
+		FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount);
+		~FileInput();
+		!FileInput();
 		bool Seek(TimeSpan time);
 		void Play();
 		void Pause();
@@ -64,21 +64,7 @@ namespace TVPlayR {
 
 		property TVPlayR::FieldOrder FieldOrder
 		{
-			TVPlayR::FieldOrder get() 
-			{
-				auto internalFieldOrder = (*_nativeSource)->GetFieldOrder();
-				switch (internalFieldOrder)
-				{
-				case AVFieldOrder::AV_FIELD_TT:
-				case AVFieldOrder::AV_FIELD_TB:
-					return TVPlayR::FieldOrder::TopFieldFirst;
-				case AVFieldOrder::AV_FIELD_BB:
-				case AVFieldOrder::AV_FIELD_BT:
-					return TVPlayR::FieldOrder::BottomFieldFirst;
-				default:
-					return TVPlayR::FieldOrder::Progressive;
-				}
-			}
+			TVPlayR::FieldOrder get() { return static_cast<TVPlayR::FieldOrder>((*_nativeSource)->GetFieldOrder()); }
 		}
 
 		property TVPlayR::Rational FrameRate

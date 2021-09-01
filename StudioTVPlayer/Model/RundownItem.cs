@@ -27,7 +27,7 @@ namespace StudioTVPlayer.Model
 
         public Media Media { get; }
 
-        internal TVPlayR.InputFile InputFile { get; private set; }
+        internal TVPlayR.FileInput FileInput { get; private set; }
 
         public bool IsAutoStart
         {
@@ -61,24 +61,24 @@ namespace StudioTVPlayer.Model
                 if (_isLoop == value)
                     return;
                 _isLoop = value;
-                if (!(InputFile is null))
-                    InputFile.IsLoop = value;
+                if (!(FileInput is null))
+                    FileInput.IsLoop = value;
                 RaisePropertyChanged();
             }
         }
 
         public bool Preloaded => _preloaded != default;
 
-        public bool IsPlaying => InputFile?.IsPlaying == true;
+        public bool IsPlaying => FileInput?.IsPlaying == true;
 
         public void Unload()
         {
             if (Interlocked.Exchange(ref _preloaded, default) == default)
                 return;
-            InputFile.FramePlayed -= InputFile_FramePlayed;
-            InputFile.Stopped -= InputFile_Stopped;
-            InputFile.Dispose();
-            InputFile = null;
+            FileInput.FramePlayed -= InputFile_FramePlayed;
+            FileInput.Stopped -= InputFile_Stopped;
+            FileInput.Dispose();
+            FileInput = null;
         }
 
         public void RemoveFromRundown()
@@ -90,26 +90,26 @@ namespace StudioTVPlayer.Model
         {
             if (Interlocked.Exchange(ref _preloaded, 1) != default)
                 return false;
-            InputFile = new TVPlayR.InputFile(Media.FullPath, audioChannelCount);
-            InputFile.IsLoop = IsLoop;
-            InputFile.FramePlayed += InputFile_FramePlayed;
-            InputFile.Stopped += InputFile_Stopped;
+            FileInput = new TVPlayR.FileInput(Media.FullPath, audioChannelCount);
+            FileInput.IsLoop = IsLoop;
+            FileInput.FramePlayed += InputFile_FramePlayed;
+            FileInput.Stopped += InputFile_Stopped;
             return true;
         }
 
         public void Play()
         {
-            InputFile.Play();
+            FileInput.Play();
         }
 
         internal void Pause()
         {
-            InputFile.Pause();
+            FileInput.Pause();
         }
 
         public bool Seek(TimeSpan timeSpan)
         {
-            return InputFile.Seek(timeSpan);
+            return FileInput.Seek(timeSpan);
         }
 
         public void Dispose()

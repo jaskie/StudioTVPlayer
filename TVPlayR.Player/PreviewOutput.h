@@ -25,13 +25,13 @@ namespace TVPlayR {
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return std::dynamic_pointer_cast<Core::OutputDevice>(*_preview); }
 	public:
-		property WriteableBitmap^ PreviewSource 
-		{
-			WriteableBitmap^ get() { return _target; }
-		}
 		PreviewOutput(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
 		~PreviewOutput();
 		!PreviewOutput();
+		property WriteableBitmap^ PreviewSource
+		{
+			WriteableBitmap^ get() { return _target; }
+		}
 	};
 
 }

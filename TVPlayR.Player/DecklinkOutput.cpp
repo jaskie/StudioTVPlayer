@@ -1,9 +1,5 @@
 #include "stdafx.h"
 #include "DecklinkOutput.h"
-#include "Decklink/DecklinkIterator.h"
-#include "Decklink/DecklinkOutput.h"
-
-
 
 namespace TVPlayR {
 

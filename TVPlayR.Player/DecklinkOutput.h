@@ -1,12 +1,11 @@
 #pragma once
-
 #include "OutputBase.h"
 #include "Decklink/DecklinkOutput.h"
 
 using namespace System;
 
-namespace TVPlayR {
 
+namespace TVPlayR {
 	public ref class DecklinkOutput : public OutputBase
 	{
 	private:

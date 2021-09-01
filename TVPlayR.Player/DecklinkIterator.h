@@ -9,6 +9,8 @@ namespace TVPlayR {
 
 	ref class DecklinkInfo;
 	ref class DecklinkOutput;
+	ref class DecklinkInput;
+	ref class VideoFormat;
 
 	public ref class DecklinkIterator sealed
 	{
@@ -16,7 +18,8 @@ namespace TVPlayR {
 		static Decklink::DecklinkIterator* _iterator = new Decklink::DecklinkIterator();
 	public:
 		static array<DecklinkInfo^>^ EnumerateDevices();
-		static DecklinkOutput^ CreateOutput(DecklinkInfo^ info);
+		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink);
+		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audio_channel_count);
 	};
 
 }

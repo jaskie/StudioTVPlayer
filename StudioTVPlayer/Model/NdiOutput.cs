@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Model
         public string GroupNames { get; set; }
 
 
-        public override TVPlayR.OutputBase GetDevice()
+        public override TVPlayR.OutputBase GetOutput()
         {
             return _outputDevice;
         }

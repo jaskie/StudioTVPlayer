@@ -109,6 +109,7 @@
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
     <Compile Include="Model\Channel.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Model\DecklinkInput.cs" />
     <Compile Include="Model\DecklinkOutput.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\MediaPlayer.cs" />
@@ -120,7 +121,7 @@
     <Compile Include="Model\MediaVerifier.cs" />
     <Compile Include="Model\StreamOutput.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
-    <Compile Include="Model\Media.cs" />
+    <Compile Include="Model\MediaFile.cs" />
     <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="Providers\VersionInfo.cs" />
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />
@@ -131,6 +132,8 @@
     <Compile Include="ViewModel\Configuration\OutputViewModelBase.cs" />
     <Compile Include="ViewModel\Configuration\StreamOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
+    <Compile Include="ViewModel\Main\Input\DecklinkInputViewModel.cs" />
+    <Compile Include="ViewModel\Main\Input\InputsViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
@@ -163,6 +166,9 @@
     </Compile>
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Main\Input\InputsView.xaml.cs">
+      <DependentUpon>InputsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Main\MediaBrowser\MediaView.xaml.cs">
       <DependentUpon>MediaView.xaml</DependentUpon>
@@ -225,6 +231,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Configuration\WatchedFoldersView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Main\Input\InputsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

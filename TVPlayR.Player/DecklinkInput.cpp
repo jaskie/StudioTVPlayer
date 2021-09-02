@@ -4,7 +4,6 @@
 
 namespace TVPlayR {
 
-
 	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink)
 		: _decklink(new std::shared_ptr<Decklink::DecklinkInput>(decklink))
 	{

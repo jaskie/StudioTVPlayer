@@ -76,7 +76,7 @@ namespace StudioTVPlayer.Model
             PlayingRundownItem = item;
         }
 
-        public RundownItem AddToQueue(Media media, int index)
+        public RundownItem AddToQueue(MediaFile media, int index)
         {
             if (index < _rundown.Count)
             {
@@ -141,7 +141,7 @@ namespace StudioTVPlayer.Model
             Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
         }
 
-        internal void Submit(Media media)
+        internal void Submit(MediaFile media)
         {
             var item = new RundownItem(media);
             _rundown.Add(item);

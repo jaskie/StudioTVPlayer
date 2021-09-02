@@ -461,7 +461,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 var fileName = (dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f));
                 if (fileName is null)
                     return;
-                var media = new Media(fileName);
+                var media = new MediaFile(fileName);
                 MediaVerifier.Current.Verify(media);
                 if (!media.IsValid)
                     return;

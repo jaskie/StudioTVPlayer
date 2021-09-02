@@ -12,7 +12,7 @@ namespace StudioTVPlayer.Model
         private int _preloaded;
         private bool _isLoop;
 
-        public RundownItem(Media media)
+        public RundownItem(MediaFile media)
         {
             Media = media;
         }
@@ -25,7 +25,7 @@ namespace StudioTVPlayer.Model
         
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public Media Media { get; }
+        public MediaFile Media { get; }
 
         internal TVPlayR.FileInput FileInput { get; private set; }
 

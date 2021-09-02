@@ -7,6 +7,8 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:playerViews="clr-namespace:StudioTVPlayer.View.Main.Player"    
              xmlns:playerViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
+             xmlns:inputViews="clr-namespace:StudioTVPlayer.View.Main.Input"    
+             xmlns:inputViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
              xmlns:browserViews="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"       
              xmlns:browserViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser"       
              mc:Ignorable="d" 
@@ -30,7 +32,11 @@
             <ColumnDefinition Width="5*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
-        <ListBox Grid.Column="0" ItemsSource="{Binding Players}" 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <ListBox Grid.Column="0" Grid.RowSpan="2" ItemsSource="{Binding Players}" 
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  >
             <ItemsControl.ItemContainerStyle>
@@ -51,8 +57,9 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListBox>
-        <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Left" />
-        <TabControl Grid.Column="1" ItemsSource="{Binding Browsers}" Padding="0" SelectedIndex="0" Margin="3 0 0 0" 
+        <GridSplitter Grid.Column="1" Width="3" Grid.RowSpan="2" HorizontalAlignment="Left" />
+        <inputViews:InputsView Grid.Column="1" Grid.Row="0" Margin="3 0 0 0" DataContext="{Binding Inputs}"/>
+        <TabControl Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Browsers}" Padding="0" SelectedIndex="0" Margin="3 0 0 0" 
                     mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">
             <TabControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type browserViewModels:BrowserViewModel}">

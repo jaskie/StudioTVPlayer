@@ -11,7 +11,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
     public class MediaViewModel : ViewModelBase, IDisposable
     {
 
-        public Media Media { get; }
+        public MediaFile Media { get; }
 
         public IList<Model.MediaPlayer> Players => Providers.GlobalApplicationData.Current.Players;
 
@@ -34,7 +34,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public UiCommand QueueToPlayerCommand { get; }
 
-        public MediaViewModel(Media media)
+        public MediaViewModel(MediaFile media)
         {
             Media = media;
             media.PropertyChanged += Media_PropertyChanged;

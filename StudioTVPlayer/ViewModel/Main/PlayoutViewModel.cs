@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
 using StudioTVPlayer.Providers;
+using StudioTVPlayer.ViewModel.Main.Input;
 using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 using StudioTVPlayer.ViewModel.Main.Player;
 
@@ -25,6 +24,8 @@ namespace StudioTVPlayer.ViewModel.Main
         public MediaPlayerViewModel[] Players { get; }
 
         public BrowserViewModel[] Browsers { get; }
+
+        public InputsViewModel Inputs { get; }
 
         private void FocusBrowser(object obj)
         {

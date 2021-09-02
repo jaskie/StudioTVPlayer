@@ -107,7 +107,7 @@ namespace StudioTVPlayer.Model
             foreach (var output in Outputs)
             {
                 output.Initialize();
-                _channelR.AddOutput(output.GetDevice(), output.IsFrameClock);
+                _channelR.AddOutput(output.GetOutput(), output.IsFrameClock);
             }
             _channelR.AudioVolume += ChannelR_AudioVolume;
         }

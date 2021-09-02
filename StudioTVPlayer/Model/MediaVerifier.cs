@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Model
     {
         private struct MediaVerifyData
         {
-            public Media Media;
+            public MediaFile Media;
             public int Height;
             public int Width;
             public CancellationToken CancellationToken;
@@ -44,13 +44,13 @@ namespace StudioTVPlayer.Model
 
         public static MediaVerifier Current { get; } = new MediaVerifier();
 
-        public void Queue(Media media, CancellationToken cancellationToken)
+        public void Queue(MediaFile media, CancellationToken cancellationToken)
         {
             media.IsVerified = false;
             _mediaQueue.Add(new MediaVerifyData { Media = media, Width = DefaultThumbnailWidth, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
         }
 
-        public void Verify(Media media, int thumbnailWidth, int thumbnailHeight)
+        public void Verify(MediaFile media, int thumbnailWidth, int thumbnailHeight)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace StudioTVPlayer.Model
             media.IsVerified = true;
         }
 
-        public void Verify(Media media)
+        public void Verify(MediaFile media)
         {
             Verify(media, DefaultThumbnailWidth, DefaultThumbnailHeight);
         }

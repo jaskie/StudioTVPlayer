@@ -25,7 +25,7 @@
             _streamOutput = null;
         }
 
-        public override TVPlayR.OutputBase GetDevice()
+        public override TVPlayR.OutputBase GetOutput()
         {
             return _streamOutput;
         }

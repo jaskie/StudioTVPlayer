@@ -21,7 +21,7 @@ namespace StudioTVPlayer.Model
         private FileSystemWatcher _fs;
         private CancellationTokenSource _cancellationTokenSource;
         private DateTime _filterDate = DateTime.Today;
-        private readonly List<Media> _medias = new List<Media>();
+        private readonly List<MediaFile> _medias = new List<MediaFile>();
 
         [XmlAttribute]
         public string Name { get; set; }
@@ -71,7 +71,7 @@ namespace StudioTVPlayer.Model
                 _medias.Clear();
                 foreach (var media in Directory.EnumerateFiles(Path)
                     .Where(Accept)
-                    .Select(path => new Media(path)))
+                    .Select(path => new MediaFile(path)))
                 {
                     _medias.Add(media);
                     media.PropertyChanged += Media_PropertyChanged;
@@ -80,7 +80,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public IList<Media> Medias
+        public IList<MediaFile> Medias
         {
             get
             {
@@ -122,7 +122,7 @@ namespace StudioTVPlayer.Model
         private void Fs_MediaChanged(object sender, FileSystemEventArgs e)
         {
             Debug.WriteLine("Media Changed Notified");
-            Media media;
+            MediaFile media;
             lock (((IList)_medias).SyncRoot)
                 media = _medias.FirstOrDefault(m => m.FullPath == e.FullPath);
             if (media == null)
@@ -134,7 +134,7 @@ namespace StudioTVPlayer.Model
         private void Fs_MediaRenamed(object sender, RenamedEventArgs e)
         {
             Debug.WriteLine("Media Renamed Notified");
-            Media media;
+            MediaFile media;
             lock (((IList)_medias).SyncRoot)
                 media = _medias.FirstOrDefault(m => m.FullPath == e.OldFullPath);
             if (media == null && Accept(e.FullPath))
@@ -158,9 +158,9 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        private Media AddMediaFromPath(string fullPath)
+        private MediaFile AddMediaFromPath(string fullPath)
         {
-            var media = new Media(fullPath);
+            var media = new MediaFile(fullPath);
             lock (((IList)_medias).SyncRoot)
                 _medias.Add(media);
             media.PropertyChanged += Media_PropertyChanged;
@@ -169,14 +169,14 @@ namespace StudioTVPlayer.Model
 
         private void Media_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == nameof(Media.Duration))
-                MediaChanged?.Invoke(this, new MediaEventArgs((Media)sender, MediaEventKind.Change));
+            if(e.PropertyName == nameof(MediaFile.Duration))
+                MediaChanged?.Invoke(this, new MediaEventArgs((MediaFile)sender, MediaEventKind.Change));
         }
 
         private void Fs_MediaDeleted(object sender, FileSystemEventArgs e)
         {
             Debug.WriteLine("Media Delete Notified");
-            Media media;
+            MediaFile media;
             lock (((IList)_medias).SyncRoot)
             {
                 media = _medias.FirstOrDefault(m => m.FullPath == e.FullPath);
@@ -203,7 +203,7 @@ namespace StudioTVPlayer.Model
             return true;
         }
 
-        private void AddToVerificationQueue(Media media)
+        private void AddToVerificationQueue(MediaFile media)
         {
             MediaVerifier.Current.Queue(media, _cancellationTokenSource.Token);
         }

@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Model
 
         public abstract void Initialize();
 
-        public abstract TVPlayR.OutputBase GetDevice();
+        public abstract TVPlayR.OutputBase GetOutput();
 
         public abstract void Dispose();
     }

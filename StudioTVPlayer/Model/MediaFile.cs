@@ -9,7 +9,7 @@ namespace StudioTVPlayer.Model
 {
 
     [DebuggerDisplay(nameof(FullPath))]
-    public class Media : INotifyPropertyChanged
+    public class MediaFile : INotifyPropertyChanged
     {
         private string _directoryName;
         private string _name;
@@ -33,15 +33,13 @@ namespace StudioTVPlayer.Model
         private bool _haveAlphaChannel;
         private readonly FileInfo _fileInfo;
 
-        public Media(string path)
+        public MediaFile(string path)
         {
             _fileInfo = new FileInfo(path);
             ReadFileInfo();
         }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
-
 
         public string DirectoryName
         {

@@ -25,7 +25,7 @@ namespace StudioTVPlayer.Controls
 
         public static readonly DependencyProperty EnterPressedCommandProperty =
            DependencyProperty.Register(
-               "EnterPressedCommand",
+               nameof(EnterPressedCommand),
                typeof(ICommand),
                typeof(TimecodeEdit),
                new FrameworkPropertyMetadata(OnEnterPressedChanged));
@@ -40,6 +40,11 @@ namespace StudioTVPlayer.Controls
             //cancel the paste and cut command
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Paste, null, DoNothingCommand));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Cut, null, DoNothingCommand));
+        }
+
+        static TimecodeEdit()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(TimecodeEdit), new FrameworkPropertyMetadata(typeof(TextBox)));
         }
 
 
@@ -86,6 +91,12 @@ namespace StudioTVPlayer.Controls
         {
             get => (TVPlayR.VideoFormat)GetValue(VideoFormatProperty);
             set => SetValue(VideoFormatProperty, value);
+        }
+
+        public ICommand EnterPressedCommand
+        {
+            get => (ICommand)GetValue(EnterPressedCommandProperty);
+            set => SetValue(EnterPressedCommandProperty, value);
         }
 
         /// <summary>

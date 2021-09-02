@@ -33,16 +33,18 @@ namespace StudioTVPlayer
             base.OnExit(e);
             try
             {
-                GlobalApplicationData.Current.Shutdown();
                 ViewModel.MainViewModel.Instance.Dispose();
-            } 
-            catch(OperationCanceledException)
+                GlobalApplicationData.Current.Shutdown();
+            }
+            catch (OperationCanceledException)
             { }
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-#if !DEBUG
+#if DEBUG
+            CrashLogger.SaveDump(e.ExceptionObject.ToString());
+#else
             if (e.IsTerminating)
                 MessageBox.Show(e.ExceptionObject.ToString(), "Error - terminating application", MessageBoxButton.OK, MessageBoxImage.Error);
             else
@@ -52,7 +54,9 @@ namespace StudioTVPlayer
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-#if !DEBUG
+#if DEBUG
+            CrashLogger.SaveDump(e.Exception.ToString());
+#else
             MessageBox.Show(e.Exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
 #endif

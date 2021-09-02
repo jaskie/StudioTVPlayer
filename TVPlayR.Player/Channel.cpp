@@ -44,16 +44,22 @@ namespace TVPlayR {
 		delete _channel;
 	}
 
-	bool Channel::AddOutput(OutputBase^ device, bool setAsClockBase)
+	bool Channel::AddOutput(OutputBase^ output, bool setAsClockBase)
 	{
-		if (device == nullptr)
+		if (output == nullptr)
 			return false;
 		if (setAsClockBase)
-			_channel->SetFrameClock(device->GetNativeDevice());
-		if (!_channel->AddOutput(device->GetNativeDevice()))
+			_channel->SetFrameClock(output->GetNativeDevice());
+		if (!_channel->AddOutput(output->GetNativeDevice()))
 			return false;
-		_outputs->Add(device);
+		_outputs->Add(output);
 		return true;
+	}
+
+	void Channel::RemoveOutput(OutputBase^ output)
+	{
+		if (_outputs->Remove(output))
+			_channel->RemoveOutput(output->GetNativeDevice());
 	}
 
 	void Channel::Load(FileInput^ file)

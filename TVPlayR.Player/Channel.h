@@ -27,7 +27,8 @@ namespace TVPlayR {
 		Channel(String^ name, VideoFormat^ videoFormat, PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();
 		!Channel();
-		bool AddOutput(OutputBase^ device, bool setAsClockBase);
+		bool AddOutput(OutputBase^ output, bool setAsClockBase);
+		void RemoveOutput(OutputBase^ output);
 		void Load(FileInput^ file);
 		void Preload(FileInput^ file);
 		void Clear();

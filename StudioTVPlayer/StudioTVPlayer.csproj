@@ -122,6 +122,7 @@
     <Compile Include="Model\StreamOutput.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\MediaFile.cs" />
+    <Compile Include="Providers\CrashLogger.cs" />
     <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="Providers\VersionInfo.cs" />
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />

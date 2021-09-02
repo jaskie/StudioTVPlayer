@@ -17,6 +17,8 @@ namespace TVPlayR {
 	public ref class VideoFormat sealed
 	{
 	private:
+		static VideoFormat();
+		VideoFormat(int video_format_id);
 		Core::VideoFormat* const _native_fomat;
 		const String^ _name;
 		const Rational _sample_aspect_ratio;
@@ -25,10 +27,9 @@ namespace TVPlayR {
 	internal:
 		Core::VideoFormatType GetNativeEnumType() { return _native_fomat->type(); }
 	public:
-		VideoFormat(int video_format_id);
 		!VideoFormat();
 		~VideoFormat();
-		static array<VideoFormat^>^ EnumVideoFormats();
+		static array<VideoFormat^>^ EnumVideoFormats() { return _videoFormats; }
 		property String^ Name {	String^ get() { return (String^)_name; }	}
 		property Rational SampleAspectRatio { Rational get() { return _sample_aspect_ratio; }	}
 		property int Width { int get() { return _native_fomat->width(); } }

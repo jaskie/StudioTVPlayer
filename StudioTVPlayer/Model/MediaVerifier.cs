@@ -35,7 +35,7 @@ namespace StudioTVPlayer.Model
             _cancellationTokenSource.Cancel();
             try
             {
-                _verificationTask.Wait();
+                _verificationTask.Wait(_cancellationTokenSource.Token);
             }
             catch (TaskCanceledException)
             { }

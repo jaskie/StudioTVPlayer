@@ -4,13 +4,11 @@ using System.IO;
 using System.Linq;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using TVPlayR;
 
 namespace StudioTVPlayer.Providers
 {
     class GlobalApplicationData 
     {
-
         private const string PathName = "StudioTVPlayer";
         private const string ConfigurationFile = "configuration.xml";
         private static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);

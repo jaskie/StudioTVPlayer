@@ -16,7 +16,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>TVPlayRPlayer</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -59,12 +59,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../TVPlayRLib/;$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\include;$(SolutionDir)..\TVPlayR\dependencies\Ndi\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TVPlayRLib/;$(SolutionDir)dependencies\FFMpeg\include;$(SolutionDir)dependencies\Ndi\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>avformat.lib;avdevice.lib;avcodec.lib;avutil.lib;swscale.lib;avfilter.lib;postproc.lib;swresample.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>;$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\lib;$(SolutionDir)..\TVPlayR\dependencies\Ndi\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FFMpeg\lib;$(SolutionDir)dependencies\Ndi\lib</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
       <Culture>0x007f</Culture>
@@ -75,12 +75,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../TVPlayRLib/;$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\include;$(SolutionDir)..\TVPlayR\dependencies\Ndi\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../TVPlayRLib/;$(SolutionDir)dependencies\FFMpeg\include;$(SolutionDir)dependencies\Ndi\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>avformat.lib;avdevice.lib;avcodec.lib;avutil.lib;swscale.lib;avfilter.lib;postproc.lib;swresample.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>;$(SolutionDir)..\TVPlayR\dependencies\FFMpeg\lib;$(SolutionDir)..\TVPlayR\dependencies\Ndi\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\FFMpeg\lib;$(SolutionDir)dependencies\Ndi\lib</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
       <Culture>0x007f</Culture>

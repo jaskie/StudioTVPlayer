@@ -217,7 +217,7 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 		break;
 	}
 
-	bool timecode_is_supported_ = av_timecode_check_frame_rate(frame_rate_.av()) == 0;
+	timecode_is_supported_ = av_timecode_check_frame_rate(frame_rate_.av()) == 0;
 	if (timecode_is_supported_)
 		THROW_ON_FFMPEG_ERROR(av_timecode_init(
 			&timecode_,

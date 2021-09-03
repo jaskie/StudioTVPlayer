@@ -42,12 +42,12 @@ namespace TVPlayR {
 
 	int VideoFormat::TimeToFrameNumber(TimeSpan time)
 	{
-		return static_cast<int>(time.Ticks * ((Rational)_frame_rate).Numerator / (((Rational)_frame_rate).Denominator * TimeSpan::TicksPerSecond));
+		return static_cast<int>(time.Ticks * _frame_rate.Numerator / (_frame_rate.Denominator * TimeSpan::TicksPerSecond));
 	}
 
 	TimeSpan VideoFormat::FrameNumberToTime(int frame_number)
 	{
-		return TimeSpan(frame_number * TimeSpan::TicksPerSecond * ((Rational)_frame_rate).Denominator / ((Rational)_frame_rate).Numerator);
+		return TimeSpan(frame_number * TimeSpan::TicksPerSecond * _frame_rate.Denominator / _frame_rate.Numerator);
 	}
 
 }

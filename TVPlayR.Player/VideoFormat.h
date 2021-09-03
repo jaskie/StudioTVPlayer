@@ -22,7 +22,7 @@ namespace TVPlayR {
 		Core::VideoFormat* const _native_fomat;
 		const String^ _name;
 		const Rational _sample_aspect_ratio;
-		const Rational _frame_rate;
+		Rational _frame_rate;
 		static array<VideoFormat^>^ _videoFormats;
 	internal:
 		Core::VideoFormatType GetNativeEnumType() { return _native_fomat->type(); }

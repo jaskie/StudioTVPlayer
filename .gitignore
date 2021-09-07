@@ -28,3 +28,5 @@
 /Helpers/TestPlayer/Debug
 /TVPlayRLib/Decklink/DeckLinkAPI_h.h
 /TVPlayRLib/Decklink/DeckLinkAPI_i.c
+/Helpers/TestCSharp/bin
+/Helpers/TestCSharp/obj

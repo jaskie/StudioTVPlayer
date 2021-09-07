@@ -27,7 +27,7 @@ namespace StudioTVPlayer.Model
         public void Initialize()
         {
             var videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormat);
-            var info = TVPlayR.DecklinkIterator.EnumerateDevices().FirstOrDefault(i => i.Index == DeviceIndex);
+            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
             _input = info is null || videoFormat is null ? null : TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2);
         }
     }

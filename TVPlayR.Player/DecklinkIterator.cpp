@@ -7,13 +7,17 @@
 
 namespace TVPlayR {
 
-	array<DecklinkInfo^>^ DecklinkIterator::EnumerateDevices()
+	void DecklinkIterator::Refresh()
 	{
 		int count = static_cast<int>(_iterator->Size());
-		array<DecklinkInfo^>^ devices = gcnew array<DecklinkInfo^>(count);
+		_devices = gcnew array<DecklinkInfo^>(count);
 		for (int i = 0; i < count; i++)
-			devices[i] = gcnew DecklinkInfo(_iterator->operator[](i));
-		return devices;
+			_devices[i] = gcnew DecklinkInfo(_iterator->operator[](i));
+	}
+
+	static DecklinkIterator::DecklinkIterator()
+	{
+		Refresh();
 	}
 
 	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink)

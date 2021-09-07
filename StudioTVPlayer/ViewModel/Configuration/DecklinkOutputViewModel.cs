@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == decklink.DeviceIndex);
         }
 
-        public static TVPlayR.DecklinkInfo[] Devices { get; } = TVPlayR.DecklinkIterator.EnumerateDevices();
+        public static TVPlayR.DecklinkInfo[] Devices { get; } = TVPlayR.DecklinkIterator.Devices;
 
         public TVPlayR.DecklinkInfo SelectedDevice { get => _selectedDevice; set => Set(ref _selectedDevice, value); }
 

@@ -136,8 +136,12 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR == null)
                 return;
+            foreach (var o in Outputs)
+                _channelR.RemoveOutput(o.GetOutput());
             _channelR.Clear();
             _channelR.Dispose();
+            foreach (var o in Outputs)
+                o.Dispose();
             _previewOutput?.Dispose();
             _previewOutput = null;
             _channelR.AudioVolume -= ChannelR_AudioVolume;

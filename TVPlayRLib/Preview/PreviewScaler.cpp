@@ -8,7 +8,7 @@ namespace TVPlayR {
 std::string PreviewScaler::GetFilterString(const Core::VideoFormat& channel_format, const Core::PixelFormat pix_fmt, int width, int height)
 {
 	std::ostringstream filter_str;
-	filter_str << "scale=w=" << width << ":h=" << height;
+	filter_str << "field,scale=w=" << width << ":h=" << height;
 	if (pix_fmt == Core::PixelFormat::yuv422)
 	{
 		filter_str << ":in_color_matrix=";
@@ -18,9 +18,6 @@ std::string PreviewScaler::GetFilterString(const Core::VideoFormat& channel_form
 		else
 			filter_str << "bt709";
 	}
-	filter_str << ":sws_flags=neighbor";
-	filter_str << ":sws_dither=none";
-	filter_str << ":interl=-1";
 	return filter_str.str();
 }
 

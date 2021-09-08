@@ -23,7 +23,7 @@ namespace TVPlayR {
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
 		void DrawFrame();
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return std::dynamic_pointer_cast<Core::OutputDevice>(*_preview); }
+		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _preview == nullptr ? nullptr : *_preview; }
 	public:
 		PreviewOutput(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
 		~PreviewOutput();

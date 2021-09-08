@@ -42,6 +42,8 @@ namespace TVPlayR {
 			{
 				executor_.invoke([this]()
 				{
+					if (audio_volume_callback_)
+						audio_volume_callback_ = nullptr;
 					if (frame_clock_)
 						frame_clock_->SetFrameRequestedCallback(nullptr);
 					frame_clock_ = nullptr;
@@ -109,6 +111,14 @@ namespace TVPlayR {
 				});
 			}
 
+			void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback)
+			{
+				executor_.invoke([this, &callback]
+				{
+					audio_volume_callback_ = callback;
+				});
+			}
+			
 			void Load(std::shared_ptr<InputSource>& source)
 			{
 				executor_.invoke([this, &source]
@@ -172,7 +182,7 @@ namespace TVPlayR {
 
 		void Channel::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
 
-		void Channel::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->audio_volume_callback_ = callback; }
+		void Channel::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
 
 		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 

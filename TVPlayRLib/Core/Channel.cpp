@@ -38,6 +38,16 @@ namespace TVPlayR {
 			{
 			}
 
+			~implementation()
+			{
+				executor_.invoke([this]()
+				{
+					if (frame_clock_)
+						frame_clock_->SetFrameRequestedCallback(nullptr);
+					frame_clock_ = nullptr;
+				});
+			}
+
 			void RequestFrame(int audio_samples_count)
 			{
 				executor_.begin_invoke([this, audio_samples_count]() mutable

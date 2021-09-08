@@ -12,10 +12,15 @@ namespace TestCSharp
     {
         static void Main(string[] args)
         {
-            Channel channel = new Channel("Channel 1", VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == "1080i50"), PixelFormat.yuv422, 2);
-            channel.AddOutput(DecklinkIterator.CreateOutput(DecklinkIterator.Devices[0]), true);
-            channel.AudioVolume += Channel_AudioVolume;
-            Console.ReadKey();
+            using (Channel channel = new Channel("Channel 1", VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == "1080i50"), PixelFormat.yuv422, 2))
+            {
+                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[0]))
+                {
+                    channel.AddOutput(output, true);
+                    channel.AudioVolume += Channel_AudioVolume;
+                }
+                Console.ReadKey();
+            }
         }
 
         private static void Channel_AudioVolume(object sender, AudioVolumeEventArgs e)

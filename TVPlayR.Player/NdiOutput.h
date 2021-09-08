@@ -26,7 +26,7 @@ namespace TVPlayR {
 			String^ get() { return _groupNames; }
 		}
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return *_ndi; }
+		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _ndi == nullptr ? nullptr : *_ndi; }
 	};
 
 }

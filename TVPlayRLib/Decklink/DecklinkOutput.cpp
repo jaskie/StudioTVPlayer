@@ -105,8 +105,8 @@ namespace TVPlayR {
 					DebugPrintLine(msg.str());
 				}
 #endif			
-				if (FAILED(ret))
-					decklink_frame->Release();
+				//if (FAILED(ret))
+				//	decklink_frame->Release();
 				return SUCCEEDED(ret);
 			}
 

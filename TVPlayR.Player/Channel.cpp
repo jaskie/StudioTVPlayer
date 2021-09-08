@@ -39,8 +39,12 @@ namespace TVPlayR {
 	Channel::!Channel()
 	{
 		_channel->SetAudioVolumeCallback(nullptr);
-		for each (OutputBase^ output in _outputs)
-			_channel->RemoveOutput(output->GetNativeDevice());
+		for each (OutputBase ^ output in _outputs)
+		{
+			std::shared_ptr<Core::OutputDevice> native_ouptut = output->GetNativeDevice();
+			if (native_ouptut)
+				_channel->RemoveOutput(native_ouptut);
+		}
 		delete _channel;
 	}
 

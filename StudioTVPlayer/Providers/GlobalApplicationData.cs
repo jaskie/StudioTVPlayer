@@ -50,9 +50,8 @@ namespace StudioTVPlayer.Providers
                 channel.Dispose();
         }
 
-        public void UpdateChannels(List<Model.Channel> channels)
+        public void UpdateChannels(List<Channel> channels)
         {
-            var oldChannels = Configuration.Channels;
             foreach (var channel in channels)
             {
                 if (!channel.IsInitialized)
@@ -73,7 +72,12 @@ namespace StudioTVPlayer.Providers
             {
                 if (!channels.Contains(channel))
                 {
-                    Players.FirstOrDefault(p => p.Channel == channel)?.Dispose();
+                    var player = Players.FirstOrDefault(p => p.Channel == channel);
+                    if (!(player is null))
+                    {
+                        player.Dispose();
+                        Players.Remove(player);
+                    }
                     channel.Dispose();
                 }
             }

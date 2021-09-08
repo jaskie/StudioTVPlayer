@@ -6,14 +6,14 @@
 #include "../Core/Channel.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
+#include "../Common/BlockingCollection.h"
 
 namespace TVPlayR {
 	namespace Ndi {
 		
-		struct NdiOutput::implementation: Common::DebugTarget<true>
+		struct NdiOutput::implementation: Common::DebugTarget<false>
 		{
 			const std::string source_name_;
-			const std::string group_name_;
 			volatile bool is_running_ = false;
 			NDIlib_v4* const ndi_;
 			const NDIlib_send_instance_t send_instance_;
@@ -22,8 +22,7 @@ namespace TVPlayR {
 			int audio_sample_rate_ = 48000;
 			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			std::shared_ptr<AVFrame> last_video_;
-			std::shared_ptr<FFmpeg::AVSync> buffer_frame_;
-			std::mutex buffer_mutex_;
+			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			Common::Executor executor_;
 			int64_t video_frames_pushed_ = 0LL;
@@ -32,7 +31,9 @@ namespace TVPlayR {
 
 			implementation(const std::string& source_name, const std::string& group_names)
 				: executor_("NDI output " + source_name)
+				, buffer_(4)
 				, format_(Core::VideoFormatType::invalid)
+				, source_name_(source_name)
 				, ndi_(LoadNdi())
 				, send_instance_(ndi_ ? CreateSend(ndi_, source_name, group_names) : nullptr)
 			{				
@@ -75,25 +76,24 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				DebugPrintIf(buffer_frame_, "NdiOutput: Frame dropped when pushed\n");
-				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
+				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
+					DebugPrintLine("NdiOutput " + source_name_ + ": Frame dropped when pushed");
 			}
 						
 			void Tick()
 			{
 				std::shared_ptr<AVFrame> audio;
 				auto buffer = GetBuffer();
-				if (buffer)
+				if (buffer.Video)
 				{
-					last_video_ = buffer->Video;
-					last_video_time_ = buffer->Time;
-					audio = buffer->Audio;
+					last_video_ = buffer.Video;
+					last_video_time_ = buffer.Time;
+					audio = buffer.Audio;
 				}
 				else
 				{
 					audio = FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, audio_sample_format_);
-					DebugPrintLine("Frame late");
+					DebugPrintLine("NdiOutput " + source_name_ + ": Frame late");
 				}
 				video_frames_pushed_++;
 				audio_samples_pushed_ += audio->nb_samples;
@@ -107,12 +107,11 @@ namespace TVPlayR {
 					executor_.begin_invoke([this] { Tick(); }); // next frame
 			}
 
-			std::shared_ptr<FFmpeg::AVSync> GetBuffer()
+			FFmpeg::AVSync GetBuffer()
 			{
-				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				std::shared_ptr<FFmpeg::AVSync> buffer = buffer_frame_;
-				buffer_frame_.reset();
-				return buffer;
+				FFmpeg::AVSync sync;
+				buffer_.try_take(sync);
+				return sync;
 			}
 
 			int AudioSamplesRequired() 

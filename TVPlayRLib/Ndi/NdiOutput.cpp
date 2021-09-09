@@ -14,7 +14,6 @@ namespace TVPlayR {
 		struct NdiOutput::implementation: Common::DebugTarget<false>
 		{
 			const std::string source_name_;
-			volatile bool is_running_ = false;
 			NDIlib_v4* const ndi_;
 			const NDIlib_send_instance_t send_instance_;
 			Core::VideoFormat format_;
@@ -31,7 +30,7 @@ namespace TVPlayR {
 
 			implementation(const std::string& source_name, const std::string& group_names)
 				: executor_("NDI output " + source_name)
-				, buffer_(4)
+				, buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, source_name_(source_name)
 				, ndi_(LoadNdi())
@@ -51,9 +50,8 @@ namespace TVPlayR {
 			{
 				return executor_.invoke([&] 
 				{
-					if (is_running_)
+					if (format_.type() != Core::VideoFormatType::invalid)
 						return false;
-					is_running_ = true;
 					format_ = channel.Format();
 					audio_sample_rate_ = channel.AudioSampleRate();
 					last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, channel.PixelFormat());
@@ -69,7 +67,6 @@ namespace TVPlayR {
 			{
 				executor_.invoke([this] 
 				{ 
-					is_running_ = false;
 					format_ = Core::VideoFormatType::invalid;
 				});
 			}
@@ -103,7 +100,7 @@ namespace TVPlayR {
 				ndi_->send_send_video_v2(send_instance_, &ndi_video);
 				NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(audio, last_video_time_);
 				ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
-				if (is_running_)
+				if (format_.type() != Core::VideoFormatType::invalid)
 					executor_.begin_invoke([this] { Tick(); }); // next frame
 			}
 

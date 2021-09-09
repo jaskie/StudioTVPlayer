@@ -4,6 +4,7 @@
 #include "../Core/VideoFormat.h"
 #include "../Core/PixelFormat.h"
 #include "../Core/Channel.h"
+#include "../Common/BlockingCollection.h"
 #include "../Common/Executor.h"
 #include "DecklinkUtils.h"
 #include "DecklinkVideoFrame.h"
@@ -23,9 +24,7 @@ namespace TVPlayR {
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 2;
-			std::atomic_bool is_running_;
-			std::mutex buffer_mutex_;
-			std::shared_ptr<FFmpeg::AVSync> buffer_frame_;
+			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
 
@@ -35,6 +34,7 @@ namespace TVPlayR {
 				: output_(decklink)
 				, attributes_(decklink)
 				, keyer_(decklink)
+				, buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
 			{
@@ -74,7 +74,7 @@ namespace TVPlayR {
 						
 			void Preroll(Core::Channel& channel)
 			{
-				if (is_running_ || !output_)
+				if (!output_)
 					return;
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
@@ -135,7 +135,7 @@ namespace TVPlayR {
 
 			bool SetBufferSize(int size) 
 			{
-				if (is_running_)
+				if (format_.type() != Core::VideoFormatType::invalid)
 					return false;
 				buffer_size_ = size;
 				return true;
@@ -147,32 +147,32 @@ namespace TVPlayR {
 					return false;
 				if (!OpenOutput(GetDecklinkDisplayMode(channel.Format().type()), BMDPixelFormatFromVideoFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
 					return false;
+				if (channel.Format().type() == Core::VideoFormatType::invalid)
+					THROW_EXCEPTION("Invalid video format");
 				format_ = channel.Format();
 				audio_channels_count_ = channel.AudioChannelsCount();
 				last_video_time_ = 0LL;
 				Preroll(channel);
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
-				is_running_ = true;
 				return true;
 			}
 
 			void ReleaseChannel()
 			{
-				if (!is_running_.exchange(false))
+				if (format_.type() == Core::VideoFormatType::invalid)
 					return;
+				format_ = Core::VideoFormatType::invalid;
 				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				BMDTimeValue actual_stop;
 				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
 				output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
-				format_ = Core::VideoFormatType::invalid;
 			}
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				DebugPrintIf(buffer_frame_, "DecklinkOutput: Frame dropped when pushed\n");
-				buffer_frame_ = std::make_shared<FFmpeg::AVSync>(sync);
+				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
+					DebugPrintLine("DecklinkOutput: Frame dropped when pushed\n");
 			}
 
 			//IDeckLinkVideoOutputCallback
@@ -184,22 +184,15 @@ namespace TVPlayR {
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 
-				std::shared_ptr<FFmpeg::AVSync> sync;
-				{
-					std::lock_guard<std::mutex> lock(buffer_mutex_);
-					if (buffer_frame_)
-					{
-						sync = buffer_frame_;
-						buffer_frame_.reset();
-					}
-				}
-				DebugPrintIf(!sync, "DecklinkOutput: frame not received");
+				FFmpeg::AVSync sync;
+				if (buffer_.try_take(sync) != Common::BlockingCollectionStatus::Ok)
+					DebugPrintLine("DecklinkOutput: frame not received");
 
-				if (!sync)
-					sync = std::make_shared<FFmpeg::AVSync>(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
+				if (!sync.Video)
+					sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
 
-				if (ScheduleVideo(sync->Video, sync->Time))
-					ScheduleAudio(sync->Audio);
+				if (ScheduleVideo(sync.Video, sync.Time))
+					ScheduleAudio(sync.Audio);
 
 #ifdef DEBUG
 				auto frame = static_cast<DecklinkVideoFrame*>(completedFrame);

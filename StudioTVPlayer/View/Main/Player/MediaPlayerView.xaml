@@ -61,10 +61,11 @@
             <Grid Grid.Row="1" Margin="10" MinWidth="200">
                 <Grid.Resources>
                     <Style TargetType="controls:TimecodeEdit" BasedOn="{StaticResource {x:Type TextBox}}">
-                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="FontSize" Value="22"/>
                         <Setter Property="TextAlignment" Value="Center"/>
                         <Setter Property="VideoFormat" Value="{Binding VideoFormat}"/>
-                        <Setter Property="Padding" Value="2"/>
+                        <Setter Property="Padding" Value="2 0"/>
+                        <Setter Property="mah:ControlsHelper.CornerRadius" Value="3"/>
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
@@ -73,7 +74,7 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition Width="115"/>
+                    <ColumnDefinition Width="120"/>
                 </Grid.ColumnDefinitions>
                 <Slider Orientation="Vertical" Grid.RowSpan="2" Minimum="-15" Maximum="15" HorizontalAlignment="Left" 
                         AutoToolTipPlacement="BottomRight"
@@ -91,7 +92,7 @@
                     </Grid.RowDefinitions>
                     <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding VideoFormat}" />
                     <TextBlock Text="Current time" Grid.Row="0" />
-                    <controls:TimecodeEdit Grid.Row="1" BorderThickness="0.7" mah:ControlsHelper.CornerRadius="3" 
+                    <controls:TimecodeEdit Grid.Row="1" BorderThickness="0.7" 
                                            Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                            EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
                                            />
@@ -102,10 +103,33 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Time left" Grid.Row="0" />
-                    <controls:TimecodeEdit Grid.Row="1" BorderThickness="0" 
+                    <controls:TimecodeEdit Grid.Row="1" BorderThickness="0"
                                            Time="{Binding OutTime}"
                                            IsReadOnly="True"
-                                           />
+                                           >
+                        <controls:TimecodeEdit.Resources>
+                            <Storyboard x:Key="Blink" AutoReverse="True" BeginTime="00:00:00" RepeatBehavior="Forever">
+                                <ColorAnimationUsingKeyFrames Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)" Duration="00:00:00.5" AutoReverse="True">
+                                    <DiscreteColorKeyFrame KeyTime="0:00:00" Value="#B00000"/>
+                                    <DiscreteColorKeyFrame KeyTime="0:00:00.25" Value="Transparent"/>
+                                </ColorAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </controls:TimecodeEdit.Resources>
+                        <controls:TimecodeEdit.Style>
+                            <Style TargetType="controls:TimecodeEdit" BasedOn="{StaticResource {x:Type controls:TimecodeEdit}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding OutTimeBlink}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard x:Name="Blink" Storyboard="{StaticResource Blink}"/>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <StopStoryboard BeginStoryboardName="Blink"/>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </controls:TimecodeEdit.Style>
+                    </controls:TimecodeEdit>
                 </Grid>
             </Grid>
             <UniformGrid Margin="10 9" Grid.Row="2" Columns="4">

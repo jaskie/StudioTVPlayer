@@ -30,6 +30,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         //private bool _isSliderDrag;
         private double _volume;
         private ImageSource _preview;
+        private bool _outTimeBlink;
 
         public MediaPlayerViewModel(Model.MediaPlayer player)
         {
@@ -64,7 +65,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         public TVPlayR.VideoFormat VideoFormat { get; }
 
         public bool IsPlaying => _mediaPlayer.IsPlaying;
-        
+
         public bool IsFocused
         {
             get => _isFocused;
@@ -87,6 +88,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             get => _outTime;
             set => Set(ref _outTime, value);
         }
+
+        public bool OutTimeBlink { get => _outTimeBlink; set => Set(ref _outTimeBlink, value); }
 
         public double SliderPosition
         {
@@ -114,7 +117,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
 
-        public bool IsLoop { 
+        public bool IsLoop
+        {
             get => _mediaPlayer.IsLoop;
             set
             {
@@ -125,7 +129,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public bool DisableAfterUnload { 
+        public bool DisableAfterUnload
+        {
             get => _mediaPlayer.DisableAfterUnload;
             set
             {
@@ -326,6 +331,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 _mediaPlayer.Pause();
                 NotifyPropertyChanged(nameof(IsPlaying));
+                OutTimeBlink = false;
             }
             catch
             {
@@ -337,13 +343,17 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
         {
-            DisplayTime = e.Time;
-            OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
-            if (/*!_isSliderDrag && */IsPlaying)
+            OnUiThread(() =>
             {
-                _sliderPosition = e.Time.TotalMilliseconds;
-                NotifyPropertyChanged(nameof(SliderPosition));
-            }
+                DisplayTime = e.Time;
+                OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
+                OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _mediaPlayer.OneFrame;
+                if (/*!_isSliderDrag && */IsPlaying)
+                {
+                    _sliderPosition = e.Time.TotalMilliseconds;
+                    NotifyPropertyChanged(nameof(SliderPosition));
+                }
+            });
         }
 
         private void MediaPlayer_Stopped(object sender, EventArgs e)

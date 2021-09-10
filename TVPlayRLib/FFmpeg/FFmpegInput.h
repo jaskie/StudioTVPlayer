@@ -14,7 +14,7 @@ namespace TVPlayR {
 class FFmpegInput: public Core::InputSource
 {
 public:
-	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount);
+	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
 	~FFmpegInput();
 	virtual std::shared_ptr<AVFrame> GetFrameAt(int64_t time);
 	virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count);

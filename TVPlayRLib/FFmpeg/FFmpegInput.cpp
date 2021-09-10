@@ -19,13 +19,16 @@ namespace TVPlayR {
 			   		 
 struct FFmpegInput::implementation : Common::DebugTarget<false>
 {
-	std::atomic_bool is_eof_ = false;
+	// const variables
 	const std::string file_name_;
-	std::atomic_bool is_playing_ = false;
-	InputFormat input_;
-	const bool is_stream_;
 	const Core::HwAccel acceleration_;
 	const std::string hw_device_;
+	
+	InputFormat input_;
+
+	std::atomic_bool is_eof_ = false;
+	std::atomic_bool is_playing_ = false;
+	const bool is_stream_;
 	std::unique_ptr<Decoder> video_decoder_;
 	std::atomic_bool is_loop_ = false;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
@@ -35,19 +38,18 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 	std::unique_ptr<SynchronizingBuffer> buffer_;
 	std::unique_ptr<std::thread> producer_thread_;
 	Common::Semaphore producer_semaphore_;
-	//std::mutex 
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
 
-	implementation(const std::string& fileName, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
-		: file_name_(fileName)
-		, input_(fileName)
+	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
+		: file_name_(file_name)
+		, input_(file_name)
 		, acceleration_(acceleration)
 		, hw_device_(hw_device)
-		, is_stream_(IsStream(fileName))
+		, is_stream_(IsStream(file_name))
 	{ 
 		input_.LoadStreamData();
 		InitializeVideoDecoder();
@@ -491,8 +493,8 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 };
 
 
-FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
-	: impl_(std::make_unique<implementation>(file_name, acceleration, hw_device, audioChannelCount))
+FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device)
+	: impl_(std::make_unique<implementation>(file_name, acceleration, hw_device))
 { }
 
 FFmpegInput::~FFmpegInput(){}

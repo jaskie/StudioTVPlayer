@@ -1,24 +1,35 @@
 #include "../pch.h"
 #include "InputFormat.h"
 #include "FFmpegUtils.h"
+#include "../Common/Executor.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-InputFormat::InputFormat(const std::string& fileName)
-	: format_context_(NULL, [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
-{
-	AVFormatContext* weak_format_context = NULL;
-	THROW_ON_FFMPEG_ERROR(avformat_open_input(&weak_format_context, fileName.c_str(), NULL, NULL) == 0 && weak_format_context);
-	if (!weak_format_context)
-		THROW_EXCEPTION("Format context not created")
-	if (!weak_format_context)
-		return;
+		AVFormatContext* CreateContext(const std::string& file_name)
+		{
+			AVFormatContext* ctx = NULL;
+			THROW_ON_FFMPEG_ERROR(avformat_open_input(&ctx, file_name.c_str(), NULL, NULL) == 0 && ctx);
+			if (!ctx)
+				THROW_EXCEPTION("Format context not created")
 #ifdef DEBUG
-	av_dump_format(weak_format_context, 0, fileName.c_str(), 0);
+			av_dump_format(ctx, 0, file_name.c_str(), 0);
 #endif // DEBUG
+			return ctx;
+		}
 
-	format_context_.reset(weak_format_context);
+
+InputFormat::InputFormat(const std::string& file_name)
+	: format_context_(CreateContext(file_name), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
+	, file_name_(file_name)
+{
+}
+
+Common::Executor& InputFormat::Executor()
+{
+	if (!executor_)
+		executor_.reset(new Common::Executor("Input thread for " + file_name_));
+	return *executor_;
 }
 
 int64_t InputFormat::ReadStartTimecode() const
@@ -62,7 +73,6 @@ bool InputFormat::LoadStreamData()
 			stream
 			});
 	}
-	start_timecode_ = ReadStartTimecode();
 	is_stream_data_loaded_ = true;
 	return true;
 }

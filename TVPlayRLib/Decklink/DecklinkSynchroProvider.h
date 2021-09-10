@@ -1,6 +1,6 @@
 #pragma once
-#include "../FFMpeg/ChannelScaler.h"
-#include "../FFMpeg/AudioFifo.h"
+#include "../FFmpeg/ChannelScaler.h"
+#include "../FFmpeg/AudioFifo.h"
 
 namespace TVPlayR {
 	namespace Core {

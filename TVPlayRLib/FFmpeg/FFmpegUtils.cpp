@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "FFMpegUtils.h"
+#include "FFmpegUtils.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/PixelFormat.h"
 

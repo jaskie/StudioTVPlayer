@@ -1,5 +1,5 @@
 #pragma once
-#include "../FFMpeg/AVSync.h"
+#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Core {

@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "DecklinkVideoFrame.h"
-#include "../FFMpeg/FFMpegUtils.h"
+#include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {

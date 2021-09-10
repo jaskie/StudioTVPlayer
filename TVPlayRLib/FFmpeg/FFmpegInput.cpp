@@ -1,8 +1,8 @@
 #include "../pch.h"
-#include "FFMpegUtils.h"
+#include "FFmpegUtils.h"
 #include "../Common/Semaphore.h"
 #include "../Common/Executor.h"
-#include "FFmpegInputSource.h"
+#include "FFmpegInput.h"
 #include "InputFormat.h"
 #include "Decoder.h"
 #include "../Core/Channel.h"
@@ -17,7 +17,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
-struct FFmpegInputSource::implementation : Common::DebugTarget<false>
+struct FFmpegInput::implementation : Common::DebugTarget<false>
 {
 	std::atomic_bool is_eof_ = false;
 	const std::string file_name_;
@@ -189,7 +189,7 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 					channel_scaler_->Reset();
 				if (buffer_)
 					buffer_->Seek(seek_time);
-				DebugPrintLine("FFmpegInputSource: Loop");
+				DebugPrintLine("FFmpegInput: Loop");
 			}
 			else
 				buffer_->Flush();
@@ -491,37 +491,37 @@ struct FFmpegInputSource::implementation : Common::DebugTarget<false>
 };
 
 
-FFmpegInputSource::FFmpegInputSource(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
+FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device, int audioChannelCount)
 	: impl_(std::make_unique<implementation>(file_name, acceleration, hw_device, audioChannelCount))
 { }
 
-FFmpegInputSource::~FFmpegInputSource(){}
-std::shared_ptr<AVFrame> FFmpegInputSource::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
-AVSync FFmpegInputSource::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
-bool FFmpegInputSource::Seek(const int64_t time)        { return impl_->Seek(time); }
-bool FFmpegInputSource::IsEof() const					{ return impl_->is_eof_; }
-bool FFmpegInputSource::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
-void FFmpegInputSource::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
-void FFmpegInputSource::RemoveFromChannel(const Core::Channel& channel)				{ impl_->RemoveFromChannel(channel);}
-void FFmpegInputSource::Play()							{ impl_->Play(); }
-void FFmpegInputSource::Pause()							{ impl_->Pause(); }
-bool FFmpegInputSource::IsPlaying()	const				{ return impl_->is_playing_; }
-void FFmpegInputSource::SetIsLoop(bool is_loop) { impl_->SetIsLoop(is_loop); }
-int64_t FFmpegInputSource::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
-int64_t FFmpegInputSource::GetVideoStart() const		{ return impl_->GetVideoStart(); }
-int64_t FFmpegInputSource::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
-AVRational FFmpeg::FFmpegInputSource::GetTimeBase() const { return impl_->GetTimeBase(); }
-AVRational FFmpeg::FFmpegInputSource::GetFrameRate() const { return impl_->GetFrameRate(); }
-int FFmpeg::FFmpegInputSource::GetWidth() const { return impl_->GetWidth(); }
-int FFmpeg::FFmpegInputSource::GetHeight() const { return impl_->GetHeight(); }
-Core::FieldOrder FFmpeg::FFmpegInputSource::GetFieldOrder() { return impl_->GetFieldOrder(); }
-int FFmpeg::FFmpegInputSource::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
-bool FFmpegInputSource::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
-int FFmpegInputSource::StreamCount() const				{ return impl_->StreamCount(); }
-Core::StreamInfo& FFmpegInputSource::GetStreamInfo(int index) { return impl_->GetStreamInfo(index); }
-void FFmpegInputSource::SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map) { impl_->SetupAudio(audio_channel_map); }
-void FFmpegInputSource::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
-void FFmpegInputSource::SetStoppedCallback(STOPPED_CALLBACK stopped_callback) { impl_->stopped_callback_ = stopped_callback; }
-void FFmpegInputSource::SetLoadedCallback(LOADED_CALLBACK loaded_callback) { impl_->loaded_callback_ = loaded_callback; }
+FFmpegInput::~FFmpegInput(){}
+std::shared_ptr<AVFrame> FFmpegInput::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
+AVSync FFmpegInput::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
+bool FFmpegInput::Seek(const int64_t time)        { return impl_->Seek(time); }
+bool FFmpegInput::IsEof() const					{ return impl_->is_eof_; }
+bool FFmpegInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
+void FFmpegInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
+void FFmpegInput::RemoveFromChannel(const Core::Channel& channel)				{ impl_->RemoveFromChannel(channel);}
+void FFmpegInput::Play()							{ impl_->Play(); }
+void FFmpegInput::Pause()							{ impl_->Pause(); }
+bool FFmpegInput::IsPlaying()	const				{ return impl_->is_playing_; }
+void FFmpegInput::SetIsLoop(bool is_loop) { impl_->SetIsLoop(is_loop); }
+int64_t FFmpegInput::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
+int64_t FFmpegInput::GetVideoStart() const		{ return impl_->GetVideoStart(); }
+int64_t FFmpegInput::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
+AVRational FFmpeg::FFmpegInput::GetTimeBase() const { return impl_->GetTimeBase(); }
+AVRational FFmpeg::FFmpegInput::GetFrameRate() const { return impl_->GetFrameRate(); }
+int FFmpeg::FFmpegInput::GetWidth() const { return impl_->GetWidth(); }
+int FFmpeg::FFmpegInput::GetHeight() const { return impl_->GetHeight(); }
+Core::FieldOrder FFmpeg::FFmpegInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
+int FFmpeg::FFmpegInput::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
+bool FFmpegInput::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
+int FFmpegInput::StreamCount() const				{ return impl_->StreamCount(); }
+Core::StreamInfo& FFmpegInput::GetStreamInfo(int index) { return impl_->GetStreamInfo(index); }
+void FFmpegInput::SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map) { impl_->SetupAudio(audio_channel_map); }
+void FFmpegInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
+void FFmpegInput::SetStoppedCallback(STOPPED_CALLBACK stopped_callback) { impl_->stopped_callback_ = stopped_callback; }
+void FFmpegInput::SetLoadedCallback(LOADED_CALLBACK loaded_callback) { impl_->loaded_callback_ = loaded_callback; }
 
 }}

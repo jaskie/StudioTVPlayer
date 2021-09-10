@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "ThumbnailFilter.h"
-#include "FFMpegUtils.h"
+#include "FFmpegUtils.h"
 #include "../Common/Rational.h"
 
 

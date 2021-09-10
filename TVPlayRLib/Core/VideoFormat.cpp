@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "VideoFormat.h"
 #include "FieldOrder.h"
-#include "../FFMpeg/FFMpegUtils.h"
+#include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Core {

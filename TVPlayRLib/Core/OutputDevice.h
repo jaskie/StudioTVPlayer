@@ -1,6 +1,6 @@
 #pragma once
 #include "../Common/NonCopyable.h"
-#include "../FFMpeg/AVSync.h"
+#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Core {

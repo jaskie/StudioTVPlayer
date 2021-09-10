@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "InputFormat.h"
-#include "FFMpegUtils.h"
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

@@ -1,8 +1,8 @@
 #include "../pch.h"
 #include "DecklinkSynchroProvider.h"
 #include "../Core/Channel.h"
-#include "../FFMpeg/AVSync.h"
-#include "../FFMpeg/FFMpegUtils.h"
+#include "../FFmpeg/AVSync.h"
+#include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {

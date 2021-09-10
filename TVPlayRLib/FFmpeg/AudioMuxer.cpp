@@ -2,7 +2,7 @@
 #include "AudioMuxer.h"
 #include "Decoder.h"
 #include "AudioFifo.h"
-#include "FFMpegUtils.h"
+#include "FFmpegUtils.h"
 
 
 namespace TVPlayR {

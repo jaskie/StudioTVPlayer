@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AVSync.h"
+#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace Core 
@@ -9,8 +9,10 @@ namespace TVPlayR {
 		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
+		class AVSync;
+		class AudioFifo;
 
-class SynchronizingBuffer
+class SynchronizingBuffer : Common::DebugTarget<false>
 {
 public:
 	SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync);
@@ -28,9 +30,23 @@ public:
 	void Flush();
 	const Core::VideoFormatType VideoFormat();
 private:
-	struct implementation;
-	std::unique_ptr<implementation> impl_;
-
+	const int sample_rate_;
+	const int audio_channel_count_;
+	const AVRational audio_time_base_;
+	const AVRational video_frame_rate_;
+	AVRational input_video_time_base_ = { 0, 1 };
+	const bool have_video_;
+	const bool have_audio_;
+	std::atomic_bool is_playing_;
+	std::atomic_bool is_flushed_;
+	int64_t sync_;
+	const int64_t duration_;
+	std::deque<std::shared_ptr<AVFrame>> video_queue_;
+	std::unique_ptr<AudioFifo> fifo_;
+	std::shared_ptr<AVFrame> last_video_;
+	const Core::VideoFormatType video_format_;
+	const AVSampleFormat audio_sample_format_;
+	void Sweep();
 };
 
 }}

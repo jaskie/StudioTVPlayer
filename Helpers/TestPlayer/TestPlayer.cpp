@@ -7,7 +7,7 @@
 #include "Decklink/DecklinkInput.h"
 #include "Decklink/DecklinkInfo.h"
 #include "Ndi/NdiOutput.h"
-#include "FFMpeg/FFMpegInputSource.h"
+#include "FFmpeg/FFmpegInput.h"
 #include "Core/PixelFormat.h"
 
 #undef DEBUG
@@ -52,9 +52,9 @@ int main()
 
 		auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "", 2);
+		//auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "", 2);
 		//input->SetIsLoop(true);
-		//auto input = std::make_shared<FFmpeg::FFmpegInputSource>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
+		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
 		//input->Seek(seek);
 		//input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });

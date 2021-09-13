@@ -90,7 +90,7 @@ namespace StudioTVPlayer.Model
         {
             if (Interlocked.Exchange(ref _preloaded, 1) != default)
                 return false;
-            FileInput = new TVPlayR.FileInput(Media.FullPath, audioChannelCount);
+            FileInput = new TVPlayR.FileInput(Media.FullPath);
             FileInput.IsLoop = IsLoop;
             FileInput.FramePlayed += InputFile_FramePlayed;
             FileInput.Stopped += InputFile_Stopped;

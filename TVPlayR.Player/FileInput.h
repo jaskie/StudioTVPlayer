@@ -1,5 +1,5 @@
 #pragma once
-#include "FFMpeg/FFMpegInputSource.h"
+#include "FFmpeg/FFmpegInput.h"
 #include "TimeEventArgs.h"
 #include "HardwareAcceleration.h"
 #include "FieldOrder.h"
@@ -15,8 +15,8 @@ namespace TVPlayR {
 	public ref class FileInput
 	{
 	public:
-		FileInput(String^ fileName, int audioChannelCount);
-		FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount);
+		FileInput(String^ fileName);
+		FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice);
 		~FileInput();
 		!FileInput();
 		bool Seek(TimeSpan time);
@@ -93,7 +93,7 @@ namespace TVPlayR {
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
-		const std::shared_ptr<FFmpeg::FFmpegInputSource> * _nativeSource;
+		const std::shared_ptr<FFmpeg::FFmpegInput> * _nativeSource;
 		String^ _fileName;
 		bool _isLoop;
 
@@ -107,7 +107,7 @@ namespace TVPlayR {
 		GCHandle _stoppedHandle;
 		void StoppedCallback();
 	internal:
-		const std::shared_ptr<FFmpeg::FFmpegInputSource>& GetNativeSource() { return *_nativeSource; }
+		const std::shared_ptr<FFmpeg::FFmpegInput>& GetNativeSource() { return *_nativeSource; }
 	};
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "OutputBase.h"
-#include "FFMpeg/FFStreamOutput.h"
+#include "FFmpeg/FFStreamOutput.h"
 
 using namespace System;
 

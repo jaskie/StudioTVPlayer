@@ -1,16 +1,16 @@
 #include "stdafx.h"
 #include "FileInput.h"
 #include "ClrStringHelper.h"
-#include "FFMpeg/ThumbnailFilter.h"
-#include "FFMpeg/FFMpegInputSource.h"
+#include "FFmpeg/ThumbnailFilter.h"
+#include "FFmpeg/FFmpegInput.h"
 
 namespace TVPlayR {
 
-	FileInput::FileInput(String^ fileName, int audioChannelCount) : FileInput(fileName, HardwareAcceleration::None, String::Empty, audioChannelCount)
+	FileInput::FileInput(String^ fileName) : FileInput(fileName, HardwareAcceleration::None, String::Empty)
 	{ }
 
-	FileInput::FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice, int audioChannelCount)
-		: _nativeSource(new std::shared_ptr<FFmpeg::FFmpegInputSource>(new FFmpeg::FFmpegInputSource(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice), audioChannelCount)))
+	FileInput::FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice)
+		: _nativeSource(new std::shared_ptr<FFmpeg::FFmpegInput>(new FFmpeg::FFmpegInput(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice))))
 		, _fileName(fileName)
 		, _acceleration(acceleration)
 		, _hwDevice(hwDevice)

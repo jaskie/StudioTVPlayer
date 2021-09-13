@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "StreamOutput.h"
 #include "ClrStringHelper.h"
-#include "FFMpeg/FFStreamOutputParams.h"
+#include "FFmpeg/FFStreamOutputParams.h"
 
 namespace TVPlayR
 {

@@ -10,12 +10,18 @@ namespace TVPlayR {
 	namespace FFmpeg {
 		namespace internal {
 
+			bool IsFilenameStream(const std::string& fileName)
+			{
+				auto prefix = fileName.substr(0, 6);
+				return prefix == "udp://" || prefix == "rtp://";
+			}
+
 			FFmpegInputBase::FFmpegInputBase(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 				: file_name_(file_name)
 				, input_(file_name)
 				, acceleration_(acceleration)
 				, hw_device_(hw_device)
-				, is_stream_(IsStream(file_name))
+				, is_stream_(IsFilenameStream(file_name))
 				, video_decoder_()
 			{
 			}
@@ -30,10 +36,10 @@ namespace TVPlayR {
 				video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, stream->StartTime, acceleration_, hw_device_);
 			}
 
-			bool FFmpegInputBase::IsStream(const std::string& fileName) const
+
+			bool FFmpegInputBase::IsStream() const
 			{
-				auto prefix = fileName.substr(0, 6);
-				return prefix == "udp://" || prefix == "rtp://";
+				return is_stream_;
 			}
 
 			int FFmpegInputBase::StreamCount() const

@@ -22,8 +22,8 @@ public:
 	int64_t GetVideoDuration() const;
 	int GetWidth() const;
 	int GetHeight() const;
-	Core::FieldOrder GetFieldOrder();
-	int GetAudioChannelCount();
+	Core::FieldOrder GetFieldOrder() const;
+	int GetAudioChannelCount() const;
 	bool HaveAlphaChannel()const;
 	int StreamCount() const;
 	const Core::StreamInfo& GetStreamInfo(int index) const;

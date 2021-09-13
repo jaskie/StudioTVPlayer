@@ -51,20 +51,20 @@ FFmpegFileInfo::FFmpegFileInfo(const std::string & file_name, Core::HwAccel acce
 	: impl_(std::make_unique<implementation>(file_name, acceleration, hw_device))
 { }
 
-FFmpegFileInfo::~FFmpegFileInfo(){}
-std::shared_ptr<AVFrame> FFmpegFileInfo::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
-int64_t FFmpegFileInfo::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
-int64_t FFmpegFileInfo::GetVideoStart() const		{ return impl_->GetVideoStart(); }
-int64_t FFmpegFileInfo::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
-AVRational FFmpeg::FFmpegFileInfo::GetTimeBase() const { return impl_->GetTimeBase(); }
-AVRational FFmpeg::FFmpegFileInfo::GetFrameRate() const { return impl_->GetFrameRate(); }
-int FFmpeg::FFmpegFileInfo::GetWidth() const { return impl_->GetWidth(); }
-int FFmpeg::FFmpegFileInfo::GetHeight() const { return impl_->GetHeight(); }
-Core::FieldOrder FFmpeg::FFmpegFileInfo::GetFieldOrder() { return impl_->GetFieldOrder(); }
-int FFmpeg::FFmpegFileInfo::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
-bool FFmpegFileInfo::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
-int FFmpegFileInfo::StreamCount() const				{ return impl_->StreamCount(); }
-const Core::StreamInfo& FFmpegFileInfo::GetStreamInfo(int index) const { return impl_->GetStreamInfo(index); }
-bool FFmpegFileInfo::IsStream() const { return impl_->is_stream_; }
+FFmpegFileInfo::~FFmpegFileInfo() {}
+std::shared_ptr<AVFrame> FFmpegFileInfo::GetFrameAt(int64_t time)		{ return impl_->GetFrameAt(time); }
+int64_t FFmpegFileInfo::GetAudioDuration() const						{ return impl_->GetAudioDuration(); }
+int64_t FFmpegFileInfo::GetVideoStart() const							{ return impl_->GetVideoStart(); }
+int64_t FFmpegFileInfo::GetVideoDuration() const						{ return impl_->GetVideoDuration(); }
+AVRational FFmpegFileInfo::GetTimeBase() const							{ return impl_->GetTimeBase(); }
+AVRational FFmpegFileInfo::GetFrameRate() const							{ return impl_->GetFrameRate(); }
+int FFmpegFileInfo::GetWidth() const									{ return impl_->GetWidth(); }
+int FFmpegFileInfo::GetHeight() const									{ return impl_->GetHeight(); }
+Core::FieldOrder FFmpegFileInfo::GetFieldOrder() const					{ return impl_->GetFieldOrder(); }
+int FFmpegFileInfo::GetAudioChannelCount() const						{ return impl_->GetAudioChannelCount(); }
+bool FFmpegFileInfo::HaveAlphaChannel() const							{ return impl_->HaveAlphaChannel(); }
+int FFmpegFileInfo::StreamCount() const									{ return impl_->StreamCount(); }
+const Core::StreamInfo& FFmpegFileInfo::GetStreamInfo(int index) const	{ return impl_->GetStreamInfo(index); }
+bool FFmpegFileInfo::IsStream() const									{ return impl_->IsStream(); }
 
 }}

@@ -15,6 +15,7 @@ namespace TVPlayR {
 
 struct FFmpegInputBase
 {
+protected:
 	FFmpegInputBase(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
 	const std::string file_name_;
 	const Core::HwAccel acceleration_;
@@ -22,9 +23,9 @@ struct FFmpegInputBase
 	FFmpeg::InputFormat input_;
 	const bool is_stream_;
 	std::unique_ptr<FFmpeg::Decoder> video_decoder_;
-
+public:
 	void InitializeVideoDecoder();
-	bool IsStream(const std::string& fileName) const;
+	bool IsStream() const;
 	int StreamCount() const;
 	const Core::StreamInfo& GetStreamInfo(int index) const;
 	int64_t GetAudioDuration();

@@ -37,7 +37,7 @@ public:
 	virtual int GetAudioChannelCount() override;
 	virtual bool HaveAlphaChannel() const override;
 	virtual int StreamCount() const;
-	virtual Core::StreamInfo& GetStreamInfo(int index);
+	const Core::StreamInfo& GetStreamInfo(int index) const;
 	virtual void SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map);
 	virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) override;
 	virtual void SetStoppedCallback(STOPPED_CALLBACK stopped_callback);

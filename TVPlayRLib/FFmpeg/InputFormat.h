@@ -24,7 +24,7 @@ public:
 	inline bool IsStreamDataLoaded() const { return is_stream_data_loaded_; }
 	int GetTotalAudioChannelCount() const;
 	int64_t ReadStartTimecode() const;
-	std::vector<Core::StreamInfo>& GetStreams() { return streams_; };
+	const std::vector<Core::StreamInfo>& GetStreams() const { return streams_; };
 	const Core::StreamInfo* GetVideoStream() const;
 };
 

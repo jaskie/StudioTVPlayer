@@ -1,35 +1,23 @@
 #include "../pch.h"
+#include "FFmpegInput.h"
+#include "internal/FFmpegInputBase.h"
 #include "FFmpegUtils.h"
 #include "../Common/Semaphore.h"
 #include "../Common/Executor.h"
-#include "FFmpegInput.h"
-#include "InputFormat.h"
 #include "Decoder.h"
 #include "../Core/Channel.h"
-#include "../Core/FieldOrder.h"
 #include "AudioMuxer.h"
 #include "SynchronizingBuffer.h"
 #include "ChannelScaler.h"
-#include "../Core/AudioChannelMapEntry.h"
-#include "../Core/StreamInfo.h"
 #include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
-struct FFmpegInput::implementation : Common::DebugTarget<false>
+struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpegInputBase
 {
-	// const variables
-	const std::string file_name_;
-	const Core::HwAccel acceleration_;
-	const std::string hw_device_;
-	
-	InputFormat input_;
-
 	std::atomic_bool is_eof_ = false;
 	std::atomic_bool is_playing_ = false;
-	const bool is_stream_;
-	std::unique_ptr<Decoder> video_decoder_;
 	std::atomic_bool is_loop_ = false;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	const Core::Channel* channel_ = nullptr;
@@ -42,11 +30,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 	LOADED_CALLBACK loaded_callback_ = nullptr;
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
-		: file_name_(file_name)
-		, input_(file_name)
-		, acceleration_(acceleration)
-		, hw_device_(hw_device)
-		, is_stream_(IsStream(file_name))
+		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
 	{ 
 		input_.LoadStreamData();
 		InitializeVideoDecoder();
@@ -285,16 +269,6 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 		is_loop_ = is_loop;
 	}
 
-	void InitializeVideoDecoder()
-	{
-		if (video_decoder_)
-			return;
-		auto stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return;
-		video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, stream->StartTime, acceleration_, hw_device_);
-	}
-
 	void InitializeAudioDecoders()
 	{
 		auto& streams = input_.GetStreams();
@@ -314,104 +288,9 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 			}
 	}
 
-	bool IsStream(const std::string& fileName)
-	{
-		auto prefix = fileName.substr(0, 6);
-		return prefix == "udp://" || prefix == "rtp://";
-	}
-
 	void SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map)
 	{
 
-	}
-
-	int StreamCount() 
-	{
-		return static_cast<int>(input_.GetStreams().size());
-	}
-
-	Core::StreamInfo& GetStreamInfo(int index)
-	{
-		auto& streams = input_.GetStreams();
-		assert(index >= 0 && index < streams.size());
-		return input_.GetStreams()[index];
-	}
-
-	int64_t GetAudioDuration()
-	{
-		for (auto& stream : input_.GetStreams())
-			if (stream.Type == Core::MediaType::audio)
-				return stream.Duration;
-		return 0LL;
-	}
-
-	int64_t GetVideoStart() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return 0LL;
-		return stream->StartTime;
-	}
-
-	int64_t GetVideoDuration() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return 0LL;
-		return stream->Duration;
-	}
-
-	AVRational GetTimeBase() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return { 0, 1 };
-		return stream->Stream->time_base;
-	}
-
-	AVRational GetFrameRate() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return {0, 1};
-		return stream->Stream->r_frame_rate;
-	}
-
-	int GetWidth() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return 0;
-		return stream->Stream->codecpar->width;
-	}
-
-	int GetHeight() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return 0;
-		return stream->Stream->codecpar->height;
-	}
-
-	Core::FieldOrder GetFieldOrder() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return Core::FieldOrder::unknown;
-		return Core::FieldOrderFromAVFieldOrder(stream->Stream->codecpar->field_order);
-	}
-
-	bool HaveAlphaChannel() const
-	{
-		const Core::StreamInfo* stream = input_.GetVideoStream();
-		if (stream == nullptr)
-			return false;
-		return FFmpeg::HaveAlphaChannel(static_cast<AVPixelFormat>(stream->Stream->codecpar->format));
-	}
-
-	int GetAudioChannelCount() const
-	{
-		return input_.GetTotalAudioChannelCount();
 	}
 
 };
@@ -443,7 +322,7 @@ Core::FieldOrder FFmpeg::FFmpegInput::GetFieldOrder() { return impl_->GetFieldOr
 int FFmpeg::FFmpegInput::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
 bool FFmpegInput::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
 int FFmpegInput::StreamCount() const				{ return impl_->StreamCount(); }
-Core::StreamInfo& FFmpegInput::GetStreamInfo(int index) { return impl_->GetStreamInfo(index); }
+const Core::StreamInfo& FFmpegInput::GetStreamInfo(int index) const { return impl_->GetStreamInfo(index); }
 void FFmpegInput::SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map) { impl_->SetupAudio(audio_channel_map); }
 void FFmpegInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
 void FFmpegInput::SetStoppedCallback(STOPPED_CALLBACK stopped_callback) { impl_->stopped_callback_ = stopped_callback; }

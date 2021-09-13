@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Decklink\DecklinkSynchroProvider.h" />
+    <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BlockingCollection.h" />
@@ -152,6 +153,10 @@
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\internal\FFmpegInputBase.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFmpeg\AudioFifo.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>

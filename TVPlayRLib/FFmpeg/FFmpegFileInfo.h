@@ -26,7 +26,7 @@ public:
 	int GetAudioChannelCount();
 	bool HaveAlphaChannel()const;
 	int StreamCount() const;
-	Core::StreamInfo& GetStreamInfo(int index);
+	const Core::StreamInfo& GetStreamInfo(int index) const;
 	bool IsStream() const;
 private:
 	struct implementation;

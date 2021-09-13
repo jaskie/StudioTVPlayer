@@ -26,6 +26,9 @@
     <Filter Include="FFmpeg">
       <UniqueIdentifier>{6383a109-8738-4ebc-a479-21bd5e6cb721}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FFmpeg\internal">
+      <UniqueIdentifier>{1046ea7f-414c-4834-9f09-ac0faaf1667e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ComInitializer.h">
@@ -173,6 +176,9 @@
     <ClInclude Include="Decklink\DecklinkSynchroProvider.h">
       <Filter>Decklink</Filter>
     </ClInclude>
+    <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h">
+      <Filter>FFmpeg\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -259,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp">
       <Filter>Decklink</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\internal\FFmpegInputBase.cpp">
+      <Filter>FFmpeg\internal</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

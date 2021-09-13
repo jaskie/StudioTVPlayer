@@ -53,5 +53,48 @@ namespace TVPlayR {
 			av_free(filter_dump);
 		}
 
+		bool HaveAlphaChannel(AVPixelFormat format)
+		{
+			switch (format)
+			{
+			case AV_PIX_FMT_ARGB:
+			case AV_PIX_FMT_RGBA:
+			case AV_PIX_FMT_ABGR:
+			case AV_PIX_FMT_BGRA:
+			case AV_PIX_FMT_YA8:
+			case AV_PIX_FMT_YA16BE:
+			case AV_PIX_FMT_YA16LE:
+			case AV_PIX_FMT_GBRAPF32BE:
+			case AV_PIX_FMT_GBRAPF32LE:
+			case AV_PIX_FMT_YUVA422P:
+			case AV_PIX_FMT_YUVA444P:
+			case AV_PIX_FMT_YUVA420P9LE:
+			case AV_PIX_FMT_YUVA420P9BE:
+			case AV_PIX_FMT_YUVA422P9BE:
+			case AV_PIX_FMT_YUVA422P9LE:
+			case AV_PIX_FMT_YUVA444P9BE:
+			case AV_PIX_FMT_YUVA444P9LE:
+			case AV_PIX_FMT_YUVA420P10BE:
+			case AV_PIX_FMT_YUVA420P10LE:
+			case AV_PIX_FMT_YUVA422P10BE:
+			case AV_PIX_FMT_YUVA422P10LE:
+			case AV_PIX_FMT_YUVA444P10BE:
+			case AV_PIX_FMT_YUVA444P10LE:
+			case AV_PIX_FMT_YUVA420P16BE:
+			case AV_PIX_FMT_YUVA420P16LE:
+			case AV_PIX_FMT_YUVA422P16BE:
+			case AV_PIX_FMT_YUVA422P16LE:
+			case AV_PIX_FMT_YUVA444P16BE:
+			case AV_PIX_FMT_YUVA444P16LE:
+			case AV_PIX_FMT_YUVA422P12BE:
+			case AV_PIX_FMT_YUVA422P12LE:
+			case AV_PIX_FMT_YUVA444P12BE:
+			case AV_PIX_FMT_YUVA444P12LE:
+				return true;
+			default:
+				return false;
+			}
+		}
+
 
 }}

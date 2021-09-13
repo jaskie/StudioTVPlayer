@@ -36,10 +36,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
-	std::unique_ptr<std::thread> producer_thread_;
-	Common::Semaphore producer_semaphore_;
-	std::mutex buffer_mutex_;
-	std::condition_variable buffer_cv_;
+	std::unique_ptr<Common::Executor> producer_thread_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
@@ -63,9 +60,8 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 
 #pragma region Input thread methods
 
-	void ProducerThreadProc()
+	void InitializeBuffer()
 	{
-		Common::SetThreadName(::GetCurrentThreadId(), ("Input thread for "+file_name_).c_str());
 		InitializeAudioDecoders();
 		channel_scaler_ = std::make_unique<ChannelScaler>(*channel_);
 		if (!audio_decoders_.empty())
@@ -75,18 +71,15 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 			is_playing_,
 			AV_TIME_BASE / 2, // 0.5 sec
 			0);
-		while (channel_)
-		{
-			while (!buffer_->Full())
-			{
-				if (!channel_)
-					break;
-				ProcessNextInputPacket();
-				if (buffer_->Ready())
-					buffer_cv_.notify_all();
-			}
-			producer_semaphore_.wait();
-		}
+	}
+
+	void Tick()
+	{
+		if (!channel_)
+			return;
+		ProcessNextInputPacket();
+		if (!buffer_->Full())
+			producer_thread_->begin_invoke([this] { Tick(); });
 	}
 
 	void ProcessNextInputPacket()
@@ -135,7 +128,6 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 
 	void ProcessVideo()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
 			channel_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
@@ -147,7 +139,6 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 
 	void ProcessAudio(const std::unique_ptr<Decoder>& decoder)
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		auto decoded = decoder->Pull();
 		if (decoded)
 			audio_muxer_->Push(decoder->StreamIndex(), decoded);
@@ -157,14 +148,12 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 
 	void FlushChannelScalerIfNeeded()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (video_decoder_->IsEof() && !channel_scaler_->IsFlushed())
 			channel_scaler_->Flush();
 	}
 
 	void FlushAudioMuxerIfNeeded()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (!audio_muxer_ || audio_muxer_->IsFlushed())
 			return;
 		auto need_flush = std::all_of(audio_decoders_.begin(), audio_decoders_.end(), [](const std::unique_ptr<Decoder>& decoder) { return decoder->IsEof(); });
@@ -174,7 +163,6 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 
 	void FlushBufferOrLoopIfNeeded()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (!buffer_->IsFlushed() && // not flushed yet
 			(channel_scaler_->IsEof() || (video_decoder_->IsEof() && !channel_scaler_->IsInitialized())) && // scaler will provide no more frames
 			(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
@@ -205,10 +193,6 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 		bool finished = false;
 		AVSync sync;
 		{
-			std::unique_lock<std::mutex> lock(buffer_mutex_);
-			while (!(buffer_ && buffer_->Ready()))
-				buffer_cv_.wait(lock);
-			producer_semaphore_.notify();
 			if (is_eof_)
 				return buffer_->PullSync(audio_samples_count);
 			sync = buffer_->PullSync(audio_samples_count);
@@ -220,7 +204,8 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 		{
 			is_eof_ = true;
 			Pause();
-		}
+		} else
+			producer_thread_->begin_invoke([this] { Tick(); });
 		return sync;
 	}
 
@@ -239,7 +224,11 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 		if (channel_)
 			THROW_EXCEPTION("Already added to another channel");
 		channel_ = &channel;
-		producer_thread_ = std::make_unique<std::thread>(&implementation::ProducerThreadProc, this);
+		producer_thread_ = std::make_unique<Common::Executor>(file_name_);
+		producer_thread_->invoke([this] {
+			InitializeBuffer();
+			Tick();
+		});
 	}
 
 	void RemoveFromChannel(const Core::Channel& channel)
@@ -247,38 +236,36 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 		if (channel_ != &channel)
 			return;
 		channel_ = nullptr;
-		producer_semaphore_.notify();
-		producer_thread_->join();
 		producer_thread_.reset();
 	}
 
 
 	bool Seek(const int64_t time)
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (input_.Seek(time))
+		return producer_thread_->invoke([this, time]
 		{
-			DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
-			if (video_decoder_)
-				video_decoder_->Seek(time);
-			for (auto& decoder : audio_decoders_)
-				decoder->Seek(time);
-			if (channel_scaler_)
-				channel_scaler_->Reset();
-			if (audio_muxer_)
-				audio_muxer_->Reset();
-			if (buffer_)
-				buffer_->Seek(time);
-			is_eof_ = false;
-			producer_semaphore_.notify();
-			return true;
-		}
-		return false;
+			if (input_.Seek(time))
+			{
+				DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
+				if (video_decoder_)
+					video_decoder_->Seek(time);
+				for (auto& decoder : audio_decoders_)
+					decoder->Seek(time);
+				if (channel_scaler_)
+					channel_scaler_->Reset();
+				if (audio_muxer_)
+					audio_muxer_->Reset();
+				if (buffer_)
+					buffer_->Seek(time);
+				is_eof_ = false;
+				return true;
+			}
+			return false;
+		});
 	}
 
 	void Play()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		is_playing_ = true;
 		if (buffer_)
 			buffer_->SetIsPlaying(true);
@@ -286,8 +273,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 
 	void Pause()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if(buffer_)
+		if (buffer_)
 			buffer_->SetIsPlaying(false);
 		is_playing_ = false;
 		if (stopped_callback_)
@@ -420,74 +406,12 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>
 		const Core::StreamInfo* stream = input_.GetVideoStream();
 		if (stream == nullptr)
 			return false;
-		switch (stream->Stream->codecpar->format)
-		{
-		case AV_PIX_FMT_ARGB:
-		case AV_PIX_FMT_RGBA:
-		case AV_PIX_FMT_ABGR:
-		case AV_PIX_FMT_BGRA:
-		case AV_PIX_FMT_YA8:
-		case AV_PIX_FMT_YA16BE:
-		case AV_PIX_FMT_YA16LE:
-		case AV_PIX_FMT_GBRAPF32BE:
-		case AV_PIX_FMT_GBRAPF32LE:
-		case AV_PIX_FMT_YUVA422P:
-		case AV_PIX_FMT_YUVA444P:
-		case AV_PIX_FMT_YUVA420P9LE:
-		case AV_PIX_FMT_YUVA420P9BE:
-		case AV_PIX_FMT_YUVA422P9BE:
-		case AV_PIX_FMT_YUVA422P9LE:
-		case AV_PIX_FMT_YUVA444P9BE:
-		case AV_PIX_FMT_YUVA444P9LE:
-		case AV_PIX_FMT_YUVA420P10BE:
-		case AV_PIX_FMT_YUVA420P10LE:
-		case AV_PIX_FMT_YUVA422P10BE:
-		case AV_PIX_FMT_YUVA422P10LE:
-		case AV_PIX_FMT_YUVA444P10BE:
-		case AV_PIX_FMT_YUVA444P10LE:
-		case AV_PIX_FMT_YUVA420P16BE:
-		case AV_PIX_FMT_YUVA420P16LE:
-		case AV_PIX_FMT_YUVA422P16BE:
-		case AV_PIX_FMT_YUVA422P16LE:
-		case AV_PIX_FMT_YUVA444P16BE:
-		case AV_PIX_FMT_YUVA444P16LE:
-		case AV_PIX_FMT_YUVA422P12BE:
-		case AV_PIX_FMT_YUVA422P12LE:
-		case AV_PIX_FMT_YUVA444P12BE:
-		case AV_PIX_FMT_YUVA444P12LE:
-			return true;
-		default:
-			return false;
-		}
+		return FFmpeg::HaveAlphaChannel(static_cast<AVPixelFormat>(stream->Stream->codecpar->format));
 	}
 
 	int GetAudioChannelCount() const
 	{
 		return input_.GetTotalAudioChannelCount();
-	}
-
-	std::shared_ptr<AVFrame> GetFrameAt(int64_t time)
-	{
-		if (buffer_)
-			return nullptr;
-		input_.Seek(time);
-		video_decoder_->Seek(time);
-		while (!video_decoder_->IsEof())
-		{
-			auto packet = input_.PullPacket();
-			if (!packet)
-				if (input_.IsEof())
-					return nullptr;
-				else 
-					continue;
-			if (packet->stream_index != video_decoder_->StreamIndex())
-				continue;
-			video_decoder_->Push(packet);
-			auto frame = video_decoder_->Pull();
-			if (frame)
-				return frame;
-		}
-		return nullptr;
 	}
 
 };
@@ -498,7 +422,6 @@ FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel accelerati
 { }
 
 FFmpegInput::~FFmpegInput(){}
-std::shared_ptr<AVFrame> FFmpegInput::GetFrameAt(int64_t time)	{ return impl_->GetFrameAt(time); }
 AVSync FFmpegInput::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInput::Seek(const int64_t time)        { return impl_->Seek(time); }
 bool FFmpegInput::IsEof() const					{ return impl_->is_eof_; }

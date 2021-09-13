@@ -22,8 +22,6 @@ namespace TVPlayR {
 		bool Seek(TimeSpan time);
 		void Play();
 		void Pause();
-		Bitmap^ GetThumbnail(TimeSpan time, int width, int height);
-		BitmapSource^ GetBitmapSource(TimeSpan time, int width, int height);
 		property TimeSpan AudioDuration 
 		{
 			TimeSpan get() { return TimeSpan((*_nativeSource)->GetAudioDuration() * 10); }

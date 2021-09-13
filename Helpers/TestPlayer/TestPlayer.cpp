@@ -6,7 +6,7 @@
 #include "Decklink/DecklinkOutput.h"
 #include "Decklink/DecklinkInput.h"
 #include "Decklink/DecklinkInfo.h"
-#include "Ndi/NdiOutput.h"
+//#include "Ndi/NdiOutput.h"
 #include "FFmpeg/FFmpegInput.h"
 #include "Core/PixelFormat.h"
 
@@ -43,23 +43,23 @@ int main()
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index]);
-		//channel.SetFrameClock(decklink_output);
+		channel.SetFrameClock(decklink_output);
 		channel.AddOutput(decklink_output);
 		
-		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
-		channel.SetFrameClock(ndi);
-		channel.AddOutput(ndi);
+		//auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		//channel.SetFrameClock(ndi);
+		//channel.AddOutput(ndi);
 
-		auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
+		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		//auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "", 2);
-		//input->SetIsLoop(true);
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "");
+		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
 		//input->Seek(seek);
-		//input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
-		//input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		//input->Play();
+		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
+		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
+		input->Play();
 		channel.Load(input);
 		while (true)
 		{
@@ -68,8 +68,8 @@ int main()
 				break;
 			if (i == 'c')
 				channel.Clear();
-			//if (i == 's')
-			//	input->Seek(AV_TIME_BASE * 0);
+			if (i == 's')
+				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
 				channel.Load(input);
 			if (i == ' ')

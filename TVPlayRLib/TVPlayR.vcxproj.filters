@@ -167,7 +167,12 @@
     <ClInclude Include="Core\FieldOrder.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\DecklinkSynchroProvider.h" />
+    <ClInclude Include="FFmpeg\FFmpegFileInfo.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Decklink\DecklinkSynchroProvider.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -249,7 +254,12 @@
     <ClCompile Include="Decklink\DecklinkInput.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
-    <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp" />
+    <ClCompile Include="FFmpeg\FFmpegFileInfo.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

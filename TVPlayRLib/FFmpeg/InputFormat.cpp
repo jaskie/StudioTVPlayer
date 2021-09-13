@@ -25,13 +25,6 @@ InputFormat::InputFormat(const std::string& file_name)
 {
 }
 
-Common::Executor& InputFormat::Executor()
-{
-	if (!executor_)
-		executor_.reset(new Common::Executor("Input thread for " + file_name_));
-	return *executor_;
-}
-
 int64_t InputFormat::ReadStartTimecode() const
 {
 	for (const Core::StreamInfo& stream : streams_)

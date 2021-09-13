@@ -93,6 +93,7 @@
     <ClInclude Include="DecklinkIterator.h" />
     <ClInclude Include="DecklinkOutput.h" />
     <ClInclude Include="FieldOrder.h" />
+    <ClInclude Include="FileInfo.h" />
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="FileInput.h" />
     <ClInclude Include="NdiOutput.h" />
@@ -107,6 +108,7 @@
     <ClCompile Include="DecklinkInfo.h" />
     <ClCompile Include="DecklinkInput.cpp" />
     <ClCompile Include="DecklinkIterator.cpp" />
+    <ClCompile Include="FileInfo.cpp" />
     <ClCompile Include="StreamOutput.cpp" />
     <ClCompile Include="VersionInfo.h">
       <FileType>CppHeader</FileType>

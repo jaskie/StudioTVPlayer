@@ -54,7 +54,7 @@ namespace StudioTVPlayer.Model
         {
             try
             {
-                using (var file = new FileInput(media.FullPath))
+                using (var file = new TVPlayR.FileInfo(media.FullPath))
                 {
                     media.StartTime = file.VideoStart;
                     media.Duration = file.VideoDuration;

@@ -24,13 +24,14 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
-	std::unique_ptr<Common::Executor> producer_thread_;
+	Common::Executor producer_thread_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
+		, producer_thread_(file_name_)
 	{ 
 		input_.LoadStreamData();
 		InitializeVideoDecoder();
@@ -59,11 +60,8 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 
 	void Tick()
 	{
-		if (!channel_)
-			return;
-		ProcessNextInputPacket();
-		if (!buffer_->Full())
-			producer_thread_->begin_invoke([this] { Tick(); });
+		while (channel_ && !buffer_->Full())
+			ProcessNextInputPacket();
 	}
 
 	void ProcessNextInputPacket()
@@ -189,7 +187,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 			is_eof_ = true;
 			Pause();
 		} else
-			producer_thread_->begin_invoke([this] { Tick(); });
+			producer_thread_.begin_invoke([this] { Tick(); });
 		return sync;
 	}
 
@@ -208,8 +206,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 		if (channel_)
 			THROW_EXCEPTION("Already added to another channel");
 		channel_ = &channel;
-		producer_thread_ = std::make_unique<Common::Executor>(file_name_);
-		producer_thread_->invoke([this] {
+		producer_thread_.invoke([this] {
 			InitializeBuffer();
 			Tick();
 		});
@@ -220,13 +217,12 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 		if (channel_ != &channel)
 			return;
 		channel_ = nullptr;
-		producer_thread_.reset();
 	}
 
 
 	bool Seek(const int64_t time)
 	{
-		return producer_thread_->invoke([this, time]
+		return producer_thread_.invoke([this, time]
 		{
 			if (input_.Seek(time))
 			{

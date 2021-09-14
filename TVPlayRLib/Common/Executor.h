@@ -39,7 +39,7 @@ namespace TVPlayR {
         using queue_t = BlockingCollection<task_t>;
 
         const std::string name_;
-        std::atomic<bool> is_running_ = true;
+        std::atomic_bool  is_running_ = true;
         queue_t           queue_;
         std::thread       thread_;
 

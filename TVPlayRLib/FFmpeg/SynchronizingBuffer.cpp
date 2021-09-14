@@ -67,7 +67,7 @@ namespace TVPlayR {
 		if (is_playing_ && !video_queue_.empty())
 			video_queue_.pop_front();
 #ifdef DEBUG
-		if (audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
+		if (audio && audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
 			DebugPrintLine(("Output video " + std::to_string(PtsToTime(last_video_->pts, input_video_time_base_)) + ", audio: " + std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000)));
 #endif // DEBUG
 		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_));

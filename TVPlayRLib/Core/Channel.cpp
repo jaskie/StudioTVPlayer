@@ -9,7 +9,7 @@
 namespace TVPlayR {
 	namespace Core {
 
-		struct Channel::implementation : Common::DebugTarget<false>
+		struct Channel::implementation : Common::DebugTarget
 		{
 			const Channel& channel_;
 			const std::string name_;
@@ -26,7 +26,8 @@ namespace TVPlayR {
 			Common::Executor executor_;
 		
 			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
-				: channel_(channel)
+				: Common::DebugTarget(false, "Channel " + name)
+				, channel_(channel)
 				, name_(name)
 				, format_(format)
 				, pixel_format_(pixel_format)
@@ -183,6 +184,8 @@ namespace TVPlayR {
 		void Channel::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
 
 		void Channel::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
+
+		const std::string& Channel::Name() const { return impl_->name_; }
 
 		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 

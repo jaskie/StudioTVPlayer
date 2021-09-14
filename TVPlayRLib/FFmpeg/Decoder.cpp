@@ -18,7 +18,7 @@ AVPixelFormat GetHwPixelFormat(AVCodecContext* ctx, const enum AVPixelFormat* pi
 	return AV_PIX_FMT_NONE;
 }
 
-struct Decoder::implementation : Common::DebugTarget<false>
+struct Decoder::implementation : Common::DebugTarget
 {
 	const int64_t start_ts_;
 	const Core::HwAccel acceleration_;
@@ -39,7 +39,8 @@ struct Decoder::implementation : Common::DebugTarget<false>
 	std::mutex mutex_;
 
 	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
-		: ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
+		: Common::DebugTarget(false, "Decoder")
+		, ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
 		, start_ts_(stream ? stream->start_time : 0LL)
 		, duration_(stream ? stream->duration: 0LL)
 		, stream_index_(stream ? stream->index : 0)

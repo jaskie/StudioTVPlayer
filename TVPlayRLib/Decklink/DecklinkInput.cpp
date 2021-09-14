@@ -19,7 +19,7 @@ namespace TVPlayR {
 			return format_auto_detection;
 		}
 
-		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget<false>
+		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget
 		{
 			CComQIPtr<IDeckLinkInput>									input_;
 			const bool													is_autodetection_supported_;
@@ -33,7 +33,8 @@ namespace TVPlayR {
 
 
 			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType requestedFormat, int audio_channels_count)
-				: input_(decklink)
+				: Common::DebugTarget(false, "Decklink input")
+				, input_(decklink)
 				, is_wide_(!(requestedFormat == Core::VideoFormatType::ntsc || requestedFormat == Core::VideoFormatType::pal))
 				, is_autodetection_supported_(IsAutodetectionSupprted(decklink))
 				, audio_channels_count_(audio_channels_count)

@@ -12,7 +12,7 @@ namespace TVPlayR {
 		class AVSync;
 		class AudioFifo;
 
-class SynchronizingBuffer : Common::DebugTarget<false>
+class SynchronizingBuffer : Common::DebugTarget
 {
 public:
 	SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync);
@@ -20,8 +20,8 @@ public:
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
 	AVSync PullSync(int audio_samples_count);
-	bool Full() const;
-	bool Ready() const;
+	bool IsFull() const;
+	bool IsReady() const;
 	void SetIsPlaying(bool is_playing);
 	void Seek(int64_t time);
 	void SetSynchro(int64_t time);
@@ -40,7 +40,8 @@ private:
 	std::atomic_bool is_playing_;
 	std::atomic_bool is_flushed_;
 	int64_t sync_;
-	const int64_t duration_;
+	const size_t video_queue_size_;
+	const int audio_fifo_size_;
 	std::deque<std::shared_ptr<AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
 	std::shared_ptr<AVFrame> last_video_;

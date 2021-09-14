@@ -38,21 +38,21 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
-		Decklink::DecklinkIterator iterator;
-		int device_index = 1;
-		for (size_t i = 0; i < iterator.Size(); i++)
-			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto decklink_output = iterator.CreateOutput(*iterator[device_index]);
-		channel.SetFrameClock(decklink_output);
-		channel.AddOutput(decklink_output);
+		//Decklink::DecklinkIterator iterator;
+		//int device_index = 1;
+		//for (size_t i = 0; i < iterator.Size(); i++)
+		//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
+		//auto decklink_output = iterator.CreateOutput(*iterator[device_index]);
+		//channel.SetFrameClock(decklink_output);
+		//channel.AddOutput(decklink_output);
 		
-		/*auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
-		channel.AddOutput(ndi);*/
+		channel.AddOutput(ndi);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\TEMP\\test4.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\TEMP\\timecode.mov", Core::HwAccel::none, "");
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
@@ -60,6 +60,7 @@ int main()
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();
+		input->SetIsLoop(true);
 		channel.Load(input);
 		while (true)
 		{
@@ -78,8 +79,8 @@ int main()
 				else	 
 					input->Play();
 		}
-		//channel.RemoveOutput(ndi);
-		channel.RemoveOutput(decklink_output);
+		channel.RemoveOutput(ndi);
+		//channel.RemoveOutput(decklink_output);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

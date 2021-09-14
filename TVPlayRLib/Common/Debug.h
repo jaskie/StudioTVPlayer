@@ -1,25 +1,21 @@
 #pragma once
 
-#define DebugPrintIf(c, s) \
+#define DebugPrintLineIf(c, s) \
 if (c) \
 	DebugPrintLine(s)
 
 namespace TVPlayR {
 	namespace Common {
 
-template <const bool debug_output = false> class DebugTarget
+class DebugTarget
 {
-protected:
-
-	inline void DebugPrintLine(const std::string& s)
-	{
-		DebugPrintLine(s.c_str());
-	}
-
-	inline void DebugPrintLine(const char * s)
+private:
+	const std::string name_;
+	bool debug_output_;
+	inline void DebugPrint(const char* s)
 	{
 #ifdef DEBUG
-		if (debug_output)
+		if (debug_output_)
 		{
 			OutputDebugStringA(s);
 			OutputDebugStringA("\n");
@@ -27,7 +23,19 @@ protected:
 #endif // DEBUG
 	}
 
-	inline bool IsDebugOutput() const { return debug_output; }
+protected:
+	DebugTarget(bool debug_output, const std::string name)
+		: name_(name)
+		, debug_output_(debug_output)
+	{}
+
+	inline void DebugPrintLine(const std::string& s)
+	{
+		DebugPrint((name_ + ": " + s).c_str());
+	}
+
+
+	inline bool IsDebugOutput() const { return debug_output_; }
 };
 
 }	

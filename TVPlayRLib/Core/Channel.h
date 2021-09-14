@@ -28,6 +28,7 @@ public:
 	const int AudioSampleRate() const { return 48000; }
 	void SetVolume(double volume);
 	void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback);
+	const std::string& Name() const;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

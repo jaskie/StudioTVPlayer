@@ -6,7 +6,8 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, int64_t seek_time, int64_t fifo_duration)
-	: aduio_fifo_(av_audio_fifo_alloc(sample_fmt, channels_count, static_cast<int>(fifo_duration * sample_rate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
+	: Common::DebugTarget(false, "AduioFifo")
+	, aduio_fifo_(av_audio_fifo_alloc(sample_fmt, channels_count, static_cast<int>(fifo_duration * sample_rate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
 	, sample_rate_(sample_rate)
 	, time_base_(time_base)
 	, seek_time_(seek_time)

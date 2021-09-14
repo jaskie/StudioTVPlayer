@@ -11,7 +11,7 @@
 namespace TVPlayR {
 	namespace Ndi {
 		
-		struct NdiOutput::implementation: Common::DebugTarget<false>
+		struct NdiOutput::implementation: Common::DebugTarget
 		{
 			const std::string source_name_;
 			NDIlib_v4* const ndi_;
@@ -29,7 +29,8 @@ namespace TVPlayR {
 			int64_t last_video_time_ = 0LL;
 
 			implementation(const std::string& source_name, const std::string& group_names)
-				: executor_("NDI output " + source_name)
+				: Common::DebugTarget(false, "NDI output " + source_name)
+				, executor_("NDI output " + source_name)
 				, buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, source_name_(source_name)
@@ -96,6 +97,8 @@ namespace TVPlayR {
 				audio_samples_pushed_ += audio->nb_samples;
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
+				if (format_.type() == Core::VideoFormatType::invalid)
+					return;
 				NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, last_video_, last_video_time_);
 				ndi_->send_send_video_v2(send_instance_, &ndi_video);
 				NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(audio, last_video_time_);

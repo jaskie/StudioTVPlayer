@@ -10,7 +10,8 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	SynchronizingBuffer::SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync)
-		: video_format_(channel->Format().type())
+		: Common::DebugTarget(true, "SynchronizingBuffer " + channel->Name())
+		, video_format_(channel->Format().type())
 		, video_frame_rate_(channel->Format().FrameRate().av())
 		, sample_rate_(channel->AudioSampleRate())
 		, audio_time_base_(av_make_q(1, sample_rate_))
@@ -18,10 +19,11 @@ namespace TVPlayR {
 		, have_video_(true)
 		, have_audio_(channel->AudioChannelsCount() > 0)
 		, is_playing_(is_playing)
-		, duration_(duration)
+		, video_queue_size_(av_rescale(duration, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 		, sync_(initial_sync)
 		, is_flushed_(false)
 		, audio_sample_format_(channel->AudioSampleFormat())
+		, audio_fifo_size_(static_cast<int>(av_rescale(duration, sample_rate_, AV_TIME_BASE)))
 	{
 	}
 
@@ -42,6 +44,7 @@ namespace TVPlayR {
 			fifo_->TryPush(frame);
 		}
 	}
+
 	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base) 
 	{ 
 		if (!(frame && have_video_))
@@ -57,6 +60,7 @@ namespace TVPlayR {
 		}
 		video_queue_.push_back(frame);
 	}
+	
 	AVSync SynchronizingBuffer::PullSync(int audio_samples_count)
 	{ 
 		std::shared_ptr<AVFrame> audio = is_playing_ && fifo_
@@ -73,12 +77,12 @@ namespace TVPlayR {
 		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_));
 	}
 	
-	bool SynchronizingBuffer::Full() const 
+	bool SynchronizingBuffer::IsFull() const 
 	{ 
 		if (is_flushed_)
 			return true;
-		return video_queue_.size() >= av_rescale(duration_, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE)
-			&& (!fifo_ || fifo_->SamplesCount() > av_rescale(duration_, sample_rate_, AV_TIME_BASE));
+		return video_queue_.size() >= video_queue_size_
+			&& (!fifo_ || fifo_->SamplesCount() > audio_fifo_size_);
 		/*int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
 		int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, video_time_base_);
 		int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
@@ -86,7 +90,7 @@ namespace TVPlayR {
 		return max_video - min_video >= duration_ &&
 					(!fifo_ || max_audio - min_audio >= duration_);*/
 	}
-	bool SynchronizingBuffer::Ready() const 
+	bool SynchronizingBuffer::IsReady() const 
 	{ 
 		if (is_flushed_)
 			return true;
@@ -133,7 +137,7 @@ namespace TVPlayR {
 	void SynchronizingBuffer::Sweep()
 	{
 		return;
-		int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, input_video_time_base_);
+		/*int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, input_video_time_base_);
 		int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, input_video_time_base_);
 		int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
 		int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
@@ -141,6 +145,6 @@ namespace TVPlayR {
 			while (video_queue_.size() > av_rescale(2 * duration_, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 				video_queue_.pop_front();
 		if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > 2 * duration_)
-			fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * duration_, sample_rate_, AV_TIME_BASE)));
+			fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * duration_, sample_rate_, AV_TIME_BASE)));*/
 	}
 }}

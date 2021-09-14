@@ -14,7 +14,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
-struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpegInputBase
+struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputBase
 {
 	std::atomic_bool is_eof_ = false;
 	std::atomic_bool is_playing_ = false;
@@ -23,18 +23,20 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 	const Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
+	std::mutex buffer_mutex_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
-	Common::Executor producer_thread_;
+	std::condition_variable buffer_cv_;
+	Common::Executor producer_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
-		, producer_thread_(file_name_)
+		, Common::DebugTarget(false, "FFmpegInput " + file_name)
+		, producer_(file_name_)
 	{ 
 		input_.LoadStreamData();
-		InitializeVideoDecoder();
 	}
 
 	~implementation()
@@ -47,6 +49,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 
 	void InitializeBuffer()
 	{
+		InitializeVideoDecoder();
 		InitializeAudioDecoders();
 		channel_scaler_ = std::make_unique<ChannelScaler>(*channel_);
 		if (!audio_decoders_.empty())
@@ -54,14 +57,21 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 		buffer_ = std::make_unique<SynchronizingBuffer>(
 			channel_,
 			is_playing_,
-			AV_TIME_BASE / 2, // 0.5 sec
+			AV_TIME_BASE / 10, // 100 ms = 2-5 frames
 			0);
 	}
 
 	void Tick()
 	{
-		while (channel_ && !buffer_->Full())
-			ProcessNextInputPacket();
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
+		if (!channel_)
+			return;
+		if (buffer_->IsFull())
+			return;
+		ProcessNextInputPacket();
+		if (buffer_->IsReady())
+			buffer_cv_.notify_one();
+		producer_.begin_invoke([this] { Tick(); });		
 	}
 
 	void ProcessNextInputPacket()
@@ -175,6 +185,9 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 		bool finished = false;
 		AVSync sync;
 		{
+			std::unique_lock<std::mutex> lock(buffer_mutex_);
+			if (!buffer_->IsReady())
+				buffer_cv_.wait(lock);
 			if (is_eof_)
 				return buffer_->PullSync(audio_samples_count);
 			sync = buffer_->PullSync(audio_samples_count);
@@ -187,7 +200,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 			is_eof_ = true;
 			Pause();
 		} else
-			producer_thread_.begin_invoke([this] { Tick(); });
+			producer_.begin_invoke([this] { Tick(); });
 		return sync;
 	}
 
@@ -206,7 +219,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 		if (channel_)
 			THROW_EXCEPTION("Already added to another channel");
 		channel_ = &channel;
-		producer_thread_.invoke([this] {
+		producer_.begin_invoke([this] {
 			InitializeBuffer();
 			Tick();
 		});
@@ -222,8 +235,9 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 
 	bool Seek(const int64_t time)
 	{
-		return producer_thread_.invoke([this, time]
+		return producer_.invoke([this, time]
 		{
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
 			if (input_.Seek(time))
 			{
 				DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
@@ -238,6 +252,7 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 				if (buffer_)
 					buffer_->Seek(time);
 				is_eof_ = false;
+				producer_.begin_invoke([this] { Tick(); });
 				return true;
 			}
 			return false;
@@ -246,16 +261,20 @@ struct FFmpegInput::implementation : Common::DebugTarget<false>, internal::FFmpe
 
 	void Play()
 	{
-		is_playing_ = true;
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (buffer_)
 			buffer_->SetIsPlaying(true);
+		is_playing_ = true;
 	}
 
 	void Pause()
 	{
-		if (buffer_)
-			buffer_->SetIsPlaying(false);
-		is_playing_ = false;
+		{
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
+			if (buffer_)
+				buffer_->SetIsPlaying(false);
+			is_playing_ = false;
+		}
 		if (stopped_callback_)
 			stopped_callback_();
 	}

@@ -11,7 +11,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-struct FFmpegFileInfo::implementation : Common::DebugTarget<false>, internal::FFmpegInputBase
+struct FFmpegFileInfo::implementation : internal::FFmpegInputBase
 {
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
@@ -20,7 +20,6 @@ struct FFmpegFileInfo::implementation : Common::DebugTarget<false>, internal::FF
 		input_.LoadStreamData();
 		InitializeVideoDecoder();
 	}
-
 
 	std::shared_ptr<AVFrame> GetFrameAt(int64_t time)
 	{

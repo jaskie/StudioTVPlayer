@@ -13,7 +13,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 		
-		struct DecklinkOutput::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget<false>
+		struct DecklinkOutput::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget
 		{
 			const CComQIPtr<IDeckLinkOutput> output_;
 			const CComQIPtr<IDeckLinkKeyer> keyer_;
@@ -31,7 +31,8 @@ namespace TVPlayR {
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, int index)
-				: output_(decklink)
+				: Common::DebugTarget(false, "Decklink " + std::to_string(index))
+				, output_(decklink)
 				, attributes_(decklink)
 				, keyer_(decklink)
 				, buffer_(2)

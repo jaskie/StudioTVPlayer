@@ -9,7 +9,7 @@ namespace TVPlayR {
 class Decoder;
 
 class AudioMuxer :
-	public FilterBase, Common::DebugTarget<false>
+	public FilterBase, Common::DebugTarget
 {
 public:
 	AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, const int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels);

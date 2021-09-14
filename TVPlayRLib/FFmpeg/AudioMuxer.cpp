@@ -9,7 +9,8 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
-	: FilterBase::FilterBase()
+	: Common::DebugTarget(false, "Audio muxer")
+	, FilterBase::FilterBase()
 	, decoders_(decoders)
 	, input_time_base_(decoders.empty() ? av_make_q(1, sample_rate) : decoders[0]->TimeBase())
 	, output_sample_rate_(sample_rate)

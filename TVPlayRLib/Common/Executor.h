@@ -35,12 +35,9 @@ namespace TVPlayR {
     private:
         Executor(const Executor&);
 
-        using task_t = std::function<void()>;
-        using queue_t = BlockingCollection<task_t>;
-
         const std::string name_;
         std::atomic_bool  is_running_ = true;
-        queue_t           queue_;
+        BlockingCollection<std::function<void()>>  queue_;
         std::thread       thread_;
 
     public:
@@ -117,10 +114,10 @@ namespace TVPlayR {
         void run()
         {
             SetThreadName(::GetCurrentThreadId(), name_.c_str());
-            task_t task;
+            std::function<void()> task;
             while (is_running_) {
                 try {
-                    task_t task;
+                    std::function<void()> task;
                     auto status = queue_.take(task);
                     if (status == BlockingCollectionStatus::AddingCompleted)
                         return;

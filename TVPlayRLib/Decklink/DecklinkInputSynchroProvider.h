@@ -9,16 +9,17 @@ namespace TVPlayR {
 	namespace FFmpeg {
 		class AVSync;
 		class ChannelScaler;
+		class AudioFifo;
 	}
 	namespace Common {
 		template<typename> class Rational;
 	}
 	namespace Decklink {
 
-class DecklinkSynchroProvider
+class DecklinkInputSynchroProvider
 {
 public:
-	DecklinkSynchroProvider(const Core::Channel& channel);
+	DecklinkInputSynchroProvider(const Core::Channel& channel);
 	const Core::Channel& Channel() const;
 	void Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet);
 	FFmpeg::AVSync PullSync(int audio_samples_count);

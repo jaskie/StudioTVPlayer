@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "DecklinkInput.h"
 #include "DecklinkUtils.h"
-#include "DecklinkSynchroProvider.h"
+#include "DecklinkInputSynchroProvider.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/FieldOrder.h"
 #include "../Common/Debug.h"
@@ -21,15 +21,15 @@ namespace TVPlayR {
 
 		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget<false>
 		{
-			CComQIPtr<IDeckLinkInput>								input_;
-			const bool												is_autodetection_supported_;
-			const bool												is_wide_;
-			std::vector<std::unique_ptr<DecklinkSynchroProvider>>	channel_prividers_;
-			BMDTimeValue											frame_duration_ = 0LL;
-			BMDTimeScale											time_scale_ = 1LL;
-			BMDFieldDominance										field_dominance_ = BMDFieldDominance::bmdUnknownFieldDominance;
-			long													current_width_, current_height_ = 0L;
-			const													int audio_channels_count_;
+			CComQIPtr<IDeckLinkInput>									input_;
+			const bool													is_autodetection_supported_;
+			const bool													is_wide_;
+			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	channel_prividers_;
+			BMDTimeValue												frame_duration_ = 0LL;
+			BMDTimeScale												time_scale_ = 1LL;
+			BMDFieldDominance											field_dominance_ = BMDFieldDominance::bmdUnknownFieldDominance;
+			long														current_width_, current_height_ = 0L;
+			const														int audio_channels_count_;
 
 
 			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType requestedFormat, int audio_channels_count)
@@ -107,14 +107,14 @@ namespace TVPlayR {
 
 			bool IsAddedToChannel(const Core::Channel& channel)
 			{
-				return std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkSynchroProvider>& provider) { return &provider->Channel() == &channel; }) != channel_prividers_.end();
+				return std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& provider) { return &provider->Channel() == &channel; }) != channel_prividers_.end();
 			}
 
 			void AddToChannel(const Core::Channel& channel)
 			{
 				if (!IsAddedToChannel(channel))
 				{
-					std::unique_ptr<DecklinkSynchroProvider> newProvider = std::make_unique<DecklinkSynchroProvider>(channel);
+					std::unique_ptr<DecklinkInputSynchroProvider> newProvider = std::make_unique<DecklinkInputSynchroProvider>(channel);
 					newProvider->SetInputParameters(field_dominance_, time_scale_, frame_duration_);
 					channel_prividers_.emplace_back(std::move(newProvider));
 				}
@@ -122,7 +122,7 @@ namespace TVPlayR {
 
 			void RemoveFromChannel(const Core::Channel& channel)
 			{
-				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkSynchroProvider>& p) { return &p->Channel() == &channel; });
+				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Channel() == &channel; });
 				if (provider == channel_prividers_.end())
 					return;
 				channel_prividers_.erase(provider);
@@ -145,7 +145,7 @@ namespace TVPlayR {
 
 			FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count)
 			{
-				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkSynchroProvider>& p) { return &p->Channel() == &channel; });
+				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Channel() == &channel; });
 				if (provider == channel_prividers_.end())
 					return FFmpeg::AVSync();
 				return (*provider)->PullSync(audio_samples_count);

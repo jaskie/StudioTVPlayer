@@ -1,20 +1,21 @@
 #include "../pch.h"
-#include "DecklinkSynchroProvider.h"
+#include "DecklinkInputSynchroProvider.h"
 #include "../Core/Channel.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
+
 namespace TVPlayR {
 	namespace Decklink {
-		DecklinkSynchroProvider::DecklinkSynchroProvider(const Core::Channel& channel)
+		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Channel& channel)
 			: channel_(channel)
 			, scaler_(channel)
 			, audio_fifo_(channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), av_make_q(1, channel.AudioSampleRate()), 0LL, AV_TIME_BASE/10)
 		{ }
 
-		const Core::Channel& DecklinkSynchroProvider::Channel() const { return channel_; }
+		const Core::Channel& DecklinkInputSynchroProvider::Channel() const { return channel_; }
 
-		void DecklinkSynchroProvider::Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet)
+		void DecklinkInputSynchroProvider::Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet)
 		{
 			void* video_bytes = nullptr;
 			if (SUCCEEDED(video_frame->GetBytes(&video_bytes)) && video_bytes)
@@ -51,7 +52,7 @@ namespace TVPlayR {
 			}
 		}
 
-		FFmpeg::AVSync DecklinkSynchroProvider::PullSync(int audio_samples_count)
+		FFmpeg::AVSync DecklinkInputSynchroProvider::PullSync(int audio_samples_count)
 		{
 			auto video = scaler_.Pull();
 			if (!video)
@@ -60,7 +61,7 @@ namespace TVPlayR {
 			return FFmpeg::AVSync(audio, video, 0LL);
 		}
 
-		void DecklinkSynchroProvider::SetInputParameters(BMDFieldDominance field_dominance, BMDTimeScale time_scale, BMDTimeValue frame_duration)
+		void DecklinkInputSynchroProvider::SetInputParameters(BMDFieldDominance field_dominance, BMDTimeScale time_scale, BMDTimeValue frame_duration)
 		{
 			field_dominance_ = field_dominance;
 			time_scale_ = time_scale;

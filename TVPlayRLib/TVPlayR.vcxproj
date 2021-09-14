@@ -86,7 +86,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Decklink\DecklinkSynchroProvider.h" />
+    <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
     <ClInclude Include="pch.h" />
@@ -138,7 +138,7 @@
     <ClInclude Include="Ndi\NdiOutput.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp">
+    <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

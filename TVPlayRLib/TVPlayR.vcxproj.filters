@@ -173,7 +173,7 @@
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\DecklinkSynchroProvider.h">
+    <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h">
@@ -263,7 +263,7 @@
     <ClCompile Include="FFmpeg\FFmpegFileInfo.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
-    <ClCompile Include="Decklink\DecklinkSynchroProvider.cpp">
+    <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="FFmpeg\internal\FFmpegInputBase.cpp">

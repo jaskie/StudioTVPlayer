@@ -24,6 +24,7 @@ public:
 	bool IsReady() const;
 	void SetIsPlaying(bool is_playing);
 	void Seek(int64_t time);
+	void Loop();
 	void SetSynchro(int64_t time);
 	bool IsFlushed() const;
 	bool IsEof();
@@ -42,8 +43,10 @@ private:
 	int64_t sync_;
 	const size_t video_queue_size_;
 	const int audio_fifo_size_;
+	const int64_t duration_;
 	std::deque<std::shared_ptr<AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
+	std::unique_ptr<AudioFifo> fifo_loop_;
 	std::shared_ptr<AVFrame> last_video_;
 	const Core::VideoFormatType video_format_;
 	const AVSampleFormat audio_sample_format_;

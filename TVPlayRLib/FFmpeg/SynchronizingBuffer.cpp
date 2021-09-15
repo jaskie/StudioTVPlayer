@@ -24,6 +24,7 @@ namespace TVPlayR {
 		, is_flushed_(false)
 		, audio_sample_format_(channel->AudioSampleFormat())
 		, audio_fifo_size_(static_cast<int>(av_rescale(duration, sample_rate_, AV_TIME_BASE)))
+		, duration_(duration)
 	{
 	}
 
@@ -34,9 +35,13 @@ namespace TVPlayR {
 		if (!(frame && have_audio_))
 			return;
 		assert(!is_flushed_);
+		DebugPrintLine("Push audio " + std::to_string(static_cast<float>(PtsToTime(frame->pts, audio_time_base_)) / AV_TIME_BASE));
 		Sweep();
 		if (!fifo_)
-			fifo_ = std::make_unique<AudioFifo>(audio_sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), AV_TIME_BASE * 10);
+		{
+			fifo_ = std::make_unique<AudioFifo>(audio_sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), duration_ * 4);
+			DebugPrintLine("New fifo created");
+		}
 		if (!fifo_->TryPush(frame))
 		{
 			fifo_->Reset(PtsToTime(frame->pts, audio_time_base_));
@@ -50,7 +55,7 @@ namespace TVPlayR {
 		if (!(frame && have_video_))
 			return;
 		input_video_time_base_ = time_base;
-		DebugPrintLine(("Push video " + std::to_string(PtsToTime(frame->pts, input_video_time_base_))));
+		DebugPrintLine("Push video " + std::to_string(static_cast<float>(PtsToTime(frame->pts, input_video_time_base_)) / AV_TIME_BASE));
 		assert(!is_flushed_);
 		Sweep();
 		if (video_queue_.size() > video_frame_rate_.num * 10 / video_frame_rate_.den) // approx. 10 seconds
@@ -63,16 +68,22 @@ namespace TVPlayR {
 	
 	AVSync SynchronizingBuffer::PullSync(int audio_samples_count)
 	{ 
-		std::shared_ptr<AVFrame> audio = is_playing_ && fifo_
-			? fifo_->Pull(audio_samples_count)
+		auto& fifo = (fifo_loop_) ? fifo_loop_ : fifo_;
+		std::shared_ptr<AVFrame> audio = is_playing_ && fifo
+			? fifo->Pull(audio_samples_count)
 			: FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_, audio_sample_format_);
+		if (fifo_loop_ && fifo_loop_->SamplesCount() <= av_rescale(sample_rate_ / 2, input_video_time_base_.num, input_video_time_base_.den)) // less than half frame samples left
+		{
+			fifo_loop_.reset();
+			DebugPrintLine("Loop fifo is destroyed");
+		}
 		if ((is_playing_ || !last_video_) && !video_queue_.empty())
 			last_video_ = video_queue_.front();
 		if (is_playing_ && !video_queue_.empty())
 			video_queue_.pop_front();
 #ifdef DEBUG
 		if (audio && audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
-			DebugPrintLine(("Output video " + std::to_string(PtsToTime(last_video_->pts, input_video_time_base_)) + ", audio: " + std::to_string(PtsToTime(audio->pts, audio_time_base_)) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000)));
+			DebugPrintLine(("Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms"));
 #endif // DEBUG
 		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_));
 	}
@@ -113,7 +124,21 @@ namespace TVPlayR {
 		video_queue_.clear();
 		last_video_.reset();
 		is_flushed_ = false;
-		DebugPrintLine(("Buffer seek: " + std::to_string(time / 1000)));
+		DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
+	}
+
+	void SynchronizingBuffer::Loop()
+	{
+		if (!fifo_)
+			return;
+		int64_t samples_over = fifo_->SamplesCount() - (video_queue_.size() * sample_rate_ * video_frame_rate_.den / video_frame_rate_.num);
+		DebugPrintLine(("Loop, samples over=" + std::to_string(samples_over)));
+		if (samples_over > 0)
+			fifo_->DiscardSamples(samples_over);
+		if (samples_over < 0)
+			fifo_->TryPush(FFmpeg::CreateSilentAudioFrame(-samples_over, audio_channel_count_, audio_sample_format_));
+		fifo_loop_ = std::move(fifo_);
+		fifo_.reset();
 	}
 	
 	void SynchronizingBuffer::SetSynchro(int64_t time) 

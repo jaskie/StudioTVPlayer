@@ -23,8 +23,8 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 	const Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
-	std::mutex buffer_mutex_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
+	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
 	Common::Executor producer_;
 	TIME_CALLBACK frame_played_callback_ = nullptr;
@@ -170,7 +170,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 				if (channel_scaler_)
 					channel_scaler_->Reset();
 				if (buffer_)
-					buffer_->Seek(seek_time);
+					buffer_->Loop();
 				DebugPrintLine("FFmpegInput: Loop");
 			}
 			else
@@ -186,7 +186,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		AVSync sync;
 		{
 			std::unique_lock<std::mutex> lock(buffer_mutex_);
-			if (!buffer_->IsReady())
+			if (!(buffer_ && buffer_->IsReady()))
 				buffer_cv_.wait(lock);
 			if (is_eof_)
 				return buffer_->PullSync(audio_samples_count);

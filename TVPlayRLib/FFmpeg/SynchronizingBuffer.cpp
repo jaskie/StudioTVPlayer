@@ -10,7 +10,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	SynchronizingBuffer::SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync)
-		: Common::DebugTarget(true, "SynchronizingBuffer " + channel->Name())
+		: Common::DebugTarget(false, "SynchronizingBuffer " + channel->Name())
 		, video_format_(channel->Format().type())
 		, video_frame_rate_(channel->Format().FrameRate().av())
 		, sample_rate_(channel->AudioSampleRate())

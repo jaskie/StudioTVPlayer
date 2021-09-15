@@ -19,14 +19,20 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 	std::atomic_bool is_eof_ = false;
 	std::atomic_bool is_playing_ = false;
 	std::atomic_bool is_loop_ = false;
+	std::atomic_bool is_producer_running_ = true;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	const Core::Channel* channel_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
+	std::mutex buffer_content_mutex_;
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
-	Common::Executor producer_;
+
+	std::thread producer_;
+	std::mutex producer_mutex_;
+	std::condition_variable producer_cv_;
+
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
@@ -34,18 +40,45 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
 		, Common::DebugTarget(false, "FFmpegInput " + file_name)
-		, producer_(file_name_)
+		, producer_(&implementation::ProducerTheradStart, this)
 	{ 
 		input_.LoadStreamData();
 	}
 
 	~implementation()
 	{
+		is_producer_running_ = false;
 		if (channel_)
 			RemoveFromChannel(*channel_);
+		producer_cv_.notify_one();
+		producer_.join();
 	}
 
 #pragma region Input thread methods
+
+	void ProducerTheradStart()
+	{
+		Common::SetThreadName(::GetCurrentThreadId(), ("FFmpegInput " + file_name_).c_str());
+		while (is_producer_running_)
+		{
+			std::unique_lock<std::mutex> wait_lock(producer_mutex_);
+			producer_cv_.wait(wait_lock);
+			{
+				std::lock_guard<std::mutex> lock(buffer_mutex_);
+				if (!channel_)
+					continue;
+				if (!buffer_ && channel_)
+					InitializeBuffer();
+				while (!buffer_->IsFull())
+				{
+					std::lock_guard<std::mutex> lock(buffer_content_mutex_);
+					ProcessNextInputPacket();
+					if (buffer_->IsReady())
+						buffer_cv_.notify_one();
+				}
+			}			
+		}
+	}
 
 	void InitializeBuffer()
 	{
@@ -61,17 +94,23 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 			0);
 	}
 
-	void Tick()
+	void InitializeAudioDecoders()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (!channel_)
-			return;
-		if (buffer_->IsFull())
-			return;
-		ProcessNextInputPacket();
-		if (buffer_->IsReady())
-			buffer_cv_.notify_one();
-		producer_.begin_invoke([this] { Tick(); });		
+		auto& streams = input_.GetStreams();
+		auto stream = input_.GetVideoStream();
+		int64_t seek = stream ? stream->StartTime : 0;
+		if (std::any_of(streams.begin(), streams.end(), [](const auto& stream) { return stream.Type == Core::MediaType::audio && stream.Language == "pol"; }))
+			for (const auto& stream : streams)
+			{
+				if (stream.Type == Core::MediaType::audio && stream.Language == "pol")
+					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
+			}
+		else
+			for (const auto& stream : streams)
+			{
+				if (stream.Type == Core::MediaType::audio)
+					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
+			}
 	}
 
 	void ProcessNextInputPacket()
@@ -185,7 +224,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		bool finished = false;
 		AVSync sync;
 		{
-			std::unique_lock<std::mutex> lock(buffer_mutex_);
+			std::unique_lock<std::mutex> lock(buffer_content_mutex_);
 			if (!(buffer_ && buffer_->IsReady()))
 				buffer_cv_.wait(lock);
 			if (is_eof_)
@@ -200,17 +239,19 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 			is_eof_ = true;
 			Pause();
 		} else
-			producer_.begin_invoke([this] { Tick(); });
+			producer_cv_.notify_one();
 		return sync;
 	}
 
 	bool IsAddedToChannel(const Core::Channel& channel)
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		return &channel == channel_;
 	}
 
 	void AddToChannel(const Core::Channel& channel)
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (&channel == channel_)
 		{
 			DebugPrintLine("Already added to this channel");
@@ -219,49 +260,45 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		if (channel_)
 			THROW_EXCEPTION("Already added to another channel");
 		channel_ = &channel;
-		producer_.begin_invoke([this] {
-			InitializeBuffer();
-			Tick();
-		});
+		producer_cv_.notify_one();
 	}
 
 	void RemoveFromChannel(const Core::Channel& channel)
 	{
+		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (channel_ != &channel)
 			return;
 		channel_ = nullptr;
+		producer_cv_.notify_one();
 	}
 
 
 	bool Seek(const int64_t time)
 	{
-		return producer_.invoke([this, time]
+		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
+		if (input_.Seek(time))
 		{
-			std::lock_guard<std::mutex> lock(buffer_mutex_);
-			if (input_.Seek(time))
-			{
-				DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
-				if (video_decoder_)
-					video_decoder_->Seek(time);
-				for (auto& decoder : audio_decoders_)
-					decoder->Seek(time);
-				if (channel_scaler_)
-					channel_scaler_->Reset();
-				if (audio_muxer_)
-					audio_muxer_->Reset();
-				if (buffer_)
-					buffer_->Seek(time);
-				is_eof_ = false;
-				producer_.begin_invoke([this] { Tick(); });
-				return true;
-			}
-			return false;
-		});
+			DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
+			if (video_decoder_)
+				video_decoder_->Seek(time);
+			for (auto& decoder : audio_decoders_)
+				decoder->Seek(time);
+			if (channel_scaler_)
+				channel_scaler_->Reset();
+			if (audio_muxer_)
+				audio_muxer_->Reset();
+			if (buffer_)
+				buffer_->Seek(time);
+			is_eof_ = false;
+			producer_cv_.notify_one();
+			return true;
+		}
+		return false;
 	}
 
 	void Play()
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
+		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 		if (buffer_)
 			buffer_->SetIsPlaying(true);
 		is_playing_ = true;
@@ -270,7 +307,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 	void Pause()
 	{
 		{
-			std::lock_guard<std::mutex> lock(buffer_mutex_);
+			std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 			if (buffer_)
 				buffer_->SetIsPlaying(false);
 			is_playing_ = false;
@@ -284,24 +321,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		is_loop_ = is_loop;
 	}
 
-	void InitializeAudioDecoders()
-	{
-		auto& streams = input_.GetStreams();
-		auto stream = input_.GetVideoStream();
-		int64_t seek = stream ? stream->StartTime : 0;
-		if (std::any_of(streams.begin(), streams.end(), [](const auto& stream) { return stream.Type == Core::MediaType::audio && stream.Language == "pol"; }))
-			for (const auto& stream : streams)
-			{
-				if (stream.Type == Core::MediaType::audio && stream.Language == "pol")
-					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
-			}
-		else
-			for (const auto& stream : streams)
-			{
-				if (stream.Type == Core::MediaType::audio)
-					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
-			}
-	}
+	
 
 	void SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map)
 	{

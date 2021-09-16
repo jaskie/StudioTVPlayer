@@ -29,7 +29,7 @@ namespace TVPlayR {
 	public:
 		!VideoFormat();
 		~VideoFormat();
-		static array<VideoFormat^>^ EnumVideoFormats() { return _videoFormats; }
+		static property array<VideoFormat^>^ Formats { array<VideoFormat^>^ get() { return _videoFormats; }}
 		property String^ Name {	String^ get() { return (String^)_name; }	}
 		property Rational SampleAspectRatio { Rational get() { return _sample_aspect_ratio; }	}
 		property int Width { int get() { return _native_fomat->width(); } }

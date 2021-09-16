@@ -58,7 +58,7 @@
             </ItemsControl.ItemTemplate>
         </ListBox>
         <GridSplitter Grid.Column="1" Width="3" Grid.RowSpan="2" HorizontalAlignment="Left" />
-        <!--<inputViews:InputsView Grid.Column="1" Grid.Row="0" Margin="3 0 0 0" DataContext="{Binding Inputs}"/>-->
+        <inputViews:InputsView Grid.Column="1" Grid.Row="0" Margin="3 0 0 0" DataContext="{Binding Inputs}"/>
         <TabControl Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Browsers}" Padding="0" SelectedIndex="0" Margin="3 0 0 0" 
                     mah:TabControlHelper.Underlined="SelectedTabItem" mah:ControlsHelper.ContentCharacterCasing="Upper">
             <TabControl.ItemTemplate>

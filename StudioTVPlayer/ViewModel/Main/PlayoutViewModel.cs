@@ -13,7 +13,8 @@ namespace StudioTVPlayer.ViewModel.Main
         public PlayoutViewModel()
         {
             Players = GlobalApplicationData.Current.Players.Select(p => new MediaPlayerViewModel(p)).ToArray();
-            Browsers = GlobalApplicationData.Current.Configuration.WatchedFolders.Select(f => new BrowserViewModel(f)).ToArray();
+            Browsers = Providers.Configuration.Current.WatchedFolders.Select(f => new BrowserViewModel(f)).ToArray();
+            Inputs = new InputsViewModel();
             FocusPlayerCommand = new UiCommand(FocusPlayer);
             FocusBrowserCommand = new UiCommand(FocusBrowser);
         }

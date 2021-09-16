@@ -100,7 +100,7 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR != null)
                 throw new ApplicationException($"Channel {Name} already initialized");
-            _videoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(f => f.Name == VideoFormatName);
+            _videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormatName);
             if (_videoFormat == null)
                 return;
             _channelR = new TVPlayR.Channel(_name, _videoFormat, PixelFormat, AudioChannelCount);

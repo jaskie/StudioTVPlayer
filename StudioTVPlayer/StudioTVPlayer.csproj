@@ -104,11 +104,11 @@
     <Compile Include="Helpers\FolderHelper.cs" />
     <Compile Include="Helpers\Wildcard.cs" />
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
-    <Compile Include="Model\Args\ConfigurationChangedEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
     <Compile Include="Model\Channel.cs" />
-    <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Model\InputBase.cs" />
+    <Compile Include="Providers\Configuration.cs" />
     <Compile Include="Model\DecklinkInput.cs" />
     <Compile Include="Model\DecklinkOutput.cs" />
     <Compile Include="Model\Enums.cs" />
@@ -124,6 +124,7 @@
     <Compile Include="Model\MediaFile.cs" />
     <Compile Include="Providers\CrashLogger.cs" />
     <Compile Include="Providers\GlobalApplicationData.cs" />
+    <Compile Include="Providers\InputList.cs" />
     <Compile Include="Providers\VersionInfo.cs" />
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
@@ -167,6 +168,9 @@
     </Compile>
     <Compile Include="View\Configuration\WatchedFoldersView.xaml.cs">
       <DependentUpon>WatchedFoldersView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Main\Input\DecklinkInputView.xaml.cs">
+      <DependentUpon>DecklinkInputView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Main\Input\InputsView.xaml.cs">
       <DependentUpon>InputsView.xaml</DependentUpon>
@@ -232,6 +236,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Configuration\WatchedFoldersView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Main\Input\DecklinkInputView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

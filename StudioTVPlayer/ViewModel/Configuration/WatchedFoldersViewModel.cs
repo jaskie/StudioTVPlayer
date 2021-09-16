@@ -17,7 +17,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public WatchedFoldersViewModel()
         {
-            WatchedFolders = new ObservableCollection<WatchedFolderViewModel>(GlobalApplicationData.Current.Configuration.WatchedFolders.Select(f =>
+            WatchedFolders = new ObservableCollection<WatchedFolderViewModel>(Providers.Configuration.Current.WatchedFolders.Select(f =>
             {
                 var vm = new WatchedFolderViewModel(f);
                 vm.Modified += (o, e) => IsModified = true;
@@ -51,7 +51,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override void Apply()
         {
-            GlobalApplicationData.Current.Configuration.WatchedFolders = WatchedFolders.Select(f => {
+            Providers.Configuration.Current.WatchedFolders = WatchedFolders.Select(f => {
                 f.Apply();
                 return f.WatchedFolder;
             }).ToList();

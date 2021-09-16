@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="StudioTVPlayer.View.Main.Input.DecklinkInputView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance {x:Type vm:DecklinkInputViewModel}}"
+             d:DesignHeight="45" d:DesignWidth="400">
+    <Grid>
+        <Grid.Resources>
+            <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}"/>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Label Grid.Column="1">Decklink input</Label>
+        <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
+        <Label Grid.Column="2">Video format</Label>
+        <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
+        <Button Grid.RowSpan="2" Grid.Column="3" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
+            <mah:FontIcon Glyph="&#xE74D;"/>
+        </Button>
+    </Grid>
+</UserControl>

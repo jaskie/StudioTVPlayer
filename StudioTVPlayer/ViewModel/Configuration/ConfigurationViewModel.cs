@@ -22,7 +22,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void SaveConfiguration(object obj)
         {
             Apply();
-            GlobalApplicationData.Current.SaveConfiguration();
+            Providers.Configuration.Current.Save();
             MainViewModel.Instance.ShowPlayoutView();
         }
 

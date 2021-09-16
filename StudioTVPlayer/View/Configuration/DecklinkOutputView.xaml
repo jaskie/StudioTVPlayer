@@ -14,9 +14,9 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
         </Grid.RowDefinitions>
         <TextBlock HorizontalAlignment="Center" FontSize="14">Decklink output</TextBlock>
         <Label Grid.Row="1" Style="{StaticResource ConfigurationLabelStyle}">Selected decklink device</Label>

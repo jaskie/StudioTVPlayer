@@ -45,7 +45,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 if (output.IsFrameClock)
                     _frameClockSource = output;
             }
-            _selectedVideoFormat = TVPlayR.VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
+            _selectedVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
             _selectedPixelFormat = channel.PixelFormat;
             _livePreview = channel.LivePreview;
             AddStreamOutputCommand = new UiCommand(AddStreamOutput);
@@ -78,9 +78,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
 
-        public static TVPlayR.VideoFormat[] VideoFormats { get; } = TVPlayR.VideoFormat.EnumVideoFormats();
+        public TVPlayR.VideoFormat[] VideoFormats => TVPlayR.VideoFormat.Formats;
 
-        public static TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422 };
+        public TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422 };
 
         public TVPlayR.VideoFormat SelectedVideoFormat { get => _selectedVideoFormat; set => Set(ref _selectedVideoFormat, value); }
 

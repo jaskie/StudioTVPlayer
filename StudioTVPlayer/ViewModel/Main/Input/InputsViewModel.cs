@@ -21,10 +21,18 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private void AddDecklinkInput(object _)
         {
-
+            var input = new Model.DecklinkInput();
+            var vm = new DecklinkInputViewModel(input);
+            vm.RemoveRequested += Input_RemoveRequested;
+            Inputs.Add(vm);
         }
 
         public IList<DecklinkInputViewModel> Inputs { get; }
-
+        
+        private void Input_RemoveRequested(object sender, EventArgs e)
+        {
+            var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));
+            Inputs.Remove(vm);
+        }
     }
 }

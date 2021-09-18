@@ -11,7 +11,7 @@
 namespace TVPlayR {
 	namespace Ndi {
 		
-		struct NdiOutput::implementation: Common::DebugTarget
+		struct NdiOutput::implementation : Common::DebugTarget
 		{
 			const std::string source_name_;
 			NDIlib_v4* const ndi_;
@@ -55,6 +55,7 @@ namespace TVPlayR {
 						return false;
 					format_ = channel.Format();
 					audio_sample_rate_ = channel.AudioSampleRate();
+					audio_channels_count_ = channel.AudioChannelsCount();
 					last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, channel.PixelFormat());
 					video_frames_pushed_ = 0LL;
 					audio_samples_pushed_ = 0LL;
@@ -81,7 +82,8 @@ namespace TVPlayR {
 			void Tick()
 			{
 				std::shared_ptr<AVFrame> audio;
-				auto buffer = GetBuffer();
+				FFmpeg::AVSync buffer;
+				buffer_.try_take(buffer);
 				if (buffer.Video)
 				{
 					last_video_ = buffer.Video;
@@ -105,13 +107,6 @@ namespace TVPlayR {
 				ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
 				if (format_.type() != Core::VideoFormatType::invalid)
 					executor_.begin_invoke([this] { Tick(); }); // next frame
-			}
-
-			FFmpeg::AVSync GetBuffer()
-			{
-				FFmpeg::AVSync sync;
-				buffer_.try_take(sync);
-				return sync;
 			}
 
 			int AudioSamplesRequired() 

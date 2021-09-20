@@ -33,25 +33,42 @@ extern "C"
 #include "Decklink/DecklinkInput.h"
 #include "Decklink/DecklinkInfo.h"
 #include "Core/TimecodeOverlay.h"
+#include "Ndi/NdiOutput.h"
 
 using namespace TVPlayR;
 
 int main()
 {
-	Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::yuv422, 2);
-	Decklink::DecklinkIterator iterator;
-	int device_index = 1;
-	for (size_t i = 0; i < iterator.Size(); i++)
-		std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-	auto decklink_output = iterator.CreateOutput(*iterator[device_index]);
-	channel.SetFrameClock(decklink_output);
+#ifdef _DEBUG
+	try
+	{
+#endif
+	Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
+	//Decklink::DecklinkIterator iterator;
+	//int device_index = 1;
+	//for (size_t i = 0; i < iterator.Size(); i++)
+	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
+	//auto output = iterator.CreateOutput(*iterator[device_index]);
+	auto output = std::make_shared<Ndi::NdiOutput>("NDI Output", "");
 	auto overlay = std::make_shared<Core::TimecodeOverlay>();
 	channel.AddOverlay(overlay);
-	channel.AddOutput(decklink_output);
+	channel.SetFrameClock(output);
+	channel.AddOutput(output);
 	
-	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2, Decklink::DecklinkTimecodeSource::RP188Any);
-	input->Play();
-	channel.Load(input);
+	//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2, Decklink::DecklinkTimecodeSource::RP188Any);
+	//input->Play();
+	//channel.Load(input);
 	std::getchar();
+	channel.RemoveOutput(output);
+#ifdef _DEBUG
+	}
+	catch (std::exception e)
+	{
+		OutputDebugStringA("\n");
+		OutputDebugStringA(e.what());
+	}
+	if (_CrtDumpMemoryLeaks())
+		OutputDebugStringA("\nMemory leak!\n");
+#endif
 }
 

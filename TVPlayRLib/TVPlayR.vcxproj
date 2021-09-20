@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
+    <ClInclude Include="Decklink\DecklinkTimecodeSource.h" />
     <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
     <ClInclude Include="pch.h" />

@@ -64,9 +64,9 @@ namespace TVPlayR {
 				return std::make_shared<DecklinkOutput>(info.GetDecklink(), info.Index());
 			}
 
-			std::shared_ptr<DecklinkInput> CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count)
+			std::shared_ptr<DecklinkInput> CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source)
 			{
-				return std::make_shared<DecklinkInput>(info.GetDecklink(), format, audio_channels_count);
+				return std::make_shared<DecklinkInput>(info.GetDecklink(), format, audio_channels_count, timecode_source);
 			}
 
 		};
@@ -77,7 +77,7 @@ namespace TVPlayR {
 		DecklinkIterator::~DecklinkIterator() {}
 		std::shared_ptr<DecklinkInfo> DecklinkIterator::operator[](size_t pos) { return impl_->operator[](pos); }
 		std::shared_ptr<DecklinkOutput> DecklinkIterator::CreateOutput(const DecklinkInfo& info) { return impl_->CreateOutput(info); }
-		std::shared_ptr<DecklinkInput> DecklinkIterator::CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count) { return impl_->CreateInput(info, format, audio_channels_count); }
+		std::shared_ptr<DecklinkInput> DecklinkIterator::CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source) { return impl_->CreateInput(info, format, audio_channels_count, timecode_source); }
 		size_t DecklinkIterator::Size() const { return impl_->Size(); }
 		std::shared_ptr<ApiVersion> DecklinkIterator::GetVersion() { return impl_->GetVersion(); }
 	}

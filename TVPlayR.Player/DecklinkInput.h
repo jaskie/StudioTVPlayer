@@ -4,6 +4,11 @@ namespace TVPlayR {
 	namespace Decklink {
 		class DecklinkInput;
 	}
+	public enum class DecklinkTimecodeSource {
+		None,
+		StreamTime,
+		RP188Any
+	};
 
 	public ref class DecklinkInput
 	{

@@ -7,10 +7,11 @@
 
 namespace TVPlayR {
 	namespace Decklink {
-		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Channel& channel)
+		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source)
 			: channel_(channel)
 			, scaler_(channel)
 			, audio_fifo_(channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), av_make_q(1, channel.AudioSampleRate()), 0LL, AV_TIME_BASE/10)
+			, timecode_source_(timecode_source)
 		{ }
 
 		const Core::Channel& DecklinkInputSynchroProvider::Channel() const { return channel_; }
@@ -18,7 +19,7 @@ namespace TVPlayR {
 		void DecklinkInputSynchroProvider::Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet)
 		{
 			void* video_bytes = nullptr;
-			if (SUCCEEDED(video_frame->GetBytes(&video_bytes)) && video_bytes)
+			if (video_frame && SUCCEEDED(video_frame->GetBytes(&video_bytes)) && video_bytes)
 			{
 				std::shared_ptr<AVFrame> video = FFmpeg::AllocFrame();
 				video->data[0] = reinterpret_cast<uint8_t*>(video_bytes);
@@ -31,12 +32,32 @@ namespace TVPlayR {
 				video->top_field_first = field_dominance_ == bmdUpperFieldFirst;
 				BMDTimeValue frameTime;
 				BMDTimeValue frameDuration;
-				if (SUCCEEDED(video_frame->GetStreamTime(&frameTime, &frameDuration, time_scale_)))
-					video->pts = frameTime;
+				switch (timecode_source_)
+				{
+				case DecklinkTimecodeSource::StreamTime:
+					if (SUCCEEDED(video_frame->GetStreamTime(&frameTime, &frameDuration, time_scale_)))
+						video->pts = frameTime / frameDuration;
+					break;
+				case DecklinkTimecodeSource::RP188Any:
+				{
+					CComPtr<IDeckLinkTimecode> timecode;
+					if (SUCCEEDED(video_frame->GetTimecode(BMDTimecodeFormat::bmdTimecodeRP188Any, &timecode)))
+					{
+						unsigned char hours, minutes, seconds, frames;
+						if (SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
+							video->pts = ((((hours * 60) + minutes) * 60) + seconds) * frame_rate_.Numerator() / frame_rate_.Denominator() + frames;
+					}
+					break;
+				}
+				default:
+					video->pts = 0;
+					break;
+				}
+
 				scaler_.Push(video, frame_rate_, video_time_base_);
 			}
 			void* audio_bytes = nullptr;
-			if (SUCCEEDED(audio_packet->GetBytes(&audio_bytes)) && audio_bytes)
+			if (audio_packet && SUCCEEDED(audio_packet->GetBytes(&audio_bytes)) && audio_bytes)
 			{
 				std::shared_ptr<AVFrame> audio = FFmpeg::AllocFrame();
 				audio->data[0] = reinterpret_cast<uint8_t*>(audio_bytes);
@@ -58,7 +79,7 @@ namespace TVPlayR {
 			if (!video)
 				video = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
 			auto audio = audio_fifo_.Pull(audio_samples_count);
-			return FFmpeg::AVSync(audio, video, 0LL);
+			return FFmpeg::AVSync(audio, video, FFmpeg::PtsToTime(video->pts, video_time_base_.av()));
 		}
 
 		void DecklinkInputSynchroProvider::SetInputParameters(BMDFieldDominance field_dominance, BMDTimeScale time_scale, BMDTimeValue frame_duration)

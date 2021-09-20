@@ -131,7 +131,7 @@ namespace TVPlayR {
 	{
 		if (!fifo_)
 			return;
-		int64_t samples_over = fifo_->SamplesCount() - (video_queue_.size() * sample_rate_ * video_frame_rate_.den / video_frame_rate_.num);
+		int samples_over = static_cast<int>(fifo_->SamplesCount() - (video_queue_.size() * sample_rate_ * video_frame_rate_.den / video_frame_rate_.num));
 		DebugPrintLine(("Loop, samples over=" + std::to_string(samples_over)));
 		if (samples_over > 0)
 			fifo_->DiscardSamples(samples_over);

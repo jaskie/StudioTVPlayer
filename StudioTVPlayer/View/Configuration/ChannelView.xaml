@@ -100,12 +100,12 @@
                                 <Label FontSize="16" FontWeight="Normal">Add NDI output</Label>
                             </StackPanel>
                         </Button>
-                        <Button Margin="10" Command="{Binding AddStreamOutputCommand}" >
+                        <!--<Button Margin="10" Command="{Binding AddStreamOutputCommand}" >
                             <StackPanel Orientation="Horizontal">
                                 <mah:FontIcon Glyph="&#xE710;" />
                                 <Label FontSize="16" FontWeight="Normal">Add stream output</Label>
                             </StackPanel>
-                        </Button>
+                        </Button>-->
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

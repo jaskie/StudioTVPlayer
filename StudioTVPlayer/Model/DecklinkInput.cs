@@ -26,7 +26,7 @@ namespace StudioTVPlayer.Model
             _input?.Dispose();
             var videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            _input = info is null || videoFormat is null ? null : TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2);
+            _input = info is null || videoFormat is null ? null : TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.None);
         }
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "../FFmpeg/ChannelScaler.h"
 #include "../FFmpeg/AudioFifo.h"
+#include "DecklinkTimecodeSource.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -19,7 +20,7 @@ namespace TVPlayR {
 class DecklinkInputSynchroProvider
 {
 public:
-	DecklinkInputSynchroProvider(const Core::Channel& channel);
+	DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source);
 	const Core::Channel& Channel() const;
 	void Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet);
 	FFmpeg::AVSync PullSync(int audio_samples_count);
@@ -35,6 +36,7 @@ private:
 	BMDTimeValue							frame_duration_ = 0LL;
 	Common::Rational<int>					frame_rate_;
 	Common::Rational<int>					video_time_base_;
+	DecklinkTimecodeSource					timecode_source_;
 };
 
 }}

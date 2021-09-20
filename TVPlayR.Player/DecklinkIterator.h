@@ -11,6 +11,7 @@ namespace TVPlayR {
 	ref class DecklinkOutput;
 	ref class DecklinkInput;
 	ref class VideoFormat;
+	enum class DecklinkTimecodeSource;
 
 	public ref class DecklinkIterator sealed
 	{
@@ -24,7 +25,7 @@ namespace TVPlayR {
 			array<DecklinkInfo^>^ get() { return _devices; }
 		}
 		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink);
-		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audio_channel_count);
+		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, DecklinkTimecodeSource timecodeSource);
 	};
 
 }

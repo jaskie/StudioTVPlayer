@@ -179,6 +179,9 @@
     <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h">
       <Filter>FFmpeg\internal</Filter>
     </ClInclude>
+    <ClInclude Include="Decklink\DecklinkTimecodeSource.h">
+      <Filter>Decklink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">

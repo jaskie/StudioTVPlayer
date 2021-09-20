@@ -5,6 +5,7 @@
 #include "AudioVolume.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
+#include "Overlay.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -21,6 +22,7 @@ namespace TVPlayR {
 			const Core::PixelFormat pixel_format_;
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
+			std::vector<std::shared_ptr<Overlay>> overlays_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
@@ -66,20 +68,26 @@ namespace TVPlayR {
 						if (!sync.Video)
 							sync.Video = empty_video_;
 						volume = audio_volume_.ProcessVolume(sync.Audio);
-						for (auto& device : output_devices_)
-							device->Push(sync);
-					
+						AddOverlayAndPushToOutputs(sync);					
 					}
 					else
 					{
 						auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_), empty_video_, 0LL);
 						assert(sync.Audio->nb_samples == audio_samples_count);
-						for (auto& device : output_devices_)
-							device->Push(sync);
+						AddOverlayAndPushToOutputs(sync);
 					}
 					if (audio_volume_callback_)
 						audio_volume_callback_(volume);
 				});
+			}
+
+			// used only in executor thread
+			void AddOverlayAndPushToOutputs(FFmpeg::AVSync sync)
+			{
+				for (auto& overlay : overlays_)
+					sync = overlay->Transform(sync);
+				for (auto& device : output_devices_)
+					device->Push(sync);
 			}
 
 			void AddOutput(std::shared_ptr<OutputDevice>& device)
@@ -138,6 +146,15 @@ namespace TVPlayR {
 					playing_source_ = nullptr;
 				});
 			}
+
+			void AddOverlay(std::shared_ptr<Overlay> overlay)
+			{
+				executor_.invoke([&]
+				{
+					overlays_.push_back(overlay);
+				});
+			}
+
 		};
 
 		Channel::Channel(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
@@ -172,6 +189,8 @@ namespace TVPlayR {
 			if (!source->IsAddedToChannel(*this))
 				source->AddToChannel(*this);
 		}
+
+		void Channel::AddOverlay(std::shared_ptr<Overlay> overlay) { impl_->AddOverlay(overlay); }
 
 		void Channel::Clear() { impl_->Clear(); }
 

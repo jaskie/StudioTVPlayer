@@ -32,6 +32,7 @@ extern "C"
 #include "Decklink/DecklinkOutput.h"
 #include "Decklink/DecklinkInput.h"
 #include "Decklink/DecklinkInfo.h"
+#include "Core/TimecodeOverlay.h"
 
 using namespace TVPlayR;
 
@@ -44,7 +45,10 @@ int main()
 		std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 	auto decklink_output = iterator.CreateOutput(*iterator[device_index]);
 	channel.SetFrameClock(decklink_output);
+	auto overlay = std::make_shared<Core::TimecodeOverlay>();
+	channel.AddOverlay(overlay);
 	channel.AddOutput(decklink_output);
+	
 	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2, Decklink::DecklinkTimecodeSource::RP188Any);
 	input->Play();
 	channel.Load(input);

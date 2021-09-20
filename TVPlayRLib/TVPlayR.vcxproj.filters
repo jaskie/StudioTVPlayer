@@ -26,9 +26,6 @@
     <Filter Include="FFmpeg">
       <UniqueIdentifier>{6383a109-8738-4ebc-a479-21bd5e6cb721}</UniqueIdentifier>
     </Filter>
-    <Filter Include="FFmpeg\internal">
-      <UniqueIdentifier>{1046ea7f-414c-4834-9f09-ac0faaf1667e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ComInitializer.h">
@@ -176,11 +173,20 @@
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\internal\FFmpegInputBase.h">
-      <Filter>FFmpeg\internal</Filter>
-    </ClInclude>
     <ClInclude Include="Decklink\DecklinkTimecodeSource.h">
       <Filter>Decklink</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Overlay.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="FFmpeg\FFmpegInputBase.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFmpeg\SwScale.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\TimecodeOverlay.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -269,8 +275,14 @@
     <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
-    <ClCompile Include="FFmpeg\internal\FFmpegInputBase.cpp">
-      <Filter>FFmpeg\internal</Filter>
+    <ClCompile Include="FFmpeg\FFmpegInputBase.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\SwScale.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\TimecodeOverlay.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

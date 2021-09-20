@@ -1,9 +1,9 @@
-#include "../../pch.h"
+#include "../pch.h"
 #include "FFmpegInputBase.h"
-#include "../Decoder.h"
-#include "../../Core/StreamInfo.h"
-#include "../../Core/FieldOrder.h"
-#include "../FFmpegUtils.h"
+#include "Decoder.h"
+#include "../Core/StreamInfo.h"
+#include "../Core/FieldOrder.h"
+#include "FFmpegUtils.h"
 
 
 namespace TVPlayR {

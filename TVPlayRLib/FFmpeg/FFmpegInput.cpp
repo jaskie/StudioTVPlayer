@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "FFmpegInput.h"
-#include "internal/FFmpegInputBase.h"
+#include "FFmpegInputBase.h"
 #include "FFmpegUtils.h"
 #include "../Common/Semaphore.h"
 #include "../Common/Executor.h"

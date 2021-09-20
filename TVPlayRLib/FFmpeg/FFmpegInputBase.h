@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../InputFormat.h"
+#include "InputFormat.h"
 
 namespace TVPlayR {
 	namespace Core {

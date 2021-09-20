@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "FFmpegFileInfo.h"
-#include "internal/FFmpegInputBase.h"
+#include "FFmpegInputBase.h"
 #include "Decoder.h"
 #include "FFmpegUtils.h"
 #include "../Core/FieldOrder.h"

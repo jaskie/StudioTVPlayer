@@ -8,6 +8,7 @@ namespace TVPlayR {
 	namespace Core {
 		class InputSource;
 		class OutputDevice;
+		class Overlay;
 
 class Channel : public Common::NonCopyable
 {
@@ -20,6 +21,7 @@ public:
 	void SetFrameClock(std::shared_ptr<OutputDevice> clock);
 	void Load(std::shared_ptr<InputSource> source);
 	void Preload(std::shared_ptr<InputSource> source);
+	void AddOverlay(std::shared_ptr<Overlay> overlay);
 	void Clear();
 	const VideoFormat& Format() const;
 	const PixelFormat PixelFormat() const;

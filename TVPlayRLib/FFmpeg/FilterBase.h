@@ -1,9 +1,10 @@
 #pragma once
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class FilterBase
+class FilterBase : public Common::NonCopyable
 {
 public:
 	FilterBase();

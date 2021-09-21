@@ -5,7 +5,7 @@
 #include "AudioVolume.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
-#include "Overlay.h"
+#include "OverlayBase.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -22,7 +22,7 @@ namespace TVPlayR {
 			const Core::PixelFormat pixel_format_;
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
-			std::vector<std::shared_ptr<Overlay>> overlays_;
+			std::vector<std::shared_ptr<OverlayBase>> overlays_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
@@ -147,7 +147,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void AddOverlay(std::shared_ptr<Overlay> overlay)
+			void AddOverlay(std::shared_ptr<OverlayBase> overlay)
 			{
 				executor_.invoke([&]
 				{
@@ -190,7 +190,7 @@ namespace TVPlayR {
 				source->AddToChannel(*this);
 		}
 
-		void Channel::AddOverlay(std::shared_ptr<Overlay> overlay) { impl_->AddOverlay(overlay); }
+		void Channel::AddOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->AddOverlay(overlay); }
 
 		void Channel::Clear() { impl_->Clear(); }
 

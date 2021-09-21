@@ -86,7 +86,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Core\Overlay.h" />
+    <ClInclude Include="Core\OverlayBase.h" />
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="Decklink\DecklinkTimecodeSource.h" />
     <ClInclude Include="FFmpeg\FFmpegInputBase.h" />

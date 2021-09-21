@@ -2,6 +2,7 @@
 #include "Channel.h"
 #include "Core/Channel.h"
 #include "OutputBase.h"
+#include "OverlayBase.h"
 #include "DecklinkOutput.h"
 #include "PreviewOutput.h"
 #include "FileInput.h"
@@ -64,6 +65,11 @@ namespace TVPlayR {
 	{
 		if (_outputs->Remove(output))
 			_channel->RemoveOutput(output->GetNativeDevice());
+	}
+
+	void Channel::AddOverlay(OverlayBase^ overlay)
+	{
+		_channel->AddOverlay(overlay->GetNativeObject());
 	}
 
 	void Channel::Load(FileInput^ file)

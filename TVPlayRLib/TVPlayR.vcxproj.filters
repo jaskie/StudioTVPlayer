@@ -176,7 +176,7 @@
     <ClInclude Include="Decklink\DecklinkTimecodeSource.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Overlay.h">
+    <ClInclude Include="Core\OverlayBase.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="FFmpeg\FFmpegInputBase.h">

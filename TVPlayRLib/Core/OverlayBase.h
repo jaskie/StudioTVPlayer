@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace Core {
 
-class Overlay : public Common::NonCopyable
+class OverlayBase : public Common::NonCopyable
 {
 public:
 	virtual FFmpeg::AVSync Transform(FFmpeg::AVSync& sync) = 0;

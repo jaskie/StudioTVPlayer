@@ -98,18 +98,21 @@
     <ClInclude Include="FileInput.h" />
     <ClInclude Include="NdiOutput.h" />
     <ClInclude Include="OutputBase.h" />
+    <ClInclude Include="OverlayBase.h" />
     <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="PreviewOutput.h" />
     <ClInclude Include="Rational.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Channel.h" />
     <ClInclude Include="StreamOutput.h" />
+    <ClInclude Include="TimecodeOverlay.h" />
     <ClInclude Include="TimeEventArgs.h" />
     <ClCompile Include="DecklinkInfo.h" />
     <ClCompile Include="DecklinkInput.cpp" />
     <ClCompile Include="DecklinkIterator.cpp" />
     <ClCompile Include="FileInfo.cpp" />
     <ClCompile Include="StreamOutput.cpp" />
+    <ClCompile Include="TimecodeOverlay.cpp" />
     <ClCompile Include="VersionInfo.h">
       <FileType>CppHeader</FileType>
     </ClCompile>

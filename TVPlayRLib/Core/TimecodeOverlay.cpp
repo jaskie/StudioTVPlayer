@@ -24,7 +24,7 @@ namespace TVPlayR {
 
 			const GdiplusInitializer			gdiplus_initializer_;
 			const VideoFormat					video_format_;
-			const bool							no_video_;
+			const bool							no_passthrough_video_;
 			std::unique_ptr<FFmpeg::SwScale>	in_scaler_;
 			std::unique_ptr<FFmpeg::SwScale>	out_scaler_;
 			Gdiplus::SolidBrush					background_;
@@ -34,9 +34,9 @@ namespace TVPlayR {
 			Gdiplus::StringFormat				timecode_format_;
 			Gdiplus::Rect						background_rect_;
 
-			implementation::implementation(const VideoFormatType video_format, bool no_video)
+			implementation::implementation(const VideoFormatType video_format, bool no_passthrough_video)
 				: video_format_(video_format)
-				, no_video_(no_video)
+				, no_passthrough_video_(no_passthrough_video)
 				, timecode_position_(static_cast<Gdiplus::REAL>(video_format_.width() / 2), static_cast<Gdiplus::REAL>(video_format_.height() * 900 / 1000))
 				, background_rect_(video_format_.width() / 4, video_format_.height() * 165 / 200, video_format_.width() / 2, video_format_.height() / 7)
 				, background_(Gdiplus::Color(150, 16, 16, 16))
@@ -52,7 +52,7 @@ namespace TVPlayR {
 				if (!sync.Video)
 					return sync;
 				std::shared_ptr<AVFrame>& input_frame = sync.Video;
-				if (no_video_)
+				if (no_passthrough_video_)
 				{
 					auto frame = FFmpeg::CreateEmptyVideoFrame(video_format_, Core::PixelFormat::bgra);
 					frame->pts = input_frame->pts;
@@ -89,8 +89,8 @@ namespace TVPlayR {
 
 		};
 
-		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, bool no_video)
-			: impl_(std::make_unique<implementation>(video_format, no_video))
+		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, bool no_passthrough_video)
+			: impl_(std::make_unique<implementation>(video_format, no_passthrough_video))
 		{ }
 
 		TimecodeOverlay::~TimecodeOverlay() { }

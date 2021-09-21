@@ -12,6 +12,7 @@ namespace TVPlayR {
 	ref class PreviewOutput;
 	ref class FileInput;
 	ref class OutputBase;
+	ref class OverlayBase;
 
 	public ref class Channel sealed
 	{
@@ -29,6 +30,7 @@ namespace TVPlayR {
 		!Channel();
 		bool AddOutput(OutputBase^ output, bool setAsClockBase);
 		void RemoveOutput(OutputBase^ output);
+		void AddOverlay(OverlayBase^ overlay);
 		void Load(FileInput^ file);
 		void Preload(FileInput^ file);
 		void Clear();

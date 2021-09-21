@@ -61,15 +61,12 @@ namespace TVPlayR {
 				}
 				else
 				{
-					if (!in_scaler_ || in_scaler_->GetSrcWidth() != input_frame->width || in_scaler_->GetSrcHeight() != input_frame->height || in_scaler_->GetSrcPixelFormat() != input_frame->format)
+					if (input_frame->format != AV_PIX_FMT_BGRA && (!in_scaler_ || in_scaler_->GetSrcWidth() != input_frame->width || in_scaler_->GetSrcHeight() != input_frame->height || in_scaler_->GetSrcPixelFormat() != input_frame->format))
 					{
 						in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
-						if (input_frame->format != AV_PIX_FMT_BGRA)
-							out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format));
-						else
-							out_scaler_.reset();
+						out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format));
 					}
-					std::shared_ptr<AVFrame> rgba_frame = in_scaler_->Scale(input_frame);
+					std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ?  in_scaler_->Scale(input_frame) : input_frame;
 					Draw(rgba_frame, sync.Time);
 					// if incomming frame pixel format is AV_PIX_FMT_BGRA only copy the frame, otherwise convert it back to the format
 					return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Time);

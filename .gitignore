@@ -31,3 +31,5 @@
 /Helpers/TestCSharp/bin
 /Helpers/TestCSharp/obj
 /TimecodeDecoder/x64
+/TimecodeDecoderService/bin
+/TimecodeDecoderService/obj

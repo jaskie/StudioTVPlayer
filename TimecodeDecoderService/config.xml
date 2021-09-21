@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<channels>
+  <channel Input="1" Output="1" Keyer="Passthrough" />
+</channels>

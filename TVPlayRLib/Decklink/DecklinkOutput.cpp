@@ -27,10 +27,11 @@ namespace TVPlayR {
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
+			const bool internal_keyer_;
 
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
-			implementation(IDeckLink* decklink, int index)
+			implementation(IDeckLink* decklink, bool internal_keyer, int index)
 				: Common::DebugTarget(false, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
@@ -38,6 +39,7 @@ namespace TVPlayR {
 				, buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
+				, internal_keyer_(internal_keyer)
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
 			}
@@ -60,16 +62,17 @@ namespace TVPlayR {
 				if (pixel_format == BMDPixelFormat::bmdFormat8BitBGRA)
 				{
 					BOOL support = FALSE;
-					if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) && support)
-						keyer_->Enable(TRUE);
-					else if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) && support)
+					if (internal_keyer_ && SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) && support)
 						keyer_->Enable(FALSE);
+					else if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) && support)
+						keyer_->Enable(TRUE);
 					if (support)
 						keyer_->SetLevel(255);
 				}
 				if (FAILED(output_->EnableVideoOutput(mode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
 					return false;
-				output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
+				if (!internal_keyer_)
+					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
 				return true;
 			}
 						
@@ -114,10 +117,11 @@ namespace TVPlayR {
 			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
 			{
 				unsigned int samples_written;
-				output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
+				if (!internal_keyer_)
+					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
 #ifdef DEBUG
-				if (samples_written != buffer->nb_samples)
+				if (!internal_keyer_ && samples_written != buffer->nb_samples)
 				{
 					std::stringstream msg;
 					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples;
@@ -166,7 +170,8 @@ namespace TVPlayR {
 				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				BMDTimeValue actual_stop;
 				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
-				output_->DisableAudioOutput();
+				if (!internal_keyer_)
+					output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
 			}
 
@@ -227,8 +232,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkOutput::DecklinkOutput(IDeckLink * decklink, int index)
-			: impl_(std::make_unique<implementation>(decklink, index))
+		DecklinkOutput::DecklinkOutput(IDeckLink * decklink, bool internal_keyer, int index)
+			: impl_(std::make_unique<implementation>(decklink, internal_keyer, index))
 		{}
 
 		DecklinkOutput::~DecklinkOutput() { }

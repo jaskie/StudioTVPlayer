@@ -49,7 +49,7 @@ public:
 	FieldOrder field_order() const;
 	bool interlaced() const;
 	bool IsDropFrame() const;
-	std::string FrameNumberToString(int frame_number);
+	std::string FrameNumberToString(int frame_number) const;
 	int StringToFrameNumber(const std::string& tc);
 	uint32_t FrameNumberToSmpteTimecode(int frame_number);
 	int TimeToFrameNumber(int64_t time);

@@ -67,8 +67,11 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
 				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_autodetection_supported_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
-				if (FAILED(input_->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType32bitInteger, audio_channels_count_)))
-					THROW_EXCEPTION("DecklinkInput: EnableAudioInput failed");
+				if (audio_channels_count_ > 0)
+				{
+					if (FAILED(input_->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType32bitInteger, audio_channels_count_)))
+						THROW_EXCEPTION("DecklinkInput: EnableAudioInput failed");
+				}
 				if (FAILED(input_->StartStreams()))
 					THROW_EXCEPTION("DecklinkInput: StartStreams failed");
 				for (auto& provider : channel_prividers_)

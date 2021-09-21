@@ -7,7 +7,7 @@ namespace TVPlayR {
 class DecklinkOutput : public Core::OutputDevice
 {
 public:
-	explicit DecklinkOutput(IDeckLink* decklink, int index);
+	explicit DecklinkOutput(IDeckLink* decklink, bool internal_keyer, int index);
 	~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;

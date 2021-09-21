@@ -20,9 +20,9 @@ namespace TVPlayR {
 		Refresh();
 	}
 
-	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink)
+	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink, bool enableInternalKeyer)
 	{
-		auto native_output = _iterator->CreateOutput(*decklink->GetNativeInfo());
+		auto native_output = _iterator->CreateOutput(*decklink->GetNativeInfo(), enableInternalKeyer);
 		return gcnew DecklinkOutput(native_output);
 	}
 

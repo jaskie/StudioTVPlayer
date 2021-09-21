@@ -6,11 +6,12 @@ namespace TVPlayR {
 		class AVSync;
 	}
 	namespace Core {
+		enum class VideoFormatType;
 
 class TimecodeOverlay :  public Overlay
 {
 public:
-	TimecodeOverlay();
+	TimecodeOverlay(const VideoFormatType video_format, bool no_video);
 	~TimecodeOverlay();
 	virtual FFmpeg::AVSync Transform(FFmpeg::AVSync& sync) override;
 private:

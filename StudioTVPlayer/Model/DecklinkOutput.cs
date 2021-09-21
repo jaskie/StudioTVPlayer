@@ -23,7 +23,7 @@ namespace StudioTVPlayer.Model
         public override void Initialize()
         {
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info);
+            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, false);
         }
 
 

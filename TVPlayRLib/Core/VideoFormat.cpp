@@ -273,7 +273,7 @@ bool VideoFormat::IsDropFrame() const
 	return is_drop_frame_;
 }
 
-std::string VideoFormat::FrameNumberToString(int frame_number)
+std::string VideoFormat::FrameNumberToString(int frame_number) const
 {
 	if (timecode_is_supported_)
 	{

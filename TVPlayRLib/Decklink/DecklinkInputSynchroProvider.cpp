@@ -44,7 +44,7 @@ namespace TVPlayR {
 					if (SUCCEEDED(video_frame->GetTimecode(BMDTimecodeFormat::bmdTimecodeRP188Any, &timecode)))
 					{
 						unsigned char hours, minutes, seconds, frames;
-						if (SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
+						if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
 							video->pts = ((((hours * 60) + minutes) * 60) + seconds) * frame_rate_.Numerator() / frame_rate_.Denominator() + frames;
 					}
 					break;

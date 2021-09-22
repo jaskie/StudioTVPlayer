@@ -4,6 +4,7 @@
 #include "HardwareAcceleration.h"
 #include "FieldOrder.h"
 #include "Rational.h"
+#include "InputBase.h"
 
 using namespace System;
 using namespace System::Drawing;
@@ -12,7 +13,7 @@ using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
 
-	public ref class FileInput
+	public ref class FileInput : public InputBase
 	{
 	public:
 		FileInput(String^ fileName);
@@ -91,7 +92,7 @@ namespace TVPlayR {
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
-		const std::shared_ptr<FFmpeg::FFmpegInput> * _nativeSource;
+		const std::shared_ptr<FFmpeg::FFmpegInput>* _nativeSource;
 		String^ _fileName;
 		bool _isLoop;
 
@@ -105,7 +106,7 @@ namespace TVPlayR {
 		GCHandle _stoppedHandle;
 		void StoppedCallback();
 	internal:
-		const std::shared_ptr<FFmpeg::FFmpegInput>& GetNativeSource() { return *_nativeSource; }
+		virtual std::shared_ptr<Core::InputSource> GetNativeSource() override { return *_nativeSource; }
 	};
 
 }

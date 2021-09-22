@@ -7,7 +7,7 @@ using namespace System;
 namespace TVPlayR {
     ref class VideoFormat;
 
-    ref class TimecodeOverlay : public OverlayBase
+    public ref class TimecodeOverlay : public OverlayBase
     {
     public:
         TimecodeOverlay(VideoFormat^ video_format, bool no_passthrough_video);

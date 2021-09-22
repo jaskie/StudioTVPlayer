@@ -72,12 +72,12 @@ namespace TVPlayR {
 		_channel->AddOverlay(overlay->GetNativeObject());
 	}
 
-	void Channel::Load(FileInput^ file)
+	void Channel::Load(InputBase^ file)
 	{
 		_channel->Load(file->GetNativeSource());
 	}
 
-	void Channel::Preload(FileInput^ file)
+	void Channel::Preload(InputBase^ file)
 	{
 		_channel->Preload(file->GetNativeSource());
 	}

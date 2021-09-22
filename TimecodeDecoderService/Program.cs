@@ -10,6 +10,7 @@ namespace TimecodeDecoderService
     [System.ComponentModel.DesignerCategory("Code")]
     public class Program : ServiceBase
     {
+        private static Channels _channels;
 
         public Program()
         {
@@ -27,29 +28,45 @@ namespace TimecodeDecoderService
 
         protected override void OnStop()
         {
+            Cleanup();
             base.OnStop();
         }
 
         private static void Execute(bool userInteractive)
         {
-            Channels channels;
             using (var reader = new StreamReader("config.xml"))
             {
                 var serializer = new XmlSerializer(typeof(Channels));
-                channels = (Channels)serializer.Deserialize(reader);
+                _channels = (Channels)serializer.Deserialize(reader);
             }
+            _channels?.StartAll();
             if (userInteractive)
             {
+                ExecuteConsoleCommands();
+                Cleanup();
+            }
+        }
+
+        public static void ExecuteConsoleCommands()
+        {
+            while (true)
+            {
                 var line = Console.ReadLine().ToLower();
-                switch(line)
+                switch (line)
                 {
                     case "q":
                     case "quit":
-                        break;
+                        return;
                 }
             }
         }
         
+        private static void Cleanup()
+        {
+            _channels.Dispose();
+            _channels = null;
+        }
+
         public static void Main(string[] args)
         {
             if (Environment.UserInteractive)

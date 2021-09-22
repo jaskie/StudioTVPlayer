@@ -96,6 +96,7 @@
     <ClInclude Include="FileInfo.h" />
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="FileInput.h" />
+    <ClInclude Include="InputBase.h" />
     <ClInclude Include="NdiOutput.h" />
     <ClInclude Include="OutputBase.h" />
     <ClInclude Include="OverlayBase.h" />

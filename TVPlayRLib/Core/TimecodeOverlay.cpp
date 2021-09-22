@@ -79,7 +79,9 @@ namespace TVPlayR {
 				Gdiplus::Graphics graphics(&bitmap);
 				graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeDefault);
 				graphics.FillRectangle(&background_, background_rect_);
-				std::string timecode = video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
+				std::string timecode = time == AV_NOPTS_VALUE ?
+					"NO TC DATA" :
+					video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
 				CA2W ca2w(timecode.c_str());
 				graphics.DrawString(ca2w, -1, &font_, timecode_position_, &timecode_format_, &foreground_);
 				Gdiplus::BitmapData bmpData;

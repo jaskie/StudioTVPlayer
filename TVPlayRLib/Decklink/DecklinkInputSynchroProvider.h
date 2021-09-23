@@ -1,5 +1,6 @@
 #pragma once
-#include "../FFmpeg/ChannelScaler.h"
+#include "../Common/Rational.h"
+#include "../FFmpeg/SwScale.h"
 #include "../FFmpeg/AudioFifo.h"
 #include "DecklinkTimecodeSource.h"
 
@@ -9,7 +10,7 @@ namespace TVPlayR {
 	}
 	namespace FFmpeg {
 		class AVSync;
-		class ChannelScaler;
+		class SwScale;
 		class AudioFifo;
 	}
 	namespace Common {
@@ -27,7 +28,7 @@ public:
 	void SetInputParameters(BMDFieldDominance field_dominance, BMDTimeScale time_scale, BMDTimeValue frame_duration);
 private:
 	const Core::Channel&					channel_;
-	FFmpeg::ChannelScaler					scaler_;
+	std::unique_ptr<FFmpeg::SwScale>		scaler_;
 	FFmpeg::AudioFifo						audio_fifo_;
 	std::shared_ptr<AVFrame>				last_video_;
 	int64_t									frame_pts_ = 0LL;

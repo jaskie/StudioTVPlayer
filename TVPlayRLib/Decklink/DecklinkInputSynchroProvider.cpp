@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "DecklinkInputSynchroProvider.h"
 #include "../Core/Channel.h"
+#include "../FFmpeg/SwScale.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
@@ -9,7 +10,6 @@ namespace TVPlayR {
 	namespace Decklink {
 		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source)
 			: channel_(channel)
-			, scaler_(channel)
 			, audio_fifo_(channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), av_make_q(1, channel.AudioSampleRate()), 0LL, AV_TIME_BASE/10)
 			, timecode_source_(timecode_source)
 		{ }
@@ -21,6 +21,8 @@ namespace TVPlayR {
 			void* video_bytes = nullptr;
 			if (video_frame && SUCCEEDED(video_frame->GetBytes(&video_bytes)) && video_bytes)
 			{
+				if (!scaler_)
+					scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));
 				std::shared_ptr<AVFrame> video = FFmpeg::AllocFrame();
 				video->data[0] = reinterpret_cast<uint8_t*>(video_bytes);
 				video->linesize[0] = video_frame->GetRowBytes();
@@ -53,8 +55,7 @@ namespace TVPlayR {
 					video->pts = 0;
 					break;
 				}
-
-				scaler_.Push(video, frame_rate_, video_time_base_);
+				last_video_ = scaler_->Scale(video);
 			}
 			void* audio_bytes = nullptr;
 			if (audio_packet && SUCCEEDED(audio_packet->GetBytes(&audio_bytes)) && audio_bytes)
@@ -75,7 +76,7 @@ namespace TVPlayR {
 
 		FFmpeg::AVSync DecklinkInputSynchroProvider::PullSync(int audio_samples_count)
 		{
-			auto video = scaler_.Pull();
+			auto video = last_video_;
 			if (!video)
 				video = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
 			auto audio = audio_fifo_.Pull(audio_samples_count);

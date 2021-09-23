@@ -45,7 +45,7 @@ int main()
 #endif
 	Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
 	Decklink::DecklinkIterator iterator;
-	int device_index = 1;
+	int device_index = 0;
 	//for (size_t i = 0; i < iterator.Size(); i++)
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 	auto output = iterator.CreateOutput(*iterator[device_index], true);

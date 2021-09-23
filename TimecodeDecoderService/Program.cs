@@ -34,7 +34,8 @@ namespace TimecodeDecoderService
 
         private static void Execute(bool userInteractive)
         {
-            using (var reader = new StreamReader("config.xml"))
+            var fileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "config.xml");
+            using (var reader = new StreamReader(fileName))
             {
                 var serializer = new XmlSerializer(typeof(Channels));
                 _channels = (Channels)serializer.Deserialize(reader);

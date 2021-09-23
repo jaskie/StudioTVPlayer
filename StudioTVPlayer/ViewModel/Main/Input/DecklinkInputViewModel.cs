@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Linq;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
 {
@@ -7,26 +8,51 @@ namespace StudioTVPlayer.ViewModel.Main.Input
     {
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.DecklinkInfo _selectedDevice;
-        private readonly Model.DecklinkInput _input;
 
         public DecklinkInputViewModel(Model.DecklinkInput input)
         {
-            _input = input;
+            Input = input;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
+            if (Input.GetInput() is null)
+                Input.Initialize();
         }
 
-        public TVPlayR.DecklinkInfo SelectedDevice { get => _selectedDevice; set => Set(ref _selectedDevice , value); }
+        public TVPlayR.DecklinkInfo SelectedDevice
+        {
+            get => _selectedDevice; 
+            set
+            {
+                if (!Set(ref _selectedDevice, value))
+                    return;
+                Input.DeviceIndex = value.Index;
+                if (Input.Initialize())
+                    Providers.InputList.Current.Save();
+            }
+        }
 
         public TVPlayR.DecklinkInfo[] Devices => TVPlayR.DecklinkIterator.Devices;
 
-        public TVPlayR.VideoFormat VideoFormat { get => _videoFormat; set => Set(ref _videoFormat, value); }
+        public TVPlayR.VideoFormat VideoFormat
+        {
+            get => _videoFormat; 
+            set
+            {
+                if (!Set(ref _videoFormat, value))
+                    return;
+                Input.VideoFormat = value.Name;
+                if (Input.Initialize())
+                    Providers.InputList.Current.Save();
+            }
+        }
 
         public TVPlayR.VideoFormat[] VideoFormats => TVPlayR.VideoFormat.Formats;
 
-        public bool IsEnabled { get; set; }
+        public ImageSource Thumbnail => Input.Thumbnail;
 
         public string Error => string.Empty;
+
+        public Model.DecklinkInput Input { get; }
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 
@@ -38,13 +64,13 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public override void Apply()
         {
-            _input.DeviceIndex = SelectedDevice.Index;
-            _input.VideoFormat = VideoFormat.Name;
+            Input.DeviceIndex = SelectedDevice.Index;
+            Input.VideoFormat = VideoFormat.Name;
         }
 
         protected override bool CanRequestRemove(object obj)
         {
-            return !IsEnabled;
+            return true;
         }
 
         private string ReadErrorInfo(string propertyName)

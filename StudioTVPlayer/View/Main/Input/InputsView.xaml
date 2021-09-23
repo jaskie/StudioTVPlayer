@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main.Input"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -14,13 +15,18 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Margin="10" Command="{Binding AddDecklinkInputCommand}" HorizontalAlignment="Left">
-            <StackPanel Orientation="Horizontal" Margin="5 0">
+        <Button Grid.Row="0" Margin="10" FontSize="14" Command="{Binding AddDecklinkInputCommand}" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal">
                 <mah:FontIcon Glyph="&#xE710;" />
-                <Label FontSize="16" FontWeight="Normal">Add input</Label>
+                <TextBlock Margin="5 0 0 0" FontWeight="Normal">Add input</TextBlock>
             </StackPanel>
         </Button>
-        <ListBox Grid.Row="1" ItemsSource="{Binding Inputs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Grid.Row="1" ItemsSource="{Binding Inputs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 dd:DragDrop.IsDragSource="True"
+                 dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
+                 dd:DragDrop.UseDefaultDragAdorner="True"
+                 >
+            
             <ListBox.Resources>
                 <DataTemplate DataType="{x:Type vm:DecklinkInputViewModel}">
                     <local:DecklinkInputView/>

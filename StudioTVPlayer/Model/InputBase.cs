@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
@@ -7,6 +8,9 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public string VideoFormat { get; set; }
 
-        public abstract void Initialize();
+        [XmlIgnore]
+        public abstract ImageSource Thumbnail { get; }
+
+        public abstract bool Initialize();
     }
 }

@@ -8,10 +8,10 @@ namespace StudioTVPlayer.Providers
     public class InputList
     {
         private const string InputsFile = "Inputs.xml";
-        
+
         [XmlArray]
         [XmlArrayItem(typeof(Model.DecklinkInput))]
-        public List<Model.InputBase> Inputs { get; set; }
+        public List<Model.InputBase> Inputs { get; set; } = new List<Model.InputBase>();
 
         public static InputList Current { get; } = Load();
 

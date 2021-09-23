@@ -19,6 +19,7 @@ namespace TimecodeDecoderService
             serviceInstaller.StartType = ServiceStartMode.Manual;
             serviceInstaller.ServiceName = "TimecodeDecoderService";
             serviceInstaller.Description = "Timecode decoder";
+            serviceInstaller.ServicesDependedOn = new [] { "dvhlp" };
             foreach (var installer in serviceInstaller.Installers)
                 if (installer is System.Diagnostics.EventLogInstaller eventLogInstaller)
                 {

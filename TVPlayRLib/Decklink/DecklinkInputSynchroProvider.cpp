@@ -41,16 +41,11 @@ namespace TVPlayR {
 						video->pts = frameTime / frameDuration;
 					break;
 				case DecklinkTimecodeSource::RP188Any:
-				{
-					CComPtr<IDeckLinkTimecode> timecode;
-					if (SUCCEEDED(video_frame->GetTimecode(BMDTimecodeFormat::bmdTimecodeRP188Any, &timecode)))
-					{
-						unsigned char hours, minutes, seconds, frames;
-						if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
-							video->pts = ((((hours * 60) + minutes) * 60) + seconds) * frame_rate_.Numerator() / frame_rate_.Denominator() + frames;
-					}
+					video->pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeRP188Any);
 					break;
-				}
+				case DecklinkTimecodeSource::VITC:
+					video->pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeVITC);
+					break;
 				default:
 					video->pts = 0;
 					break;
@@ -72,6 +67,18 @@ namespace TVPlayR {
 				audio->channels = channel_.AudioChannelsCount();
 				audio_fifo_.TryPush(audio);
 			}
+		}
+
+		int64_t DecklinkInputSynchroProvider::GetPts(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format)
+		{
+			CComPtr<IDeckLinkTimecode> timecode;
+			if (SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
+			{
+				unsigned char hours, minutes, seconds, frames;
+				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
+					return ((((hours * 60) + minutes) * 60) + seconds) * frame_rate_.Numerator() / frame_rate_.Denominator() + frames;
+			}
+			return AV_NOPTS_VALUE;
 		}
 
 		FFmpeg::AVSync DecklinkInputSynchroProvider::PullSync(int audio_samples_count)

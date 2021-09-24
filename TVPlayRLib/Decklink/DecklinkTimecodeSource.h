@@ -7,7 +7,8 @@ namespace TVPlayR {
 		{
 			None,
 			StreamTime,
-			RP188Any
+			RP188Any,
+			VITC
 		};
 
 }}

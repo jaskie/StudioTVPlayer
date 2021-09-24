@@ -38,6 +38,7 @@ private:
 	Common::Rational<int>					frame_rate_;
 	Common::Rational<int>					video_time_base_;
 	DecklinkTimecodeSource					timecode_source_;
+	int64_t GetPts(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format);
 };
 
 }}

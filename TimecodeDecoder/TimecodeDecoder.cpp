@@ -43,9 +43,9 @@ int main()
 	try
 	{
 #endif
-	Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
+	Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::bgra, 2);
 	Decklink::DecklinkIterator iterator;
-	int device_index = 0;
+	int device_index = 1;
 	//for (size_t i = 0; i < iterator.Size(); i++)
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 	auto output = iterator.CreateOutput(*iterator[device_index], true);
@@ -56,7 +56,7 @@ int main()
 	channel.AddOutput(output);
 	channel.AddOutput(ndi);
 
-	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2, Decklink::DecklinkTimecodeSource::RP188Any);
+	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, Decklink::DecklinkTimecodeSource::VITC);
 	input->Play();
 	channel.Load(input);
 	std::getchar();

@@ -104,8 +104,7 @@ namespace TVPlayR {
 				fourcc,
 				format.FrameRate().Numerator(),
 				format.FrameRate().Denominator(),
-				static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Numerator() * format.height()),
-				frame_format_type,
+				static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Denominator() * format.height()),				frame_format_type,
 				time * 10,
 				avframe->data[0],
 				avframe->linesize[0]

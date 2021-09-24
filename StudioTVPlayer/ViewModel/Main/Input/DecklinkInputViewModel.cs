@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Media;
 
@@ -85,5 +86,6 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                     return string.Empty;                    
             }
         }
+
     }
 }

@@ -11,10 +11,10 @@ namespace StudioTVPlayer.Model
 {
     public class MediaPlayer : IDisposable
     {
-        private readonly List<RundownItem> _rundown = new List<RundownItem>();
+        private readonly List<FileRundownItem> _rundown = new List<FileRundownItem>();
         private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
-        private RundownItem _playingRundownItem;
-        private RundownItem _nextRundownItem;
+        private FileRundownItem _playingRundownItem;
+        private FileRundownItem _nextRundownItem;
 
         public MediaPlayer(Channel channel)
         {
@@ -22,11 +22,11 @@ namespace StudioTVPlayer.Model
             Channel.AudioVolume += Channel_AudioVolume;
         }
 
-        public IReadOnlyCollection<RundownItem> Rundown => _rundown;
+        public IReadOnlyCollection<FileRundownItem> Rundown => _rundown;
 
         public Channel Channel { get; }
 
-        public RundownItem PlayingRundownItem
+        public FileRundownItem PlayingRundownItem
         {
             get => _playingRundownItem;
             private set
@@ -69,18 +69,18 @@ namespace StudioTVPlayer.Model
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
         public event EventHandler<RundownItemEventArgs> Removed;
 
-        public void Load(RundownItem item)
+        public void Load(FileRundownItem item)
         {
             if (!_rundown.Contains(item))
                 return;
             PlayingRundownItem = item;
         }
 
-        public RundownItem AddToQueue(MediaFile media, int index)
+        public FileRundownItem AddToQueue(MediaFile media, int index)
         {
             if (index < _rundown.Count)
             {
-                var item = new RundownItem(media);
+                var item = new FileRundownItem(media);
                 _rundown.Insert(index, item);
                 item.PropertyChanged += RundownItem_PropertyChanged;
                 item.RemoveRequested += RundownItem_RemoveRequested;
@@ -88,7 +88,7 @@ namespace StudioTVPlayer.Model
             }
             if (index == Rundown.Count)
             {
-                var item = new RundownItem(media);
+                var item = new FileRundownItem(media);
                 _rundown.Add(item);
                 item.PropertyChanged += RundownItem_PropertyChanged;
                 item.RemoveRequested += RundownItem_RemoveRequested;
@@ -113,7 +113,7 @@ namespace StudioTVPlayer.Model
             _rundown.Insert(destIndex, item);
         }
 
-        private void InternalUnload(RundownItem rundownItem)
+        private void InternalUnload(FileRundownItem rundownItem)
         {
             if (rundownItem == null)
                 return;
@@ -126,7 +126,7 @@ namespace StudioTVPlayer.Model
             rundownItem.Unload();
         }
 
-        private void InternalLoad(RundownItem rundownItem)
+        private void InternalLoad(FileRundownItem rundownItem)
         {
             Debug.WriteLine(rundownItem, "InternalLoad:");
             if (rundownItem != null)
@@ -143,7 +143,7 @@ namespace StudioTVPlayer.Model
 
         internal void Submit(MediaFile media)
         {
-            var item = new RundownItem(media);
+            var item = new FileRundownItem(media);
             _rundown.Add(item);
             MediaSubmitted?.Invoke(this, new RundownItemEventArgs(item));
         }
@@ -168,7 +168,7 @@ namespace StudioTVPlayer.Model
 
         public void DeleteDisabled()
         {
-            RundownItem item = null;
+            FileRundownItem item = null;
             while (true)
             {
                 item = Rundown.FirstOrDefault(i => i.IsDisabled);
@@ -178,7 +178,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        private bool RemoveItem(RundownItem rundownItem)
+        private bool RemoveItem(FileRundownItem rundownItem)
         {
             if (!_rundown.Remove(rundownItem))
                 return false;
@@ -205,7 +205,7 @@ namespace StudioTVPlayer.Model
             });
         }
 
-        private RundownItem FindNextAutoPlayItem()
+        private FileRundownItem FindNextAutoPlayItem()
         {
             var currentItem = PlayingRundownItem;
             using (var iterator = _rundown.GetEnumerator())
@@ -231,7 +231,7 @@ namespace StudioTVPlayer.Model
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, new TimeEventArgs(e.Time));
-            var current = sender as RundownItem ?? throw new ArgumentException(nameof(sender));
+            var current = sender as FileRundownItem ?? throw new ArgumentException(nameof(sender));
             var nextItem = _nextRundownItem;
             if (nextItem is null)
                 return;
@@ -243,8 +243,8 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(RundownItem.IsAutoStart) || 
-                e.PropertyName == nameof(RundownItem.IsDisabled))
+            if (e.PropertyName == nameof(FileRundownItem.IsAutoStart) || 
+                e.PropertyName == nameof(FileRundownItem.IsDisabled))
                 _nextRundownItem = FindNextAutoPlayItem();
         }
 
@@ -255,7 +255,7 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_RemoveRequested(object sender, EventArgs e)
         {
-            var item = sender as RundownItem ?? throw new ArgumentException(nameof(sender));
+            var item = sender as FileRundownItem ?? throw new ArgumentException(nameof(sender));
             RemoveItem(item);
         }
 

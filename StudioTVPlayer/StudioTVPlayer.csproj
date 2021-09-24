@@ -108,6 +108,7 @@
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
     <Compile Include="Model\Channel.cs" />
     <Compile Include="Model\InputBase.cs" />
+    <Compile Include="Model\RundownItemBase.cs" />
     <Compile Include="Providers\Configuration.cs" />
     <Compile Include="Model\DecklinkInput.cs" />
     <Compile Include="Model\DecklinkOutput.cs" />
@@ -116,7 +117,7 @@
     <Compile Include="Model\Args\TimeEventArgs.cs" />
     <Compile Include="Model\NdiOutput.cs" />
     <Compile Include="Model\OutputBase.cs" />
-    <Compile Include="Model\RundownItem.cs" />
+    <Compile Include="Model\FileRundownItem.cs" />
     <Compile Include="Model\Args\RundownItemEventArgs.cs" />
     <Compile Include="Model\MediaVerifier.cs" />
     <Compile Include="Model\StreamOutput.cs" />
@@ -146,7 +147,7 @@
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\MediaPlayerViewModel.cs" />
-    <Compile Include="ViewModel\Main\Player\RundownItemViewModel.cs" />
+    <Compile Include="ViewModel\Main\Player\FileRundownItemViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
     <Compile Include="View\AboutDialog.xaml.cs">
       <DependentUpon>AboutDialog.xaml</DependentUpon>

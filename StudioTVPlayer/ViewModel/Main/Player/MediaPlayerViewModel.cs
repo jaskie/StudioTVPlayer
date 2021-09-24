@@ -10,6 +10,7 @@ using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
+using StudioTVPlayer.ViewModel.Main.Input;
 using StudioTVPlayer.ViewModel.Main.MediaBrowser;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
@@ -24,7 +25,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private TimeSpan _outTime;
         private double _sliderPosition;
         private bool _isDisposed;
-        private RundownItemViewModel _currentRundownItem;
+        private FileRundownItemViewModel _currentRundownItem;
         private bool _isLoaded;
 
         //private bool _isSliderDrag;
@@ -55,7 +56,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (player.Channel.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
-            Rundown = new ObservableCollection<RundownItemViewModel>(player.Rundown.Select(ri => new RundownItemViewModel(ri)));
+            Rundown = new ObservableCollection<FileRundownItemViewModel>(player.Rundown.Select(ri => new FileRundownItemViewModel(ri)));
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
             _mediaPlayer = player;
         }
@@ -145,11 +146,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsAlpha { get; }
 
-        public ObservableCollection<RundownItemViewModel> Rundown { get; }
+        public ObservableCollection<FileRundownItemViewModel> Rundown { get; }
 
-        public RundownItemViewModel SelectedRundownItem { get; set; }
+        public FileRundownItemViewModel SelectedRundownItem { get; set; }
 
-        public RundownItemViewModel CurrentRundownItem
+        public FileRundownItemViewModel CurrentRundownItem
         {
             get => _currentRundownItem;
             private set
@@ -258,10 +259,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(object param)
         {
-            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModel ?? throw new ArgumentException(nameof(param)));
+            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as FileRundownItemViewModel ?? throw new ArgumentException(nameof(param)));
         }
 
-        private void LoadMedia(RundownItemViewModel playerItem)
+        private void LoadMedia(FileRundownItemViewModel playerItem)
         {
             if (playerItem.RundownItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
                 return;
@@ -373,7 +374,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)
         {
-            Rundown.Add(new RundownItemViewModel(e.RundownItem));
+            Rundown.Add(new FileRundownItemViewModel(e.RundownItem));
             Refresh();
         }
 
@@ -422,63 +423,74 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         #region drag&drop
         public void DragOver(IDropInfo dropInfo)
         {
-            if (dropInfo.Data is MediaViewModel mediaViewModel)
+            switch (dropInfo.Data)
             {
-                if (!mediaViewModel.IsVerified || mediaViewModel.Duration <= TimeSpan.Zero)
+                case MediaViewModel mediaViewModel:
+                    if (!mediaViewModel.IsVerified || mediaViewModel.Duration <= TimeSpan.Zero)
+                        return;
+                    break;
+                case DecklinkInputViewModel decklink:
+                    if (!decklink.Input.IsRunning)
+                        return;
+                    break;
+                case FileRundownItemViewModel _:
+                    if (dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex || dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex + 1)
+                        return;
+                    if (dropInfo.DragInfo.SourceCollection != Rundown)
+                        return;
+                    if (dropInfo.InsertPosition == RelativeInsertPosition.None)
+                        return;
+                    break;
+                case IDataObject dataObject:
+                    if ((dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f)) is null)
+                        return;
+                    break;
+                default:
                     return;
             }
-            else if (dropInfo.Data is RundownItemViewModel)
-            {
-                if (dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex || dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex + 1)
-                    return;
-                if (dropInfo.DragInfo.SourceCollection != Rundown)
-                    return;
-                if (dropInfo.InsertPosition == RelativeInsertPosition.None)
-                    return;
-            }
-            else if (dropInfo.Data is IDataObject dataObject)
-            {
-                if ((dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f)) is null)
-                    return;
-            }
-            else
-                return;
             dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
             dropInfo.Effects = DragDropEffects.Move;
         }
 
         public void Drop(IDropInfo dropInfo)
         {
-            if (dropInfo.Data is MediaViewModel mediaViewModel)
+            switch (dropInfo.Data)
             {
-                var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, index);
-                Rundown.Insert(index, new RundownItemViewModel(rundownItem));
-                Refresh();
-            }
-            else if (dropInfo.Data is RundownItemViewModel)
-            {
-                var srcIndex = dropInfo.DragInfo.SourceIndex;
-                var destIndex = dropInfo.InsertIndex;
-                if (destIndex > srcIndex)
-                    destIndex--;
-                _mediaPlayer.MoveItem(srcIndex, destIndex);
-                Rundown.Move(srcIndex, destIndex);
-                Refresh();
-            }
-            else if (dropInfo.Data is IDataObject dataObject)
-            {
-                var fileName = (dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f));
-                if (fileName is null)
-                    return;
-                var media = new MediaFile(fileName);
-                MediaVerifier.Current.Verify(media);
-                if (!media.IsValid)
-                    return;
-                var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                var rundownItem = _mediaPlayer.AddToQueue(media, index);
-                Rundown.Insert(index, new RundownItemViewModel(rundownItem));
-                Refresh();
+                case MediaViewModel mediaViewModel:
+                    var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
+                    var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, index);
+                    Rundown.Insert(index, new FileRundownItemViewModel(rundownItem));
+                    Refresh();
+                    break;
+
+                case DecklinkInputViewModel decklink:
+
+
+                    break;
+
+                case FileRundownItemViewModel _:
+                    var srcIndex = dropInfo.DragInfo.SourceIndex;
+                    var destIndex = dropInfo.InsertIndex;
+                    if (destIndex > srcIndex)
+                        destIndex--;
+                    _mediaPlayer.MoveItem(srcIndex, destIndex);
+                    Rundown.Move(srcIndex, destIndex);
+                    Refresh();
+                    break;
+
+                case IDataObject dataObject:
+                    var fileName = (dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f));
+                    if (fileName is null)
+                        return;
+                    var media = new MediaFile(fileName);
+                    MediaVerifier.Current.Verify(media);
+                    if (!media.IsValid)
+                        return;
+                    index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
+                    rundownItem = _mediaPlayer.AddToQueue(media, index);
+                    Rundown.Insert(index, new FileRundownItemViewModel(rundownItem));
+                    Refresh();
+                    break;
             }
         }
         #endregion //drag&drop

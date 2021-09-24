@@ -5,30 +5,26 @@ using System.Threading;
 
 namespace StudioTVPlayer.Model
 {
-    public class RundownItem : INotifyPropertyChanged, IDisposable
+    public class FileRundownItem : RundownItemBase
     {
         private bool _isAutoStart;
         private bool _isDisabled;
-        private int _preloaded;
         private bool _isLoop;
+        private int _preloaded;
 
-        public RundownItem(MediaFile media)
+        public FileRundownItem(MediaFile media)
         {
             Media = media;
         }
 
         public event EventHandler Stopped;
 
-        public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
-
-        public event EventHandler RemoveRequested;
-        
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public MediaFile Media { get; }
 
         internal TVPlayR.FileInput FileInput { get; private set; }
 
+        public override bool IsPlaying => FileInput?.IsPlaying == true;
+        
         public bool IsAutoStart
         {
             get => _isAutoStart;
@@ -67,42 +63,37 @@ namespace StudioTVPlayer.Model
             }
         }
 
+
         public bool Preloaded => _preloaded != default;
 
-        public bool IsPlaying => FileInput?.IsPlaying == true;
-
-        public void Unload()
-        {
-            if (Interlocked.Exchange(ref _preloaded, default) == default)
-                return;
-            FileInput.FramePlayed -= InputFile_FramePlayed;
-            FileInput.Stopped -= InputFile_Stopped;
-            FileInput.Dispose();
-            FileInput = null;
-        }
-
-        public void RemoveFromRundown()
-        {
-            RemoveRequested?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool Preload(int audioChannelCount)
+        public override bool Preload(int audioChannelCount)
         {
             if (Interlocked.Exchange(ref _preloaded, 1) != default)
                 return false;
             FileInput = new TVPlayR.FileInput(Media.FullPath);
             FileInput.IsLoop = IsLoop;
-            FileInput.FramePlayed += InputFile_FramePlayed;
+            FileInput.FramePlayed += Input_FramePlayed;
             FileInput.Stopped += InputFile_Stopped;
             return true;
         }
 
-        public void Play()
+        public override void Play()
         {
             FileInput.Play();
         }
 
-        internal void Pause()
+        public override void Unload()
+        {
+            if (Interlocked.Exchange(ref _preloaded, default) == default)
+                return;
+            FileInput.FramePlayed -= Input_FramePlayed;
+            FileInput.Stopped -= InputFile_Stopped;
+            FileInput.Dispose();
+            FileInput = null;
+        }
+
+
+        internal override void Pause()
         {
             FileInput.Pause();
         }
@@ -112,24 +103,9 @@ namespace StudioTVPlayer.Model
             return FileInput.Seek(timeSpan);
         }
 
-        public void Dispose()
-        {
-            Unload();
-        }
-
         private void InputFile_Stopped(object sender, EventArgs e)
         {
             Stopped?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void InputFile_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
-        {
-            FramePlayed?.Invoke(this, e);
-        }
-
-        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
     }
 }

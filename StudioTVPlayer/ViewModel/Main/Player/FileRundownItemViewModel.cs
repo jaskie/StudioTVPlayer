@@ -5,11 +5,11 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
-    public class RundownItemViewModel : ViewModelBase
+    public class FileRundownItemViewModel : ViewModelBase
     {
         private bool _isLoaded;
 
-        public RundownItemViewModel(RundownItem rundownItem)
+        public FileRundownItemViewModel(FileRundownItem rundownItem)
         {
             RundownItem = rundownItem;
             CommandRemove = new UiCommand(Remove, _ => !IsLoaded);
@@ -28,7 +28,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public ICommand CommandRemove { get; }
 
-        public RundownItem RundownItem { get; }
+        public FileRundownItem RundownItem { get; }
 
         public ImageSource Thumbnail => RundownItem.Media.Thumbnail;
 

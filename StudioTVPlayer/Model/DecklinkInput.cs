@@ -42,5 +42,7 @@ namespace StudioTVPlayer.Model
                 return false;
             }
         }
+
+        public bool IsRunning => !(_input is null);
     }
 }

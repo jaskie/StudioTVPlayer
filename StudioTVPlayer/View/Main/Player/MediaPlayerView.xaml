@@ -276,7 +276,7 @@
                      dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                      >
                 <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:RundownItemViewModel}">
+                    <DataTemplate DataType="{x:Type vm:FileRundownItemViewModel}">
                         <view:RundownItemView />
                     </DataTemplate>
                 </ListBox.ItemTemplate>

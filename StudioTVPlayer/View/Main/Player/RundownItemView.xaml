@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Player"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             d:DataContext="{d:DesignInstance vm:RundownItemViewModel}"
+             d:DataContext="{d:DesignInstance vm:FileRundownItemViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="500"
              Height="auto"

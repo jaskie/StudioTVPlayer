@@ -7,7 +7,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:DecklinkInputViewModel}}"
-             d:DesignHeight="45" d:DesignWidth="400">
+             d:DesignHeight="90" d:DesignWidth="400">
     <Grid>
         <Grid.Resources>
             <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
@@ -16,18 +16,24 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
-            <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
+        <Image Grid.RowSpan="4" Height="60" Width="160" Source="{Binding Thumbnail}">
+            <Image.Effect>
+                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
+            </Image.Effect>
+        </Image>
         <Label Grid.Column="1">Decklink input</Label>
         <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
-        <Label Grid.Column="2">Video format</Label>
-        <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
-        <Button Grid.RowSpan="2" Grid.Column="3" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
+        <Label Grid.Column="1" Grid.Row="2">Video format</Label>
+        <ComboBox Grid.Column="1" Grid.Row="3" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
+        <Button Grid.RowSpan="4" Grid.Column="2" Command="{Binding RequestRemoveCommand}" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
             <mah:FontIcon Glyph="&#xE74D;"/>
         </Button>
     </Grid>

@@ -39,7 +39,7 @@ int main()
 #else
 		av_log_set_callback(NULL);
 #endif
-		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::yuv422, 2);
+		Core::Channel channel("Channel 1", Core::VideoFormatType::pal, Core::PixelFormat::yuv422, 2);
 		/*Decklink::DecklinkIterator iterator;
 		int device_index = 1;
 		for (size_t i = 0; i < iterator.Size(); i++)
@@ -51,13 +51,13 @@ int main()
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
-		FFmpeg::FFStreamOutputParams stream_params{ "udp://127.0.0.1:1234", "libx264", "aac", 4000, 128 };
-		auto stream = std::make_shared<FFmpeg::FFStreamOutput>(stream_params);
-		channel.AddOutput(stream);
+		//FFmpeg::FFStreamOutputParams stream_params{ "udp://127.0.0.1:1234", "libx264", "aac", 4000, 128 };
+		//auto stream = std::make_shared<FFmpeg::FFStreamOutput>(stream_params);
+		//channel.AddOutput(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("c:\\TEMP\\AMB.mp4", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("d:\\TEMP\\test5.mov", Core::HwAccel::none, "");
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
@@ -86,7 +86,7 @@ int main()
 		}
 		channel.RemoveOutput(ndi);
 		//channel.RemoveOutput(decklink_output);
-		channel.RemoveOutput(stream);
+		//channel.RemoveOutput(stream);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

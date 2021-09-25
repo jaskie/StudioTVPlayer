@@ -34,6 +34,7 @@ extern "C"
 #include "Decklink/DecklinkInfo.h"
 #include "Core/TimecodeOverlay.h"
 #include "Ndi/NdiOutput.h"
+#include "FFmpeg/FFmpegInput.h"
 
 using namespace TVPlayR;
 
@@ -45,7 +46,7 @@ int main()
 #endif
 	Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::bgra, 2);
 	Decklink::DecklinkIterator iterator;
-	int device_index = 1;
+	int device_index = 0;
 	//for (size_t i = 0; i < iterator.Size(); i++)
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 	auto output = iterator.CreateOutput(*iterator[device_index], true);
@@ -56,7 +57,10 @@ int main()
 	channel.AddOutput(output);
 	channel.AddOutput(ndi);
 
-	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, Decklink::DecklinkTimecodeSource::VITC);
+//	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, Decklink::DecklinkTimecodeSource::VITC);
+	auto input = std::make_shared<FFmpeg::FFmpegInput>("d:\\TEMP\\test5.mov", Core::HwAccel::none, "");
+	input->SetIsLoop(true);
+
 	input->Play();
 	channel.Load(input);
 	std::getchar();

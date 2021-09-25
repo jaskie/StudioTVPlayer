@@ -4,27 +4,29 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
 {
-    public class InputsViewModel: ViewModelBase
+    public class InputsViewModel: ViewModelBase, IDisposable
     {
         public InputsViewModel()
         {
             AddDecklinkInputCommand = new UiCommand(AddDecklinkInput);
-            Inputs = new ObservableCollection<DecklinkInputViewModel>(InputList.Current.Inputs.Select( input =>
-            {
-                switch (input)
-                {
-                    case Model.DecklinkInput decklink:
-                        return new DecklinkInputViewModel(decklink);
-                    default:
-                        throw new ApplicationException("Invalid model type provided");
-                }
-            }));
+            Inputs = new ObservableCollection<InputViewModelBase>(InputList.Current.Inputs.Select(input =>
+           {
+               InputViewModelBase inputViewModel;
+               switch (input)
+               {
+                   case Model.DecklinkInput decklink:
+                       inputViewModel = new DecklinkInputViewModel(decklink);
+                       break;
+                   default:
+                       throw new ApplicationException("Invalid model type provided");
+               }
+               inputViewModel.RemoveRequested += Input_RemoveRequested;
+               return inputViewModel;
+           }));
         }
 
         public ICommand AddDecklinkInputCommand { get; }
@@ -38,13 +40,23 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             Inputs.Add(vm);
         }
 
-        public IList<DecklinkInputViewModel> Inputs { get; }
+        public IList<InputViewModelBase> Inputs { get; }
         
         private void Input_RemoveRequested(object sender, EventArgs e)
         {
             var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));
-            if (InputList.Current.Inputs.Remove(vm.Input))
+            if (InputList.Current.RemoveInput(vm.Input))
+            {
                 Inputs.Remove(vm);
+                vm.Dispose();
+                vm.RemoveRequested -= Input_RemoveRequested;
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var input in Inputs)
+                input.Dispose();
         }
     }
 }

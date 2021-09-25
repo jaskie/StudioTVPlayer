@@ -42,6 +42,7 @@ namespace StudioTVPlayer.ViewModel.Main
                 player.Dispose();
             foreach (var browser in Browsers)
                 browser.Dispose();
+            Inputs.Dispose();
         }
 
     }

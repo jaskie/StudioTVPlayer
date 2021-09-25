@@ -15,7 +15,7 @@ namespace StudioTVPlayer.Model
 
         public override ImageSource Thumbnail => _thumbnail;
 
-        public void Dispose()
+        public override void Dispose()
         {
             if (_input is null)
                 return;
@@ -43,6 +43,12 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public bool IsRunning => !(_input is null);
+        public override void Uninitialize()
+        {
+            _input?.Dispose();
+            _input = null;
+        }
+
+        public override bool IsRunning => !(_input is null);
     }
 }

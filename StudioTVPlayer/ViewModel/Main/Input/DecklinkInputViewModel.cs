@@ -1,21 +1,20 @@
-﻿using System;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
 {
-    public class DecklinkInputViewModel : RemovableViewModelBase, IDataErrorInfo
+    public class DecklinkInputViewModel : InputViewModelBase
     {
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.DecklinkInfo _selectedDevice;
+        private readonly Model.DecklinkInput _input;
 
         public DecklinkInputViewModel(Model.DecklinkInput input)
         {
-            Input = input;
+            _input = input;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
-            if (Input.GetInput() is null)
+            if (_input.GetInput() is null)
                 Input.Initialize();
         }
 
@@ -26,8 +25,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             {
                 if (!Set(ref _selectedDevice, value))
                     return;
-                Input.DeviceIndex = value.Index;
-                if (Input.Initialize())
+                _input.DeviceIndex = value.Index;
+                if (_input.Initialize())
                     Providers.InputList.Current.Save();
             }
         }
@@ -51,11 +50,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public ImageSource Thumbnail => Input.Thumbnail;
 
-        public string Error => string.Empty;
-
-        public Model.DecklinkInput Input { get; }
-
-        public string this[string columnName] => ReadErrorInfo(columnName);
+        public override Model.InputBase Input => _input;
 
         public override bool IsValid()
         {
@@ -65,8 +60,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public override void Apply()
         {
-            Input.DeviceIndex = SelectedDevice.Index;
-            Input.VideoFormat = VideoFormat.Name;
+            _input.DeviceIndex = SelectedDevice.Index;
+            _input.VideoFormat = VideoFormat.Name;
         }
 
         protected override bool CanRequestRemove(object obj)
@@ -74,7 +69,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             return true;
         }
 
-        private string ReadErrorInfo(string propertyName)
+        protected override string ReadErrorInfo(string propertyName)
         {
             switch(propertyName)
             {

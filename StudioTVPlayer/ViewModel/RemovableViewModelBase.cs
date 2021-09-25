@@ -13,7 +13,7 @@ namespace StudioTVPlayer.ViewModel
             RequestRemoveCommand = new UiCommand(RequestRemove, CanRequestRemove);
         }
 
-        public ICommand RequestRemoveCommand { get; } 
+        public ICommand RequestRemoveCommand { get; }
 
         protected virtual bool CanRequestRemove(object obj)
         {

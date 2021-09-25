@@ -33,5 +33,14 @@ namespace StudioTVPlayer.Providers
             var inputsFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, InputsFile);
             DataStore.Save(this, inputsFile);
         }
+
+        public bool RemoveInput(Model.InputBase input)
+        {
+            if (!Inputs.Remove(input))
+                return false;
+            Save();
+            return true;
+        }
+
     }
 }

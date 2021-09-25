@@ -137,6 +137,7 @@
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\Main\Input\DecklinkInputViewModel.cs" />
     <Compile Include="ViewModel\Main\Input\InputsViewModel.cs" />
+    <Compile Include="ViewModel\Main\Input\InputViewModelBase.cs" />
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />

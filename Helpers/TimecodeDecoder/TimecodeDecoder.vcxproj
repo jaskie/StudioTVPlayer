@@ -106,7 +106,7 @@
     <ClCompile Include="TimecodeDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TVPlayRLib\TVPlayR.vcxproj">
+    <ProjectReference Include="..\..\TVPlayRLib\TVPlayR.vcxproj">
       <Project>{000b04e8-1484-4100-b36c-10f1cdf4602b}</Project>
     </ProjectReference>
   </ItemGroup>

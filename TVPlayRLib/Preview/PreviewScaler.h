@@ -13,11 +13,11 @@ namespace TVPlayR {
 class PreviewScaler : public FFmpeg::VideoFilterBase
 {
 private:
-	Core::Channel& channel_;
 	const std::string filter_str_;
-	std::string GetFilterString(const Core::VideoFormat& channel_format, const Core::PixelFormat pix_fmt, int width, int height);
+	const AVRational time_base_;
+	std::string GetFilterString(int output_width, int output_height);
 public:
-	PreviewScaler(Core::Channel& channel,  int width, int height);
+	PreviewScaler(AVRational input_frame_rate, int output_width, int output_height);
 	void Push(std::shared_ptr<AVFrame> frame);
 };
 

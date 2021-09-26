@@ -342,6 +342,9 @@ bool FFmpegInput::IsEof() const					{ return impl_->is_eof_; }
 bool FFmpegInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
 void FFmpegInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
 void FFmpegInput::RemoveFromChannel(const Core::Channel& channel)				{ impl_->RemoveFromChannel(channel);}
+void FFmpegInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview)
+{
+}
 void FFmpegInput::Play()							{ impl_->Play(); }
 void FFmpegInput::Pause()							{ impl_->Pause(); }
 bool FFmpegInput::IsPlaying()	const				{ return impl_->is_playing_; }

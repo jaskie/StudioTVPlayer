@@ -4,12 +4,8 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class Channel;
 		enum class VideoFormatType;
-		enum class FieldOrder;
 	}
-
-
 
 	namespace Decklink {
 		class DecklinkInput : public Core::InputSource
@@ -21,6 +17,7 @@ namespace TVPlayR {
 			virtual bool IsAddedToChannel(const Core::Channel& channel) override;
 			virtual void AddToChannel(const Core::Channel& channel) override;
 			virtual void RemoveFromChannel(const Core::Channel& channel) override;
+			virtual void AddPreview(std::shared_ptr<Preview::InputPreview> preview);
 			virtual void Play() override;
 			virtual void Pause() override;
 			virtual bool IsPlaying() const override;

@@ -17,7 +17,7 @@ ChannelScaler::ChannelScaler(const Core::Channel& channel)
 }
 
 
-bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, Common::Rational<int> frame_rate, Common::Rational<int> time_base)
+bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, AVRational frame_rate, AVRational time_base)
 {
 	if (!IsInitialized()
 		|| current_time_base_ != time_base
@@ -27,7 +27,7 @@ bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, Common::Rational<int> f
 		|| current_pixel_fomat_ != frame->format
 		)
 	{
-		VideoFilterBase::CreateFilterChain(frame, time_base, Setup(frame, frame_rate, time_base));
+		VideoFilterBase::CreateFilterChain(frame, time_base, Setup(frame, frame_rate));
 		current_time_base_ = time_base;
 		current_frame_rate_ = frame_rate;
 		current_height_ = frame->height;
@@ -37,7 +37,7 @@ bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, Common::Rational<int> f
 	return VideoFilterBase::Push(frame);
 }
 
-std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame, Common::Rational<int>& frame_rate, Common::Rational<int>& time_base)
+std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame, Common::Rational<int> frame_rate)
 {
 	std::ostringstream filter;
 	int height = frame->height;

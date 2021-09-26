@@ -188,6 +188,9 @@
     <ClInclude Include="Core\TimecodeOverlay.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Preview\InputPreview.h">
+      <Filter>Preview</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -283,6 +286,9 @@
     </ClCompile>
     <ClCompile Include="Core\TimecodeOverlay.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Preview\InputPreview.cpp">
+      <Filter>Preview</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

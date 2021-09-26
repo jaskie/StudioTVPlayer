@@ -186,6 +186,9 @@ namespace TVPlayR {
 		bool DecklinkInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
 		void DecklinkInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
 		void DecklinkInput::RemoveFromChannel(const Core::Channel& channel) { impl_->RemoveFromChannel(channel); }
+		void DecklinkInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview)
+		{
+		}
 		void DecklinkInput::Play()
 		{
 		}

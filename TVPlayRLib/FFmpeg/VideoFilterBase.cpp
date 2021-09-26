@@ -76,7 +76,7 @@ void VideoFilterBase::Flush() {
 	is_flushed_ = true;
 }
 
-void VideoFilterBase::CreateFilterChain(std::shared_ptr<AVFrame> frame, const Common::Rational<int> input_time_base, const std::string& filter_str)
+void VideoFilterBase::CreateFilterChain(std::shared_ptr<AVFrame> frame, const AVRational input_time_base, const std::string& filter_str)
 {
 	source_ctx_ = NULL;
 	sink_ctx_ = NULL;
@@ -95,7 +95,7 @@ void VideoFilterBase::CreateFilterChain(std::shared_ptr<AVFrame> frame, const Co
 		snprintf(args, sizeof(args),
 			"video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
 			frame->width, frame->height, frame->format,
-			input_time_base.Numerator(), input_time_base.Denominator(),
+			input_time_base.num, input_time_base.den,
 			frame->sample_aspect_ratio.num, frame->sample_aspect_ratio.den);
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args, NULL, graph_.get()));
 		enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };

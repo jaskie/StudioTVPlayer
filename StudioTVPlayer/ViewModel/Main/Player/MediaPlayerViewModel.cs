@@ -158,7 +158,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 var oldItem = _currentRundownItem;
                 if (!Set(ref _currentRundownItem, value))
                     return;
-                if (value != null)
+                if (value is null)
+                {
+                    DisplayTime = TimeSpan.Zero;
+                    OutTime = TimeSpan.Zero;
+                    OutTimeBlink = false;
+                }
+                else
                     value.IsLoaded = true;
                 if (oldItem != null)
                     oldItem.IsLoaded = false;
@@ -269,7 +275,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.Load(playerItem.RundownItem);
         }
 
-        private void LoadNextItem(object obj)
+        private void LoadNextItem(object _)
         {
             var currentIndex = Rundown.IndexOf(CurrentRundownItem);
             if (currentIndex >= Rundown.Count - 1)
@@ -283,7 +289,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        private bool CanLoadNextItem(object obj)
+        private bool CanLoadNextItem(object _)
         {
             var currentIndex = Rundown.IndexOf(CurrentRundownItem);
             while (++currentIndex < Rundown.Count)
@@ -295,13 +301,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             return false;
         }
 
-        private void Unload(object obj = null)
+        private void Unload(object _)
         {
-            CurrentRundownItem = null;
             _mediaPlayer.Clear();
         }
 
-        private async void TogglePlay(object obj)
+        private async void TogglePlay(object _)
         {
             if (IsPlaying)
                 await Pause();

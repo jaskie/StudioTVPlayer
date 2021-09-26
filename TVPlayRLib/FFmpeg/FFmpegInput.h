@@ -4,7 +4,6 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class Channel;
 		class AudioChannelMapEntry;
 		class StreamInfo;
 		enum class FieldOrder;
@@ -22,6 +21,7 @@ public:
 	virtual bool IsAddedToChannel(const Core::Channel& channel) override;
 	virtual void AddToChannel(const Core::Channel& channel) override;
 	virtual void RemoveFromChannel(const Core::Channel& channel) override;
+	virtual void AddPreview(std::shared_ptr<Preview::InputPreview> preview);
 	virtual void Play() override;
 	virtual void Pause() override;
 	virtual bool IsPlaying() const override;

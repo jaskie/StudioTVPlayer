@@ -2,12 +2,13 @@
 #include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
-	namespace Core {
+	namespace Preview {
+		class InputPreview;
+	}
 
-class Channel;
-class AudioChannelMapEntry;
-class StreamInfo;
-enum class FieldOrder;
+	namespace Core {
+		class Channel;
+		enum class FieldOrder;
 
 class InputSource
 {
@@ -19,6 +20,7 @@ public:
 	virtual bool IsAddedToChannel(const Channel& channel) = 0;
 	virtual void AddToChannel(const Channel& channel) = 0;
 	virtual void RemoveFromChannel(const Core::Channel& channel) = 0;
+	virtual void AddPreview(std::shared_ptr<Preview::InputPreview> preview) = 0;
 	virtual void Play() = 0;
 	virtual void Pause() = 0;
 	virtual bool IsPlaying() const = 0;

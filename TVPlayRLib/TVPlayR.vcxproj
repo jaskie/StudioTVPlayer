@@ -91,6 +91,7 @@
     <ClInclude Include="Decklink\DecklinkTimecodeSource.h" />
     <ClInclude Include="FFmpeg\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
+    <ClInclude Include="Preview\InputPreview.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BlockingCollection.h" />
     <ClInclude Include="Common\Debug.h" />
@@ -227,6 +228,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFmpeg\FFStreamOutput.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="Preview\InputPreview.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

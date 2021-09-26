@@ -50,7 +50,7 @@ namespace TVPlayR {
 		{
 			consumer_executor_.invoke([&] {
 				channel_ = &channel;
-				preview_scaler_ = std::make_unique<PreviewScaler>(*channel_, width_, height_);
+				preview_scaler_ = std::make_unique<PreviewScaler>(channel.Format().FrameRate().av(), width_, height_);
 			});
 			return true;
 		}

@@ -9,7 +9,7 @@ using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
 	ref class DecklinkOutput;
-	ref class PreviewOutput;
+	ref class OutputPreview;
 	ref class InputBase;
 	ref class OutputBase;
 	ref class OverlayBase;

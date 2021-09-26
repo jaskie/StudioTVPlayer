@@ -134,7 +134,7 @@
     <ClInclude Include="Core\AudioVolume.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Preview\Preview.h">
+    <ClInclude Include="Preview\OutputPreview.h">
       <Filter>Preview</Filter>
     </ClInclude>
     <ClInclude Include="Preview\PreviewScaler.h">
@@ -248,7 +248,7 @@
     <ClCompile Include="Core\AudioVolume.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Preview\Preview.cpp">
+    <ClCompile Include="Preview\OutputPreview.cpp">
       <Filter>Preview</Filter>
     </ClCompile>
     <ClCompile Include="Preview\PreviewScaler.cpp">

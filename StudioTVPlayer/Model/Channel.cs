@@ -21,7 +21,7 @@ namespace StudioTVPlayer.Model
         private bool _livePreview;
 
         private TVPlayR.Channel _channelR;
-        private TVPlayR.PreviewOutput _previewOutput;
+        private TVPlayR.OutputPreview _OutputPreview;
 
         private List<OutputBase> _outputs = new List<OutputBase>();
 
@@ -124,12 +124,12 @@ namespace StudioTVPlayer.Model
         {
             if (_channelR == null)
                 throw new ApplicationException($"Channel {Name} not initialized");
-            if (_previewOutput is null)
+            if (_OutputPreview is null)
             {
-                _previewOutput = new TVPlayR.PreviewOutput(Application.Current.Dispatcher, width, height);
-                _channelR.AddOutput(_previewOutput, false);
+                _OutputPreview = new TVPlayR.OutputPreview(Application.Current.Dispatcher, width, height);
+                _channelR.AddOutput(_OutputPreview, false);
             }
-            return _previewOutput.PreviewSource;
+            return _OutputPreview.PreviewSource;
         }
 
         public void Uninitialize()
@@ -141,8 +141,12 @@ namespace StudioTVPlayer.Model
                 _channelR.RemoveOutput(o.GetOutput());
                 o.Dispose();
             }
-            _previewOutput?.Dispose();
-            _previewOutput = null;
+            if (!(_OutputPreview is null))
+            {
+                _channelR.RemoveOutput(_OutputPreview);
+                _OutputPreview.Dispose();
+                _OutputPreview = null;
+            }
             _channelR.AudioVolume -= ChannelR_AudioVolume;
             _channelR.Clear();
             _channelR.Dispose();

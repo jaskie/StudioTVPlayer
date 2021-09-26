@@ -8,11 +8,11 @@ namespace TVPlayR {
 	}
 	namespace Preview {
 
-class Preview: public Core::OutputDevice
+class OutputPreview: public Core::OutputDevice
 {
 public:
-	explicit Preview(int width, int height);
-	~Preview();
+	explicit OutputPreview(int width, int height);
+	~OutputPreview();
 	typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
 	virtual bool AssignToChannel(Core::Channel& channel) override;
 	virtual void ReleaseChannel() override;

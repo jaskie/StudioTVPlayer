@@ -4,7 +4,7 @@
 #include "OutputBase.h"
 #include "OverlayBase.h"
 #include "DecklinkOutput.h"
-#include "PreviewOutput.h"
+#include "OutputPreview.h"
 #include "FileInput.h"
 #include "ClrStringHelper.h"
 

@@ -12,9 +12,9 @@ namespace TestCSharp
     {
         static void Main(string[] args)
         {
-            using (Channel channel = new Channel("Channel 1", VideoFormat.EnumVideoFormats().FirstOrDefault(vf => vf.Name == "1080i50"), PixelFormat.yuv422, 2))
+            using (Channel channel = new Channel("Channel 1", VideoFormat.Formats.FirstOrDefault(vf => vf.Name == "1080i50"), PixelFormat.yuv422, 2))
             {
-                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[0]))
+                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[0], false))
                 {
                     channel.AddOutput(output, true);
                     channel.AudioVolume += Channel_AudioVolume;

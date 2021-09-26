@@ -1,16 +1,16 @@
 #pragma once
 #include "OutputBase.h"
-#include "Preview/Preview.h"
+#include "Preview/OutputPreview.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Media::Imaging;
 namespace TVPlayR {
 	
-	public ref class PreviewOutput sealed : public OutputBase
+	public ref class OutputPreview sealed : public OutputBase
 	{
 	private:
-		const std::shared_ptr<Preview::Preview>* _preview;
+		const std::shared_ptr<Preview::OutputPreview>* _preview;
 		WriteableBitmap^ _target;
 		std::shared_ptr<AVFrame>* _buffer_frame = nullptr;
 		delegate void FramePlayedDelegate(std::shared_ptr<AVFrame>);
@@ -25,9 +25,9 @@ namespace TVPlayR {
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _preview == nullptr ? nullptr : *_preview; }
 	public:
-		PreviewOutput(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
-		~PreviewOutput();
-		!PreviewOutput();
+		OutputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
+		~OutputPreview();
+		!OutputPreview();
 		property WriteableBitmap^ PreviewSource
 		{
 			WriteableBitmap^ get() { return _target; }

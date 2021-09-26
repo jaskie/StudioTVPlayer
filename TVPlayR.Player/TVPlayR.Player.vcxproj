@@ -101,7 +101,7 @@
     <ClInclude Include="OutputBase.h" />
     <ClInclude Include="OverlayBase.h" />
     <ClInclude Include="PixelFormat.h" />
-    <ClInclude Include="PreviewOutput.h" />
+    <ClInclude Include="OutputPreview.h" />
     <ClInclude Include="Rational.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Channel.h" />
@@ -124,7 +124,7 @@
     <ClCompile Include="DecklinkOutput.cpp" />
     <ClCompile Include="FileInput.cpp" />
     <ClCompile Include="NdiOutput.cpp" />
-    <ClCompile Include="PreviewOutput.cpp" />
+    <ClCompile Include="OutputPreview.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

@@ -51,9 +51,6 @@
     <ClInclude Include="FieldOrder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PreviewOutput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AudioVolumeEventArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,6 +78,9 @@
     <ClInclude Include="InputBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OutputPreview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -104,9 +104,6 @@
     <ClCompile Include="NdiOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PreviewOutput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VersionInfo.h">
       <Filter>Header Files</Filter>
     </ClCompile>
@@ -126,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TimecodeOverlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OutputPreview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

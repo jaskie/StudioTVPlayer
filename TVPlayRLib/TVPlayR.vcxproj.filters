@@ -290,6 +290,9 @@
     <ClCompile Include="Preview\InputPreview.cpp">
       <Filter>Preview</Filter>
     </ClCompile>
+    <ClCompile Include="Decklink\DecklinkUtils.cpp">
+      <Filter>Decklink</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

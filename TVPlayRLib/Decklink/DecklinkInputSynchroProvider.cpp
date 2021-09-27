@@ -1,5 +1,6 @@
 #include "../pch.h"
 #include "DecklinkInputSynchroProvider.h"
+#include "DecklinkUtils.h"
 #include "../Core/Channel.h"
 #include "../FFmpeg/SwScale.h"
 #include "../FFmpeg/AVSync.h"
@@ -19,47 +20,39 @@ namespace TVPlayR {
 
 		void DecklinkInputSynchroProvider::Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet)
 		{
-			void* video_bytes = nullptr;
-			if (video_frame && SUCCEEDED(video_frame->GetBytes(&video_bytes)) && video_bytes)
+			int64_t pts;
+			switch (timecode_source_)
 			{
-				if (process_video_ && !scaler_)
-					scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));
-				std::shared_ptr<AVFrame> video = FFmpeg::AllocFrame();
-				video->data[0] = reinterpret_cast<uint8_t*>(video_bytes);
-				video->linesize[0] = video_frame->GetRowBytes();
-				video->format = AV_PIX_FMT_UYVY422;
-				video->width = video_frame->GetWidth();
-				video->height = video_frame->GetHeight();
-				video->pict_type = AV_PICTURE_TYPE_I;
-				video->interlaced_frame = field_dominance_ == bmdLowerFieldFirst || field_dominance_ == bmdUpperFieldFirst;
-				video->top_field_first = field_dominance_ == bmdUpperFieldFirst;
+			case DecklinkTimecodeSource::RP188Any:
+				pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeRP188Any);
+				break;
+			case DecklinkTimecodeSource::VITC:
+				pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeVITC);
+				break;
+			default:
 				BMDTimeValue frameTime;
 				BMDTimeValue frameDuration;
-				switch (timecode_source_)
-				{
-				case DecklinkTimecodeSource::StreamTime:
-					if (SUCCEEDED(video_frame->GetStreamTime(&frameTime, &frameDuration, time_scale_)))
-						video->pts = frameTime / frameDuration;
-					break;
-				case DecklinkTimecodeSource::RP188Any:
-					video->pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeRP188Any);
-					break;
-				case DecklinkTimecodeSource::VITC:
-					video->pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeVITC);
-					break;
-				default:
-					video->pts = 0;
-					break;
-				}
-				if (process_video_)
-					last_video_ = scaler_->Scale(video);
-				else
-				{
-					auto v = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
-					v->pts = video->pts;
-					last_video_ = v;
-				}
+				if (SUCCEEDED(video_frame->GetStreamTime(&frameTime, &frameDuration, time_scale_)))
+					pts = frameTime / frameDuration;
+				break;
 			}
+
+			std::shared_ptr<AVFrame> video;
+			if (process_video_)
+			{
+				video = AVFrameFromDecklink(video_frame, field_dominance_);
+				video->pts = pts;
+				if (!scaler_)
+					scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));
+				std::shared_ptr<AVFrame> video = FFmpeg::AllocFrame();
+				video = scaler_->Scale(video);
+			}
+			else
+			{
+				video = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
+				video->pts = pts;
+			}
+			last_video_ = video;
 
 			void* audio_bytes = nullptr;
 			if (audio_packet && SUCCEEDED(audio_packet->GetBytes(&audio_bytes)) && audio_bytes)
@@ -70,9 +63,14 @@ namespace TVPlayR {
 				audio->format = channel_.AudioSampleFormat();
 				audio->nb_samples = nb_samples;
 				audio->linesize[0] = nb_samples * 4;
-				BMDTimeValue packetTime;
-				if (SUCCEEDED(audio_packet->GetPacketTime(&packetTime, channel_.AudioSampleRate())))
-					audio->pts = packetTime;
+				if (timecode_source_ == DecklinkTimecodeSource::None)
+				{
+					BMDTimeValue packetTime;
+					if (SUCCEEDED(audio_packet->GetPacketTime(&packetTime, channel_.AudioSampleRate())))
+						audio->pts = packetTime;
+				}
+				else
+					audio->pts = pts;
 				audio->channels = channel_.AudioChannelsCount();
 				audio_fifo_.TryPush(audio);
 			}

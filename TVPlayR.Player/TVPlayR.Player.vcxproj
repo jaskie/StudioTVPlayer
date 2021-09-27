@@ -97,6 +97,7 @@
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="FileInput.h" />
     <ClInclude Include="InputBase.h" />
+    <ClInclude Include="InputPreview.h" />
     <ClInclude Include="NdiOutput.h" />
     <ClInclude Include="OutputBase.h" />
     <ClInclude Include="OverlayBase.h" />
@@ -112,6 +113,7 @@
     <ClCompile Include="DecklinkInput.cpp" />
     <ClCompile Include="DecklinkIterator.cpp" />
     <ClCompile Include="FileInfo.cpp" />
+    <ClCompile Include="InputPreview.cpp" />
     <ClCompile Include="StreamOutput.cpp" />
     <ClCompile Include="TimecodeOverlay.cpp" />
     <ClCompile Include="VersionInfo.h">

@@ -3,12 +3,13 @@
 #include "Decklink/DecklinkInput.h"
 
 namespace TVPlayR {
+	ref class InputPreview;
+
 	namespace Decklink {
 		class DecklinkInput;
 	}
 	public enum class DecklinkTimecodeSource {
 		None,
-		StreamTime,
 		RP188Any,
 		VITC
 	};
@@ -21,6 +22,7 @@ namespace TVPlayR {
 		DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink);
 		virtual std::shared_ptr<Core::InputSource> GetNativeSource() override { return _decklink ? *_decklink : nullptr; }
 	public:
+		void AddPreview(InputPreview^ preview);
 		~DecklinkInput();
 		!DecklinkInput();
 	};

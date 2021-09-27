@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DecklinkInput.h"
 #include "Decklink/DecklinkInput.h"
+#include "InputPreview.h"
 
 namespace TVPlayR {
 
@@ -9,6 +10,10 @@ namespace TVPlayR {
 	{
 	}
 
+	void DecklinkInput::AddPreview(InputPreview^ preview)
+	{
+		(*_decklink)->AddPreview(preview->GetNative());
+	}
 
 	DecklinkInput::~DecklinkInput()
 	{

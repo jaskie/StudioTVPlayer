@@ -6,7 +6,6 @@ namespace TVPlayR {
 		enum class DecklinkTimecodeSource
 		{
 			None,
-			StreamTime,
 			RP188Any,
 			VITC
 		};

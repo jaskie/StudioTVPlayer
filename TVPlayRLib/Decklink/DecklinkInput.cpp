@@ -4,6 +4,7 @@
 #include "DecklinkInputSynchroProvider.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/FieldOrder.h"
+#include "../Preview/InputPreview.h"
 #include "../Common/Debug.h"
 
 
@@ -26,6 +27,7 @@ namespace TVPlayR {
 			const bool													is_wide_;
 			const bool													capture_video_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	channel_prividers_;
+			std::vector<std::shared_ptr<Preview::InputPreview>>			previews_;
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
 			BMDFieldDominance											field_dominance_ = BMDFieldDominance::bmdUnknownFieldDominance;
@@ -106,6 +108,8 @@ namespace TVPlayR {
 			{
 				for (auto& provider : channel_prividers_)
 					provider->Push(videoFrame, audioPacket);
+				for (auto& preview : previews_)
+					preview->Push(AVFrameFromDecklink(videoFrame, field_dominance_));
 				return S_OK;
 			}
 
@@ -134,6 +138,11 @@ namespace TVPlayR {
 				if (provider == channel_prividers_.end())
 					return;
 				channel_prividers_.erase(provider);
+			}
+
+			void AddPreview(std::shared_ptr<Preview::InputPreview>& preview)
+			{
+				previews_.push_back(preview);
 			}
 
 			int GetWidth() const
@@ -188,20 +197,12 @@ namespace TVPlayR {
 		bool DecklinkInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
 		void DecklinkInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
 		void DecklinkInput::RemoveFromChannel(const Core::Channel& channel) { impl_->RemoveFromChannel(channel); }
-		void DecklinkInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview)
-		{
-		}
-		void DecklinkInput::Play()
-		{
-		}
-		void DecklinkInput::Pause()
-		{
-		}
+		void DecklinkInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->AddPreview(preview); }
+		void DecklinkInput::Play() { }
+		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }
-		
 		int DecklinkInput::GetWidth() const { return impl_->GetWidth(); }
 		int DecklinkInput::GetHeight() const { return impl_->GetHeight(); }
-
 		Core::FieldOrder DecklinkInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
 		int DecklinkInput::GetAudioChannelCount() { return impl_->GetAudioChannelsCount(); }
 		bool DecklinkInput::HaveAlphaChannel() const { return false; }

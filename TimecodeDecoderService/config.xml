@@ -1,4 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <channels>
-  <channel Input="0" Output="0" Keyer="Passthrough" VideoFormat="1080i50"/>
+  <channel Input="1" Output="1" Keyer="Passthrough" VideoFormat="PAL 16:9" TcSource="VITC"/>
 </channels>

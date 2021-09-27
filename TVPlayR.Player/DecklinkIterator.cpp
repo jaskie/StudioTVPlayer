@@ -26,9 +26,9 @@ namespace TVPlayR {
 		return gcnew DecklinkOutput(native_output);
 	}
 
-	DecklinkInput^ DecklinkIterator::CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, DecklinkTimecodeSource timecodeSource)
+	DecklinkInput^ DecklinkIterator::CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, DecklinkTimecodeSource timecodeSource, bool captureVideo)
 	{
-		auto native_input = _iterator->CreateInput(*decklink->GetNativeInfo(), initialFormat->GetNativeEnumType(), audioChannelCount, static_cast<Decklink::DecklinkTimecodeSource>(timecodeSource));
+		auto native_input = _iterator->CreateInput(*decklink->GetNativeInfo(), initialFormat->GetNativeEnumType(), audioChannelCount, static_cast<Decklink::DecklinkTimecodeSource>(timecodeSource), captureVideo);
 		return gcnew DecklinkInput(native_input);
 	}
 

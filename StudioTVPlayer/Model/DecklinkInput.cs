@@ -34,7 +34,7 @@ namespace StudioTVPlayer.Model
                 return false;
             try
             {
-                _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.None);
+                _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.None, true);
                 return true;
             }
             catch

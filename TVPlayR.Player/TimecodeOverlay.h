@@ -6,11 +6,12 @@ using namespace System;
 
 namespace TVPlayR {
     ref class VideoFormat;
+    enum class PixelFormat;
 
     public ref class TimecodeOverlay : public OverlayBase
     {
     public:
-        TimecodeOverlay(VideoFormat^ video_format, bool no_passthrough_video);
+        TimecodeOverlay(VideoFormat^ videoFormat, PixelFormat pixelFormat, bool noPassthroughVideo);
     public:
         ~TimecodeOverlay();
         !TimecodeOverlay();

@@ -25,7 +25,7 @@ namespace TVPlayR {
 			array<DecklinkInfo^>^ get() { return _devices; }
 		}
 		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink, bool enableInternalKeyer);
-		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, DecklinkTimecodeSource timecodeSource);
+		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, DecklinkTimecodeSource timecodeSource, bool captureVideo);
 	};
 
 }

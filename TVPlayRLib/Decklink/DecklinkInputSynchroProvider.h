@@ -21,7 +21,7 @@ namespace TVPlayR {
 class DecklinkInputSynchroProvider
 {
 public:
-	DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source);
+	DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source, bool process_video);
 	const Core::Channel& Channel() const;
 	void Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet);
 	FFmpeg::AVSync PullSync(int audio_samples_count);
@@ -29,6 +29,7 @@ public:
 private:
 	const Core::Channel&					channel_;
 	std::unique_ptr<FFmpeg::SwScale>		scaler_;
+	const bool								process_video_;
 	FFmpeg::AudioFifo						audio_fifo_;
 	std::shared_ptr<AVFrame>				last_video_;
 	int64_t									frame_pts_ = 0LL;

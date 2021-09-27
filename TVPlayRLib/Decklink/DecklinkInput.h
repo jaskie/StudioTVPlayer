@@ -11,7 +11,7 @@ namespace TVPlayR {
 		class DecklinkInput : public Core::InputSource
 		{
 		public:
-			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source);
+			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video);
 			~DecklinkInput();
 			virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count) override;
 			virtual bool IsAddedToChannel(const Core::Channel& channel) override;

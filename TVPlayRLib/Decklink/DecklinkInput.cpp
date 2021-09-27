@@ -24,6 +24,7 @@ namespace TVPlayR {
 			CComQIPtr<IDeckLinkInput>									input_;
 			const bool													is_autodetection_supported_;
 			const bool													is_wide_;
+			const bool													capture_video_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	channel_prividers_;
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
@@ -33,13 +34,14 @@ namespace TVPlayR {
 			const DecklinkTimecodeSource								timecode_source_;
 
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source)
+			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
 				: Common::DebugTarget(false, "Decklink input")
 				, input_(decklink)
 				, is_wide_(!(format == Core::VideoFormatType::ntsc || format == Core::VideoFormatType::pal))
 				, is_autodetection_supported_(IsAutodetectionSupprted(decklink))
 				, audio_channels_count_(audio_channels_count)
 				, timecode_source_(timecode_source)
+				, capture_video_(capture_video)
 			{
 				BMDDisplayMode mode = GetDecklinkDisplayMode(format);
 				BMDDisplayModeSupport support;
@@ -120,7 +122,7 @@ namespace TVPlayR {
 			{
 				if (!IsAddedToChannel(channel))
 				{
-					std::unique_ptr<DecklinkInputSynchroProvider> newProvider = std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_);
+					std::unique_ptr<DecklinkInputSynchroProvider> newProvider = std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_);
 					newProvider->SetInputParameters(field_dominance_, time_scale_, frame_duration_);
 					channel_prividers_.emplace_back(std::move(newProvider));
 				}
@@ -175,8 +177,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source)
-			: impl_(std::make_unique<implementation>(decklink, format, audio_channels_count, timecode_source))
+		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
+			: impl_(std::make_unique<implementation>(decklink, format, audio_channels_count, timecode_source, capture_video))
 		{ }
 		
 		DecklinkInput::~DecklinkInput()	{ }

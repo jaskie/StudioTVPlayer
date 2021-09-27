@@ -25,7 +25,6 @@ namespace TVPlayR {
 			const GdiplusInitializer			gdiplus_initializer_;
 			const VideoFormat					video_format_;
 			const PixelFormat					output_pixel_format_;
-			const bool							no_passthrough_video_;
 			std::unique_ptr<FFmpeg::SwScale>	in_scaler_;
 			std::unique_ptr<FFmpeg::SwScale>	out_scaler_;
 			Gdiplus::SolidBrush					background_;
@@ -37,10 +36,9 @@ namespace TVPlayR {
 			Gdiplus::PointF						timecode_position_;
 
 
-			implementation::implementation(const VideoFormatType video_format, PixelFormat output_pixel_format, bool no_passthrough_video)
+			implementation::implementation(const VideoFormatType video_format, PixelFormat output_pixel_format)
 				: video_format_(video_format)
 				, output_pixel_format_(output_pixel_format)
-				, no_passthrough_video_(no_passthrough_video)
 				, background_rect_(GetBackgroundRect())
 				, background_(Gdiplus::Color(150, 16, 16, 16))
 				, foreground_(Gdiplus::Color(255, 232, 232, 232))
@@ -65,27 +63,15 @@ namespace TVPlayR {
 				if (!sync.Video)
 					return sync;
 				std::shared_ptr<AVFrame>& input_frame = sync.Video;
-				assert(no_passthrough_video_ || (input_frame->width == video_format_.width() && input_frame->height == video_format_.height()));
-				if (no_passthrough_video_)
-				{
-					auto frame = FFmpeg::CreateEmptyVideoFrame(video_format_, Core::PixelFormat::bgra);
-					frame->pts = input_frame->pts;
-					Draw(frame, sync.Time);
-					if (output_pixel_format_ != Core::PixelFormat::bgra && !out_scaler_)
-						out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, video_format_.width(), video_format_.height(), Core::PixelFormatToFFmpegFormat(output_pixel_format_));
-					return FFmpeg::AVSync(sync.Audio, output_pixel_format_ == Core::PixelFormat::bgra ? frame : out_scaler_->Scale(frame), sync.Time);
-				}
-				else
-				{
-					if (!out_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
-						out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format));
-					if (!in_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
-						in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
-					std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ?  in_scaler_->Scale(input_frame) : input_frame;
-					Draw(rgba_frame, sync.Time);
-					// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
-					return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Time);
-				}
+				assert(input_frame->width == video_format_.width() && input_frame->height == video_format_.height());
+				if (!out_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
+					out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format));
+				if (!in_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
+					in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
+				std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ? in_scaler_->Scale(input_frame) : input_frame;
+				Draw(rgba_frame, sync.Time);
+				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
+				return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Time);
 			}
 
 			void Draw(std::shared_ptr<AVFrame>& video, int64_t time)
@@ -107,8 +93,8 @@ namespace TVPlayR {
 			}
 		};
 
-		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format, bool no_passthrough_video)
-			: impl_(std::make_unique<implementation>(video_format, output_pixel_format, no_passthrough_video))
+		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format)
+			: impl_(std::make_unique<implementation>(video_format, output_pixel_format))
 		{ }
 
 		TimecodeOverlay::~TimecodeOverlay() { }

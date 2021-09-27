@@ -51,7 +51,7 @@ int main()
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 	auto output = iterator.CreateOutput(*iterator[device_index], true);
 	auto ndi = std::make_shared<Ndi::NdiOutput>("NDI Output", "");
-	auto overlay = std::make_shared<Core::TimecodeOverlay>(channel.Format().type(), channel.PixelFormat(), true);
+	auto overlay = std::make_shared<Core::TimecodeOverlay>(channel.Format().type(), channel.PixelFormat());
 	channel.AddOverlay(overlay);
 	channel.SetFrameClock(output);
 	channel.AddOutput(output);

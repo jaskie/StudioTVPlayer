@@ -12,7 +12,7 @@ namespace TVPlayR {
 class TimecodeOverlay :  public OverlayBase
 {
 public:
-	TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format, bool no_passthrough_video);
+	TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format);
 	~TimecodeOverlay();
 	virtual FFmpeg::AVSync Transform(FFmpeg::AVSync& sync) override;
 private:

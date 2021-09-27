@@ -55,11 +55,12 @@ namespace TVPlayR {
 					last_video_ = scaler_->Scale(video);
 				else
 				{
-					if (!last_video_)
-						last_video_ = FFmpeg::AllocFrame();
-					last_video_->pts = video->pts;;
+					auto v = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
+					v->pts = video->pts;
+					last_video_ = v;
 				}
 			}
+
 			void* audio_bytes = nullptr;
 			if (audio_packet && SUCCEEDED(audio_packet->GetBytes(&audio_bytes)) && audio_bytes)
 			{

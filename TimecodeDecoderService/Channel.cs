@@ -65,7 +65,7 @@ namespace TimecodeDecoderService
             _channel = new TVPlayR.Channel($"Input {Input} Output {Output} Keyer {Keyer} Format {VideoFormat}", format, TVPlayR.PixelFormat.bgra, 2);
             _decklinkInput = TVPlayR.DecklinkIterator.CreateInput(inputDecklink, format, 2, TcSource, Keyer != Keyer.Internal);
             _decklinkOutput = TVPlayR.DecklinkIterator.CreateOutput(outputDecklink, Keyer == Keyer.Internal);
-            _timecodeOverlay = new TVPlayR.TimecodeOverlay(format, _channel.PixelFormat, Keyer == Keyer.Internal);
+            _timecodeOverlay = new TVPlayR.TimecodeOverlay(format, _channel.PixelFormat);
             _channel.AddOverlay(_timecodeOverlay);
             _channel.AddOutput(_decklinkOutput, true);
             _channel.Load(_decklinkInput);

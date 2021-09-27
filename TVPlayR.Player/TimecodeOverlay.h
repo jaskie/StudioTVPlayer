@@ -11,7 +11,7 @@ namespace TVPlayR {
     public ref class TimecodeOverlay : public OverlayBase
     {
     public:
-        TimecodeOverlay(VideoFormat^ videoFormat, PixelFormat pixelFormat, bool noPassthroughVideo);
+        TimecodeOverlay(VideoFormat^ videoFormat, PixelFormat pixelFormat);
     public:
         ~TimecodeOverlay();
         !TimecodeOverlay();

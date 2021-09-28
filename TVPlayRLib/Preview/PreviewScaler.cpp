@@ -21,9 +21,8 @@ std::string PreviewScaler::GetFilterString(int output_width, int output_height)
 	return filter_str.str();
 }
 
-PreviewScaler::PreviewScaler(AVRational input_frame_rate, int output_width, int output_height)
+PreviewScaler::PreviewScaler(int output_width, int output_height)
 	: VideoFilterBase(AV_PIX_FMT_BGRA)
-	, time_base_(av_inv_q(input_frame_rate))
 	, filter_str_(GetFilterString(output_width, output_height))
 {
 }
@@ -31,7 +30,7 @@ PreviewScaler::PreviewScaler(AVRational input_frame_rate, int output_width, int 
 void PreviewScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
-		VideoFilterBase::CreateFilterChain(frame, time_base_, filter_str_);
+		VideoFilterBase::CreateFilterChain(frame, av_make_q(1, 1), filter_str_);
 	VideoFilterBase::Push(frame);
 }
 

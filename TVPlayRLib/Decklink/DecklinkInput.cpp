@@ -58,8 +58,8 @@ namespace TVPlayR {
 
 			implementation::~implementation()
 			{
-				input_->SetCallback(NULL);
 				CloseInput();
+				input_->SetCallback(NULL);
 			}
 
 			void OpenInput(IDeckLinkDisplayMode* displayMode)

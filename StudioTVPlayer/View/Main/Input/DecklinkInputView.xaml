@@ -24,7 +24,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Image Grid.RowSpan="4" Height="60" Width="160" Source="{Binding Thumbnail}">
+        <Image Grid.RowSpan="4" Height="90" Width="160" Margin="5 0" Source="{Binding Thumbnail}">
             <Image.Effect>
                 <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
             </Image.Effect>

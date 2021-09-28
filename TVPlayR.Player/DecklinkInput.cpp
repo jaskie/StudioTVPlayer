@@ -15,6 +15,11 @@ namespace TVPlayR {
 		(*_decklink)->AddPreview(preview->GetNative());
 	}
 
+	void DecklinkInput::RemovePreview(InputPreview^ preview)
+	{
+		(*_decklink)->RemovePreview(preview->GetNative());
+	}
+
 	DecklinkInput::~DecklinkInput()
 	{
 		this->!DecklinkInput();

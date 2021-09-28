@@ -23,6 +23,7 @@ namespace TVPlayR {
 		virtual std::shared_ptr<Core::InputSource> GetNativeSource() override { return _decklink ? *_decklink : nullptr; }
 	public:
 		void AddPreview(InputPreview^ preview);
+		void RemovePreview(InputPreview^ preview);
 		~DecklinkInput();
 		!DecklinkInput();
 	};

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 
@@ -7,27 +8,26 @@ namespace StudioTVPlayer.Model
 {
     public class DecklinkInput : InputBase, IDisposable
     {
-        private ImageSource _thumbnail;
         private TVPlayR.DecklinkInput _input;
+        private TVPlayR.InputPreview _preview;
 
         [XmlAttribute]
         public int DeviceIndex { get; set; }
 
-        public override ImageSource Thumbnail => _thumbnail;
+        public override ImageSource Thumbnail => _preview?.PreviewSource;
 
         public override void Dispose()
         {
             if (_input is null)
                 return;
-            _input.Dispose();
-            _input = null;
+            Uninitialize();
         }
 
         public TVPlayR.DecklinkInput GetInput() => _input;
 
         public override bool Initialize()
         {
-            _input?.Dispose();
+            Uninitialize();
             var videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
             if (info is null || videoFormat is null)
@@ -35,6 +35,8 @@ namespace StudioTVPlayer.Model
             try
             {
                 _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.None, true);
+                _preview = new TVPlayR.InputPreview(Application.Current.Dispatcher, 160, 90);
+                _input.AddPreview(_preview);
                 return true;
             }
             catch
@@ -45,8 +47,12 @@ namespace StudioTVPlayer.Model
 
         public override void Uninitialize()
         {
+            if (!(_preview is null))
+                _input.RemovePreview(_preview);
             _input?.Dispose();
+            _preview?.Dispose();
             _input = null;
+            _preview = null;
         }
 
         public override bool IsRunning => !(_input is null);

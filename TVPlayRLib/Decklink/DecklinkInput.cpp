@@ -145,6 +145,11 @@ namespace TVPlayR {
 				previews_.push_back(preview);
 			}
 
+			void RemovePreview(std::shared_ptr<Preview::InputPreview>& preview)
+			{
+				previews_.erase(std::remove(previews_.begin(), previews_.end(), preview), previews_.end());
+			}
+
 			int GetWidth() const
 			{
 				return current_width_;
@@ -198,6 +203,7 @@ namespace TVPlayR {
 		void DecklinkInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
 		void DecklinkInput::RemoveFromChannel(const Core::Channel& channel) { impl_->RemoveFromChannel(channel); }
 		void DecklinkInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->AddPreview(preview); }
+		void DecklinkInput::RemovePreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->RemovePreview(preview); }
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }

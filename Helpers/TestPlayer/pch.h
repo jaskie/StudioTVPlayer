@@ -23,6 +23,9 @@
 #include <assert.h>
 #include <objbase.h>
 #include <comdef.h>
+#include <comutil.h>
+#include <atlbase.h>
+#include <atlcom.h>
 #include <mutex>
 #include "Decklink/DeckLinkAPI_h.h"
 

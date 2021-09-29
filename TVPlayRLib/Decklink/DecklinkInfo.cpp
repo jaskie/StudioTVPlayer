@@ -6,7 +6,7 @@ namespace TVPlayR {
 
 		struct DecklinkInfo::implementation
 		{
-			IDeckLink* const decklink_;
+			CComPtr<IDeckLink> const decklink_;
 			const int index_;
 
 			implementation(IDeckLink* decklink, int index)
@@ -16,7 +16,7 @@ namespace TVPlayR {
 
 			std::wstring GetDisplayName() const
 			{
-				BSTR pModelName;
+				CComBSTR pModelName;
 				if (FAILED(decklink_->GetDisplayName(&pModelName)))
 					return L"";
 				return std::wstring(pModelName);
@@ -24,7 +24,7 @@ namespace TVPlayR {
 
 			std::wstring GetModelName() const
 			{
-				BSTR pModelName;
+				CComBSTR pModelName;
 				if (FAILED(decklink_->GetModelName(&pModelName)))
 					return L"";
 				return std::wstring(pModelName);

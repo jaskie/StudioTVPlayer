@@ -30,7 +30,7 @@ PreviewScaler::PreviewScaler(int output_width, int output_height)
 void PreviewScaler::Push(std::shared_ptr<AVFrame> frame)
 {
 	if (!IsInitialized())
-		VideoFilterBase::CreateFilterChain(frame, av_make_q(1, 1), filter_str_);
+		VideoFilterBase::CreateFilterChain(filter_str_, frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, av_make_q(1, 1));
 	VideoFilterBase::Push(frame);
 }
 

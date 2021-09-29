@@ -12,6 +12,6 @@ namespace TVPlayR {
 
 		Core::VideoFormatType BMDDisplayModeToVideoFormatType(BMDDisplayMode displayMode, bool isWide);
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, BMDFieldDominance field_dominance);
+		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, BMDFieldDominance field_dominance, const Common::Rational<int>& sar);
 	}
 }

@@ -40,7 +40,7 @@ namespace TVPlayR {
 			std::shared_ptr<AVFrame> video;
 			if (process_video_)
 			{
-				video = AVFrameFromDecklink(video_frame, field_dominance_);
+				video = AVFrameFromDecklink(video_frame, field_dominance_, channel_.Format().SampleAspectRatio());
 				video->pts = pts;
 				if (!scaler_)
 					scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));

@@ -83,7 +83,7 @@ namespace TVPlayR {
 			}
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, BMDFieldDominance field_dominance)
+		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, BMDFieldDominance field_dominance, const Common::Rational<int>& sar)
 		{
 			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
@@ -97,6 +97,7 @@ namespace TVPlayR {
 			frame->pict_type = AV_PICTURE_TYPE_I;
 			frame->interlaced_frame = field_dominance == bmdLowerFieldFirst || field_dominance == bmdUpperFieldFirst;
 			frame->top_field_first = field_dominance == bmdUpperFieldFirst;
+			frame->sample_aspect_ratio = sar.av();
 			return frame;
 		}
 

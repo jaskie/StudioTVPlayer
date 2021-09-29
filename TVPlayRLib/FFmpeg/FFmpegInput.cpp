@@ -162,8 +162,6 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
 			channel_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
-		if (!channel_scaler_->IsInitialized())
-			return;
 		while (auto scaled = channel_scaler_->Pull())
 			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
 	}
@@ -195,7 +193,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 	void FlushBufferOrLoopIfNeeded()
 	{
 		if (!buffer_->IsFlushed() && // not flushed yet
-			(channel_scaler_->IsEof() || (video_decoder_->IsEof() && !channel_scaler_->IsInitialized())) && // scaler will provide no more frames
+			(channel_scaler_->IsEof() || (video_decoder_->IsEof() || channel_scaler_->IsInitialized())) && // scaler will provide no more frames
 			(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
 			if (is_loop_)
 			{

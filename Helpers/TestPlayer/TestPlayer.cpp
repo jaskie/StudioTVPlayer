@@ -57,7 +57,7 @@ int main()
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("d:\\TEMP\\test5.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Wilno\\KONCERT_BACZYNSKI_PT.aaf", Core::HwAccel::none, "");
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;

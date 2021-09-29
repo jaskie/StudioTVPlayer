@@ -34,6 +34,7 @@ namespace TVPlayR {
 			long														current_width_, current_height_ = 0L;
 			const int													audio_channels_count_;
 			const DecklinkTimecodeSource								timecode_source_;
+			const Core::VideoFormat										format_;
 
 
 			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
@@ -44,6 +45,7 @@ namespace TVPlayR {
 				, audio_channels_count_(audio_channels_count)
 				, timecode_source_(timecode_source)
 				, capture_video_(capture_video)
+				, format_(format)
 			{
 				BMDDisplayMode mode = GetDecklinkDisplayMode(format);
 				BMDDisplayModeSupport support;
@@ -109,7 +111,7 @@ namespace TVPlayR {
 				for (auto& provider : channel_prividers_)
 					provider->Push(videoFrame, audioPacket);
 				for (auto& preview : previews_)
-					preview->Push(AVFrameFromDecklink(videoFrame, field_dominance_));
+					preview->Push(AVFrameFromDecklink(videoFrame, field_dominance_, format_.SampleAspectRatio()));
 				return S_OK;
 			}
 

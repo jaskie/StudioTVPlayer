@@ -7,7 +7,7 @@ namespace StudioTVPlayer.Providers
 {
     public class InputList
     {
-        private const string InputsFile = "Inputs.xml";
+        private const string InputsFile = "inputs.xml";
 
         [XmlArray]
         [XmlArrayItem(typeof(Model.DecklinkInput))]

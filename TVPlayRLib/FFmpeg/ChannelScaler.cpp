@@ -19,21 +19,8 @@ ChannelScaler::ChannelScaler(const Core::Channel& channel)
 
 bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, AVRational frame_rate, AVRational time_base)
 {
-	if (!IsInitialized()
-		|| current_time_base_ != time_base
-		|| current_frame_rate_ != frame_rate
-		|| current_height_ != frame->height
-		|| current_width_ != frame->width
-		|| current_pixel_fomat_ != frame->format
-		)
-	{
-		VideoFilterBase::CreateFilterChain(frame, time_base, Setup(frame, frame_rate));
-		current_time_base_ = time_base;
-		current_frame_rate_ = frame_rate;
-		current_height_ = frame->height;
-		current_width_ = frame->width;
-		current_pixel_fomat_ = static_cast<AVPixelFormat>(frame->format);
-	}
+	if (!IsInitialized())
+		VideoFilterBase::CreateFilterChain(Setup(frame, frame_rate), frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, time_base);
 	return VideoFilterBase::Push(frame);
 }
 

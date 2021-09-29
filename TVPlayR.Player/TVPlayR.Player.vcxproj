@@ -120,6 +120,7 @@
       <FileType>CppHeader</FileType>
     </ClCompile>
     <ClInclude Include="VideoFormat.h" />
+    <ClInclude Include="VideoFormatEventArgs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />

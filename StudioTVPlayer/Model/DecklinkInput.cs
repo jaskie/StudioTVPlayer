@@ -35,6 +35,7 @@ namespace StudioTVPlayer.Model
             try
             {
                 _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.None, true);
+                _input.FormatChanged += Input_FormatChanged;
                 _preview = new TVPlayR.InputPreview(Application.Current.Dispatcher, 160, 90);
                 _input.AddPreview(_preview);
                 return true;
@@ -48,13 +49,22 @@ namespace StudioTVPlayer.Model
         public override void Uninitialize()
         {
             if (!(_preview is null))
-                _input.RemovePreview(_preview);
-            _input?.Dispose();
+                _input?.RemovePreview(_preview);
+            if (!(_input is null))
+            {
+                _input.FormatChanged -= Input_FormatChanged;
+                _input.Dispose();
+                _input = null;
+            }
             _preview?.Dispose();
-            _input = null;
             _preview = null;
         }
 
         public override bool IsRunning => !(_input is null);
+        private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
+        {
+        }
+
+
     }
 }

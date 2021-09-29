@@ -30,7 +30,6 @@ namespace TVPlayR {
 		_audioVolumeHandle = GCHandle::Alloc(_audioVolumeDelegate);
 		IntPtr audioVolumeIp = Marshal::GetFunctionPointerForDelegate(_audioVolumeDelegate);
 		_channel->SetAudioVolumeCallback(static_cast<Core::Channel::AUDIO_VOLUME_CALLBACK>(audioVolumeIp.ToPointer()));
-
 	}
 
 	Channel::~Channel()
@@ -47,6 +46,7 @@ namespace TVPlayR {
 			if (native_ouptut)
 				_channel->RemoveOutput(native_ouptut);
 		}
+		_audioVolumeHandle.Free();
 		delete _channel;
 	}
 

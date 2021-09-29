@@ -35,6 +35,8 @@ namespace TVPlayR {
 			const int													audio_channels_count_;
 			const DecklinkTimecodeSource								timecode_source_;
 			const Core::VideoFormat										format_;
+			FORMAT_CALLBACK								format_changed_callback_ = nullptr;
+			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
 			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
@@ -102,6 +104,8 @@ namespace TVPlayR {
 				{
 					CloseInput();
 					OpenInput(newDisplayMode);
+					if (format_changed_callback_)
+						format_changed_callback_(BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_));
 				}
 				return S_OK;
 			}
@@ -214,8 +218,7 @@ namespace TVPlayR {
 		Core::FieldOrder DecklinkInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
 		int DecklinkInput::GetAudioChannelCount() { return impl_->GetAudioChannelsCount(); }
 		bool DecklinkInput::HaveAlphaChannel() const { return false; }
-		void DecklinkInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback)
-		{
-		}
+		void DecklinkInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
+		void DecklinkInput::SetFormatChangedCallback(FORMAT_CALLBACK format_changed_callback) { impl_->format_changed_callback_ = format_changed_callback; }
 	}
 }

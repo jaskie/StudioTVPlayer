@@ -1,6 +1,7 @@
 #pragma once
 #include "../Core/InputSource.h"
 #include "DecklinkTimecodeSource.h"
+#include "DecklinkUtils.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -28,6 +29,7 @@ namespace TVPlayR {
 			virtual int GetAudioChannelCount() override;
 			virtual bool HaveAlphaChannel() const override;
 			virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) override;
+			void SetFormatChangedCallback(FORMAT_CALLBACK format_changed_callback);
 		private:
 			struct implementation;
 			std::unique_ptr<implementation> impl_;

@@ -1,6 +1,7 @@
 #pragma once
 #include "../Common/NonCopyable.h"
 #include "ApiVersion.h"
+#include "DecklinkUtils.h"
 
 namespace TVPlayR {
 	namespace Core {

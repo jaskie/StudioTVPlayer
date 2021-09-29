@@ -2,8 +2,12 @@
 #include "InputBase.h"
 #include "Decklink/DecklinkInput.h"
 
+using namespace System; 
+using namespace System::Runtime::InteropServices;
+
 namespace TVPlayR {
 	ref class InputPreview;
+	ref class VideoFormatEventArgs;
 
 	namespace Decklink {
 		class DecklinkInput;
@@ -17,7 +21,11 @@ namespace TVPlayR {
 	public ref class DecklinkInput : public InputBase
 	{
 	private:
+		delegate void FormatChangedDelegate(Core::VideoFormatType);
+		FormatChangedDelegate^ _formatChangedDelegate;
+		GCHandle _formatChangedHandle;
 		const std::shared_ptr<Decklink::DecklinkInput>* _decklink;
+		void FormatChangedCallback(Core::VideoFormatType newFormat);
 	internal:
 		DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink);
 		virtual std::shared_ptr<Core::InputSource> GetNativeSource() override { return _decklink ? *_decklink : nullptr; }
@@ -26,6 +34,7 @@ namespace TVPlayR {
 		void RemovePreview(InputPreview^ preview);
 		~DecklinkInput();
 		!DecklinkInput();
+		event EventHandler<VideoFormatEventArgs^>^ FormatChanged;
 	};
 
 }

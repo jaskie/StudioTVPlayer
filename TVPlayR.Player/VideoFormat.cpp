@@ -25,6 +25,14 @@ namespace TVPlayR {
 		this->!VideoFormat();
 	}
 
+	VideoFormat^ VideoFormat::FindFormat(Core::VideoFormatType type)
+	{
+		for each (VideoFormat ^ format in _videoFormats)
+			if (format->GetNativeEnumType() == type)
+				return format;
+		return nullptr;
+	}
+
 	VideoFormat::!VideoFormat()
 	{
 		delete _native_fomat;

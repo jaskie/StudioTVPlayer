@@ -26,6 +26,7 @@ namespace TVPlayR {
 		static array<VideoFormat^>^ _videoFormats;
 	internal:
 		Core::VideoFormatType GetNativeEnumType() { return _native_fomat->type(); }
+		static VideoFormat^ FindFormat(Core::VideoFormatType type);
 	public:
 		!VideoFormat();
 		~VideoFormat();

@@ -6,6 +6,8 @@
 namespace TVPlayR {
 	namespace Decklink {
 
+		typedef void(*FORMAT_CALLBACK)(Core::VideoFormatType new_format);
+
 		BMDPixelFormat BMDPixelFormatFromVideoFormat(const Core::PixelFormat& format);
 
 		BMDDisplayMode GetDecklinkDisplayMode(Core::VideoFormatType fmt);

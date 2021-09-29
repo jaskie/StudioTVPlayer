@@ -51,6 +51,30 @@ VideoFormat::VideoFormat(enum VideoFormatType type)
 		frame_rate_ = Common::Rational<int>(25, 1);
 		name_ = "PAL 16:9";
 		break;
+	case VideoFormatType::v720p5000:
+		width_ = 1280;
+		height_ = 720;
+		field_order_ = FieldOrder::progressive;
+		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
+		frame_rate_ = Common::Rational<int>(50, 1);
+		name_ = "720p50";
+		break;
+	case VideoFormatType::v720p5994:
+		width_ = 1280;
+		height_ = 720;
+		field_order_ = FieldOrder::progressive;
+		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
+		frame_rate_ = Common::Rational<int>(60000, 1001);
+		name_ = "720p59.94";
+		break;
+	case VideoFormatType::v720p6000:
+		width_ = 1280;
+		height_ = 720;
+		field_order_ = FieldOrder::progressive;
+		sample_aspect_ratio_ = Common::Rational<int>(1, 1);
+		frame_rate_ = Common::Rational<int>(60, 1);
+		name_ = "720p60";
+		break;
 	case VideoFormatType::v1080i5000:
 		width_ = 1920;
 		height_ = 1080;

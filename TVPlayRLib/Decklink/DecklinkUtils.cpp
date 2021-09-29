@@ -29,6 +29,9 @@ namespace TVPlayR {
 			case Core::VideoFormatType::ntsc:
 			case Core::VideoFormatType::ntsc_fha:
 				return bmdModeNTSC;
+			case Core::VideoFormatType::v720p5000:		return BMDDisplayMode::bmdModeHD720p50;
+			case Core::VideoFormatType::v720p5994:		return BMDDisplayMode::bmdModeHD720p5994;
+			case Core::VideoFormatType::v720p6000:		return BMDDisplayMode::bmdModeHD720p60;
 			case Core::VideoFormatType::v1080p2398:		return BMDDisplayMode::bmdModeHD1080p2398;
 			case Core::VideoFormatType::v1080p2400:		return BMDDisplayMode::bmdModeHD1080p24;
 			case Core::VideoFormatType::v1080i5000:		return BMDDisplayMode::bmdModeHD1080i50;
@@ -57,27 +60,30 @@ namespace TVPlayR {
 		{
 			switch (displayMode)
 			{
-			case BMDDisplayMode::bmdModeNTSC: return isWide ? Core::VideoFormatType::ntsc_fha : Core::VideoFormatType::ntsc;
-			case BMDDisplayMode::bmdModePAL: return isWide ? Core::VideoFormatType::pal_fha : Core::VideoFormatType::pal;
-			case BMDDisplayMode::bmdModeHD1080p2398: return Core::VideoFormatType::v1080p2398;
-			case BMDDisplayMode::bmdModeHD1080p24: return Core::VideoFormatType::v1080p2400;
-			case BMDDisplayMode::bmdModeHD1080p25: return Core::VideoFormatType::v1080p2500;
-			case BMDDisplayMode::bmdModeHD1080p2997: return Core::VideoFormatType::v1080p2997;
-			case BMDDisplayMode::bmdModeHD1080p30: return Core::VideoFormatType::v1080p3000;
-			case BMDDisplayMode::bmdModeHD1080i50: return Core::VideoFormatType::v1080i5000;
-			case BMDDisplayMode::bmdModeHD1080i5994: return Core::VideoFormatType::v1080i5994;
-			case BMDDisplayMode::bmdModeHD1080i6000: return Core::VideoFormatType::v1080i6000;
-			case BMDDisplayMode::bmdModeHD1080p50: return Core::VideoFormatType::v1080p5000;
-			case BMDDisplayMode::bmdModeHD1080p5994: return Core::VideoFormatType::v1080p5994;
-			case BMDDisplayMode::bmdModeHD1080p6000: return Core::VideoFormatType::v1080p6000;
-			case BMDDisplayMode::bmdMode4K2160p2398: return Core::VideoFormatType::v2160p2398;
-			case BMDDisplayMode::bmdMode4K2160p24: return Core::VideoFormatType::v2160p2400;
-			case BMDDisplayMode::bmdMode4K2160p25: return Core::VideoFormatType::v2160p2500;
-			case BMDDisplayMode::bmdMode4K2160p2997: return Core::VideoFormatType::v2160p2997;
-			case BMDDisplayMode::bmdMode4K2160p30: return Core::VideoFormatType::v2160p3000;
-			case BMDDisplayMode::bmdMode4K2160p50: return Core::VideoFormatType::v2160p5000;
-			case BMDDisplayMode::bmdMode4K2160p5994: return Core::VideoFormatType::v2160p5994;
-			case BMDDisplayMode::bmdMode4K2160p60: return Core::VideoFormatType::v2160p6000;
+			case BMDDisplayMode::bmdModeNTSC:			return isWide ? Core::VideoFormatType::ntsc_fha : Core::VideoFormatType::ntsc;
+			case BMDDisplayMode::bmdModePAL:			return isWide ? Core::VideoFormatType::pal_fha : Core::VideoFormatType::pal;
+			case BMDDisplayMode::bmdModeHD720p50:		return Core::VideoFormatType::v720p5000;
+			case BMDDisplayMode::bmdModeHD720p5994:		return Core::VideoFormatType::v720p5994;
+			case BMDDisplayMode::bmdModeHD720p60:		return Core::VideoFormatType::v720p6000;
+			case BMDDisplayMode::bmdModeHD1080p2398:	return Core::VideoFormatType::v1080p2398;
+			case BMDDisplayMode::bmdModeHD1080p24:		return Core::VideoFormatType::v1080p2400;
+			case BMDDisplayMode::bmdModeHD1080p25:		return Core::VideoFormatType::v1080p2500;
+			case BMDDisplayMode::bmdModeHD1080p2997:	return Core::VideoFormatType::v1080p2997;
+			case BMDDisplayMode::bmdModeHD1080p30:		return Core::VideoFormatType::v1080p3000;
+			case BMDDisplayMode::bmdModeHD1080i50:		return Core::VideoFormatType::v1080i5000;
+			case BMDDisplayMode::bmdModeHD1080i5994:	return Core::VideoFormatType::v1080i5994;
+			case BMDDisplayMode::bmdModeHD1080i6000:	return Core::VideoFormatType::v1080i6000;
+			case BMDDisplayMode::bmdModeHD1080p50:		return Core::VideoFormatType::v1080p5000;
+			case BMDDisplayMode::bmdModeHD1080p5994:	return Core::VideoFormatType::v1080p5994;
+			case BMDDisplayMode::bmdModeHD1080p6000:	return Core::VideoFormatType::v1080p6000;
+			case BMDDisplayMode::bmdMode4K2160p2398:	return Core::VideoFormatType::v2160p2398;
+			case BMDDisplayMode::bmdMode4K2160p24:		return Core::VideoFormatType::v2160p2400;
+			case BMDDisplayMode::bmdMode4K2160p25:		return Core::VideoFormatType::v2160p2500;
+			case BMDDisplayMode::bmdMode4K2160p2997:	return Core::VideoFormatType::v2160p2997;
+			case BMDDisplayMode::bmdMode4K2160p30:		return Core::VideoFormatType::v2160p3000;
+			case BMDDisplayMode::bmdMode4K2160p50:		return Core::VideoFormatType::v2160p5000;
+			case BMDDisplayMode::bmdMode4K2160p5994:	return Core::VideoFormatType::v2160p5994;
+			case BMDDisplayMode::bmdMode4K2160p60:		return Core::VideoFormatType::v2160p6000;
 			default:
 				return Core::VideoFormatType::invalid;
 			}

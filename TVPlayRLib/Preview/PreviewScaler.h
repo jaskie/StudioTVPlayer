@@ -10,7 +10,7 @@ namespace TVPlayR {
 	
 	namespace Preview {
 
-class PreviewScaler : public FFmpeg::VideoFilterBase
+class PreviewScaler final : public FFmpeg::VideoFilterBase
 {
 private:
 	const std::string filter_str_;

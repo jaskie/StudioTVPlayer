@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/Debug.h"
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace Core 
@@ -12,7 +13,7 @@ namespace TVPlayR {
 		class AVSync;
 		class AudioFifo;
 
-class SynchronizingBuffer : Common::DebugTarget
+class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 {
 public:
 	SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync);

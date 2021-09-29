@@ -4,7 +4,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-class DecklinkOutput : public Core::OutputDevice
+class DecklinkOutput final : public Core::OutputDevice
 {
 public:
 	explicit DecklinkOutput(IDeckLink* decklink, bool internal_keyer, int index);

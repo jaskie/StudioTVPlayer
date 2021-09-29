@@ -4,7 +4,7 @@
 namespace TVPlayR {
 	namespace Ndi {
 
-class NdiOutput : public Core::OutputDevice
+class NdiOutput final : public Core::OutputDevice
 {
 public:
 	NdiOutput(const std::string& source_name, const std::string& group_names);

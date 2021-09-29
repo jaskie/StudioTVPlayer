@@ -1,12 +1,10 @@
 #pragma once
-
-#include <mutex>
-#include <condition_variable>
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace Common {
 
-class Semaphore
+class Semaphore final : Common::NonCopyable
 {
 private:
 	std::mutex mutex_;

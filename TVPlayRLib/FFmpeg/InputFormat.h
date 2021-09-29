@@ -1,11 +1,12 @@
 #pragma once
 #include "../Core/HwAccel.h"
 #include "../Core/StreamInfo.h"
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class InputFormat
+class InputFormat final : Common::NonCopyable
 {
 private:
 	std::unique_ptr<AVFormatContext, void(*)(AVFormatContext*)> format_context_;

@@ -4,8 +4,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class ThumbnailFilter :
-	public VideoFilterBase
+class ThumbnailFilter final : public VideoFilterBase
 {
 public:
 	ThumbnailFilter(int width, int height, std::shared_ptr<AVFrame> frame);

@@ -3,7 +3,7 @@
 namespace TVPlayR {
 	namespace Common {
 		
-template <class T> class Rational
+template <class T> class Rational final
 {
 private:
 	T numerator_;

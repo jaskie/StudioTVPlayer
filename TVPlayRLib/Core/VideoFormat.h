@@ -34,7 +34,7 @@ namespace TVPlayR {
 
 		enum class FieldOrder;
 
-class VideoFormat
+class VideoFormat final
 {
 public:
 	VideoFormat();

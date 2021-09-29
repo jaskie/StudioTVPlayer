@@ -9,7 +9,7 @@ namespace TVPlayR {
 		enum class VideoFormatType;
 		enum class PixelFormat;
 
-class TimecodeOverlay :  public OverlayBase
+class TimecodeOverlay final :  public OverlayBase
 {
 public:
 	TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format);

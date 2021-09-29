@@ -1,5 +1,6 @@
 #pragma once
 #include "../FFmpeg/AVSync.h"
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace Preview {
@@ -10,7 +11,7 @@ namespace TVPlayR {
 		class Channel;
 		enum class FieldOrder;
 
-class InputSource
+class InputSource : Common::NonCopyable
 {
 public:
 	typedef void(*TIME_CALLBACK) (int64_t);

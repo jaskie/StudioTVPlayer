@@ -8,7 +8,7 @@ namespace TVPlayR {
 	}
 
 	namespace Decklink {
-		class DecklinkInput : public Core::InputSource
+		class DecklinkInput final : public Core::InputSource
 		{
 		public:
 			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video);

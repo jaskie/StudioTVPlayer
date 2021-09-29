@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include "../Core/HwAccel.h"
-
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class Decoder
+class Decoder final : Common::NonCopyable
 {
 public:
 	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& device_index);

@@ -13,7 +13,7 @@ class DecklinkInfo;
 class DecklinkInput;
 enum class DecklinkTimecodeSource;
 
-class DecklinkIterator: Common::NonCopyable
+class DecklinkIterator final : Common::NonCopyable
 {
 public:
 	DecklinkIterator();

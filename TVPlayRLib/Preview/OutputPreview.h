@@ -8,7 +8,7 @@ namespace TVPlayR {
 	}
 	namespace Preview {
 
-class OutputPreview: public Core::OutputDevice
+class OutputPreview final : public Core::OutputDevice
 {
 public:
 	explicit OutputPreview(int width, int height);

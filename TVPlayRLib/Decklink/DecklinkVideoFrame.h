@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		class DecklinkVideoFrame : public IDeckLinkVideoFrame
+		class DecklinkVideoFrame final : public IDeckLinkVideoFrame
 		{
 		private:
 			const std::shared_ptr<AVFrame> frame_;

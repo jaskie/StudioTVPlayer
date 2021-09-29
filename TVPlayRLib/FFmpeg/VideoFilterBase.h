@@ -9,8 +9,7 @@ namespace TVPlayR {
 
 	namespace FFmpeg {
 
-class VideoFilterBase :
-	public FilterBase, Common::DebugTarget
+class VideoFilterBase :	public FilterBase, Common::DebugTarget
 {
 private:
 public:

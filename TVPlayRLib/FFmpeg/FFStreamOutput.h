@@ -4,7 +4,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 		struct FFStreamOutputParams;
-		class FFStreamOutput : public Core::OutputDevice
+		class FFStreamOutput final : public Core::OutputDevice
 		{
 		public:
 			FFStreamOutput(const FFStreamOutputParams& params);

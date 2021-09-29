@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputFormat.h"
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -13,7 +14,7 @@ namespace TVPlayR {
 		
 		namespace internal {
 
-struct FFmpegInputBase
+struct FFmpegInputBase : Common::NonCopyable
 {
 protected:
 	FFmpegInputBase(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);

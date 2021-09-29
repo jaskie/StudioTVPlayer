@@ -1,10 +1,11 @@
 #pragma once
 #include "../Common/Debug.h"
+#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class AudioFifo: Common::DebugTarget
+class AudioFifo final : Common::NonCopyable, Common::DebugTarget
 {
 public:
 	AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, int64_t seek_time, int64_t fifo_duration);

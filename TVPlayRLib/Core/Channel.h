@@ -10,7 +10,7 @@ namespace TVPlayR {
 		class OutputDevice;
 		class OverlayBase;
 
-class Channel : public Common::NonCopyable
+class Channel final : public Common::NonCopyable
 {
 public:
 	typedef void(*AUDIO_VOLUME_CALLBACK) (std::vector<double>&);

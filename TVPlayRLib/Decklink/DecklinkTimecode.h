@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
 	namespace Decklink {
-        class DecklinkTimecode : public IDeckLinkTimecode
+        class DecklinkTimecode final : public IDeckLinkTimecode
         {
         private:
             ULONG ref_count_;

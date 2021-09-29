@@ -4,7 +4,7 @@
 namespace TVPlayR {
 	namespace Core {
 
-class AudioVolume : public Common::NonCopyable
+class AudioVolume final : public Common::NonCopyable
 {
 public:
 	AudioVolume();

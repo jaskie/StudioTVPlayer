@@ -10,22 +10,20 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		static CComPtr<IDeckLinkIterator> create_iterator()
-		{
-			CComPtr<IDeckLinkIterator> pDecklinkIterator;
-			if (FAILED(pDecklinkIterator.CoCreateInstance(CLSID_CDeckLinkIterator)))
-				return nullptr;
-			return pDecklinkIterator;
-		}
-
 		struct DecklinkIterator::implementation {
 			Common::ComInitializer com_;
-			const CComPtr<IDeckLinkIterator> decklink_iterator_;
 			std::vector<std::shared_ptr<DecklinkInfo>> decklink_list_;
 			implementation()
-				: decklink_iterator_(create_iterator())
 			{ 
 				Refresh();
+			}
+
+			static CComPtr<IDeckLinkIterator> create_iterator()
+			{
+				CComPtr<IDeckLinkIterator> pDecklinkIterator;
+				if (FAILED(pDecklinkIterator.CoCreateInstance(CLSID_CDeckLinkIterator)))
+					return nullptr;
+				return pDecklinkIterator;
 			}
 
 			std::shared_ptr<DecklinkInfo>& operator[](size_t pos)
@@ -40,20 +38,18 @@ namespace TVPlayR {
 
 			void Refresh()
 			{
-				if (!decklink_iterator_)
-					return;
+				auto iterator = create_iterator();
 				IDeckLink* decklink;
 				int index = 0;
-				while (decklink_iterator_->Next(&decklink) == S_OK)
+				while (iterator->Next(&decklink) == S_OK)
 					decklink_list_.push_back(std::make_shared<DecklinkInfo>(decklink, index++));
 			}
 
 			std::shared_ptr<ApiVersion> GetVersion()
 			{
-				if (!decklink_iterator_)
-					return nullptr;
+				auto iterator = create_iterator();
 				int64_t deckLinkVersion;
-				CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(decklink_iterator_);
+				CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(iterator);
 				if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))
 					return std::make_shared<ApiVersion>(static_cast<int>((deckLinkVersion & 0xFF000000) >> 24), static_cast<int>((deckLinkVersion & 0x00FF0000) >> 16), static_cast<int>((deckLinkVersion & 0x0000FF00) >> 8));
 				return nullptr;

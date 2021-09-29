@@ -1,8 +1,10 @@
 #pragma once
+#include "../Common/NonCopyable.h"
+
 namespace TVPlayR {
 	namespace Preview {
 
-		class InputPreview
+		class InputPreview final : Common::NonCopyable
 		{
 		public:
 			explicit InputPreview(int output_width, int output_height);

@@ -11,8 +11,7 @@ namespace TVPlayR {
 
 class Decoder;
 
-class ChannelScaler :
-	public VideoFilterBase
+class ChannelScaler final :	public VideoFilterBase
 {
 public:
 	ChannelScaler(const Core::Channel& channel);

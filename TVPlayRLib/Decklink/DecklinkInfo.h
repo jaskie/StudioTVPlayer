@@ -3,7 +3,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		class DecklinkInfo
+		class DecklinkInfo final
 		{
 		public:
 			explicit DecklinkInfo(IDeckLink* decklink, int index);

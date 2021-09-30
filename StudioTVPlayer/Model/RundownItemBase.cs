@@ -1,12 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 using TVPlayR;
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class RundownItemBase: INotifyPropertyChanged, IDisposable
+    public abstract class RundownItemBase : INotifyPropertyChanged, IDisposable
     {
+        private bool _isAutoStart;
+        private bool _isDisabled;
 
         public abstract bool IsPlaying { get; }
 
@@ -14,10 +17,41 @@ namespace StudioTVPlayer.Model
         public event EventHandler RemoveRequested;
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public bool IsAutoStart
+        {
+            get => _isAutoStart;
+            set
+            {
+                if (_isAutoStart == value)
+                    return;
+                _isAutoStart = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool IsDisabled
+        {
+            get => _isDisabled;
+            set
+            {
+                if (_isDisabled == value)
+                    return;
+                _isDisabled = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
         public void Dispose()
         {
             Unload();
         }
+
+        public abstract TVPlayR.InputBase Input { get; }
+
+        public abstract ImageSource Thumbnail { get; }
+
+        public abstract string Title { get; }
 
         public abstract void Play();
 

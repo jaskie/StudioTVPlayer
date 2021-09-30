@@ -4,11 +4,11 @@ namespace StudioTVPlayer.Model.Args
 {
     public class RundownItemEventArgs : EventArgs
     {
-        public RundownItemEventArgs(FileRundownItem rundownItem)
+        public RundownItemEventArgs(RundownItemBase rundownItem)
         {
             RundownItem = rundownItem;
         }
 
-        public FileRundownItem RundownItem { get; }
+        public RundownItemBase RundownItem { get; }
     }
 }

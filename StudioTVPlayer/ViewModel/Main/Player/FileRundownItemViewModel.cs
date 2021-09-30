@@ -5,37 +5,15 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
-    public class FileRundownItemViewModel : ViewModelBase
+    public class FileRundownItemViewModel : RundownItemViewModelBase
     {
-        private bool _isLoaded;
+        private readonly FileRundownItem _rundownItem;
 
         public FileRundownItemViewModel(FileRundownItem rundownItem)
         {
-            RundownItem = rundownItem;
-            CommandRemove = new UiCommand(Remove, _ => !IsLoaded);
+            _rundownItem = rundownItem;
         }
 
-        public bool IsLoaded
-        {
-            get => _isLoaded;
-            set
-            {
-                if (!Set(ref _isLoaded, value))
-                    return;
-                Refresh();
-            }
-        }
-
-        public ICommand CommandRemove { get; }
-
-        public FileRundownItem RundownItem { get; }
-
-        public ImageSource Thumbnail => RundownItem.Media.Thumbnail;
-
-        private void Remove(object _)
-        {
-            RundownItem.RemoveFromRundown();
-        }
-
+        public override RundownItemBase RundownItem => _rundownItem;
     }
 }

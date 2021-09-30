@@ -1,16 +1,14 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
     public class FileRundownItem : RundownItemBase
     {
-        private bool _isAutoStart;
-        private bool _isDisabled;
         private bool _isLoop;
         private int _preloaded;
+        private TVPlayR.FileInput _input;
 
         public FileRundownItem(MediaFile media)
         {
@@ -21,86 +19,66 @@ namespace StudioTVPlayer.Model
 
         public MediaFile Media { get; }
 
-        internal TVPlayR.FileInput FileInput { get; private set; }
+        public override TVPlayR.InputBase Input => _input; 
 
-        public override bool IsPlaying => FileInput?.IsPlaying == true;
-        
-        public bool IsAutoStart
-        {
-            get => _isAutoStart;
-            set
-            {
-                if (_isAutoStart == value)
-                    return;
-                _isAutoStart = value;
-                RaisePropertyChanged();
-            }
-        }
+        public override bool IsPlaying => _input?.IsPlaying == true;
 
-        public bool IsDisabled
-        {
-            get => _isDisabled;
-            set
-            {
-                if (_isDisabled == value)
-                    return;
-                _isDisabled = value;
-                RaisePropertyChanged();
-            }
-        }
 
         public bool IsLoop
         {
-            get => _isLoop; 
+            get => _isLoop;
             set
             {
                 if (_isLoop == value)
                     return;
                 _isLoop = value;
-                if (!(FileInput is null))
-                    FileInput.IsLoop = value;
+                if (!(_input is null))
+                    _input.IsLoop = value;
                 RaisePropertyChanged();
             }
         }
 
-
         public bool Preloaded => _preloaded != default;
+
+        public override ImageSource Thumbnail => Media.Thumbnail;
+
+        public override string Title => $"clip {Media.Name}";
 
         public override bool Preload(int audioChannelCount)
         {
             if (Interlocked.Exchange(ref _preloaded, 1) != default)
                 return false;
-            FileInput = new TVPlayR.FileInput(Media.FullPath);
-            FileInput.IsLoop = IsLoop;
-            FileInput.FramePlayed += Input_FramePlayed;
-            FileInput.Stopped += InputFile_Stopped;
+            _input = new TVPlayR.FileInput(Media.FullPath);
+            _input.IsLoop = IsLoop;
+            _input.FramePlayed += Input_FramePlayed;
+            _input.Stopped += InputFile_Stopped;
             return true;
         }
 
         public override void Play()
         {
-            FileInput.Play();
+            _input.Play();
         }
 
         public override void Unload()
         {
             if (Interlocked.Exchange(ref _preloaded, default) == default)
                 return;
-            FileInput.FramePlayed -= Input_FramePlayed;
-            FileInput.Stopped -= InputFile_Stopped;
-            FileInput.Dispose();
-            FileInput = null;
+            _input.FramePlayed -= Input_FramePlayed;
+            _input.Stopped -= InputFile_Stopped;
+            _input.Dispose();
+            _input = null;
         }
 
 
         internal override void Pause()
         {
-            FileInput.Pause();
+            _input.Pause();
         }
 
         public bool Seek(TimeSpan timeSpan)
         {
-            return FileInput.Seek(timeSpan);
+            return _input.Seek(timeSpan);
         }
 
         private void InputFile_Stopped(object sender, EventArgs e)

@@ -4,14 +4,18 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class InputBase: IDisposable
+    public abstract class InputBase : IDisposable
     {
         [XmlAttribute]
         public string VideoFormat { get; set; }
 
         [XmlIgnore]
+        public abstract TVPlayR.InputBase Input { get; }
+
+        [XmlIgnore]
         public abstract ImageSource Thumbnail { get; }
 
+        [XmlIgnore]
         public abstract bool IsRunning { get; }
 
         public abstract void Dispose();

@@ -25,7 +25,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private TimeSpan _outTime;
         private double _sliderPosition;
         private bool _isDisposed;
-        private FileRundownItemViewModel _currentRundownItem;
+        private RundownItemViewModelBase _currentRundownItem;
         private bool _isLoaded;
 
         //private bool _isSliderDrag;
@@ -56,7 +56,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (player.Channel.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
-            Rundown = new ObservableCollection<FileRundownItemViewModel>(player.Rundown.Select(ri => new FileRundownItemViewModel(ri)));
+            Rundown = new ObservableCollection<RundownItemViewModelBase>(player.Rundown.Select(CreateRundownItemViewModel));
+                
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
             _mediaPlayer = player;
         }
@@ -79,9 +80,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _displayTime, value);
         }
 
-        public TimeSpan CurrentItemStartTime => CurrentRundownItem?.RundownItem.Media.StartTime ?? TimeSpan.Zero;
+        public TimeSpan CurrentItemStartTime => (CurrentRundownItem?.RundownItem as FileRundownItem)?.Media.StartTime ?? TimeSpan.Zero;
 
-        public TimeSpan CurrentItemDuration => CurrentRundownItem?.RundownItem.Media.Duration ?? TimeSpan.Zero;
+        public TimeSpan CurrentItemDuration => (CurrentRundownItem?.RundownItem as FileRundownItem)?.Media.Duration ?? TimeSpan.Zero;
 
 
         public TimeSpan OutTime
@@ -146,11 +147,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsAlpha { get; }
 
-        public ObservableCollection<FileRundownItemViewModel> Rundown { get; }
+        public ObservableCollection<RundownItemViewModelBase> Rundown { get; }
 
-        public FileRundownItemViewModel SelectedRundownItem { get; set; }
+        public RundownItemViewModelBase SelectedRundownItem { get; set; }
 
-        public FileRundownItemViewModel CurrentRundownItem
+        public RundownItemViewModelBase CurrentRundownItem
         {
             get => _currentRundownItem;
             private set
@@ -265,12 +266,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(object param)
         {
-            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as FileRundownItemViewModel ?? throw new ArgumentException(nameof(param)));
+            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModelBase ?? throw new ArgumentException(nameof(param)));
         }
 
-        private void LoadMedia(FileRundownItemViewModel playerItem)
+        private void LoadMedia(RundownItemViewModelBase playerItem)
         {
-            if (playerItem.RundownItem.IsDisabled || !playerItem.RundownItem.Media.IsVerified)
+            if (playerItem.RundownItem.IsDisabled)
                 return;
             _mediaPlayer.Load(playerItem.RundownItem);
         }
@@ -325,7 +326,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting clip {_mediaPlayer.PlayingRundownItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting {_mediaPlayer.PlayingRundownItem?.Title }", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
             return true;
@@ -341,7 +342,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Media.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Title}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
             return true;
@@ -379,7 +380,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)
         {
-            Rundown.Add(new FileRundownItemViewModel(e.RundownItem));
+            Rundown.Add(CreateRundownItemViewModel(e.RundownItem));
             Refresh();
         }
 
@@ -463,12 +464,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 case MediaViewModel mediaViewModel:
                     var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                    var rundownItem = _mediaPlayer.AddToQueue(mediaViewModel.Media, index);
-                    Rundown.Insert(index, new FileRundownItemViewModel(rundownItem));
+                    var fileRundownItem = _mediaPlayer.AddMediaToQueue(mediaViewModel.Media, index);
+                    Rundown.Insert(index, new FileRundownItemViewModel(fileRundownItem));
                     Refresh();
                     break;
 
                 case DecklinkInputViewModel decklink:
+                    index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
+                    var liveInputRundownItem = _mediaPlayer.AddLiveToQueue(decklink.Input, index);
+                    Rundown.Insert(index, new LiveInputRundownItemViewModel(liveInputRundownItem));
+                    Refresh();
 
 
                     break;
@@ -492,12 +497,26 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     if (!media.IsValid)
                         return;
                     index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                    rundownItem = _mediaPlayer.AddToQueue(media, index);
-                    Rundown.Insert(index, new FileRundownItemViewModel(rundownItem));
+                    fileRundownItem = _mediaPlayer.AddMediaToQueue(media, index);
+                    Rundown.Insert(index, new FileRundownItemViewModel(fileRundownItem));
                     Refresh();
                     break;
             }
         }
         #endregion //drag&drop
+
+        private RundownItemViewModelBase CreateRundownItemViewModel(RundownItemBase rundownItem)
+        {
+            switch (rundownItem)
+            {
+                case FileRundownItem fileRundownItem:
+                    return new FileRundownItemViewModel(fileRundownItem);
+                case LiveInputRundownItem liveInputRundownItem:
+                    return new LiveInputRundownItemViewModel(liveInputRundownItem);
+                default:
+                    throw new ArgumentException(nameof(rundownItem));
+            }
+        }
+
     }
 }

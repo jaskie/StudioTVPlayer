@@ -20,7 +20,7 @@ namespace TVPlayR {
 
 		void DecklinkInputSynchroProvider::Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet)
 		{
-			int64_t pts;
+			int64_t pts = AV_NOPTS_VALUE;
 			switch (timecode_source_)
 			{
 			case DecklinkTimecodeSource::RP188Any:
@@ -44,7 +44,6 @@ namespace TVPlayR {
 				video->pts = pts;
 				if (!scaler_)
 					scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));
-				std::shared_ptr<AVFrame> video = FFmpeg::AllocFrame();
 				video = scaler_->Scale(video);
 			}
 			else

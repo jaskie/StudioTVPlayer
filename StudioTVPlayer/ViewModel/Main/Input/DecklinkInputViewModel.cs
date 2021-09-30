@@ -15,7 +15,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
             input.InputFormatChanged += Input_InputFormatChanged;
-            if (_input.GetInput() is null)
+            if (_input.Input is null)
                 Input.Initialize();
         }
 

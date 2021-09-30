@@ -275,11 +275,14 @@
                      dd:DragDrop.UseDefaultDragAdorner="True"
                      dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                      >
-                <ListBox.ItemTemplate>
+                <ListBox.Resources>
                     <DataTemplate DataType="{x:Type vm:FileRundownItemViewModel}">
-                        <view:RundownItemView />
+                        <view:FileRundownItemView />
                     </DataTemplate>
-                </ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:LiveInputRundownItemViewModel}">
+                        <TextBlock Text="{Binding RundownItem.Title}"/>
+                    </DataTemplate>
+                </ListBox.Resources>
                 <ListBox.InputBindings>
                     <KeyBinding Modifiers="Ctrl" Key="Return" Command="{Binding LoadSelectedMediaCommand}" />
                 </ListBox.InputBindings>

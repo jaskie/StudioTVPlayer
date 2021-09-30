@@ -23,7 +23,7 @@ namespace StudioTVPlayer.Model
             Uninitialize();
         }
 
-        public TVPlayR.DecklinkInput GetInput() => _input;
+        public override TVPlayR.InputBase Input => _input;
 
         public override bool Initialize()
         {

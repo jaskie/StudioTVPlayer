@@ -24,6 +24,8 @@ namespace TVPlayR {
 
 			void Push(std::shared_ptr<AVFrame>& video)
 			{
+				if (!video)
+					return;
 				executor_.begin_invoke([this, video]
 				{
 					preview_scaler_.Push(video);

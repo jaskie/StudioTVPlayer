@@ -4,14 +4,16 @@
 #include "../Core/Channel.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
+#include "OutputFormat.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
 		struct FFStreamOutput::implementation : Common::DebugTarget
 		{
-			AVDictionary* options_ = nullptr;
 			const FFStreamOutputParams params_;
+			AVDictionary* options_ = nullptr;
+			OutputFormat output_format_;
 			Common::Executor executor_;
 			Core::VideoFormat format_;
 			int audio_channels_count_ = 2;
@@ -29,11 +31,13 @@ namespace TVPlayR {
 			
 			implementation(const FFStreamOutputParams& params)
 				: Common::DebugTarget(false, "Stream output: " + params.Address)
+				, output_format_(params.Address)
 				, params_(params)
 				, executor_("Stream output: " + params.Address)
 				, format_(Core::VideoFormatType::invalid)
 				, options_(ReadOptions(params.Options))
 			{
+
 			}
 			
 			~implementation()

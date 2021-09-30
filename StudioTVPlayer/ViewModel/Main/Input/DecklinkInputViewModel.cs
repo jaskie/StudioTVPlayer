@@ -14,6 +14,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             _input = input;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
+            input.InputFormatChanged += Input_InputFormatChanged;
             if (_input.GetInput() is null)
                 Input.Initialize();
         }
@@ -80,6 +81,18 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                 default:
                     return string.Empty;                    
             }
+        }
+
+        private void Input_InputFormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
+        {
+            _videoFormat = e.Format;
+            NotifyPropertyChanged(nameof(VideoFormat));
+        }
+
+        public override void Dispose()
+        {
+            _input.InputFormatChanged -= Input_InputFormatChanged;
+            base.Dispose();
         }
 
     }

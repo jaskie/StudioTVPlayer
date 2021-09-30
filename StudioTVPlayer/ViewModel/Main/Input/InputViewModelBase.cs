@@ -13,7 +13,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         protected abstract string ReadErrorInfo(string propertyName);
         
-        public void Dispose()
+        public virtual void Dispose()
         {
             Input.Uninitialize();
         }

@@ -33,8 +33,6 @@
         <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
         <Label Grid.Column="1" Grid.Row="2">Video format</Label>
         <ComboBox Grid.Column="1" Grid.Row="3" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
-        <Button Grid.RowSpan="4" Grid.Column="2" Command="{Binding RequestRemoveCommand}" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
-            <mah:FontIcon Glyph="&#xE74D;"/>
-        </Button>
+        <Button Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
     </Grid>
 </UserControl>

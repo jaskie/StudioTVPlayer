@@ -17,7 +17,7 @@ namespace StudioTVPlayer.Model
 
         public override ImageSource Thumbnail => null;
 
-        public override string Title => $"live input";
+        public override string Name => _input.Name;
 
         public override void Play()
         {

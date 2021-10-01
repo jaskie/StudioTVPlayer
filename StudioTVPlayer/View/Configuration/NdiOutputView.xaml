@@ -31,8 +31,6 @@
         <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding SourceName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI source name (mandatory)"/>
         <Label Grid.Row="1" Grid.Column="1">Group names</Label>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding GroupNames, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group names (default - leave empty)"/>
-        <Button Grid.Row="2" Grid.Column="2" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
-            <mah:FontIcon Glyph="&#xE74D;"/>
-        </Button>
+        <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove this output" />
     </Grid>
 </UserControl>

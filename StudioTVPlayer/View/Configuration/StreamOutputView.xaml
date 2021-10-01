@@ -58,8 +58,6 @@
         <TextBox Grid.Row="5" Grid.Column="2" Text="{Binding OutputFilter, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
         <Label Grid.Row="6" Grid.Column="2">Options</Label>
         <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding Options, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" TextWrapping="Wrap"/>
-        <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="99" VerticalAlignment="Center" Command="{Binding RequestRemoveCommand}" Style="{DynamicResource MahApps.Styles.Button.ToolBar}" ToolTip="Remove this output">
-            <mah:FontIcon Glyph="&#xE74D;"/>
-        </Button>
+        <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="99" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove this output"/>
     </Grid>
 </UserControl>

@@ -51,7 +51,7 @@ namespace StudioTVPlayer.Model
 
         public abstract ImageSource Thumbnail { get; }
 
-        public abstract string Title { get; }
+        public abstract string Name { get; }
 
         public abstract void Play();
 

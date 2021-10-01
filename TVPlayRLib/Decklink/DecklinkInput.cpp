@@ -35,7 +35,8 @@ namespace TVPlayR {
 			const int													audio_channels_count_;
 			const DecklinkTimecodeSource								timecode_source_;
 			const Core::VideoFormat										format_;
-			FORMAT_CALLBACK								format_changed_callback_ = nullptr;
+			std::mutex													channel_list_mutex_;
+			FORMAT_CALLBACK												format_changed_callback_ = nullptr;
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
@@ -112,6 +113,7 @@ namespace TVPlayR {
 
 			virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
 			{
+				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				for (auto& provider : channel_prividers_)
 					provider->Push(videoFrame, audioPacket);
 				for (auto& preview : previews_)
@@ -130,6 +132,7 @@ namespace TVPlayR {
 
 			void AddToChannel(const Core::Channel& channel)
 			{
+				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToChannel(channel))
 				{
 					std::unique_ptr<DecklinkInputSynchroProvider> newProvider = std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_);
@@ -140,6 +143,7 @@ namespace TVPlayR {
 
 			void RemoveFromChannel(const Core::Channel& channel)
 			{
+				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Channel() == &channel; });
 				if (provider == channel_prividers_.end())
 					return;
@@ -148,11 +152,13 @@ namespace TVPlayR {
 
 			void AddPreview(std::shared_ptr<Preview::InputPreview>& preview)
 			{
+				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				previews_.push_back(preview);
 			}
 
 			void RemovePreview(std::shared_ptr<Preview::InputPreview>& preview)
 			{
+				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				previews_.erase(std::remove(previews_.begin(), previews_.end(), preview), previews_.end());
 			}
 

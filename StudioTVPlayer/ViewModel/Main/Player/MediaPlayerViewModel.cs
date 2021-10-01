@@ -326,7 +326,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting {_mediaPlayer.PlayingRundownItem?.Title }", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting {_mediaPlayer.PlayingRundownItem?.Name }", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
             return true;
@@ -342,7 +342,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Title}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
             return true;

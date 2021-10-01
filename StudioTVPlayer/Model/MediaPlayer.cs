@@ -147,12 +147,19 @@ namespace StudioTVPlayer.Model
             if (rundownItem != null)
             {
                 rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
-                if (rundownItem is FileRundownItem fileRundownItem)
+                switch (rundownItem)
                 {
-                    fileRundownItem.Stopped += PlaiyngRundownItem_Stopped;
-                    fileRundownItem.Preload(Channel.AudioChannelCount);
-                    Channel.Load(rundownItem);
+                    case FileRundownItem fileRundownItem:
+                        fileRundownItem.Stopped += PlaiyngRundownItem_Stopped;
+                        fileRundownItem.Preload(Channel.AudioChannelCount);
+                        break;
+                    case LiveInputRundownItem liveInputRundownItem:
+                        break;
+                    default:
+                        Debug.Fail("Invalid rundownItem type");
+                        break;
                 }
+                Channel.Load(rundownItem);
                 if (rundownItem.IsAutoStart)
                     rundownItem.Play();
             }

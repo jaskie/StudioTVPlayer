@@ -42,7 +42,7 @@ namespace StudioTVPlayer.Model
 
         public override ImageSource Thumbnail => Media.Thumbnail;
 
-        public override string Title => $"clip {Media.Name}";
+        public override string Name => Media.Name;
 
         public override bool Preload(int audioChannelCount)
         {

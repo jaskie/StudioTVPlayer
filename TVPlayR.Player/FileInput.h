@@ -35,7 +35,7 @@ namespace TVPlayR {
 		{
 			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoStart() * 10); }
 		}
-
+		
 		property String^ FileName
 		{
 			String^ get() { return _fileName; }
@@ -107,6 +107,9 @@ namespace TVPlayR {
 		void StoppedCallback();
 	internal:
 		virtual std::shared_ptr<Core::InputSource> GetNativeSource() override { return *_nativeSource; }
+	protected:
+		virtual String^ GetName() override { return _fileName; }
+
 	};
 
 }

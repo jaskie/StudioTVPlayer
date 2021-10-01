@@ -10,17 +10,17 @@ namespace StudioTVPlayer.ViewModel
 
         protected RemovableViewModelBase()
         {
-            RequestRemoveCommand = new UiCommand(RequestRemove, CanRequestRemove);
+            CommandRemove = new UiCommand(Remove, CanRequestRemove);
         }
 
-        public ICommand RequestRemoveCommand { get; }
+        public ICommand CommandRemove { get; }
 
         protected virtual bool CanRequestRemove(object obj)
         {
             return true;
         }
 
-        protected virtual void RequestRemove(object obj)
+        protected virtual void Remove(object obj)
         {
             RemoveRequested?.Invoke(this, EventArgs.Empty);
         }

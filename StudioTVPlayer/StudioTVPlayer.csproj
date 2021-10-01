@@ -189,6 +189,9 @@
     <Compile Include="View\Main\MediaBrowser\BrowserView.xaml.cs">
       <DependentUpon>BrowserView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Main\Player\LiveInputRundownItemView.xaml.cs">
+      <DependentUpon>LiveInputRundownItemView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Main\PlayoutView.xaml.cs">
       <DependentUpon>PlayoutView.xaml</DependentUpon>
     </Compile>
@@ -261,6 +264,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Main\MediaBrowser\BrowserView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Main\Player\LiveInputRundownItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

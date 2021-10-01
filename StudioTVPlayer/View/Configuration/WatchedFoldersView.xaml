@@ -72,9 +72,7 @@
                 <DataGridTemplateColumn Width="*" CanUserSort="False" CanUserResize="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Command="{Binding RequestRemoveCommand}" ToolTip="Remove this folder">
-                                <mah:FontIcon Glyph="&#xE74D;"/>
-                            </Button>
+                            <Button Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove this folder"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

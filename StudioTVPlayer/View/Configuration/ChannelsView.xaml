@@ -37,9 +37,7 @@
                     <DataGridTemplateColumn Width="45" CanUserSort="False" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Command="{Binding RequestRemoveCommand}" ToolTip="Remove this channel">
-                                    <mah:FontIcon Glyph="&#xE74D;"/>
-                                </Button>
+                                <Button Style="{StaticResource RemoveButtonStyle}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -280,7 +280,7 @@
                         <view:FileRundownItemView />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type vm:LiveInputRundownItemViewModel}">
-                        <TextBlock Text="{Binding RundownItem.Title}"/>
+                        <view:LiveInputRundownItemView />
                     </DataTemplate>
                 </ListBox.Resources>
                 <ListBox.InputBindings>

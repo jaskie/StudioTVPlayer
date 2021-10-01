@@ -12,8 +12,9 @@ namespace TVPlayR {
 		FormatChanged(this, gcnew VideoFormatEventArgs(format));
 	}
 
-	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink)
+	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink, String^ modelName)
 		: _decklink(new std::shared_ptr<Decklink::DecklinkInput>(decklink))
+		, _modelName(modelName)
 	{
 		_formatChangedDelegate = gcnew DecklinkInput::FormatChangedDelegate(this, &DecklinkInput::FormatChangedCallback);
 		_formatChangedHandle = GCHandle::Alloc(_formatChangedDelegate);

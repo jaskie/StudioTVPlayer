@@ -1,7 +1,4 @@
-﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
-using System.Windows.Input;
-using System.Windows.Media;
+﻿using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {

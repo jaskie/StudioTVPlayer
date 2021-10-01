@@ -1,6 +1,5 @@
 #pragma once
 #include "FFmpeg/FFmpegInput.h"
-#include "TimeEventArgs.h"
 #include "HardwareAcceleration.h"
 #include "FieldOrder.h"
 #include "Rational.h"
@@ -23,58 +22,18 @@ namespace TVPlayR {
 		bool Seek(TimeSpan time);
 		void Play();
 		void Pause();
-		property TimeSpan AudioDuration 
-		{
-			TimeSpan get() { return TimeSpan((*_nativeSource)->GetAudioDuration() * 10); }
-		}
-		property TimeSpan VideoDuration 
-		{
-			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoDuration() * 10); }
-		}
-		property TimeSpan VideoStart
-		{
-			TimeSpan get() { return TimeSpan((*_nativeSource)->GetVideoStart() * 10); }
-		}
-		
-		property String^ FileName
-		{
-			String^ get() { return _fileName; }
-		}
-
-		property int Width
-		{
-			int get() { return (*_nativeSource)->GetWidth(); }
-		}
-
-		property int Height
-		{
-			int get() { return (*_nativeSource)->GetHeight(); }
-		}
-
-		property bool IsPlaying
-		{
-			bool get() { return (*_nativeSource)->IsPlaying(); }
-		}
-
-		property bool IsEof
-		{
-			bool get() { return (*_nativeSource)->IsEof(); }
-		}
-
-		property TVPlayR::FieldOrder FieldOrder
-		{
-			TVPlayR::FieldOrder get() { return static_cast<TVPlayR::FieldOrder>((*_nativeSource)->GetFieldOrder()); }
-		}
-
-		property TVPlayR::Rational FrameRate
-		{
-			TVPlayR::Rational get() { return TVPlayR::Rational((*_nativeSource)->GetFrameRate()); }
-		}
-
-		property int AudioChannelCount { int get() { return (*_nativeSource)->GetAudioChannelCount(); }}
-
-		property bool HaveAlphaChannel { bool get() { return (*_nativeSource)->HaveAlphaChannel(); }}
-
+		property TimeSpan AudioDuration { TimeSpan get() { return TimeSpan(GetFFmpegInput()->GetAudioDuration() * 10); } }
+		property TimeSpan VideoDuration { TimeSpan get() { return TimeSpan(GetFFmpegInput()->GetVideoDuration() * 10); } }
+		property TimeSpan VideoStart { TimeSpan get() { return TimeSpan(GetFFmpegInput()->GetVideoStart() * 10); } }
+		property String^ FileName { String^ get() { return _fileName; } }
+		property int Width { int get() { return GetFFmpegInput()->GetWidth(); } }
+		property int Height { int get() { return GetFFmpegInput()->GetHeight(); } }
+		property bool IsPlaying { bool get() { return GetFFmpegInput()->IsPlaying(); } }
+		property bool IsEof { bool get() { return GetFFmpegInput()->IsEof(); } }
+		property TVPlayR::FieldOrder FieldOrder { TVPlayR::FieldOrder get() { return static_cast<TVPlayR::FieldOrder>(GetFFmpegInput()->GetFieldOrder()); } }
+		property TVPlayR::Rational FrameRate { TVPlayR::Rational get() { return TVPlayR::Rational(GetFFmpegInput()->GetFrameRate()); } }
+		property int AudioChannelCount { int get() { return GetFFmpegInput()->GetAudioChannelCount(); }}
+		property bool HaveAlphaChannel { bool get() { return GetFFmpegInput()->HaveAlphaChannel(); }}
 		property bool IsLoop 
 		{
 			bool get() { return _isLoop; }
@@ -82,34 +41,25 @@ namespace TVPlayR {
 			{
 				if (isLoop == _isLoop)
 					return;
-				(*_nativeSource)->SetIsLoop(isLoop);
+				GetFFmpegInput()->SetIsLoop(isLoop);
 				_isLoop = isLoop;
 			}
 		}
-
-		event EventHandler<TimeEventArgs^>^ FramePlayed;
 		event EventHandler^ Stopped;
+
 	private:
 		const HardwareAcceleration _acceleration;
 		const String^ _hwDevice;
-		const std::shared_ptr<FFmpeg::FFmpegInput>* _nativeSource;
 		String^ _fileName;
 		bool _isLoop;
-
-		delegate void FramePlayedDelegate(int64_t);
-		FramePlayedDelegate^ _framePlayedDelegate;
-		GCHandle _framePlayedHandle;
-		void FramePlayedCallback(int64_t time);
 
 		delegate void StoppedDelegate(void);
 		StoppedDelegate^ _stoppedDelegate;
 		GCHandle _stoppedHandle;
 		void StoppedCallback();
-	internal:
-		virtual std::shared_ptr<Core::InputSource> GetNativeSource() override { return *_nativeSource; }
+		std::shared_ptr<FFmpeg::FFmpegInput> GetFFmpegInput() { return std::dynamic_pointer_cast<FFmpeg::FFmpegInput>(InputBase::GetNativeSource()); }
 	protected:
 		virtual String^ GetName() override { return _fileName; }
-
 	};
 
 }

@@ -28,7 +28,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                     return;
                 _input.DeviceIndex = value.Index;
                 if (_input.Initialize())
-                    Providers.InputList.Current.Save();
+                    ApplyChanges();
             }
         }
 
@@ -43,7 +43,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                     return;
                 Input.VideoFormat = value.Name;
                 if (Input.Initialize())
-                    Providers.InputList.Current.Save();
+                    ApplyChanges();
             }
         }
 
@@ -93,6 +93,12 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         {
             _input.InputFormatChanged -= Input_InputFormatChanged;
             base.Dispose();
+        }
+
+        private void ApplyChanges()
+        {
+            Providers.InputList.Current.Save();
+            NotifyPropertyChanged(nameof(Thumbnail));
         }
 
     }

@@ -19,21 +19,31 @@ namespace StudioTVPlayer.Model
 
         public override string Name => _input.Name;
 
+        public override bool CanSeek => false;
+
         public override void Play()
+        {
+        }
+
+        public override void Pause()
         {
         }
 
         public override bool Preload(int audioChannelCount)
         {
+            if (!base.Preload(audioChannelCount))
+                return false;
+            InputAdded(_input);
             return true;
         }
 
-        public override void Unload()
+        public override bool Unload()
         {
+            if (!base.Unload())
+                return false;
+            InputRemoved(_input);
+            return true;
         }
 
-        internal override void Pause()
-        {
-        }
     }
 }

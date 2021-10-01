@@ -187,7 +187,7 @@
                 </Button>
             </UniformGrid>
             <Slider Grid.Row="4" Margin="5" IsMoveToPointEnabled="True" 
-                    IsEnabled="{Binding IsLoaded}"
+                    IsEnabled="{Binding IsSliderActive}"
                     Minimum="{Binding CurrentItemStartTime.TotalMilliseconds}"
                     Maximum="{Binding CurrentItemDuration.TotalMilliseconds}" 
                     Thumb.DragStarted="Slider_DragStarted"

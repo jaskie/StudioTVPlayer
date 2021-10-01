@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudioTVPlayer.Model.Args;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -36,6 +37,7 @@ namespace StudioTVPlayer.Model
             {
                 _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.None, true);
                 _input.FormatChanged += Input_FormatChanged;
+                
                 _preview = new TVPlayR.InputPreview(Application.Current.Dispatcher, 160, 90);
                 _input.AddPreview(_preview);
                 return true;
@@ -67,7 +69,6 @@ namespace StudioTVPlayer.Model
         }
 
         public event EventHandler<TVPlayR.VideoFormatEventArgs> InputFormatChanged;
-
 
     }
 }

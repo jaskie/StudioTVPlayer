@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
@@ -7,7 +6,6 @@ namespace StudioTVPlayer.Model
     public class FileRundownItem : RundownItemBase
     {
         private bool _isLoop;
-        private int _preloaded;
         private TVPlayR.FileInput _input;
 
         public FileRundownItem(MediaFile media)
@@ -38,19 +36,20 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public bool Preloaded => _preloaded != default;
 
         public override ImageSource Thumbnail => Media.Thumbnail;
 
         public override string Name => Media.Name;
 
+        public override bool CanSeek => true;
+
         public override bool Preload(int audioChannelCount)
         {
-            if (Interlocked.Exchange(ref _preloaded, 1) != default)
+            if (!base.Preload(audioChannelCount))
                 return false;
             _input = new TVPlayR.FileInput(Media.FullPath);
+            InputAdded(_input);
             _input.IsLoop = IsLoop;
-            _input.FramePlayed += Input_FramePlayed;
             _input.Stopped += InputFile_Stopped;
             return true;
         }
@@ -60,18 +59,18 @@ namespace StudioTVPlayer.Model
             _input.Play();
         }
 
-        public override void Unload()
+        public override bool Unload()
         {
-            if (Interlocked.Exchange(ref _preloaded, default) == default)
-                return;
-            _input.FramePlayed -= Input_FramePlayed;
+            if (!base.Unload())
+                return false;
+            InputRemoved(_input);
             _input.Stopped -= InputFile_Stopped;
             _input.Dispose();
             _input = null;
+            return true;
         }
 
-
-        internal override void Pause()
+        public override void Pause()
         {
             _input.Pause();
         }

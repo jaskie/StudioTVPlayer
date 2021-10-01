@@ -26,7 +26,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private double _sliderPosition;
         private bool _isDisposed;
         private RundownItemViewModelBase _currentRundownItem;
-        private bool _isLoaded;
 
         //private bool _isSliderDrag;
         private double _volume;
@@ -37,7 +36,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
-            CueCommand = new UiCommand(Cue, _ => CurrentRundownItem != null);
+            CueCommand = new UiCommand(Cue, _ => CurrentRundownItem is FileRundownItemViewModel);
             TogglePlayCommand = new UiCommand(TogglePlay, CanTogglePlay);
             UnloadCommand = new UiCommand(Unload, _ => CurrentRundownItem != null);
             LoadNextItemCommand = new UiCommand(LoadNextItem, CanLoadNextItem);
@@ -117,8 +116,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public AudioLevelBarViewModel[] AudioLevelBars { get; }
 
-        public bool IsLoaded { get => _isLoaded; private set => Set(ref _isLoaded, value); }
-
         public bool IsLoop
         {
             get => _mediaPlayer.IsLoop;
@@ -142,6 +139,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 NotifyPropertyChanged();
             }
         }
+
+        public bool IsSliderActive => _currentRundownItem?.RundownItem.CanSeek == true;
 
         public ImageSource Preview { get => _preview; private set => Set(ref _preview, value); }
 
@@ -169,12 +168,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     value.IsLoaded = true;
                 if (oldItem != null)
                     oldItem.IsLoaded = false;
-                IsLoaded = value != null;
                 _sliderPosition = CurrentItemStartTime.TotalMilliseconds;
                 NotifyPropertyChanged(nameof(IsPlaying));
                 NotifyPropertyChanged(nameof(SliderPosition));
                 NotifyPropertyChanged(nameof(CurrentItemStartTime));
                 NotifyPropertyChanged(nameof(CurrentItemDuration));
+                NotifyPropertyChanged(nameof(IsSliderActive));
             }
         }
 
@@ -406,7 +405,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private bool CanTogglePlay(object obj)
         {
-            var item = _mediaPlayer.PlayingRundownItem;
+            var item = _mediaPlayer.PlayingRundownItem as FileRundownItem;
             if (item == null)
                 return false;
             if (!IsPlaying && _mediaPlayer.IsEof)

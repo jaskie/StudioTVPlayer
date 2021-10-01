@@ -1,6 +1,9 @@
 #pragma once
 
+#include "TimeEventArgs.h"
+
 using namespace System;
+using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR
 {
@@ -11,9 +14,19 @@ namespace TVPlayR
 	{
 	public:
 		property String^ Name { String^ get() { return GetName(); } }
+		event EventHandler<TimeEventArgs^>^ FramePlayed;
+		~InputBase();
+		!InputBase();
 	internal:
-		virtual std::shared_ptr<Core::InputSource> GetNativeSource() abstract;
+		std::shared_ptr<Core::InputSource> GetNativeSource() { return _nativeSource == nullptr ? nullptr : *_nativeSource; }
 	protected:
+		InputBase(std::shared_ptr<Core::InputSource> input_source);
 		virtual String^ GetName() abstract;
+	private:
+		const std::shared_ptr<Core::InputSource>* _nativeSource;
+		delegate void FramePlayedDelegate(int64_t);
+		FramePlayedDelegate^ _framePlayedDelegate;
+		GCHandle _framePlayedHandle;
+		void FramePlayedCallback(int64_t time);
 	};
 }

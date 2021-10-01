@@ -12,8 +12,8 @@ namespace TVPlayR {
 		FormatChanged(this, gcnew VideoFormatEventArgs(format));
 	}
 
-	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink, String^ modelName)
-		: _decklink(new std::shared_ptr<Decklink::DecklinkInput>(decklink))
+	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput> decklink, String^ modelName)
+		: InputBase(decklink)
 		, _modelName(modelName)
 	{
 		_formatChangedDelegate = gcnew DecklinkInput::FormatChangedDelegate(this, &DecklinkInput::FormatChangedCallback);
@@ -24,12 +24,12 @@ namespace TVPlayR {
 
 	void DecklinkInput::AddPreview(InputPreview^ preview)
 	{
-		(*_decklink)->AddPreview(preview->GetNative());
+		GetDecklinkInput()->AddPreview(preview->GetNative());
 	}
 
 	void DecklinkInput::RemovePreview(InputPreview^ preview)
 	{
-		(*_decklink)->RemovePreview(preview->GetNative());
+		GetDecklinkInput()->RemovePreview(preview->GetNative());
 	}
 
 	DecklinkInput::~DecklinkInput()
@@ -39,10 +39,8 @@ namespace TVPlayR {
 
 	DecklinkInput::!DecklinkInput()
 	{
-		if (!_decklink)
+		if (!GetNativeSource())
 			return;
-		delete _decklink;
-		_decklink = nullptr;
 		_formatChangedHandle.Free();
 	}
 }

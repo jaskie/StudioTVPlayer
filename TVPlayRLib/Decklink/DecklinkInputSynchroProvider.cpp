@@ -21,37 +21,40 @@ namespace TVPlayR {
 		void DecklinkInputSynchroProvider::Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet)
 		{
 			int64_t pts = AV_NOPTS_VALUE;
-			switch (timecode_source_)
+			if (video_frame)
 			{
-			case DecklinkTimecodeSource::RP188Any:
-				pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeRP188Any);
-				break;
-			case DecklinkTimecodeSource::VITC:
-				pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeVITC);
-				break;
-			default:
-				BMDTimeValue frameTime;
-				BMDTimeValue frameDuration;
-				if (SUCCEEDED(video_frame->GetStreamTime(&frameTime, &frameDuration, time_scale_)))
-					pts = frameTime / frameDuration;
-				break;
-			}
+				switch (timecode_source_)
+				{
+				case DecklinkTimecodeSource::RP188Any:
+					pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeRP188Any);
+					break;
+				case DecklinkTimecodeSource::VITC:
+					pts = GetPts(video_frame, BMDTimecodeFormat::bmdTimecodeVITC);
+					break;
+				default:
+					BMDTimeValue frameTime;
+					BMDTimeValue frameDuration;
+					if (SUCCEEDED(video_frame->GetStreamTime(&frameTime, &frameDuration, time_scale_)))
+						pts = frameTime / frameDuration;
+					break;
+				}
 
-			std::shared_ptr<AVFrame> video;
-			if (process_video_)
-			{
-				video = AVFrameFromDecklink(video_frame, field_dominance_, channel_.Format().SampleAspectRatio());
-				video->pts = pts;
-				if (!scaler_)
-					scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));
-				video = scaler_->Scale(video);
+				std::shared_ptr<AVFrame> video;
+				if (process_video_)
+				{
+					video = AVFrameFromDecklink(video_frame, field_dominance_, channel_.Format().SampleAspectRatio());
+					video->pts = pts;
+					if (!scaler_)
+						scaler_ = std::make_unique<FFmpeg::SwScale>(video_frame->GetWidth(), video_frame->GetHeight(), AV_PIX_FMT_UYVY422, channel_.Format().width(), channel_.Format().height(), Core::PixelFormatToFFmpegFormat(channel_.PixelFormat()));
+					video = scaler_->Scale(video);
+				}
+				else
+				{
+					video = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
+					video->pts = pts;
+				}
+				last_video_ = video;
 			}
-			else
-			{
-				video = FFmpeg::CreateEmptyVideoFrame(channel_.Format(), channel_.PixelFormat());
-				video->pts = pts;
-			}
-			last_video_ = video;
 
 			void* audio_bytes = nullptr;
 			if (audio_packet && SUCCEEDED(audio_packet->GetBytes(&audio_bytes)) && audio_bytes)

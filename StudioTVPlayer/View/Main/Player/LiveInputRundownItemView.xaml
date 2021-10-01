@@ -36,6 +36,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
@@ -68,7 +69,10 @@
             </ToggleButton.Style>
             <mah:FontIcon Glyph="&#xE73E;"/>
         </ToggleButton>
-        <TextBlock Grid.Column="2" Text="{Binding RundownItem.Name}" />
-        <Button Grid.Column="3" Style="{StaticResource RemoveButtonStyle}" />
+        <ToggleButton Grid.Column="2" IsChecked="{Binding RundownItem.IsAutoStart}" ToolTip="Auto start" >
+            <mah:FontIcon Glyph="&#xE768;"/>
+        </ToggleButton>
+        <TextBlock Grid.Column="3" Text="{Binding RundownItem.Name}" />
+        <Button Grid.Column="4" Style="{StaticResource RemoveButtonStyle}" />
     </Grid>
 </UserControl>

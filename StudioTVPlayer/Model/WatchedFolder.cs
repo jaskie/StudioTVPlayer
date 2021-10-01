@@ -56,7 +56,7 @@ namespace StudioTVPlayer.Model
             _cancellationTokenSource = new CancellationTokenSource();
             _fs = new FileSystemWatcher(Path)
             {
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime,
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite,
                 InternalBufferSize = 64000 //recommended max
             };
             _fs.Error += Fs_Error;

@@ -29,9 +29,9 @@ namespace StudioTVPlayer.Model
         {
         }
 
-        public override bool Preload(int audioChannelCount)
+        public override bool Prepare(int audioChannelCount)
         {
-            if (!base.Preload(audioChannelCount))
+            if (!base.Prepare(audioChannelCount))
                 return false;
             InputAdded(_input);
             return true;

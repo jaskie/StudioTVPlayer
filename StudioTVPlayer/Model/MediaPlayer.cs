@@ -129,7 +129,7 @@ namespace StudioTVPlayer.Model
         {
             if (rundownItem == null)
                 return;
-            Debug.WriteLine(rundownItem, "InternalUnload:");
+            Debug.WriteLine(rundownItem.Name, "InternalUnload");
             rundownItem.FramePlayed -= PlaiyngRundownItem_FramePlayed;
             if (rundownItem is FileRundownItem fileRundownItem)
             {
@@ -143,7 +143,7 @@ namespace StudioTVPlayer.Model
 
         private void InternalLoad(RundownItemBase rundownItem)
         {
-            Debug.WriteLine(rundownItem, "InternalLoad:");
+            Debug.WriteLine(rundownItem?.Name, "InternalLoad");
             if (rundownItem != null)
             {
                 rundownItem.FramePlayed += PlaiyngRundownItem_FramePlayed;
@@ -151,7 +151,6 @@ namespace StudioTVPlayer.Model
                 {
                     case FileRundownItem fileRundownItem:
                         fileRundownItem.Stopped += PlaiyngRundownItem_Stopped;
-                        fileRundownItem.Preload(Channel.AudioChannelCount);
                         break;
                     case LiveInputRundownItem liveInputRundownItem:
                         break;
@@ -159,7 +158,8 @@ namespace StudioTVPlayer.Model
                         Debug.Fail("Invalid rundownItem type");
                         break;
                 }
-                Channel.Load(rundownItem);
+                rundownItem.Prepare(Channel.AudioChannelCount);
+                Channel.Load(rundownItem.Input);
                 if (rundownItem.IsAutoStart)
                     rundownItem.Play();
             }
@@ -188,6 +188,7 @@ namespace StudioTVPlayer.Model
         public void Clear()
         {
             PlayingRundownItem = null;
+            SetNext(null);
             Channel.Clear();
         }
 
@@ -219,7 +220,7 @@ namespace StudioTVPlayer.Model
         {
             Task.Run(() => // do not block incoming thread
             {
-                var nextItem = FindNextAutoPlayItem();
+                var nextItem = _nextRundownItem;
                 if (nextItem is null)
                 {
                     Stopped?.Invoke(this, EventArgs.Empty);
@@ -256,21 +257,32 @@ namespace StudioTVPlayer.Model
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, new TimeEventArgs(e.Time));
-            var current = sender as FileRundownItem ?? throw new ArgumentException(nameof(sender));
+            var current = sender as FileRundownItem;
+            if (current == null)
+                return;
             var nextItem = _nextRundownItem;
             if (nextItem is null)
                 return;
             if (current.Media.Duration - e.Time < PreloadTime)
                 return;
-            if (nextItem.Preload(Channel.AudioChannelCount))
-                Channel.Preload(nextItem);
+            if (nextItem.Prepare(Channel.AudioChannelCount))
+                Channel.Preload(nextItem.Input);
+        }
+
+        private void SetNext(RundownItemBase item)
+        {
+            var oldNext = _nextRundownItem;
+            if (oldNext == item)
+                return;
+            _nextRundownItem = item;
+            oldNext?.Unload();
         }
 
         private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(FileRundownItem.IsAutoStart) || 
+            if (e.PropertyName == nameof(FileRundownItem.IsAutoStart) ||
                 e.PropertyName == nameof(FileRundownItem.IsDisabled))
-                _nextRundownItem = FindNextAutoPlayItem();
+                SetNext(FindNextAutoPlayItem());
         }
 
         private void Channel_AudioVolume(object sender, AudioVolumeEventArgs e)
@@ -280,7 +292,7 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_RemoveRequested(object sender, EventArgs e)
         {
-            var item = sender as FileRundownItem ?? throw new ArgumentException(nameof(sender));
+            var item = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
             RemoveItem(item);
         }
 

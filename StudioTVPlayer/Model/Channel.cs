@@ -153,16 +153,16 @@ namespace StudioTVPlayer.Model
             _channelR = null;
         }
 
-        public void Load(RundownItemBase item)
+        public void Load(TVPlayR.InputBase item)
         {
-            Debug.Assert(item.Input != null);
-            _channelR.Load(item.Input);
+            Debug.Assert(item != null);
+            _channelR.Load(item);
         }
 
-        public void Preload(RundownItemBase item)
+        public void Preload(TVPlayR.InputBase item)
         {
-            Debug.Assert(item.Input != null);
-            _channelR.Preload(item.Input);
+            Debug.Assert(item != null);
+            _channelR.Preload(item);
         }
 
         public void Clear()

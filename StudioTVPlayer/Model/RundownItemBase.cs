@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Media;
@@ -11,7 +12,7 @@ namespace StudioTVPlayer.Model
     {
         private bool _isAutoStart;
         private bool _isDisabled;
-        private int _preloaded;
+        private int _prepared;
 
         public abstract bool IsPlaying { get; }
 
@@ -19,7 +20,7 @@ namespace StudioTVPlayer.Model
         public event EventHandler RemoveRequested;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public bool Preloaded => _preloaded != default;
+        public bool IsPrepared => _prepared != default;
 
         public bool IsAutoStart
         {
@@ -62,9 +63,9 @@ namespace StudioTVPlayer.Model
 
         public abstract void Pause();
 
-        public virtual bool Preload(int audioChannelCount)
+        public virtual bool Prepare(int audioChannelCount)
         {
-            if (Interlocked.Exchange(ref _preloaded, 1) == default)
+            if (Interlocked.Exchange(ref _prepared, 1) != default)
                 return false;
             return true;
         }
@@ -76,7 +77,7 @@ namespace StudioTVPlayer.Model
 
         public virtual bool Unload()
         {
-            if (Interlocked.Exchange(ref _preloaded, default) == default)
+            if (Interlocked.Exchange(ref _prepared, default) == default)
                 return false;
             return true;
         }
@@ -88,12 +89,14 @@ namespace StudioTVPlayer.Model
 
         protected void InputAdded(TVPlayR.InputBase input)
         {
+            Debug.WriteLine($"InputAdded: {input.Name}");
             input.FramePlayed += Input_FramePlayed;
         }
 
         protected void InputRemoved(TVPlayR.InputBase input)
         {
             input.FramePlayed -= Input_FramePlayed;
+            Debug.WriteLine($"InputRemoved: {input.Name}");
         }
 
 

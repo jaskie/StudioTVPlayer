@@ -43,9 +43,9 @@ namespace StudioTVPlayer.Model
 
         public override bool CanSeek => true;
 
-        public override bool Preload(int audioChannelCount)
+        public override bool Prepare(int audioChannelCount)
         {
-            if (!base.Preload(audioChannelCount))
+            if (!base.Prepare(audioChannelCount))
                 return false;
             _input = new TVPlayR.FileInput(Media.FullPath);
             InputAdded(_input);
@@ -72,12 +72,12 @@ namespace StudioTVPlayer.Model
 
         public override void Pause()
         {
-            _input.Pause();
+            _input?.Pause();
         }
 
         public bool Seek(TimeSpan timeSpan)
         {
-            return _input.Seek(timeSpan);
+            return _input?.Seek(timeSpan) ?? false;
         }
 
         private void InputFile_Stopped(object sender, EventArgs e)

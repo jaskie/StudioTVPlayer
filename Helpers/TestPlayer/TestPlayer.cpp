@@ -11,6 +11,7 @@
 #include "FFmpeg/FFStreamOutput.h"
 #include "FFmpeg/FFStreamOutputParams.h"
 #include "Core/PixelFormat.h"
+#include "Common/ComInitializer.h"
 
 #undef DEBUG
 
@@ -39,9 +40,10 @@ int main()
 #else
 		av_log_set_callback(NULL);
 #endif
-		Core::Channel channel("Channel 1", Core::VideoFormatType::pal, Core::PixelFormat::yuv422, 2);
+		Common::ComInitializer com_initializer;
+		Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::yuv422, 2);
 		Decklink::DecklinkIterator iterator;
-		int device_index = 1;
+		int device_index = 0;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
@@ -57,7 +59,7 @@ int main()
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Wilno\\KONCERT_BACZYNSKI_PT.aaf", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
@@ -85,6 +87,7 @@ int main()
 					input->Play();
 		}
 		channel.RemoveOutput(ndi);
+		channel.SetFrameClock(nullptr);
 		channel.RemoveOutput(decklink_output);
 		//channel.RemoveOutput(stream);
 #ifdef _DEBUG

@@ -4,14 +4,12 @@
 #include "DecklinkIterator.h"
 #include "DecklinkInput.h"
 #include "../Common/Exceptions.h"
-#include "../Common/ComInitializer.h"
 #include "../Core/VideoFormat.h"
 
 namespace TVPlayR {
 	namespace Decklink {
 
 		struct DecklinkIterator::implementation {
-			Common::ComInitializer com_;
 			std::vector<std::shared_ptr<DecklinkInfo>> decklink_list_;
 			implementation()
 			{ 

@@ -1,6 +1,5 @@
 #include "../pch.h"
 #include "DecklinkOutput.h"
-#include "../Common/ComInitializer.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/PixelFormat.h"
 #include "../Core/Channel.h"
@@ -96,7 +95,7 @@ namespace TVPlayR {
 			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t time)
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
-				DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(format_, frame, time);
+				CComPtr<DecklinkVideoFrame> decklink_frame(new DecklinkVideoFrame(format_, frame, time));
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 
 				last_video_time_ = time;
@@ -109,8 +108,6 @@ namespace TVPlayR {
 					DebugPrintLine(msg.str());
 				}
 #endif			
-				//if (FAILED(ret))
-				//	decklink_frame->Release();
 				return SUCCEEDED(ret);
 			}
 

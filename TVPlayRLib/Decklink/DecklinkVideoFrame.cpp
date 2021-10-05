@@ -12,6 +12,11 @@ namespace TVPlayR {
 			, format_(format)
 		{ }
 
+		DecklinkVideoFrame::~DecklinkVideoFrame()
+		{
+			assert(!ref_count_);
+		}
+
 		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::QueryInterface(REFIID, LPVOID*) { return E_NOINTERFACE; }
 
 		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::AddRef() { return InterlockedIncrement(&ref_count_); }

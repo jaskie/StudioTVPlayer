@@ -102,9 +102,7 @@ namespace TVPlayR {
 			{
 				executor_.invoke([this, &device]
 				{
-					output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
-					if (device == frame_clock_)
-						frame_clock_->SetFrameRequestedCallback(nullptr);
+					auto iter = output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
 					device->ReleaseChannel();
 				});
 			}
@@ -116,7 +114,8 @@ namespace TVPlayR {
 					if (frame_clock_)
 						frame_clock_->SetFrameRequestedCallback(nullptr);
 					frame_clock_ = clock;
-					clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
+					if (clock)
+						clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
 				});
 			}
 
@@ -171,7 +170,6 @@ namespace TVPlayR {
 
 		void Channel::RemoveOutput(std::shared_ptr<OutputDevice> device)
 		{
-			device->ReleaseChannel();
 			impl_->RemoveOutput(device);
 		}
 

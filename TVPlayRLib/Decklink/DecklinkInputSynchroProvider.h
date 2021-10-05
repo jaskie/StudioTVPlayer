@@ -23,9 +23,10 @@ class DecklinkInputSynchroProvider
 public:
 	DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source, bool process_video);
 	const Core::Channel& Channel() const;
-	void Push(IDeckLinkVideoInputFrame* video_frame, IDeckLinkAudioInputPacket* audio_packet);
+	void Push(std::shared_ptr<AVFrame> video, IDeckLinkAudioInputPacket* audio_packet);
 	FFmpeg::AVSync PullSync(int audio_samples_count);
 	void SetInputParameters(BMDFieldDominance field_dominance, BMDTimeScale time_scale, BMDTimeValue frame_duration);
+	const DecklinkTimecodeSource GetTimecodeSource() const { return timecode_source_; }
 private:
 	const Core::Channel&					channel_;
 	std::unique_ptr<FFmpeg::SwScale>		scaler_;
@@ -39,7 +40,6 @@ private:
 	Common::Rational<int>					frame_rate_;
 	Common::Rational<int>					video_time_base_;
 	DecklinkTimecodeSource					timecode_source_;
-	int64_t GetPts(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format);
 };
 
 }}

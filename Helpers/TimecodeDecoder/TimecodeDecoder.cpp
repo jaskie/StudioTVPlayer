@@ -44,7 +44,7 @@ int main()
 	try
 	{
 #endif
-	Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, Core::PixelFormat::bgra, 2);
+	Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::bgra, 2);
 	Decklink::DecklinkIterator iterator;
 	int device_index = 1;
 	//for (size_t i = 0; i < iterator.Size(); i++)

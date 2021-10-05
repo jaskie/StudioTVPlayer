@@ -34,23 +34,23 @@ namespace TVPlayR {
 			long														current_width_, current_height_ = 0L;
 			const int													audio_channels_count_;
 			const DecklinkTimecodeSource								timecode_source_;
-			const Core::VideoFormat										format_;
+			Core::VideoFormat											current_format_;
 			std::mutex													channel_list_mutex_;
 			FORMAT_CALLBACK												format_changed_callback_ = nullptr;
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
+			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
 				: Common::DebugTarget(false, "Decklink input")
 				, input_(decklink)
-				, is_wide_(!(format == Core::VideoFormatType::ntsc || format == Core::VideoFormatType::pal))
+				, is_wide_(!(initial_format == Core::VideoFormatType::ntsc || initial_format == Core::VideoFormatType::pal))
 				, is_autodetection_supported_(IsAutodetectionSupprted(decklink))
 				, audio_channels_count_(audio_channels_count)
 				, timecode_source_(timecode_source)
 				, capture_video_(capture_video)
-				, format_(format)
+				, current_format_(initial_format)
 			{
-				BMDDisplayMode mode = GetDecklinkDisplayMode(format);
+				BMDDisplayMode mode = GetDecklinkDisplayMode(initial_format);
 				BMDDisplayModeSupport support;
 				IDeckLinkDisplayMode* initialDisplayMode = nullptr;
 				if (FAILED(input_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, bmdVideoInputFlagDefault, &support, &initialDisplayMode)))
@@ -104,6 +104,9 @@ namespace TVPlayR {
 				if (notificationEvents & bmdVideoInputDisplayModeChanged)
 				{
 					CloseInput();
+					current_format_ = BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_);
+					if (current_format_.type() == Core::VideoFormatType::invalid)
+						return S_OK;
 					OpenInput(newDisplayMode);
 					if (format_changed_callback_)
 						format_changed_callback_(BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_));
@@ -114,10 +117,13 @@ namespace TVPlayR {
 			virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
+				if (current_format_.type() == Core::VideoFormatType::invalid)
+					return S_OK;
+				std::shared_ptr<AVFrame> video = AVFrameFromDecklink(videoFrame, timecode_source_, current_format_, time_scale_);
 				for (auto& provider : channel_prividers_)
-					provider->Push(videoFrame, audioPacket);
+					provider->Push(video, audioPacket);
 				for (auto& preview : previews_)
-					preview->Push(AVFrameFromDecklink(videoFrame, field_dominance_, format_.SampleAspectRatio()));
+					preview->Push(video);
 				return S_OK;
 			}
 
@@ -203,8 +209,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
-			: impl_(std::make_unique<implementation>(decklink, format, audio_channels_count, timecode_source, capture_video))
+		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
+			: impl_(std::make_unique<implementation>(decklink, initial_format, audio_channels_count, timecode_source, capture_video))
 		{ }
 		
 		DecklinkInput::~DecklinkInput()	{ }

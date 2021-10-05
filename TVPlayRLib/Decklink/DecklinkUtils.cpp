@@ -1,5 +1,7 @@
 #include "../pch.h"
 #include "DecklinkUtils.h"
+#include "../Core/FieldOrder.h"
+#include "DecklinkTimecodeSource.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
@@ -89,21 +91,49 @@ namespace TVPlayR {
 			}
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, BMDFieldDominance field_dominance, const Common::Rational<int>& sar)
+		static int64_t GetPts(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
+		{
+			CComPtr<IDeckLinkTimecode> timecode;
+			if (SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
+			{
+				unsigned char hours, minutes, seconds, frames;
+				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
+					return ((((hours * 60) + minutes) * 60) + seconds) * frame_rate.Numerator() / frame_rate.Denominator() + frames;
+			}
+			return AV_NOPTS_VALUE;
+		}
+
+		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale)
 		{
 			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
 				return nullptr;
 			std::shared_ptr<AVFrame> frame = FFmpeg::AllocFrame();
-			frame->data[0] = reinterpret_cast<uint8_t*>(video_bytes);
-			frame->linesize[0] = decklink_frame->GetRowBytes();
 			frame->format = AV_PIX_FMT_UYVY422;
 			frame->width = decklink_frame->GetWidth();
 			frame->height = decklink_frame->GetHeight();
 			frame->pict_type = AV_PICTURE_TYPE_I;
-			frame->interlaced_frame = field_dominance == bmdLowerFieldFirst || field_dominance == bmdUpperFieldFirst;
-			frame->top_field_first = field_dominance == bmdUpperFieldFirst;
-			frame->sample_aspect_ratio = sar.av();
+			frame->interlaced_frame = format.interlaced();
+			frame->top_field_first = format.field_order() == Core::FieldOrder::upper;
+			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
+			assert(decklink_frame->GetRowBytes() == frame->linesize[0]);
+			memcpy(frame->data[0], video_bytes, frame->linesize[0] * frame->height);
+			switch (timecode_source)
+			{
+			case DecklinkTimecodeSource::RP188Any:
+				frame->pts = GetPts(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188Any, format.FrameRate());
+				break;
+			case DecklinkTimecodeSource::VITC:
+				frame->pts = GetPts(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITC, format.FrameRate());
+				break;
+			default:
+				BMDTimeValue frameTime;
+				BMDTimeValue frameDuration;
+				if (SUCCEEDED(decklink_frame->GetStreamTime(&frameTime, &frameDuration, time_scale)))
+					frame->pts = frameTime / frameDuration;
+				break;
+			}
 			return frame;
 		}
 

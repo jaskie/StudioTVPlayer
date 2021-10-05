@@ -63,6 +63,7 @@ namespace StudioTVPlayer.Model
         }
 
         public override bool IsRunning => !(_input is null);
+
         private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
         {
             InputFormatChanged?.Invoke(this, e);

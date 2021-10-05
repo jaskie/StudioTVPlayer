@@ -438,12 +438,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     if (!decklink.Input.IsRunning)
                         return;
                     break;
+                case LiveInputRundownItemViewModel _:
                 case FileRundownItemViewModel _:
-                    if (dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex || dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex + 1)
-                        return;
-                    if (dropInfo.DragInfo.SourceCollection != Rundown)
-                        return;
-                    if (dropInfo.InsertPosition == RelativeInsertPosition.None)
+                    if (!CanDrop(dropInfo))
                         return;
                     break;
                 case IDataObject dataObject:
@@ -476,7 +473,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
 
                     break;
-
+                case LiveInputRundownItemViewModel _:
                 case FileRundownItemViewModel _:
                     var srcIndex = dropInfo.DragInfo.SourceIndex;
                     var destIndex = dropInfo.InsertIndex;
@@ -502,6 +499,18 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     break;
             }
         }
+
+        public bool CanDrop(IDropInfo dropInfo)
+        {
+            if (dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex || dropInfo.InsertIndex == dropInfo.DragInfo.SourceIndex + 1)
+                return false;
+            if (dropInfo.DragInfo.SourceCollection != Rundown)
+                return false;
+            if (dropInfo.InsertPosition == RelativeInsertPosition.None)
+                return false;
+            return true;
+        }
+
         #endregion //drag&drop
 
         private RundownItemViewModelBase CreateRundownItemViewModel(RundownItemBase rundownItem)

@@ -2,6 +2,7 @@
 #include "DecklinkInput.h"
 #include "DecklinkUtils.h"
 #include "DecklinkInputSynchroProvider.h"
+#include "../Core/Channel.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/FieldOrder.h"
 #include "../Preview/InputPreview.h"
@@ -83,8 +84,6 @@ namespace TVPlayR {
 				}
 				if (FAILED(input_->StartStreams()))
 					THROW_EXCEPTION("DecklinkInput: StartStreams failed");
-				for (auto& provider : channel_prividers_)
-					provider->SetInputParameters(field_dominance_, time_scale_, frame_duration_);
 			}
 
 			void CloseInput()
@@ -119,9 +118,11 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (current_format_.type() == Core::VideoFormatType::invalid)
 					return S_OK;
-				std::shared_ptr<AVFrame> video = AVFrameFromDecklink(videoFrame, timecode_source_, current_format_, time_scale_);
+
+				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
+				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AV_SAMPLE_FMT_S32, bmdAudioSampleRate48kHz);
 				for (auto& provider : channel_prividers_)
-					provider->Push(video, audioPacket);
+					provider->Push(video, audio, FrameNumberFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()));
 				for (auto& preview : previews_)
 					preview->Push(video);
 				return S_OK;
@@ -140,11 +141,7 @@ namespace TVPlayR {
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToChannel(channel))
-				{
-					std::unique_ptr<DecklinkInputSynchroProvider> newProvider = std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_);
-					newProvider->SetInputParameters(field_dominance_, time_scale_, frame_duration_);
-					channel_prividers_.emplace_back(std::move(newProvider));
-				}
+					channel_prividers_.emplace_back(std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_));
 			}
 
 			void RemoveFromChannel(const Core::Channel& channel)

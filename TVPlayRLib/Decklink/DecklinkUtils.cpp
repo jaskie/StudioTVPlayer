@@ -91,19 +91,7 @@ namespace TVPlayR {
 			}
 		}
 
-		static int64_t GetPts(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
-		{
-			CComPtr<IDeckLinkTimecode> timecode;
-			if (SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
-			{
-				unsigned char hours, minutes, seconds, frames;
-				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
-					return ((((hours * 60) + minutes) * 60) + seconds) * frame_rate.Numerator() / frame_rate.Denominator() + frames;
-			}
-			return AV_NOPTS_VALUE;
-		}
-
-		std::shared_ptr<AVFrame> AVFrameFromDecklink(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale)
 		{
 			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
@@ -118,23 +106,57 @@ namespace TVPlayR {
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 			assert(decklink_frame->GetRowBytes() == frame->linesize[0]);
-			memcpy(frame->data[0], video_bytes, frame->linesize[0] * frame->height);
+			std::memcpy(frame->data[0], video_bytes, frame->linesize[0] * frame->height);
+			BMDTimeValue frameTime;
+			BMDTimeValue frameDuration;
+			if (SUCCEEDED(decklink_frame->GetStreamTime(&frameTime, &frameDuration, time_scale)))
+				frame->pts = frameTime / frameDuration;
+			return frame;
+		}
+
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, AVSampleFormat sample_format, BMDTimeScale sample_rate)
+		{
+			void* audio_bytes = nullptr;
+			if (!audio_packet || FAILED(audio_packet->GetBytes(&audio_bytes)) || !audio_bytes)
+				return nullptr;
+			std::shared_ptr<AVFrame> audio = FFmpeg::AllocFrame();
+			audio->format = AV_SAMPLE_FMT_S32;
+			audio->nb_samples = audio_packet->GetSampleFrameCount();
+			BMDTimeValue packetTime;
+			if (SUCCEEDED(audio_packet->GetPacketTime(&packetTime, sample_rate)))
+				audio->pts = packetTime;
+			audio->channels = channels;
+			audio->channel_layout = av_get_default_channel_layout(channels);
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(audio.get(), 0));
+			std::memcpy(audio->data[0], audio_bytes, audio->linesize[0]);
+			return audio;
+		}
+
+		int64_t GetFrameFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
+		{
+			CComPtr<IDeckLinkTimecode> timecode;
+			if (SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
+			{
+				unsigned char hours, minutes, seconds, frames;
+				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
+					return ((((hours * 60) + minutes) * 60) + seconds) * frame_rate.Numerator() / frame_rate.Denominator() + frames;
+			}
+			return AV_NOPTS_VALUE;
+		}
+
+		int64_t FrameNumberFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
+		{
 			switch (timecode_source)
 			{
 			case DecklinkTimecodeSource::RP188Any:
-				frame->pts = GetPts(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188Any, format.FrameRate());
+				return GetFrameFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188Any, frame_rate);
 				break;
 			case DecklinkTimecodeSource::VITC:
-				frame->pts = GetPts(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITC, format.FrameRate());
+				return GetFrameFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITC, frame_rate);
 				break;
 			default:
-				BMDTimeValue frameTime;
-				BMDTimeValue frameDuration;
-				if (SUCCEEDED(decklink_frame->GetStreamTime(&frameTime, &frameDuration, time_scale)))
-					frame->pts = frameTime / frameDuration;
-				break;
+				return AV_NOPTS_VALUE;
 			}
-			return frame;
 		}
 
 	}

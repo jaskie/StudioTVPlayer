@@ -23,7 +23,11 @@ struct FFmpegFileInfo::implementation : internal::FFmpegInputBase
 
 	std::shared_ptr<AVFrame> GetFrameAt(int64_t time)
 	{
+		if (!input_.IsValid())
+			return nullptr;
 		input_.Seek(time);
+		if (!video_decoder_)
+			return nullptr;
 		video_decoder_->Seek(time);
 		while (!video_decoder_->IsEof())
 		{

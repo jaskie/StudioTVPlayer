@@ -27,6 +27,7 @@ public:
 	int64_t ReadStartTimecode() const;
 	const std::vector<Core::StreamInfo>& GetStreams() const { return streams_; };
 	const Core::StreamInfo* GetVideoStream() const;
+	bool IsValid() const;
 };
 
 }}

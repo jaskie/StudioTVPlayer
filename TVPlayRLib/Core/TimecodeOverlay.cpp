@@ -69,9 +69,9 @@ namespace TVPlayR {
 				if (!in_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
 					in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
 				std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ? in_scaler_->Scale(input_frame) : input_frame;
-				Draw(rgba_frame, sync.Time);
+				Draw(rgba_frame, sync.Timecode);
 				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
-				return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Time);
+				return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Timecode);
 			}
 
 			void Draw(std::shared_ptr<AVFrame>& video, int64_t time)

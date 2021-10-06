@@ -132,6 +132,11 @@ const Core::StreamInfo* InputFormat::GetVideoStream() const
 	return &*info_iter;
 }
 
+bool InputFormat::IsValid() const
+{
+	return !!format_context_;
+}
+
 
 
 	

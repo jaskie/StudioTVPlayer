@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TVPlayR;
 
@@ -12,14 +13,21 @@ namespace TestCSharp
     {
         static void Main(string[] args)
         {
-            using (Channel channel = new Channel("Channel 1", VideoFormat.Formats.FirstOrDefault(vf => vf.Name == "1080i50"), PixelFormat.yuv422, 2))
+            int deviceIndex = 1;
+            var videoFormat = VideoFormat.Formats.FirstOrDefault(vf => vf.Name == "1080i50");
+            using (Channel channel = new Channel("Channel 1", videoFormat, PixelFormat.yuv422, 2))
             {
-                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[0], false))
+                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[deviceIndex], false))
+                using (DecklinkInput input = DecklinkIterator.CreateInput(DecklinkIterator.Devices[deviceIndex], videoFormat, 2, DecklinkTimecodeSource.VITC, true))
                 {
+
                     channel.AddOutput(output, true);
-                    channel.AudioVolume += Channel_AudioVolume;
+                    var file = new FileInput(@"d:\temp\test5.mov");
+                    channel.Load(file);
+                    file.Play();
+                    Console.ReadKey();
+                    //channel.AudioVolume += Channel_AudioVolume;
                 }
-                Console.ReadKey();
             }
         }
 

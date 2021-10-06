@@ -231,7 +231,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 			finished = buffer_->IsEof();
 		}
 		if (frame_played_callback_)
-			frame_played_callback_(sync.Time);
+			frame_played_callback_(sync.Timecode);
 		if (finished)
 		{
 			is_eof_ = true;

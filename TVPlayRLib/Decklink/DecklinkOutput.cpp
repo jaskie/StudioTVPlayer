@@ -92,13 +92,13 @@ namespace TVPlayR {
 				output_->EndAudioPreroll();
 			}
 
-			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t time)
+			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t timecode)
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
-				CComPtr<DecklinkVideoFrame> decklink_frame(new DecklinkVideoFrame(format_, frame, time));
+				CComPtr<DecklinkVideoFrame> decklink_frame(new DecklinkVideoFrame(format_, frame, timecode));
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 
-				last_video_time_ = time;
+				last_video_time_ = timecode;
 				last_video_ = frame;
 #ifdef DEBUG
 				if (FAILED(ret))
@@ -194,7 +194,7 @@ namespace TVPlayR {
 				if (!sync.Video)
 					sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
 
-				if (ScheduleVideo(sync.Video, sync.Time))
+				if (ScheduleVideo(sync.Video, sync.Timecode))
 					ScheduleAudio(sync.Audio);
 
 #ifdef DEBUG

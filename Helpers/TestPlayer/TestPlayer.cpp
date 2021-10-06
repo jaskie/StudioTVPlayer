@@ -43,7 +43,7 @@ int main()
 		Common::ComInitializer com_initializer;
 		Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::yuv422, 2);
 		Decklink::DecklinkIterator iterator;
-		int device_index = 0;
+		int device_index = 1;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
@@ -62,8 +62,8 @@ int main()
 		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
 		input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
-		//auto seek = /*input->GetVideoDuration() - */AV_TIME_BASE;
-		//input->Seek(seek);
+		auto seek = input->GetVideoDuration() - AV_TIME_BASE;
+		input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();

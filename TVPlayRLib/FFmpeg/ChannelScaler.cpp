@@ -17,14 +17,14 @@ ChannelScaler::ChannelScaler(const Core::Channel& channel)
 }
 
 
-bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, AVRational frame_rate, AVRational time_base)
+bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base)
 {
 	if (!IsInitialized())
-		VideoFilterBase::CreateFilterChain(Setup(frame, frame_rate), frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, time_base);
+		VideoFilterBase::CreateFilterChain(GetFilterString(frame, input_frame_rate), frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, input_time_base);
 	return VideoFilterBase::Push(frame);
 }
 
-std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame, Common::Rational<int> frame_rate)
+std::string ChannelScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate)
 {
 	std::ostringstream filter;
 	int height = frame->height;
@@ -37,7 +37,7 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame, Common::Ration
 			filter << "setsar=64/45,";
 		height = 576;
 	}
-	if (frame_rate == output_format_.FrameRate())
+	if (input_frame_rate == output_format_.FrameRate())
 	{
 		if (height != output_format_.height())
 			if (frame->interlaced_frame && output_format_.field_order() != Core::FieldOrder::progressive && height < output_format_.height()) // only when upscaling
@@ -45,7 +45,7 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame, Common::Ration
 			else
 				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=-1,";
 	}
-	else if (frame_rate == output_format_.FrameRate() * 2)
+	else if (input_frame_rate == output_format_.FrameRate() * 2)
 	{
 		if (height != output_format_.height())
 			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=-1,";
@@ -54,7 +54,7 @@ std::string ChannelScaler::Setup(std::shared_ptr<AVFrame>& frame, Common::Ration
 		else if (frame->interlaced_frame && !output_format_.interlaced())
 			filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 	}
-	else if (frame_rate != output_format_.FrameRate())
+	else if (input_frame_rate != output_format_.FrameRate())
 	{
 		filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 		if (frame->interlaced_frame)

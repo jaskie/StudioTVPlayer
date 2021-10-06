@@ -31,8 +31,6 @@ namespace TVPlayR {
 			std::vector<std::shared_ptr<Preview::InputPreview>>			previews_;
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
-			BMDFieldDominance											field_dominance_ = BMDFieldDominance::bmdUnknownFieldDominance;
-			long														current_width_, current_height_ = 0L;
 			const int													audio_channels_count_;
 			const DecklinkTimecodeSource								timecode_source_;
 			Core::VideoFormat											current_format_;
@@ -70,9 +68,6 @@ namespace TVPlayR {
 
 			void OpenInput(IDeckLinkDisplayMode* displayMode)
 			{
-				field_dominance_ = displayMode->GetFieldDominance();
-				current_width_ = displayMode->GetWidth();
-				current_height_ = displayMode->GetHeight();
 				if (FAILED(displayMode->GetFrameRate(&frame_duration_, &time_scale_)))
 					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
 				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_autodetection_supported_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
@@ -106,6 +101,8 @@ namespace TVPlayR {
 					current_format_ = BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_);
 					if (current_format_.type() == Core::VideoFormatType::invalid)
 						return S_OK;
+					for (auto& provider : channel_prividers_)
+						provider->Reset(current_format_.FrameRate().av());
 					OpenInput(newDisplayMode);
 					if (format_changed_callback_)
 						format_changed_callback_(BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_));
@@ -122,7 +119,7 @@ namespace TVPlayR {
 				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
 				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AV_SAMPLE_FMT_S32, bmdAudioSampleRate48kHz);
 				for (auto& provider : channel_prividers_)
-					provider->Push(video, audio, FrameNumberFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()));
+					provider->Push(video, audio, TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()));
 				for (auto& preview : previews_)
 					preview->Push(video);
 				return S_OK;
@@ -141,7 +138,11 @@ namespace TVPlayR {
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToChannel(channel))
-					channel_prividers_.emplace_back(std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_));
+				{
+					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_);
+					provider->Reset(current_format_.FrameRate().av());
+					channel_prividers_.emplace_back(std::move(provider));
+				}
 			}
 
 			void RemoveFromChannel(const Core::Channel& channel)
@@ -167,12 +168,12 @@ namespace TVPlayR {
 
 			int GetWidth() const
 			{
-				return current_width_;
+				return current_format_.width();
 			}
 
 			int GetHeight() const
 			{
-				return current_height_;
+				return current_format_.height();
 			}
 
 			int GetAudioChannelsCount() const
@@ -190,18 +191,7 @@ namespace TVPlayR {
 
 			Core::FieldOrder GetFieldOrder() const
 			{
-				switch (field_dominance_)
-				{
-				case BMDFieldDominance::bmdLowerFieldFirst:
-					return Core::FieldOrder::lower;
-				case BMDFieldDominance::bmdUpperFieldFirst:
-					return Core::FieldOrder::upper;
-				case BMDFieldDominance::bmdProgressiveFrame:
-				case BMDFieldDominance::bmdProgressiveSegmentedFrame:
-					return Core::FieldOrder::progressive;
-				default:
-					return Core::FieldOrder::unknown;
-				}
+				return current_format_.field_order();
 			}
 
 		};

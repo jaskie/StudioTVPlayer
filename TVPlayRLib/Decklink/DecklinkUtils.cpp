@@ -132,27 +132,27 @@ namespace TVPlayR {
 			return audio;
 		}
 
-		int64_t GetFrameFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
+		int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
 		{
 			CComPtr<IDeckLinkTimecode> timecode;
 			if (SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
 			{
 				unsigned char hours, minutes, seconds, frames;
 				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
-					return ((((hours * 60) + minutes) * 60) + seconds) * frame_rate.Numerator() / frame_rate.Denominator() + frames;
+					return ((((hours * 60LL) + minutes) * 60LL) + seconds) * AV_TIME_BASE + av_rescale(static_cast<int64_t>(frames) * AV_TIME_BASE, frame_rate.Denominator(), frame_rate.Numerator());
 			}
 			return AV_NOPTS_VALUE;
 		}
 
-		int64_t FrameNumberFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
+		int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
 		{
 			switch (timecode_source)
 			{
 			case DecklinkTimecodeSource::RP188Any:
-				return GetFrameFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188Any, frame_rate);
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188Any, frame_rate);
 				break;
 			case DecklinkTimecodeSource::VITC:
-				return GetFrameFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITC, frame_rate);
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITC, frame_rate);
 				break;
 			default:
 				return AV_NOPTS_VALUE;

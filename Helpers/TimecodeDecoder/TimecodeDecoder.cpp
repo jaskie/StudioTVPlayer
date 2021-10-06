@@ -48,15 +48,15 @@ int main()
 	Common::ComInitializer com_initializer;
 	Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::bgra, 2);
 	Decklink::DecklinkIterator iterator;
-	int device_index = 0;
+	int device_index = 1;
 	//for (size_t i = 0; i < iterator.Size(); i++)
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-	//auto output = iterator.CreateOutput(*iterator[device_index], true);
+	auto output = iterator.CreateOutput(*iterator[device_index], true);
 	auto ndi = std::make_shared<Ndi::NdiOutput>("NDI Output", "");
 	auto overlay = std::make_shared<Core::TimecodeOverlay>(channel.Format().type(), channel.PixelFormat());
 	channel.AddOverlay(overlay);
 	channel.SetFrameClock(ndi);
-	//channel.AddOutput(output);
+	channel.AddOutput(output);
 	channel.AddOutput(ndi);
 
 	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, Decklink::DecklinkTimecodeSource::VITC, false);

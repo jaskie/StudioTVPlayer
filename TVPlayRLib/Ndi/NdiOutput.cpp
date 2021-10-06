@@ -87,7 +87,7 @@ namespace TVPlayR {
 				if (buffer.Video)
 				{
 					last_video_ = buffer.Video;
-					last_video_time_ = buffer.Time;
+					last_video_time_ = buffer.Timecode;
 					audio = buffer.Audio;
 				}
 				else

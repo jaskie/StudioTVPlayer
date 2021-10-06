@@ -1,7 +1,9 @@
 #pragma once
 #include "../Common/Rational.h"
-#include "../FFmpeg/SwScale.h"
+#include "../Common/BlockingCollection.h"
+#include "../Common/Executor.h"
 #include "../FFmpeg/AudioFifo.h"
+#include "../FFmpeg/ChannelScaler.h"
 #include "DecklinkTimecodeSource.h"
 
 namespace TVPlayR {
@@ -10,8 +12,6 @@ namespace TVPlayR {
 	}
 	namespace FFmpeg {
 		class AVSync;
-		class SwScale;
-		class AudioFifo;
 	}
 	namespace Common {
 		template<typename> class Rational;
@@ -23,15 +23,19 @@ class DecklinkInputSynchroProvider
 public:
 	DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source, bool process_video);
 	const Core::Channel& Channel() const;
-	void Push(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, int64_t timecode);
+	void Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, int64_t timecode);
 	FFmpeg::AVSync PullSync(int audio_samples_count);
+	void Reset(AVRational input_frame_rate);
 private:
-	const Core::Channel&					channel_;
-	std::unique_ptr<FFmpeg::SwScale>		scaler_;
-	const bool								process_video_;
-	FFmpeg::AudioFifo						audio_fifo_;
-	std::shared_ptr<AVFrame>				last_video_;
-	int64_t									last_timecode_;
+	typedef std::pair<int64_t, std::shared_ptr<AVFrame>> queue_item_t;
+	const Core::Channel&						channel_;
+	std::unique_ptr<FFmpeg::ChannelScaler>		scaler_;
+	const bool									process_video_;
+	FFmpeg::AudioFifo							audio_fifo_;
+	queue_item_t								last_video_;
+	AVRational									input_frame_rate_;
+	Common::BlockingCollection<queue_item_t>	frame_queue_;
+	Common::Executor							executor_;
 };
 
 }}

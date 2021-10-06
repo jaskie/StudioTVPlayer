@@ -191,7 +191,12 @@
     <ClInclude Include="Preview\InputPreview.h">
       <Filter>Preview</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\OutputFormat.h" />
+    <ClInclude Include="FFmpeg\Encoder.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFmpeg\OutputFormat.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -294,7 +299,12 @@
     <ClCompile Include="Decklink\DecklinkUtils.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
-    <ClCompile Include="FFmpeg\OutputFormat.cpp" />
+    <ClCompile Include="FFmpeg\Encoder.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\OutputFormat.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

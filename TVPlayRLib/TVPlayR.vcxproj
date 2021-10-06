@@ -89,6 +89,7 @@
     <ClInclude Include="Core\OverlayBase.h" />
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="Decklink\DecklinkTimecodeSource.h" />
+    <ClInclude Include="FFmpeg\Encoder.h" />
     <ClInclude Include="FFmpeg\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
     <ClInclude Include="FFmpeg\OutputFormat.h" />
@@ -161,6 +162,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkUtils.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\Encoder.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

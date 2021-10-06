@@ -1,9 +1,10 @@
 #pragma once
-
+#include "../Common/Executor.h"
 
 namespace TVPlayR {
 	namespace Core {
 		class VideoFormat;
+		enum class PixelFormat;
 	}
 	namespace FFmpeg {
 		class OutputFormat;
@@ -16,8 +17,12 @@ namespace TVPlayR {
 		AVStream* const stream_;
 		int audio_frame_size_ = 0;
 		int64_t output_timestamp_ = 0LL;
+		std::deque<std::shared_ptr<AVFrame>> frame_buffer_;
+		Common::Executor executor_;
+		std::mutex mutex_;
 		void OpenCodec(const OutputFormat& formatContext);
 		void InternalPush(const std::shared_ptr<AVFrame>& frame);
+		std::shared_ptr<AVFrame> GetFrameFromFifo(int nb_samples);
 	public:
 		Encoder(const OutputFormat& output_format, AVCodec* const encoder, int bitrate, const Core::VideoFormat& video_format, Core::PixelFormat pixel_format);
 		Encoder(const OutputFormat& output_format, AVCodec* const encoder, int bitrate, AVSampleFormat sample_format, int audio_sample_rate, int audio_channels_count);

@@ -26,7 +26,8 @@ namespace TVPlayR {
 	}
 
 	Encoder::Encoder(const OutputFormat& output_format, AVCodec* const encoder, int bitrate, const Core::VideoFormat& video_format, Core::PixelFormat pixel_format)
-		: encoder_(encoder)
+		: executor_("Video encoder")
+		, encoder_(encoder)
 		, enc_ctx_(GetContext(encoder))
 		, stream_(avformat_new_stream(output_format.Ctx().get(), NULL))
 	{
@@ -57,7 +58,8 @@ namespace TVPlayR {
 
 
 	Encoder::Encoder(const OutputFormat& output_format, AVCodec* const encoder, int bitrate, AVSampleFormat sample_format, int audio_sample_rate, int audio_channels_count)
-		: encoder_(encoder)
+		: executor_("Audio encoder")
+		, encoder_(encoder)
 		, enc_ctx_(GetContext(encoder))
 		, stream_(avformat_new_stream(output_format.Ctx().get(), NULL))
 	{
@@ -71,7 +73,7 @@ namespace TVPlayR {
 		if (enc_ctx_->frame_size > 0)
 		{
 			audio_frame_size_ = enc_ctx_->frame_size;
-			fifo_ = AVAudioFifoPtr(av_audio_fifo_alloc(filter.get_sample_format(), filter.get_channels_count(), enc_ctx_->sample_rate / 10), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
+			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(sample_format, audio_channels_count, audio_sample_rate / 10), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
 		}
 	}
 
@@ -80,38 +82,27 @@ namespace TVPlayR {
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(enc_ctx_.get(), encoder_, NULL));
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_from_context(stream_->codecpar, enc_ctx_.get()))
 	}
-
 	
 	void Encoder::Push(const std::shared_ptr<AVFrame>& frame)
 	{
-		if (!fifo_)
+		executor_.begin_invoke([=]
 		{
-			InternalPush(frame);
-			return;
-		}
-		if (frame->nb_samples > av_audio_fifo_space(fifo_.get()))
-			THROW_ON_ERROR(av_audio_fifo_realloc(fifo_.get(), frame->nb_samples * 2));
-		if (av_audio_fifo_write(fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
-			THROW_EXCEPTION("Can't write all samples to audio fifo");
-		while(av_audio_fifo_size(fifo_.get()) >= audio_frame_size_)
-		{
-			auto frame_from_fifo = get_frame_from_fifo(audio_frame_size_);
-			push_frame_to_encoder(frame_from_fifo);
-		}
-	}
-
-	bool Encoder::push_fifo_frame()
-	{
-		if (!fifo_)
-			return false;
-		int frame_size = av_audio_fifo_size(fifo_.get());
-		if (frame_size == 0)
-			return false;
-		if (frame_size > audio_frame_size_)
-			frame_size = audio_frame_size_;
-		auto frame = get_frame_from_fifo(frame_size);
-		push_frame_to_encoder(frame);
-		return true;
+			std::lock_guard<std::mutex> lock(mutex_);
+			if (!fifo_)
+			{
+				InternalPush(frame);
+				return;
+			}
+			if (frame->nb_samples > av_audio_fifo_space(fifo_.get()))
+				THROW_ON_FFMPEG_ERROR(av_audio_fifo_realloc(fifo_.get(), frame->nb_samples * 2));
+			if (av_audio_fifo_write(fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
+				THROW_EXCEPTION("Can't write all samples to audio fifo");
+			while (av_audio_fifo_size(fifo_.get()) >= audio_frame_size_)
+			{
+				auto frame_from_fifo = GetFrameFromFifo(audio_frame_size_);
+				InternalPush(frame_from_fifo);
+			}
+		});
 	}
 
 	void Encoder::InternalPush(const std::shared_ptr<AVFrame>& frame)
@@ -126,34 +117,40 @@ namespace TVPlayR {
 		{
 		case AVERROR(EAGAIN):
 			frame_buffer_.push_back(frame);
+			break;
 		default:
 			break;
 		}
 	}
 
-	AVFramePtr Encoder::get_frame_from_fifo(int nb_samples)
+	std::shared_ptr<AVFrame> Encoder::GetFrameFromFifo(int nb_samples)
 	{
-		auto frame = Utils::AllocFrame();
+		auto frame = FFmpeg::AllocFrame();
 		frame->nb_samples = nb_samples;
 		frame->format = enc_ctx_->sample_fmt;
 		frame->channels = enc_ctx_->channels;
 		frame->channel_layout = enc_ctx_->channel_layout;
-		THROW_ON_ERROR(av_frame_get_buffer(frame.get(), 32));
+		THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 		if (int readed = av_audio_fifo_read(fifo_.get(), (void**)frame->data, audio_frame_size_) < nb_samples)
 			THROW_EXCEPTION("Readed too few frames");
 		return frame;
 	}
 
-	void FFEncoder::flush()
+	void Encoder::Flush()
 	{
-		THROW_ON_ERROR(avcodec_send_frame(enc_ctx_.get(), NULL));
+		executor_.begin_invoke([this] 
+		{
+			std::lock_guard<std::mutex> lock(mutex_);
+			THROW_ON_FFMPEG_ERROR(avcodec_send_frame(enc_ctx_.get(), NULL));
+		});
 	}
 
-	AVPacketPtr Encoder::pull_packet()
+	std::shared_ptr<AVPacket> Encoder::Pull()
 	{
-		auto packet(Utils::AllocPacket());
+		auto packet(AllocPacket());
 		while (true)
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			auto ret = avcodec_receive_packet(enc_ctx_.get(), packet.get());
 			switch (ret)
 			{
@@ -166,14 +163,14 @@ namespace TVPlayR {
 				{
 					auto frame = frame_buffer_.front();
 					frame_buffer_.pop_front();
-					THROW_ON_ERROR(avcodec_send_frame(enc_ctx_.get(), frame.get()));
+					THROW_ON_FFMPEG_ERROR(avcodec_send_frame(enc_ctx_.get(), frame.get()));
 					continue;
 				}
-				return __nullptr;
+				return nullptr;
 			default:
-				return __nullptr;
+				return nullptr;
 			}
 		}
-		return __nullptr;
+		return nullptr;
 	}
 }}

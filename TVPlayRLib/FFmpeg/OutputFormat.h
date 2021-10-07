@@ -11,8 +11,10 @@ namespace TVPlayR {
 			OutputFormat(const std::string& file_name);
 			void Push(std::shared_ptr<AVPacket> packet);
 			const AVFormatContextPtr& Ctx() const { return format_ctx_; }
+			const std::string& GetFileName() const { return file_name_; }
 		private:
 			AVFormatContextPtr format_ctx_;
+			const std::string file_name_;
 			AVFormatContext* AllocFormatContext(const std::string& file_name);
 			void FreeFormatContext(AVFormatContext* ctx);
 

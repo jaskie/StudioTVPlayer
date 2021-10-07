@@ -5,6 +5,7 @@
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
 #include "OutputFormat.h"
+#include "Encoder.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -13,7 +14,9 @@ namespace TVPlayR {
 		{
 			const FFStreamOutputParams params_;
 			AVDictionary* options_ = nullptr;
-			OutputFormat output_format_;
+			std::unique_ptr<OutputFormat> output_format_;
+			std::unique_ptr<Encoder> video_encoder_;
+			std::unique_ptr<Encoder> audio_encoder_;
 			Common::Executor executor_;
 			Core::VideoFormat format_;
 			int audio_channels_count_ = 2;
@@ -25,13 +28,9 @@ namespace TVPlayR {
 			int64_t video_frames_pushed_ = 0LL;
 			int64_t audio_samples_pushed_ = 0LL;
 			int64_t last_video_time_ = 0LL;
-			std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> format_context_;
-			std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> video_codec_ctx_;
-			std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> audio_codec_ctx_;
 			
 			implementation(const FFStreamOutputParams& params)
 				: Common::DebugTarget(false, "Stream output: " + params.Address)
-				, output_format_(params.Address)
 				, params_(params)
 				, executor_("Stream output: " + params.Address)
 				, format_(Core::VideoFormatType::invalid)
@@ -40,10 +39,6 @@ namespace TVPlayR {
 
 			}
 			
-			~implementation()
-			{
-			}
-
 			void Tick() 
 			{
 
@@ -55,29 +50,7 @@ namespace TVPlayR {
 				return static_cast<int>(samples_required);
 			}
 
-			AVDictionary* ReadOptions(const std::string& params) {
-				AVDictionary* result = nullptr;
-				if (av_dict_parse_string(&result, params.c_str(), "=", ",", 0))
-					DebugPrintLine("ReadOptions failed for: " + params);
-				return result;
-			}
-
-			AVFormatContext* CreateOutputFormatContext()
-			{
-				AVOutputFormat* format = NULL;
-				const std::string& file_name = params_.Address;
-				if (file_name.find("rtmp://") == 0)
-					format = av_guess_format("flv", NULL, NULL);
-				else
-					format = av_guess_format("mpegts", NULL, NULL);
-
-				if (!format)
-					THROW_EXCEPTION("Could not find output format.");
-				AVFormatContext* ctx = nullptr;
-				THROW_ON_FFMPEG_ERROR(avformat_alloc_output_context2(&ctx, format, NULL, file_name.c_str()));
-				return ctx;
-			}
-
+			/*
 			void AddVideoStream()
 			{
 				const AVCodec* encoder = avcodec_find_encoder_by_name(params_.VideoCodec.c_str());
@@ -156,6 +129,7 @@ namespace TVPlayR {
 				video_stream->time_base = av_make_q(90000, 1);
 				video_stream->avg_frame_rate = format_.FrameRate().av();
 			}
+			*/
 
 			bool AssignToChannel(Core::Channel& channel)
 			{
@@ -163,7 +137,8 @@ namespace TVPlayR {
 					{
 						if (format_.type() != Core::VideoFormatType::invalid)
 							return false;
-						format_ = channel.Format();
+						output_format_ = std::make_unique<OutputFormat>(params_.Address);
+						audio_encoder_ = std::make_unique<Encoder>(*output_format_, params_.AudioCodec, params_.AudioBitrate, channel.Format(), channel.PixelFormat(), &options_, params_.VideoMetadata);
 						audio_sample_rate_ = channel.AudioSampleRate();
 						audio_channels_count_ = channel.AudioChannelsCount();
 						last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, channel.PixelFormat());
@@ -171,16 +146,6 @@ namespace TVPlayR {
 						video_frames_pushed_ = 0LL;
 						audio_samples_pushed_ = 0LL;
 						last_video_time_ = 0LL;
-						format_context_ = std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>>(CreateOutputFormatContext(), [this](AVFormatContext* ctx)
-							{
-								if (!(ctx->oformat->flags & AVFMT_NOFILE))
-									if (avio_close(ctx->pb))
-										DebugPrintLine("avio_close failed when finalizing format context");
-								avformat_free_context(ctx);
-							});
-						if (format_context_)
-							AddVideoStream();
-						
 						executor_.begin_invoke([this] { Tick(); }); // first frame
 						return true;
 					});
@@ -191,9 +156,9 @@ namespace TVPlayR {
 				executor_.invoke([this]
 					{
 						format_ = Core::VideoFormatType::invalid;
-						video_codec_ctx_.reset();
-						format_context_.reset();
-
+						audio_encoder_.reset();
+						video_encoder_.reset();
+						output_format_.reset();
 					});
 			}
 

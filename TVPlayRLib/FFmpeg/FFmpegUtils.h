@@ -55,4 +55,6 @@ void dump_filter(const std::string& filter_str, AVFilterGraph* graph);
 
 bool HaveAlphaChannel(AVPixelFormat format);
 
+AVDictionary* ReadOptions(const std::string& params);
+
 }}

@@ -97,4 +97,19 @@ namespace TVPlayR {
 		}
 
 
+		AVDictionary* ReadOptions(const std::string& params)
+		{
+			AVDictionary* result = nullptr;
+			if (av_dict_parse_string(&result, params.c_str(), "=", ",", 0))
+			{
+#ifdef DEBUG
+				OutputDebugStringA("ReadOptions failed for: ");
+				OutputDebugStringA(params.c_str());
+				OutputDebugStringA("\n");
+#endif // DEBUG
+			}
+			return result;
+		}
+
+
 }}

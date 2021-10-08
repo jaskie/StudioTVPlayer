@@ -140,7 +140,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public bool IsSliderActive => _currentRundownItem?.RundownItem.CanSeek == true;
+        public bool IsSeekable => _currentRundownItem?.RundownItem.CanSeek == true;
+
+        public bool IsLive => _currentRundownItem?.RundownItem.CanSeek != true;
 
         public ImageSource Preview { get => _preview; private set => Set(ref _preview, value); }
 
@@ -173,7 +175,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 NotifyPropertyChanged(nameof(SliderPosition));
                 NotifyPropertyChanged(nameof(CurrentItemStartTime));
                 NotifyPropertyChanged(nameof(CurrentItemDuration));
-                NotifyPropertyChanged(nameof(IsSliderActive));
+                NotifyPropertyChanged(nameof(IsSeekable));
+                NotifyPropertyChanged(nameof(IsLive));
             }
         }
 
@@ -339,8 +342,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 NotifyPropertyChanged(nameof(IsPlaying));
                 OutTimeBlink = false;
             }
-            catch
+            catch (Exception e)
             {
+                Debug.WriteLine(e);
                 await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return false;
             }
@@ -352,12 +356,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             OnUiThread(() =>
             {
                 DisplayTime = e.Time;
-                OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
-                OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _mediaPlayer.OneFrame;
-                if (/*!_isSliderDrag && */IsPlaying)
+                if (!IsLive)
                 {
-                    _sliderPosition = e.Time.TotalMilliseconds;
-                    NotifyPropertyChanged(nameof(SliderPosition));
+                    OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
+                    OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _mediaPlayer.OneFrame;
+                    if (IsPlaying)
+                    {
+                        _sliderPosition = e.Time.TotalMilliseconds;
+                        NotifyPropertyChanged(nameof(SliderPosition));
+                    }
                 }
             });
         }

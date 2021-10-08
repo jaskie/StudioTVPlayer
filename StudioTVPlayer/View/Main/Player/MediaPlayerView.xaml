@@ -66,11 +66,12 @@
                         <Setter Property="VideoFormat" Value="{Binding VideoFormat}"/>
                         <Setter Property="Padding" Value="2 0"/>
                         <Setter Property="mah:ControlsHelper.CornerRadius" Value="3"/>
+                        <Setter Property="VerticalAlignment" Value="Top"/>
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -85,9 +86,9 @@
                         <TextBlock Text="{Binding Volume, StringFormat={}Volume: {0:F1}}"/>
                     </Slider.ToolTip>
                 </Slider>
-                <Grid Grid.Column="1">
+                <Grid Grid.Column="1" >
                     <Grid.RowDefinitions>
-                        <RowDefinition />
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <FrameworkElement x:Name="ConverterHelper" DataContext="{Binding VideoFormat}" />
@@ -95,11 +96,12 @@
                     <controls:TimecodeEdit Grid.Row="1" BorderThickness="0.7" 
                                            Time="{Binding DisplayTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                            EnterPressedCommand="{Binding DisplayTimecodeEditCommand}"
+                                           IsReadOnly="{Binding IsLive}"
                                            />
                 </Grid>
-                <Grid Margin="0,5,0,0" Grid.Column="1" Grid.Row="1" Width="auto">
+                <Grid Margin="0,5,0,0" Grid.Column="1" Grid.Row="1" Visibility="{Binding IsSeekable, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.RowDefinitions>
-                        <RowDefinition />
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Time left" Grid.Row="0" />
@@ -187,7 +189,7 @@
                 </Button>
             </UniformGrid>
             <Slider Grid.Row="4" Margin="5" IsMoveToPointEnabled="True" 
-                    IsEnabled="{Binding IsSliderActive}"
+                    IsEnabled="{Binding IsSeekable}"
                     Minimum="{Binding CurrentItemStartTime.TotalMilliseconds}"
                     Maximum="{Binding CurrentItemDuration.TotalMilliseconds}" 
                     Thumb.DragStarted="Slider_DragStarted"

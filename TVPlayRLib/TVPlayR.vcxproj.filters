@@ -83,9 +83,6 @@
     <ClInclude Include="FFmpeg\FFmpegInput.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="Core\PixelFormat.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Ndi\NdiOutput.h">
       <Filter>Ndi</Filter>
     </ClInclude>
@@ -164,16 +161,10 @@
     <ClInclude Include="Decklink\DecklinkInput.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="Core\FieldOrder.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h">
-      <Filter>Decklink</Filter>
-    </ClInclude>
-    <ClInclude Include="Decklink\DecklinkTimecodeSource.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Core\OverlayBase.h">
@@ -197,6 +188,9 @@
     <ClInclude Include="FFmpeg\OutputFormat.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
+    <ClInclude Include="DecklinkTimecodeSource.h" />
+    <ClInclude Include="PixelFormat.h" />
+    <ClInclude Include="FieldOrder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">

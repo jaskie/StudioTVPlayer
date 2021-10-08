@@ -2,9 +2,10 @@
 
 #include "../Common/NonCopyable.h"
 #include "VideoFormat.h"
-#include "../Core/PixelFormat.h"
 
 namespace TVPlayR {
+	enum class PixelFormat;
+
 	namespace Core {
 		class InputSource;
 		class OutputDevice;
@@ -14,7 +15,7 @@ class Channel final : public Common::NonCopyable
 {
 public:
 	typedef void(*AUDIO_VOLUME_CALLBACK) (std::vector<double>&);
-	Channel(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count);
+	Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count);
 	~Channel();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);
 	void RemoveOutput(std::shared_ptr<OutputDevice> device);
@@ -24,7 +25,7 @@ public:
 	void AddOverlay(std::shared_ptr<OverlayBase> overlay);
 	void Clear();
 	const VideoFormat& Format() const;
-	const PixelFormat PixelFormat() const;
+	const TVPlayR::PixelFormat PixelFormat() const;
 	const int AudioChannelsCount() const;
 	const AVSampleFormat AudioSampleFormat() const { return AVSampleFormat::AV_SAMPLE_FMT_S32; }
 	const int AudioSampleRate() const { return 48000; }

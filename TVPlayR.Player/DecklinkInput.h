@@ -1,6 +1,7 @@
 #pragma once
 #include "InputBase.h"
 #include "Decklink/DecklinkInput.h"
+#include "DecklinkTimecodeSource.h"
 
 using namespace System; 
 using namespace System::Runtime::InteropServices;
@@ -12,11 +13,6 @@ namespace TVPlayR {
 	namespace Decklink {
 		class DecklinkInput;
 	}
-	public enum class DecklinkTimecodeSource {
-		None,
-		RP188Any,
-		VITC
-	};
 
 	public ref class DecklinkInput : public InputBase
 	{

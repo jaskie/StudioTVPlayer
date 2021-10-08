@@ -2,17 +2,18 @@
 #pragma comment( lib, "gdiplus.lib" )
 #include "OverlayBase.h"
 namespace TVPlayR {
+		enum class PixelFormat;	
+	
 	namespace FFmpeg {
 		class AVSync;
 	}
 	namespace Core {
 		enum class VideoFormatType;
-		enum class PixelFormat;
 
 class TimecodeOverlay final :  public OverlayBase
 {
 public:
-	TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format);
+	TimecodeOverlay(const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format);
 	~TimecodeOverlay();
 	virtual FFmpeg::AVSync Transform(FFmpeg::AVSync& sync) override;
 private:

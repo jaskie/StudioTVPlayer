@@ -2,8 +2,9 @@
 #include "../Common/Rational.h"
 
 namespace TVPlayR {
-	namespace Core {
-
+		enum class FieldOrder;	
+		
+		namespace Core {
 		enum class VideoFormatType {
 			invalid,
 			pal,
@@ -35,8 +36,6 @@ namespace TVPlayR {
 			count
 		};
 
-		enum class FieldOrder;
-
 class VideoFormat final
 {
 public:
@@ -64,7 +63,7 @@ private:
 	std::string name_;
 	Common::Rational<int> sample_aspect_ratio_;
 	Common::Rational<int> frame_rate_;
-	FieldOrder field_order_;
+	TVPlayR::FieldOrder field_order_;
 	bool timecode_is_supported_;
 	bool is_drop_frame_;
 	AVTimecode timecode_;

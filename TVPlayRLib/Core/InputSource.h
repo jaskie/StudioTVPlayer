@@ -3,13 +3,14 @@
 #include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
+	enum class FieldOrder;
+
 	namespace Preview {
 		class InputPreview;
 	}
 
 	namespace Core {
 		class Channel;
-		enum class FieldOrder;
 
 class InputSource : Common::NonCopyable
 {
@@ -30,7 +31,7 @@ public:
 	virtual int64_t GetAudioDuration() const { return 0LL; }
 	virtual int GetWidth() const = 0;
 	virtual int GetHeight() const = 0;
-	virtual FieldOrder GetFieldOrder() = 0;
+	virtual TVPlayR::FieldOrder GetFieldOrder() = 0;
 	virtual int GetAudioChannelCount() = 0;
 	virtual bool HaveAlphaChannel() const = 0;
 	virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) = 0;

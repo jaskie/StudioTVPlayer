@@ -4,9 +4,10 @@
 #include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
+	enum class FieldOrder;
+
 	namespace Core {
 		enum class HwAccel;
-		enum class FieldOrder;
 		class StreamInfo;
 	}
 	namespace FFmpeg {
@@ -36,7 +37,7 @@ public:
 	AVRational GetFrameRate() const;
 	int GetWidth() const;
 	int GetHeight() const;
-	Core::FieldOrder GetFieldOrder() const;
+	TVPlayR::FieldOrder GetFieldOrder() const;
 	bool HaveAlphaChannel() const;
 	int GetAudioChannelCount() const;
 };

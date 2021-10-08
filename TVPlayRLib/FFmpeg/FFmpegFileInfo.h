@@ -2,12 +2,14 @@
 #include "../Core/HwAccel.h"
 
 namespace TVPlayR {
+	enum class FieldOrder;
+	
 	namespace Core {
 		class AudioChannelMapEntry;
 		class StreamInfo;
-		enum class FieldOrder;
 	}
-		namespace FFmpeg {
+
+	namespace FFmpeg {
 
 class FFmpegFileInfo
 {
@@ -22,7 +24,7 @@ public:
 	int64_t GetVideoDuration() const;
 	int GetWidth() const;
 	int GetHeight() const;
-	Core::FieldOrder GetFieldOrder() const;
+	TVPlayR::FieldOrder GetFieldOrder() const;
 	int GetAudioChannelCount() const;
 	bool HaveAlphaChannel()const;
 	int StreamCount() const;

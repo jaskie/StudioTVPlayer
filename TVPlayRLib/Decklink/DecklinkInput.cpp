@@ -4,7 +4,7 @@
 #include "DecklinkInputSynchroProvider.h"
 #include "../Core/Channel.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/FieldOrder.h"
+#include "../FieldOrder.h"
 #include "../Preview/InputPreview.h"
 #include "../Common/Debug.h"
 
@@ -32,14 +32,14 @@ namespace TVPlayR {
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
 			const int													audio_channels_count_;
-			const DecklinkTimecodeSource								timecode_source_;
+			const TVPlayR::DecklinkTimecodeSource						timecode_source_;
 			Core::VideoFormat											current_format_;
 			std::mutex													channel_list_mutex_;
 			FORMAT_CALLBACK												format_changed_callback_ = nullptr;
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
+			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video)
 				: Common::DebugTarget(false, "Decklink input")
 				, input_(decklink)
 				, is_wide_(!(initial_format == Core::VideoFormatType::ntsc || initial_format == Core::VideoFormatType::pal))
@@ -118,10 +118,13 @@ namespace TVPlayR {
 
 				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
 				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AV_SAMPLE_FMT_S32, bmdAudioSampleRate48kHz);
+				int64_t timecode = TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate());
 				for (auto& provider : channel_prividers_)
-					provider->Push(video, audio, TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()));
+					provider->Push(video, audio, timecode);
 				for (auto& preview : previews_)
 					preview->Push(video);
+				if (frame_played_callback_)
+					frame_played_callback_(timecode);
 				return S_OK;
 			}
 
@@ -189,14 +192,14 @@ namespace TVPlayR {
 				return (*provider)->PullSync(audio_samples_count);
 			}
 
-			Core::FieldOrder GetFieldOrder() const
+			TVPlayR::FieldOrder GetFieldOrder() const
 			{
 				return current_format_.field_order();
 			}
 
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video)
+		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video)
 			: impl_(std::make_unique<implementation>(decklink, initial_format, audio_channels_count, timecode_source, capture_video))
 		{ }
 		
@@ -214,7 +217,7 @@ namespace TVPlayR {
 		bool DecklinkInput::IsPlaying() const { return true; }
 		int DecklinkInput::GetWidth() const { return impl_->GetWidth(); }
 		int DecklinkInput::GetHeight() const { return impl_->GetHeight(); }
-		Core::FieldOrder DecklinkInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
+		TVPlayR::FieldOrder DecklinkInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
 		int DecklinkInput::GetAudioChannelCount() { return impl_->GetAudioChannelsCount(); }
 		bool DecklinkInput::HaveAlphaChannel() const { return false; }
 		void DecklinkInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }

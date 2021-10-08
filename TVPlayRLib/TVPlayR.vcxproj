@@ -88,7 +88,7 @@
   <ItemGroup>
     <ClInclude Include="Core\OverlayBase.h" />
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
-    <ClInclude Include="Decklink\DecklinkTimecodeSource.h" />
+    <ClInclude Include="DecklinkTimecodeSource.h" />
     <ClInclude Include="FFmpeg\Encoder.h" />
     <ClInclude Include="FFmpeg\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
@@ -104,7 +104,7 @@
     <ClInclude Include="Common\Exceptions.h" />
     <ClInclude Include="Common\Rational.h" />
     <ClInclude Include="Core\AudioChannelMapEntry.h" />
-    <ClInclude Include="Core\FieldOrder.h" />
+    <ClInclude Include="FieldOrder.h" />
     <ClInclude Include="Core\MediaType.h" />
     <ClInclude Include="Core\StreamInfo.h" />
     <ClInclude Include="Core\AudioVolume.h" />
@@ -113,7 +113,7 @@
     <ClInclude Include="Core\OutputDevice.h" />
     <ClInclude Include="Core\Channel.h" />
     <ClInclude Include="Core\VideoFormat.h" />
-    <ClInclude Include="Core\PixelFormat.h" />
+    <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="Decklink\DecklinkInput.h" />
     <ClInclude Include="Decklink\DecklinkInfo.h" />
     <ClInclude Include="Decklink\DecklinkTimecode.h" />

@@ -354,7 +354,7 @@ AVRational FFmpeg::FFmpegInput::GetTimeBase() const { return impl_->GetTimeBase(
 AVRational FFmpeg::FFmpegInput::GetFrameRate() const { return impl_->GetFrameRate(); }
 int FFmpeg::FFmpegInput::GetWidth() const { return impl_->GetWidth(); }
 int FFmpeg::FFmpegInput::GetHeight() const { return impl_->GetHeight(); }
-Core::FieldOrder FFmpeg::FFmpegInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
+TVPlayR::FieldOrder FFmpeg::FFmpegInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
 int FFmpeg::FFmpegInput::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
 bool FFmpegInput::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
 int FFmpegInput::StreamCount() const				{ return impl_->StreamCount(); }

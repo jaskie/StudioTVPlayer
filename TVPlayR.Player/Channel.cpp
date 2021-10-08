@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Channel.h"
+#include "PixelFormat.h"
 #include "Core/Channel.h"
 #include "OutputBase.h"
 #include "OverlayBase.h"
@@ -7,7 +8,6 @@
 #include "OutputPreview.h"
 #include "FileInput.h"
 #include "ClrStringHelper.h"
-
 
 
 namespace TVPlayR {
@@ -23,7 +23,7 @@ namespace TVPlayR {
 	}
 
 	Channel::Channel(String^ name, VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount)
-		: _channel(new Core::Channel(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), static_cast<Core::PixelFormat>(pixelFormat), audioChannelCount))
+		: _channel(new Core::Channel(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), pixelFormat, audioChannelCount))
 		, _pixelFormat(pixelFormat)
 	{ 
 		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Channel::AudioVolumeCallback);

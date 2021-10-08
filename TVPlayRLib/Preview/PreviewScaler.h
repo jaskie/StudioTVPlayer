@@ -1,6 +1,6 @@
 #pragma once
 #include "../FFmpeg/VideoFilterBase.h"
-#include "../Core/PixelFormat.h"
+#include "../PixelFormat.h"
 
 namespace TVPlayR {
 	namespace Core {

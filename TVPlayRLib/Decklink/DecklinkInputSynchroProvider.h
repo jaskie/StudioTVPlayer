@@ -4,7 +4,7 @@
 #include "../Common/Executor.h"
 #include "../FFmpeg/AudioFifo.h"
 #include "../FFmpeg/ChannelScaler.h"
-#include "DecklinkTimecodeSource.h"
+#include "../DecklinkTimecodeSource.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -21,7 +21,7 @@ namespace TVPlayR {
 class DecklinkInputSynchroProvider
 {
 public:
-	DecklinkInputSynchroProvider(const Core::Channel& channel, DecklinkTimecodeSource timecode_source, bool process_video);
+	DecklinkInputSynchroProvider(const Core::Channel& channel, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video);
 	const Core::Channel& Channel() const;
 	void Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, int64_t timecode);
 	FFmpeg::AVSync PullSync(int audio_samples_count);

@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "FFStreamOutput.h"
 #include "FFStreamOutputParams.h"
+#include "../PixelFormat.h"
 #include "../Core/Channel.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
@@ -142,7 +143,7 @@ namespace TVPlayR {
 						audio_sample_rate_ = channel.AudioSampleRate();
 						audio_channels_count_ = channel.AudioChannelsCount();
 						last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, channel.PixelFormat());
-						pixel_format_ = Core::PixelFormatToFFmpegFormat(channel.PixelFormat());
+						pixel_format_ = TVPlayR::PixelFormatToFFmpegFormat(channel.PixelFormat());
 						video_frames_pushed_ = 0LL;
 						audio_samples_pushed_ = 0LL;
 						last_video_time_ = 0LL;

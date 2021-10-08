@@ -1,4 +1,5 @@
 #include "../pch.h"
+#include "../PixelFormat.h"
 #include "Channel.h"
 #include "InputSource.h"
 #include "OutputDevice.h"
@@ -19,7 +20,7 @@ namespace TVPlayR {
 			std::shared_ptr<InputSource> playing_source_;
 			AudioVolume audio_volume_;
 			const VideoFormat format_;
-			const Core::PixelFormat pixel_format_;
+			const TVPlayR::PixelFormat pixel_format_;
 			const int audio_channels_count_;
 			const std::shared_ptr<AVFrame> empty_video_;
 			std::vector<std::shared_ptr<OverlayBase>> overlays_;
@@ -27,7 +28,7 @@ namespace TVPlayR {
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
 		
-			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count)
 				: Common::DebugTarget(false, "Channel " + name)
 				, channel_(channel)
 				, name_(name)
@@ -156,7 +157,7 @@ namespace TVPlayR {
 
 		};
 
-		Channel::Channel(const std::string& name, const VideoFormatType& format, const Core::PixelFormat pixel_format, const int audio_channels_count)
+		Channel::Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count)
 			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count)) {}
 		
 		Channel::~Channel() {}
@@ -194,7 +195,7 @@ namespace TVPlayR {
 
 		const VideoFormat & Channel::Format() const	{ return impl_->format_; }
 
-		const PixelFormat Channel::PixelFormat() const { return impl_->pixel_format_;	}
+		const TVPlayR::PixelFormat Channel::PixelFormat() const { return impl_->pixel_format_;	}
 
 		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
 

@@ -9,7 +9,7 @@ std::string PreviewScaler::GetFilterString(int output_width, int output_height)
 {
 	std::ostringstream filter_str;
 	filter_str << "field,scale=w=" << output_width << ":h=" << output_height;
-	/*if (pix_fmt == Core::PixelFormat::yuv422)
+	/*if (pix_fmt == TVPlayR::PixelFormat::yuv422)
 	{
 		filter_str << ":in_color_matrix=";
 		if (channel_format.type() == Core::VideoFormatType::pal || channel_format.type() == Core::VideoFormatType::pal_fha ||

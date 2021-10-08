@@ -3,7 +3,7 @@
 #include "FFmpegUtils.h"
 #include "OutputFormat.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/PixelFormat.h"
+#include "../PixelFormat.h"
 #include "../Common/Exceptions.h"
 
 namespace TVPlayR {
@@ -25,7 +25,7 @@ namespace TVPlayR {
 		});
 	}
 
-	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, Core::PixelFormat pixel_format, AVDictionary** options, const std::string& stream_metadata)
+	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, TVPlayR::PixelFormat pixel_format, AVDictionary** options, const std::string& stream_metadata)
 		: Common::DebugTarget(true, "Video encoder for " + output_format.GetFileName())
 		, executor_("Video encoder for " + output_format.GetFileName())
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
@@ -35,7 +35,7 @@ namespace TVPlayR {
 		enc_ctx_->height = video_format.height();
 		enc_ctx_->width = video_format.width();
 		enc_ctx_->sample_aspect_ratio = video_format.SampleAspectRatio().av();
-		enc_ctx_->pix_fmt = Core::PixelFormatToFFmpegFormat(pixel_format);
+		enc_ctx_->pix_fmt = TVPlayR::PixelFormatToFFmpegFormat(pixel_format);
 		enc_ctx_->framerate = video_format.FrameRate().av();
 		enc_ctx_->time_base = video_format.FrameRate().invert().av();
 		enc_ctx_->max_b_frames = 0; // b-frames not supported by default.

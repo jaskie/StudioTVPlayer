@@ -46,7 +46,7 @@ int main()
 	{
 #endif
 	Common::ComInitializer com_initializer;
-	Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::bgra, 2);
+	Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, PixelFormat::bgra, 2);
 	Decklink::DecklinkIterator iterator;
 	int device_index = 1;
 	//for (size_t i = 0; i < iterator.Size(); i++)
@@ -59,7 +59,7 @@ int main()
 	channel.AddOutput(output);
 	channel.AddOutput(ndi);
 
-	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, Decklink::DecklinkTimecodeSource::VITC, false);
+	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::VITC, false);
 	//auto input = std::make_shared<FFmpeg::FFmpegInput>("d:\\TEMP\\test5.mov", Core::HwAccel::none, "");
 	//input-SetIsLoop(true);
 

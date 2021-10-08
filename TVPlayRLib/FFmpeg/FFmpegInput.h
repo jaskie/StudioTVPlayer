@@ -33,7 +33,7 @@ public:
 	int64_t GetVideoDuration() const override;
 	virtual int GetWidth() const override;
 	virtual int GetHeight() const override;
-	virtual Core::FieldOrder GetFieldOrder() override;
+	virtual TVPlayR::FieldOrder GetFieldOrder() override;
 	virtual int GetAudioChannelCount() override;
 	virtual bool HaveAlphaChannel() const override;
 	virtual int StreamCount() const;

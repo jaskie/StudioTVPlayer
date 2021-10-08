@@ -1,20 +1,20 @@
 #include "../pch.h"
 #include "FFmpegUtils.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/PixelFormat.h"
+#include "../PixelFormat.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, Core::PixelFormat pix_fmt)
+		std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt)
 		{
 			auto frame = AllocFrame();
 			frame->width = format.width();
 			frame->height = format.height();
 			frame->display_picture_number = -1;
-			frame->format = Core::PixelFormatToFFmpegFormat(pix_fmt);
+			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
 			frame->pict_type = AV_PICTURE_TYPE_I;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
-			if (pix_fmt == Core::PixelFormat::bgra)
+			if (pix_fmt == TVPlayR::PixelFormat::bgra)
 			{
 				// to make transparent alpha
 				memset(frame->data[0], 0x10101000, frame->linesize[0] * frame->height);

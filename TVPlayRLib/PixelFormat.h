@@ -1,14 +1,17 @@
 #pragma once
-#include "../Common/Exceptions.h"
+#include "Common/Exceptions.h"
 
 namespace TVPlayR {
-	namespace Core {
 
+#if (_MANAGED == 1)
+		public
+#endif
 enum class PixelFormat {
 	yuv422,
-	bgra,
+	bgra
 };
 
+#if (_MANAGED != 1)
 static AVPixelFormat PixelFormatToFFmpegFormat(const PixelFormat format)
 {
 	switch (format)
@@ -21,5 +24,6 @@ static AVPixelFormat PixelFormatToFFmpegFormat(const PixelFormat format)
 		THROW_EXCEPTION("invalid pixel format")
 	}
 }
+#endif
 
-}}
+}

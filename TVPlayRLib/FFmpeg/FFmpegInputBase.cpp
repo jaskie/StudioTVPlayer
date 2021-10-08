@@ -2,7 +2,7 @@
 #include "FFmpegInputBase.h"
 #include "Decoder.h"
 #include "../Core/StreamInfo.h"
-#include "../Core/FieldOrder.h"
+#include "../FieldOrder.h"
 #include "FFmpegUtils.h"
 
 
@@ -110,12 +110,12 @@ namespace TVPlayR {
 				return stream->Stream->codecpar->height;
 			}
 
-			Core::FieldOrder FFmpegInputBase::GetFieldOrder() const
+			TVPlayR::FieldOrder FFmpegInputBase::GetFieldOrder() const
 			{
 				const Core::StreamInfo* stream = input_.GetVideoStream();
 				if (stream == nullptr)
-					return Core::FieldOrder::unknown;
-				return Core::FieldOrderFromAVFieldOrder(stream->Stream->codecpar->field_order);
+					return TVPlayR::FieldOrder::Unknown;
+				return TVPlayR::FieldOrderFromAVFieldOrder(stream->Stream->codecpar->field_order);
 			}
 
 			bool FFmpegInputBase::HaveAlphaChannel() const

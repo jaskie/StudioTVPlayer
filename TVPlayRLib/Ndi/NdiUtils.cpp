@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "NdiUtils.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/FieldOrder.h"
+#include "../FieldOrder.h"
 #include "../Common/Exceptions.h"
 
 namespace TVPlayR {
@@ -90,8 +90,8 @@ namespace TVPlayR {
 			NDIlib_frame_format_type_e frame_format_type;
 			switch (format.field_order())
 			{
-			case Core::FieldOrder::lower:
-			case Core::FieldOrder::upper:
+			case TVPlayR::FieldOrder::BottomFieldFirst:
+			case TVPlayR::FieldOrder::TopFieldFirst:
 				frame_format_type = NDIlib_frame_format_type_interleaved;
 				break;
 			default:

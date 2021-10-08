@@ -1,7 +1,6 @@
 #pragma once
 #include "Core/Channel.h"
 #include "VideoFormat.h"
-#include "PixelFormat.h"
 #include "AudioVolumeEventArgs.h"
 
 using namespace System;
@@ -13,6 +12,7 @@ namespace TVPlayR {
 	ref class InputBase;
 	ref class OutputBase;
 	ref class OverlayBase;
+	enum class PixelFormat;
 
 	public ref class Channel sealed
 	{

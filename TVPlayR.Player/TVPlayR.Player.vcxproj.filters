@@ -24,9 +24,6 @@
     <ClInclude Include="Channel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PixelFormat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FileInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -46,9 +43,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HardwareAcceleration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FieldOrder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AudioVolumeEventArgs.h">

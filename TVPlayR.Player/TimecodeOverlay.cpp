@@ -7,7 +7,7 @@
 namespace TVPlayR {
     
     TimecodeOverlay::TimecodeOverlay(VideoFormat^ videoFormat, PixelFormat pixelFormat)
-        : _native_object(new std::shared_ptr<Core::TimecodeOverlay>(new Core::TimecodeOverlay(videoFormat->GetNativeEnumType(), static_cast<Core::PixelFormat>(pixelFormat))))
+        : _native_object(new std::shared_ptr<Core::TimecodeOverlay>(new Core::TimecodeOverlay(videoFormat->GetNativeEnumType(), pixelFormat)))
     { }
     
     TimecodeOverlay::~TimecodeOverlay()

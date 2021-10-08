@@ -3,7 +3,7 @@
 #include "FFmpegInputBase.h"
 #include "Decoder.h"
 #include "FFmpegUtils.h"
-#include "../Core/FieldOrder.h"
+#include "../FieldOrder.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
 #include "../Common/Debug.h"
@@ -63,7 +63,7 @@ AVRational FFmpegFileInfo::GetTimeBase() const							{ return impl_->GetTimeBase
 AVRational FFmpegFileInfo::GetFrameRate() const							{ return impl_->GetFrameRate(); }
 int FFmpegFileInfo::GetWidth() const									{ return impl_->GetWidth(); }
 int FFmpegFileInfo::GetHeight() const									{ return impl_->GetHeight(); }
-Core::FieldOrder FFmpegFileInfo::GetFieldOrder() const					{ return impl_->GetFieldOrder(); }
+TVPlayR::FieldOrder FFmpegFileInfo::GetFieldOrder() const				{ return impl_->GetFieldOrder(); }
 int FFmpegFileInfo::GetAudioChannelCount() const						{ return impl_->GetAudioChannelCount(); }
 bool FFmpegFileInfo::HaveAlphaChannel() const							{ return impl_->HaveAlphaChannel(); }
 int FFmpegFileInfo::StreamCount() const									{ return impl_->StreamCount(); }

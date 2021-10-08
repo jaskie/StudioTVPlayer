@@ -10,7 +10,7 @@
 #include "FFmpeg/FFmpegInput.h"
 #include "FFmpeg/FFStreamOutput.h"
 #include "FFmpeg/FFStreamOutputParams.h"
-#include "Core/PixelFormat.h"
+#include "PixelFormat.h"
 #include "Common/ComInitializer.h"
 
 #undef DEBUG
@@ -41,7 +41,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, Core::PixelFormat::yuv422, 2);
+		Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, PixelFormat::yuv422, 2);
 		Decklink::DecklinkIterator iterator;
 		int device_index = 1;
 		for (size_t i = 0; i < iterator.Size(); i++)

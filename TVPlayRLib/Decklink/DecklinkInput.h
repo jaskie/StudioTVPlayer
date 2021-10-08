@@ -1,6 +1,6 @@
 #pragma once
 #include "../Core/InputSource.h"
-#include "DecklinkTimecodeSource.h"
+#include "../DecklinkTimecodeSource.h"
 #include "DecklinkUtils.h"
 
 namespace TVPlayR {
@@ -12,7 +12,7 @@ namespace TVPlayR {
 		class DecklinkInput final : public Core::InputSource
 		{
 		public:
-			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, DecklinkTimecodeSource timecode_source, bool capture_video);
+			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
 			~DecklinkInput();
 			virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count) override;
 			virtual bool IsAddedToChannel(const Core::Channel& channel) override;
@@ -25,7 +25,7 @@ namespace TVPlayR {
 			virtual bool IsPlaying() const override;
 			virtual int GetWidth() const override;
 			virtual int GetHeight() const override;
-			virtual Core::FieldOrder GetFieldOrder() override;
+			virtual TVPlayR::FieldOrder GetFieldOrder() override;
 			virtual int GetAudioChannelCount() override;
 			virtual bool HaveAlphaChannel() const override;
 			virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) override;

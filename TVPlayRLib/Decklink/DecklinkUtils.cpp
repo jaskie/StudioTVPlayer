@@ -1,19 +1,19 @@
 #include "../pch.h"
 #include "DecklinkUtils.h"
-#include "../Core/FieldOrder.h"
-#include "DecklinkTimecodeSource.h"
+#include "../FieldOrder.h"
+#include "../DecklinkTimecodeSource.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {
 
-		BMDPixelFormat BMDPixelFormatFromVideoFormat(const Core::PixelFormat& format)
+		BMDPixelFormat BMDPixelFormatFromVideoFormat(TVPlayR::PixelFormat format)
 		{
 			switch (format)
 			{
-			case Core::PixelFormat::bgra:
+			case TVPlayR::PixelFormat::bgra:
 				return BMDPixelFormat::bmdFormat8BitBGRA;
-			case Core::PixelFormat::yuv422:
+			case TVPlayR::PixelFormat::yuv422:
 				return BMDPixelFormat::bmdFormat8BitYUV;
 			default:
 				break;
@@ -91,7 +91,7 @@ namespace TVPlayR {
 			}
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale)
 		{
 			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
@@ -102,7 +102,7 @@ namespace TVPlayR {
 			frame->height = decklink_frame->GetHeight();
 			frame->pict_type = AV_PICTURE_TYPE_I;
 			frame->interlaced_frame = format.interlaced();
-			frame->top_field_first = format.field_order() == Core::FieldOrder::upper;
+			frame->top_field_first = format.field_order() == TVPlayR::FieldOrder::TopFieldFirst;
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 			assert(decklink_frame->GetRowBytes() == frame->linesize[0]);
@@ -144,16 +144,24 @@ namespace TVPlayR {
 			return AV_NOPTS_VALUE;
 		}
 
-		int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
+		int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
 		{
 			switch (timecode_source)
 			{
-			case DecklinkTimecodeSource::RP188Any:
+			case TVPlayR::DecklinkTimecodeSource::RP188VITC1:
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188VITC1, frame_rate);
+			case TVPlayR::DecklinkTimecodeSource::RP188VITC2:
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188VITC2, frame_rate);
+			case TVPlayR::DecklinkTimecodeSource::RP188LTC:
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188LTC, frame_rate);
+			case TVPlayR::DecklinkTimecodeSource::RP188Any:
 				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeRP188Any, frame_rate);
-				break;
-			case DecklinkTimecodeSource::VITC:
+			case TVPlayR::DecklinkTimecodeSource::VITC:
 				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITC, frame_rate);
-				break;
+			case TVPlayR::DecklinkTimecodeSource::VITCField2:
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeVITCField2, frame_rate);
+			case TVPlayR::DecklinkTimecodeSource::Serial:
+				return GetTimeFromTimecode(decklink_frame, BMDTimecodeFormat::bmdTimecodeSerial, frame_rate);
 			default:
 				return AV_NOPTS_VALUE;
 			}

@@ -3,9 +3,9 @@
 #include "../Common/Executor.h"
 
 namespace TVPlayR {
+		enum class PixelFormat;
 	namespace Core {
 		class VideoFormat;
-		enum class PixelFormat;
 	}
 	namespace FFmpeg {
 		class OutputFormat;
@@ -26,7 +26,7 @@ namespace TVPlayR {
 		void InternalPush(const std::shared_ptr<AVFrame>& frame);
 		std::shared_ptr<AVFrame> GetFrameFromFifo(int nb_samples);
 	public:
-		Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, Core::PixelFormat pixel_format, AVDictionary** options, const std::string& stream_metadata);
+		Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, TVPlayR::PixelFormat pixel_format, AVDictionary** options, const std::string& stream_metadata);
 		Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, AVSampleFormat sample_format, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata);
 		void Push(const std::shared_ptr<AVFrame>& frame);
 		void Flush();

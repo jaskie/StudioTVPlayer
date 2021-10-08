@@ -5,9 +5,9 @@
 #define FF(value) (value >= 0)
 
 namespace TVPlayR {
+		enum class PixelFormat;
 	namespace Core {
 		class VideoFormat;
-		enum class PixelFormat;
 	}
 	namespace FFmpeg {
 
@@ -47,7 +47,7 @@ inline int64_t TimeToPts(int64_t time, const AVRational time_base)
 	return av_rescale(time, time_base.den, static_cast<int64_t>(time_base.num) * AV_TIME_BASE);
 }
 
-std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, Core::PixelFormat pix_fmt);
+std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt);
 
 std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format);
 

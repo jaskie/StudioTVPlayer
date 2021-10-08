@@ -3,7 +3,7 @@
 #include "TimecodeOverlay.h"
 #include "../FFmpeg/SwScale.h"
 #include "VideoFormat.h"
-#include "PixelFormat.h"
+#include "../PixelFormat.h"
 
 
 namespace TVPlayR {
@@ -24,7 +24,7 @@ namespace TVPlayR {
 
 			const GdiplusInitializer			gdiplus_initializer_;
 			const VideoFormat					video_format_;
-			const PixelFormat					output_pixel_format_;
+			const TVPlayR::PixelFormat			output_pixel_format_;
 			std::unique_ptr<FFmpeg::SwScale>	in_scaler_;
 			std::unique_ptr<FFmpeg::SwScale>	out_scaler_;
 			Gdiplus::SolidBrush					background_;
@@ -36,7 +36,7 @@ namespace TVPlayR {
 			Gdiplus::PointF						timecode_position_;
 
 
-			implementation::implementation(const VideoFormatType video_format, PixelFormat output_pixel_format)
+			implementation::implementation(const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
 				: video_format_(video_format)
 				, output_pixel_format_(output_pixel_format)
 				, background_rect_(GetBackgroundRect())
@@ -93,7 +93,7 @@ namespace TVPlayR {
 			}
 		};
 
-		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, PixelFormat output_pixel_format)
+		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
 			: impl_(std::make_unique<implementation>(video_format, output_pixel_format))
 		{ }
 

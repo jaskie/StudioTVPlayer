@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "DecklinkOutput.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/PixelFormat.h"
+#include "../PixelFormat.h"
 #include "../Core/Channel.h"
 #include "../Common/BlockingCollection.h"
 #include "../Common/Executor.h"

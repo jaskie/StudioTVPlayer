@@ -8,6 +8,7 @@ namespace TVPlayR {
 
 	static VideoFormat::VideoFormat()
 	{
+		av_log_set_callback(NULL);
 		_videoFormats = gcnew array<VideoFormat^>(static_cast<int>(Core::VideoFormatType::count) - 1);
 		for (int type = static_cast<int>(Core::VideoFormatType::pal); type != static_cast<int>(Core::VideoFormatType::count); type++)
 			_videoFormats[type - 1] = gcnew VideoFormat(type);

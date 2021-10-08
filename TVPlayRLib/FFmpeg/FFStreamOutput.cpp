@@ -1,7 +1,5 @@
 #include "../pch.h"
 #include "FFStreamOutput.h"
-#include "FFStreamOutputParams.h"
-#include "../PixelFormat.h"
 #include "../Core/Channel.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
@@ -13,29 +11,33 @@ namespace TVPlayR {
 
 		struct FFStreamOutput::implementation : Common::DebugTarget
 		{
-			const FFStreamOutputParams params_;
+			const FFStreamOutputParams& params_;
 			AVDictionary* options_ = nullptr;
-			std::unique_ptr<OutputFormat> output_format_;
-			std::unique_ptr<Encoder> video_encoder_;
-			std::unique_ptr<Encoder> audio_encoder_;
 			Common::Executor executor_;
 			Core::VideoFormat format_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
-			AVPixelFormat pixel_format_;
+			OutputFormat output_format_;
+			Encoder video_encoder_;
+			Encoder audio_encoder_;
+			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
-			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			int64_t video_frames_pushed_ = 0LL;
 			int64_t audio_samples_pushed_ = 0LL;
 			int64_t last_video_time_ = 0LL;
-			
-			implementation(const FFStreamOutputParams& params)
+
+			implementation(const Core::Channel& channel, const FFStreamOutputParams& params)
 				: Common::DebugTarget(false, "Stream output: " + params.Address)
 				, params_(params)
+				, format_(channel.Format())
+				, audio_sample_rate_(channel.AudioSampleRate())
+				, audio_channels_count_(channel.AudioChannelsCount())
 				, executor_("Stream output: " + params.Address)
-				, format_(Core::VideoFormatType::invalid)
 				, options_(ReadOptions(params.Options))
+				, output_format_(params.Address)
+				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleFormat(), channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
+				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), channel.PixelFormat(), &options_, params.VideoMetadata, params.VideoStreamId)
 			{
 
 			}
@@ -132,37 +134,6 @@ namespace TVPlayR {
 			}
 			*/
 
-			bool AssignToChannel(Core::Channel& channel)
-			{
-				return executor_.invoke([&]
-					{
-						if (format_.type() != Core::VideoFormatType::invalid)
-							return false;
-						output_format_ = std::make_unique<OutputFormat>(params_.Address);
-						audio_encoder_ = std::make_unique<Encoder>(*output_format_, params_.AudioCodec, params_.AudioBitrate, channel.Format(), channel.PixelFormat(), &options_, params_.VideoMetadata);
-						audio_sample_rate_ = channel.AudioSampleRate();
-						audio_channels_count_ = channel.AudioChannelsCount();
-						last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, channel.PixelFormat());
-						pixel_format_ = TVPlayR::PixelFormatToFFmpegFormat(channel.PixelFormat());
-						video_frames_pushed_ = 0LL;
-						audio_samples_pushed_ = 0LL;
-						last_video_time_ = 0LL;
-						executor_.begin_invoke([this] { Tick(); }); // first frame
-						return true;
-					});
-			}
-
-			void ReleaseChannel()
-			{
-				executor_.invoke([this]
-					{
-						format_ = Core::VideoFormatType::invalid;
-						audio_encoder_.reset();
-						video_encoder_.reset();
-						output_format_.reset();
-					});
-			}
-
 			void Push(FFmpeg::AVSync& sync)
 			{
 				buffer_.try_add(sync);			
@@ -176,17 +147,21 @@ namespace TVPlayR {
 		};
 
 		FFStreamOutput::FFStreamOutput(const FFStreamOutputParams& params)
-			: impl_(std::make_unique<implementation>(params))
+			: params_(params)
 		{ }
 
 		FFStreamOutput::~FFStreamOutput() { }
-		bool FFStreamOutput::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
-		void FFStreamOutput::ReleaseChannel() { impl_->ReleaseChannel(); }
+		bool FFStreamOutput::AssignToChannel(const Core::Channel& channel)
+		{
+			if (impl_)
+				return false;
+			impl_ = std::make_unique<implementation>(channel, params_);
+			return true;
+		}
+		void FFStreamOutput::ReleaseChannel() { impl_.reset(); }
 		void FFStreamOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 		void FFStreamOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->SetFrameRequestedCallback(frame_requested_callback); }
-
-		const FFStreamOutputParams& FFStreamOutput::GetStreamOutputParams() { return impl_->params_; }
-
+		const FFStreamOutputParams& FFStreamOutput::GetStreamOutputParams() { return params_; }
 	}
 }
 

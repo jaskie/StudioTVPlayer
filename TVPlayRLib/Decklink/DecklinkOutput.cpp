@@ -75,7 +75,7 @@ namespace TVPlayR {
 				return true;
 			}
 						
-			void Preroll(Core::Channel& channel)
+			void Preroll(const Core::Channel& channel)
 			{
 				if (!output_)
 					return;
@@ -127,7 +127,7 @@ namespace TVPlayR {
 				return true;
 			}
 
-			bool AssignToChannel(Core::Channel& channel)
+			bool AssignToChannel(const Core::Channel& channel)
 			{
 				if (channel.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
 					return false;
@@ -225,7 +225,7 @@ namespace TVPlayR {
 
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
-		bool DecklinkOutput::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
+		bool DecklinkOutput::AssignToChannel(const Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 		void DecklinkOutput::ReleaseChannel()	{ impl_->ReleaseChannel(); }
 		void DecklinkOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 		void DecklinkOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }

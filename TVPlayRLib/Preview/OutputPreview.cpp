@@ -13,7 +13,7 @@ namespace TVPlayR {
 	struct OutputPreview::implementation
 	{
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
-		Core::Channel* channel_;
+		const Core::Channel* channel_;
 		std::unique_ptr<PreviewScaler> preview_scaler_;
 		Common::Executor consumer_executor_;
 		const int width_, height_;
@@ -46,7 +46,7 @@ namespace TVPlayR {
 			});
 		}
 
-		bool AssignToChannel(Core::Channel& channel)
+		bool AssignToChannel(const Core::Channel& channel)
 		{
 			consumer_executor_.invoke([&] {
 				channel_ = &channel;
@@ -76,7 +76,7 @@ namespace TVPlayR {
 
 	OutputPreview::~OutputPreview()	{}
 
-	bool OutputPreview::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
+	bool OutputPreview::AssignToChannel(const Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 
 	void OutputPreview::ReleaseChannel() { impl_->ReleaseChannel(); }
 

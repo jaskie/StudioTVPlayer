@@ -47,7 +47,7 @@ namespace TVPlayR {
 					ndi_->send_destroy(send_instance_);
 			}
 
-			bool AssignToChannel(Core::Channel& channel)
+			bool AssignToChannel(const Core::Channel& channel)
 			{
 				return executor_.invoke([&] 
 				{
@@ -125,7 +125,7 @@ namespace TVPlayR {
 		NdiOutput::NdiOutput(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		NdiOutput::~NdiOutput() { }
 
-		bool NdiOutput::AssignToChannel(Core::Channel& channel) { return impl_->AssignToChannel(channel); }
+		bool NdiOutput::AssignToChannel(const Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 
 		void NdiOutput::ReleaseChannel() { impl_->ReleaseChannel(); }
 

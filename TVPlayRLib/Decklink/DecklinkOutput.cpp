@@ -31,7 +31,7 @@ namespace TVPlayR {
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, bool internal_keyer, int index)
-				: Common::DebugTarget(false, "Decklink " + std::to_string(index))
+				: Common::DebugTarget(true, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
 				, keyer_(decklink)
@@ -71,7 +71,7 @@ namespace TVPlayR {
 				if (FAILED(output_->EnableVideoOutput(mode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
 					return false;
 				if (!internal_keyer_)
-					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamContinuous);
+					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
 				return true;
 			}
 						
@@ -92,39 +92,23 @@ namespace TVPlayR {
 				output_->EndAudioPreroll();
 			}
 
-			bool ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t timecode)
+			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t timecode)
 			{
 				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				CComPtr<DecklinkVideoFrame> decklink_frame(new DecklinkVideoFrame(format_, frame, timecode));
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
-
 				last_video_time_ = timecode;
 				last_video_ = frame;
-#ifdef DEBUG
-				if (FAILED(ret))
-				{
-					std::stringstream msg;
-					msg << "Unable to schedule frame: " << frame->pts;
-					DebugPrintLine(msg.str());
-				}
-#endif			
-				return SUCCEEDED(ret);
+				DebugPrintLineIf(FAILED(ret), "Unable to schedule frame: " + std::to_string(frame->pts) + " HRESULT: " + std::to_string(ret));
 			}
 
 			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
 			{
-				unsigned int samples_written;
+				unsigned int samples_written = 0;
 				if (!internal_keyer_)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
-#ifdef DEBUG
-				if (!internal_keyer_ && samples_written != buffer->nb_samples)
-				{
-					std::stringstream msg;
-					msg << "Not all samples written: " << samples_written << " from buffer of " << buffer->nb_samples;
-					DebugPrintLine(msg.str());
-				}
-#endif	
+				DebugPrintLineIf(!internal_keyer_ && samples_written != buffer->nb_samples, "Not all samples written: " + std::to_string(samples_written) + " from buffer of " + std::to_string(buffer->nb_samples));
 			}
 
 			int AudioSamplesRequired() const
@@ -175,7 +159,7 @@ namespace TVPlayR {
 			void Push(FFmpeg::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("DecklinkOutput: Frame dropped when pushed\n");
+					DebugPrintLine("Frame dropped when pushed\n");
 			}
 
 			//IDeckLinkVideoOutputCallback
@@ -184,18 +168,22 @@ namespace TVPlayR {
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
 					return S_OK;
 
+				int audio_samples_required = AudioSamplesRequired();
 				if (frame_requested_callback_)
-					frame_requested_callback_(AudioSamplesRequired());
+					frame_requested_callback_(audio_samples_required);
 
 				FFmpeg::AVSync sync;
 				if (buffer_.try_take(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("DecklinkOutput: frame not received");
+					DebugPrintLine("Frame not received");
 
 				if (!sync.Video)
-					sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
-
-				if (ScheduleVideo(sync.Video, sync.Timecode))
-					ScheduleAudio(sync.Audio);
+				{
+					sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_required, audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
+					DebugPrintLine("Created empty audio with " + std::to_string(audio_samples_required) + " audio samples");
+				}
+				ScheduleVideo(sync.Video, sync.Timecode);
+				ScheduleAudio(sync.Audio);
+				scheduled_frames_++;
 
 #ifdef DEBUG
 				auto frame = static_cast<DecklinkVideoFrame*>(completedFrame);
@@ -213,7 +201,7 @@ namespace TVPlayR {
 				}
 #endif
 
-				scheduled_frames_++;
+
 				return S_OK;
 			}
 

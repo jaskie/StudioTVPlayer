@@ -130,7 +130,7 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 		input_sar_ = input_sar;
 		DebugPrintLine(args);
 		if (IsDebugOutput())
-			dump_filter(filter_, graph_.get());
+			DumpFilter(filter_, graph_.get());
 	}
 	catch (const std::exception& e)
 	{

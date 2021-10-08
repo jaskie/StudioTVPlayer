@@ -43,7 +43,7 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		void dump_filter(const std::string& filter_str, AVFilterGraph* graph)
+		void DumpFilter(const std::string& filter_str, AVFilterGraph* graph)
 		{
 			OutputDebugStringA("\nFilter: ");
 			OutputDebugStringA(filter_str.c_str());

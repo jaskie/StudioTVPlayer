@@ -51,7 +51,7 @@ std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, 
 
 std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format);
 
-void dump_filter(const std::string& filter_str, AVFilterGraph* graph);
+void DumpFilter(const std::string& filter_str, AVFilterGraph* graph);
 
 bool HaveAlphaChannel(AVPixelFormat format);
 

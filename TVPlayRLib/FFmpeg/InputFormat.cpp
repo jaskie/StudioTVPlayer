@@ -11,7 +11,7 @@ namespace TVPlayR {
 			AVFormatContext* ctx = NULL;
 			THROW_ON_FFMPEG_ERROR(avformat_open_input(&ctx, file_name.c_str(), NULL, NULL) == 0 && ctx);
 			if (!ctx)
-				THROW_EXCEPTION("Format context not created")
+				THROW_EXCEPTION("Format context not created for " + file_name)
 #ifdef DEBUG
 			av_dump_format(ctx, 0, file_name.c_str(), 0);
 #endif // DEBUG

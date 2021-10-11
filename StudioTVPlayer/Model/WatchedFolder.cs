@@ -114,7 +114,9 @@ namespace StudioTVPlayer.Model
             Debug.WriteLine("Media Created Notified");
             if (!Accept(e.FullPath))
                 return;
-            var media = AddMediaFromPath(e.FullPath);
+            MediaFile media;
+            lock (((IList)_medias).SyncRoot)
+                media = AddMediaFromPath(e.FullPath);
             AddToVerificationQueue(media);
             MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Create));
         }
@@ -135,26 +137,31 @@ namespace StudioTVPlayer.Model
         {
             Debug.WriteLine("Media Renamed Notified");
             MediaFile media;
+            bool accept =  Accept(e.FullPath);
+            bool added = false;
+            bool removed = false;
             lock (((IList)_medias).SyncRoot)
+            {
                 media = _medias.FirstOrDefault(m => m.FullPath == e.OldFullPath);
-            if (media == null && Accept(e.FullPath))
-            {
-                media = AddMediaFromPath(e.FullPath);
-                AddToVerificationQueue(media);
-                MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Create));
-            }
-            else if (media != null && !Accept(e.FullPath))
-            {
-                lock (((IList)_medias).SyncRoot)
+                if (!(media is null) && !accept)
+                {
                     _medias.Remove(media);
-                media.PropertyChanged -= Media_PropertyChanged;
-                MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Delete));
+                    removed = true;
+                }
+                if (media == null && accept)
+                {
+                    media = AddMediaFromPath(e.FullPath);
+                    added = true;
+                }
             }
-            else if (media != null)
+            Debug.Assert((added || removed) && !(media is null));
+            if (removed)
+                media.PropertyChanged -= Media_PropertyChanged;
+            if (added || removed)
             {
-                media.Refresh();
                 AddToVerificationQueue(media);
-                MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Change));
+                media.Refresh();
+                MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Create));
             }
         }
 

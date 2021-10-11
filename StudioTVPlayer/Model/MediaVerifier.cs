@@ -82,9 +82,10 @@ namespace StudioTVPlayer.Model
                 }
                 media.IsValid = true;
             }
-            catch
+            catch 
             {
                 media.IsValid = false;
+                throw;
             }
             media.IsVerified = true;
         }
@@ -114,8 +115,8 @@ namespace StudioTVPlayer.Model
                     }
                     catch (Exception e)
                     {
-                        if (DateTime.Now > vd.FirstVerification + TimeSpan.FromMinutes(30))
-                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 minutes. Error: {1}", vd.Media.FullPath, e);
+                        if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
+                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds. Error: {1}", vd.Media.FullPath, e);
                         else
                         {
                             Task.Run(async () =>

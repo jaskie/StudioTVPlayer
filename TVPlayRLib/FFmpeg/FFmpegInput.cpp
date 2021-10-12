@@ -39,7 +39,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
-		, Common::DebugTarget(true, "FFmpegInput " + file_name)
+		, Common::DebugTarget(false, "FFmpegInput " + file_name)
 		, producer_(&implementation::ProducerTheradStart, this)
 	{ 
 		input_.LoadStreamData();
@@ -208,7 +208,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 					channel_scaler_->Reset();
 				if (buffer_)
 					buffer_->Loop();
-				DebugPrintLine("FFmpegInput: Loop");
+				DebugPrintLine("Loop");
 			}
 			else
 				buffer_->Flush();

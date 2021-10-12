@@ -96,7 +96,6 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 	graph_ = std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)>(avfilter_graph_alloc(), [](AVFilterGraph* graph) { avfilter_graph_free(&graph); });
 	AVFilterInOut* inputs = avfilter_inout_alloc();
 	AVFilterInOut* outputs = avfilter_inout_alloc();
-	AVBufferSinkParams* buffersink_params = av_buffersink_params_alloc();
 	try
 	{
 		const AVFilter* buffersrc = avfilter_get_by_name("buffer");
@@ -109,8 +108,7 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 			input_sar.num, input_sar.den);
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args, NULL, graph_.get()));
 		enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
-		buffersink_params->pixel_fmts = pix_fmts;
-		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&sink_ctx_, buffersink, "vout", NULL, buffersink_params, graph_.get()));
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&sink_ctx_, buffersink, "vout", NULL, NULL, graph_.get()));
 		THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(sink_ctx_, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN));
 
 		outputs->name = av_strdup("in");
@@ -138,7 +136,6 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 		avfilter_inout_free(&outputs);
 		throw e;
 	}
-	av_free(buffersink_params);
 }
 
 

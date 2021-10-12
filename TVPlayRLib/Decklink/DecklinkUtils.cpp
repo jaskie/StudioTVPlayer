@@ -135,7 +135,7 @@ namespace TVPlayR {
 		int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
 		{
 			CComPtr<IDeckLinkTimecode> timecode;
-			if (SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
+			if (video_frame && SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
 			{
 				unsigned char hours, minutes, seconds, frames;
 				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))

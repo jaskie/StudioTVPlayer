@@ -19,7 +19,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     {
         private readonly Model.MediaPlayer _mediaPlayer;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
-        private const double AudioHeadroom = 9.0;
+        private const double AudioLevelMaxValue = -6.0;
+        private const double AudioLevelMinValue = -40.0;
         private bool _isFocused;
         private TimeSpan _displayTime;
         private TimeSpan _outTime;
@@ -45,7 +46,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Channel.Name;
             VideoFormat = player.Channel.VideoFormat;
-            AudioLevelBars = Enumerable.Repeat(0, player.Channel.AudioChannelCount).Select(_ => new AudioLevelBarViewModel()).ToArray();
+            AudioLevelBars = Enumerable.Repeat(0, player.Channel.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
             player.Loaded += MediaPlayer_Loaded;
             player.FramePlayed += MediaPlayer_Progress;
             player.Stopped += MediaPlayer_Stopped;
@@ -402,12 +403,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (e.AudioVolume.Length == 0)
             {
                 foreach (var bar in AudioLevelBars)
-                    bar.AudioLevel = AudioLevelBarViewModel.MinValue;
+                    bar.AudioLevel = bar.MinValue;
                 return;
             }
             Debug.Assert(e.AudioVolume.Length == AudioLevelBars.Length);
             for (int i = 0; i < e.AudioVolume.Length; i++)
-                AudioLevelBars[i].AudioLevel = Math.Max(AudioLevelBarViewModel.MinValue, (20 * Math.Log10(e.AudioVolume[i])) + AudioHeadroom);
+                AudioLevelBars[i].AudioLevel = Math.Max(AudioLevelBars[i].MinValue, 20 * Math.Log10(e.AudioVolume[i]));
         }
 
         private bool CanTogglePlay(object obj)

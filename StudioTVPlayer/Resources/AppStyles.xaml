@@ -57,10 +57,10 @@
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                     <GradientStop Offset="0" Color="#FF00FF00"/>
-                                    <GradientStop Offset="0.61" Color="#FF00FF00"/>
-                                    <GradientStop Offset="0.62" Color="#FFFFFF00"/>
-                                    <GradientStop Offset="0.8" Color="#FFFFFF00"/>
-                                    <GradientStop Offset="0.81" Color="#FFFF0000"/>
+                                    <GradientStop Offset="0.65" Color="#FF00FF00"/>
+                                    <GradientStop Offset="0.65" Color="#FFFFFF00"/>
+                                    <GradientStop Offset="0.92" Color="#FFFFFF00"/>
+                                    <GradientStop Offset="0.92" Color="#FFFF0000"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                         </Border>

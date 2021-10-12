@@ -6,7 +6,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     {
         private double _audioLevel;
 
-        public static double MinValue { get; } = -60.0;
+        public AudioLevelBarViewModel(double minValue, double maxValue)
+        {
+            MinValue = minValue;
+            MaxValue = maxValue;
+        }
+
+        public double MinValue { get; }
+
+        public double MaxValue { get; }
 
         public double AudioLevel
         {

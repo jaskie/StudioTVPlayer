@@ -39,7 +39,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
-		, Common::DebugTarget(false, "FFmpegInput " + file_name)
+		, Common::DebugTarget(true, "FFmpegInput " + file_name)
 		, producer_(&implementation::ProducerTheradStart, this)
 	{ 
 		input_.LoadStreamData();
@@ -90,7 +90,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		buffer_ = std::make_unique<SynchronizingBuffer>(
 			channel_,
 			is_playing_,
-			AV_TIME_BASE / 10, // 100 ms = 2-5 frames
+			AV_TIME_BASE, // 1s
 			0);
 	}
 

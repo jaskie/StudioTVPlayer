@@ -55,7 +55,7 @@ namespace TVPlayR {
 
 		void ReleaseChannel()
 		{
-			consumer_executor_.begin_invoke([this] {
+			consumer_executor_.invoke([this] {
 				channel_ = nullptr;
 				preview_scaler_.reset();
 			});
@@ -63,7 +63,9 @@ namespace TVPlayR {
 
 		void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback)
 		{
-			frame_played_callback_ = frame_played_callback;
+			consumer_executor_.invoke([this, frame_played_callback] {
+				frame_played_callback_ = frame_played_callback;
+			});
 		}
 
 	};

@@ -138,7 +138,6 @@
     <ClInclude Include="FFmpeg\VideoFilterBase.h" />
     <ClInclude Include="FFmpeg\ThumbnailFilter.h" />
     <ClInclude Include="Preview\OutputPreview.h" />
-    <ClInclude Include="Preview\PreviewScaler.h" />
     <ClInclude Include="Ndi\NdiUtils.h" />
     <ClInclude Include="Ndi\NdiOutput.h" />
     <ClInclude Include="Core\TimecodeOverlay.h" />
@@ -256,10 +255,6 @@
     <ClCompile Include="Ndi\NdiUtils.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Preview\PreviewScaler.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -4,7 +4,8 @@
 #include "../Common/Executor.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
-#include "PreviewScaler.h"
+#include "../FFmpeg/SwScale.h"
+#include "../PixelFormat.h"
 
 
 namespace TVPlayR {
@@ -14,12 +15,13 @@ namespace TVPlayR {
 	{
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
 		const Core::Channel* channel_;
-		std::unique_ptr<PreviewScaler> preview_scaler_;
+		std::unique_ptr<FFmpeg::SwScale> preview_scaler_;
+
 		Common::Executor consumer_executor_;
 		const int width_, height_;
 
 		implementation(int width, int height)
-			: consumer_executor_("OutputPreview thread")
+			: consumer_executor_("OutputPreview thread", 1)
 			, channel_(nullptr)
 			, width_(width)
 			, height_(height)
@@ -35,14 +37,10 @@ namespace TVPlayR {
 		{
 			auto& frame = sync.Video;
 			consumer_executor_.begin_invoke([frame, this] {
-				preview_scaler_->Push(frame);
-				std::shared_ptr<AVFrame> received_frame;
-				while (received_frame = preview_scaler_->Pull())
-				{
-					if (!frame_played_callback_)
-						continue;
-					frame_played_callback_(received_frame);
-				}
+				if (!frame_played_callback_)
+					return;
+				std::shared_ptr<AVFrame> received_frame = preview_scaler_->Scale(frame);
+				frame_played_callback_(received_frame);
 			});
 		}
 
@@ -50,7 +48,7 @@ namespace TVPlayR {
 		{
 			consumer_executor_.invoke([&] {
 				channel_ = &channel;
-				preview_scaler_ = std::make_unique<PreviewScaler>(width_, height_);
+				preview_scaler_ = std::make_unique<FFmpeg::SwScale>(channel.Format().width(), channel.Format().height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), width_, height_, AV_PIX_FMT_BGRA);
 			});
 			return true;
 		}

@@ -44,7 +44,6 @@ namespace TVPlayR {
         Executor(const std::string& name)
             : thread_(&Executor::run, this)
             , name_(name)
-            , queue_(SIZE_MAX)
         { }
 
         Executor(const std::string& name, size_t max_queue_size)
@@ -69,7 +68,7 @@ namespace TVPlayR {
             using result_type = decltype(func());
 
             auto task = std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func));
-            queue_.add([=]() mutable { (*task)(); });
+            queue_.try_add([=]() mutable { (*task)(); });
             return task->get_future();
         }
 
@@ -78,8 +77,13 @@ namespace TVPlayR {
         {
             if (is_current())  // Avoids potential deadlock.
                 return func();
-
-            return begin_invoke(std::forward<Func>(func)).get();
+            if (!is_running_) {
+                THROW_EXCEPTION("executor not running.");
+            }
+            using result_type = decltype(func());
+            auto task = std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func));
+            queue_.add([=]() mutable { (*task)(); });
+            return task->get_future().get();
         }
 
         template <typename Func>

@@ -134,9 +134,6 @@
     <ClInclude Include="Preview\OutputPreview.h">
       <Filter>Preview</Filter>
     </ClInclude>
-    <ClInclude Include="Preview\PreviewScaler.h">
-      <Filter>Preview</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Debug.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -252,9 +249,6 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Preview\OutputPreview.cpp">
-      <Filter>Preview</Filter>
-    </ClCompile>
-    <ClCompile Include="Preview\PreviewScaler.cpp">
       <Filter>Preview</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">

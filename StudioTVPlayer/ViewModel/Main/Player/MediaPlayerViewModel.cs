@@ -20,7 +20,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private readonly Model.MediaPlayer _mediaPlayer;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
         private const double AudioLevelMaxValue = -6.0;
-        private const double AudioLevelMinValue = -40.0;
+        private const double AudioLevelMinValue = -60.0;
         private bool _isFocused;
         private TimeSpan _displayTime;
         private TimeSpan _outTime;

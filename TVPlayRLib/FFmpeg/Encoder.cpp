@@ -9,34 +9,33 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-
-	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, TVPlayR::PixelFormat pixel_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(true, "Video encoder for " + output_format.GetFileName())
 		, executor_("Video encoder for " + output_format.GetFileName())
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
-		, format_ctx_(output_format.Ctx().get())
-		, enc_ctx_(GetVideoContext(encoder_, bitrate, video_format, pixel_format))
+		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_format))
+		, format_(enc_ctx_->pix_fmt)
 	{
-		OpenCodec(output_format, options, stream_metadata, stream_id);
+		OpenCodec(output_format.Ctx(), output_format, options, stream_metadata, stream_id);
 	}
 
 
-	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, AVSampleFormat sample_format, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(true, "Audio encoder for " + output_format.GetFileName())
-		, executor_("Audio encoder for " + output_format.GetFileName())
+		, executor_("Audio encoder for " + output_format.GetFileName(), 2)
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
-		, format_ctx_(output_format.Ctx().get())
-		, enc_ctx_(GetAudioContext(encoder_, bitrate, audio_sample_rate, audio_channels_count, sample_format))
+		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
+		, format_(enc_ctx_->sample_fmt)
 	{
-		OpenCodec(output_format, options, stream_metadata, stream_id);
+		OpenCodec(output_format.Ctx(), output_format, options, stream_metadata, stream_id);
 		if (enc_ctx_->frame_size > 0)
 		{
 			audio_frame_size_ = enc_ctx_->frame_size;
-			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(sample_format, audio_channels_count, audio_sample_rate / 10), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
+			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(encoder_->sample_fmts[0], audio_channels_count, audio_sample_rate / 10), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
 		}
 	}
 
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetAudioContext(const AVCodec* encoder, int bitrate, int sample_rate, int channels_count, AVSampleFormat sample_format)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetAudioContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, int sample_rate, int channels_count)
 	{
 		if (!encoder)
 		{
@@ -49,10 +48,10 @@ namespace TVPlayR {
 		ctx->sample_rate = sample_rate;
 		ctx->channel_layout = av_get_default_channel_layout(channels_count);
 		ctx->channels = channels_count;
-		ctx->sample_fmt = sample_format;
+		ctx->sample_fmt = encoder->sample_fmts[0];
 		ctx->time_base = av_make_q(1, sample_rate);
 		ctx->bit_rate = bitrate;
-		if (format_ctx_->oformat->flags & AVFMT_GLOBALHEADER)
+		if (format_context->oformat->flags & AVFMT_GLOBALHEADER)
 			ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 		return std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>>(ctx, [](AVCodecContext* c)
 		{
@@ -60,7 +59,7 @@ namespace TVPlayR {
 		});
 	}
 	
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format, TVPlayR::PixelFormat pixel_format)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, const Core::VideoFormat& video_format)
 	{
 		if (!encoder)
 		{
@@ -73,11 +72,11 @@ namespace TVPlayR {
 		ctx->height = video_format.height();
 		ctx->width = video_format.width();
 		ctx->sample_aspect_ratio = video_format.SampleAspectRatio().av();
-		ctx->pix_fmt = TVPlayR::PixelFormatToFFmpegFormat(pixel_format);
+		ctx->pix_fmt = encoder->pix_fmts[0];
 		ctx->framerate = video_format.FrameRate().av();
 		ctx->time_base = av_inv_q(ctx->framerate);
 		ctx->max_b_frames = 0; // b-frames not supported by default.
-		ctx->bit_rate = bitrate;
+		ctx->bit_rate = bitrate * 1000;
 
 		if (video_format.interlaced())
 			ctx->flags |= (AV_CODEC_FLAG_INTERLACED_ME | AV_CODEC_FLAG_INTERLACED_DCT);
@@ -117,19 +116,13 @@ namespace TVPlayR {
 		{
 			ctx->pix_fmt = AV_PIX_FMT_ARGB;
 		}
-
-		if (encoder_->id == AV_CODEC_ID_MJPEG)
+		else if (encoder_->id == AV_CODEC_ID_MJPEG)
 		{
 			ctx->color_range = AVCOL_RANGE_JPEG;
 			ctx->qmax = 2;
 		}
-		else
-		{
-			ctx->gop_size = 50;
-			ctx->bit_rate = bitrate;
-			ctx->max_b_frames = 3;
-		}
-		if (format_ctx_->oformat->flags & AVFMT_GLOBALHEADER)
+
+		if (format_context->oformat->flags & AVFMT_GLOBALHEADER)
 			ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;		
 		return std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>>(ctx, [](AVCodecContext* c)
 		{
@@ -137,14 +130,13 @@ namespace TVPlayR {
 		});
 	}
 
-	void Encoder::OpenCodec(const OutputFormat& otput_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	void Encoder::OpenCodec(AVFormatContext* const format_context, const OutputFormat& otput_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 	{
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(enc_ctx_.get(), encoder_, options));
-		stream_ = avformat_new_stream(format_ctx_, encoder_);
+		stream_ = avformat_new_stream(format_context, encoder_);
 		stream_->metadata = ReadOptions(stream_metadata);
 		stream_->id = stream_id;
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_from_context(stream_->codecpar, enc_ctx_.get()));
-		THROW_ON_FFMPEG_ERROR(avformat_write_header(format_ctx_, options));
 	}
 	
 	void Encoder::Push(const std::shared_ptr<AVFrame>& frame)
@@ -215,10 +207,10 @@ namespace TVPlayR {
 
 	std::shared_ptr<AVPacket> Encoder::Pull()
 	{
-		auto packet(AllocPacket());
 		while (true)
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
+			auto packet(AllocPacket());
 			auto ret = avcodec_receive_packet(enc_ctx_.get(), packet.get());
 			switch (ret)
 			{
@@ -236,7 +228,7 @@ namespace TVPlayR {
 				}
 				return nullptr;
 			default:
-				return nullptr;
+				THROW_ON_FFMPEG_ERROR(ret);
 			}
 		}
 		return nullptr;

@@ -43,19 +43,19 @@ int main()
 		Common::ComInitializer com_initializer;
 		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2);
 		Decklink::DecklinkIterator iterator;
-		int device_index = 1;
+		int device_index = 0;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
+		/*auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
 		channel.SetFrameClock(decklink_output);
 		channel.AddOutput(decklink_output);
-		
+		*/
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
-		//channel.SetFrameClock(ndi);
+		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
-		//FFmpeg::FFStreamOutputParams stream_params{ "udp://127.0.0.1:1234", "libx264", "aac", 4000, 128 };
-		//auto stream = std::make_shared<FFmpeg::FFStreamOutput>(stream_params);
-		//channel.AddOutput(stream);
+		FFmpeg::FFStreamOutputParams stream_params{ "udp://127.0.0.1:1234", "libx264", "aac", 4000, 128 };
+		auto stream = std::make_shared<FFmpeg::FFStreamOutput>(stream_params);
+		channel.AddOutput(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
@@ -88,8 +88,8 @@ int main()
 		}
 		channel.RemoveOutput(ndi);
 		channel.SetFrameClock(nullptr);
-		channel.RemoveOutput(decklink_output);
-		//channel.RemoveOutput(stream);
+		//channel.RemoveOutput(decklink_output);
+		channel.RemoveOutput(stream);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

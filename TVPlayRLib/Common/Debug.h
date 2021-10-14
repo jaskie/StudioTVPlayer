@@ -14,13 +14,7 @@ private:
 	bool debug_output_;
 	inline void DebugPrint(const char* s)
 	{
-#ifdef DEBUG
-		if (debug_output_)
-		{
 			OutputDebugStringA(s);
-			OutputDebugStringA("\n");
-		}
-#endif // DEBUG
 	}
 
 protected:
@@ -31,7 +25,12 @@ protected:
 
 	inline void DebugPrintLine(const std::string& s)
 	{
-		DebugPrint((name_ + ": " + s).c_str());
+#ifdef DEBUG
+		if (debug_output_)
+		{
+			DebugPrint((name_ + ": " + s + "\n").c_str());
+		}
+#endif // DEBUG
 	}
 
 

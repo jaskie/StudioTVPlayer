@@ -7,6 +7,7 @@
 #include "OutputFormat.h"
 #include "Encoder.h"
 #include "SwScale.h"
+#include "SwResample.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -23,6 +24,7 @@ namespace TVPlayR {
 			Encoder video_encoder_;
 			Encoder audio_encoder_;
 			SwScale video_scaler_;
+			SwResample audio_resampler_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
@@ -42,6 +44,7 @@ namespace TVPlayR {
 				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
 				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), &options_, params.VideoMetadata, params.VideoStreamId)
 				, video_scaler_(format_.width(), format_.height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), video_encoder_.Width(), video_encoder_.Height(), static_cast<AVPixelFormat>(video_encoder_.Format()))
+				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
 			{
 				output_format_.Initialize(&options_);
@@ -56,11 +59,11 @@ namespace TVPlayR {
 					AVSync sync;
 					if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 					{
-						//audio_encoder_.Push(sync.Audio);
 						video_encoder_.Push(video_scaler_.Scale(sync.Video));
+						audio_encoder_.Push(audio_resampler_.Resample(sync.Audio));
 						last_video_ = sync.Video;
-						PushNextVideo();
-						//PushNextAudio();
+						PushVideoPackets();
+						PushtAudioPackets();
 					}
 					else
 					{
@@ -70,7 +73,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void PushNextVideo()
+			void PushVideoPackets()
 			{
 				while (true)
 				{
@@ -81,7 +84,7 @@ namespace TVPlayR {
 				}
 			}
 
-			void PushNextAudio()
+			void PushtAudioPackets()
 			{
 				while (true)
 				{

@@ -15,6 +15,7 @@ namespace TVPlayR {
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_format))
 		, format_(enc_ctx_->pix_fmt)
+		, sample_rate_(0)
 	{
 		OpenCodec(output_format.Ctx(), output_format, options, stream_metadata, stream_id);
 	}
@@ -26,6 +27,7 @@ namespace TVPlayR {
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
 		, format_(enc_ctx_->sample_fmt)
+		, sample_rate_(enc_ctx_->sample_rate)
 	{
 		OpenCodec(output_format.Ctx(), output_format, options, stream_metadata, stream_id);
 		if (enc_ctx_->frame_size > 0)
@@ -50,7 +52,7 @@ namespace TVPlayR {
 		ctx->channels = channels_count;
 		ctx->sample_fmt = encoder->sample_fmts[0];
 		ctx->time_base = av_make_q(1, sample_rate);
-		ctx->bit_rate = bitrate;
+		ctx->bit_rate = bitrate * 1000;
 		if (format_context->oformat->flags & AVFMT_GLOBALHEADER)
 			ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 		return std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>>(ctx, [](AVCodecContext* c)
@@ -168,6 +170,7 @@ namespace TVPlayR {
 		if (enc_ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			frame->key_frame = 0;
 		frame->pts = output_timestamp_;
+		DebugPrintLine("InternalPush pts=" + std::to_string(frame->pts));
 		int ret = avcodec_send_frame(enc_ctx_.get(), frame.get());
 		switch (ret)
 		{
@@ -217,6 +220,7 @@ namespace TVPlayR {
 			case 0:
 				packet->stream_index = stream_->index;
 				av_packet_rescale_ts(packet.get(), enc_ctx_->time_base, stream_->time_base);
+				DebugPrintLine("Pull packet pts=" + std::to_string(packet->pts));
 				return packet;
 			case AVERROR(EAGAIN):
 				if (!frame_buffer_.empty())

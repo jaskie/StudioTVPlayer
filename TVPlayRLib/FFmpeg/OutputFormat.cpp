@@ -20,6 +20,11 @@ namespace TVPlayR {
 		void OutputFormat::Initialize(AVDictionary** options)
 		{
 			DebugPrintLine("Writing header");
+			//format_ctx_->metadata = read_parameters(output_params_.output_metadata_);
+			format_ctx_->max_delay = AV_TIME_BASE * 7 / 10;
+			format_ctx_->flags = AVFMT_FLAG_FLUSH_PACKETS | format_ctx_->flags;
+			if (!(format_ctx_->oformat->flags & AVFMT_NOFILE))
+				THROW_ON_FFMPEG_ERROR(avio_open2(&format_ctx_->pb, file_name_.c_str(), AVIO_FLAG_WRITE, NULL, options));
 			THROW_ON_FFMPEG_ERROR(avformat_write_header(format_ctx_.get(), options));
 		}
 

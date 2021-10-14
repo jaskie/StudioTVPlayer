@@ -188,6 +188,9 @@
     <ClInclude Include="DecklinkTimecodeSource.h" />
     <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="FieldOrder.h" />
+    <ClInclude Include="FFmpeg\SwResample.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -291,6 +294,9 @@
       <Filter>FFmpeg</Filter>
     </ClCompile>
     <ClCompile Include="FFmpeg\OutputFormat.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\SwResample.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
   </ItemGroup>

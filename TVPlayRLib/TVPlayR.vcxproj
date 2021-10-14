@@ -143,6 +143,7 @@
     <ClInclude Include="Ndi\NdiOutput.h" />
     <ClInclude Include="Core\TimecodeOverlay.h" />
     <ClInclude Include="FFmpeg\SwScale.h" />
+    <ClInclude Include="FFmpeg\SwResample.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
@@ -282,6 +283,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFmpeg\SwScale.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\SwResample.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

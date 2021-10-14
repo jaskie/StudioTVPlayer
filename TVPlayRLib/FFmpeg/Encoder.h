@@ -22,6 +22,7 @@ namespace TVPlayR {
 		Common::Executor executor_;
 		std::mutex mutex_;
 		const int format_;
+		const int sample_rate_;
 		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetAudioContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, int sample_rate, int channels_count);
 		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetVideoContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, const Core::VideoFormat& video_format);
 		void OpenCodec(AVFormatContext* const format_context, const OutputFormat& formatContext, AVDictionary** options, const std::string& stream_metadata, int stream_id);
@@ -34,6 +35,7 @@ namespace TVPlayR {
 		void Push(const std::shared_ptr<AVFrame>& frame);
 		void Flush();
 		int Format() const { return format_; }
+		int SampleRate() const { return sample_rate_; }
 		int Width() const { return enc_ctx_->width; }
 		int Height() const { return enc_ctx_->height; }
 		std::shared_ptr<AVPacket> Pull();

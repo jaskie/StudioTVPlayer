@@ -93,6 +93,7 @@ namespace TVPlayR {
 
 			void AddOutput(std::shared_ptr<OutputDevice>& device)
 			{
+				assert(device);
 				executor_.invoke([this, &device]
 				{
 					output_devices_.push_back(device);
@@ -101,15 +102,17 @@ namespace TVPlayR {
 
 			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
 			{
+				assert(device);
 				executor_.invoke([this, &device]
 				{
-					auto iter = output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
+					output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
 					device->ReleaseChannel();
 				});
 			}
 
 			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
 			{
+				assert(clock);
 				executor_.invoke([this, &clock]
 				{
 					if (frame_clock_)

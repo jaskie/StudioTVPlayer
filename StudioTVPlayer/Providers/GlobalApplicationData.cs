@@ -27,6 +27,8 @@ namespace StudioTVPlayer.Providers
                 player.Dispose();
             foreach (var channel in Configuration.Current.Channels)
                 channel.Dispose();
+            foreach (var input in InputList.Current.Inputs)
+                input.Dispose();
         }
 
         public void UpdateChannels(List<Channel> channels)
@@ -70,6 +72,8 @@ namespace StudioTVPlayer.Providers
                 channel.Initialize();
                 Players.Add(new MediaPlayer(channel));
             }
+            foreach (var input in InputList.Current.Inputs)
+                input.Initialize();
         }
 
     }

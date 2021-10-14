@@ -143,7 +143,6 @@ namespace StudioTVPlayer.Model
             }
             if (!(_outputPreview is null))
             {
-                _channelR.RemoveOutput(_outputPreview);
                 _outputPreview.Dispose();
                 _outputPreview = null;
             }

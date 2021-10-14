@@ -83,6 +83,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)dependencies\FFMpeg\include;$(SolutionDir)dependencies\Ndi\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

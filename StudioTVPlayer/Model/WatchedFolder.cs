@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Model
         private bool _needsInitialization;
         private string _path;
         private bool _isFilteredByDate;
-        private string _filter = "*.*";
+        private string _filter;
         private Wildcard[] _filterWildcards;
         private FileSystemWatcher _fs;
         private CancellationTokenSource _cancellationTokenSource;
@@ -40,7 +40,7 @@ namespace StudioTVPlayer.Model
             {
                 if (!Set(ref _filter, value))
                     return;
-                var filterParts = value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                var filterParts = value.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries);
                 _filterWildcards = filterParts.Select(p => new Wildcard(p)).ToArray();
             }
         }

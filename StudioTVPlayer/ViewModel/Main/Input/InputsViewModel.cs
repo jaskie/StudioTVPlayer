@@ -33,8 +33,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private void AddDecklinkInput(object _)
         {
-            var input = new Model.DecklinkInput();
-            InputList.Current.Inputs.Add(input);
+            var input = InputList.Current.AddDecklinkInput();
             var vm = new DecklinkInputViewModel(input);
             vm.RemoveRequested += Input_RemoveRequested;
             Inputs.Add(vm);

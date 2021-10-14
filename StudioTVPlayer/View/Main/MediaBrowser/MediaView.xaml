@@ -70,7 +70,7 @@
             </Image>
         </Grid>
         <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="18" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="Wrap"/>
-        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Duration}" FontSize="10" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" FontSize="10" Margin="5 0" FontWeight="Bold" VerticalAlignment="Center"/>
         <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding CreationTime}" FontSize="10" Margin="5 0 0 5" FontWeight="Bold" VerticalAlignment="Center"/>
     </Grid>
 </UserControl>

@@ -8,11 +8,14 @@ namespace StudioTVPlayer.Providers
     public class InputList
     {
         private const string InputsFile = "inputs.xml";
-
-        [XmlArray]
+        
+        [XmlArray(nameof(Inputs))]
         [XmlArrayItem(typeof(Model.DecklinkInput))]
-        public List<Model.InputBase> Inputs { get; set; } = new List<Model.InputBase>();
+        public List<Model.InputBase> _inputs = new List<Model.InputBase>();
 
+        [XmlIgnore]
+        public IEnumerable<Model.InputBase> Inputs { get => _inputs; }
+        
         public static InputList Current { get; } = Load();
 
         private static InputList Load()
@@ -36,10 +39,20 @@ namespace StudioTVPlayer.Providers
 
         public bool RemoveInput(Model.InputBase input)
         {
-            if (!Inputs.Remove(input))
+            if (!_inputs.Remove(input))
                 return false;
+            input.Dispose();
             Save();
             return true;
+        }
+
+        public Model.DecklinkInput AddDecklinkInput()
+        {
+            var input = new Model.DecklinkInput();
+            _inputs.Add(input);
+            input.Initialize();
+            Save();
+            return input;
         }
 
     }

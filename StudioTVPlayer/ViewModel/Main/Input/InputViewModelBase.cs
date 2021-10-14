@@ -12,10 +12,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         public string this[string columnName] => ReadErrorInfo(columnName);
 
         protected abstract string ReadErrorInfo(string propertyName);
-        
-        public virtual void Dispose()
-        {
-            Input.Uninitialize();
-        }
+
+        public abstract void Dispose();
     }
 }

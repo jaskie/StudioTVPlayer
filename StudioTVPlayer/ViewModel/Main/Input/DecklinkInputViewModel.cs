@@ -15,8 +15,6 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
             input.InputFormatChanged += Input_InputFormatChanged;
-            if (_input.Input is null)
-                Input.Initialize();
         }
 
         public TVPlayR.DecklinkInfo SelectedDevice
@@ -92,7 +90,6 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         public override void Dispose()
         {
             _input.InputFormatChanged -= Input_InputFormatChanged;
-            base.Dispose();
         }
 
         private void ApplyChanges()

@@ -33,7 +33,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (FolderHelper.Browse(ref path, "Select path for new watched folder"))
             {
                 var name = path.Split(new[] { System.IO.Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? "New watched folder";
-                var vm = new WatchedFolderViewModel(new WatchedFolder() { Path = path, Name = name });
+                var vm = new WatchedFolderViewModel(new WatchedFolder() { Path = path, Name = name, Filter = "*.mov;*.mp4;*.mxf" });
                 vm.RemoveRequested += WatchedFolder_RemoveRequested;
                 WatchedFolders.Add(vm);
                 IsModified = true;

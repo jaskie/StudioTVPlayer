@@ -112,7 +112,6 @@ namespace TVPlayR {
 
 			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
 			{
-				assert(clock);
 				executor_.invoke([this, &clock]
 				{
 					if (frame_clock_)

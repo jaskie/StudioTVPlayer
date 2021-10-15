@@ -33,7 +33,7 @@ namespace TVPlayR {
 		if (enc_ctx_->frame_size > 0)
 		{
 			audio_frame_size_ = enc_ctx_->frame_size;
-			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(encoder_->sample_fmts[0], audio_channels_count, audio_sample_rate / 10), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
+			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(encoder_->sample_fmts[0], audio_channels_count, audio_frame_size_ * 3), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
 		}
 	}
 
@@ -143,43 +143,46 @@ namespace TVPlayR {
 	
 	void Encoder::Push(const std::shared_ptr<AVFrame>& frame)
 	{
-		executor_.begin_invoke([=]
+		executor_.begin_invoke([this, frame]
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
-			if (!fifo_)
+			if (fifo_)
 			{
-				InternalPush(frame);
-				return;
+				if (frame->nb_samples > av_audio_fifo_space(fifo_.get()))
+					THROW_ON_FFMPEG_ERROR(av_audio_fifo_realloc(fifo_.get(), frame->nb_samples * 2));
+				if (av_audio_fifo_write(fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
+					THROW_EXCEPTION("Can't write all samples to audio fifo");
+				while (av_audio_fifo_size(fifo_.get()) >= audio_frame_size_)
+					frame_buffer_.emplace_back(GetFrameFromFifo(audio_frame_size_));
 			}
-			if (frame->nb_samples > av_audio_fifo_space(fifo_.get()))
-				THROW_ON_FFMPEG_ERROR(av_audio_fifo_realloc(fifo_.get(), frame->nb_samples * 2));
-			if (av_audio_fifo_write(fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
-				THROW_EXCEPTION("Can't write all samples to audio fifo");
-			while (av_audio_fifo_size(fifo_.get()) >= audio_frame_size_)
-			{
-				auto frame_from_fifo = GetFrameFromFifo(audio_frame_size_);
-				InternalPush(frame_from_fifo);
-			}
+			else
+				frame_buffer_.emplace_back(av_frame_clone(frame.get()), [](AVFrame* ptr) { av_frame_free(&ptr); });
 		});
 	}
 
-	void Encoder::InternalPush(const std::shared_ptr<AVFrame>& frame)
+	bool Encoder::InternalPush(AVFrame* frame)
 	{
-		output_timestamp_ += (enc_ctx_->codec_type == AVMEDIA_TYPE_AUDIO ? frame->nb_samples : 1LL);
-		frame->pict_type = AV_PICTURE_TYPE_NONE;
-		if (enc_ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-			frame->key_frame = 0;
-		frame->pts = output_timestamp_;
-		DebugPrintLine("InternalPush pts=" + std::to_string(frame->pts));
-		int ret = avcodec_send_frame(enc_ctx_.get(), frame.get());
+		if (frame)
+		{
+			frame->pict_type = AV_PICTURE_TYPE_NONE;
+			if (enc_ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
+				frame->key_frame = 0;
+			frame->pts = output_timestamp_;
+			output_timestamp_ += (enc_ctx_->codec_type == AVMEDIA_TYPE_AUDIO ? frame->nb_samples : 1LL);
+			DebugPrintLine("InternalPush pts=" + std::to_string(output_timestamp_));
+		}
+		else
+			DebugPrintLine("InternalPush flush frame");
+		int ret = avcodec_send_frame(enc_ctx_.get(), frame);
 		switch (ret)
 		{
 		case AVERROR(EAGAIN):
-			frame_buffer_.push_back(frame);
+			return false;
 			break;
 		default:
 			break;
 		}
+		return true;
 	}
 
 	std::shared_ptr<AVFrame> Encoder::GetFrameFromFifo(int nb_samples)
@@ -195,16 +198,13 @@ namespace TVPlayR {
 		return frame;
 	}
 
-	void Encoder::SetVideoParameters(AVCodecContext* context)
-	{
-	}
-
 	void Encoder::Flush()
 	{
 		executor_.begin_invoke([this] 
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
-			THROW_ON_FFMPEG_ERROR(avcodec_send_frame(enc_ctx_.get(), NULL));
+			InternalPush(nullptr);
+			flushed_ = true;
 		});
 	}
 
@@ -218,18 +218,22 @@ namespace TVPlayR {
 			switch (ret)
 			{
 			case 0:
-				packet->stream_index = stream_->index;
 				av_packet_rescale_ts(packet.get(), enc_ctx_->time_base, stream_->time_base);
-				DebugPrintLine("Pull packet pts=" + std::to_string(packet->pts));
+				DebugPrintLine("Pull packet stream=" + std::to_string(packet->stream_index) + ", time=" + std::to_string(PtsToTime(packet->pts, stream_->time_base)/1000));
+				packet->stream_index = stream_->index;
+				packet->time_base = stream_->time_base;
 				return packet;
 			case AVERROR(EAGAIN):
 				if (!frame_buffer_.empty())
 				{
 					auto frame = frame_buffer_.front();
-					frame_buffer_.pop_front();
-					THROW_ON_FFMPEG_ERROR(avcodec_send_frame(enc_ctx_.get(), frame.get()));
+					if (InternalPush(frame.get()))
+						frame_buffer_.pop_front();
 					continue;
 				}
+				return nullptr;
+			case AVERROR_EOF:
+				is_eof_ = true;
 				return nullptr;
 			default:
 				THROW_ON_FFMPEG_ERROR(ret);

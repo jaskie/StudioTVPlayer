@@ -23,10 +23,10 @@ namespace TVPlayR {
 			std::shared_ptr<AVFrame> last_video_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
-			Common::Executor executor_;
 			int64_t video_frames_pushed_ = 0LL;
 			int64_t audio_samples_pushed_ = 0LL;
 			int64_t last_video_time_ = 0LL;
+			Common::Executor executor_;
 
 			implementation(const std::string& source_name, const std::string& group_names)
 				: Common::DebugTarget(false, "NDI output " + source_name)
@@ -76,7 +76,7 @@ namespace TVPlayR {
 			void Push(FFmpeg::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("NdiOutput " + source_name_ + ": Frame dropped when pushed");
+					DebugPrintLine("frame dropped when pushed");
 			}
 						
 			void Tick()
@@ -93,7 +93,7 @@ namespace TVPlayR {
 				else
 				{
 					audio = FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, audio_sample_format_);
-					DebugPrintLine("NdiOutput " + source_name_ + ": Frame late");
+					DebugPrintLine("frame late");
 				}
 				video_frames_pushed_++;
 				audio_samples_pushed_ += audio->nb_samples;

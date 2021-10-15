@@ -8,6 +8,7 @@
 #include "Encoder.h"
 #include "SwScale.h"
 #include "SwResample.h"
+#include <chrono>
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -16,7 +17,6 @@ namespace TVPlayR {
 		{
 			const FFStreamOutputParams& params_;
 			AVDictionary* options_ = nullptr;
-			Common::Executor executor_;
 			Core::VideoFormat format_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
@@ -31,6 +31,8 @@ namespace TVPlayR {
 			int64_t video_frames_pushed_ = 0LL;
 			int64_t audio_samples_pushed_ = 0LL;
 			int64_t last_video_time_ = 0LL;
+			std::chrono::steady_clock clock_;
+			Common::Executor executor_;
 
 			implementation(const Core::Channel& channel, const FFStreamOutputParams& params)
 				: Common::DebugTarget(false, "Stream output: " + params.Address)
@@ -40,17 +42,30 @@ namespace TVPlayR {
 				, audio_channels_count_(channel.AudioChannelsCount())
 				, executor_("Stream output: " + params.Address)
 				, options_(ReadOptions(params.Options))
-				, output_format_(params.Address)
+				, output_format_(params.Address, options_)
 				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
 				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), &options_, params.VideoMetadata, params.VideoStreamId)
 				, video_scaler_(format_.width(), format_.height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), video_encoder_.Width(), video_encoder_.Height(), static_cast<AVPixelFormat>(video_encoder_.Format()))
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
 			{
-				output_format_.Initialize(&options_);
+				//clock_.now()
+				output_format_.Initialize(params.OutputMetadata);
 #ifdef DEBUG
 				av_dump_format(output_format_.Ctx(), 0, params.Address.c_str(), true);
 #endif
+			}
+
+			~implementation()
+			{
+				executor_.begin_invoke([this]
+				{
+					video_encoder_.Flush();
+					audio_encoder_.Flush();
+					PushVideoPackets();
+					PushtAudioPackets();
+				});
+				executor_.wait();
 			}
 			
 			void Tick() 

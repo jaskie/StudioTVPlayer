@@ -31,7 +31,7 @@ namespace TVPlayR {
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, bool internal_keyer, int index)
-				: Common::DebugTarget(true, "Decklink " + std::to_string(index))
+				: Common::DebugTarget(false, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
 				, keyer_(decklink)

@@ -16,9 +16,8 @@ namespace TVPlayR {
 		FRAME_PLAYED_CALLBACK frame_played_callback_ =nullptr;
 		const Core::Channel* channel_;
 		std::unique_ptr<FFmpeg::SwScale> preview_scaler_;
-
-		Common::Executor consumer_executor_;
 		const int width_, height_;
+		Common::Executor consumer_executor_;
 
 		implementation(int width, int height)
 			: consumer_executor_("OutputPreview thread", 1)

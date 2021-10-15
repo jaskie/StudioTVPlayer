@@ -7,7 +7,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		BMDPixelFormat BMDPixelFormatFromVideoFormat(TVPlayR::PixelFormat format)
+		BMDPixelFormat BMDPixelFormatFromPixelFormat(TVPlayR::PixelFormat format)
 		{
 			switch (format)
 			{

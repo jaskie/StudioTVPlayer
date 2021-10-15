@@ -131,7 +131,7 @@ namespace TVPlayR {
 			{
 				if (channel.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
 					return false;
-				if (!OpenOutput(GetDecklinkDisplayMode(channel.Format().type()), BMDPixelFormatFromVideoFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
+				if (!OpenOutput(GetDecklinkDisplayMode(channel.Format().type()), BMDPixelFormatFromPixelFormat(channel.PixelFormat()), channel.AudioChannelsCount()))
 					return false;
 				if (channel.Format().type() == Core::VideoFormatType::invalid)
 					THROW_EXCEPTION("Invalid video format");

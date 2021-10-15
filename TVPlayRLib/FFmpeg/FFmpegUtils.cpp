@@ -13,6 +13,7 @@ namespace TVPlayR {
 			frame->display_picture_number = -1;
 			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
 			frame->pict_type = AV_PICTURE_TYPE_I;
+			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 			if (pix_fmt == TVPlayR::PixelFormat::bgra)
 			{

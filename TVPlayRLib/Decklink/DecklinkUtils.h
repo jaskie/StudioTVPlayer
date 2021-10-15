@@ -10,7 +10,7 @@ namespace TVPlayR {
 
 		typedef void(*FORMAT_CALLBACK)(Core::VideoFormatType new_format);
 
-		BMDPixelFormat BMDPixelFormatFromVideoFormat(TVPlayR::PixelFormat format);
+		BMDPixelFormat BMDPixelFormatFromPixelFormat(TVPlayR::PixelFormat format);
 
 		BMDDisplayMode GetDecklinkDisplayMode(Core::VideoFormatType fmt);
 

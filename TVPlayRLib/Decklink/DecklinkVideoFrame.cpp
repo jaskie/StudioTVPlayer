@@ -46,7 +46,7 @@ namespace TVPlayR {
 			case AV_PIX_FMT_BGRA:
 				return BMDPixelFormat::bmdFormat8BitBGRA;
 			default:
-				return BMDPixelFormat::bmdFormat8BitYUV;
+				THROW_EXCEPTION("Invalid pixel format: " + std::to_string(frame_->format));
 			}
 		}
 

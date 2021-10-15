@@ -37,7 +37,7 @@ namespace TVPlayR {
 		}
 	}
 
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetAudioContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, int sample_rate, int channels_count)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetAudioContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int sample_rate, int channels_count)
 	{
 		if (!encoder)
 		{
@@ -61,7 +61,7 @@ namespace TVPlayR {
 		});
 	}
 	
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, const Core::VideoFormat& video_format)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format)
 	{
 		if (!encoder)
 		{

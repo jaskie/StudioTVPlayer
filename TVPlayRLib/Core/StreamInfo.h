@@ -13,7 +13,7 @@ public:
 	int64_t Duration;
 	int AudioChannelsCount;
 	std::string Language;
-	AVCodec* Codec;
+	const AVCodec* Codec;
 	AVStream* Stream;
 };
 

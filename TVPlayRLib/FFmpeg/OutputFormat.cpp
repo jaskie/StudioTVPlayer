@@ -30,7 +30,7 @@ namespace TVPlayR {
 
 		AVFormatContext* OutputFormat::AllocFormatContext(const std::string& file_name)
 		{
-			AVOutputFormat* format = nullptr;
+			const AVOutputFormat* format = nullptr;
 			if (file_name.find("rtmp://") == 0)
 				format = av_guess_format("flv", NULL, NULL);
 			else if (file_name.find("udp://") == 0)

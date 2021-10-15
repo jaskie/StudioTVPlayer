@@ -12,7 +12,7 @@ namespace TVPlayR {
 	class Encoder : private Common::DebugTarget
 	{
 	private:
-		AVCodec* const encoder_;
+		const AVCodec* encoder_;
 		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> enc_ctx_;
 		std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>> fifo_;
 		AVStream* stream_;
@@ -23,8 +23,8 @@ namespace TVPlayR {
 		std::mutex mutex_;
 		const int format_;
 		const int sample_rate_;
-		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetAudioContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, int sample_rate, int channels_count);
-		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetVideoContext(AVFormatContext* const format_context, AVCodec* const encoder, int bitrate, const Core::VideoFormat& video_format);
+		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetAudioContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int sample_rate, int channels_count);
+		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format);
 		void OpenCodec(AVFormatContext* const format_context, const OutputFormat& formatContext, AVDictionary** options, const std::string& stream_metadata, int stream_id);
 		void InternalPush(const std::shared_ptr<AVFrame>& frame);
 		std::shared_ptr<AVFrame> GetFrameFromFifo(int nb_samples);

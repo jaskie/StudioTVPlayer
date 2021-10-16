@@ -27,7 +27,7 @@ namespace TVPlayR {
 		Common::Executor executor_;
 		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetAudioContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int sample_rate, int channels_count);
 		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format);
-		void OpenCodec(AVFormatContext* const format_context, const OutputFormat& formatContext, AVDictionary** options, const std::string& stream_metadata, int stream_id);
+		void OpenCodec(AVFormatContext* const format_context, AVDictionary** options, const std::string& stream_metadata, int stream_id);
 		bool InternalPush(AVFrame* frame);
 		std::shared_ptr<AVFrame> GetFrameFromFifo(int nb_samples);
 	public:

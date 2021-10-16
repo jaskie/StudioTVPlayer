@@ -54,7 +54,7 @@
     <ClInclude Include="DecklinkIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StreamOutput.h">
+    <ClInclude Include="FFOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DecklinkInput.h">
@@ -113,7 +113,7 @@
     <ClCompile Include="DecklinkInfo.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StreamOutput.cpp">
+    <ClCompile Include="FFOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DecklinkInput.cpp">

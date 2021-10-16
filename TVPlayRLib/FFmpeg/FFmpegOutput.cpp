@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "FFStreamOutput.h"
+#include "FFmpegOutput.h"
 #include "../Core/Channel.h"
 #include "../PixelFormat.h"
 #include "../Common/Executor.h"
@@ -13,9 +13,9 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		struct FFStreamOutput::implementation : Common::DebugTarget
+		struct FFmpegOutput::implementation : Common::DebugTarget
 		{
-			const FFStreamOutputParams& params_;
+			const FFOutputParams& params_;
 			AVDictionary* options_ = nullptr;
 			Core::VideoFormat format_;
 			int audio_channels_count_ = 2;
@@ -34,25 +34,25 @@ namespace TVPlayR {
 			std::chrono::steady_clock clock_;
 			Common::Executor executor_;
 
-			implementation(const Core::Channel& channel, const FFStreamOutputParams& params)
-				: Common::DebugTarget(false, "Stream output: " + params.Address)
+			implementation(const Core::Channel& channel, const FFOutputParams& params)
+				: Common::DebugTarget(false, "Stream output: " + params.Url)
 				, params_(params)
 				, format_(channel.Format())
 				, audio_sample_rate_(channel.AudioSampleRate())
 				, audio_channels_count_(channel.AudioChannelsCount())
-				, executor_("Stream output: " + params.Address)
+				, executor_("Stream output: " + params.Url)
 				, options_(ReadOptions(params.Options))
-				, output_format_(params.Address, options_)
+				, output_format_(params.Url, options_)
 				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
 				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), &options_, params.VideoMetadata, params.VideoStreamId)
 				, video_scaler_(format_.width(), format_.height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), video_encoder_.Width(), video_encoder_.Height(), static_cast<AVPixelFormat>(video_encoder_.Format()))
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
 			{
-				//clock_.now()
+				auto time = clock_.now().time_since_epoch().count();
 				output_format_.Initialize(params.OutputMetadata);
 #ifdef DEBUG
-				av_dump_format(output_format_.Ctx(), 0, params.Address.c_str(), true);
+				av_dump_format(output_format_.Ctx(), 0, params.Url.c_str(), true);
 #endif
 			}
 
@@ -129,22 +129,22 @@ namespace TVPlayR {
 
 		};
 
-		FFStreamOutput::FFStreamOutput(const FFStreamOutputParams& params)
+		FFmpegOutput::FFmpegOutput(const FFOutputParams params)
 			: params_(params)
 		{ }
 
-		FFStreamOutput::~FFStreamOutput() { }
-		bool FFStreamOutput::AssignToChannel(const Core::Channel& channel)
+		FFmpegOutput::~FFmpegOutput() { }
+		bool FFmpegOutput::AssignToChannel(const Core::Channel& channel)
 		{
 			if (impl_)
 				return false;
 			impl_ = std::make_unique<implementation>(channel, params_);
 			return true;
 		}
-		void FFStreamOutput::ReleaseChannel() { impl_.reset(); }
-		void FFStreamOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
-		void FFStreamOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->SetFrameRequestedCallback(frame_requested_callback); }
-		const FFStreamOutputParams& FFStreamOutput::GetStreamOutputParams() { return params_; }
+		void FFmpegOutput::ReleaseChannel() { impl_.reset(); }
+		void FFmpegOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
+		void FFmpegOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->SetFrameRequestedCallback(frame_requested_callback); }
+		const FFOutputParams& FFmpegOutput::GetStreamOutputParams() { return params_; }
 	}
 }
 

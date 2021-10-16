@@ -149,10 +149,10 @@
     <ClInclude Include="Decklink\DecklinkInfo.h">
       <Filter>Decklink</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\FFStreamOutput.h">
+    <ClInclude Include="FFmpeg\FFmpegOutput.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\FFStreamOutputParams.h">
+    <ClInclude Include="FFmpeg\FFOutputParams.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
     <ClInclude Include="Decklink\DecklinkInput.h">
@@ -263,7 +263,7 @@
     <ClCompile Include="Decklink\DecklinkInfo.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
-    <ClCompile Include="FFmpeg\FFStreamOutput.cpp">
+    <ClCompile Include="FFmpeg\FFmpegOutput.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkInput.cpp">

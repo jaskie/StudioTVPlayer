@@ -1,10 +1,10 @@
 ﻿namespace StudioTVPlayer.Model
 {
-    public class StreamOutput : OutputBase
+    public class FFOutput : OutputBase
     {
-        private TVPlayR.StreamOutput _streamOutput;
+        private TVPlayR.FFOutput _ffOutput;
 
-        public string Address { get; set; }
+        public string Url { get; set; }
         public string VideoCodec { get; set; }
         public string AudioCodec { get; set; }
         public int VideoBitrate { get; set; }
@@ -19,21 +19,21 @@
 
         public override void Dispose()
         {
-            if (_streamOutput is null)
+            if (_ffOutput is null)
                 return;
-            _streamOutput.Dispose();
-            _streamOutput = null;
+            _ffOutput.Dispose();
+            _ffOutput = null;
         }
 
         public override TVPlayR.OutputBase GetOutput()
         {
-            return _streamOutput;
+            return _ffOutput;
         }
 
         public override void Initialize()
         {
-            _streamOutput = new TVPlayR.StreamOutput(
-                Address,
+            _ffOutput = new TVPlayR.FFOutput(
+                Url,
                 VideoCodec,
                 AudioCodec,
                 VideoBitrate * 1024,

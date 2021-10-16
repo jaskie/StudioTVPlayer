@@ -4,11 +4,11 @@
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		OutputFormat::OutputFormat(const std::string& file_name, AVDictionary*& options)
-			: Common::DebugTarget(false, "OutputFormat " + file_name)
-			, file_name_(file_name)
+		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
+			: Common::DebugTarget(false, "OutputFormat " + url)
+			, url_(url)
 			, options_(options)
-			, format_ctx_(AllocFormatContext(file_name), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
+			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
 		{
 		}
 
@@ -27,24 +27,24 @@ namespace TVPlayR {
 			THROW_ON_FFMPEG_ERROR(avformat_write_header(format_ctx_.get(), &options_));
 		}
 
-		AVFormatContext* OutputFormat::AllocFormatContext(const std::string& file_name)
+		AVFormatContext* OutputFormat::AllocFormatContext(const std::string& url)
 		{
 			const AVOutputFormat* format = nullptr;
-			if (file_name.find("rtmp://") == 0)
+			if (url.find("rtmp://") == 0)
 				format = av_guess_format("flv", NULL, NULL);
-			else if (file_name.find("udp://") == 0)
+			else if (url.find("udp://") == 0)
 				format = av_guess_format("mpegts", NULL, NULL);
 			else
-				format = av_guess_format(NULL, file_name.c_str(), NULL);
+				format = av_guess_format(NULL, url.c_str(), NULL);
 			if (!format)
 				THROW_EXCEPTION("Can't determine oformat");
 
 			AVFormatContext* ctx = nullptr;
-			THROW_ON_FFMPEG_ERROR(avformat_alloc_output_context2(&ctx, format, NULL, file_name.c_str()));
+			THROW_ON_FFMPEG_ERROR(avformat_alloc_output_context2(&ctx, format, NULL, url.c_str()));
 			if (!ctx)
 				THROW_EXCEPTION("Format context not created");
 			if (!(ctx->oformat->flags & AVFMT_NOFILE))
-				THROW_ON_FFMPEG_ERROR(avio_open2(&ctx->pb, file_name_.c_str(), AVIO_FLAG_WRITE, NULL, &options_));
+				THROW_ON_FFMPEG_ERROR(avio_open2(&ctx->pb, url.c_str(), AVIO_FLAG_WRITE, NULL, &options_));
 			return ctx;
 		}
 

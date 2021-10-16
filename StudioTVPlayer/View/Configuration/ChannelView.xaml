@@ -82,7 +82,7 @@
                             <DataTemplate DataType="{x:Type vm:NdiOutputViewModel}">
                                 <local:NdiOutputView/>
                             </DataTemplate>
-                            <DataTemplate DataType="{x:Type vm:StreamOutputViewModel}">
+                            <DataTemplate DataType="{x:Type vm:FFOutputViewModel}">
                                 <local:StreamOutputView/>
                             </DataTemplate>
                         </ListBox.Resources>

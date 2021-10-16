@@ -8,8 +8,8 @@
 #include "Decklink/DecklinkInfo.h"
 #include "Ndi/NdiOutput.h"
 #include "FFmpeg/FFmpegInput.h"
-#include "FFmpeg/FFStreamOutput.h"
-#include "FFmpeg/FFStreamOutputParams.h"
+#include "FFmpeg/FFmpegOutput.h"
+#include "FFmpeg/FFOutputParams.h"
 #include "PixelFormat.h"
 #include "Common/ComInitializer.h"
 
@@ -41,34 +41,34 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2);
+		Core::Channel channel("Channel 1", Core::VideoFormatType::pal_fha, PixelFormat::bgra, 2);
 		Decklink::DecklinkIterator iterator;
 		int device_index = 0;
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		/*auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
+		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
 		channel.SetFrameClock(decklink_output);
 		channel.AddOutput(decklink_output);
-		*/
+		
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
-		FFmpeg::FFStreamOutputParams stream_params{ "udp://127.0.0.1:1234", "libx264", "aac", 4000, 128 };
-		auto stream = std::make_shared<FFmpeg::FFStreamOutput>(stream_params);
+		FFmpeg::FFOutputParams stream_params{ "udp://@127.0.0.1:1234", "libx264", "aac", 4000, 128 };
+		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
 		channel.AddOutput(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		/*auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
 		input->SetIsLoop(true);
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
-		auto seek = input->GetVideoDuration() - AV_TIME_BASE;
-		input->Seek(seek);
+		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
+		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
+		//input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();
 		input->SetIsLoop(true);
-		channel.Load(input);*/
+		channel.Load(input);
 		while (true)
 		{
 			char i = std::cin.get();
@@ -76,19 +76,19 @@ int main()
 				break;
 			if (i == 'c')
 				channel.Clear();
-			//if (i == 's')
-			//	input->Seek(AV_TIME_BASE * 10);
-			//if (i == 'l')
-			//	channel.Load(input);
-			//if (i == ' ')
-			//	if (input->IsPlaying())
-			//		input->Pause();
-			//	else	 
-			//		input->Play();
+			if (i == 's')
+				input->Seek(AV_TIME_BASE * 10);
+			if (i == 'l')
+				channel.Load(input);
+			if (i == ' ')
+				if (input->IsPlaying())
+					input->Pause();
+				else	 
+					input->Play();
 		}
 		channel.RemoveOutput(ndi);
 		channel.SetFrameClock(nullptr);
-		//channel.RemoveOutput(decklink_output);
+		channel.RemoveOutput(decklink_output);
 		channel.RemoveOutput(stream);
 #ifdef _DEBUG
 	}

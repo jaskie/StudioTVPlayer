@@ -133,8 +133,8 @@
     <ClInclude Include="FFmpeg\InputFormat.h" />
     <ClInclude Include="FFmpeg\FFmpegInput.h" />
     <ClInclude Include="FFmpeg\ChannelScaler.h" />
-    <ClInclude Include="FFmpeg\FFStreamOutput.h" />
-    <ClInclude Include="FFmpeg\FFStreamOutputParams.h" />
+    <ClInclude Include="FFmpeg\FFmpegOutput.h" />
+    <ClInclude Include="FFmpeg\FFOutputParams.h" />
     <ClInclude Include="FFmpeg\FFmpegUtils.h" />
     <ClInclude Include="FFmpeg\VideoFilterBase.h" />
     <ClInclude Include="FFmpeg\ThumbnailFilter.h" />
@@ -238,7 +238,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="FFmpeg\FFStreamOutput.cpp">
+    <ClCompile Include="FFmpeg\FFmpegOutput.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

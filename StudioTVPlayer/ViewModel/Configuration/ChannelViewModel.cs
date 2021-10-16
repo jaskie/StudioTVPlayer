@@ -29,8 +29,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         return new DecklinkOutputViewModel(decklink);
                     case Model.NdiOutput ndi:
                         return new NdiOutputViewModel(ndi);
-                    case Model.StreamOutput stream:
-                        return new StreamOutputViewModel(stream);
+                    case Model.FFOutput stream:
+                        return new FFOutputViewModel(stream);
                     default:
                         throw new ApplicationException("Invalid type provided");
                 }
@@ -155,12 +155,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddStreamOutput(object _)
         {
-            var vm = new StreamOutputViewModel(new Model.StreamOutput { 
+            var vm = new FFOutputViewModel(new Model.FFOutput { 
                 IsFrameClock = !Outputs.Any(a => a.IsFrameClock),
                 VideoBitrate = 4000,
-                VideoCodec = StreamOutputViewModel.VideoCodecs.FirstOrDefault(),
+                VideoCodec = FFOutputViewModel.VideoCodecs.FirstOrDefault(),
                 AudioBitrate = 128,
-                AudioCodec = StreamOutputViewModel.AudioCodecs.FirstOrDefault(),
+                AudioCodec = FFOutputViewModel.AudioCodecs.FirstOrDefault(),
             });
             AddOutput(vm);
         }

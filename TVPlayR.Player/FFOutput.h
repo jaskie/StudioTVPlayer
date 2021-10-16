@@ -1,15 +1,15 @@
 #pragma once
 #include "OutputBase.h"
-#include "FFmpeg/FFStreamOutput.h"
+#include "FFmpeg/FFmpegOutput.h"
 
 using namespace System;
 
 namespace TVPlayR {
 
-	public ref class StreamOutput sealed : public OutputBase
+	public ref class FFOutput sealed : public OutputBase
 	{
 	public:
-		StreamOutput(
+		FFOutput(
 			String^ address, 
 			String^ video_codec, 
 			String^ audio_codec,
@@ -23,12 +23,12 @@ namespace TVPlayR {
 			int video_stream_id,
 			int audio_stream_id
 			);
-		~StreamOutput();
-		!StreamOutput();
+		~FFOutput();
+		!FFOutput();
 		property static array<String^>^ VideoCodecs { array<String^>^ get() { return _videoCodecs; }};
 		property static array<String^>^ AudioCodecs { array<String^>^ get() { return _audioCodecs; }};
 	private:
-		std::shared_ptr<FFmpeg::FFStreamOutput>* _native_output;
+		std::shared_ptr<FFmpeg::FFmpegOutput>* _native_output;
 		static array<String^>^ _videoCodecs = gcnew array<String^> { "mpeg2video", "libx264", "h264_nvenc",	"hevc_nvenc"};
 		static array<String^>^ _audioCodecs = gcnew array<String^> { "aac", "ac3", "libmp3lame", "mp2" };
 	internal:

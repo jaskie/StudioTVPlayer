@@ -10,26 +10,26 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
-		: Common::DebugTarget(true, "Video encoder for " + output_format.GetFileName())
-		, executor_("Video encoder for " + output_format.GetFileName())
+		: Common::DebugTarget(true, "Video encoder for " + output_format.GetUrl())
+		, executor_("Video encoder for " + output_format.GetUrl())
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_format))
 		, format_(enc_ctx_->pix_fmt)
 		, sample_rate_(0)
 	{
-		OpenCodec(output_format.Ctx(), output_format, options, stream_metadata, stream_id);
+		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
 	}
 
 
 	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
-		: Common::DebugTarget(true, "Audio encoder for " + output_format.GetFileName())
-		, executor_("Audio encoder for " + output_format.GetFileName(), 2)
+		: Common::DebugTarget(true, "Audio encoder for " + output_format.GetUrl())
+		, executor_("Audio encoder for " + output_format.GetUrl(), 2)
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
 		, format_(enc_ctx_->sample_fmt)
 		, sample_rate_(enc_ctx_->sample_rate)
 	{
-		OpenCodec(output_format.Ctx(), output_format, options, stream_metadata, stream_id);
+		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
 		if (enc_ctx_->frame_size > 0)
 		{
 			audio_frame_size_ = enc_ctx_->frame_size;
@@ -132,7 +132,7 @@ namespace TVPlayR {
 		});
 	}
 
-	void Encoder::OpenCodec(AVFormatContext* const format_context, const OutputFormat& otput_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	void Encoder::OpenCodec(AVFormatContext* const format_context, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 	{
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(enc_ctx_.get(), encoder_, options));
 		stream_ = avformat_new_stream(format_context, encoder_);

@@ -2,9 +2,9 @@
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class StreamOutputViewModel : OutputViewModelBase
+    public class FFOutputViewModel : OutputViewModelBase
     {
-        private string _address;
+        private string _url;
         private string _videoCodec;
         private string _audioCodec;
         private int _videoBitrate;
@@ -16,12 +16,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private string _options;
         private int _videoStreamId;
         private int _audioStreamId;
-        private readonly StreamOutput _streamOutput;
+        private readonly FFOutput _streamOutput;
 
-        public StreamOutputViewModel(StreamOutput streamOutput) : base(streamOutput)
+        public FFOutputViewModel(FFOutput streamOutput) : base(streamOutput)
         {
             _streamOutput = streamOutput;
-            _address = streamOutput.Address;
+            _url = streamOutput.Url;
             _videoCodec = streamOutput.VideoCodec;
             _audioCodec = streamOutput.AudioCodec;
             _videoBitrate = streamOutput.VideoBitrate;
@@ -35,7 +35,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _audioStreamId = streamOutput.AudioStreamId;
         }
 
-        public string Address { get => _address; set => Set(ref _address, value); }
+        public string Url { get => _url; set => Set(ref _url, value); }
         public string VideoCodec { get => _videoCodec; set => Set(ref _videoCodec, value); }
         public string AudioCodec { get => _audioCodec; set => Set(ref _audioCodec, value); }
         public int VideoBitrate { get => _videoBitrate; set => Set(ref _videoBitrate, value); }
@@ -48,13 +48,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public int VideoStreamId { get => _videoStreamId; set => Set(ref _videoStreamId, value); }
         public int AudioStreamId { get => _audioStreamId; set => Set(ref _audioStreamId, value); }
 
-        public static string[] VideoCodecs => TVPlayR.StreamOutput.VideoCodecs;
-        public static string[] AudioCodecs => TVPlayR.StreamOutput.AudioCodecs;
+        public static string[] VideoCodecs => TVPlayR.FFOutput.VideoCodecs;
+        public static string[] AudioCodecs => TVPlayR.FFOutput.AudioCodecs;
 
         public override void Apply()
         {
             base.Apply();
-            _streamOutput.Address = _address;
+            _streamOutput.Url = _url;
             _streamOutput.VideoCodec = _videoCodec;
             _streamOutput.AudioCodec = _audioCodec;
             _streamOutput.VideoBitrate = _videoBitrate;
@@ -71,7 +71,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             switch (propertyName)
             {
-                case nameof(Address) when string.IsNullOrWhiteSpace(Address):
+                case nameof(Url) when string.IsNullOrWhiteSpace(Url):
                     return "Destination address can't be empty";
             }
             return base.ReadErrorInfo(propertyName);
@@ -79,7 +79,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override bool IsValid()
         {
-            return string.IsNullOrEmpty(this[nameof(Address)]);
+            return string.IsNullOrEmpty(this[nameof(Url)]);
         }
     }
 }

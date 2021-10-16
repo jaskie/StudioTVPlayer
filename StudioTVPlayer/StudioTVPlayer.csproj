@@ -121,7 +121,7 @@
     <Compile Include="Model\FileRundownItem.cs" />
     <Compile Include="Model\Args\RundownItemEventArgs.cs" />
     <Compile Include="Model\MediaVerifier.cs" />
-    <Compile Include="Model\StreamOutput.cs" />
+    <Compile Include="Model\FFOutput.cs" />
     <Compile Include="Model\WatchedFolder.cs" />
     <Compile Include="Model\MediaFile.cs" />
     <Compile Include="Providers\CrashLogger.cs" />
@@ -134,7 +134,7 @@
     <Compile Include="ViewModel\Configuration\ICheckErrorInfo.cs" />
     <Compile Include="ViewModel\Configuration\NdiOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\OutputViewModelBase.cs" />
-    <Compile Include="ViewModel\Configuration\StreamOutputViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\FFOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFolderViewModel.cs" />
     <Compile Include="ViewModel\Main\Input\DecklinkInputViewModel.cs" />
     <Compile Include="ViewModel\Main\Input\InputsViewModel.cs" />

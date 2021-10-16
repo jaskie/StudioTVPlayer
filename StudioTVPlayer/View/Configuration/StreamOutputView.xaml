@@ -6,7 +6,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance vm:StreamOutputViewModel}"
+             d:DataContext="{d:DesignInstance vm:FFOutputViewModel}"
              d:DesignHeight="250" d:DesignWidth="400">
     <UserControl.Resources>
         <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">

@@ -1,9 +1,9 @@
 #pragma once
 namespace TVPlayR {
 	namespace FFmpeg {
-		struct FFStreamOutputParams
+		struct FFOutputParams
 		{
-			std::string Address;
+			std::string Url;
 			std::string VideoCodec;
 			std::string AudioCodec;
 			int VideoBitrate;

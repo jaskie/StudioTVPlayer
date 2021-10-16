@@ -53,7 +53,7 @@ int main()
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
-		FFmpeg::FFOutputParams stream_params{ "udp://@127.0.0.1:1234", "libx264", "aac", 4000, 128 };
+		FFmpeg::FFOutputParams stream_params{ "udp://224.0.0.1:1234", "libx264", "aac", 4000, 128 };
 		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
 		channel.AddOutput(stream);
 

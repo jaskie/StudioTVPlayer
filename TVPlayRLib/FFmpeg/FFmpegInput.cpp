@@ -71,7 +71,6 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 					InitializeBuffer();
 				while (!buffer_->IsFull())
 				{
-					std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 					ProcessNextInputPacket();
 					if (buffer_->IsReady())
 						buffer_cv_.notify_one();
@@ -162,6 +161,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
 			channel_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
+		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 		while (auto scaled = channel_scaler_->Pull())
 			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
 	}
@@ -171,6 +171,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 		auto decoded = decoder->Pull();
 		if (decoded)
 			audio_muxer_->Push(decoder->StreamIndex(), decoded);
+		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 		while (auto muxed = audio_muxer_->Pull())
 			buffer_->PushAudio(muxed);
 	}
@@ -206,12 +207,16 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 					audio_muxer_->Reset();
 				if (channel_scaler_)
 					channel_scaler_->Reset();
+				std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 				if (buffer_)
 					buffer_->Loop();
 				DebugPrintLine("Loop");
 			}
 			else
+			{
+				std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 				buffer_->Flush();
+			}
 	}
 
 #pragma endregion

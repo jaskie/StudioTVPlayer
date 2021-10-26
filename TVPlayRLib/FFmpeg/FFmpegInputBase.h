@@ -13,8 +13,6 @@ namespace TVPlayR {
 	namespace FFmpeg {
 		class Decoder;
 		
-		namespace internal {
-
 struct FFmpegInputBase : Common::NonCopyable
 {
 protected:
@@ -42,4 +40,4 @@ public:
 	int GetAudioChannelCount() const;
 };
 
-}}}
+}}

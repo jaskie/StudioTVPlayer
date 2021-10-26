@@ -11,7 +11,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-struct FFmpegFileInfo::implementation : internal::FFmpegInputBase
+struct FFmpegFileInfo::implementation : FFmpegInputBase
 {
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)

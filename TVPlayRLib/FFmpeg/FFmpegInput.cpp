@@ -14,7 +14,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 			   		 
-struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputBase
+struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 {
 	std::atomic_bool is_eof_ = false;
 	std::atomic_bool is_playing_ = false;
@@ -38,7 +38,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, internal::FFmpegInputB
 	LOADED_CALLBACK loaded_callback_ = nullptr;
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
-		: internal::FFmpegInputBase(file_name, acceleration, hw_device)
+		: FFmpegInputBase(file_name, acceleration, hw_device)
 		, Common::DebugTarget(false, "FFmpegInput " + file_name)
 		, producer_(&implementation::ProducerTheradStart, this)
 	{ 

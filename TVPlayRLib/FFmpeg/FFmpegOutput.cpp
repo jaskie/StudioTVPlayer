@@ -43,29 +43,32 @@ namespace TVPlayR {
 				, executor_("Stream output: " + params.Url)
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
-				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
 				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), &options_, params.VideoMetadata, params.VideoStreamId)
+				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
 				, video_scaler_(format_.width(), format_.height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), video_encoder_.Width(), video_encoder_.Height(), static_cast<AVPixelFormat>(video_encoder_.Format()))
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
 			{
-				auto time = clock_.now().time_since_epoch().count();
-				output_format_.Initialize(params.OutputMetadata);
+				executor_.begin_invoke([this]
+				{
+					auto time = clock_.now().time_since_epoch().count();
+					output_format_.Initialize(params_.OutputMetadata);
 #ifdef DEBUG
-				av_dump_format(output_format_.Ctx(), 0, params.Url.c_str(), true);
+					av_dump_format(output_format_.Ctx(), 0, params_.Url.c_str(), true);
 #endif
+				});
+				
 			}
 
 			~implementation()
 			{
-				executor_.begin_invoke([this]
+				executor_.invoke([this]
 				{
 					video_encoder_.Flush();
 					audio_encoder_.Flush();
-					PushVideoPackets();
-					PushtAudioPackets();
+					PushPackets(video_encoder_);
+					PushPackets(audio_encoder_);
 				});
-				executor_.wait();
 			}
 			
 			void Tick() 
@@ -77,8 +80,8 @@ namespace TVPlayR {
 						video_encoder_.Push(video_scaler_.Scale(sync.Video));
 						audio_encoder_.Push(audio_resampler_.Resample(sync.Audio));
 						last_video_ = sync.Video;
-						PushVideoPackets();
-						PushtAudioPackets();
+						PushPackets(video_encoder_);
+						PushPackets(audio_encoder_);
 					}
 					else
 					{
@@ -88,22 +91,11 @@ namespace TVPlayR {
 				});
 			}
 
-			void PushVideoPackets()
+			void PushPackets(Encoder& encoder)
 			{
 				while (true)
 				{
-					auto packet = video_encoder_.Pull();
-					if (!packet)
-						return;
-					output_format_.Push(packet);
-				}
-			}
-
-			void PushtAudioPackets()
-			{
-				while (true)
-				{
-					auto packet = audio_encoder_.Pull();
+					auto packet = encoder.Pull();
 					if (!packet)
 						return;
 					output_format_.Push(packet);

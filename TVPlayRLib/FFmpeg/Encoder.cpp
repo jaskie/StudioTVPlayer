@@ -28,6 +28,7 @@ namespace TVPlayR {
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
 		, format_(enc_ctx_->sample_fmt)
 		, sample_rate_(enc_ctx_->sample_rate)
+		, output_timestamp_(48000)
 	{
 		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
 		if (enc_ctx_->frame_size > 0)
@@ -138,6 +139,9 @@ namespace TVPlayR {
 		stream_ = avformat_new_stream(format_context, encoder_);
 		stream_->metadata = ReadOptions(stream_metadata);
 		stream_->id = stream_id;
+		stream_->time_base = enc_ctx_->time_base;
+		stream_->sample_aspect_ratio = enc_ctx_->sample_aspect_ratio;
+		stream_->avg_frame_rate = enc_ctx_->framerate;
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_from_context(stream_->codecpar, enc_ctx_.get()));
 	}
 	
@@ -156,7 +160,7 @@ namespace TVPlayR {
 					frame_buffer_.emplace_back(GetFrameFromFifo(audio_frame_size_));
 			}
 			else
-				frame_buffer_.emplace_back(av_frame_clone(frame.get()), [](AVFrame* ptr) { av_frame_free(&ptr); });
+				frame_buffer_.emplace_back(frame);
 		});
 	}
 
@@ -165,8 +169,6 @@ namespace TVPlayR {
 		if (frame)
 		{
 			frame->pict_type = AV_PICTURE_TYPE_NONE;
-			if (enc_ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				frame->key_frame = 0;
 			frame->pts = output_timestamp_;
 			output_timestamp_ += (enc_ctx_->codec_type == AVMEDIA_TYPE_AUDIO ? frame->nb_samples : 1LL);
 			DebugPrintLine("InternalPush pts=" + std::to_string(output_timestamp_));
@@ -213,15 +215,14 @@ namespace TVPlayR {
 		while (true)
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
-			auto packet(AllocPacket());
+			std::shared_ptr<AVPacket> packet = AllocPacket();
 			auto ret = avcodec_receive_packet(enc_ctx_.get(), packet.get());
 			switch (ret)
 			{
 			case 0:
 				av_packet_rescale_ts(packet.get(), enc_ctx_->time_base, stream_->time_base);
-				DebugPrintLine("Pull packet stream=" + std::to_string(packet->stream_index) + ", time=" + std::to_string(PtsToTime(packet->pts, stream_->time_base)/1000));
 				packet->stream_index = stream_->index;
-				packet->time_base = stream_->time_base;
+				DebugPrintLine("Pull packet stream=" + std::to_string(packet->stream_index) + ", time=" + std::to_string(PtsToTime(packet->pts, stream_->time_base)/1000));
 				return packet;
 			case AVERROR(EAGAIN):
 				if (!frame_buffer_.empty())

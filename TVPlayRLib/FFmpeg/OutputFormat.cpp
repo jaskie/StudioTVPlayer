@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
-			: Common::DebugTarget(true, "OutputFormat " + url)
+			: Common::DebugTarget(false, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
 			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
@@ -14,7 +14,7 @@ namespace TVPlayR {
 
 		void OutputFormat::Push(std::shared_ptr<AVPacket> packet)
 		{
-			DebugPrintLine("Sending packet to stream=" + std::to_string(packet->stream_index) + ", time=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+			DebugPrintLine("Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 		}
 

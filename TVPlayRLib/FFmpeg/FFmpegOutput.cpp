@@ -40,7 +40,6 @@ namespace TVPlayR {
 				, format_(channel.Format())
 				, audio_sample_rate_(channel.AudioSampleRate())
 				, audio_channels_count_(channel.AudioChannelsCount())
-				, executor_("Stream output: " + params.Url)
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
 				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), &options_, params.VideoMetadata, params.VideoStreamId)
@@ -48,6 +47,7 @@ namespace TVPlayR {
 				, video_scaler_(format_.width(), format_.height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), video_encoder_.Width(), video_encoder_.Height(), static_cast<AVPixelFormat>(video_encoder_.Format()))
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
+				, executor_("Stream output: " + params.Url)
 			{
 				executor_.begin_invoke([this]
 				{

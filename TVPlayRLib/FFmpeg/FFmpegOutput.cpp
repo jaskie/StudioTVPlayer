@@ -35,7 +35,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const Core::Channel& channel, const FFOutputParams& params)
-				: Common::DebugTarget(false, "Stream output: " + params.Url)
+				: Common::DebugTarget(true, "Stream output: " + params.Url)
 				, params_(params)
 				, format_(channel.Format())
 				, audio_sample_rate_(channel.AudioSampleRate())
@@ -49,6 +49,17 @@ namespace TVPlayR {
 				, buffer_(2)
 				, executor_("Stream output: " + params.Url)
 			{
+				if (options_)
+				{
+					char* unused_options;
+					if (av_dict_count(options_) > 0 && av_dict_get_string(options_, &unused_options, '=', ',') >= 0 && unused_options)
+					{
+						DebugPrintLine("Following options were not parsed: " + std::string(unused_options));
+						delete(unused_options);
+					}
+					av_dict_free(&options_);
+				}
+
 				executor_.begin_invoke([this]
 				{
 					auto time = clock_.now().time_since_epoch().count();

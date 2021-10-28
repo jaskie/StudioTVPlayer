@@ -60,7 +60,7 @@ int main()
 			4000,																	// VideoBitrate
 			128, 																	// AudioBitrate
 			"",																		// OutputFilter
-			"",																		// OutputMetadata
+			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
 			"",																		// VideoMetadata
 			"",																		// AudioMetadata
 			"preset=veryfast,profile=Main"											// Options

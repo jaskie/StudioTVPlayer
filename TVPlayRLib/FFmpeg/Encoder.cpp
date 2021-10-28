@@ -10,7 +10,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
-		: Common::DebugTarget(true, "Video encoder for " + output_format.GetUrl())
+		: Common::DebugTarget(false, "Video encoder for " + output_format.GetUrl())
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_format))
 		, format_(enc_ctx_->pix_fmt)
@@ -21,7 +21,7 @@ namespace TVPlayR {
 
 
 	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
-		: Common::DebugTarget(true, "Audio encoder for " + output_format.GetUrl())
+		: Common::DebugTarget(false, "Audio encoder for " + output_format.GetUrl())
 		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
 		, format_(enc_ctx_->sample_fmt)

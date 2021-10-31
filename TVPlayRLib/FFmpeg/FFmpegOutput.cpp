@@ -8,6 +8,7 @@
 #include "Encoder.h"
 #include "SwScale.h"
 #include "SwResample.h"
+#include "OutputVideoFilter.h"
 #include <chrono>
 
 namespace TVPlayR {
@@ -18,12 +19,14 @@ namespace TVPlayR {
 			const FFOutputParams& params_;
 			AVDictionary* options_ = nullptr;
 			Core::VideoFormat format_;
-			int audio_channels_count_ = 2;
-			int audio_sample_rate_ = 48000;
+			const AVPixelFormat src_pixel_format_;
+			int audio_channels_count_;
+			int audio_sample_rate_;
 			OutputFormat output_format_;
-			Encoder video_encoder_;
+			std::unique_ptr<Encoder> video_encoder_;
 			Encoder audio_encoder_;
-			SwScale video_scaler_;
+			std::unique_ptr<SwScale> video_scaler_;
+			std::unique_ptr<OutputVideoFilter> video_filter_;
 			SwResample audio_resampler_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
@@ -38,17 +41,27 @@ namespace TVPlayR {
 				: Common::DebugTarget(true, "Stream output: " + params.Url)
 				, params_(params)
 				, format_(channel.Format())
+				, src_pixel_format_(PixelFormatToFFmpegFormat(channel.PixelFormat()))
 				, audio_sample_rate_(channel.AudioSampleRate())
 				, audio_channels_count_(channel.AudioChannelsCount())
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
-				, video_encoder_(output_format_, params.VideoCodec, params.VideoBitrate, channel.Format(), &options_, params.VideoMetadata, params.VideoStreamId)
 				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
-				, video_scaler_(format_.width(), format_.height(), PixelFormatToFFmpegFormat(channel.PixelFormat()), video_encoder_.Width(), video_encoder_.Height(), static_cast<AVPixelFormat>(video_encoder_.Format()))
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
 				, executor_("Stream output: " + params.Url)
 			{
+
+
+				const AVCodec* video_encoder = avcodec_find_encoder_by_name(params.VideoCodec.c_str());
+
+				if (params.OutputFilter.empty())
+					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_encoder->pix_fmts[0]);
+				else
+					video_filter_ = std::make_unique<OutputVideoFilter>(channel, params.OutputFilter, video_encoder->pix_fmts[0]);
+
+				video_encoder_ = std::make_unique<Encoder>(output_format_, video_encoder, params.VideoBitrate, format_, &options_, params.VideoMetadata, params.VideoStreamId);
+				
 				if (options_)
 				{
 					char* unused_options;
@@ -59,10 +72,10 @@ namespace TVPlayR {
 					}
 					av_dict_free(&options_);
 				}
-
 				executor_.begin_invoke([this]
 				{
 					auto time = clock_.now().time_since_epoch().count();
+
 					output_format_.Initialize(params_.OutputMetadata);
 #ifdef DEBUG
 					av_dump_format(output_format_.Ctx(), 0, params_.Url.c_str(), true);
@@ -75,9 +88,9 @@ namespace TVPlayR {
 			{
 				executor_.invoke([this]
 				{
-					video_encoder_.Flush();
+					video_encoder_->Flush();
 					audio_encoder_.Flush();
-					PushPackets(video_encoder_);
+					PushPackets(*video_encoder_);
 					PushPackets(audio_encoder_);
 				});
 			}
@@ -88,10 +101,10 @@ namespace TVPlayR {
 					AVSync sync;
 					if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 					{
-						video_encoder_.Push(video_scaler_.Scale(sync.Video));
+						video_encoder_->Push(video_scaler_->Scale(sync.Video));
 						audio_encoder_.Push(audio_resampler_.Resample(sync.Audio));
 						last_video_ = sync.Video;
-						PushPackets(video_encoder_);
+						PushPackets(*video_encoder_);
 						PushPackets(audio_encoder_);
 					}
 					else

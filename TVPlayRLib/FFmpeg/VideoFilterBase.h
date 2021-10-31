@@ -11,7 +11,6 @@ namespace TVPlayR {
 
 class VideoFilterBase :	public FilterBase, Common::DebugTarget
 {
-private:
 public:
 	VideoFilterBase(AVPixelFormat output_pix_fmt);
 	virtual std::shared_ptr<AVFrame> Pull() override;

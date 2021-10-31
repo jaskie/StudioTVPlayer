@@ -9,9 +9,9 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(false, "Video encoder for " + output_format.GetUrl())
-		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
+		, encoder_(encoder)
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_format))
 		, format_(enc_ctx_->pix_fmt)
 		, sample_rate_(0)
@@ -75,7 +75,6 @@ namespace TVPlayR {
 		ctx->pix_fmt = encoder->pix_fmts[0];
 		ctx->framerate = video_format.FrameRate().av();
 		ctx->time_base = av_inv_q(ctx->framerate);
-		ctx->max_b_frames = 0; // b-frames not supported by default.
 		ctx->bit_rate = bitrate * 1000;
 
 		if (video_format.interlaced())
@@ -156,12 +155,10 @@ namespace TVPlayR {
 		}
 		else
 		{
-			auto copy_of_frame = AllocFrame(); // have to copy to not change original frame's pts
-			av_frame_ref(copy_of_frame.get(), frame.get());
-			copy_of_frame->pict_type = AV_PICTURE_TYPE_NONE;
-			copy_of_frame->pts = output_timestamp_;
+			frame->pict_type = AV_PICTURE_TYPE_NONE;
+			frame->pts = output_timestamp_;
 			output_timestamp_ += (enc_ctx_->codec_type == AVMEDIA_TYPE_AUDIO ? frame->nb_samples : 1LL);
-			frame_buffer_.emplace_back(copy_of_frame);
+			frame_buffer_.emplace_back(frame);
 		}
 	}
 

@@ -42,28 +42,28 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2);
-		Decklink::DecklinkIterator iterator;
-		int device_index = 0;
-		for (size_t i = 0; i < iterator.Size(); i++)
-			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
-		channel.SetFrameClock(decklink_output);
-		channel.AddOutput(decklink_output);
+		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2);
+		//Decklink::DecklinkIterator iterator;
+		//int device_index = 0;
+		//for (size_t i = 0; i < iterator.Size(); i++)
+		//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
+		//auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
+		//channel.SetFrameClock(decklink_output);
+		//channel.AddOutput(decklink_output);
 		
-		/*auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
-		channel.AddOutput(ndi);*/
+		channel.AddOutput(ndi);
 		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-			"libx264", 																// VideoCodec
+			"libx264",															// VideoCodec
 			"aac", 																	// AudioCodec
 			4000,																	// VideoBitrate
 			128, 																	// AudioBitrate
-			"",																		// OutputFilter
+			"g=18,bf=2",															// Options
+			"bwdif,scale=256x128",													// VideoFilter
 			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
 			"",																		// VideoMetadata
-			"",																		// AudioMetadata
-			"preset=veryfast,profile=Main"											// Options
+			""																		// AudioMetadata
 		};
 		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
 		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
@@ -98,9 +98,9 @@ int main()
 				else	 
 					input->Play();
 		}
-		//channel.RemoveOutput(ndi);
 		channel.SetFrameClock(nullptr);
-		channel.RemoveOutput(decklink_output);
+		channel.RemoveOutput(ndi);
+		//channel.RemoveOutput(decklink_output);
 		channel.RemoveOutput(stream);
 #ifdef _DEBUG
 	}

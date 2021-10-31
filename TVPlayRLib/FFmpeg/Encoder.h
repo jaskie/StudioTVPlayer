@@ -29,7 +29,7 @@ namespace TVPlayR {
 		bool InternalPush(AVFrame* frame);
 		std::shared_ptr<AVFrame> GetFrameFromFifo(int nb_samples);
 	public:
-		Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id);
+		Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id);
 		Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id);
 		void Push(const std::shared_ptr<AVFrame>& frame);
 		void Flush();

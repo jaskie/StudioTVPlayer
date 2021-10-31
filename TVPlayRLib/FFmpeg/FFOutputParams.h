@@ -8,11 +8,11 @@ namespace TVPlayR {
 			std::string AudioCodec;
 			int VideoBitrate;
 			int AudioBitrate;
+			std::string Options;
 			std::string OutputFilter;
 			std::string OutputMetadata;
 			std::string VideoMetadata;
 			std::string AudioMetadata;
-			std::string Options;
 			int VideoStreamId;
 			int AudioStreamId;
 		};

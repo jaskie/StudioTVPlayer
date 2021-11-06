@@ -9,10 +9,10 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, std::shared_ptr<AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(false, "Video encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
-		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_format))
+		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_frame->width, video_frame->height, time_base, frame_rate, video_frame->sample_aspect_ratio, video_frame->interlaced_frame))
 		, format_(enc_ctx_->pix_fmt)
 		, sample_rate_(0)
 	{
@@ -59,7 +59,7 @@ namespace TVPlayR {
 		});
 	}
 	
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, const Core::VideoFormat& video_format)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int width, int height, AVRational time_base, AVRational frame_rate, AVRational sar, bool interlaced)
 	{
 		if (!encoder)
 		{
@@ -69,15 +69,15 @@ namespace TVPlayR {
 		AVCodecContext* ctx = avcodec_alloc_context3(encoder);
 		if (!ctx)
 			return nullptr;
-		ctx->height = video_format.height();
-		ctx->width = video_format.width();
-		ctx->sample_aspect_ratio = video_format.SampleAspectRatio().av();
+		ctx->height = height;
+		ctx->width = width;
+		ctx->sample_aspect_ratio = sar;
 		ctx->pix_fmt = encoder->pix_fmts[0];
-		ctx->framerate = video_format.FrameRate().av();
-		ctx->time_base = av_inv_q(ctx->framerate);
+		ctx->framerate = frame_rate;
+		ctx->time_base = time_base;
 		ctx->bit_rate = bitrate * 1000;
 
-		if (video_format.interlaced())
+		if (interlaced)
 			ctx->flags |= (AV_CODEC_FLAG_INTERLACED_ME | AV_CODEC_FLAG_INTERLACED_DCT);
 
 		if (ctx->codec_id == AV_CODEC_ID_PRORES)
@@ -91,20 +91,6 @@ namespace TVPlayR {
 				THROW_EXCEPTION("Unsupported video dimensions.");
 			ctx->bit_rate = 220 * 1000000;
 			ctx->pix_fmt = AV_PIX_FMT_YUV422P;
-		}
-		else if (ctx->codec_id == AV_CODEC_ID_DVVIDEO)
-		{
-			ctx->width = ctx->height == 1280 ? 960 : ctx->width;
-			if (video_format.type() == Core::VideoFormatType::ntsc || video_format.type() == Core::VideoFormatType::ntsc_fha)
-				ctx->pix_fmt = AV_PIX_FMT_YUV411P;
-			else if (video_format.type() == Core::VideoFormatType::pal || video_format.type() == Core::VideoFormatType::pal_fha)
-				ctx->pix_fmt = AV_PIX_FMT_YUV420P;
-			else // dv50
-				ctx->pix_fmt = AV_PIX_FMT_YUV422P;
-			if (video_format.FrameRate().Denominator() == 1001)
-				ctx->width = ctx->height == 1080 ? 1280 : ctx->width;
-			else
-				ctx->width = ctx->height == 1080 ? 1440 : ctx->width;
 		}
 		else if (ctx->codec_id == AV_CODEC_ID_H264)
 		{

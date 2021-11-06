@@ -23,7 +23,7 @@ namespace TVPlayR {
 	}
 
 	Channel::Channel(String^ name, VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount)
-		: _channel(new Core::Channel(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), pixelFormat, audioChannelCount))
+		: _channel(new Core::Channel(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), pixelFormat, audioChannelCount, 48000))
 		, _pixelFormat(pixelFormat)
 	{ 
 		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Channel::AudioVolumeCallback);

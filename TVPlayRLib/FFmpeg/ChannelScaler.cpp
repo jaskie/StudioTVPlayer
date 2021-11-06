@@ -20,7 +20,7 @@ ChannelScaler::ChannelScaler(const Core::Channel& channel)
 bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base)
 {
 	if (!IsInitialized())
-		VideoFilterBase::CreateFilterChain(GetFilterString(frame, input_frame_rate), frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio, input_time_base);
+		VideoFilterBase::SetFilter(GetFilterString(frame, input_frame_rate), input_time_base);
 	return VideoFilterBase::Push(frame);
 }
 

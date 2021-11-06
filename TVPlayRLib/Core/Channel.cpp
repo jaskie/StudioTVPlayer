@@ -22,19 +22,23 @@ namespace TVPlayR {
 			const VideoFormat format_;
 			const TVPlayR::PixelFormat pixel_format_;
 			const int audio_channels_count_;
+			const int audio_sample_rate_;
 			const std::shared_ptr<AVFrame> empty_video_;
 			std::vector<std::shared_ptr<OverlayBase>> overlays_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
+			int64_t frames_pushed_ = 0LL;
+			int64_t samples_pushed_ = 0LL;
 			Common::Executor executor_;
 		
-			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count)
+			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
 				: Common::DebugTarget(false, "Channel " + name)
 				, channel_(channel)
 				, name_(name)
 				, format_(format)
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
+				, audio_sample_rate_(audio_sample_rate)
 				, frame_clock_(nullptr)
 				, playing_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
@@ -65,17 +69,19 @@ namespace TVPlayR {
 					{
 						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
 						auto sync = playing_source_->PullSync(channel_, audio_samples_count);
+						auto audio = sync.Audio;
+						auto video = sync.Video;
 						assert(sync.Audio->nb_samples == audio_samples_count);
-						if (!sync.Video)
-							sync.Video = empty_video_;
-						volume = audio_volume_.ProcessVolume(sync.Audio);
-						AddOverlayAndPushToOutputs(sync);					
+						if (video)
+							video = empty_video_;
+						volume = audio_volume_.ProcessVolume(audio);
+						AddOverlayAndPushToOutputs(video, audio, sync.Timecode);					
 					}
 					else
 					{
-						auto sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_), empty_video_, 0LL);
-						assert(sync.Audio->nb_samples == audio_samples_count);
-						AddOverlayAndPushToOutputs(sync);
+						auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_);
+						assert(audio->nb_samples == audio_samples_count);
+						AddOverlayAndPushToOutputs(empty_video_, audio, 0LL);
 					}
 					if (audio_volume_callback_)
 						audio_volume_callback_(volume);
@@ -83,8 +89,15 @@ namespace TVPlayR {
 			}
 
 			// used only in executor thread
-			void AddOverlayAndPushToOutputs(FFmpeg::AVSync sync)
+			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, int64_t timecode)
 			{
+				video = FFmpeg::CloneFrame(video);
+				video->pts = frames_pushed_;
+				frames_pushed_++;
+				audio = FFmpeg::CloneFrame(audio);
+				audio->pts = samples_pushed_;
+				samples_pushed_ += audio->nb_samples;
+				FFmpeg::AVSync sync(audio, video, timecode);
 				for (auto& overlay : overlays_)
 					sync = overlay->Transform(sync);
 				for (auto& device : output_devices_)
@@ -159,8 +172,8 @@ namespace TVPlayR {
 
 		};
 
-		Channel::Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count)
-			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count)) {}
+		Channel::Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
+			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count, audio_sample_rate)) {}
 		
 		Channel::~Channel() {}
 
@@ -200,6 +213,8 @@ namespace TVPlayR {
 		const TVPlayR::PixelFormat Channel::PixelFormat() const { return impl_->pixel_format_;	}
 
 		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
+
+		const int Channel::AudioSampleRate() const { return impl_->audio_sample_rate_; }
 
 		void Channel::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
 

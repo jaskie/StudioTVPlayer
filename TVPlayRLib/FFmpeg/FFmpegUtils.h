@@ -33,6 +33,8 @@ inline std::shared_ptr<AVFrame> AllocFrame()
 	return std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* ptr) { av_frame_free(&ptr); });
 }
 
+std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source);
+
 inline int64_t PtsToTime(int64_t pts, const AVRational time_base)
 {
 	if (pts == AV_NOPTS_VALUE)

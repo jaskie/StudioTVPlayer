@@ -19,7 +19,7 @@ bool VideoFilterBase::Push(std::shared_ptr<AVFrame> frame)
 }
 
 VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
-	: Common::DebugTarget(false, "VideoFilterBase")
+	: Common::DebugTarget(true, "VideoFilterBase")
 	, output_pix_fmt_(output_pix_fmt)
 { }
 
@@ -77,18 +77,28 @@ AVRational VideoFilterBase::OutputTimeBase() const
 	return av_buffersink_get_time_base(sink_ctx_);
 }
 
+AVRational VideoFilterBase::OutputFrameRate() const 
+{ 
+	assert(sink_ctx_);
+	return av_buffersink_get_frame_rate(sink_ctx_);
+}
+
+
 void VideoFilterBase::Flush() { 
 	if (source_ctx_)
 		av_buffersrc_write_frame(source_ctx_, NULL);
 	is_flushed_ = true;
 }
 
-void VideoFilterBase::CreateFilterChain(const std::string& filter_str, int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar, const AVRational input_time_base)
+void VideoFilterBase::SetFilter(const std::string& filter_str, const AVRational input_time_base)
 {
 	Reset();
 	input_time_base_ = input_time_base;
 	filter_ = filter_str;
-	CreateFilter(input_width, input_height, input_pixel_format, input_sar);
+	input_width_ = 0;
+	input_height_ = 0;
+	input_pixel_format_ = AV_PIX_FMT_NONE;
+	input_sar_ = av_make_q(1, 1);
 }
 
 void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar) 
@@ -154,7 +164,6 @@ void VideoFilterBase::Reset()
 	input_width_ = 0;
 	input_height_ = 0;
 	input_pixel_format_ = AV_PIX_FMT_NONE;
-	input_time_base_ = av_make_q(1,1);
 	input_sar_ = av_make_q(1, 1);
 }
 

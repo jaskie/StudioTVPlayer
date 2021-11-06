@@ -23,6 +23,7 @@ namespace TVPlayR {
 			int audio_channels_count_;
 			int audio_sample_rate_;
 			OutputFormat output_format_;
+			const AVCodec* video_codec_;
 			std::unique_ptr<Encoder> video_encoder_;
 			Encoder audio_encoder_;
 			std::unique_ptr<SwScale> video_scaler_;
@@ -49,19 +50,16 @@ namespace TVPlayR {
 				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
 				, buffer_(2)
+				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, executor_("Stream output: " + params.Url)
 			{
 
 
-				const AVCodec* video_encoder = avcodec_find_encoder_by_name(params.VideoCodec.c_str());
-
 				if (params.OutputFilter.empty())
-					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_encoder->pix_fmts[0]);
+					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
-					video_filter_ = std::make_unique<OutputVideoFilter>(channel, params.OutputFilter, video_encoder->pix_fmts[0]);
+					video_filter_ = std::make_unique<OutputVideoFilter>(channel.Format().FrameRate().av(), params.OutputFilter, video_codec_->pix_fmts[0]);
 
-				video_encoder_ = std::make_unique<Encoder>(output_format_, video_encoder, params.VideoBitrate, format_, &options_, params.VideoMetadata, params.VideoStreamId);
-				
 				if (options_)
 				{
 					char* unused_options;
@@ -101,10 +99,24 @@ namespace TVPlayR {
 					AVSync sync;
 					if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 					{
-						video_encoder_->Push(video_scaler_->Scale(sync.Video));
+						std::shared_ptr<AVFrame> video;
+						if (video_filter_)
+						{
+							video_filter_->Push(sync.Video);
+							while (video = video_filter_->Pull())
+							{
+								video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, video, video_filter_->OutputTimeBase(), video_filter_->OutputFrameRate(), &options_, params_.VideoMetadata, params_.VideoStreamId);
+								video_encoder_->Push(video);
+								PushPackets(*video_encoder_);
+							}
+						} 
+						else if (video_scaler_)
+						{
+							video_encoder_->Push(video_scaler_->Scale(sync.Video));
+							PushPackets(*video_encoder_);
+						}
 						audio_encoder_.Push(audio_resampler_.Resample(sync.Audio));
 						last_video_ = sync.Video;
-						PushPackets(*video_encoder_);
 						PushPackets(audio_encoder_);
 					}
 					else

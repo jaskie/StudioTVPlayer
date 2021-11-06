@@ -135,7 +135,7 @@ void AudioMuxer::Reset()
 void AudioMuxer::Initialize()
 {
 	if (std::find_if(decoders_.begin(), decoders_.end(), [](const std::unique_ptr<Decoder>& decoder) -> bool { return decoder->MediaType() != AVMEDIA_TYPE_AUDIO; }) != decoders_.end())
-		THROW_EXCEPTION("AudioMuxer::CreateFilterChain() got non-audio stream")
+		THROW_EXCEPTION("AudioMuxer::Initialize() got non-audio stream")
 
 	source_ctx_.clear();
 	is_eof_ = false;

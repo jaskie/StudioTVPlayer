@@ -42,7 +42,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2);
+		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
 		//Decklink::DecklinkIterator iterator;
 		//int device_index = 0;
 		//for (size_t i = 0; i < iterator.Size(); i++)
@@ -71,16 +71,16 @@ int main()
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
+		//auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
 		//input->Seek(seek);
-		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
+		/*input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
 		input->Play();
 		input->SetIsLoop(true);
-		channel.Load(input);
+		channel.Load(input);*/
 		while (true)
 		{
 			char i = std::cin.get();
@@ -88,7 +88,7 @@ int main()
 				break;
 			if (i == 'c')
 				channel.Clear();
-			if (i == 's')
+			/*if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
 				channel.Load(input);
@@ -96,7 +96,7 @@ int main()
 				if (input->IsPlaying())
 					input->Pause();
 				else	 
-					input->Play();
+					input->Play();*/
 		}
 		channel.SetFrameClock(nullptr);
 		channel.RemoveOutput(ndi);

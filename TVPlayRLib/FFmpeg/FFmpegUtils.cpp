@@ -5,6 +5,12 @@
 
 namespace TVPlayR {
 	namespace FFmpeg {
+
+		std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source)
+		{
+			return std::shared_ptr<AVFrame>(av_frame_clone(source.get()), [](AVFrame* ptr) { av_frame_free(&ptr); });
+		}
+
 		std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt)
 		{
 			auto frame = AllocFrame();

@@ -10,8 +10,8 @@ namespace TVPlayR {
 			public VideoFilterBase
 		{
 		public:
-			OutputVideoFilter(const Core::Channel& channel, const std::string& filter_str, AVPixelFormat output_pix_fmt);
-
+			OutputVideoFilter(AVRational input_frame_rate, const std::string& filter_str, AVPixelFormat output_pix_fmt);
+			bool Push(std::shared_ptr<AVFrame> frame);
 		};
 
 	}

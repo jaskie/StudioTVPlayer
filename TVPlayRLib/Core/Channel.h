@@ -15,7 +15,7 @@ class Channel final : public Common::NonCopyable
 {
 public:
 	typedef void(*AUDIO_VOLUME_CALLBACK) (std::vector<double>&);
-	Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count);
+	Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
 	~Channel();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);
 	void RemoveOutput(std::shared_ptr<OutputDevice> device);
@@ -28,7 +28,7 @@ public:
 	const TVPlayR::PixelFormat PixelFormat() const;
 	const int AudioChannelsCount() const;
 	const AVSampleFormat AudioSampleFormat() const { return AVSampleFormat::AV_SAMPLE_FMT_S32; }
-	const int AudioSampleRate() const { return 48000; }
+	const int AudioSampleRate() const;
 	void SetVolume(double volume);
 	void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback);
 	const std::string& Name() const;

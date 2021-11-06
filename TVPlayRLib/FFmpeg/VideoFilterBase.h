@@ -19,12 +19,13 @@ public:
 	AVRational OutputSampleAspectRatio();
 	AVPixelFormat OutputPixelFormat();
 	virtual AVRational OutputTimeBase() const override;
+	AVRational OutputFrameRate() const;
 	virtual void Flush() override;
 	void Reset();
 	bool IsInitialized() const;
 protected:
 	bool Push(std::shared_ptr<AVFrame> frame);
-	void CreateFilterChain(const std::string& filter_str, int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar, const AVRational input_time_base );
+	void SetFilter(const std::string& filter_str, const AVRational input_time_base );
 private:
 	std::string filter_;
 	AVFilterContext* source_ctx_ = NULL;

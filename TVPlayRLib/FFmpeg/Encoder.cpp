@@ -14,18 +14,16 @@ namespace TVPlayR {
 		, encoder_(encoder)
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_frame->width, video_frame->height, time_base, frame_rate, video_frame->sample_aspect_ratio, video_frame->interlaced_frame))
 		, format_(enc_ctx_->pix_fmt)
-		, sample_rate_(0)
 	{
 		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
 	}
 
 
-	Encoder::Encoder(const OutputFormat& output_format, const std::string& encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(false, "Audio encoder for " + output_format.GetUrl())
-		, encoder_(avcodec_find_encoder_by_name(encoder.c_str()))
+		, encoder_(encoder)
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
 		, format_(enc_ctx_->sample_fmt)
-		, sample_rate_(enc_ctx_->sample_rate)
 	{
 		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
 		if (enc_ctx_->frame_size > 0)

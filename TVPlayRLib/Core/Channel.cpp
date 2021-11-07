@@ -72,7 +72,7 @@ namespace TVPlayR {
 						auto audio = sync.Audio;
 						auto video = sync.Video;
 						assert(sync.Audio->nb_samples == audio_samples_count);
-						if (video)
+						if (!video)
 							video = empty_video_;
 						volume = audio_volume_.ProcessVolume(audio);
 						AddOverlayAndPushToOutputs(video, audio, sync.Timecode);					

@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
-			: Common::DebugTarget(true, "OutputFormat " + url)
+			: Common::DebugTarget(false, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
 			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
@@ -14,6 +14,11 @@ namespace TVPlayR {
 
 		void OutputFormat::Push(std::shared_ptr<AVPacket> packet)
 		{
+			if (!is_initialized_)
+			{
+				buffer_.emplace_back(packet);
+				DebugPrintLine("Buffering packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+			}
 			DebugPrintLine("Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 		}
@@ -27,11 +32,18 @@ namespace TVPlayR {
 
 		void OutputFormat::Initialize(const std::string& stream_metadata)
 		{
+			assert(!is_initialized_);
 			DebugPrintLine("Writing header");
 			format_ctx_->metadata = ReadOptions(stream_metadata);
 			format_ctx_->max_delay = AV_TIME_BASE * 7 / 10;
 			format_ctx_->flags = AVFMT_FLAG_FLUSH_PACKETS | format_ctx_->flags;
 			THROW_ON_FFMPEG_ERROR(avformat_write_header(format_ctx_.get(), &options_));
+			is_initialized_ = true;
+			while (!buffer_.empty())
+			{
+				Push(buffer_.front());
+				buffer_.pop_front();
+			}
 		}
 
 		AVFormatContext* OutputFormat::AllocFormatContext(const std::string& url)

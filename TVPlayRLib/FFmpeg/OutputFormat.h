@@ -18,6 +18,8 @@ namespace TVPlayR {
 			const std::string url_;
 			AVDictionary*& options_;
 			AVFormatContextPtr format_ctx_;
+			bool is_initialized_ = false;
+			std::deque <std::shared_ptr<AVPacket>> buffer_;
 			AVFormatContext* AllocFormatContext(const std::string& url);
 			void FreeFormatContext(AVFormatContext* ctx);
 		};

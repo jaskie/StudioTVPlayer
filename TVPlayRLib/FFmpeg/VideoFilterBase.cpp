@@ -19,7 +19,7 @@ bool VideoFilterBase::Push(std::shared_ptr<AVFrame> frame)
 }
 
 VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
-	: Common::DebugTarget(true, "VideoFilterBase")
+	: Common::DebugTarget(false, "VideoFilterBase")
 	, output_pix_fmt_(output_pix_fmt)
 { }
 

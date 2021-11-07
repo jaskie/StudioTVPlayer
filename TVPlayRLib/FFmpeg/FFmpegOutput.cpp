@@ -24,11 +24,12 @@ namespace TVPlayR {
 			int audio_sample_rate_;
 			OutputFormat output_format_;
 			const AVCodec* video_codec_;
-			std::unique_ptr<Encoder> video_encoder_;
-			Encoder audio_encoder_;
+			const AVCodec* audio_codec_;
 			std::unique_ptr<SwScale> video_scaler_;
 			std::unique_ptr<OutputVideoFilter> video_filter_;
 			SwResample audio_resampler_;
+			std::unique_ptr<Encoder> video_encoder_;
+			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
@@ -47,37 +48,21 @@ namespace TVPlayR {
 				, audio_channels_count_(channel.AudioChannelsCount())
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
-				, audio_encoder_(output_format_, params.AudioCodec, params.AudioBitrate, channel.AudioSampleRate(), channel.AudioChannelsCount(), &options_, params.AudioMetadata, params.AudioStreamId)
-				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), audio_encoder_.SampleRate(), static_cast<AVSampleFormat>(audio_encoder_.Format()))
+				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]))
 				, buffer_(2)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
+				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
 				, executor_("Stream output: " + params.Url)
 			{
 
-
-				if (params.OutputFilter.empty())
+				if (params.VideoFilter.empty())
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
-					video_filter_ = std::make_unique<OutputVideoFilter>(channel.Format().FrameRate().av(), params.OutputFilter, video_codec_->pix_fmts[0]);
+					video_filter_ = std::make_unique<OutputVideoFilter>(channel.Format().FrameRate().av(), params.VideoFilter, video_codec_->pix_fmts[0]);
 
-				if (options_)
-				{
-					char* unused_options;
-					if (av_dict_count(options_) > 0 && av_dict_get_string(options_, &unused_options, '=', ',') >= 0 && unused_options)
-					{
-						DebugPrintLine("Following options were not parsed: " + std::string(unused_options));
-						delete(unused_options);
-					}
-					av_dict_free(&options_);
-				}
 				executor_.begin_invoke([this]
 				{
 					auto time = clock_.now().time_since_epoch().count();
-
-					output_format_.Initialize(params_.OutputMetadata);
-#ifdef DEBUG
-					av_dump_format(output_format_.Ctx(), 0, params_.Url.c_str(), true);
-#endif
 				});
 				
 			}
@@ -87,8 +72,8 @@ namespace TVPlayR {
 				executor_.invoke([this]
 				{
 					video_encoder_->Flush();
-					audio_encoder_.Flush();
-					PushPackets(*video_encoder_);
+					audio_encoder_->Flush();
+					PushPackets(video_encoder_);
 					PushPackets(audio_encoder_);
 				});
 			}
@@ -105,18 +90,33 @@ namespace TVPlayR {
 							video_filter_->Push(sync.Video);
 							while (video = video_filter_->Pull())
 							{
-								video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, video, video_filter_->OutputTimeBase(), video_filter_->OutputFrameRate(), &options_, params_.VideoMetadata, params_.VideoStreamId);
+								if (!video_encoder_)
+								{
+									video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, video, video_filter_->OutputTimeBase(), video_filter_->OutputFrameRate(), &options_, params_.VideoMetadata, params_.VideoStreamId);
+									InitializeOuputIfPossible();
+								}
 								video_encoder_->Push(video);
-								PushPackets(*video_encoder_);
+								PushPackets(video_encoder_);
 							}
 						} 
 						else if (video_scaler_)
 						{
+							auto video = video_scaler_->Scale(sync.Video);
+							if (!video_encoder_)
+							{
+								video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, video, format_.FrameRate().invert().av(), format_.FrameRate().av(), &options_, params_.VideoMetadata, params_.VideoStreamId);
+								InitializeOuputIfPossible();
+							}
 							video_encoder_->Push(video_scaler_->Scale(sync.Video));
-							PushPackets(*video_encoder_);
+							PushPackets(video_encoder_);
 						}
-						audio_encoder_.Push(audio_resampler_.Resample(sync.Audio));
 						last_video_ = sync.Video;
+						if (!audio_encoder_)
+						{
+							audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_.OutputSampleRate(), audio_resampler_.OutputChannelCount(), &options_, params_.AudioMetadata, params_.AudioStreamId);
+							InitializeOuputIfPossible();
+						}
+						audio_encoder_->Push(audio_resampler_.Resample(sync.Audio));
 						PushPackets(audio_encoder_);
 					}
 					else
@@ -127,11 +127,30 @@ namespace TVPlayR {
 				});
 			}
 
-			void PushPackets(Encoder& encoder)
+			void InitializeOuputIfPossible()
+			{
+				if (video_encoder_ && audio_encoder_)
+					output_format_.Initialize(params_.OutputMetadata);
+#ifdef DEBUG
+				av_dump_format(output_format_.Ctx(), 0, params_.Url.c_str(), true);
+#endif
+				if (options_)
+				{
+					char* unused_options;
+					if (av_dict_count(options_) > 0 && av_dict_get_string(options_, &unused_options, '=', ',') >= 0 && unused_options)
+					{
+						DebugPrintLine("Following options were not parsed: " + std::string(unused_options));
+						av_free(unused_options);
+					}
+					av_dict_free(&options_);
+				}
+			}
+
+			void PushPackets(std::unique_ptr<Encoder>& encoder)
 			{
 				while (true)
 				{
-					auto packet = encoder.Pull();
+					auto packet = encoder->Pull();
 					if (!packet)
 						return;
 					output_format_.Push(packet);

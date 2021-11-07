@@ -148,13 +148,8 @@ namespace TVPlayR {
 
 			void PushPackets(std::unique_ptr<Encoder>& encoder)
 			{
-				while (true)
-				{
-					auto packet = encoder->Pull();
-					if (!packet)
-						return;
+				while (auto packet = encoder->Pull())
 					output_format_.Push(packet);
-				}
 			}
 
 			int AudioSamplesRequired()

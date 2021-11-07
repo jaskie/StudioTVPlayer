@@ -55,7 +55,7 @@ int main()
 		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
 		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-			"hevc_nvenc",															// VideoCodec
+			"libx264",																// VideoCodec
 			"aac", 																	// AudioCodec
 			4000,																	// VideoBitrate
 			128, 																	// AudioBitrate

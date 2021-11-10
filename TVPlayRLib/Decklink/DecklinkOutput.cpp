@@ -175,14 +175,21 @@ namespace TVPlayR {
 				FFmpeg::AVSync sync;
 				if (buffer_.try_take(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine("Frame not received");
+				if (sync.Video)
+					ScheduleVideo(sync.Video, sync.Timecode);
+				else
+					ScheduleVideo(last_video_, last_video_time_);
 
-				if (!sync.Video)
-				{
-					sync = FFmpeg::AVSync(FFmpeg::CreateSilentAudioFrame(audio_samples_required, audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32), last_video_, last_video_time_);
-					DebugPrintLine("Created empty audio with " + std::to_string(audio_samples_required) + " audio samples");
-				}
-				ScheduleVideo(sync.Video, sync.Timecode);
-				ScheduleAudio(sync.Audio);
+				if (sync.Audio)
+					ScheduleAudio(sync.Audio);
+				else
+					if (audio_samples_required > 0)
+					{
+						auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_required, audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32);
+						DebugPrintLine("Created empty audio with " + std::to_string(audio_samples_required) + " audio samples");
+						ScheduleAudio(audio);
+					}
+				
 				scheduled_frames_++;
 
 #ifdef DEBUG

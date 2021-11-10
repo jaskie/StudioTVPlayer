@@ -69,8 +69,8 @@ namespace TVPlayR {
 					{
 						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
 						auto sync = playing_source_->PullSync(channel_, audio_samples_count);
-						auto audio = sync.Audio;
-						auto video = sync.Video;
+						auto& audio = sync.Audio;
+						auto& video = sync.Video;
 						assert(sync.Audio->nb_samples == audio_samples_count);
 						if (!video)
 							video = empty_video_;

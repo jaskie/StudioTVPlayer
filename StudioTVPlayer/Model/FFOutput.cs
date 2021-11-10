@@ -9,7 +9,7 @@
         public string AudioCodec { get; set; }
         public int VideoBitrate { get; set; }
         public int AudioBitrate { get; set; }
-        public string OutputFilter { get; set; }
+        public string VideoFilter { get; set; }
         public string OutputMetadata { get; set; }
         public string AudioMetadata { get; set; }
         public string VideoMetadata { get; set; }
@@ -34,17 +34,12 @@
         {
             _ffOutput = new TVPlayR.FFOutput(
                 Url,
-                VideoCodec,
-                AudioCodec,
-                VideoBitrate * 1024,
-                AudioBitrate * 1024,
-                OutputFilter,
-                OutputMetadata,
-                VideoMetadata,
-                AudioMetadata,
-                Options,
-                VideoStreamId,
-                AudioStreamId
+                VideoCodec, AudioCodec,
+                VideoBitrate, AudioBitrate,
+                Options, 
+                VideoFilter,
+                OutputMetadata, VideoMetadata, AudioMetadata,
+                VideoStreamId, AudioStreamId
                 );
         }
     }

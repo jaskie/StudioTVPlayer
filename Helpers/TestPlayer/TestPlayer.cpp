@@ -25,8 +25,7 @@ static void avlog_cb(void * ptr, int level, const char * fmt, va_list vargs) {
 		char line[ERROR_STRING_LENGTH];
 		static int prefix(1);
 		av_log_format_line(ptr, level, fmt, vargs, line, ERROR_STRING_LENGTH, &prefix);
-		std::string line_str(line);
-		OutputDebugStringA((line_str + "\n").c_str());
+		OutputDebugStringA(line);
 	}
 }
 
@@ -43,31 +42,31 @@ int main()
 #endif
 		Common::ComInitializer com_initializer;
 		Core::Channel channel("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
-		//Decklink::DecklinkIterator iterator;
-		//int device_index = 0;
-		//for (size_t i = 0; i < iterator.Size(); i++)
-		//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		//auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
-		//channel.SetFrameClock(decklink_output);
-		//channel.AddOutput(decklink_output);
+		Decklink::DecklinkIterator iterator;
+		int device_index = 0;
+		for (size_t i = 0; i < iterator.Size(); i++)
+			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
+		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
+		channel.SetFrameClock(decklink_output);
+		channel.AddOutput(decklink_output);
 		
-		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
-		channel.SetFrameClock(ndi);
-		channel.AddOutput(ndi);
-		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-			"libx264",																// VideoCodec
-			"aac", 																	// AudioCodec
-			4000,																	// VideoBitrate
-			128, 																	// AudioBitrate
-			"g=18,bf=2",															// Options
-			"",//"bwdif,scale=256x128",													// VideoFilter
-			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
-			"",																		// VideoMetadata
-			""																		// AudioMetadata
-		};
+		//auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		//channel.SetFrameClock(ndi);
+		//channel.AddOutput(ndi);
+		//FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
+		//	"hevc_nvenc",															// VideoCodec
+		//	"aac", 																	// AudioCodec
+		//	4000,																	// VideoBitrate
+		//	128, 																	// AudioBitrate
+		//	"g=18,bf=0",															// Options
+		//	"bwdif,scale=256x128",													// VideoFilter
+		//	"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
+		//	"",																		// VideoMetadata
+		//	""																		// AudioMetadata
+		//};
 		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
-		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
-		channel.AddOutput(stream);
+		/*auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
+		channel.AddOutput(stream);*/
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
@@ -88,7 +87,7 @@ int main()
 				break;
 			if (i == 'c')
 				channel.Clear();
-			if (i == 's')
+			/*if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
 				channel.Load(input);
@@ -96,12 +95,12 @@ int main()
 				if (input->IsPlaying())
 					input->Pause();
 				else	 
-					input->Play();
+					input->Play();*/
 		}
 		channel.SetFrameClock(nullptr);
-		channel.RemoveOutput(ndi);
-		//channel.RemoveOutput(decklink_output);
-		channel.RemoveOutput(stream);
+		//channel.RemoveOutput(ndi);
+		channel.RemoveOutput(decklink_output);
+		//channel.RemoveOutput(stream);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

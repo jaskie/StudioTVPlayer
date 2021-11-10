@@ -4,17 +4,12 @@ namespace TVPlayR {
 		struct FFOutputParams
 		{
 			std::string Url;
-			std::string VideoCodec;
-			std::string AudioCodec;
-			int VideoBitrate;
-			int AudioBitrate;
+			std::string VideoCodec, AudioCodec;
+			int VideoBitrate, AudioBitrate;
 			std::string Options;
 			std::string VideoFilter;
-			std::string OutputMetadata;
-			std::string VideoMetadata;
-			std::string AudioMetadata;
-			int VideoStreamId;
-			int AudioStreamId;
+			std::string OutputMetadata, VideoMetadata, AudioMetadata;
+			int VideoStreamId, AudioStreamId;
 		};
 
 	}

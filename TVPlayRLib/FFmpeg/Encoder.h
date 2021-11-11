@@ -19,7 +19,6 @@ namespace TVPlayR {
 		int audio_frame_size_ = 0;
 		int64_t output_timestamp_ = 0LL;
 		std::deque<std::shared_ptr<AVFrame>> frame_buffer_;
-		std::mutex mutex_;
 		const int format_;
 		bool is_eof_ = false;
 		std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> GetAudioContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int sample_rate, int channels_count);

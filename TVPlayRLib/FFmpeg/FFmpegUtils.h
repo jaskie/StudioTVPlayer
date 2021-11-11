@@ -23,15 +23,9 @@ if (error_code < 0) \
 	throw TVPlayR::Common::TVPlayRException(exception_message);\
 	}
 
-inline std::shared_ptr<AVPacket> AllocPacket()
-{
-	return std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* p) { av_packet_free(&p); });
-}
+std::shared_ptr<AVPacket> AllocPacket();
 
-inline std::shared_ptr<AVFrame> AllocFrame()
-{
-	return std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* ptr) { av_frame_free(&ptr); });
-}
+std::shared_ptr<AVFrame> AllocFrame();
 
 std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source);
 

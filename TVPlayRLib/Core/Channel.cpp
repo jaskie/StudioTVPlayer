@@ -80,7 +80,7 @@ namespace TVPlayR {
 					else
 					{
 						auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_);
-						assert(audio->nb_samples == audio_samples_count);
+						assert(audio_samples_count == 0 || audio->nb_samples == audio_samples_count);
 						AddOverlayAndPushToOutputs(empty_video_, audio, 0LL);
 					}
 					if (audio_volume_callback_)
@@ -91,12 +91,15 @@ namespace TVPlayR {
 			// used only in executor thread
 			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, int64_t timecode)
 			{
-				video = FFmpeg::CloneFrame(video);
+				//video = FFmpeg::CloneFrame(video);
 				video->pts = frames_pushed_;
 				frames_pushed_++;
-				audio = FFmpeg::CloneFrame(audio);
-				audio->pts = samples_pushed_;
-				samples_pushed_ += audio->nb_samples;
+				//audio = FFmpeg::CloneFrame(audio);
+				if (audio)
+				{
+					audio->pts = samples_pushed_;
+					samples_pushed_ += audio->nb_samples;
+				}
 				FFmpeg::AVSync sync(audio, video, timecode);
 				for (auto& overlay : overlays_)
 					sync = overlay->Transform(sync);

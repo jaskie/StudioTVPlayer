@@ -6,21 +6,38 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
+
+		std::shared_ptr<AVPacket> AllocPacket()
+		{
+			return std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* p) { av_packet_free(&p); });
+		}
+
+		static void FreeFrame(AVFrame* f) { av_frame_free(&f); }
+
+		std::shared_ptr<AVFrame> AllocFrame()
+		{
+			return std::shared_ptr<AVFrame>(av_frame_alloc(), FreeFrame);
+		}
+
 		std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source)
 		{
-			return std::shared_ptr<AVFrame>(av_frame_clone(source.get()), [](AVFrame* ptr) { av_frame_free(&ptr); });
+			AVFrame* frame = av_frame_alloc();
+			THROW_ON_FFMPEG_ERROR(av_frame_ref(frame, source.get()));
+			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
 		std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt)
 		{
-			auto frame = AllocFrame();
+			AVFrame* frame = av_frame_alloc();
+			if (!frame)
+				THROW_EXCEPTION("Frame not allocated");
 			frame->width = format.width();
 			frame->height = format.height();
 			frame->display_picture_number = -1;
 			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
 			frame->pict_type = AV_PICTURE_TYPE_I;
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
-			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
 			if (pix_fmt == TVPlayR::PixelFormat::bgra)
 			{
 				// to make transparent alpha
@@ -31,23 +48,25 @@ namespace TVPlayR {
 				ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };
 				THROW_ON_FFMPEG_ERROR(av_image_fill_black(frame->data, linesize, static_cast<AVPixelFormat>(frame->format), AVColorRange::AVCOL_RANGE_MPEG, frame->width, frame->height));
 			}
-			return frame;
+			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
 		std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format)
 		{
-			if (samples_count < 0)
-				samples_count = 0;
+			if (samples_count <= 0)
+				return nullptr;
 			assert(num_channels <= 63);
-			auto frame = AllocFrame();
+			AVFrame* frame = av_frame_alloc();
+			if (!frame)
+				THROW_EXCEPTION("Frame not allocated");
 			frame->format = format;
 			frame->channels = num_channels;
 			frame->channel_layout = 0x7FFFFFFFFFFFFFFFULL >> (63 - num_channels);
 			frame->nb_samples = samples_count;
 			frame->sample_rate = 48000;
-			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
 			THROW_ON_FFMPEG_ERROR(av_samples_set_silence(frame->data, 0, frame->nb_samples, frame->channels, static_cast<AVSampleFormat>(frame->format)));
-			return frame;
+			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
 		void DumpFilter(const std::string& filter_str, AVFilterGraph* graph)

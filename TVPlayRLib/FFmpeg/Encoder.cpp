@@ -127,7 +127,6 @@ namespace TVPlayR {
 	
 	void Encoder::Push(const std::shared_ptr<AVFrame>& frame)
 	{
-		std::lock_guard<std::mutex> lock(mutex_);
 		if (fifo_)
 		{
 			if (frame->nb_samples > av_audio_fifo_space(fifo_.get()))
@@ -181,12 +180,12 @@ namespace TVPlayR {
 
 	void Encoder::Flush()
 	{
-		std::lock_guard<std::mutex> lock(mutex_);
 		if (fifo_)
 		{
 			int fifo_samples = av_audio_fifo_size(fifo_.get());
 			assert(fifo_samples < audio_frame_size_);
-			frame_buffer_.emplace_back(GetFrameFromFifo(fifo_samples));
+			if (fifo_samples > 0)
+				frame_buffer_.emplace_back(GetFrameFromFifo(fifo_samples));
 		}
 		frame_buffer_.emplace_back(nullptr);
 	}
@@ -196,7 +195,6 @@ namespace TVPlayR {
 		while (true)
 		{
 			std::shared_ptr<AVPacket> packet = AllocPacket();
-			std::lock_guard<std::mutex> lock(mutex_);
 			auto ret = avcodec_receive_packet(enc_ctx_.get(), packet.get());
 			switch (ret)
 			{

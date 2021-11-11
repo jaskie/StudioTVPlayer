@@ -18,6 +18,7 @@ namespace TVPlayR {
 			const FFOutputParams& GetStreamOutputParams();
 		private:
 			const FFOutputParams params_;
+			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			struct implementation;
 			std::unique_ptr<implementation> impl_;
 		};

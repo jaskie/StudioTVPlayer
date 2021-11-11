@@ -96,15 +96,18 @@ namespace TVPlayR {
 					DebugPrintLine("frame late");
 				}
 				video_frames_pushed_++;
-				audio_samples_pushed_ += audio->nb_samples;
 				if (frame_requested_callback_)
 					frame_requested_callback_(AudioSamplesRequired());
 				if (format_.type() == Core::VideoFormatType::invalid)
 					return;
 				NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, last_video_, last_video_time_);
 				ndi_->send_send_video_v2(send_instance_, &ndi_video);
-				NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(audio, last_video_time_);
-				ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+				if (audio)
+				{
+					audio_samples_pushed_ += audio->nb_samples;
+					NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(audio, last_video_time_);
+					ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+				}
 				if (format_.type() != Core::VideoFormatType::invalid)
 					executor_.begin_invoke([this] { Tick(); }); // next frame
 			}

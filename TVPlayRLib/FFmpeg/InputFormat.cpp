@@ -6,21 +6,21 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		AVFormatContext* CreateContext(const std::string& file_name)
+		AVFormatContext* CreateContext(const std::string& file_name, bool dump)
 		{
 			AVFormatContext* ctx = NULL;
 			THROW_ON_FFMPEG_ERROR(avformat_open_input(&ctx, file_name.c_str(), NULL, NULL) == 0 && ctx);
 			if (!ctx)
-				THROW_EXCEPTION("Format context not created for " + file_name)
-#ifdef DEBUG
-			av_dump_format(ctx, 0, file_name.c_str(), 0);
-#endif // DEBUG
+				THROW_EXCEPTION("Format context not created for " + file_name);
+			if (dump)
+				av_dump_format(ctx, 0, file_name.c_str(), 0);
 			return ctx;
 		}
 
 
 InputFormat::InputFormat(const std::string& file_name)
-	: format_context_(CreateContext(file_name), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
+	: DebugTarget(false, "Input format: " + file_name)
+	, format_context_(CreateContext(file_name, IsDebugOutput()), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
 	, file_name_(file_name)
 {
 }

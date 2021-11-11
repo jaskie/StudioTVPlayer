@@ -9,7 +9,7 @@ namespace TVPlayR {
 		public:
 			typedef std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> AVFormatContextPtr;
 			OutputFormat(const std::string& url, AVDictionary*& options);
-			void Push(std::shared_ptr<AVPacket> packet);
+			void Push(const std::shared_ptr<AVPacket>& packet);
 			void Flush();
 			void Initialize(const std::string& stream_metadata);
 			AVFormatContext* Ctx() const { return format_ctx_.get(); }
@@ -19,7 +19,7 @@ namespace TVPlayR {
 			AVDictionary*& options_;
 			AVFormatContextPtr format_ctx_;
 			bool is_initialized_ = false;
-			std::deque <std::shared_ptr<AVPacket>> buffer_;
+			std::deque<std::shared_ptr<AVPacket>> initialization_queue_;
 			AVFormatContext* AllocFormatContext(const std::string& url);
 			void FreeFormatContext(AVFormatContext* ctx);
 		};

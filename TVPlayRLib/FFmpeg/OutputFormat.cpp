@@ -5,19 +5,20 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
-			: Common::DebugTarget(false, "OutputFormat " + url)
+			: Common::DebugTarget(true, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
 			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
 		{
 		}
 
-		void OutputFormat::Push(std::shared_ptr<AVPacket> packet)
+		void OutputFormat::Push(const std::shared_ptr<AVPacket>& packet)
 		{
 			if (!is_initialized_)
 			{
-				buffer_.emplace_back(packet);
-				DebugPrintLine("Buffering packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				initialization_queue_.emplace_back(packet);
+				DebugPrintLine("Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				return;
 			}
 			DebugPrintLine("Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
@@ -38,12 +39,16 @@ namespace TVPlayR {
 			format_ctx_->max_delay = AV_TIME_BASE * 7 / 10;
 			format_ctx_->flags = AVFMT_FLAG_FLUSH_PACKETS | format_ctx_->flags;
 			THROW_ON_FFMPEG_ERROR(avformat_write_header(format_ctx_.get(), &options_));
-			is_initialized_ = true;
-			while (!buffer_.empty())
+			if (IsDebugOutput())
+				av_dump_format(format_ctx_.get(), 0, url_.c_str(), true);
+			while (!initialization_queue_.empty())
 			{
-				Push(buffer_.front());
-				buffer_.pop_front();
+				std::shared_ptr<AVPacket> packet = initialization_queue_.front();
+				initialization_queue_.pop_front();
+				DebugPrintLine("Sending queued packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 			}
+			is_initialized_ = true;
 		}
 
 		AVFormatContext* OutputFormat::AllocFormatContext(const std::string& url)

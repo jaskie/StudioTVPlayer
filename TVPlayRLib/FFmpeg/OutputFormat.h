@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		class OutputFormat final : Common::NonCopyable, Common::DebugTarget
+		class OutputFormat final : private Common::NonCopyable, private Common::DebugTarget
 		{
 		public:
 			typedef std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> AVFormatContextPtr;
@@ -14,11 +14,13 @@ namespace TVPlayR {
 			void Initialize(const std::string& stream_metadata);
 			AVFormatContext* Ctx() const { return format_ctx_.get(); }
 			const std::string& GetUrl() const { return url_; }
+			bool IsFlushed() const { return is_flushed_; }
 		private:
 			const std::string url_;
 			AVDictionary*& options_;
 			AVFormatContextPtr format_ctx_;
 			bool is_initialized_ = false;
+			bool is_flushed_ = false;
 			std::deque<std::shared_ptr<AVPacket>> initialization_queue_;
 			AVFormatContext* AllocFormatContext(const std::string& url);
 			void FreeFormatContext(AVFormatContext* ctx);

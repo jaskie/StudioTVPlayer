@@ -54,12 +54,12 @@ int main()
 		//channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
 		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-			"mpeg2video",															// VideoCodec
+			"libx264",															// VideoCodec
 			"aac", 																	// AudioCodec
 			4000,																	// VideoBitrate
 			128, 																	// AudioBitrate
 			"g=18,bf=0",															// Options
-			"bwdif,scale=384x216",										// VideoFilter
+			"",//"bwdif,scale=384x216,interlace",										// VideoFilter
 			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
 			"",															// VideoMetadata
 			"language=pol",												// AudioMetadata

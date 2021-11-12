@@ -28,8 +28,8 @@ namespace TVPlayR {
 		{
 			DebugPrintLine("Flushing");
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), NULL));
+			is_flushed_ = true;
 		}
-
 
 		void OutputFormat::Initialize(const std::string& stream_metadata)
 		{

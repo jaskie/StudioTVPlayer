@@ -34,6 +34,8 @@ namespace TVPlayR {
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
+			int64_t video_frames_requested_ = 0LL;
+			int64_t audio_samples_requested_ = 0LL;
 			int64_t video_frames_pushed_ = 0LL;
 			int64_t audio_samples_pushed_ = 0LL;
 			int64_t last_video_time_ = 0LL;
@@ -41,7 +43,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const Core::Channel& channel, const FFOutputParams& params, FRAME_REQUESTED_CALLBACK frame_requested_callback)
-				: Common::DebugTarget(true, "FFmpeg output: " + params.Url)
+				: Common::DebugTarget(false, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, frame_requested_callback_(frame_requested_callback)
 				, format_(channel.Format())
@@ -51,22 +53,17 @@ namespace TVPlayR {
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
 				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]))
-				, buffer_(3)
+				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
 				, executor_("Stream output: " + params.Url)
 			{
-
 				if (params.VideoFilter.empty())
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(channel.Format().FrameRate().av(), params.VideoFilter, video_codec_->pix_fmts[0]);
 				if (frame_requested_callback)
-					executor_.begin_invoke([this] 
-				{
-					stream_start_time_ = clock::now();
-					Tick();
-				});
+					executor_.begin_invoke([this] { InitializeFrameRequester(); });
 			}
 
 			~implementation()
@@ -75,11 +72,22 @@ namespace TVPlayR {
 				{
 					PushToEncoder(video_encoder_, nullptr);
 					PushToEncoder(audio_encoder_, nullptr);
+					output_format_.Flush();
 				});
+			}
+
+			void InitializeFrameRequester()
+			{
+				assert(executor_.is_current());
+				stream_start_time_ = clock::now();
+				while (video_frames_requested_ <= static_cast<int64_t>(buffer_.bounded_capacity() / 2))
+					RequestFrameFromChannel();
+				Tick();
 			}
 			
 			void Tick()
 			{
+				assert(executor_.is_current());
 				AVSync sync;
 				if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 				{
@@ -106,7 +114,6 @@ namespace TVPlayR {
 						}
 						PushToEncoder(video_encoder_, video);
 					}
-					video_frames_pushed_++;
 					if (!audio_encoder_)
 					{
 						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_.OutputSampleRate(), audio_resampler_.OutputChannelCount(), &options_, params_.AudioMetadata, params_.AudioStreamId);
@@ -115,25 +122,33 @@ namespace TVPlayR {
 					if (sync.Audio)
 					{
 						PushToEncoder(audio_encoder_, audio_resampler_.Resample(sync.Audio));
-						audio_samples_pushed_ += sync.Audio->nb_samples;
 					}
 				}
 				else
 					DebugPrintLine("Buffer didn't return frame");
-				
-				if (frame_requested_callback_)
-				{
-					frame_requested_callback_(AudioSamplesRequired());
+				RequestFrameFromChannel();
+				if (!output_format_.IsFlushed())
 					executor_.begin_invoke([this]
 					{
 						WaitForNextFrameTime();
 						Tick();
 					});
-				}
+			}
+
+			void RequestFrameFromChannel()
+			{
+				assert(executor_.is_current());
+				if (!frame_requested_callback_)
+					return;
+				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
+				frame_requested_callback_(audio_samples_required);
+				video_frames_requested_++;
+				audio_samples_requested_ += audio_samples_required;
 			}
 
 			void PushToEncoder(const std::unique_ptr<Encoder>& encoder, const std::shared_ptr<AVFrame>& frame)
 			{
+				assert(executor_.is_current());
 				if (frame)
 					encoder->Push(frame);
 				else
@@ -144,9 +159,10 @@ namespace TVPlayR {
 
 			void WaitForNextFrameTime()
 			{
+				assert(executor_.is_current());
 				auto& frame_rate = format_.FrameRate();
 				clock::time_point current_time = clock::now();
-				clock::time_point next_frame_time = stream_start_time_ + clock::duration(clock::period::den * frame_rate.Denominator() * video_frames_pushed_ / (clock::period::num * frame_rate.Numerator()));
+				clock::time_point next_frame_time = stream_start_time_ + clock::duration(clock::period::den * frame_rate.Denominator() * video_frames_requested_ / (clock::period::num * frame_rate.Numerator()));
 				auto wait_time = next_frame_time - current_time;
 				if (wait_time > clock::duration::zero())
 				{
@@ -159,6 +175,7 @@ namespace TVPlayR {
 
 			void InitializeOuputIfPossible()
 			{
+				assert(executor_.is_current());
 				if (!video_encoder_ || !audio_encoder_)
 					return;
 				output_format_.Initialize(params_.OutputMetadata);
@@ -174,28 +191,24 @@ namespace TVPlayR {
 				}
 			}
 
-			int AudioSamplesRequired()
-			{
-				int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_pushed_;
-				return static_cast<int>(samples_required);
-			}
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				buffer_.try_add(sync);
-				DebugPrintLine("Frame pushed");
-				executor_.begin_invoke([this] {
-					if (!frame_requested_callback_)
-						Tick();
-				});
+				AVSync copy = AVSync(CloneFrame(sync.Audio), CloneFrame(sync.Video), sync.Timecode);
+				copy.Audio->pts = audio_samples_pushed_;
+				audio_samples_pushed_ += copy.Audio->nb_samples;
+				copy.Video->pts = video_frames_pushed_;
+				video_frames_pushed_++;
+				if (buffer_.try_emplace(copy) != Common::BlockingCollectionStatus::Ok)
+					DebugPrintLine("Frame dropped");
 			}
 
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
 			{
 				executor_.invoke([&] { 
 					frame_requested_callback_ = frame_requested_callback; 
-					stream_start_time_ = clock::now();
-					Tick();
+					if (frame_requested_callback)
+						InitializeFrameRequester();
 				});
 			}
 

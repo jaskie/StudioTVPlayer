@@ -27,8 +27,6 @@ namespace TVPlayR {
 			std::vector<std::shared_ptr<OverlayBase>> overlays_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
-			int64_t frames_pushed_ = 0LL;
-			int64_t samples_pushed_ = 0LL;
 			Common::Executor executor_;
 		
 			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
@@ -91,15 +89,6 @@ namespace TVPlayR {
 			// used only in executor thread
 			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, int64_t timecode)
 			{
-				//video = FFmpeg::CloneFrame(video);
-				video->pts = frames_pushed_;
-				frames_pushed_++;
-				//audio = FFmpeg::CloneFrame(audio);
-				if (audio)
-				{
-					audio->pts = samples_pushed_;
-					samples_pushed_ += audio->nb_samples;
-				}
 				FFmpeg::AVSync sync(audio, video, timecode);
 				for (auto& overlay : overlays_)
 					sync = overlay->Transform(sync);

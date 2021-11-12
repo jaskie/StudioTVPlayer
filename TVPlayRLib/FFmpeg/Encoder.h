@@ -1,4 +1,5 @@
 #pragma once
+#include "../Common/NonCopyable.h"
 #include "../Common/Debug.h"
 #include "../Common/Executor.h"
 
@@ -9,7 +10,7 @@ namespace TVPlayR {
 	}
 	namespace FFmpeg {
 		class OutputFormat;
-	class Encoder : private Common::DebugTarget
+	class Encoder : private Common::NonCopyable, private Common::DebugTarget
 	{
 	private:
 		const AVCodec* encoder_;

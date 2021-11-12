@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-class Decoder final : Common::NonCopyable
+class Decoder final : private Common::NonCopyable
 {
 public:
 	Decoder(const AVCodec* codec, AVStream * const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& device_index);

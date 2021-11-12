@@ -7,7 +7,7 @@ namespace TVPlayR {
 
 class Channel;
 
-class OutputDevice : public Common::NonCopyable
+class OutputDevice : private Common::NonCopyable
 {
 private:
 	Channel* channel_ = nullptr;

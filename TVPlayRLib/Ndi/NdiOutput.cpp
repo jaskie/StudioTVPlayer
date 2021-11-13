@@ -20,18 +20,18 @@ namespace TVPlayR {
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
 			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
-			std::shared_ptr<AVFrame> last_video_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			int64_t video_frames_pushed_ = 0LL;
 			int64_t audio_samples_pushed_ = 0LL;
-			int64_t last_video_time_ = 0LL;
+			int64_t audio_samples_requested_ = 0LL;
+			int64_t video_frames_requested_ = 0LL;
 			Common::Executor executor_;
 
 			implementation(const std::string& source_name, const std::string& group_names)
-				: Common::DebugTarget(false, "NDI output " + source_name)
+				: Common::DebugTarget(true, "NDI output " + source_name)
 				, executor_("NDI output " + source_name)
-				, buffer_(2)
+				, buffer_(6)
 				, format_(Core::VideoFormatType::invalid)
 				, source_name_(source_name)
 				, ndi_(LoadNdi())
@@ -56,11 +56,13 @@ namespace TVPlayR {
 					format_ = channel.Format();
 					audio_sample_rate_ = channel.AudioSampleRate();
 					audio_channels_count_ = channel.AudioChannelsCount();
-					last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, channel.PixelFormat());
 					video_frames_pushed_ = 0LL;
 					audio_samples_pushed_ = 0LL;
-					last_video_time_ = 0LL;
-					executor_.begin_invoke([this] { Tick(); }); // first frame
+					executor_.begin_invoke([this] 
+					{ 
+						InitializeFrameRequester();
+						Tick(); 
+					}); 
 					return true;
 				});
 			}
@@ -75,38 +77,28 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("frame dropped when pushed");
+				if (buffer_.try_add(sync) == Common::BlockingCollectionStatus::Ok)
+				{
+					video_frames_pushed_++;
+					audio_samples_pushed_ += sync.Audio->nb_samples;
+				}
+				else
+					DebugPrintLine("Frame dropped");
 			}
 						
 			void Tick()
 			{
-				std::shared_ptr<AVFrame> audio;
-				FFmpeg::AVSync buffer;
-				buffer_.try_take(buffer);
-				if (buffer.Video)
-				{
-					last_video_ = buffer.Video;
-					last_video_time_ = buffer.Timecode;
-					audio = buffer.Audio;
-				}
-				else
-				{
-					audio = FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, audio_sample_format_);
-					DebugPrintLine("frame late");
-				}
-				video_frames_pushed_++;
-				if (frame_requested_callback_)
-					frame_requested_callback_(AudioSamplesRequired());
+				assert(executor_.is_current());
 				if (format_.type() == Core::VideoFormatType::invalid)
 					return;
-				NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, last_video_, last_video_time_);
-				ndi_->send_send_video_v2(send_instance_, &ndi_video);
-				if (audio)
+				FFmpeg::AVSync buffer;
+				if (buffer_.try_take(buffer) == Common::BlockingCollectionStatus::Ok)
 				{
-					audio_samples_pushed_ += audio->nb_samples;
-					NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(audio, last_video_time_);
+					NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.Timecode);
+					ndi_->send_send_video_v2(send_instance_, &ndi_video);
+					NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
 					ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+					RequestFrameFromChannel();
 				}
 				if (format_.type() != Core::VideoFormatType::invalid)
 					executor_.begin_invoke([this] { Tick(); }); // next frame
@@ -118,9 +110,35 @@ namespace TVPlayR {
 				return static_cast<int>(samples_required);
 			}
 
+			void RequestFrameFromChannel()
+			{
+				assert(executor_.is_current());
+				if (!frame_requested_callback_)
+					return;
+				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
+				frame_requested_callback_(audio_samples_required);
+				video_frames_requested_++;
+				audio_samples_requested_ += audio_samples_required;
+			}
+
+			void InitializeFrameRequester()
+			{
+				audio_samples_requested_ = 0LL;
+				video_frames_requested_ = 0LL;
+				while (video_frames_requested_ <= static_cast<int64_t>(buffer_.bounded_capacity() / 2))
+					RequestFrameFromChannel();
+			}
+
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
 			{
-				executor_.invoke([&] { frame_requested_callback_ = frame_requested_callback; });
+				executor_.invoke([&] { 
+					frame_requested_callback_ = frame_requested_callback;
+					if (frame_requested_callback)
+					{
+						InitializeFrameRequester();
+						Tick();
+					}
+				});
 			}
 
 		};

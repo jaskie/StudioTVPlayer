@@ -80,7 +80,7 @@ namespace TVPlayR {
 				if (!FF(avio_close(ctx->pb)))
 					DebugPrintLine("avio_close failed");
 			avformat_free_context(ctx);
-			DebugPrintLine("destroyed");
+			DebugPrintLine("avformat_free_context");
 		}
 
 		

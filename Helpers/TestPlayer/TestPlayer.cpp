@@ -51,7 +51,7 @@ int main()
 		//channel.AddOutput(decklink_output);
 		
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
-		//channel.SetFrameClock(ndi);
+		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
 		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
 			"libx264",															// VideoCodec
@@ -68,7 +68,7 @@ int main()
 		};
 		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
 		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
-		channel.SetFrameClock(stream);
+		//channel.SetFrameClock(stream);
 		channel.AddOutput(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);

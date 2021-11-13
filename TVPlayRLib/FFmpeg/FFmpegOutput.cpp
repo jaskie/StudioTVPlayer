@@ -43,7 +43,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const Core::Channel& channel, const FFOutputParams& params, FRAME_REQUESTED_CALLBACK frame_requested_callback)
-				: Common::DebugTarget(false, "FFmpeg output: " + params.Url)
+				: Common::DebugTarget(true, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, frame_requested_callback_(frame_requested_callback)
 				, format_(channel.Format())
@@ -80,6 +80,8 @@ namespace TVPlayR {
 			{
 				assert(executor_.is_current());
 				stream_start_time_ = clock::now();
+				audio_samples_requested_ = 0LL;
+				video_frames_requested_ = 0LL;
 				while (video_frames_requested_ <= static_cast<int64_t>(buffer_.bounded_capacity() / 2))
 					RequestFrameFromChannel();
 				Tick();
@@ -126,20 +128,21 @@ namespace TVPlayR {
 				}
 				else
 					DebugPrintLine("Buffer didn't return frame");
-				RequestFrameFromChannel();
-				if (!output_format_.IsFlushed())
-					executor_.begin_invoke([this]
+				if (frame_requested_callback_)
+				{
+					RequestFrameFromChannel();
+					if (!output_format_.IsFlushed())
+						executor_.begin_invoke([this]
 					{
 						WaitForNextFrameTime();
 						Tick();
 					});
+				}
 			}
 
 			void RequestFrameFromChannel()
 			{
 				assert(executor_.is_current());
-				if (!frame_requested_callback_)
-					return;
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
 				frame_requested_callback_(audio_samples_required);
 				video_frames_requested_++;
@@ -191,7 +194,6 @@ namespace TVPlayR {
 				}
 			}
 
-
 			void Push(FFmpeg::AVSync& sync)
 			{
 				AVSync copy = AVSync(CloneFrame(sync.Audio), CloneFrame(sync.Video), sync.Timecode);
@@ -201,6 +203,12 @@ namespace TVPlayR {
 				video_frames_pushed_++;
 				if (buffer_.try_emplace(copy) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine("Frame dropped");
+				executor_.begin_invoke([this]
+				{
+					if (frame_requested_callback_)
+						return;
+					Tick();
+				});
 			}
 
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)

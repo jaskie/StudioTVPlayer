@@ -22,10 +22,10 @@ namespace TVPlayR {
 			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
-			int64_t video_frames_pushed_ = 0LL;
-			int64_t audio_samples_pushed_ = 0LL;
-			int64_t audio_samples_requested_ = 0LL;
-			int64_t video_frames_requested_ = 0LL;
+			std::int64_t video_frames_pushed_ = 0LL;
+			std::int64_t audio_samples_pushed_ = 0LL;
+			std::int64_t audio_samples_requested_ = 0LL;
+			std::int64_t video_frames_requested_ = 0LL;
 			Common::Executor executor_;
 
 			implementation(const std::string& source_name, const std::string& group_names)
@@ -52,7 +52,10 @@ namespace TVPlayR {
 				return executor_.invoke([&] 
 				{
 					if (format_.type() != Core::VideoFormatType::invalid)
+					{
+						DebugPrintLine("Already assigned to another channel");
 						return false;
+					}
 					format_ = channel.Format();
 					audio_sample_rate_ = channel.AudioSampleRate();
 					audio_channels_count_ = channel.AudioChannelsCount();
@@ -62,7 +65,8 @@ namespace TVPlayR {
 					{ 
 						if (frame_requested_callback_)
 							InitializeFrameRequester();
-						Tick(); 
+						DebugPrintLine("AssignToChannel - calling Tick()");
+						Tick();
 					}); 
 					return true;
 				});
@@ -108,7 +112,7 @@ namespace TVPlayR {
 			int AudioSamplesRequired() 
 			{
 				assert(executor_.is_current());
-				int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_pushed_;
+				std::int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_pushed_;
 				return static_cast<int>(samples_required);
 			}
 
@@ -128,7 +132,7 @@ namespace TVPlayR {
 				assert(executor_.is_current());
 				audio_samples_requested_ = 0LL;
 				video_frames_requested_ = 0LL;
-				while (video_frames_requested_ <= static_cast<int64_t>(buffer_.bounded_capacity() / 2))
+				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
 					RequestFrameFromChannel();
 			}
 
@@ -136,9 +140,10 @@ namespace TVPlayR {
 			{
 				executor_.invoke([&] { 
 					frame_requested_callback_ = frame_requested_callback;
-					if (frame_requested_callback)
+					if (frame_requested_callback && format_.type() != Core::VideoFormatType::invalid)
 					{
 						InitializeFrameRequester();
+						DebugPrintLine("SetFrameRequestedCallback - calling Tick()");
 						Tick();
 					}
 				});

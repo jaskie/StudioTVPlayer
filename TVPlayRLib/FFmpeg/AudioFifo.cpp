@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, int64_t seek_time, int64_t fifo_duration)
+AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, std::int64_t seek_time, std::int64_t fifo_duration)
 	: Common::DebugTarget(false, "AduioFifo")
 	, aduio_fifo_(av_audio_fifo_alloc(sample_fmt, channels_count, static_cast<int>(fifo_duration * sample_rate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
 	, sample_rate_(sample_rate)
@@ -27,8 +27,8 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 		av_audio_fifo_realloc(aduio_fifo_.get(), frame->nb_samples * 2);
 		fifo_space = av_audio_fifo_space(aduio_fifo_.get());
 	}
-	int64_t frame_start_time = PtsToTime(frame->pts, time_base_);
-	int64_t frame_end_time = frame_start_time + av_rescale(frame->nb_samples, AV_TIME_BASE, sample_rate_);
+	std::int64_t frame_start_time = PtsToTime(frame->pts, time_base_);
+	std::int64_t frame_end_time = frame_start_time + av_rescale(frame->nb_samples, AV_TIME_BASE, sample_rate_);
 	if (frame_end_time > seek_time_)
 	{
 		if (fifo_space < frame->nb_samples)
@@ -64,7 +64,7 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 	frame->channels = channels_count_;
 	frame->channel_layout = av_get_default_channel_layout(channels_count_);
 	frame->sample_rate = sample_rate_;
-	frame->pts = av_rescale(start_sample_, time_base_.den, static_cast<int64_t>(sample_rate_) * time_base_.num);
+	frame->pts = av_rescale(start_sample_, time_base_.den, static_cast<std::int64_t>(sample_rate_) * time_base_.num);
 	int samples_from_fifo = min(samples_in_fifo, nb_samples);
 	if (nb_samples > 0)
 	{
@@ -96,7 +96,7 @@ void AudioFifo::DiscardSamples(int nb_samples)
 		start_sample_ += nb_samples;
 }
 
-void AudioFifo::Reset(int64_t seek_time)
+void AudioFifo::Reset(std::int64_t seek_time)
 {
 	av_audio_fifo_reset(aduio_fifo_.get());
 	start_sample_ = 0LL;
@@ -109,13 +109,13 @@ int AudioFifo::SamplesCount() const
 	return av_audio_fifo_size(aduio_fifo_.get());
 }
 
-int64_t AudioFifo::TimeMin() const
+std::int64_t AudioFifo::TimeMin() const
 {
 	return av_rescale(start_sample_, AV_TIME_BASE , sample_rate_);
 }
 
 
-int64_t AudioFifo::TimeMax() const
+std::int64_t AudioFifo::TimeMax() const
 {
 	return av_rescale(end_sample_, AV_TIME_BASE, sample_rate_);
 }

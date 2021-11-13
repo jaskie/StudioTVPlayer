@@ -6,7 +6,7 @@ namespace TVPlayR {
 		class AVSync
 		{
 		public:
-			AVSync(std::shared_ptr<AVFrame> audio, std::shared_ptr<AVFrame> video, int64_t time)
+			AVSync(std::shared_ptr<AVFrame> audio, std::shared_ptr<AVFrame> video, std::int64_t time)
 				: Audio(audio)
 				, Video(video)
 				, Timecode(time)
@@ -16,7 +16,7 @@ namespace TVPlayR {
 			AVSync(const AVSync& other) = default;
 			std::shared_ptr<AVFrame> Audio;
 			std::shared_ptr<AVFrame> Video;
-			int64_t Timecode;
+			std::int64_t Timecode;
 			AVSync operator=(AVSync&& other) noexcept
 			{
 				if (&other == this)

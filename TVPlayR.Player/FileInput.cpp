@@ -19,7 +19,8 @@ namespace TVPlayR {
 		_stoppedDelegate = gcnew StoppedDelegate(this, &FileInput::StoppedCallback);
 		_stoppedHandle = GCHandle::Alloc(_stoppedDelegate);
 		IntPtr stoppedIp = Marshal::GetFunctionPointerForDelegate(_stoppedDelegate);
-		GetFFmpegInput()->SetStoppedCallback(static_cast<Core::InputSource::STOPPED_CALLBACK>(stoppedIp.ToPointer()));
+		typedef void(__stdcall* STOPPED_CALLBACK) (); // compatible with Core::InputSource::STOPPED_CALLBACK
+		GetFFmpegInput()->SetStoppedCallback(static_cast<STOPPED_CALLBACK>(stoppedIp.ToPointer()));
 	}
 
 	FileInput::~FileInput()

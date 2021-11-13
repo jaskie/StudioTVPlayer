@@ -8,10 +8,10 @@ namespace TVPlayR {
         {
         private:
             ULONG ref_count_;
-            int64_t time_;
+            std::int64_t time_;
             Core::VideoFormat& format_;
         public:
-            DecklinkTimecode(Core::VideoFormat& format, int64_t time);
+            DecklinkTimecode(Core::VideoFormat& format, std::int64_t time);
             //IUnknown
             STDMETHOD(QueryInterface(REFIID, LPVOID*));
             STDMETHOD_(ULONG, AddRef());

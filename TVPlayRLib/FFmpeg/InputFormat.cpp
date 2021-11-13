@@ -25,7 +25,7 @@ InputFormat::InputFormat(const std::string& file_name)
 {
 }
 
-int64_t InputFormat::ReadStartTimecode() const
+std::int64_t InputFormat::ReadStartTimecode() const
 {
 	for (const Core::StreamInfo& stream : streams_)
 	{
@@ -36,7 +36,7 @@ int64_t InputFormat::ReadStartTimecode() const
 		{
 			AVTimecode tc;
 			if (FF(av_timecode_init_from_string(&tc, stream.Stream->r_frame_rate, tcr->value, NULL)))
-				return av_rescale((int64_t)tc.start * AV_TIME_BASE, tc.rate.den, tc.rate.num);
+				return av_rescale((std::int64_t)tc.start * AV_TIME_BASE, tc.rate.den, tc.rate.num);
 		}
 	}
 	return 0LL;
@@ -101,7 +101,7 @@ bool InputFormat::CanSeek() const
 	return stream->Duration > AV_TIME_BASE/10 || stream->Stream->nb_frames > 1 ;
 }
 
-bool InputFormat::Seek(int64_t time)
+bool InputFormat::Seek(std::int64_t time)
 {
 	if (!CanSeek())
 		return false;

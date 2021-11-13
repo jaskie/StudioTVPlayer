@@ -323,7 +323,7 @@ uint32_t VideoFormat::FrameNumberToSmpteTimecode(int frame_number)
 	return av_timecode_get_smpte_from_framenum(&timecode_, frame_number);
 }
 
-int VideoFormat::TimeToFrameNumber(int64_t time)
+int VideoFormat::TimeToFrameNumber(std::int64_t time)
 {
 	return static_cast<int>(av_rescale(time,  frame_rate_.Numerator(), frame_rate_.Denominator() * AV_TIME_BASE));
 

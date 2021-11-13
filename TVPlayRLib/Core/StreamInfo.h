@@ -9,8 +9,8 @@ public:
 	int Index;
 	MediaType Type;
 	bool IsPreffered;
-	int64_t StartTime;
-	int64_t Duration;
+	std::int64_t StartTime;
+	std::int64_t Duration;
 	int AudioChannelsCount;
 	std::string Language;
 	const AVCodec* Codec;

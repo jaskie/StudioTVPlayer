@@ -29,6 +29,7 @@ static void avlog_cb(void * ptr, int level, const char * fmt, va_list vargs) {
 	}
 }
 
+
 int main()
 {
 #ifdef _DEBUG
@@ -53,23 +54,22 @@ int main()
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
 		channel.AddOutput(ndi);
-		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-			"libx264",															// VideoCodec
-			"aac", 																	// AudioCodec
-			4000,																	// VideoBitrate
-			128, 																	// AudioBitrate
-			"g=18,bf=0",															// Options
-			"",//"bwdif,scale=384x216,interlace",										// VideoFilter
-			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
-			"",															// VideoMetadata
-			"language=pol",												// AudioMetadata
-			121, // VideoStreamId
-			122  // AudioStreamId
-		};
-		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
+		//FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
+		//	"libx264",															// VideoCodec
+		//	"aac", 																	// AudioCodec
+		//	4000,																	// VideoBitrate
+		//	128, 																	// AudioBitrate
+		//	"g=18,bf=0",															// Options
+		//	"",//"bwdif,scale=384x216,interlace",										// VideoFilter
+		//	"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
+		//	"",															// VideoMetadata
+		//	"language=pol",												// AudioMetadata
+		//	121, // VideoStreamId
+		//	122  // AudioStreamId
+		//};
+		FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
 		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
 		//channel.SetFrameClock(stream);
-		channel.AddOutput(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
@@ -80,6 +80,7 @@ int main()
 		//input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
+		input->SetFramePlayedCallback([&](int64_t time) {});
 		input->Play();
 		input->SetIsLoop(true);
 		channel.Load(input);
@@ -90,6 +91,11 @@ int main()
 				break;
 			if (i == 'c')
 				channel.Clear();
+			if (i == 'r')
+				channel.AddOutput(stream);
+			if (i == 's')
+				channel.RemoveOutput(stream);
+
 			/*if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')

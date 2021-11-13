@@ -29,18 +29,18 @@ std::shared_ptr<AVFrame> AllocFrame();
 
 std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source);
 
-inline int64_t PtsToTime(int64_t pts, const AVRational time_base)
+inline std::int64_t PtsToTime(std::int64_t pts, const AVRational time_base)
 {
 	if (pts == AV_NOPTS_VALUE)
 		return pts;
 	return av_rescale(pts * AV_TIME_BASE, time_base.num, time_base.den);
 }
 
-inline int64_t TimeToPts(int64_t time, const AVRational time_base)
+inline std::int64_t TimeToPts(std::int64_t time, const AVRational time_base)
 {
 	if (time == AV_NOPTS_VALUE || time == 0)
 		return time;
-	return av_rescale(time, time_base.den, static_cast<int64_t>(time_base.num) * AV_TIME_BASE);
+	return av_rescale(time, time_base.den, static_cast<std::int64_t>(time_base.num) * AV_TIME_BASE);
 }
 
 std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt);

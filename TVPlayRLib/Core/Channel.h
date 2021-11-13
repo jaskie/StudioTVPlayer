@@ -14,7 +14,7 @@ namespace TVPlayR {
 class Channel final : public Common::NonCopyable
 {
 public:
-	typedef void(*AUDIO_VOLUME_CALLBACK) (std::vector<double>&);
+	typedef std::function<void(std::vector<double>&)> AUDIO_VOLUME_CALLBACK;
 	Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
 	~Channel();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);

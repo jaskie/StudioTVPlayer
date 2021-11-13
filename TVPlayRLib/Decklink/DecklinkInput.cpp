@@ -118,7 +118,7 @@ namespace TVPlayR {
 
 				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
 				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AV_SAMPLE_FMT_S32, bmdAudioSampleRate48kHz);
-				int64_t timecode = TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate());
+				std::int64_t timecode = TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate());
 				for (auto& provider : channel_prividers_)
 					provider->Push(video, audio, timecode);
 				for (auto& preview : previews_)

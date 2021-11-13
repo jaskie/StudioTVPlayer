@@ -14,7 +14,7 @@ namespace TVPlayR {
 			const int dest_channels_;
 			const int dest_sample_rate_; 
 			const AVSampleFormat dest_sample_format_;
-			const uint64_t dest_channel_layout_;
+			const std::uint64_t dest_channel_layout_;
 			std::unique_ptr<SwrContext, std::function<void(SwrContext*)>> swr_;
 		};
 

@@ -54,7 +54,7 @@ public:
 	std::string FrameNumberToString(int frame_number) const;
 	int StringToFrameNumber(const std::string& tc);
 	uint32_t FrameNumberToSmpteTimecode(int frame_number);
-	int TimeToFrameNumber(int64_t time);
+	int TimeToFrameNumber(std::int64_t time);
 
 private:
 	enum VideoFormatType type_;

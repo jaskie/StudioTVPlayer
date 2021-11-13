@@ -20,11 +20,11 @@ namespace TVPlayR {
 		Core::Channel* const _channel;
 		double _volume = 1.0f;
 		const PixelFormat _pixelFormat;
-		delegate void AudioVolumeDelegate(std::vector<double>);
+		delegate void AudioVolumeDelegate(std::vector<double>&);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
 		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
-		void AudioVolumeCallback(std::vector<double> audio_volume);
+		void AudioVolumeCallback(std::vector<double>& audio_volume);
 	public:
 		Channel(String^ name, VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();

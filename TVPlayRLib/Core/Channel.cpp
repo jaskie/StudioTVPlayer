@@ -87,7 +87,7 @@ namespace TVPlayR {
 			}
 
 			// used only in executor thread
-			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, int64_t timecode)
+			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, std::int64_t timecode)
 			{
 				FFmpeg::AVSync sync(audio, video, timecode);
 				for (auto& overlay : overlays_)

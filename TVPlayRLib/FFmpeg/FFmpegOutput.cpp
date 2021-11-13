@@ -34,11 +34,11 @@ namespace TVPlayR {
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
-			int64_t video_frames_requested_ = 0LL;
-			int64_t audio_samples_requested_ = 0LL;
-			int64_t video_frames_pushed_ = 0LL;
-			int64_t audio_samples_pushed_ = 0LL;
-			int64_t last_video_time_ = 0LL;
+			std::int64_t video_frames_requested_ = 0LL;
+			std::int64_t audio_samples_requested_ = 0LL;
+			std::int64_t video_frames_pushed_ = 0LL;
+			std::int64_t audio_samples_pushed_ = 0LL;
+			std::int64_t last_video_time_ = 0LL;
 			clock::time_point stream_start_time_;
 			Common::Executor executor_;
 
@@ -82,7 +82,7 @@ namespace TVPlayR {
 				stream_start_time_ = clock::now();
 				audio_samples_requested_ = 0LL;
 				video_frames_requested_ = 0LL;
-				while (video_frames_requested_ <= static_cast<int64_t>(buffer_.bounded_capacity() / 2))
+				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
 					RequestFrameFromChannel();
 				Tick();
 			}

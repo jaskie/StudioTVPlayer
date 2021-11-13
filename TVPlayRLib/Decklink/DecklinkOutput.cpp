@@ -92,9 +92,9 @@ namespace TVPlayR {
 				output_->EndAudioPreroll();
 			}
 
-			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, int64_t timecode)
+			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
 			{
-				int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
+				std::int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				CComPtr<DecklinkVideoFrame> decklink_frame(new DecklinkVideoFrame(format_, frame, timecode));
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_time_ = timecode;
@@ -113,7 +113,7 @@ namespace TVPlayR {
 
 			int AudioSamplesRequired() const
 			{
-				int64_t samples_required = av_rescale(scheduled_frames_ + 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - scheduled_samples_;
+				std::int64_t samples_required = av_rescale(scheduled_frames_ + 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - scheduled_samples_;
 				if (samples_required < 0)
 					samples_required = 0;
 				return static_cast<int>(samples_required);

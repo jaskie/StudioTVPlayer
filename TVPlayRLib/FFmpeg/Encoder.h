@@ -18,7 +18,7 @@ namespace TVPlayR {
 		std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>> fifo_;
 		AVStream* stream_;
 		int audio_frame_size_ = 0;
-		int64_t output_timestamp_ = 0LL;
+		std::int64_t output_timestamp_ = 0LL;
 		std::deque<std::shared_ptr<AVFrame>> frame_buffer_;
 		const int format_;
 		bool is_eof_ = false;

@@ -11,7 +11,7 @@
 
 
 namespace TVPlayR {
-	void Channel::AudioVolumeCallback(std::vector<double>audio_volume)
+	void Channel::AudioVolumeCallback(std::vector<double>& audio_volume)
 	{
 		array<double>^ result = gcnew array<double>(static_cast<int>(audio_volume.size()));
 		if (audio_volume.size())
@@ -29,7 +29,8 @@ namespace TVPlayR {
 		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Channel::AudioVolumeCallback);
 		_audioVolumeHandle = GCHandle::Alloc(_audioVolumeDelegate);
 		IntPtr audioVolumeIp = Marshal::GetFunctionPointerForDelegate(_audioVolumeDelegate);
-		_channel->SetAudioVolumeCallback(static_cast<Core::Channel::AUDIO_VOLUME_CALLBACK>(audioVolumeIp.ToPointer()));
+		typedef void(__stdcall* AUDIO_VOLUME_CALLBACK) (std::vector<double>&); // compatible with Core::Channel::AUDIO_VOLUME_CALLBACK
+		_channel->SetAudioVolumeCallback(static_cast<AUDIO_VOLUME_CALLBACK>(audioVolumeIp.ToPointer()));
 	}
 
 	Channel::~Channel()

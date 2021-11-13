@@ -46,7 +46,7 @@ namespace TVPlayR {
 			std::shared_ptr<ApiVersion> GetVersion()
 			{
 				auto iterator = create_iterator();
-				int64_t deckLinkVersion;
+				std::int64_t deckLinkVersion;
 				CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(iterator);
 				if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))
 					return std::make_shared<ApiVersion>(static_cast<int>((deckLinkVersion & 0xFF000000) >> 24), static_cast<int>((deckLinkVersion & 0x00FF0000) >> 16), static_cast<int>((deckLinkVersion & 0x0000FF00) >> 8));

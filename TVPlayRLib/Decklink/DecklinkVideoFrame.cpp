@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 				
-		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t timecode)
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, std::int64_t timecode)
 			: frame_(frame)
 			, timecode_(format, timecode)
 			, ref_count_(0)

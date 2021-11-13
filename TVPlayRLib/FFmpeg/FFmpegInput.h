@@ -16,7 +16,7 @@ public:
 	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
 	~FFmpegInput();
 	virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count);
-	virtual bool Seek(const int64_t time);
+	virtual bool Seek(const std::int64_t time);
 	virtual bool IsEof() const;
 	virtual bool IsAddedToChannel(const Core::Channel& channel) override;
 	virtual void AddToChannel(const Core::Channel& channel) override;
@@ -28,9 +28,9 @@ public:
 	void SetIsLoop(bool is_loop);
 	virtual AVRational GetTimeBase() const;
 	virtual AVRational GetFrameRate() const;
-	int64_t GetAudioDuration() const override;
-	int64_t GetVideoStart() const override;
-	int64_t GetVideoDuration() const override;
+	std::int64_t GetAudioDuration() const override;
+	std::int64_t GetVideoStart() const override;
+	std::int64_t GetVideoDuration() const override;
 	virtual int GetWidth() const override;
 	virtual int GetHeight() const override;
 	virtual TVPlayR::FieldOrder GetFieldOrder() override;

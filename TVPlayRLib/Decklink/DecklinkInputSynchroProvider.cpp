@@ -21,7 +21,7 @@ namespace TVPlayR {
 
 		const Core::Channel& DecklinkInputSynchroProvider::Channel() const { return channel_; }
 
-		void DecklinkInputSynchroProvider::Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, int64_t timecode)
+		void DecklinkInputSynchroProvider::Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, std::int64_t timecode)
 		{
 			executor_.begin_invoke([=] {
 				if (process_video_ && video)

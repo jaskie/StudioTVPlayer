@@ -3,7 +3,7 @@
 
 namespace TVPlayR {
     namespace Decklink {
-        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat& format, int64_t time)
+        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat& format, std::int64_t time)
             : ref_count_(0)
             , time_(time)
             , format_(format)

@@ -24,9 +24,9 @@ namespace TVPlayR
 		virtual String^ GetName() abstract;
 	private:
 		const std::shared_ptr<Core::InputSource>* _nativeSource;
-		delegate void FramePlayedDelegate(int64_t);
+		delegate void FramePlayedDelegate(std::int64_t);
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
-		void FramePlayedCallback(int64_t time);
+		void FramePlayedCallback(std::int64_t time);
 	};
 }

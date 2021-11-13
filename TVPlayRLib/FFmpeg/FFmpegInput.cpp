@@ -97,7 +97,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	{
 		auto& streams = input_.GetStreams();
 		auto stream = input_.GetVideoStream();
-		int64_t seek = stream ? stream->StartTime : 0;
+		std::int64_t seek = stream ? stream->StartTime : 0;
 		if (std::any_of(streams.begin(), streams.end(), [](const auto& stream) { return stream.Type == Core::MediaType::audio && stream.Language == "pol"; }))
 			for (const auto& stream : streams)
 			{
@@ -198,7 +198,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
 			if (is_loop_)
 			{
-				int64_t seek_time = input_.GetVideoStream()->StartTime;
+				std::int64_t seek_time = input_.GetVideoStream()->StartTime;
 				input_.Seek(seek_time);
 				video_decoder_->Seek(seek_time);
 				for (const auto& decoder : audio_decoders_)
@@ -276,7 +276,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	}
 
 
-	bool Seek(const int64_t time)
+	bool Seek(const std::int64_t time)
 	{
 		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 		if (input_.Seek(time))
@@ -340,7 +340,7 @@ FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel accelerati
 
 FFmpegInput::~FFmpegInput(){}
 AVSync FFmpegInput::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
-bool FFmpegInput::Seek(const int64_t time)        { return impl_->Seek(time); }
+bool FFmpegInput::Seek(const std::int64_t time)        { return impl_->Seek(time); }
 bool FFmpegInput::IsEof() const					{ return impl_->is_eof_; }
 bool FFmpegInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
 void FFmpegInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
@@ -352,9 +352,9 @@ void FFmpegInput::Play()							{ impl_->Play(); }
 void FFmpegInput::Pause()							{ impl_->Pause(); }
 bool FFmpegInput::IsPlaying()	const				{ return impl_->is_playing_; }
 void FFmpegInput::SetIsLoop(bool is_loop) { impl_->SetIsLoop(is_loop); }
-int64_t FFmpegInput::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
-int64_t FFmpegInput::GetVideoStart() const		{ return impl_->GetVideoStart(); }
-int64_t FFmpegInput::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
+std::int64_t FFmpegInput::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
+std::int64_t FFmpegInput::GetVideoStart() const		{ return impl_->GetVideoStart(); }
+std::int64_t FFmpegInput::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
 AVRational FFmpeg::FFmpegInput::GetTimeBase() const { return impl_->GetTimeBase(); }
 AVRational FFmpeg::FFmpegInput::GetFrameRate() const { return impl_->GetFrameRate(); }
 int FFmpeg::FFmpegInput::GetWidth() const { return impl_->GetWidth(); }

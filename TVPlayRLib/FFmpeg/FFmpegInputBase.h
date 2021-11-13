@@ -28,9 +28,9 @@ public:
 	bool IsStream() const;
 	int StreamCount() const;
 	const Core::StreamInfo& GetStreamInfo(int index) const;
-	int64_t GetAudioDuration();
-	int64_t GetVideoStart() const;
-	int64_t GetVideoDuration() const;
+	std::int64_t GetAudioDuration();
+	std::int64_t GetVideoStart() const;
+	std::int64_t GetVideoDuration() const;
 	AVRational GetTimeBase() const;
 	AVRational GetFrameRate() const;
 	int GetWidth() const;

@@ -74,7 +74,7 @@ namespace TVPlayR {
 				return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Timecode);
 			}
 
-			void Draw(std::shared_ptr<AVFrame>& video, int64_t time)
+			void Draw(std::shared_ptr<AVFrame>& video, std::int64_t time)
 			{
 				Gdiplus::Bitmap frame_bitmap(video->width, video->height, video->linesize[0], PixelFormat32bppARGB, video->data[0]);
 				Gdiplus::Graphics frame_graphics(&frame_bitmap);

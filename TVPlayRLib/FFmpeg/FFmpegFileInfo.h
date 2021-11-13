@@ -16,12 +16,12 @@ class FFmpegFileInfo
 public:
 	FFmpegFileInfo(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
 	~FFmpegFileInfo();
-	std::shared_ptr<AVFrame> GetFrameAt(int64_t time);
+	std::shared_ptr<AVFrame> GetFrameAt(std::int64_t time);
 	AVRational GetTimeBase() const;
 	AVRational GetFrameRate() const;
-	int64_t GetAudioDuration() const;
-	int64_t GetVideoStart() const;
-	int64_t GetVideoDuration() const;
+	std::int64_t GetAudioDuration() const;
+	std::int64_t GetVideoStart() const;
+	std::int64_t GetVideoDuration() const;
 	int GetWidth() const;
 	int GetHeight() const;
 	TVPlayR::FieldOrder GetFieldOrder() const;

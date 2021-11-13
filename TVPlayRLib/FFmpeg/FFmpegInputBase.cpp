@@ -52,7 +52,7 @@ namespace TVPlayR {
 			return input_.GetStreams()[index];
 		}
 
-		int64_t FFmpegInputBase::GetAudioDuration()
+		std::int64_t FFmpegInputBase::GetAudioDuration()
 		{
 			for (auto& stream : input_.GetStreams())
 				if (stream.Type == Core::MediaType::audio)
@@ -60,7 +60,7 @@ namespace TVPlayR {
 			return 0LL;
 		}
 
-		int64_t FFmpegInputBase::GetVideoStart() const
+		std::int64_t FFmpegInputBase::GetVideoStart() const
 		{
 			const Core::StreamInfo* stream = input_.GetVideoStream();
 			if (stream == nullptr)
@@ -68,7 +68,7 @@ namespace TVPlayR {
 			return stream->StartTime;
 		}
 
-		int64_t FFmpegInputBase::GetVideoDuration() const
+		std::int64_t FFmpegInputBase::GetVideoDuration() const
 		{
 			const Core::StreamInfo* stream = input_.GetVideoStream();
 			if (stream == nullptr)

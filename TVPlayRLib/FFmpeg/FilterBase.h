@@ -13,7 +13,7 @@ public:
 	virtual void Flush() = 0;
 	bool IsFlushed() const { return is_flushed_; }
 	bool IsEof() { return is_eof_; };
-	int64_t TimeFromTs(int64_t ts) const;
+	std::int64_t TimeFromTs(std::int64_t ts) const;
 protected:
 	std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)> graph_;
 	bool is_flushed_ = false;

@@ -29,9 +29,9 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const std::string& source_name, const std::string& group_names)
-				: Common::DebugTarget(true, "NDI output " + source_name)
+				: Common::DebugTarget(false, "NDI output " + source_name)
 				, executor_("NDI output " + source_name)
-				, buffer_(6)
+				, buffer_(4)
 				, format_(Core::VideoFormatType::invalid)
 				, source_name_(source_name)
 				, ndi_(LoadNdi())
@@ -60,7 +60,8 @@ namespace TVPlayR {
 					audio_samples_pushed_ = 0LL;
 					executor_.begin_invoke([this] 
 					{ 
-						InitializeFrameRequester();
+						if (frame_requested_callback_)
+							InitializeFrameRequester();
 						Tick(); 
 					}); 
 					return true;
@@ -106,6 +107,7 @@ namespace TVPlayR {
 
 			int AudioSamplesRequired() 
 			{
+				assert(executor_.is_current());
 				int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_pushed_;
 				return static_cast<int>(samples_required);
 			}
@@ -123,6 +125,7 @@ namespace TVPlayR {
 
 			void InitializeFrameRequester()
 			{
+				assert(executor_.is_current());
 				audio_samples_requested_ = 0LL;
 				video_frames_requested_ = 0LL;
 				while (video_frames_requested_ <= static_cast<int64_t>(buffer_.bounded_capacity() / 2))

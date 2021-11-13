@@ -43,7 +43,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const Core::Channel& channel, const FFOutputParams& params, FRAME_REQUESTED_CALLBACK frame_requested_callback)
-				: Common::DebugTarget(true, "FFmpeg output: " + params.Url)
+				: Common::DebugTarget(false, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, frame_requested_callback_(frame_requested_callback)
 				, format_(channel.Format())
@@ -196,12 +196,13 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				AVSync copy = AVSync(CloneFrame(sync.Audio), CloneFrame(sync.Video), sync.Timecode);
-				copy.Audio->pts = audio_samples_pushed_;
-				audio_samples_pushed_ += copy.Audio->nb_samples;
-				copy.Video->pts = video_frames_pushed_;
+				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
+				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
+				audio->pts = audio_samples_pushed_;
+				audio_samples_pushed_ += audio->nb_samples;
+				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
-				if (buffer_.try_emplace(copy) != Common::BlockingCollectionStatus::Ok)
+				if (buffer_.try_emplace(AVSync(audio, video, sync.Timecode)) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine("Frame dropped");
 				executor_.begin_invoke([this]
 				{

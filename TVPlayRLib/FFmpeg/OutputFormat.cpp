@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
-			: Common::DebugTarget(true, "OutputFormat " + url)
+			: Common::DebugTarget(false, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
 			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })

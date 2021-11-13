@@ -51,7 +51,10 @@
                                 <TextBlock Text="{Binding SelectedDevice.DisplayName, StringFormat={}Blackmagic {0:s}}"/>
                             </DataTemplate>
                             <DataTemplate DataType="{x:Type vm:NdiOutputViewModel}">
-                                <TextBlock Text="{Binding SourceName, StringFormat={}NDI source: {0}}"/>
+                                <TextBlock Text="{Binding SourceName, StringFormat={}NDI: {0}}"/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:FFOutputViewModel}">
+                                <TextBlock Text="{Binding Url, StringFormat={}FFmpeg: {0}}"/>
                             </DataTemplate>
                         </ComboBox.Resources>
                     </ComboBox>

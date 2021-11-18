@@ -85,7 +85,8 @@ namespace TVPlayR {
 				if (buffer_.try_add(sync) == Common::BlockingCollectionStatus::Ok)
 				{
 					video_frames_pushed_++;
-					audio_samples_pushed_ += sync.Audio->nb_samples;
+					if (sync.Audio)
+						audio_samples_pushed_ += sync.Audio->nb_samples;
 				}
 				else
 					DebugPrintLine("Frame dropped");
@@ -101,8 +102,11 @@ namespace TVPlayR {
 				{
 					NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.Timecode);
 					ndi_->send_send_video_v2(send_instance_, &ndi_video);
-					NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
-					ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+					if (buffer.Audio)
+					{
+						NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
+						ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+					}
 					RequestFrameFromChannel();
 				}
 				if (format_.type() != Core::VideoFormatType::invalid)

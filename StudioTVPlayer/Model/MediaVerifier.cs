@@ -97,7 +97,7 @@ namespace StudioTVPlayer.Model
 
         private void MediaVerifierTask()
         {
-            while (!_verificationTask.IsCanceled)
+            while (!_cancellationTokenSource.IsCancellationRequested)
             {
                 try
                 {

@@ -29,9 +29,9 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
 
-	std::thread producer_;
 	std::mutex producer_mutex_;
 	std::condition_variable producer_cv_;
+	std::thread producer_;
 
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;

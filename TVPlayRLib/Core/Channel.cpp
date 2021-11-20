@@ -58,21 +58,22 @@ namespace TVPlayR {
 
 			void RequestFrame(int audio_samples_count)
 			{
-				executor_.begin_invoke([this, audio_samples_count]() mutable
+				if (audio_samples_count < 0)
+					audio_samples_count = 0;
+				executor_.begin_invoke([this, audio_samples_count]()
 				{
-					if (audio_samples_count < 0)
-						audio_samples_count = 0;
-					std::vector<double> volume;
+					std::vector<double> volume(channel_.AudioChannelsCount(), 0.0);
 					if (playing_source_)
 					{
 						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
 						auto sync = playing_source_->PullSync(channel_, audio_samples_count);
 						auto& audio = sync.Audio;
 						auto& video = sync.Video;
-						assert(sync.Audio->nb_samples == audio_samples_count);
+						assert((audio_samples_count == 0 && !sync.Audio) || (sync.Audio->nb_samples == audio_samples_count));
 						if (!video)
 							video = empty_video_;
-						volume = audio_volume_.ProcessVolume(audio);
+						if (audio)
+							volume = audio_volume_.ProcessVolume(audio);
 						AddOverlayAndPushToOutputs(video, audio, sync.Timecode);					
 					}
 					else

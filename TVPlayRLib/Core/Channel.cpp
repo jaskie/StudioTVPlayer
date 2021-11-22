@@ -74,7 +74,6 @@ namespace TVPlayR {
 							video = empty_video_;
 						if (audio)
 							volume = audio_volume_.ProcessVolume(audio);
-						else
 						AddOverlayAndPushToOutputs(video, audio, sync.Timecode);					
 					}
 					else

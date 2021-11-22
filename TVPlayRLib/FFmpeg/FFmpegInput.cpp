@@ -29,13 +29,12 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
 
-	std::thread producer_;
-	std::mutex producer_mutex_;
-	std::condition_variable producer_cv_;
-
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	STOPPED_CALLBACK stopped_callback_ = nullptr;
 	LOADED_CALLBACK loaded_callback_ = nullptr;
+	std::mutex producer_mutex_;
+	std::condition_variable producer_cv_;
+	std::thread producer_;
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: FFmpegInputBase(file_name, acceleration, hw_device)

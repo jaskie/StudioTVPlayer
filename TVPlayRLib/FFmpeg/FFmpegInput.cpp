@@ -25,6 +25,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	std::unique_ptr<AudioMuxer> audio_muxer_;
 	std::unique_ptr<ChannelScaler> channel_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
+	std::mutex channel_scaler_reset_mutex_;
 	std::mutex buffer_content_mutex_;
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
@@ -159,7 +160,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	{
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
+		{
+			std::lock_guard<std::mutex> lock(channel_scaler_reset_mutex_);
 			channel_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
+		}
 		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 		while (auto scaled = channel_scaler_->Pull())
 			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
@@ -205,7 +209,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 				if (audio_muxer_)
 					audio_muxer_->Reset();
 				if (channel_scaler_)
+				{
+					std::lock_guard<std::mutex> lock(channel_scaler_reset_mutex_);
 					channel_scaler_->Reset();
+				}
 				std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 				if (buffer_)
 					buffer_->Loop();
@@ -286,7 +293,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			for (auto& decoder : audio_decoders_)
 				decoder->Seek(time);
 			if (channel_scaler_)
+			{
+				std::lock_guard<std::mutex> lock(channel_scaler_reset_mutex_);
 				channel_scaler_->Reset();
+			}
 			if (audio_muxer_)
 				audio_muxer_->Reset();
 			if (buffer_)

@@ -75,6 +75,7 @@ std::shared_ptr<AVPacket> InputFormat::PullPacket()
 	if (format_context_)
 	{
 		auto packet = AllocPacket();
+		std::lock_guard<std::mutex> lock(seek_mutex_);
 		int ret = av_read_frame(format_context_.get(), packet.get());
 		switch (ret)
 		{
@@ -103,6 +104,7 @@ bool InputFormat::CanSeek() const
 
 bool InputFormat::Seek(std::int64_t time)
 {
+	std::lock_guard<std::mutex> lock(seek_mutex_);
 	if (!CanSeek())
 		return false;
 	if (FF(av_seek_frame(format_context_.get(), -1, time, AVSEEK_FLAG_BACKWARD)))

@@ -15,6 +15,7 @@ private:
 	const std::string file_name_;
 	bool is_eof_ = false;
 	bool is_stream_data_loaded_ = false;
+	std::mutex seek_mutex_;
 public:
 	InputFormat(const std::string& fileName);
 	bool LoadStreamData();

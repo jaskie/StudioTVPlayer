@@ -50,9 +50,11 @@ int main()
 		//auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
 		//channel.SetFrameClock(decklink_output);
 		//channel.AddOutput(decklink_output);
-		
+		using namespace std::chrono_literals;
+
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
 		channel.SetFrameClock(ndi);
+		std::this_thread::sleep_for(200ms);
 		channel.AddOutput(ndi);
 		//FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
 		//	"libx264",															// VideoCodec
@@ -73,7 +75,7 @@ int main()
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test5.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test4.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
@@ -91,12 +93,13 @@ int main()
 				break;
 			if (i == 'c')
 				channel.Clear();
+			/*
 			if (i == 'r')
 				channel.AddOutput(stream);
 			if (i == 's')
 				channel.RemoveOutput(stream);
 
-			/*if (i == 's')
+			if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
 				channel.Load(input);
@@ -109,7 +112,7 @@ int main()
 		channel.SetFrameClock(nullptr);
 		channel.RemoveOutput(ndi);
 		//channel.RemoveOutput(decklink_output);
-		channel.RemoveOutput(stream);
+		//channel.RemoveOutput(stream);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

@@ -15,7 +15,9 @@ namespace TVPlayR {
 		{
 			const Channel& channel_;
 			const std::string name_;
+			std::mutex devices_mutex_;
 			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
+			std::mutex frame_clock_mutex_;
 			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
 			AudioVolume audio_volume_;
@@ -26,6 +28,7 @@ namespace TVPlayR {
 			const std::shared_ptr<AVFrame> empty_video_;
 			std::vector<std::shared_ptr<OverlayBase>> overlays_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
+			std::mutex audio_volume_callback_mutex_;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
 		
@@ -46,14 +49,17 @@ namespace TVPlayR {
 
 			~implementation()
 			{
-				executor_.invoke([this]()
 				{
+					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 					if (audio_volume_callback_)
 						audio_volume_callback_ = nullptr;
+				}
+				{
+					std::lock_guard<std::mutex> lock(frame_clock_mutex_);
 					if (frame_clock_)
 						frame_clock_->SetFrameRequestedCallback(nullptr);
 					frame_clock_ = nullptr;
-				});
+				}
 			}
 
 			void RequestFrame(int audio_samples_count)
@@ -82,6 +88,7 @@ namespace TVPlayR {
 						assert(audio_samples_count == 0 || audio->nb_samples == audio_samples_count);
 						AddOverlayAndPushToOutputs(empty_video_, audio, 0LL);
 					}
+					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 					if (audio_volume_callback_)
 						audio_volume_callback_(volume);
 				});
@@ -93,6 +100,7 @@ namespace TVPlayR {
 				FFmpeg::AVSync sync(audio, video, timecode);
 				for (auto& overlay : overlays_)
 					sync = overlay->Transform(sync);
+				std::lock_guard<std::mutex> lock(devices_mutex_);
 				for (auto& device : output_devices_)
 					device->Push(sync);
 			}
@@ -100,40 +108,32 @@ namespace TVPlayR {
 			void AddOutput(std::shared_ptr<OutputDevice>& device)
 			{
 				assert(device);
-				executor_.invoke([this, &device]
-				{
-					output_devices_.push_back(device);
-				});
+				std::lock_guard<std::mutex> lock(devices_mutex_);
+				output_devices_.push_back(device);
 			}
 
 			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
 			{
 				assert(device);
-				executor_.invoke([this, &device]
-				{
-					output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
-					device->ReleaseChannel();
-				});
+				device->ReleaseChannel();
+				std::lock_guard<std::mutex> lock(devices_mutex_);
+				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
 			}
 
 			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
 			{
-				executor_.invoke([this, &clock]
-				{
-					if (frame_clock_)
-						frame_clock_->SetFrameRequestedCallback(nullptr);
-					frame_clock_ = clock;
-					if (clock)
-						clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
-				});
+				std::lock_guard<std::mutex> lock(frame_clock_mutex_);
+				if (frame_clock_)
+					frame_clock_->SetFrameRequestedCallback(nullptr);
+				frame_clock_ = clock;
+				if (clock)
+					clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
 			}
 
 			void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback)
 			{
-				executor_.invoke([this, &callback]
-				{
-					audio_volume_callback_ = callback;
-				});
+				std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
+				audio_volume_callback_ = callback;
 			}
 			
 			void Load(std::shared_ptr<InputSource>& source)

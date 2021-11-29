@@ -22,8 +22,6 @@ namespace TVPlayR {
 			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
-			std::int64_t video_frames_pushed_ = 0LL;
-			std::int64_t audio_samples_pushed_ = 0LL;
 			std::int64_t audio_samples_requested_ = 0LL;
 			std::int64_t video_frames_requested_ = 0LL;
 			Common::Executor executor_;
@@ -59,15 +57,12 @@ namespace TVPlayR {
 					format_ = channel.Format();
 					audio_sample_rate_ = channel.AudioSampleRate();
 					audio_channels_count_ = channel.AudioChannelsCount();
-					video_frames_pushed_ = 0LL;
-					audio_samples_pushed_ = 0LL;
-					executor_.begin_invoke([this] 
-					{ 
-						if (frame_requested_callback_)
+					if (frame_requested_callback_)
+						executor_.begin_invoke([this] 
+						{ 
+							DebugPrintLine("AssignToChannel - calling InitializeFrameRequester()");
 							InitializeFrameRequester();
-						DebugPrintLine("AssignToChannel - calling Tick()");
-						Tick();
-					}); 
+						}); 
 					return true;
 				});
 			}
@@ -82,42 +77,29 @@ namespace TVPlayR {
 
 			void Push(FFmpeg::AVSync& sync)
 			{
-				if (buffer_.try_add(sync) == Common::BlockingCollectionStatus::Ok)
-				{
-					video_frames_pushed_++;
-					if (sync.Audio)
-						audio_samples_pushed_ += sync.Audio->nb_samples;
-				}
-				else
+				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine("Frame dropped");
 			}
 						
 			void Tick()
 			{
 				assert(executor_.is_current());
-				if (format_.type() == Core::VideoFormatType::invalid)
-					return;
-				FFmpeg::AVSync buffer;
-				if (buffer_.try_take(buffer) == Common::BlockingCollectionStatus::Ok)
-				{
-					NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.Timecode);
-					ndi_->send_send_video_v2(send_instance_, &ndi_video);
-					if (buffer.Audio)
-					{
-						NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
-						ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
-					}
-					RequestFrameFromChannel();
-				}
 				if (format_.type() != Core::VideoFormatType::invalid)
-					executor_.begin_invoke([this] { Tick(); }); // next frame
-			}
-
-			int AudioSamplesRequired() 
-			{
-				assert(executor_.is_current());
-				std::int64_t samples_required = av_rescale(video_frames_pushed_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_pushed_;
-				return static_cast<int>(samples_required);
+				{
+					FFmpeg::AVSync buffer;
+					if (buffer_.try_take(buffer) == Common::BlockingCollectionStatus::Ok)
+					{
+						NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.Timecode);
+						ndi_->send_send_video_v2(send_instance_, &ndi_video);
+						if (buffer.Audio)
+						{
+							NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
+							ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+						}
+						RequestFrameFromChannel();
+					}
+				}
+				executor_.begin_invoke([this] { Tick(); }); // next frame
 			}
 
 			void RequestFrameFromChannel()
@@ -138,6 +120,7 @@ namespace TVPlayR {
 				video_frames_requested_ = 0LL;
 				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
 					RequestFrameFromChannel();
+				Tick();
 			}
 
 			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
@@ -146,9 +129,8 @@ namespace TVPlayR {
 					frame_requested_callback_ = frame_requested_callback;
 					if (frame_requested_callback && format_.type() != Core::VideoFormatType::invalid)
 					{
+						DebugPrintLine("SetFrameRequestedCallback - calling InitializeFrameRequester()");
 						InitializeFrameRequester();
-						DebugPrintLine("SetFrameRequestedCallback - calling Tick()");
-						Tick();
 					}
 				});
 			}

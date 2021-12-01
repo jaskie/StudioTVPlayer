@@ -23,6 +23,7 @@ public:
 	void Load(std::shared_ptr<InputSource> source);
 	void Preload(std::shared_ptr<InputSource> source);
 	void AddOverlay(std::shared_ptr<OverlayBase> overlay);
+	void RemoveOverlay(std::shared_ptr<OverlayBase> overlay);
 	void Clear();
 	const VideoFormat& Format() const;
 	const TVPlayR::PixelFormat PixelFormat() const;

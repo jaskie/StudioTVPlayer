@@ -155,13 +155,22 @@ namespace TVPlayR {
 				});
 			}
 
-			void AddOverlay(std::shared_ptr<OverlayBase> overlay)
+			void AddOverlay(std::shared_ptr<OverlayBase>& overlay)
 			{
 				executor_.invoke([&]
 				{
-					overlays_.push_back(overlay);
+					overlays_.emplace_back(overlay);
 				});
 			}
+
+			void RemoveOverlay(std::shared_ptr<OverlayBase>& overlay)
+			{
+				executor_.invoke([&]
+				{
+					overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
+				});
+			}
+
 
 		};
 
@@ -198,6 +207,8 @@ namespace TVPlayR {
 		}
 
 		void Channel::AddOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->AddOverlay(overlay); }
+
+		void Channel::RemoveOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->RemoveOverlay(overlay); }
 
 		void Channel::Clear() { impl_->Clear(); }
 

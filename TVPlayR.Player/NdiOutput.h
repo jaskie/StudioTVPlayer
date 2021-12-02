@@ -6,6 +6,7 @@
 using namespace System;
 
 namespace TVPlayR {
+	ref class OverlayBase;
 
 	public ref class NdiOutput sealed : public OutputBase
 	{
@@ -25,6 +26,8 @@ namespace TVPlayR {
 		{
 			String^ get() { return _groupNames; }
 		}
+		void AddOverlay(OverlayBase^ overlay);
+		void RemoveOverlay(OverlayBase^ overlay);
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _ndi == nullptr ? nullptr : *_ndi; }
 	};

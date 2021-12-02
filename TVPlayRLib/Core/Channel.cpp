@@ -226,6 +226,5 @@ namespace TVPlayR {
 
 		const std::string& Channel::Name() const { return impl_->name_; }
 
-		void Channel::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 
 }}

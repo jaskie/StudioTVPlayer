@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "NdiOutput.h"
 #include "ClrStringHelper.h"
+#include "OverlayBase.h"
 
 namespace TVPlayR {
 
@@ -22,6 +23,20 @@ namespace TVPlayR {
 			return;
 		delete _ndi;
 		_ndi = nullptr;
+	}
+
+	void NdiOutput::AddOverlay(OverlayBase^ overlay)
+	{
+		if (!_ndi)
+			return;
+		(*_ndi)->AddOverlay(overlay->GetNativeObject());
+	}
+
+	void NdiOutput::RemoveOverlay(OverlayBase^ overlay)
+	{
+		if (!_ndi)
+			return;
+		(*_ndi)->RemoveOverlay(overlay->GetNativeObject());
 	}
 
 

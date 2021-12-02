@@ -19,6 +19,7 @@ namespace TVPlayR {
 	private:
 		Core::Channel* const _channel;
 		double _volume = 1.0f;
+		VideoFormat^ _videoFormat;
 		const PixelFormat _pixelFormat;
 		delegate void AudioVolumeDelegate(std::vector<double>&);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
@@ -46,6 +47,7 @@ namespace TVPlayR {
 				_volume = volume;
 			}
 		}
+		property TVPlayR::VideoFormat^ VideoFormat { TVPlayR::VideoFormat^ get() { return _videoFormat; }}
 		property TVPlayR::PixelFormat PixelFormat { TVPlayR::PixelFormat get() { return _pixelFormat; } }
 		event EventHandler<AudioVolumeEventArgs^>^ AudioVolume;
 	};

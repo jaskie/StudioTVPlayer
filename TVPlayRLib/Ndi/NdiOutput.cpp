@@ -4,6 +4,7 @@
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
+#include "../Core/OverlayBase.h"
 #include "../Common/Executor.h"
 #include "../Common/Debug.h"
 #include "../Common/BlockingCollection.h"
@@ -17,6 +18,7 @@ namespace TVPlayR {
 			NDIlib_v4* const ndi_;
 			const NDIlib_send_instance_t send_instance_;
 			Core::VideoFormat format_;
+			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
 			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
@@ -75,6 +77,22 @@ namespace TVPlayR {
 				});
 			}
 
+			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			{
+				executor_.invoke([&]
+					{
+						overlays_.emplace_back(overlay);
+					});
+			}
+
+			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			{
+				executor_.invoke([&]
+					{
+						overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
+					});
+			}
+
 			void Push(FFmpeg::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
@@ -89,6 +107,8 @@ namespace TVPlayR {
 					FFmpeg::AVSync buffer;
 					if (buffer_.try_take(buffer) == Common::BlockingCollectionStatus::Ok)
 					{
+						for (auto& overlay : overlays_)
+							buffer = overlay->Transform(buffer);
 						NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.Timecode);
 						ndi_->send_send_video_v2(send_instance_, &ndi_video);
 						if (buffer.Audio)
@@ -143,6 +163,10 @@ namespace TVPlayR {
 		bool NdiOutput::AssignToChannel(const Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 
 		void NdiOutput::ReleaseChannel() { impl_->ReleaseChannel(); }
+
+		void NdiOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay) { impl_->AddOverlay(overlay); }
+
+		void NdiOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay) { impl_->RemoveOverlay(overlay); }
 
 		void NdiOutput::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
 		

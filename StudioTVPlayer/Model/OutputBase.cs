@@ -8,7 +8,10 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public bool IsFrameClock { get; set; }
 
-        public abstract void Initialize();
+        [XmlAttribute]
+        public bool TimecodeOverlay { get; set; }
+
+        public abstract void Initialize(TVPlayR.Channel channel);
 
         public abstract TVPlayR.OutputBase GetOutput();
 

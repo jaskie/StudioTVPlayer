@@ -36,7 +36,6 @@ public:
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;
-	void RequestFrame(int audio_samples_count);
 };
 
 }}

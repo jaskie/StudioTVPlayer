@@ -30,7 +30,7 @@
             return _ffOutput;
         }
 
-        public override void Initialize()
+        public override void Initialize(TVPlayR.Channel channel)
         {
             _ffOutput = new TVPlayR.FFOutput(
                 Url,

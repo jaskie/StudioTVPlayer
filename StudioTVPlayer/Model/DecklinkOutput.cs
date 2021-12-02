@@ -20,7 +20,7 @@ namespace StudioTVPlayer.Model
 
         public override TVPlayR.OutputBase GetOutput() => _output;
 
-        public override void Initialize()
+        public override void Initialize(TVPlayR.Channel channel)
         {
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, false);

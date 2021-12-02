@@ -79,11 +79,21 @@ namespace TVPlayR {
 
 	void OutputPreview::ReleaseChannel() { impl_->ReleaseChannel(); }
 
+	void OutputPreview::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+	{
+		THROW_EXCEPTION("Preview don't support overlays");
+	}
+
+	void OutputPreview::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+	{
+		THROW_EXCEPTION("Preview don't support overlays");
+	}
+
 	void OutputPreview::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 
 	void OutputPreview::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
 	{
-		THROW_EXCEPTION("The preview cannot act as clock source");
+		THROW_EXCEPTION("Preview cannot act as clock source");
 	}
 
 	void OutputPreview::SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback) { impl_->SetFramePlayedCallback(frame_played_callback); }

@@ -106,7 +106,7 @@ namespace StudioTVPlayer.Model
             _channelR = new TVPlayR.Channel(_name, _videoFormat, PixelFormat, AudioChannelCount);
             foreach (var output in Outputs)
             {
-                output.Initialize();
+                output.Initialize(_channelR);
                 _channelR.AddOutput(output.GetOutput(), output.IsFrameClock);
             }
             _channelR.AudioVolume += ChannelR_AudioVolume;

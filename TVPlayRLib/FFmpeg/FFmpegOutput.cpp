@@ -236,7 +236,17 @@ namespace TVPlayR {
 			return true;
 		}
 		void FFmpegOutput::ReleaseChannel() { impl_.reset(); }
-		void FFmpegOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
+		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+		{
+		}
+		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+		{
+		}
+		void FFmpegOutput::Push(FFmpeg::AVSync& sync)
+		{
+			if (impl_) 
+				impl_->Push(sync);
+		}
 		void FFmpegOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) 
 		{ 
 			frame_requested_callback_ = frame_requested_callback;

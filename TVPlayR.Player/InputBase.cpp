@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "InputBase.h"
 #include "Core/InputSource.h"
+#include "TimeEventArgs.h"
 
 namespace TVPlayR
 {

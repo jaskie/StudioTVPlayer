@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FFOutput.h"
 #include "ClrStringHelper.h"
+#include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
 
 namespace TVPlayR
@@ -38,4 +39,7 @@ namespace TVPlayR
         delete _native_output;
         _native_output = nullptr;
     }
+
+    std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }
+
 }

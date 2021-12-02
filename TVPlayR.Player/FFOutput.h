@@ -1,10 +1,16 @@
 #pragma once
 #include "OutputBase.h"
-#include "FFmpeg/FFmpegOutput.h"
 
 using namespace System;
 
 namespace TVPlayR {
+
+	namespace Core {
+		class OutputDevice;
+	}
+	namespace FFmpeg {
+		class FFmpegOutput;
+	}
 
 	public ref class FFOutput sealed : public OutputBase
 	{
@@ -32,7 +38,7 @@ namespace TVPlayR {
 		static array<String^>^ _videoCodecs = gcnew array<String^> { "mpeg2video", "libx264", "h264_nvenc",	"hevc_nvenc"};
 		static array<String^>^ _audioCodecs = gcnew array<String^> { "aac", "ac3", "libmp3lame", "mp2" };
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _native_output ? *_native_output : nullptr; }
+		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
 	};
 
 }

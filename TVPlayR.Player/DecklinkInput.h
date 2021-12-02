@@ -1,7 +1,5 @@
 #pragma once
 #include "InputBase.h"
-#include "Decklink/DecklinkInput.h"
-#include "DecklinkTimecodeSource.h"
 
 using namespace System; 
 using namespace System::Runtime::InteropServices;
@@ -9,9 +7,13 @@ using namespace System::Runtime::InteropServices;
 namespace TVPlayR {
 	ref class InputPreview;
 	ref class VideoFormatEventArgs;
+	enum class DecklinkTimecodeSource;
 
 	namespace Decklink {
 		class DecklinkInput;
+	}
+	namespace Core {
+		enum class VideoFormatType;
 	}
 
 	public ref class DecklinkInput : public InputBase
@@ -21,7 +23,7 @@ namespace TVPlayR {
 		FormatChangedDelegate^ _formatChangedDelegate;
 		String^ _modelName;
 		GCHandle _formatChangedHandle;
-		const std::shared_ptr<Decklink::DecklinkInput> GetDecklinkInput() { return std::dynamic_pointer_cast<Decklink::DecklinkInput>(InputBase::GetNativeSource()); }
+		const std::shared_ptr<Decklink::DecklinkInput> GetDecklinkInput();
 		void FormatChangedCallback(Core::VideoFormatType newFormat);
 	protected:
 		virtual String^ GetName() override { return _modelName; }

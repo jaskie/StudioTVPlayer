@@ -81,6 +81,9 @@
     <ClInclude Include="VideoFormatEventArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DecklinkInfo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -110,9 +113,6 @@
     <ClCompile Include="DecklinkIterator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DecklinkInfo.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FFOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -132,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DecklinkInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

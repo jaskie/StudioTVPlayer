@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Channel.h"
+#include "VideoFormat.h"
 #include "PixelFormat.h"
 #include "Core/Channel.h"
 #include "OutputBase.h"
@@ -8,7 +9,7 @@
 #include "OutputPreview.h"
 #include "FileInput.h"
 #include "ClrStringHelper.h"
-
+#include "AudioVolumeEventArgs.h"
 
 namespace TVPlayR {
 	void Channel::AudioVolumeCallback(std::vector<double>& audio_volume)
@@ -88,6 +89,19 @@ namespace TVPlayR {
 	void Channel::Clear()
 	{
 		_channel->Clear();
+	}
+
+	double Channel::Volume::get()
+	{
+		return _volume;
+	}
+
+	void Channel::Volume::set(double volume)
+	{
+		if (volume == _volume)
+			return;
+		_channel->SetVolume(volume);
+		_volume = volume;
 	}
 
 }

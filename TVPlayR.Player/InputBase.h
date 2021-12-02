@@ -1,12 +1,11 @@
 #pragma once
 
-#include "TimeEventArgs.h"
-
 using namespace System;
 using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR
 {
+	ref class TimeEventArgs;
 	namespace Core {
 		class InputSource;
 	}

@@ -1,7 +1,6 @@
 #pragma once
+
 #include "Core/Channel.h"
-#include "VideoFormat.h"
-#include "AudioVolumeEventArgs.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
@@ -12,6 +11,8 @@ namespace TVPlayR {
 	ref class InputBase;
 	ref class OutputBase;
 	ref class OverlayBase;
+	ref class VideoFormat;
+	ref class AudioVolumeEventArgs;
 	enum class PixelFormat;
 
 	public ref class Channel sealed
@@ -27,7 +28,7 @@ namespace TVPlayR {
 		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
 		void AudioVolumeCallback(std::vector<double>& audio_volume);
 	public:
-		Channel(String^ name, VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
+		Channel(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
 		~Channel();
 		!Channel();
 		bool AddOutput(OutputBase^ output, bool setAsClockBase);
@@ -36,17 +37,7 @@ namespace TVPlayR {
 		void Load(InputBase^ file);
 		void Preload(InputBase^ file);
 		void Clear();
-		property double Volume
-		{
-			double get() { return _volume; }
-			void set(double volume) 
-			{
-				if (volume == _volume)
-					return;
-				_channel->SetVolume(volume);
-				_volume = volume;
-			}
-		}
+		property double Volume { double get(); void set(double volume); }
 		property TVPlayR::VideoFormat^ VideoFormat { TVPlayR::VideoFormat^ get() { return _videoFormat; }}
 		property TVPlayR::PixelFormat PixelFormat { TVPlayR::PixelFormat get() { return _pixelFormat; } }
 		event EventHandler<AudioVolumeEventArgs^>^ AudioVolume;

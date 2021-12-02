@@ -107,7 +107,8 @@
     <ClInclude Include="FFOutput.h" />
     <ClInclude Include="TimecodeOverlay.h" />
     <ClInclude Include="TimeEventArgs.h" />
-    <ClCompile Include="DecklinkInfo.h" />
+    <ClCompile Include="DecklinkInfo.cpp" />
+    <ClInclude Include="DecklinkInfo.h" />
     <ClCompile Include="DecklinkInput.cpp" />
     <ClCompile Include="DecklinkIterator.cpp" />
     <ClCompile Include="FileInfo.cpp" />

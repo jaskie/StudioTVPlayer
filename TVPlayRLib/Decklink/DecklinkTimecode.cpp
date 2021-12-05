@@ -1,4 +1,5 @@
-#include "..\pch.h"
+#include "../pch.h"
+#include "../Core/VideoFormat.h"
 #include "DecklinkTimecode.h"
 
 namespace TVPlayR {

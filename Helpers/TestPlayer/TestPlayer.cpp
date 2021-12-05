@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <iostream>
 
+#include "Core/VideoFormat.h"
 #include "Core/Channel.h"
 #include "Decklink/DecklinkIterator.h"
 #include "Decklink/DecklinkOutput.h"
@@ -10,6 +11,7 @@
 #include "FFmpeg/FFmpegInput.h"
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
+#include "FFmpeg/FFmpegUtils.h"
 #include "PixelFormat.h"
 #include "Common/ComInitializer.h"
 

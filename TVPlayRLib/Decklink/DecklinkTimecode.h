@@ -1,8 +1,11 @@
 #pragma once
-#include "DeckLinkAPI_h.h"
-#include "../Core/VideoFormat.h"
 
 namespace TVPlayR {
+
+    namespace Core {
+        class VideoFormat;
+    }
+
 	namespace Decklink {
         class DecklinkTimecode final : public IDeckLinkTimecode
         {

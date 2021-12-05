@@ -3,6 +3,7 @@
 #include "Decklink/DecklinkInput.h"
 #include "InputPreview.h"
 #include "VideoFormatEventArgs.h"
+#include "FieldOrder.h"
 
 namespace TVPlayR {
 

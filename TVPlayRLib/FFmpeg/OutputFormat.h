@@ -1,6 +1,4 @@
 #pragma once
-#include "../Common/NonCopyable.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

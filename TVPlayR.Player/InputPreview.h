@@ -1,10 +1,13 @@
 #pragma once
-#include "Preview/InputPreview.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Media::Imaging;
 namespace TVPlayR {
+
+	namespace Preview {
+		class InputPreview;
+	}
 
 	public ref class InputPreview sealed
 	{
@@ -22,7 +25,7 @@ namespace TVPlayR {
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
 		void DrawFrame();
 	internal:
-		virtual std::shared_ptr<Preview::InputPreview> GetNative() { return _preview == nullptr ? nullptr : *_preview; }
+		virtual std::shared_ptr<Preview::InputPreview> GetNative();
 	public:
 		InputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
 		~InputPreview();

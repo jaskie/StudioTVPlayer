@@ -1,20 +1,19 @@
 #pragma once
-#include "../Common/Rational.h"
-#include "../Common/BlockingCollection.h"
-#include "../Common/Executor.h"
 #include "../FFmpeg/AudioFifo.h"
-#include "../FFmpeg/ChannelScaler.h"
-#include "../DecklinkTimecodeSource.h"
 
 namespace TVPlayR {
+	enum class DecklinkTimecodeSource;
+
 	namespace Core {
 		class Channel;
 	}
 	namespace FFmpeg {
 		class AVSync;
+		class ChannelScaler;
 	}
 	namespace Common {
 		template<typename> class Rational;
+		class Executor;
 	}
 	namespace Decklink {
 
@@ -22,6 +21,7 @@ class DecklinkInputSynchroProvider
 {
 public:
 	DecklinkInputSynchroProvider(const Core::Channel& channel, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video);
+	~DecklinkInputSynchroProvider();
 	const Core::Channel& Channel() const;
 	void Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, std::int64_t timecode);
 	FFmpeg::AVSync PullSync(int audio_samples_count);

@@ -1,6 +1,4 @@
 #pragma once
-#include <string>
-
 using namespace System;
 
 namespace TVPlayR {

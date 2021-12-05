@@ -4,7 +4,6 @@
 #include "OutputFormat.h"
 #include "../Core/VideoFormat.h"
 #include "../PixelFormat.h"
-#include "../Common/Exceptions.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

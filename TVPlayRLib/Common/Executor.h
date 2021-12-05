@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Exceptions.h"
-#include "BlockingCollection.h"
-
 namespace TVPlayR {
     namespace Common {
 

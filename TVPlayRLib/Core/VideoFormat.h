@@ -1,5 +1,4 @@
 #pragma once
-#include "../Common/Rational.h"
 
 namespace TVPlayR {
 		enum class FieldOrder;	

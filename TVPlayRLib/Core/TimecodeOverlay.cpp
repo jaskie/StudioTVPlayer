@@ -1,6 +1,7 @@
 #include "../pch.h"
-#include <gdiplus.h>
 #include "TimecodeOverlay.h"
+#include <gdiplus.h>
+#include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/SwScale.h"
 #include "VideoFormat.h"
 #include "../PixelFormat.h"

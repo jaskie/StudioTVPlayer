@@ -5,9 +5,7 @@
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
 #include "../Core/OverlayBase.h"
-#include "../Common/Executor.h"
-#include "../Common/Debug.h"
-#include "../Common/BlockingCollection.h"
+#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Ndi {

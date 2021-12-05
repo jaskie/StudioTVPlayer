@@ -1,7 +1,4 @@
 #pragma once
-#include "../Common/NonCopyable.h"
-#include "ApiVersion.h"
-#include "DecklinkUtils.h"
 
 namespace TVPlayR {
 
@@ -12,6 +9,7 @@ namespace TVPlayR {
 	}
 	namespace Decklink {
 
+struct ApiVersion;
 class DecklinkOutput;
 class DecklinkInfo;
 class DecklinkInput;
@@ -21,9 +19,9 @@ class DecklinkIterator final : Common::NonCopyable
 public:
 	DecklinkIterator();
 	~DecklinkIterator(); 
-	std::shared_ptr<DecklinkInfo> operator [] (size_t pos);
-	std::shared_ptr<DecklinkOutput> CreateOutput(const DecklinkInfo& info, bool internal_keyer);
-	std::shared_ptr<DecklinkInput> CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
+	std::shared_ptr<Decklink::DecklinkInfo> operator [] (size_t pos);
+	std::shared_ptr<Decklink::DecklinkOutput> CreateOutput(const DecklinkInfo& info, bool internal_keyer);
+	std::shared_ptr<Decklink::DecklinkInput> CreateInput(const Decklink::DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
 	size_t Size() const;
 	std::shared_ptr<ApiVersion> GetVersion();
 private:

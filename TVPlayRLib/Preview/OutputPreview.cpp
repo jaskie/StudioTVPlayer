@@ -1,12 +1,11 @@
 #include "../pch.h"
 #include "OutputPreview.h"
 #include "../Common/Exceptions.h"
-#include "../Common/Executor.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/Channel.h"
 #include "../FFmpeg/SwScale.h"
 #include "../PixelFormat.h"
-
+#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Preview {

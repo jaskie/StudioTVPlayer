@@ -1,7 +1,8 @@
 #include "../pch.h"
 #include "InputFormat.h"
 #include "FFmpegUtils.h"
-#include "../Common/Executor.h"
+#include "../Core/HwAccel.h"
+#include "../Core/StreamInfo.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

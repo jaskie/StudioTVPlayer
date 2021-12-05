@@ -1,7 +1,6 @@
 #pragma once
 
 #include "InputFormat.h"
-#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	enum class FieldOrder;

@@ -6,7 +6,6 @@
 #include "../FieldOrder.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

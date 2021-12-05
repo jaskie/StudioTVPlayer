@@ -1,9 +1,11 @@
 #pragma once
-#include "Core/OutputDevice.h"
 
 using namespace System;
 
 namespace TVPlayR {
+	namespace Core {
+		class OutputDevice;
+	}
 	public ref class OutputBase abstract
 	{
 	internal:

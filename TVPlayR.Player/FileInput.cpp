@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "FileInput.h"
+#include "Rational.h"
 #include "ClrStringHelper.h"
 #include "FFmpeg/ThumbnailFilter.h"
 #include "FFmpeg/FFmpegInput.h"
+#include "FieldOrder.h"
 
 namespace TVPlayR {
 
@@ -52,8 +54,43 @@ namespace TVPlayR {
 		GetFFmpegInput()->Pause();
 	}
 
+	TimeSpan FileInput::AudioDuration::get() { return TimeSpan(GetFFmpegInput()->GetAudioDuration() * 10); }
+
+	TimeSpan FileInput::VideoDuration::get() { return TimeSpan(GetFFmpegInput()->GetVideoDuration() * 10); }
+
+	TimeSpan FileInput::VideoStart::get() { return TimeSpan(GetFFmpegInput()->GetVideoStart() * 10); }
+
+	int FileInput::Width::get() { return GetFFmpegInput()->GetWidth(); }
+	
+	int FileInput::Height::get() { return GetFFmpegInput()->GetHeight(); }
+	
+	bool FileInput::IsPlaying::get() { return GetFFmpegInput()->IsPlaying(); }
+	
+	bool FileInput::IsEof::get() { return GetFFmpegInput()->IsEof(); }
+	
+	TVPlayR::FieldOrder FileInput::FieldOrder::get() { return static_cast<TVPlayR::FieldOrder>(GetFFmpegInput()->GetFieldOrder()); }
+	
+	TVPlayR::Rational FileInput::FrameRate::get() { return TVPlayR::Rational(GetFFmpegInput()->GetFrameRate()); }
+	
+	int FileInput::AudioChannelCount::get() { return GetFFmpegInput()->GetAudioChannelCount(); }
+	
+	bool FileInput::HaveAlphaChannel::get() { return GetFFmpegInput()->HaveAlphaChannel(); }
+
+	void FileInput::IsLoop::set(bool isLoop)
+	{
+		if (isLoop == _isLoop)
+			return;
+		GetFFmpegInput()->SetIsLoop(isLoop);
+		_isLoop = isLoop;
+	}
+	
 	void FileInput::StoppedCallback()
 	{
 		Stopped(this, EventArgs::Empty);
+	}
+
+	std::shared_ptr<FFmpeg::FFmpegInput> FileInput::GetFFmpegInput()
+	{
+		return std::dynamic_pointer_cast<FFmpeg::FFmpegInput>(InputBase::GetNativeSource()); 
 	}
 }

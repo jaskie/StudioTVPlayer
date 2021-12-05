@@ -3,11 +3,10 @@
 #include "../Core/VideoFormat.h"
 #include "../PixelFormat.h"
 #include "../Core/Channel.h"
-#include "../Common/BlockingCollection.h"
-#include "../Common/Executor.h"
 #include "DecklinkUtils.h"
 #include "DecklinkVideoFrame.h"
-#include "../Common/Debug.h"
+#include "../FFmpeg/AVSync.h"
+#include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {

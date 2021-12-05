@@ -1,11 +1,14 @@
 #pragma once
 #include "OutputBase.h"
-#include "Preview/OutputPreview.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Media::Imaging;
 namespace TVPlayR {
+
+	namespace Preview {
+		class OutputPreview;
+	}
 	
 	public ref class OutputPreview sealed : public OutputBase
 	{
@@ -23,7 +26,7 @@ namespace TVPlayR {
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
 		void DrawFrame();
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _preview == nullptr ? nullptr : *_preview; }
+		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
 	public:
 		OutputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
 		~OutputPreview();

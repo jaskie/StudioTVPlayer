@@ -1,14 +1,20 @@
 #pragma once
-#include "../PixelFormat.h"
-#include "../Core/VideoFormat.h"
-#include "DeckLinkAPI_h.h"
 
 namespace TVPlayR {
+	namespace Core
+	{
+		class VideoFormat;
+		enum class VideoFormatType;
+	}
+	namespace Common 
+	{
+		template <class T> class Rational;
+	}
+
+	enum class PixelFormat;
 	enum class DecklinkTimecodeSource;
 
 	namespace Decklink {
-
-		typedef void(*FORMAT_CALLBACK)(Core::VideoFormatType new_format);
 
 		BMDPixelFormat BMDPixelFormatFromPixelFormat(TVPlayR::PixelFormat format);
 

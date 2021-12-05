@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Core/Channel.h"
-
 using namespace System;
 using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
+	namespace Core {
+		class Channel;
+	}
+
 	ref class DecklinkOutput;
 	ref class OutputPreview;
 	ref class InputBase;

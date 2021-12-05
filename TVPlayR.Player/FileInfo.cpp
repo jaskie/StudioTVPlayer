@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "FileInfo.h"
+#include "Rational.h"
 #include "ClrStringHelper.h"
 #include "FFmpeg/ThumbnailFilter.h"
+#include "FFmpeg/FFmpegFileInfo.h"
 
 namespace TVPlayR {
 
@@ -28,6 +30,27 @@ namespace TVPlayR {
 		delete _nativeSource;
 		_nativeSource = nullptr;
 	}
+
+	TimeSpan FileInfo::AudioDuration::get() { return TimeSpan((*_nativeSource)->GetAudioDuration() * 10); }
+	
+	TimeSpan FileInfo::VideoDuration::get() { return TimeSpan((*_nativeSource)->GetVideoDuration() * 10); }
+	
+	TimeSpan FileInfo::VideoStart::get() { return TimeSpan((*_nativeSource)->GetVideoStart() * 10); }
+
+	int FileInfo::Width::get() { return (*_nativeSource)->GetWidth(); } 
+
+	int FileInfo::Height::get() { return (*_nativeSource)->GetHeight(); } 
+
+	TVPlayR::FieldOrder FileInfo::FieldOrder::get() { return (*_nativeSource)->GetFieldOrder(); } 
+
+	TVPlayR::Rational FileInfo::FrameRate::get() { return TVPlayR::Rational((*_nativeSource)->GetFrameRate()); }
+
+	int FileInfo::AudioChannelCount::get() { return (*_nativeSource)->GetAudioChannelCount(); }
+	
+	bool FileInfo::HaveAlphaChannel::get() { return (*_nativeSource)->HaveAlphaChannel(); }
+	
+	bool FileInfo::IsStream::get() { return (*_nativeSource)->IsStream(); }
+
 
 	Bitmap^ FileInfo::GetThumbnail(TimeSpan time, int width, int height)
 	{

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "../Core/HwAccel.h"
-#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

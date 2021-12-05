@@ -1,7 +1,6 @@
 #include "../pch.h"
 #include "FFmpegUtils.h"
 #include "VideoFilterBase.h"
-#include "../Common/Rational.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

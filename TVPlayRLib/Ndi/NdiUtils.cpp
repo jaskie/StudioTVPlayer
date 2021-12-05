@@ -2,7 +2,6 @@
 #include "NdiUtils.h"
 #include "../Core/VideoFormat.h"
 #include "../FieldOrder.h"
-#include "../Common/Exceptions.h"
 
 namespace TVPlayR {
 	namespace Ndi {

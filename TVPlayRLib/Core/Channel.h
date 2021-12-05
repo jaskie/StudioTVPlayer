@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../Common/NonCopyable.h"
-#include "VideoFormat.h"
-
 namespace TVPlayR {
 	enum class PixelFormat;
 
@@ -10,6 +7,8 @@ namespace TVPlayR {
 		class InputSource;
 		class OutputDevice;
 		class OverlayBase;
+		class VideoFormat;
+		enum class VideoFormatType;
 
 class Channel final : public Common::NonCopyable
 {

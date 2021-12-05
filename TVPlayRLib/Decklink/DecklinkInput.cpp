@@ -1,13 +1,13 @@
 #include "../pch.h"
 #include "DecklinkInput.h"
 #include "DecklinkUtils.h"
+#include "../DecklinkTimecodeSource.h"
 #include "DecklinkInputSynchroProvider.h"
 #include "../Core/Channel.h"
 #include "../Core/VideoFormat.h"
+#include "../FFmpeg/AVSync.h"
 #include "../FieldOrder.h"
 #include "../Preview/InputPreview.h"
-#include "../Common/Debug.h"
-
 
 namespace TVPlayR {
 	namespace Decklink {

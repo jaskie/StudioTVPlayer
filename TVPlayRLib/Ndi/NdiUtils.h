@@ -1,5 +1,4 @@
 #pragma once
-#include "Processing.NDI.Lib.h"
 
 namespace TVPlayR {
 	namespace Core {

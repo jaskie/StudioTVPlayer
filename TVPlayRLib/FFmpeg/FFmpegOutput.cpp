@@ -1,15 +1,16 @@
 #include "../pch.h"
+#include <chrono>
 #include "FFmpegOutput.h"
 #include "../Core/Channel.h"
 #include "../PixelFormat.h"
-#include "../Common/Executor.h"
-#include "../Common/Debug.h"
+#include "../Core/VideoFormat.h"
 #include "OutputFormat.h"
 #include "Encoder.h"
 #include "SwScale.h"
 #include "SwResample.h"
 #include "OutputVideoFilter.h"
-#include <chrono>
+#include "AVSync.h"
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

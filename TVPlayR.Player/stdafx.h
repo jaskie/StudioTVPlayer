@@ -41,4 +41,7 @@ extern "C"
 #include "libavutil/timecode.h"
 #include "Processing.NDI.Lib.h"
 }
+#include "Common/Rational.h"
+#include "Common/Debug.h"
+#include "Common/NonCopyable.h"
 #endif //PCH_H

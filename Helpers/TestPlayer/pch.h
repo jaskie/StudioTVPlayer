@@ -48,4 +48,5 @@ extern "C"
 #include "libavutil/timecode.h"
 #include "../dependencies/Ndi/Include/Processing.NDI.Lib.h"
 }
+#include "Common/Rational.h"
 #endif //PCH_H

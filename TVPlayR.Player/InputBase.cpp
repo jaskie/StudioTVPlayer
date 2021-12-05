@@ -2,6 +2,7 @@
 #include "InputBase.h"
 #include "Core/InputSource.h"
 #include "TimeEventArgs.h"
+#include "FieldOrder.h"
 
 namespace TVPlayR
 {

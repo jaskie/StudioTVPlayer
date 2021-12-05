@@ -1,14 +1,18 @@
 #pragma once
 #include "../Core/InputSource.h"
-#include "../DecklinkTimecodeSource.h"
-#include "DecklinkUtils.h"
 
 namespace TVPlayR {
+
+	enum class DecklinkTimecodeSource;
+
 	namespace Core {
 		enum class VideoFormatType;
 	}
 
 	namespace Decklink {
+
+		typedef void(*FORMAT_CALLBACK)(Core::VideoFormatType new_format);
+
 		class DecklinkInput final : public Core::InputSource
 		{
 		public:

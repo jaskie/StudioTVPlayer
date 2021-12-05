@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "VideoFormat.h"
+#include "Rational.h"
+#include "Core/VideoFormat.h"
 #include "FieldOrder.h"
 #include "ClrStringHelper.h"
 
@@ -26,12 +28,47 @@ namespace TVPlayR {
 		this->!VideoFormat();
 	}
 
+	Core::VideoFormatType VideoFormat::GetNativeEnumType()
+	{
+		return _native_fomat->type();
+	}
+
 	VideoFormat^ VideoFormat::FindFormat(Core::VideoFormatType type)
 	{
 		for each (VideoFormat ^ format in _videoFormats)
 			if (format->GetNativeEnumType() == type)
 				return format;
 		return nullptr;
+	}
+
+	int VideoFormat::Width::get()
+	{
+		return _native_fomat->width();
+	}
+
+	int VideoFormat::Height::get()
+	{
+		return _native_fomat->height();
+	}
+
+	bool VideoFormat::IsInterlaced::get()
+	{
+		return _native_fomat->interlaced();
+	}
+	
+	TVPlayR::FieldOrder VideoFormat::FieldOrder::get()
+	{
+		return _native_fomat->field_order();
+	}
+
+	int VideoFormat::Id::get()
+	{
+		return static_cast<int>(_native_fomat->type());
+	}
+
+	bool VideoFormat::IsDropFrame::get()
+	{
+		return _native_fomat->IsDropFrame();
 	}
 
 	VideoFormat::!VideoFormat()

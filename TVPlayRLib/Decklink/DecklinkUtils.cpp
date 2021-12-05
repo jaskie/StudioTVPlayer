@@ -1,6 +1,8 @@
 #include "../pch.h"
 #include "DecklinkUtils.h"
+#include "../PixelFormat.h"
 #include "../FieldOrder.h"
+#include "../Core/VideoFormat.h"
 #include "../DecklinkTimecodeSource.h"
 #include "../FFmpeg/FFmpegUtils.h"
 

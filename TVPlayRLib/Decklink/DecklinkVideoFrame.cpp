@@ -1,5 +1,6 @@
 #include "../pch.h"
 #include "DecklinkVideoFrame.h"
+#include "../Core/VideoFormat.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {

@@ -1,7 +1,4 @@
 #pragma once
-#include "../Common/NonCopyable.h"
-#include "../Common/Debug.h"
-#include "../Common/Executor.h"
 
 namespace TVPlayR {
 		enum class PixelFormat;

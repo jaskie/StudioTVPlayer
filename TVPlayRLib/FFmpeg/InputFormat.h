@@ -1,10 +1,11 @@
 #pragma once
-#include "../Core/HwAccel.h"
-#include "../Core/StreamInfo.h"
-#include "../Common/NonCopyable.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
+	namespace Core {
+		class StreamInfo;
+		enum class HwAccel;
+	}
+
 	namespace FFmpeg {
 
 class InputFormat final : public Common::DebugTarget, Common::NonCopyable

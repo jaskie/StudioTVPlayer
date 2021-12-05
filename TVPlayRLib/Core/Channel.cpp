@@ -1,11 +1,12 @@
 #include "../pch.h"
 #include "../PixelFormat.h"
+#include "VideoFormat.h"
 #include "Channel.h"
 #include "InputSource.h"
 #include "OutputDevice.h"
 #include "AudioVolume.h"
-#include "../Common/Executor.h"
-#include "../Common/Debug.h"
+#include "../FFmpeg/FFmpegUtils.h"
+#include "../FFmpeg/AVSync.h"
 #include "OverlayBase.h"
 
 namespace TVPlayR {

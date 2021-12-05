@@ -4,6 +4,8 @@
 #include "DecklinkOutput.h"
 #include "DecklinkInput.h"
 #include "VideoFormat.h"
+#include "Decklink/DecklinkIterator.h"
+#include "DecklinkTimecodeSource.h"
 
 namespace TVPlayR {
 
@@ -17,6 +19,7 @@ namespace TVPlayR {
 
 	static DecklinkIterator::DecklinkIterator()
 	{
+		_iterator = new Decklink::DecklinkIterator();
 		Refresh();
 	}
 
@@ -26,9 +29,9 @@ namespace TVPlayR {
 		return gcnew DecklinkOutput(native_output);
 	}
 
-	DecklinkInput^ DecklinkIterator::CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, DecklinkTimecodeSource timecodeSource, bool captureVideo)
+	DecklinkInput^ DecklinkIterator::CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo)
 	{
-		auto native_input = _iterator->CreateInput(*decklink->GetNativeInfo(), initialFormat->GetNativeEnumType(), audioChannelCount, DecklinkTimecodeSource(timecodeSource), captureVideo);
+		auto native_input = _iterator->CreateInput(*decklink->GetNativeInfo(), initialFormat->GetNativeEnumType(), audioChannelCount, timecodeSource, captureVideo);
 		return gcnew DecklinkInput(native_input, decklink->ModelName);
 	}
 

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "InputPreview.h"
+#include "Preview/InputPreview.h"
 
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
@@ -81,5 +82,9 @@ namespace TVPlayR
         {
             target->Unlock();
         }
+    }
+    std::shared_ptr<Preview::InputPreview> InputPreview::GetNative()
+    {
+        return _preview == nullptr ? nullptr : *_preview;
     }
 }

@@ -1,7 +1,6 @@
 #include "../pch.h"
 #include "InputPreview.h"
 #include "../FFmpeg/SwScale.h"
-#include "../Common/Executor.h"
 
 namespace TVPlayR {
 	namespace Preview {

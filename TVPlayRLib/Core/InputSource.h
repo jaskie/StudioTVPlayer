@@ -1,12 +1,13 @@
 #pragma once
-#include "../FFmpeg/AVSync.h"
-#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	enum class FieldOrder;
 
 	namespace Preview {
 		class InputPreview;
+	}
+	namespace FFmpeg {
+		class AVSync;
 	}
 
 	namespace Core {

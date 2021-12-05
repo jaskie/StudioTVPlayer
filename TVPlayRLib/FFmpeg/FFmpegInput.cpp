@@ -2,14 +2,14 @@
 #include "FFmpegInput.h"
 #include "FFmpegInputBase.h"
 #include "FFmpegUtils.h"
-#include "../Common/Semaphore.h"
-#include "../Common/Executor.h"
+#include "AVSync.h"
 #include "Decoder.h"
 #include "../Core/Channel.h"
 #include "AudioMuxer.h"
 #include "SynchronizingBuffer.h"
 #include "ChannelScaler.h"
-#include "../Common/Debug.h"
+#include "../Core/StreamInfo.h"
+
 
 namespace TVPlayR {
 	namespace FFmpeg {

@@ -1,10 +1,11 @@
 #include "../pch.h"
 #include "DecklinkInputSynchroProvider.h"
+#include "../DecklinkTimecodeSource.h"
 #include "DecklinkUtils.h"
 #include "../Core/Channel.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
-
+#include "../FFmpeg/ChannelScaler.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -16,6 +17,10 @@ namespace TVPlayR {
 			, frame_queue_(2)
 			, last_video_(AV_NOPTS_VALUE, FFmpeg::CreateEmptyVideoFrame(channel.Format(), channel.PixelFormat()))
 			, executor_("Input provider for " + channel.Name())
+		{
+		}
+
+		DecklinkInputSynchroProvider::~DecklinkInputSynchroProvider()
 		{
 		}
 

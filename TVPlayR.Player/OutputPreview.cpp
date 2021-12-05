@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "OutputPreview.h"
+#include "Preview/OutputPreview.h"
 
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
@@ -80,5 +81,9 @@ namespace TVPlayR
         {
             target->Unlock();
         }
+    }
+    std::shared_ptr<Core::OutputDevice> OutputPreview::GetNativeDevice()
+    {
+        return _preview == nullptr ? nullptr : *_preview;
     }
 }

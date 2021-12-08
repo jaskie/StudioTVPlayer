@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:FFOutputViewModel}"
-             d:DesignHeight="300" d:DesignWidth="400">
+             d:DesignHeight="330" d:DesignWidth="400">
     <UserControl.Resources>
         <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
             <Setter Property="Margin" Value="5 0"/>
@@ -49,6 +49,7 @@
         <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center">Audio</TextBlock>
         <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center">Output</TextBlock>
         <Label Grid.Row="4" Grid.Column="0">Codec</Label>
+        <CheckBox Grid.Row="4" Grid.Column="2" IsChecked="{Binding TimecodeOverlay}" VerticalAlignment="Center" Margin="5 0" ToolTip="Adds timecode overlay to video">Display timecode</CheckBox>
         <ComboBox Grid.Row="5" Grid.Column="0" ItemsSource="{Binding VideoCodecs}" SelectedItem="{Binding VideoCodec, ValidatesOnDataErrors=True}"/>
         <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AudioCodecs}" SelectedItem="{Binding AudioCodec, ValidatesOnDataErrors=True}"/>
         <Label Grid.Row="6">Bitrate (kbps)</Label>

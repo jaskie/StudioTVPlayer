@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FFOutput.h"
 #include "ClrStringHelper.h"
+#include "OverlayBase.h"
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
 
@@ -38,6 +39,20 @@ namespace TVPlayR
             return;
         delete _native_output;
         _native_output = nullptr;
+    }
+
+    void FFOutput::AddOverlay(OverlayBase^ overlay)
+    {
+        if (!_native_output)
+            return;
+        (*_native_output)->AddOverlay(overlay->GetNativeObject());
+    }
+
+    void FFOutput::RemoveOverlay(OverlayBase^ overlay)
+    {
+        if (!_native_output)
+            return;
+        (*_native_output)->RemoveOverlay(overlay->GetNativeObject());
     }
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }

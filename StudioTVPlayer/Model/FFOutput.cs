@@ -21,14 +21,12 @@
         {
             if (_ffOutput is null)
                 return;
+            base.Dispose();
             _ffOutput.Dispose();
             _ffOutput = null;
         }
 
-        public override TVPlayR.OutputBase GetOutput()
-        {
-            return _ffOutput;
-        }
+        public override TVPlayR.OutputBase Output => _ffOutput;
 
         public override void Initialize(TVPlayR.Channel channel)
         {
@@ -41,6 +39,7 @@
                 OutputMetadata, VideoMetadata, AudioMetadata,
                 VideoStreamId, AudioStreamId
                 );
+            base.Initialize(channel);
         }
     }
 }

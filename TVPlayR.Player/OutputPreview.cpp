@@ -38,6 +38,16 @@ namespace TVPlayR
         _framePlayedHandle.Free();
     }
 
+    void OutputPreview::AddOverlay(OverlayBase^ overlay)
+    {
+        throw gcnew System::NotImplementedException();
+    }
+
+    void OutputPreview::RemoveOverlay(OverlayBase^ overlay)
+    {
+        throw gcnew System::NotImplementedException();
+    }
+
     void OutputPreview::FramePlayedCallback(std::shared_ptr<AVFrame> frame)
     {
         if (_shutdown_cts->IsCancellationRequested)

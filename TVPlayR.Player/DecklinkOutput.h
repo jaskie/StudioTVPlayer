@@ -18,6 +18,8 @@ namespace TVPlayR {
 		DecklinkOutput(std::shared_ptr<Decklink::DecklinkOutput>& decklink);
 
 	public:
+		virtual void AddOverlay(OverlayBase^ overlay) override;
+		virtual void RemoveOverlay(OverlayBase^ overlay) override;
 		~DecklinkOutput();
 		!DecklinkOutput();
 	};

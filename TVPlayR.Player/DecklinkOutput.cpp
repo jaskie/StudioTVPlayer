@@ -12,6 +12,16 @@ namespace TVPlayR {
 	{
 	}
 
+	void DecklinkOutput::AddOverlay(OverlayBase^ overlay)
+	{
+		throw gcnew System::NotImplementedException();
+	}
+
+	void DecklinkOutput::RemoveOverlay(OverlayBase^ overlay)
+	{
+		throw gcnew System::NotImplementedException();
+	}
+
 	DecklinkOutput::~DecklinkOutput()
 	{
 		this->!DecklinkOutput();

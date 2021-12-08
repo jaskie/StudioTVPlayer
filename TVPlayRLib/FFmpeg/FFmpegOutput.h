@@ -3,6 +3,7 @@
 #include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
+
 	namespace FFmpeg {
 		class FFmpegOutput final : public Core::OutputDevice
 		{
@@ -21,6 +22,7 @@ namespace TVPlayR {
 		private:
 			const FFOutputParams params_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
+			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			struct implementation;
 			std::unique_ptr<implementation> impl_;
 		};

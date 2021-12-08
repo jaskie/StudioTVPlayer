@@ -13,6 +13,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             Output = output;
             _isFrameClock = output.IsFrameClock;
+            _timecodeOverlay = output.TimecodeOverlay;
         }
 
         public string this[string columnName] => ReadErrorInfo(columnName);

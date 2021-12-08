@@ -33,6 +33,8 @@ namespace TVPlayR {
 		!FFOutput();
 		property static array<String^>^ VideoCodecs { array<String^>^ get() { return _videoCodecs; }};
 		property static array<String^>^ AudioCodecs { array<String^>^ get() { return _audioCodecs; }};
+		virtual void AddOverlay(OverlayBase^ overlay) override;
+		virtual void RemoveOverlay(OverlayBase^ overlay) override;
 	private:
 		std::shared_ptr<FFmpeg::FFmpegOutput>* _native_output;
 		static array<String^>^ _videoCodecs = gcnew array<String^> { "mpeg2video", "libx264", "h264_nvenc",	"hevc_nvenc"};

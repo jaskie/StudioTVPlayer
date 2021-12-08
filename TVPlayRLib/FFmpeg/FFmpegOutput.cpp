@@ -4,6 +4,7 @@
 #include "../Core/Channel.h"
 #include "../PixelFormat.h"
 #include "../Core/VideoFormat.h"
+#include "../Core/OverlayBase.h"
 #include "OutputFormat.h"
 #include "Encoder.h"
 #include "SwScale.h"
@@ -34,6 +35,7 @@ namespace TVPlayR {
 			std::unique_ptr<Encoder> video_encoder_;
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
+			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			std::int64_t video_frames_requested_ = 0LL;
 			std::int64_t audio_samples_requested_ = 0LL;
@@ -94,6 +96,8 @@ namespace TVPlayR {
 				AVSync sync;
 				if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 				{
+					for (auto& overlay : overlays_)
+						sync = overlay->Transform(sync);
 					if (video_filter_)
 					{
 						video_filter_->Push(sync.Video);
@@ -195,6 +199,22 @@ namespace TVPlayR {
 				}
 			}
 
+			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			{
+				executor_.invoke([&]
+					{
+						overlays_.emplace_back(overlay);
+					});
+			}
+
+			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			{
+				executor_.invoke([&]
+					{
+						overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
+					});
+			}
+
 			void Push(FFmpeg::AVSync& sync)
 			{
 				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
@@ -234,15 +254,26 @@ namespace TVPlayR {
 			if (impl_)
 				return false;
 			impl_ = std::make_unique<implementation>(channel, params_, frame_requested_callback_);
+			for (auto& overlay : overlays_)
+				impl_->AddOverlay(overlay);
 			return true;
 		}
 		void FFmpegOutput::ReleaseChannel() { impl_.reset(); }
-		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay)
-		{
+
+		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay) 
+		{ 
+			overlays_.emplace_back(overlay);
+			if (impl_)
+				impl_->AddOverlay(overlay); 
 		}
-		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+
+		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay) 
 		{
+			overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
+			if (impl_)
+				impl_->RemoveOverlay(overlay); 
 		}
+
 		void FFmpegOutput::Push(FFmpeg::AVSync& sync)
 		{
 			if (impl_) 

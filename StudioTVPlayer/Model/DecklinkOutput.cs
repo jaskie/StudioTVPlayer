@@ -14,16 +14,18 @@ namespace StudioTVPlayer.Model
         {
             if (_output is null)
                 return;
+            base.Dispose();
             _output.Dispose();
             _output = null;
         }
 
-        public override TVPlayR.OutputBase GetOutput() => _output;
+        public override TVPlayR.OutputBase Output => _output;
 
         public override void Initialize(TVPlayR.Channel channel)
         {
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, false);
+            base.Initialize(channel);
         }
 
 

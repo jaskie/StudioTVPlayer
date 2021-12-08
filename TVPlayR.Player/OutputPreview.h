@@ -31,6 +31,8 @@ namespace TVPlayR {
 		OutputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
 		~OutputPreview();
 		!OutputPreview();
+		virtual void AddOverlay(OverlayBase^ overlay) override;
+		virtual void RemoveOverlay(OverlayBase^ overlay) override;
 		property WriteableBitmap^ PreviewSource
 		{
 			WriteableBitmap^ get() { return _target; }

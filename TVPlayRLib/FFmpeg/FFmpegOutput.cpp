@@ -201,7 +201,7 @@ namespace TVPlayR {
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				executor_.invoke([&]
+				executor_.invoke([=]
 					{
 						overlays_.emplace_back(overlay);
 					});
@@ -209,7 +209,7 @@ namespace TVPlayR {
 
 			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				executor_.invoke([&]
+				executor_.invoke([=]
 					{
 						overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
 					});
@@ -260,14 +260,14 @@ namespace TVPlayR {
 		}
 		void FFmpegOutput::ReleaseChannel() { impl_.reset(); }
 
-		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay) 
+		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 
 		{ 
 			overlays_.emplace_back(overlay);
 			if (impl_)
 				impl_->AddOverlay(overlay); 
 		}
 
-		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay) 
+		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 
 		{
 			overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
 			if (impl_)

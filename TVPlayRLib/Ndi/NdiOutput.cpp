@@ -77,7 +77,7 @@ namespace TVPlayR {
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				executor_.invoke([&]
+				executor_.invoke([=]
 					{
 						overlays_.emplace_back(overlay);
 					});
@@ -85,7 +85,7 @@ namespace TVPlayR {
 
 			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				executor_.invoke([&]
+				executor_.invoke([=]
 					{
 						overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
 					});
@@ -162,9 +162,9 @@ namespace TVPlayR {
 
 		void NdiOutput::ReleaseChannel() { impl_->ReleaseChannel(); }
 
-		void NdiOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay) { impl_->AddOverlay(overlay); }
+		void NdiOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->AddOverlay(overlay); }
 
-		void NdiOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay) { impl_->RemoveOverlay(overlay); }
+		void NdiOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
 		void NdiOutput::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
 		

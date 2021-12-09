@@ -78,12 +78,12 @@ namespace TVPlayR {
 
 	void OutputPreview::ReleaseChannel() { impl_->ReleaseChannel(); }
 
-	void OutputPreview::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+	void OutputPreview::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 	{
 		THROW_EXCEPTION("Preview don't support overlays");
 	}
 
-	void OutputPreview::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay)
+	void OutputPreview::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 	{
 		THROW_EXCEPTION("Preview don't support overlays");
 	}

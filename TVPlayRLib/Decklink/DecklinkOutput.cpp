@@ -256,8 +256,8 @@ namespace TVPlayR {
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
 		bool DecklinkOutput::AssignToChannel(const Core::Channel& channel) { return impl_->AssignToChannel(channel); }
 		void DecklinkOutput::ReleaseChannel()	{ impl_->ReleaseChannel(); }
-		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase> overlay)	{ impl_->AddOverlay(overlay); }
-		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase> overlay) { impl_->RemoveOverlay(overlay); }
+		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
+		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 		void DecklinkOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 		void DecklinkOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) { impl_->frame_requested_callback_ = frame_requested_callback; }
 	}

@@ -5,6 +5,7 @@
 #include "../Core/Channel.h"
 #include "DecklinkUtils.h"
 #include "DecklinkVideoFrame.h"
+#include "../Core/OverlayBase.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
@@ -18,6 +19,8 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkAttributes> attributes_;
 			int index_;
 			Core::VideoFormat format_;
+			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
+			std::mutex overlays_mutex_;
 			int buffer_size_ = 4;
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
@@ -86,7 +89,6 @@ namespace TVPlayR {
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
 					ScheduleVideo(empty_video_frame, 0LL);
-					scheduled_frames_++;
 				}
 				output_->EndAudioPreroll();
 			}
@@ -98,6 +100,7 @@ namespace TVPlayR {
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_time_ = timecode;
 				last_video_ = frame;
+				scheduled_frames_++;
 				DebugPrintLineIf(FAILED(ret), "Unable to schedule frame: " + std::to_string(frame->pts) + " HRESULT: " + std::to_string(ret));
 			}
 
@@ -157,10 +160,14 @@ namespace TVPlayR {
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
+				std::lock_guard<std::mutex> lock(overlays_mutex_);
+				overlays_.emplace_back(overlay);
 			}
 
 			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
+				std::lock_guard<std::mutex> lock(overlays_mutex_);
+				overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
 			}
 
 			void Push(FFmpeg::AVSync& sync)
@@ -170,7 +177,7 @@ namespace TVPlayR {
 			}
 
 			//IDeckLinkVideoOutputCallback
-			HRESULT __stdcall ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
+			HRESULT STDMETHODCALLTYPE ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
 			{
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
 					return S_OK;
@@ -180,24 +187,32 @@ namespace TVPlayR {
 					frame_requested_callback_(audio_samples_required);
 
 				FFmpeg::AVSync sync;
-				if (buffer_.try_take(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("Frame not received");
-				if (sync.Video)
+				if (buffer_.try_take(sync) == Common::BlockingCollectionStatus::Ok)
+				{
+					{
+						std::lock_guard<std::mutex> lock(overlays_mutex_);
+						for (auto& overlay : overlays_)
+							sync = overlay->Transform(sync);
+					}
 					ScheduleVideo(sync.Video, sync.Timecode);
-				else
-					ScheduleVideo(last_video_, last_video_time_);
-
-				if (sync.Audio)
-					ScheduleAudio(sync.Audio);
-				else
-					if (audio_samples_required > 0)
+					if (sync.Audio)
+					{
+						ScheduleAudio(sync.Audio);
+					}
+					else if (audio_samples_required > 0)
 					{
 						auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_required, audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32);
 						DebugPrintLine("Created empty audio with " + std::to_string(audio_samples_required) + " audio samples");
 						ScheduleAudio(audio);
 					}
-				
-				scheduled_frames_++;
+				}
+				else
+				{
+					DebugPrintLine("Frame not received");
+					ScheduleVideo(last_video_, last_video_time_);
+					auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_required, audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32);
+					ScheduleAudio(audio);
+				}
 
 #ifdef DEBUG
 				auto frame = static_cast<DecklinkVideoFrame*>(completedFrame);
@@ -219,7 +234,7 @@ namespace TVPlayR {
 				return S_OK;
 			}
 
-			HRESULT __stdcall ScheduledPlaybackHasStopped(void) override
+			HRESULT STDMETHODCALLTYPE ScheduledPlaybackHasStopped(void) override
 			{
 				return S_OK;
 			}

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "DecklinkOutput.h"
+#include "OverlayBase.h"
 #include "Decklink/DecklinkOutput.h"
 
 namespace TVPlayR {
@@ -14,12 +15,16 @@ namespace TVPlayR {
 
 	void DecklinkOutput::AddOverlay(OverlayBase^ overlay)
 	{
-		throw gcnew System::NotImplementedException();
+		if (!_decklink)
+			return;
+		(*_decklink)->AddOverlay(overlay->GetNativeObject());
 	}
 
 	void DecklinkOutput::RemoveOverlay(OverlayBase^ overlay)
 	{
-		throw gcnew System::NotImplementedException();
+		if (!_decklink)
+			return;
+		(*_decklink)->RemoveOverlay(overlay->GetNativeObject());
 	}
 
 	DecklinkOutput::~DecklinkOutput()

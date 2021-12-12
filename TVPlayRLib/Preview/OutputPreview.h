@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class Channel;
+		class Player;
 	}
 	namespace Preview {
 
@@ -14,8 +14,8 @@ public:
 	explicit OutputPreview(int width, int height);
 	~OutputPreview();
 	typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
-	virtual bool AssignToChannel(const Core::Channel& channel) override;
-	virtual void ReleaseChannel() override;
+	virtual bool AssignToPlayer(const Core::Player& player) override;
+	virtual void ReleasePlayer() override;
 	virtual void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	virtual void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	virtual void Push(FFmpeg::AVSync& sync) override;

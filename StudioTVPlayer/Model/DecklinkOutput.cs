@@ -21,11 +21,11 @@ namespace StudioTVPlayer.Model
 
         public override TVPlayR.OutputBase Output => _output;
 
-        public override void Initialize(TVPlayR.Channel channel)
+        public override void Initialize(TVPlayR.Player player)
         {
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, false);
-            base.Initialize(channel);
+            base.Initialize(player);
         }
 
 

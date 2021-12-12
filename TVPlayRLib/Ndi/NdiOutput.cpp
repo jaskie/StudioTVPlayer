@@ -3,7 +3,7 @@
 #include "NdiUtils.h"
 #include "../Core/OutputDevice.h"
 #include "../Core/VideoFormat.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 #include "../Core/OverlayBase.h"
 #include "../FFmpeg/AVSync.h"
 
@@ -39,35 +39,35 @@ namespace TVPlayR {
 
 			~implementation()
 			{
-				ReleaseChannel();
+				ReleasePlayer();
 				executor_.stop();
 				if (send_instance_)
 					ndi_->send_destroy(send_instance_);
 			}
 
-			bool AssignToChannel(const Core::Channel& channel)
+			bool AssignToPlayer(const Core::Player& player)
 			{
 				return executor_.invoke([&] 
 				{
 					if (format_.type() != Core::VideoFormatType::invalid)
 					{
-						DebugPrintLine("Already assigned to another channel");
+						DebugPrintLine("Already assigned to another player");
 						return false;
 					}
-					format_ = channel.Format();
-					audio_sample_rate_ = channel.AudioSampleRate();
-					audio_channels_count_ = channel.AudioChannelsCount();
+					format_ = player.Format();
+					audio_sample_rate_ = player.AudioSampleRate();
+					audio_channels_count_ = player.AudioChannelsCount();
 					if (frame_requested_callback_)
 						executor_.begin_invoke([this] 
 						{ 
-							DebugPrintLine("AssignToChannel - calling InitializeFrameRequester()");
+							DebugPrintLine("AssignToPlayer - calling InitializeFrameRequester()");
 							InitializeFrameRequester();
 						}); 
 					return true;
 				});
 			}
 
-			void ReleaseChannel()
+			void ReleasePlayer()
 			{
 				executor_.invoke([this] 
 				{ 
@@ -114,13 +114,13 @@ namespace TVPlayR {
 							NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
 							ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
 						}
-						RequestFrameFromChannel();
+						RequestFrameFromPlayer();
 					}
 				}
 				executor_.begin_invoke([this] { Tick(); }); // next frame
 			}
 
-			void RequestFrameFromChannel()
+			void RequestFrameFromPlayer()
 			{
 				assert(executor_.is_current());
 				if (!frame_requested_callback_)
@@ -137,7 +137,7 @@ namespace TVPlayR {
 				audio_samples_requested_ = 0LL;
 				video_frames_requested_ = 0LL;
 				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
-					RequestFrameFromChannel();
+					RequestFrameFromPlayer();
 				Tick();
 			}
 
@@ -158,9 +158,9 @@ namespace TVPlayR {
 		NdiOutput::NdiOutput(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		NdiOutput::~NdiOutput() { }
 
-		bool NdiOutput::AssignToChannel(const Core::Channel& channel) { return impl_->AssignToChannel(channel); }
+		bool NdiOutput::AssignToPlayer(const Core::Player& player) { return impl_->AssignToPlayer(player); }
 
-		void NdiOutput::ReleaseChannel() { impl_->ReleaseChannel(); }
+		void NdiOutput::ReleasePlayer() { impl_->ReleasePlayer(); }
 
 		void NdiOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->AddOverlay(overlay); }
 

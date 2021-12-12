@@ -11,7 +11,7 @@ namespace TVPlayR {
 	}
 
 	namespace Core {
-		class Channel;
+		class Player;
 
 class InputSource : Common::NonCopyable
 {
@@ -19,10 +19,10 @@ public:
 	typedef std::function<void(std::int64_t)> TIME_CALLBACK;
 	typedef std::function<void()> STOPPED_CALLBACK;
 	typedef std::function<void()> LOADED_CALLBACK;
-	virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count) = 0;
-	virtual bool IsAddedToChannel(const Channel& channel) = 0;
-	virtual void AddToChannel(const Channel& channel) = 0;
-	virtual void RemoveFromChannel(const Core::Channel& channel) = 0;
+	virtual FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count) = 0;
+	virtual bool IsAddedToPlayer(const Player& player) = 0;
+	virtual void AddToPlayer(const Player& player) = 0;
+	virtual void RemoveFromPlayer(const Core::Player& player) = 0;
 	virtual void AddPreview(std::shared_ptr<Preview::InputPreview> preview) = 0;
 	virtual void Play() = 0;
 	virtual void Pause() = 0;

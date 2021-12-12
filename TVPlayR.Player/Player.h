@@ -5,7 +5,7 @@ using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
 	namespace Core {
-		class Channel;
+		class Player;
 	}
 
 	ref class DecklinkOutput;
@@ -17,10 +17,10 @@ namespace TVPlayR {
 	ref class AudioVolumeEventArgs;
 	enum class PixelFormat;
 
-	public ref class Channel sealed
+	public ref class Player sealed
 	{
 	private:
-		Core::Channel* const _channel;
+		Core::Player* const _player;
 		double _volume = 1.0f;
 		VideoFormat^ _videoFormat;
 		const PixelFormat _pixelFormat;
@@ -30,9 +30,9 @@ namespace TVPlayR {
 		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
 		void AudioVolumeCallback(std::vector<double>& audio_volume);
 	public:
-		Channel(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
-		~Channel();
-		!Channel();
+		Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
+		~Player();
+		!Player();
 		bool AddOutput(OutputBase^ output, bool setAsClockBase);
 		void RemoveOutput(OutputBase^ output);
 		void AddOverlay(OverlayBase^ overlay);

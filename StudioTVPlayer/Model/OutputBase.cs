@@ -13,11 +13,11 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public bool TimecodeOverlay { get; set; }
 
-        public virtual void Initialize(TVPlayR.Channel channel) 
+        public virtual void Initialize(TVPlayR.Player player) 
         {
             if (TimecodeOverlay)
             {
-                _overlay = new TVPlayR.TimecodeOverlay(channel.VideoFormat, channel.PixelFormat);
+                _overlay = new TVPlayR.TimecodeOverlay(player.VideoFormat, player.PixelFormat);
                 Output.AddOverlay(_overlay);
             }
         }

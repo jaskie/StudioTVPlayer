@@ -5,11 +5,11 @@ namespace TVPlayR {
 	enum class DecklinkTimecodeSource;
 
 	namespace Core {
-		class Channel;
+		class Player;
 	}
 	namespace FFmpeg {
 		class AVSync;
-		class ChannelScaler;
+		class PlayerScaler;
 	}
 	namespace Common {
 		template<typename> class Rational;
@@ -20,16 +20,16 @@ namespace TVPlayR {
 class DecklinkInputSynchroProvider
 {
 public:
-	DecklinkInputSynchroProvider(const Core::Channel& channel, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video);
+	DecklinkInputSynchroProvider(const Core::Player& player, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video);
 	~DecklinkInputSynchroProvider();
-	const Core::Channel& Channel() const;
+	const Core::Player& Player() const;
 	void Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, std::int64_t timecode);
 	FFmpeg::AVSync PullSync(int audio_samples_count);
 	void Reset(AVRational input_frame_rate);
 private:
 	typedef std::pair<std::int64_t, std::shared_ptr<AVFrame>> queue_item_t;
-	const Core::Channel&						channel_;
-	std::unique_ptr<FFmpeg::ChannelScaler>		scaler_;
+	const Core::Player&						player_;
+	std::unique_ptr<FFmpeg::PlayerScaler>		scaler_;
 	const bool									process_video_;
 	FFmpeg::AudioFifo							audio_fifo_;
 	queue_item_t								last_video_;

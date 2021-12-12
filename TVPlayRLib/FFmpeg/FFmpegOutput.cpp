@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include <chrono>
 #include "FFmpegOutput.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 #include "../PixelFormat.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/OverlayBase.h"
@@ -45,17 +45,17 @@ namespace TVPlayR {
 			clock::time_point stream_start_time_;
 			Common::Executor executor_;
 
-			implementation(const Core::Channel& channel, const FFOutputParams& params, FRAME_REQUESTED_CALLBACK frame_requested_callback)
+			implementation(const Core::Player& player, const FFOutputParams& params, FRAME_REQUESTED_CALLBACK frame_requested_callback)
 				: Common::DebugTarget(false, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, frame_requested_callback_(frame_requested_callback)
-				, format_(channel.Format())
-				, src_pixel_format_(PixelFormatToFFmpegFormat(channel.PixelFormat()))
-				, audio_sample_rate_(channel.AudioSampleRate())
-				, audio_channels_count_(channel.AudioChannelsCount())
+				, format_(player.Format())
+				, src_pixel_format_(PixelFormatToFFmpegFormat(player.PixelFormat()))
+				, audio_sample_rate_(player.AudioSampleRate())
+				, audio_channels_count_(player.AudioChannelsCount())
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
-				, audio_resampler_(channel.AudioChannelsCount(), channel.AudioSampleRate(), channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]))
+				, audio_resampler_(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]))
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
@@ -64,7 +64,7 @@ namespace TVPlayR {
 				if (params.VideoFilter.empty())
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
-					video_filter_ = std::make_unique<OutputVideoFilter>(channel.Format().FrameRate().av(), params.VideoFilter, video_codec_->pix_fmts[0]);
+					video_filter_ = std::make_unique<OutputVideoFilter>(player.Format().FrameRate().av(), params.VideoFilter, video_codec_->pix_fmts[0]);
 				if (frame_requested_callback)
 					executor_.begin_invoke([this] { InitializeFrameRequester(); });
 			}
@@ -86,7 +86,7 @@ namespace TVPlayR {
 				audio_samples_requested_ = 0LL;
 				video_frames_requested_ = 0LL;
 				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
-					RequestFrameFromChannel();
+					RequestFrameFromPlayer();
 				Tick();
 			}
 			
@@ -135,7 +135,7 @@ namespace TVPlayR {
 					DebugPrintLine("Buffer didn't return frame");
 				if (frame_requested_callback_)
 				{
-					RequestFrameFromChannel();
+					RequestFrameFromPlayer();
 					if (!output_format_.IsFlushed())
 						executor_.begin_invoke([this]
 					{
@@ -145,7 +145,7 @@ namespace TVPlayR {
 				}
 			}
 
-			void RequestFrameFromChannel()
+			void RequestFrameFromPlayer()
 			{
 				assert(executor_.is_current());
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
@@ -249,16 +249,16 @@ namespace TVPlayR {
 		{ }
 
 		FFmpegOutput::~FFmpegOutput() { }
-		bool FFmpegOutput::AssignToChannel(const Core::Channel& channel)
+		bool FFmpegOutput::AssignToPlayer(const Core::Player& player)
 		{
 			if (impl_)
 				return false;
-			impl_ = std::make_unique<implementation>(channel, params_, frame_requested_callback_);
+			impl_ = std::make_unique<implementation>(player, params_, frame_requested_callback_);
 			for (auto& overlay : overlays_)
 				impl_->AddOverlay(overlay);
 			return true;
 		}
-		void FFmpegOutput::ReleaseChannel() { impl_.reset(); }
+		void FFmpegOutput::ReleasePlayer() { impl_.reset(); }
 
 		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 
 		{ 

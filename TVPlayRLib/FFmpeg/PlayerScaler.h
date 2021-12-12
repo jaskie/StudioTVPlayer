@@ -5,16 +5,16 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class Channel;
+		class Player;
 	}
 	namespace FFmpeg {
 
 class Decoder;
 
-class ChannelScaler final :	public VideoFilterBase
+class PlayerScaler final :	public VideoFilterBase
 {
 public:
-	ChannelScaler(const Core::Channel& channel);
+	PlayerScaler(const Core::Player& player);
 	const Core::VideoFormat& Format() const { return output_format_; }
 	bool Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base);
 private:

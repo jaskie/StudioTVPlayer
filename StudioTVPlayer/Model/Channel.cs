@@ -20,7 +20,7 @@ namespace StudioTVPlayer.Model
         private TVPlayR.PixelFormat _pixelFormat;
         private bool _livePreview;
 
-        private TVPlayR.Channel _channelR;
+        private TVPlayR.Player _player;
         private TVPlayR.OutputPreview _outputPreview;
 
         private List<OutputBase> _outputs = new List<OutputBase>();
@@ -91,54 +91,54 @@ namespace StudioTVPlayer.Model
         }
 
         [XmlIgnore]
-        public bool IsInitialized => _channelR != null;
+        public bool IsInitialized => _player != null;
 
         [XmlIgnore]
         public int AudioChannelCount { get; } = 2;
 
         public void Initialize()
         {
-            if (_channelR != null)
+            if (_player != null)
                 throw new ApplicationException($"Channel {Name} already initialized");
             _videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormatName);
             if (_videoFormat == null)
                 return;
-            _channelR = new TVPlayR.Channel(_name, _videoFormat, PixelFormat, AudioChannelCount);
+            _player = new TVPlayR.Player(_name, _videoFormat, PixelFormat, AudioChannelCount);
             foreach (var output in Outputs)
             {
-                output.Initialize(_channelR);
-                _channelR.AddOutput(output.Output, output.IsFrameClock);
+                output.Initialize(_player);
+                _player.AddOutput(output.Output, output.IsFrameClock);
             }
-            _channelR.AudioVolume += ChannelR_AudioVolume;
+            _player.AudioVolume += ChannelR_AudioVolume;
         }
 
 
         public void SetVolume(double value)
         {
-            if (_channelR == null)
+            if (_player == null)
                 throw new ApplicationException($"Channel {Name} not initialized");
-            _channelR.Volume = Math.Pow(10, value / 20);
+            _player.Volume = Math.Pow(10, value / 20);
         }
 
         public ImageSource GetPreview(int width, int height)
         {
-            if (_channelR == null)
+            if (_player == null)
                 throw new ApplicationException($"Channel {Name} not initialized");
             if (_outputPreview is null)
             {
                 _outputPreview = new TVPlayR.OutputPreview(Application.Current.Dispatcher, width, height);
-                _channelR.AddOutput(_outputPreview, false);
+                _player.AddOutput(_outputPreview, false);
             }
             return _outputPreview.PreviewSource;
         }
 
         public void Uninitialize()
         {
-            if (_channelR == null)
+            if (_player == null)
                 return;
             foreach (var o in Outputs)
             {
-                _channelR.RemoveOutput(o.Output);
+                _player.RemoveOutput(o.Output);
                 o.Dispose();
             }
             if (!(_outputPreview is null))
@@ -146,27 +146,27 @@ namespace StudioTVPlayer.Model
                 _outputPreview.Dispose();
                 _outputPreview = null;
             }
-            _channelR.AudioVolume -= ChannelR_AudioVolume;
-            _channelR.Clear();
-            _channelR.Dispose();
-            _channelR = null;
+            _player.AudioVolume -= ChannelR_AudioVolume;
+            _player.Clear();
+            _player.Dispose();
+            _player = null;
         }
 
         public void Load(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
-            _channelR.Load(item);
+            _player.Load(item);
         }
 
         public void Preload(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
-            _channelR.Preload(item);
+            _player.Preload(item);
         }
 
         public void Clear()
         {
-            _channelR.Clear();
+            _player.Clear();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

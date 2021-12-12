@@ -3,7 +3,7 @@
 namespace TVPlayR {
 	namespace Core 
 	{
-		class Channel;
+		class Player;
 		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
@@ -13,7 +13,7 @@ namespace TVPlayR {
 class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 {
 public:
-	SynchronizingBuffer(const Core::Channel * channel, bool is_playing, std::int64_t duration, std::int64_t initial_sync);
+	SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync);
 	~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);

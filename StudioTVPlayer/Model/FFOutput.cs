@@ -28,7 +28,7 @@
 
         public override TVPlayR.OutputBase Output => _ffOutput;
 
-        public override void Initialize(TVPlayR.Channel channel)
+        public override void Initialize(TVPlayR.Player player)
         {
             _ffOutput = new TVPlayR.FFOutput(
                 Url,
@@ -39,7 +39,7 @@
                 OutputMetadata, VideoMetadata, AudioMetadata,
                 VideoStreamId, AudioStreamId
                 );
-            base.Initialize(channel);
+            base.Initialize(player);
         }
     }
 }

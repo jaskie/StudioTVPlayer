@@ -3,7 +3,7 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class Channel;
+		class Player;
 	}
 	namespace FFmpeg {
 		class OutputVideoFilter :

@@ -113,7 +113,7 @@
     <ClInclude Include="Core\HwAccel.h" />
     <ClInclude Include="Core\InputSource.h" />
     <ClInclude Include="Core\OutputDevice.h" />
-    <ClInclude Include="Core\Channel.h" />
+    <ClInclude Include="Core\Player.h" />
     <ClInclude Include="Core\VideoFormat.h" />
     <ClInclude Include="PixelFormat.h" />
     <ClInclude Include="Decklink\DecklinkInput.h" />
@@ -133,7 +133,7 @@
     <ClInclude Include="FFmpeg\FilterBase.h" />
     <ClInclude Include="FFmpeg\InputFormat.h" />
     <ClInclude Include="FFmpeg\FFmpegInput.h" />
-    <ClInclude Include="FFmpeg\ChannelScaler.h" />
+    <ClInclude Include="FFmpeg\PlayerScaler.h" />
     <ClInclude Include="FFmpeg\FFmpegOutput.h" />
     <ClInclude Include="FFmpeg\FFOutputParams.h" />
     <ClInclude Include="FFmpeg\FFmpegUtils.h" />
@@ -191,7 +191,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Core\Channel.cpp">
+    <ClCompile Include="Core\Player.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -231,7 +231,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="FFmpeg\ChannelScaler.cpp">
+    <ClCompile Include="FFmpeg\PlayerScaler.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

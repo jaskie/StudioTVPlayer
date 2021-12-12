@@ -1,30 +1,30 @@
 #include "../pch.h"
-#include "ChannelScaler.h"
+#include "PlayerScaler.h"
 #include "../Core/InputSource.h"
 #include "../PixelFormat.h"
 #include "../FieldOrder.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
 
-ChannelScaler::ChannelScaler(const Core::Channel& channel)
-	: VideoFilterBase(TVPlayR::PixelFormatToFFmpegFormat(channel.PixelFormat()))
-	, output_format_(channel.Format())
-	, output_pixel_format_(TVPlayR::PixelFormatToFFmpegFormat(channel.PixelFormat()))
+PlayerScaler::PlayerScaler(const Core::Player& player)
+	: VideoFilterBase(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
+	, output_format_(player.Format())
+	, output_pixel_format_(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
 {
 }
 
 
-bool ChannelScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base)
+bool PlayerScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base)
 {
 	if (!IsInitialized())
 		VideoFilterBase::SetFilter(GetFilterString(frame, input_frame_rate), input_time_base);
 	return VideoFilterBase::Push(frame);
 }
 
-std::string ChannelScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate)
+std::string PlayerScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate)
 {
 	std::ostringstream filter;
 	int height = frame->height;

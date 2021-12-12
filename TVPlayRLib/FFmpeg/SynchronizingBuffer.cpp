@@ -2,7 +2,7 @@
 #include "SynchronizingBuffer.h"
 #include "AVSync.h"
 #include "AudioFifo.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 #include "../Core/VideoFormat.h"
 #include "FFmpegUtils.h"
 
@@ -10,20 +10,20 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::Channel * channel, bool is_playing, std::int64_t duration, std::int64_t initial_sync)
-		: Common::DebugTarget(false, "SynchronizingBuffer " + channel->Name())
-		, video_format_(channel->Format().type())
-		, video_frame_rate_(channel->Format().FrameRate().av())
-		, sample_rate_(channel->AudioSampleRate())
+	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync)
+		: Common::DebugTarget(false, "SynchronizingBuffer " + player->Name())
+		, video_format_(player->Format().type())
+		, video_frame_rate_(player->Format().FrameRate().av())
+		, sample_rate_(player->AudioSampleRate())
 		, audio_time_base_(av_make_q(1, sample_rate_))
-		, audio_channel_count_(channel->AudioChannelsCount())
+		, audio_channel_count_(player->AudioChannelsCount())
 		, have_video_(true)
-		, have_audio_(channel->AudioChannelsCount() > 0)
+		, have_audio_(player->AudioChannelsCount() > 0)
 		, is_playing_(is_playing)
 		, video_queue_size_(av_rescale(duration, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 		, sync_(initial_sync)
 		, is_flushed_(false)
-		, audio_sample_format_(channel->AudioSampleFormat())
+		, audio_sample_format_(player->AudioSampleFormat())
 		, audio_fifo_size_(static_cast<int>(av_rescale(duration, sample_rate_, AV_TIME_BASE)))
 		, duration_(duration)
 	{

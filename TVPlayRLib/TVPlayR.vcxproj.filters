@@ -40,7 +40,7 @@
     <ClInclude Include="Core\VideoFormat.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Channel.h">
+    <ClInclude Include="Core\Player.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="FFmpeg\Decoder.h">
@@ -101,7 +101,7 @@
     <ClInclude Include="Core\StreamInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\ChannelScaler.h">
+    <ClInclude Include="FFmpeg\PlayerScaler.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
     <ClInclude Include="FFmpeg\AudioMuxer.h">
@@ -200,7 +200,7 @@
     <ClCompile Include="Core\VideoFormat.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Channel.cpp">
+    <ClCompile Include="Core\Player.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="FFmpeg\Decoder.cpp">
@@ -234,7 +234,7 @@
     <ClCompile Include="FFmpeg\AudioFifo.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
-    <ClCompile Include="FFmpeg\ChannelScaler.cpp">
+    <ClCompile Include="FFmpeg\PlayerScaler.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
     <ClCompile Include="FFmpeg\AudioMuxer.cpp">

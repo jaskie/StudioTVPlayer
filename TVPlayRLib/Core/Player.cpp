@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "../PixelFormat.h"
 #include "VideoFormat.h"
-#include "Channel.h"
+#include "Player.h"
 #include "InputSource.h"
 #include "OutputDevice.h"
 #include "AudioVolume.h"
@@ -12,9 +12,9 @@
 namespace TVPlayR {
 	namespace Core {
 
-		struct Channel::implementation : Common::DebugTarget
+		struct Player::implementation : Common::DebugTarget
 		{
-			const Channel& channel_;
+			const Player& player_;
 			const std::string name_;
 			std::mutex devices_mutex_;
 			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
@@ -33,9 +33,9 @@ namespace TVPlayR {
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
 		
-			implementation(const Channel& channel, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
-				: Common::DebugTarget(false, "Channel " + name)
-				, channel_(channel)
+			implementation(const Player& player, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
+				: Common::DebugTarget(false, "Player " + name)
+				, player_(player)
 				, name_(name)
 				, format_(format)
 				, pixel_format_(pixel_format)
@@ -44,7 +44,7 @@ namespace TVPlayR {
 				, frame_clock_(nullptr)
 				, playing_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
-				, executor_("Channel: " + name)
+				, executor_("Player: " + name)
 			{
 			}
 
@@ -69,11 +69,11 @@ namespace TVPlayR {
 					audio_samples_count = 0;
 				executor_.begin_invoke([this, audio_samples_count]()
 				{
-					std::vector<double> volume(channel_.AudioChannelsCount(), 0.0);
+					std::vector<double> volume(player_.AudioChannelsCount(), 0.0);
 					if (playing_source_)
 					{
 						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
-						auto sync = playing_source_->PullSync(channel_, audio_samples_count);
+						auto sync = playing_source_->PullSync(player_, audio_samples_count);
 						auto& audio = sync.Audio;
 						auto& video = sync.Video;
 						assert((audio_samples_count == 0 && !sync.Audio) || (sync.Audio->nb_samples == audio_samples_count));
@@ -116,7 +116,7 @@ namespace TVPlayR {
 			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
 			{
 				assert(device);
-				device->ReleaseChannel();
+				device->ReleasePlayer();
 				std::lock_guard<std::mutex> lock(devices_mutex_);
 				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
 			}
@@ -151,7 +151,7 @@ namespace TVPlayR {
 				{
 					if (!playing_source_)
 						return;
-					playing_source_->RemoveFromChannel(channel_);
+					playing_source_->RemoveFromPlayer(player_);
 					playing_source_ = nullptr;
 				});
 			}
@@ -175,57 +175,57 @@ namespace TVPlayR {
 
 		};
 
-		Channel::Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
+		Player::Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
 			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count, audio_sample_rate)) {}
 		
-		Channel::~Channel() {}
+		Player::~Player() {}
 
-		bool Channel::AddOutput(std::shared_ptr<OutputDevice> device) {
-			if (!device->AssignToChannel(*this))
+		bool Player::AddOutput(std::shared_ptr<OutputDevice> device) {
+			if (!device->AssignToPlayer(*this))
 				return false;
 			impl_->AddOutput(device);
 			return true;
 		}
 
-		void Channel::RemoveOutput(std::shared_ptr<OutputDevice> device)
+		void Player::RemoveOutput(std::shared_ptr<OutputDevice> device)
 		{
 			impl_->RemoveOutput(device);
 		}
 
-		void Channel::SetFrameClock(std::shared_ptr<OutputDevice> clock) { impl_->SetFrameClock(clock); }
+		void Player::SetFrameClock(std::shared_ptr<OutputDevice> clock) { impl_->SetFrameClock(clock); }
 
-		void Channel::Load(std::shared_ptr<InputSource> source) 
+		void Player::Load(std::shared_ptr<InputSource> source) 
 		{
-			if (!source->IsAddedToChannel(*this))
-				source->AddToChannel(*this);
+			if (!source->IsAddedToPlayer(*this))
+				source->AddToPlayer(*this);
 			impl_->Load(source);
 		}
 
-		void Channel::Preload(std::shared_ptr<InputSource> source)
+		void Player::Preload(std::shared_ptr<InputSource> source)
 		{
-			if (!source->IsAddedToChannel(*this))
-				source->AddToChannel(*this);
+			if (!source->IsAddedToPlayer(*this))
+				source->AddToPlayer(*this);
 		}
 
-		void Channel::AddOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->AddOverlay(overlay); }
+		void Player::AddOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->AddOverlay(overlay); }
 
-		void Channel::RemoveOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->RemoveOverlay(overlay); }
+		void Player::RemoveOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->RemoveOverlay(overlay); }
 
-		void Channel::Clear() { impl_->Clear(); }
+		void Player::Clear() { impl_->Clear(); }
 
-		const VideoFormat & Channel::Format() const	{ return impl_->format_; }
+		const VideoFormat & Player::Format() const	{ return impl_->format_; }
 
-		const TVPlayR::PixelFormat Channel::PixelFormat() const { return impl_->pixel_format_;	}
+		const TVPlayR::PixelFormat Player::PixelFormat() const { return impl_->pixel_format_;	}
 
-		const int Channel::AudioChannelsCount() const { return impl_->audio_channels_count_; }
+		const int Player::AudioChannelsCount() const { return impl_->audio_channels_count_; }
 
-		const int Channel::AudioSampleRate() const { return impl_->audio_sample_rate_; }
+		const int Player::AudioSampleRate() const { return impl_->audio_sample_rate_; }
 
-		void Channel::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
+		void Player::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
 
-		void Channel::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
+		void Player::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
 
-		const std::string& Channel::Name() const { return impl_->name_; }
+		const std::string& Player::Name() const { return impl_->name_; }
 
 
 }}

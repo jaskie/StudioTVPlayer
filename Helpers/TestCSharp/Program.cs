@@ -15,23 +15,23 @@ namespace TestCSharp
         {
             int deviceIndex = 1;
             var videoFormat = VideoFormat.Formats.FirstOrDefault(vf => vf.Name == "1080i50");
-            using (Channel channel = new Channel("Channel 1", videoFormat, PixelFormat.yuv422, 2))
+            using (Player player = new Player("Channel 1", videoFormat, PixelFormat.yuv422, 2))
             {
                 using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[deviceIndex], false))
                 using (DecklinkInput input = DecklinkIterator.CreateInput(DecklinkIterator.Devices[deviceIndex], videoFormat, 2, DecklinkTimecodeSource.VITC, true))
                 {
 
-                    channel.AddOutput(output, true);
+                    player.AddOutput(output, true);
                     var file = new FileInput(@"d:\temp\test5.mov");
-                    channel.Load(file);
+                    player.Load(file);
                     file.Play();
                     Console.ReadKey();
-                    //channel.AudioVolume += Channel_AudioVolume;
+                    //player.AudioVolume += Player_AudioVolume;
                 }
             }
         }
 
-        private static void Channel_AudioVolume(object sender, AudioVolumeEventArgs e)
+        private static void Player_AudioVolume(object sender, AudioVolumeEventArgs e)
         {
             Debug.Write(e.AudioVolume.Length);
         }

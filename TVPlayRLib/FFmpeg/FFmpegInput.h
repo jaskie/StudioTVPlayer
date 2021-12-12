@@ -15,12 +15,12 @@ class FFmpegInput: public Core::InputSource
 public:
 	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
 	~FFmpegInput();
-	virtual FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count);
+	virtual FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count);
 	virtual bool Seek(const std::int64_t time);
 	virtual bool IsEof() const;
-	virtual bool IsAddedToChannel(const Core::Channel& channel) override;
-	virtual void AddToChannel(const Core::Channel& channel) override;
-	virtual void RemoveFromChannel(const Core::Channel& channel) override;
+	virtual bool IsAddedToPlayer(const Core::Player& player) override;
+	virtual void AddToPlayer(const Core::Player& player) override;
+	virtual void RemoveFromPlayer(const Core::Player& player) override;
 	virtual void AddPreview(std::shared_ptr<Preview::InputPreview> preview);
 	virtual void Play() override;
 	virtual void Pause() override;

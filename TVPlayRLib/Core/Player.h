@@ -10,12 +10,12 @@ namespace TVPlayR {
 		class VideoFormat;
 		enum class VideoFormatType;
 
-class Channel final : public Common::NonCopyable
+class Player final : public Common::NonCopyable
 {
 public:
 	typedef std::function<void(std::vector<double>&)> AUDIO_VOLUME_CALLBACK;
-	Channel(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
-	~Channel();
+	Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
+	~Player();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);
 	void RemoveOutput(std::shared_ptr<OutputDevice> device);
 	void SetFrameClock(std::shared_ptr<OutputDevice> clock);

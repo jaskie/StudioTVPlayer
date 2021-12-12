@@ -15,11 +15,11 @@ namespace StudioTVPlayer.Model
 
         public override TVPlayR.OutputBase Output => _outputDevice;
 
-        public override void Initialize(TVPlayR.Channel channel)
+        public override void Initialize(TVPlayR.Player player)
         {
             _outputDevice?.Dispose();
             _outputDevice = new TVPlayR.NdiOutput(SourceName, GroupNames);
-            base.Initialize(channel);
+            base.Initialize(player);
         }
 
         public override void Dispose()

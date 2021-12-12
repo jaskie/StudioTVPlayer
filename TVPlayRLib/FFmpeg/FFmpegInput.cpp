@@ -4,10 +4,10 @@
 #include "FFmpegUtils.h"
 #include "AVSync.h"
 #include "Decoder.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 #include "AudioMuxer.h"
 #include "SynchronizingBuffer.h"
-#include "ChannelScaler.h"
+#include "PlayerScaler.h"
 #include "../Core/StreamInfo.h"
 
 
@@ -21,11 +21,11 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	std::atomic_bool is_loop_ = false;
 	std::atomic_bool is_producer_running_ = true;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
-	const Core::Channel* channel_ = nullptr;
+	const Core::Player* player_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
-	std::unique_ptr<ChannelScaler> channel_scaler_;
+	std::unique_ptr<PlayerScaler> player_scaler_;
 	std::unique_ptr<SynchronizingBuffer> buffer_;
-	std::mutex channel_scaler_reset_mutex_;
+	std::mutex player_scaler_reset_mutex_;
 	std::mutex buffer_content_mutex_;
 	std::mutex buffer_mutex_;
 	std::condition_variable buffer_cv_;
@@ -48,8 +48,8 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	~implementation()
 	{
 		is_producer_running_ = false;
-		if (channel_)
-			RemoveFromChannel(*channel_);
+		if (player_)
+			RemoveFromPlayer(*player_);
 		producer_cv_.notify_one();
 		producer_.join();
 	}
@@ -65,9 +65,9 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			producer_cv_.wait(wait_lock);
 			{
 				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				if (!channel_)
+				if (!player_)
 					continue;
-				if (!buffer_ && channel_)
+				if (!buffer_ && player_)
 					InitializeBuffer();
 				while (!buffer_->IsFull())
 				{
@@ -83,11 +83,11 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	{
 		InitializeVideoDecoder();
 		InitializeAudioDecoders();
-		channel_scaler_ = std::make_unique<ChannelScaler>(*channel_);
+		player_scaler_ = std::make_unique<PlayerScaler>(*player_);
 		if (!audio_decoders_.empty())
-			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, channel_->AudioSampleFormat(), 48000, channel_->AudioChannelsCount());
+			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, player_->AudioSampleFormat(), 48000, player_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
-			channel_,
+			player_,
 			is_playing_,
 			AV_TIME_BASE, // 1s
 			0);
@@ -132,7 +132,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 				if (!video_decoder_->IsFlushed())
 					video_decoder_->Flush();
 				ProcessVideo();
-				FlushChannelScalerIfNeeded();
+				FlushPlayerScalerIfNeeded();
 			}
 			FlushBufferOrLoopIfNeeded();
 		}
@@ -161,12 +161,12 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		auto decoded = video_decoder_->Pull();
 		if (decoded)
 		{
-			std::lock_guard<std::mutex> lock(channel_scaler_reset_mutex_);
-			channel_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
+			std::lock_guard<std::mutex> lock(player_scaler_reset_mutex_);
+			player_scaler_->Push(decoded, video_decoder_->FrameRate(), video_decoder_->TimeBase());
 		}
 		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
-		while (auto scaled = channel_scaler_->Pull())
-			buffer_->PushVideo(scaled, channel_scaler_->OutputTimeBase());
+		while (auto scaled = player_scaler_->Pull())
+			buffer_->PushVideo(scaled, player_scaler_->OutputTimeBase());
 	}
 
 	void ProcessAudio(const std::unique_ptr<Decoder>& decoder)
@@ -179,10 +179,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			buffer_->PushAudio(muxed);
 	}
 
-	void FlushChannelScalerIfNeeded()
+	void FlushPlayerScalerIfNeeded()
 	{
-		if (video_decoder_->IsEof() && !channel_scaler_->IsFlushed())
-			channel_scaler_->Flush();
+		if (video_decoder_->IsEof() && !player_scaler_->IsFlushed())
+			player_scaler_->Flush();
 	}
 
 	void FlushAudioMuxerIfNeeded()
@@ -197,7 +197,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	void FlushBufferOrLoopIfNeeded()
 	{
 		if (!buffer_->IsFlushed() && // not flushed yet
-			(channel_scaler_->IsEof() || (video_decoder_->IsEof() || channel_scaler_->IsInitialized())) && // scaler will provide no more frames
+			(player_scaler_->IsEof() || (video_decoder_->IsEof() || player_scaler_->IsInitialized())) && // scaler will provide no more frames
 			(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
 			if (is_loop_)
 			{
@@ -208,10 +208,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 					decoder->Seek(seek_time);
 				if (audio_muxer_)
 					audio_muxer_->Reset();
-				if (channel_scaler_)
+				if (player_scaler_)
 				{
-					std::lock_guard<std::mutex> lock(channel_scaler_reset_mutex_);
-					channel_scaler_->Reset();
+					std::lock_guard<std::mutex> lock(player_scaler_reset_mutex_);
+					player_scaler_->Reset();
 				}
 				std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 				if (buffer_)
@@ -252,32 +252,32 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		return sync;
 	}
 
-	bool IsAddedToChannel(const Core::Channel& channel)
+	bool IsAddedToPlayer(const Core::Player& player)
 	{
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		return &channel == channel_;
+		return &player == player_;
 	}
 
-	void AddToChannel(const Core::Channel& channel)
+	void AddToPlayer(const Core::Player& player)
 	{
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (&channel == channel_)
+		if (&player == player_)
 		{
-			DebugPrintLine("Already added to this channel");
+			DebugPrintLine("Already added to this player");
 			return;
 		}
-		if (channel_)
-			THROW_EXCEPTION("Already added to another channel");
-		channel_ = &channel;
+		if (player_)
+			THROW_EXCEPTION("Already added to another player");
+		player_ = &player;
 		producer_cv_.notify_one();
 	}
 
-	void RemoveFromChannel(const Core::Channel& channel)
+	void RemoveFromPlayer(const Core::Player& player)
 	{
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (channel_ != &channel)
+		if (player_ != &player)
 			return;
-		channel_ = nullptr;
+		player_ = nullptr;
 		producer_cv_.notify_one();
 	}
 
@@ -292,10 +292,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 				video_decoder_->Seek(time);
 			for (auto& decoder : audio_decoders_)
 				decoder->Seek(time);
-			if (channel_scaler_)
+			if (player_scaler_)
 			{
-				std::lock_guard<std::mutex> lock(channel_scaler_reset_mutex_);
-				channel_scaler_->Reset();
+				std::lock_guard<std::mutex> lock(player_scaler_reset_mutex_);
+				player_scaler_->Reset();
 			}
 			if (audio_muxer_)
 				audio_muxer_->Reset();
@@ -348,12 +348,12 @@ FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel accelerati
 { }
 
 FFmpegInput::~FFmpegInput(){}
-AVSync FFmpegInput::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
+AVSync FFmpegInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInput::Seek(const std::int64_t time)        { return impl_->Seek(time); }
 bool FFmpegInput::IsEof() const					{ return impl_->is_eof_; }
-bool FFmpegInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
-void FFmpegInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
-void FFmpegInput::RemoveFromChannel(const Core::Channel& channel)				{ impl_->RemoveFromChannel(channel);}
+bool FFmpegInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
+void FFmpegInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
+void FFmpegInput::RemoveFromPlayer(const Core::Player& player)				{ impl_->RemoveFromPlayer(player);}
 void FFmpegInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview)
 {
 }

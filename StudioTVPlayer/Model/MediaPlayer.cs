@@ -92,6 +92,8 @@ namespace StudioTVPlayer.Model
 
         private void AddToQueue(RundownItemBase rundownItem, int index)
         {
+            if (Channel.AddItemsWithAutoPlay)
+                rundownItem.IsAutoStart = true;
             if (index < _rundown.Count)
             {
                 _rundown.Insert(index, rundownItem);

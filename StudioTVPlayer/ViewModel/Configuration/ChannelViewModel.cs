@@ -16,6 +16,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private TVPlayR.PixelFormat _selectedPixelFormat;
         private bool _livePreview;
         private OutputViewModelBase _frameClockSource;
+        private bool _disablePlayedItems;
+        private bool _addItemsWithAutoPlay;
 
         public ChannelViewModel(Model.Channel channel)
         {
@@ -48,6 +50,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _selectedVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
             _selectedPixelFormat = channel.PixelFormat;
             _livePreview = channel.LivePreview;
+            _disablePlayedItems = channel.DisablePlayedItems;
+            _addItemsWithAutoPlay = channel.AddItemsWithAutoPlay;
             AddStreamOutputCommand = new UiCommand(AddStreamOutput);
             AddDecklinkOutputCommand = new UiCommand(AddDecklinkOutput);
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
@@ -87,6 +91,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public TVPlayR.PixelFormat SelectedPixelFormat { get => _selectedPixelFormat; set => Set(ref _selectedPixelFormat, value); }
 
         public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
+
+        public bool DisablePlayedItems { get => _disablePlayedItems; set => Set(ref _disablePlayedItems, value); }
+
+        public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => Set(ref _addItemsWithAutoPlay, value); }
 
         public ICommand AddStreamOutputCommand { get; }
         public ICommand AddDecklinkOutputCommand { get; }
@@ -132,6 +140,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Channel.PixelFormat = SelectedPixelFormat;
             Channel.VideoFormat = SelectedVideoFormat;
             Channel.LivePreview = LivePreview;
+            Channel.DisablePlayedItems = DisablePlayedItems;
+            Channel.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
             Channel.Outputs = Outputs.Select(o => o.Output).ToArray();
             IsModified = false;
         }
@@ -155,7 +165,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddStreamOutput(object _)
         {
-            var vm = new FFOutputViewModel(new Model.FFOutput { 
+            var vm = new FFOutputViewModel(new Model.FFOutput
+            {
                 IsFrameClock = !Outputs.Any(a => a.IsFrameClock),
                 VideoBitrate = 4000,
                 VideoCodec = FFOutputViewModel.VideoCodecs.FirstOrDefault(),

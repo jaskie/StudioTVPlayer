@@ -24,40 +24,20 @@ namespace StudioTVPlayer.Model
         private TVPlayR.OutputPreview _outputPreview;
 
         private List<OutputBase> _outputs = new List<OutputBase>();
+        private bool _disablePlayedItems;
+        private bool _addItemsWithAutoPlay;
 
         [XmlAttribute]
         public string Name { get => _name; set => _name = value; }
 
         [XmlIgnore]
-        public TVPlayR.VideoFormat VideoFormat
-        {
-            get => _videoFormat;
-            set
-            {
-                if (_videoFormat == value)
-                    return;
-
-                _videoFormat = value;
-                VideoFormatName = value.Name;
-                RaisePropertyChanged();
-            }
-        }
+        public TVPlayR.VideoFormat VideoFormat { get => _videoFormat; set => Set(ref _videoFormat, value); }
 
         [XmlAttribute(nameof(VideoFormat))]
         public string VideoFormatName { get => _videoFormatName; set => _videoFormatName = value; }
 
         [XmlAttribute]
-        public TVPlayR.PixelFormat PixelFormat
-        {
-            get => _pixelFormat;
-            set
-            {
-                if (_pixelFormat == value)
-                    return;
-                _pixelFormat = value;
-                RaisePropertyChanged();
-            }
-        }
+        public TVPlayR.PixelFormat PixelFormat { get => _pixelFormat; set => Set(ref _pixelFormat, value); }
 
         [XmlArray]
         [XmlArrayItem(typeof(DecklinkOutput))]
@@ -78,17 +58,13 @@ namespace StudioTVPlayer.Model
         }
 
         [XmlAttribute]
-        public bool LivePreview
-        {
-            get => _livePreview;
-            set
-            {
-               if (_livePreview == value)
-                    return;
-                _livePreview = value;
-                RaisePropertyChanged();
-            }
-        }
+        public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
+
+        [XmlAttribute]
+        public bool DisablePlayedItems { get => _disablePlayedItems; set => _disablePlayedItems = value; }
+
+        [XmlAttribute]
+        public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => _addItemsWithAutoPlay = value; }
 
         [XmlIgnore]
         public bool IsInitialized => _player != null;
@@ -171,8 +147,12 @@ namespace StudioTVPlayer.Model
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
-        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
+
+        private void Set<T>(ref T field, T value, [CallerMemberName] string propertyname = null)
         {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 

@@ -170,7 +170,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 else
                     value.IsLoaded = true;
                 if (oldItem != null)
+                {
                     oldItem.IsLoaded = false;
+                    if (_mediaPlayer.Channel.DisablePlayedItems)
+                        oldItem.RundownItem.IsDisabled = true;
+                }
                 _sliderPosition = CurrentItemStartTime.TotalMilliseconds;
                 NotifyPropertyChanged(nameof(IsPlaying));
                 NotifyPropertyChanged(nameof(SliderPosition));

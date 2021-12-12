@@ -16,6 +16,7 @@
                     <Grid.Resources>
                         <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}"/>
+                        <Style TargetType="CheckBox" BasedOn="{StaticResource ConfigurationCheckBoxStyle}"/>
                     </Grid.Resources>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -35,7 +36,7 @@
                     <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding SelectedVideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name" />
                     <Label Grid.Column="0" Grid.Row="2">Pixel format</Label>
                     <ComboBox Grid.Column="0" Grid.Row="3" ItemsSource="{Binding PixelFormats}" SelectedItem="{Binding SelectedPixelFormat}"/>
-                    <CheckBox Grid.Column="1" Grid.Row="3" Margin="5 0" IsChecked="{Binding LivePreview}" >
+                    <CheckBox Grid.Column="1" Grid.Row="3" IsChecked="{Binding LivePreview}" >
                         <CheckBox.ToolTip>
                             <TextBlock>
                             Shows playing output in application.<LineBreak/>
@@ -44,6 +45,8 @@
                         </CheckBox.ToolTip>
                         Live preview
                     </CheckBox>
+                    <CheckBox Grid.Column="1" Grid.Row="4" IsChecked="{Binding DisablePlayedItems}">Disable rundown items that were played</CheckBox>
+                    <CheckBox Grid.Column="1" Grid.Row="5" IsChecked="{Binding AddItemsWithAutoPlay}">Add rundown items with auto-play enabled</CheckBox>
                     <Label Grid.Column="0" Grid.Row="4">Channel clock source</Label>
                     <ComboBox Grid.Column="0" Grid.Row="5" ItemsSource="{Binding Outputs}" SelectedItem="{Binding FrameClockSource, ValidatesOnDataErrors=True}" >
                         <ComboBox.Resources>

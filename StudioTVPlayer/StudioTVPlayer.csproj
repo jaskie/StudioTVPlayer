@@ -106,7 +106,7 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
-    <Compile Include="Model\Channel.cs" />
+    <Compile Include="Model\Player.cs" />
     <Compile Include="Model\InputBase.cs" />
     <Compile Include="Model\LiveInputRundownItem.cs" />
     <Compile Include="Model\RundownItemBase.cs" />
@@ -129,7 +129,7 @@
     <Compile Include="Providers\InputList.cs" />
     <Compile Include="Providers\VersionInfo.cs" />
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ChannelViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Configuration\DecklinkOutputViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ICheckErrorInfo.cs" />
     <Compile Include="ViewModel\Configuration\NdiOutputViewModel.cs" />
@@ -144,23 +144,23 @@
     <Compile Include="ViewModel\Main\Player\RundownItemViewModelBase.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
-    <Compile Include="ViewModel\Configuration\ChannelsViewModel.cs" />
+    <Compile Include="ViewModel\Configuration\PlayersViewModel.cs" />
     <Compile Include="ViewModel\Configuration\WatchedFoldersViewModel.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\BrowserViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\Configuration\ConfigurationViewModel.cs" />
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
-    <Compile Include="ViewModel\Main\Player\MediaPlayerViewModel.cs" />
+    <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\FileRundownItemViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
     <Compile Include="View\AboutDialog.xaml.cs">
       <DependentUpon>AboutDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Configuration\ChannelsView.xaml.cs">
-      <DependentUpon>ChannelsView.xaml</DependentUpon>
+    <Compile Include="View\Configuration\PlayersView.xaml.cs">
+      <DependentUpon>PlayersView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Configuration\ChannelView.xaml.cs">
-      <DependentUpon>ChannelView.xaml</DependentUpon>
+    <Compile Include="View\Configuration\PlayerView.xaml.cs">
+      <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\DecklinkOutputView.xaml.cs">
       <DependentUpon>DecklinkOutputView.xaml</DependentUpon>
@@ -198,8 +198,8 @@
     <Compile Include="View\Main\Player\FileRundownItemView.xaml.cs">
       <DependentUpon>FileRundownItemView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\Player\MediaPlayerView.xaml.cs">
-      <DependentUpon>MediaPlayerView.xaml</DependentUpon>
+    <Compile Include="View\Main\Player\PlayerView.xaml.cs">
+      <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
@@ -209,7 +209,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Configuration\ChannelView.xaml">
+    <Page Include="View\Configuration\PlayerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -239,7 +239,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="View\Configuration\ChannelsView.xaml">
+    <Page Include="View\Configuration\PlayersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -279,7 +279,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\Player\MediaPlayerView.xaml">
+    <Page Include="View\Main\Player\PlayerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

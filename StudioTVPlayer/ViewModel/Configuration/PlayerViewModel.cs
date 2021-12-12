@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ChannelViewModel : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
+    public class PlayerViewModel : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
         private readonly ObservableCollection<OutputViewModelBase> _outputs;
         private string _name;
@@ -19,10 +19,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
 
-        public ChannelViewModel(Model.Channel channel)
+        public PlayerViewModel(Model.Player player)
         {
-            Channel = channel;
-            _name = channel.Name;
+            Player = player;
+            _name = player.Name;
             OutputViewModelBase viewModelSelector(Model.OutputBase o)
             {
                 switch (o)
@@ -37,7 +37,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         throw new ApplicationException("Invalid type provided");
                 }
             }
-            _outputs = new ObservableCollection<OutputViewModelBase>(channel.Outputs.Select(viewModelSelector));
+            _outputs = new ObservableCollection<OutputViewModelBase>(player.Outputs.Select(viewModelSelector));
             foreach (var output in _outputs)
             {
                 output.Modified += (o, e) => IsModified = true;
@@ -47,17 +47,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 if (output.IsFrameClock)
                     _frameClockSource = output;
             }
-            _selectedVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(vf => vf.Name == channel.VideoFormatName);
-            _selectedPixelFormat = channel.PixelFormat;
-            _livePreview = channel.LivePreview;
-            _disablePlayedItems = channel.DisablePlayedItems;
-            _addItemsWithAutoPlay = channel.AddItemsWithAutoPlay;
+            _selectedVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(vf => vf.Name == player.VideoFormatName);
+            _selectedPixelFormat = player.PixelFormat;
+            _livePreview = player.LivePreview;
+            _disablePlayedItems = player.DisablePlayedItems;
+            _addItemsWithAutoPlay = player.AddItemsWithAutoPlay;
             AddStreamOutputCommand = new UiCommand(AddStreamOutput);
             AddDecklinkOutputCommand = new UiCommand(AddDecklinkOutput);
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
         }
 
-        internal Model.Channel Channel { get; }
+        internal Model.Player Player { get; }
 
         public string Name
         {
@@ -132,17 +132,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (!IsModified)
                 return;
-            if (Outputs.Any(o => o.IsModified) || Channel.PixelFormat != SelectedPixelFormat || Channel.VideoFormat != SelectedVideoFormat || Channel.LivePreview != LivePreview)
-                Channel.Uninitialize();
+            if (Outputs.Any(o => o.IsModified) || Player.PixelFormat != SelectedPixelFormat || Player.VideoFormat != SelectedVideoFormat || Player.LivePreview != LivePreview)
+                Player.Uninitialize();
             foreach (var output in Outputs)
                 output.Apply();
-            Channel.Name = Name;
-            Channel.PixelFormat = SelectedPixelFormat;
-            Channel.VideoFormat = SelectedVideoFormat;
-            Channel.LivePreview = LivePreview;
-            Channel.DisablePlayedItems = DisablePlayedItems;
-            Channel.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
-            Channel.Outputs = Outputs.Select(o => o.Output).ToArray();
+            Player.Name = Name;
+            Player.PixelFormat = SelectedPixelFormat;
+            Player.VideoFormat = SelectedVideoFormat;
+            Player.LivePreview = LivePreview;
+            Player.DisablePlayedItems = DisablePlayedItems;
+            Player.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
+            Player.Outputs = Outputs.Select(o => o.Output).ToArray();
             IsModified = false;
         }
 

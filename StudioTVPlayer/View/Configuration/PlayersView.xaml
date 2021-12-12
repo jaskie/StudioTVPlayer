@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.ChannelsView"
+﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.PlayersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,7 +8,7 @@
              xmlns:local="clr-namespace:StudioTVPlayer.View.Configuration"
              mc:Ignorable="d" 
              FontSize="16"
-             d:DataContext="{d:DesignInstance {x:Type vm:ChannelsViewModel}}"
+             d:DataContext="{d:DesignInstance {x:Type vm:PlayersViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800" 
              >
     <Grid>
@@ -22,8 +22,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <DataGrid AutoGenerateColumns="False"
-                      ItemsSource="{Binding Channels}" 
-                      SelectedItem="{Binding SelectedChannel}"
+                      ItemsSource="{Binding Players}" 
+                      SelectedItem="{Binding SelectedPlayer}"
                       VerticalAlignment="Top"
                       CanUserAddRows="False" CanUserDeleteRows="False" 
                       IsReadOnly="True"
@@ -43,18 +43,18 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button Grid.Row="1" Margin="0 10" Command="{Binding AddChannelCommand}" HorizontalAlignment="Left">
+            <Button Grid.Row="1" Margin="0 10" Command="{Binding AddPlayerCommand}" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
                     <mah:FontIcon Glyph="&#xE710;" />
-                    <Label FontSize="16" FontWeight="Normal">Add new channel</Label>
+                    <Label FontSize="16" FontWeight="Normal">Add new player</Label>
                 </StackPanel>
             </Button>
         </Grid>
         <GridSplitter HorizontalAlignment="Right" Width="3" Margin="2 0" Background="{DynamicResource MahApps.Brushes.Separator}"/>
-        <ContentControl Grid.Column="1" Content="{Binding SelectedChannel}" Margin="4 0 0 0">
+        <ContentControl Grid.Column="1" Content="{Binding SelectedPlayer}" Margin="4 0 0 0">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type vm:ChannelViewModel}">
-                    <local:ChannelView/>
+                <DataTemplate DataType="{x:Type vm:PlayerViewModel}">
+                    <local:PlayerView/>
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>

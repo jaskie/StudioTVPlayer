@@ -15,8 +15,8 @@ namespace StudioTVPlayer.Providers
         public List<WatchedFolder> WatchedFolders { get; set; } = new List<WatchedFolder>();
 
         [XmlArray]
-        [XmlArrayItem("Channel")]
-        public List<Channel> Channels { get; set; } = new List<Channel>();
+        [XmlArrayItem("Player")]
+        public List<Player> Players { get; set; } = new List<Player>();
 
         public static Configuration Current { get; } = Load();
 

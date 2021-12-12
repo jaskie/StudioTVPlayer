@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public class Channel : INotifyPropertyChanged, IDisposable
+    public class Player : INotifyPropertyChanged, IDisposable
     {
         private string _name = string.Empty;
 
@@ -31,7 +31,16 @@ namespace StudioTVPlayer.Model
         public string Name { get => _name; set => _name = value; }
 
         [XmlIgnore]
-        public TVPlayR.VideoFormat VideoFormat { get => _videoFormat; set => Set(ref _videoFormat, value); }
+        public TVPlayR.VideoFormat VideoFormat
+        {
+            get => _videoFormat; 
+            set
+            {
+                if (!Set(ref _videoFormat, value))
+                    return;
+                VideoFormatName = value.Name;
+            }
+        }
 
         [XmlAttribute(nameof(VideoFormat))]
         public string VideoFormatName { get => _videoFormatName; set => _videoFormatName = value; }
@@ -75,7 +84,7 @@ namespace StudioTVPlayer.Model
         public void Initialize()
         {
             if (_player != null)
-                throw new ApplicationException($"Channel {Name} already initialized");
+                throw new ApplicationException($"Player {Name} already initialized");
             _videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormatName);
             if (_videoFormat == null)
                 return;
@@ -85,21 +94,21 @@ namespace StudioTVPlayer.Model
                 output.Initialize(_player);
                 _player.AddOutput(output.Output, output.IsFrameClock);
             }
-            _player.AudioVolume += ChannelR_AudioVolume;
+            _player.AudioVolume += Player_AudioVolume;
         }
 
 
         public void SetVolume(double value)
         {
             if (_player == null)
-                throw new ApplicationException($"Channel {Name} not initialized");
+                throw new ApplicationException($"Player {Name} not initialized");
             _player.Volume = Math.Pow(10, value / 20);
         }
 
         public ImageSource GetPreview(int width, int height)
         {
             if (_player == null)
-                throw new ApplicationException($"Channel {Name} not initialized");
+                throw new ApplicationException($"Player {Name} not initialized");
             if (_outputPreview is null)
             {
                 _outputPreview = new TVPlayR.OutputPreview(Application.Current.Dispatcher, width, height);
@@ -122,7 +131,7 @@ namespace StudioTVPlayer.Model
                 _outputPreview.Dispose();
                 _outputPreview = null;
             }
-            _player.AudioVolume -= ChannelR_AudioVolume;
+            _player.AudioVolume -= Player_AudioVolume;
             _player.Clear();
             _player.Dispose();
             _player = null;
@@ -148,15 +157,16 @@ namespace StudioTVPlayer.Model
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
 
-        private void Set<T>(ref T field, T value, [CallerMemberName] string propertyname = null)
+        private bool Set<T>(ref T field, T value, [CallerMemberName] string propertyname = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
-                return;
+                return false;
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+            return true;
         }
 
-        private void ChannelR_AudioVolume(object sender, TVPlayR.AudioVolumeEventArgs e)
+        private void Player_AudioVolume(object sender, TVPlayR.AudioVolumeEventArgs e)
         {
             AudioVolume?.Invoke(this, new AudioVolumeEventArgs(e.AudioVolume));
         }

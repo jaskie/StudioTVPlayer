@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace StudioTVPlayer.View.Configuration
 {
     /// <summary>
-    /// Interaction logic for ConfigurationChannelsView.xaml
+    /// Interaction logic for PlayersView.xaml
     /// </summary>
-    public partial class ChannelsView : UserControl
+    public partial class PlayersView : UserControl
     {
-        public ChannelsView()
+        public PlayersView()
         {
             InitializeComponent();
         }

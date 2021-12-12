@@ -25,20 +25,20 @@ namespace StudioTVPlayer.Providers
             MediaVerifier.Current.Dispose();
             foreach (var player in Players)
                 player.Dispose();
-            foreach (var channel in Configuration.Current.Channels)
+            foreach (var channel in Configuration.Current.Players)
                 channel.Dispose();
             foreach (var input in InputList.Current.Inputs)
                 input.Dispose();
         }
 
-        public void UpdateChannels(List<Channel> channels)
+        public void UpdateChannels(List<Player> channels)
         {
             foreach (var channel in channels)
             {
                 if (!channel.IsInitialized)
                 {
                     channel.Initialize();
-                    var player = Players.FirstOrDefault(p => p.Channel == channel);
+                    var player = Players.FirstOrDefault(p => p.Player == channel);
                     if (player == null)
                         Players.Add(new MediaPlayer(channel));
                     else
@@ -49,11 +49,11 @@ namespace StudioTVPlayer.Providers
                     }
                 }
             }
-            foreach (var channel in Configuration.Current.Channels.ToList())
+            foreach (var channel in Configuration.Current.Players.ToList())
             {
                 if (!channels.Contains(channel))
                 {
-                    var player = Players.FirstOrDefault(p => p.Channel == channel);
+                    var player = Players.FirstOrDefault(p => p.Player == channel);
                     if (!(player is null))
                     {
                         player.Dispose();
@@ -62,12 +62,12 @@ namespace StudioTVPlayer.Providers
                     channel.Dispose();
                 }
             }
-            Configuration.Current.Channels = channels;
+            Configuration.Current.Players = channels;
         }
 
         public void Initialize()
         {
-            foreach(var channel in Configuration.Current.Channels)
+            foreach(var channel in Configuration.Current.Players)
             {
                 channel.Initialize();
                 Players.Add(new MediaPlayer(channel));

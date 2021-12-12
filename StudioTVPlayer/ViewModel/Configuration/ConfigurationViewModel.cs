@@ -11,8 +11,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolders = new WatchedFoldersViewModel();
             WatchedFolders.Modified += Item_Modified;
-            Channels = new ChannelsViewModel();
-            Channels.Modified += Item_Modified;
+            Players = new PlayersViewModel();
+            Players.Modified += Item_Modified;
 
             SaveConfigurationCommand = new UiCommand(SaveConfiguration, _ => IsModified && IsValid());
             CancelCommand = new UiCommand(Cancel);
@@ -32,7 +32,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public WatchedFoldersViewModel WatchedFolders { get; } 
 
-        public ChannelsViewModel Channels { get; }
+        public PlayersViewModel Players { get; }
 
         
         private void Cancel(object obj)
@@ -43,7 +43,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public override void Apply()
         {
             WatchedFolders.Apply();
-            Channels.Apply();
+            Players.Apply();
             IsModified = false;
         }
 
@@ -51,7 +51,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override bool IsValid()
         {
-            return WatchedFolders.IsValid() && Channels.IsValid();
+            return WatchedFolders.IsValid() && Players.IsValid();
         }
     }
 }

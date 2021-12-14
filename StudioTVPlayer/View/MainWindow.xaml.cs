@@ -2,6 +2,7 @@
 using MahApps.Metro.Controls.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,13 @@ namespace StudioTVPlayer.View
         {          
             InitializeComponent();
             DataContext = ViewModel.MainViewModel.Instance;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            if (!e.Cancel)
+                ViewModel.MainViewModel.Instance.Dispose();
         }
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)

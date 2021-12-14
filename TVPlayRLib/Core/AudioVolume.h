@@ -14,10 +14,10 @@ public:
 	/// </summary>
 	/// <param name="frame">frame to process</param>
 	/// <returns>average volume</returns>
-	std::vector<double> ProcessVolume(const std::shared_ptr<AVFrame>& frame);
+	std::vector<double> ProcessVolume(const std::shared_ptr<AVFrame>& frame, double* coherence);
 private:
-	uint32_t volume_;
-	std::atomic_int32_t new_volume_;
+	std::uint32_t volume_;
+	std::int32_t new_volume_;
 };
 
 }}

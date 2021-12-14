@@ -45,6 +45,9 @@ int main()
 #endif
 		Common::ComInitializer com_initializer;
 		Core::Player player("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
+		player.SetAudioVolumeCallback([](std::vector<double>& volume, double coherence) {
+			std::cout << coherence << "\n";
+			});
 		//Decklink::DecklinkIterator iterator;
 		//int device_index = 0;
 		//for (size_t i = 0; i < iterator.Size(); i++)
@@ -95,7 +98,6 @@ int main()
 				break;
 			if (i == 'c')
 				player.Clear();
-			/*
 			if (i == 'r')
 				player.AddOutput(stream);
 			if (i == 's')
@@ -109,7 +111,7 @@ int main()
 				if (input->IsPlaying())
 					input->Pause();
 				else	 
-					input->Play();*/
+					input->Play();
 		}
 		player.SetFrameClock(nullptr);
 		player.RemoveOutput(ndi);

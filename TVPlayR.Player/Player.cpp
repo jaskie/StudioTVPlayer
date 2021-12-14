@@ -14,7 +14,7 @@
 #include "AudioVolumeEventArgs.h"
 
 namespace TVPlayR {
-	void Player::AudioVolumeCallback(std::vector<double>& audio_volume)
+	void Player::AudioVolumeCallback(std::vector<double>& audio_volume, double coherence)
 	{
 		array<double>^ result = gcnew array<double>(static_cast<int>(audio_volume.size()));
 		if (audio_volume.size())
@@ -22,7 +22,7 @@ namespace TVPlayR {
 			pin_ptr<double> dest = &result[0];
 			std::memcpy(dest, &audio_volume[0], audio_volume.size() * sizeof(double));
 		}
-		AudioVolume(this, gcnew AudioVolumeEventArgs(result));
+		AudioVolume(this, gcnew AudioVolumeEventArgs(result, coherence));
 	}
 
 	Player::Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount)
@@ -33,7 +33,7 @@ namespace TVPlayR {
 		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Player::AudioVolumeCallback);
 		_audioVolumeHandle = GCHandle::Alloc(_audioVolumeDelegate);
 		IntPtr audioVolumeIp = Marshal::GetFunctionPointerForDelegate(_audioVolumeDelegate);
-		typedef void(__stdcall* AUDIO_VOLUME_CALLBACK) (std::vector<double>&); // compatible with Core::Player::AUDIO_VOLUME_CALLBACK
+		typedef void(__stdcall* AUDIO_VOLUME_CALLBACK) (std::vector<double>&, double); // compatible with Core::Player::AUDIO_VOLUME_CALLBACK
 		_player->SetAudioVolumeCallback(static_cast<AUDIO_VOLUME_CALLBACK>(audioVolumeIp.ToPointer()));
 	}
 

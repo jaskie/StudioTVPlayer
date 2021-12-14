@@ -70,6 +70,7 @@ namespace TVPlayR {
 				executor_.begin_invoke([this, audio_samples_count]()
 				{
 					std::vector<double> volume(player_.AudioChannelsCount(), 0.0);
+					double coherence = 0.0;
 					if (playing_source_)
 					{
 						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
@@ -80,7 +81,7 @@ namespace TVPlayR {
 						if (!video)
 							video = empty_video_;
 						if (audio)
-							volume = audio_volume_.ProcessVolume(audio);
+							volume = audio_volume_.ProcessVolume(audio, &coherence);
 						AddOverlayAndPushToOutputs(video, audio, sync.Timecode);					
 					}
 					else
@@ -91,7 +92,7 @@ namespace TVPlayR {
 					}
 					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 					if (audio_volume_callback_)
-						audio_volume_callback_(volume);
+						audio_volume_callback_(volume, coherence);
 				});
 			}
 
@@ -172,6 +173,14 @@ namespace TVPlayR {
 				});
 			}
 
+			void SetVolume(double volume)
+			{
+				executor_.begin_invoke([this, volume]
+					{
+						audio_volume_.SetVolume(volume);
+					});
+			}
+
 
 		};
 
@@ -221,7 +230,7 @@ namespace TVPlayR {
 
 		const int Player::AudioSampleRate() const { return impl_->audio_sample_rate_; }
 
-		void Player::SetVolume(double volume) { impl_->audio_volume_.SetVolume(volume); }
+		void Player::SetVolume(double volume) { impl_->SetVolume(volume); }
 
 		void Player::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
 

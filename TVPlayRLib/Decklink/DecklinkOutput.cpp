@@ -8,6 +8,7 @@
 #include "../Core/OverlayBase.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
+#include "../FFmpeg/SwResample.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -29,6 +30,7 @@ namespace TVPlayR {
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
 			const bool internal_keyer_;
+			std::unique_ptr<FFmpeg::SwResample> audio_resampler_;
 
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
@@ -104,9 +106,10 @@ namespace TVPlayR {
 				DebugPrintLineIf(FAILED(ret), "Unable to schedule frame: " + std::to_string(frame->pts) + " HRESULT: " + std::to_string(ret));
 			}
 
-			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
+			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
 			{
 				unsigned int samples_written = 0;
+				buffer = audio_resampler_->Resample(buffer);
 				if (!internal_keyer_)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
@@ -139,6 +142,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("Invalid video format");
 				format_ = player.Format();
 				audio_channels_count_ = player.AudioChannelsCount();
+				audio_resampler_ = std::make_unique<FFmpeg::SwResample>(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
 				last_video_time_ = 0LL;
 				Preroll(player);
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);

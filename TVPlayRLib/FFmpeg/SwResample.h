@@ -6,7 +6,7 @@ namespace TVPlayR {
 		{
 		public:
 			SwResample(int src_channels, int src_sample_rate, AVSampleFormat src_sample_format, int dest_channels, int dest_sample_rate, AVSampleFormat dest_sample_format);
-			std::shared_ptr<AVFrame> Resample(std::shared_ptr<AVFrame> frame);
+			std::shared_ptr<AVFrame> Resample(const std::shared_ptr<AVFrame> frame);
 			int OutputSampleRate() const { return dest_sample_rate_; }
 			int OutputChannelCount() const { return dest_channels_; }
 		private:

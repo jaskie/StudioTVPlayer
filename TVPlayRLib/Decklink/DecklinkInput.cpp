@@ -142,7 +142,7 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToPlayer(player))
 				{
-					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, timecode_source_, capture_video_);
+					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, timecode_source_, capture_video_, audio_channels_count_);
 					provider->Reset(current_format_.FrameRate().av());
 					player_providers_.emplace_back(std::move(provider));
 				}

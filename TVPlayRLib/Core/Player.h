@@ -13,7 +13,7 @@ namespace TVPlayR {
 class Player final : public Common::NonCopyable
 {
 public:
-	typedef std::function<void(std::vector<double>&, double)> AUDIO_VOLUME_CALLBACK;
+	typedef std::function<void(std::vector<float>&, float)> AUDIO_VOLUME_CALLBACK;
 	Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
 	~Player();
 	bool AddOutput(std::shared_ptr<OutputDevice> device);
@@ -27,9 +27,9 @@ public:
 	const VideoFormat& Format() const;
 	const TVPlayR::PixelFormat PixelFormat() const;
 	const int AudioChannelsCount() const;
-	const AVSampleFormat AudioSampleFormat() const { return AVSampleFormat::AV_SAMPLE_FMT_S32; }
+	const AVSampleFormat AudioSampleFormat() const;
 	const int AudioSampleRate() const;
-	void SetVolume(double volume);
+	void SetVolume(float volume);
 	void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback);
 	const std::string& Name() const;
 private:

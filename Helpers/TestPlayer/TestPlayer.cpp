@@ -45,7 +45,7 @@ int main()
 #endif
 		Common::ComInitializer com_initializer;
 		Core::Player player("Channel 1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
-		player.SetAudioVolumeCallback([](std::vector<double>& volume, double coherence) {
+		player.SetAudioVolumeCallback([](std::vector<float>& volume, float coherence) {
 			std::cout << coherence << "\n";
 			});
 		//Decklink::DecklinkIterator iterator;
@@ -61,22 +61,23 @@ int main()
 		player.SetFrameClock(ndi);
 		std::this_thread::sleep_for(200ms);
 		player.AddOutput(ndi);
-		//FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-		//	"libx264",															// VideoCodec
-		//	"aac", 																	// AudioCodec
-		//	4000,																	// VideoBitrate
-		//	128, 																	// AudioBitrate
-		//	"g=18,bf=0",															// Options
-		//	"",//"bwdif,scale=384x216,interlace",										// VideoFilter
-		//	"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
-		//	"",															// VideoMetadata
-		//	"language=pol",												// AudioMetadata
-		//	121, // VideoStreamId
-		//	122  // AudioStreamId
-		//};
-		FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
+		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
+			"libx264",															// VideoCodec
+			"aac", 																	// AudioCodec
+			4000,																	// VideoBitrate
+			128, 																	// AudioBitrate
+			"g=18,bf=0",															// Options
+			"",//"bwdif,scale=384x216,interlace",										// VideoFilter
+			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
+			"",															// VideoMetadata
+			"language=pol",												// AudioMetadata
+			121, // VideoStreamId
+			122  // AudioStreamId
+		};
+		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
 		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
 		//player.SetFrameClock(stream);
+		player.AddOutput(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
@@ -116,7 +117,7 @@ int main()
 		player.SetFrameClock(nullptr);
 		player.RemoveOutput(ndi);
 		//player.RemoveOutput(decklink_output);
-		//player.RemoveOutput(stream);
+		player.RemoveOutput(stream);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

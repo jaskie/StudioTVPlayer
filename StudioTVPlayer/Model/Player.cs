@@ -98,11 +98,11 @@ namespace StudioTVPlayer.Model
         }
 
 
-        public void SetVolume(double value)
+        public void SetVolume(float value)
         {
             if (_player == null)
                 throw new ApplicationException($"Player {Name} not initialized");
-            _player.Volume = Math.Pow(10, value / 20);
+            _player.Volume = (float)Math.Pow(10, value / 20);
         }
 
         public ImageSource GetPreview(int width, int height)

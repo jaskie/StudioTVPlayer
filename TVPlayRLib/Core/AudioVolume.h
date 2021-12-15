@@ -7,17 +7,17 @@ class AudioVolume final : public Common::NonCopyable
 {
 public:
 	AudioVolume();
-	void SetVolume(double volume);
+	void SetVolume(float volume);
 
 	/// <summary>
 	/// Changes volume of the frame and calculates average volume
 	/// </summary>
 	/// <param name="frame">frame to process</param>
 	/// <returns>average volume</returns>
-	std::vector<double> ProcessVolume(const std::shared_ptr<AVFrame>& frame, double* coherence);
+	std::vector<float> ProcessVolume(const std::shared_ptr<AVFrame>& frame, float* coherence);
 private:
-	std::uint32_t volume_;
-	std::int32_t new_volume_;
+	float volume_;
+	float new_volume_;
 };
 
 }}

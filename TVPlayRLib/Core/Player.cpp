@@ -28,7 +28,7 @@ namespace TVPlayR {
 			const int audio_sample_rate_;
 			const std::shared_ptr<AVFrame> empty_video_;
 			std::vector<std::shared_ptr<OverlayBase>> overlays_;
-			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
+			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_FLT;
 			std::mutex audio_volume_callback_mutex_;
 			AUDIO_VOLUME_CALLBACK audio_volume_callback_ = nullptr;
 			Common::Executor executor_;
@@ -69,8 +69,8 @@ namespace TVPlayR {
 					audio_samples_count = 0;
 				executor_.begin_invoke([this, audio_samples_count]()
 				{
-					std::vector<double> volume(player_.AudioChannelsCount(), 0.0);
-					double coherence = 0.0;
+					std::vector<float> volume(player_.AudioChannelsCount(), 0.0);
+					float coherence = 0.0;
 					if (playing_source_)
 					{
 						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
@@ -173,7 +173,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void SetVolume(double volume)
+			void SetVolume(float volume)
 			{
 				executor_.begin_invoke([this, volume]
 					{
@@ -228,9 +228,14 @@ namespace TVPlayR {
 
 		const int Player::AudioChannelsCount() const { return impl_->audio_channels_count_; }
 
+		const AVSampleFormat Player::AudioSampleFormat() const
+		{
+			return impl_->audio_sample_format_;
+		}
+
 		const int Player::AudioSampleRate() const { return impl_->audio_sample_rate_; }
 
-		void Player::SetVolume(double volume) { impl_->SetVolume(volume); }
+		void Player::SetVolume(float volume) { impl_->SetVolume(volume); }
 
 		void Player::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
 

@@ -21,14 +21,14 @@ namespace TVPlayR {
 	{
 	private:
 		Core::Player* const _player;
-		double _volume = 1.0f;
+		float _volume = 1.0f;
 		VideoFormat^ _videoFormat;
 		const PixelFormat _pixelFormat;
-		delegate void AudioVolumeDelegate(std::vector<double>&, double);
+		delegate void AudioVolumeDelegate(std::vector<float>&, float);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
 		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
-		void AudioVolumeCallback(std::vector<double>& audio_volume, double coherence);
+		void AudioVolumeCallback(std::vector<float>& audio_volume, float coherence);
 	public:
 		Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
 		~Player();
@@ -39,7 +39,7 @@ namespace TVPlayR {
 		void Load(InputBase^ file);
 		void Preload(InputBase^ file);
 		void Clear();
-		property double Volume { double get(); void set(double volume); }
+		property float Volume { float get(); void set(float volume); }
 		property TVPlayR::VideoFormat^ VideoFormat { TVPlayR::VideoFormat^ get() { return _videoFormat; }}
 		property TVPlayR::PixelFormat PixelFormat { TVPlayR::PixelFormat get() { return _pixelFormat; } }
 		event EventHandler<AudioVolumeEventArgs^>^ AudioVolume;

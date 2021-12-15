@@ -110,16 +110,15 @@ namespace TVPlayR {
 			);
 		}
 
-		NDIlib_audio_frame_interleaved_32s_t CreateAudioFrame(std::shared_ptr<AVFrame> avframe, std::int64_t timecode)
+		NDIlib_audio_frame_interleaved_32f_t CreateAudioFrame(std::shared_ptr<AVFrame> avframe, std::int64_t timecode)
 		{
-			assert(avframe->format == AV_SAMPLE_FMT_S32);
-			return NDIlib_audio_frame_interleaved_32s_t(
+			assert(avframe->format == AV_SAMPLE_FMT_FLT);
+			return NDIlib_audio_frame_interleaved_32f_t(
 				avframe->sample_rate,
 				avframe->channels,
 				avframe->nb_samples,
 				timecode * 10,
-				0,
-				reinterpret_cast<int32_t*>(avframe->data[0])
+				reinterpret_cast<float*>(avframe->data[0])
 			);
 		}
 

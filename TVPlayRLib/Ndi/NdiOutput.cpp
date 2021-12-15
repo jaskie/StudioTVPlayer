@@ -111,8 +111,8 @@ namespace TVPlayR {
 						ndi_->send_send_video_v2(send_instance_, &ndi_video);
 						if (buffer.Audio)
 						{
-							NDIlib_audio_frame_interleaved_32s_t ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
-							ndi_->util_send_send_audio_interleaved_32s(send_instance_, &ndi_audio);
+							auto ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
+							ndi_->util_send_send_audio_interleaved_32f(send_instance_, &ndi_audio);
 						}
 						RequestFrameFromPlayer();
 					}

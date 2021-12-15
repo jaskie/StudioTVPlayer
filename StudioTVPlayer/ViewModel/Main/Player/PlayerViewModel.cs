@@ -29,7 +29,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private RundownItemViewModelBase _currentRundownItem;
 
         //private bool _isSliderDrag;
-        private double _volume;
+        private float _volume;
         private ImageSource _preview;
         private bool _outTimeBlink;
 
@@ -104,7 +104,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public double Volume
+        public float Volume
         {
             get => _volume;
             set

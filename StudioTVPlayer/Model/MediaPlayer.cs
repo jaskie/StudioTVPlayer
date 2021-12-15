@@ -182,7 +182,7 @@ namespace StudioTVPlayer.Model
             return file.Seek(timeSpan);
         }
 
-        public void SetVolume(double value)
+        public void SetVolume(float value)
         {
             Player.SetVolume(value);
         }

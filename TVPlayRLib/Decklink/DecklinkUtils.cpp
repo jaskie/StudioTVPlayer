@@ -116,12 +116,24 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, AVSampleFormat sample_format, BMDTimeScale sample_rate)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate)
 		{
 			void* audio_bytes = nullptr;
 			if (!audio_packet || FAILED(audio_packet->GetBytes(&audio_bytes)) || !audio_bytes)
 				return nullptr;
 			std::shared_ptr<AVFrame> audio = FFmpeg::AllocFrame();
+			switch (sample_type)
+			{
+			case BMDAudioSampleType::bmdAudioSampleType16bitInteger:
+				audio->format = AVSampleFormat::AV_SAMPLE_FMT_S16;
+				break;
+			case BMDAudioSampleType::bmdAudioSampleType32bitInteger:
+				audio->format = AVSampleFormat::AV_SAMPLE_FMT_S32;
+				break;
+			default:
+				THROW_EXCEPTION("Invalid input sample type")
+			}
+			audio->sample_rate = BMDAudioSampleRate::bmdAudioSampleRate48kHz;
 			audio->format = AV_SAMPLE_FMT_S32;
 			audio->nb_samples = audio_packet->GetSampleFrameCount();
 			BMDTimeValue packetTime;

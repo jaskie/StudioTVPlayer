@@ -24,7 +24,7 @@ namespace TVPlayR {
 
 		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale);
 		
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, AVSampleFormat sample_format, BMDTimeScale sample_rate);
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate);
 
 		std::int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate);
 	}

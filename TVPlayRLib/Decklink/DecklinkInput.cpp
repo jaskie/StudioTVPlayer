@@ -23,6 +23,7 @@ namespace TVPlayR {
 
 		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget
 		{
+			const BMDAudioSampleType									AUDIO_SAMPLE_TYPE = BMDAudioSampleType::bmdAudioSampleType32bitInteger;
 			CComQIPtr<IDeckLinkInput>									input_;
 			const bool													is_autodetection_supported_;
 			const bool													is_wide_;
@@ -74,7 +75,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
 				if (audio_channels_count_ > 0)
 				{
-					if (FAILED(input_->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType32bitInteger, audio_channels_count_)))
+					if (FAILED(input_->EnableAudioInput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, AUDIO_SAMPLE_TYPE, audio_channels_count_)))
 						THROW_EXCEPTION("DecklinkInput: EnableAudioInput failed");
 				}
 				if (FAILED(input_->StartStreams()))
@@ -117,7 +118,7 @@ namespace TVPlayR {
 					return S_OK;
 
 				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
-				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AV_SAMPLE_FMT_S32, bmdAudioSampleRate48kHz);
+				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz);
 				std::int64_t timecode = TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate());
 				for (auto& provider : player_providers_)
 					provider->Push(video, audio, timecode);

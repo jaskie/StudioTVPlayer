@@ -35,7 +35,7 @@ namespace TVPlayR {
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 
 			implementation(IDeckLink* decklink, bool internal_keyer, int index)
-				: Common::DebugTarget(false, "Decklink " + std::to_string(index))
+				: Common::DebugTarget(true, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
 				, keyer_(decklink)
@@ -109,7 +109,6 @@ namespace TVPlayR {
 			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
 			{
 				unsigned int samples_written = 0;
-				buffer = audio_resampler_->Resample(buffer);
 				if (!internal_keyer_)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
@@ -134,15 +133,14 @@ namespace TVPlayR {
 
 			bool AssignToPlayer(const Core::Player& player)
 			{
-				if (player.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
-					return false;
 				if (!OpenOutput(GetDecklinkDisplayMode(player.Format().type()), BMDPixelFormatFromPixelFormat(player.PixelFormat()), player.AudioChannelsCount()))
 					return false;
 				if (player.Format().type() == Core::VideoFormatType::invalid)
 					THROW_EXCEPTION("Invalid video format");
 				format_ = player.Format();
 				audio_channels_count_ = player.AudioChannelsCount();
-				audio_resampler_ = std::make_unique<FFmpeg::SwResample>(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
+				if (player.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
+					audio_resampler_ = std::make_unique<FFmpeg::SwResample>(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
 				last_video_time_ = 0LL;
 				Preroll(player);
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
@@ -160,6 +158,7 @@ namespace TVPlayR {
 				if (!internal_keyer_)
 					output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
+				audio_resampler_.reset();
 			}
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
@@ -201,7 +200,7 @@ namespace TVPlayR {
 					ScheduleVideo(sync.Video, sync.Timecode);
 					if (sync.Audio)
 					{
-						ScheduleAudio(sync.Audio);
+						ScheduleAudio(audio_resampler_? audio_resampler_->Resample(sync.Audio) : sync.Audio);
 					}
 					else if (audio_samples_required > 0)
 					{

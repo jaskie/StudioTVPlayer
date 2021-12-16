@@ -19,7 +19,6 @@ namespace TVPlayR {
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
-			AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_S32;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			std::int64_t audio_samples_requested_ = 0LL;

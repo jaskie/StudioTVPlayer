@@ -18,21 +18,21 @@ namespace TVPlayR {
 		public:
 			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
 			~DecklinkInput();
-			virtual FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count) override;
-			virtual bool IsAddedToPlayer(const Core::Player& player) override;
-			virtual void AddToPlayer(const Core::Player& player) override;
-			virtual void RemoveFromPlayer(const Core::Player& player) override;
-			virtual void AddPreview(std::shared_ptr<Preview::InputPreview> preview);
-			virtual void RemovePreview(std::shared_ptr<Preview::InputPreview> preview);
-			virtual void Play() override;
-			virtual void Pause() override;
-			virtual bool IsPlaying() const override;
-			virtual int GetWidth() const override;
-			virtual int GetHeight() const override;
-			virtual TVPlayR::FieldOrder GetFieldOrder() override;
-			virtual int GetAudioChannelCount() override;
-			virtual bool HaveAlphaChannel() const override;
-			virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) override;
+			FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count) override;
+			bool IsAddedToPlayer(const Core::Player& player) override;
+			void AddToPlayer(const Core::Player& player) override;
+			void RemoveFromPlayer(const Core::Player& player) override;
+			void AddPreview(std::shared_ptr<Preview::InputPreview> preview);
+			void RemovePreview(std::shared_ptr<Preview::InputPreview> preview);
+			void Play() override;
+			void Pause() override;
+			bool IsPlaying() const override;
+			int GetWidth() const override;
+			int GetHeight() const override;
+			TVPlayR::FieldOrder GetFieldOrder() override;
+			int GetAudioChannelCount() override;
+			bool HaveAlphaChannel() const override;
+			void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) override;
 			void SetFormatChangedCallback(FORMAT_CALLBACK format_changed_callback);
 		private:
 			struct implementation;

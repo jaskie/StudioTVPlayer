@@ -12,12 +12,12 @@ public:
 	AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, const std::int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels);
 	int OutputSampleRate();
 	int OutputChannelsCount();
-	virtual AVRational OutputTimeBase() const override;
+	AVRational OutputTimeBase() const override;
 	std::uint64_t OutputChannelLayout();
 	AVSampleFormat OutputSampleFormat();
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
-	virtual std::shared_ptr<AVFrame> Pull() override;
-	virtual void Flush() override;
+	std::shared_ptr<AVFrame> Pull() override;
+	void Flush() override;
 	void Reset();
 private:
 	std::string GetAudioMuxerString(const int sample_rate);

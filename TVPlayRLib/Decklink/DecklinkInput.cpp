@@ -94,7 +94,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: DisableVideoInput failed");
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode* newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override
+			STDMETHODIMP VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode* newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override
 			{
 				if (notificationEvents & bmdVideoInputDisplayModeChanged)
 				{
@@ -111,7 +111,7 @@ namespace TVPlayR {
 				return S_OK;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
+			STDMETHODIMP VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (current_format_.type() == Core::VideoFormatType::invalid)
@@ -129,7 +129,7 @@ namespace TVPlayR {
 				return S_OK;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE	QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
+			STDMETHODIMP						QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
 			virtual ULONG STDMETHODCALLTYPE		AddRef() override { return 1; }
 			virtual ULONG STDMETHODCALLTYPE		Release() override { return 1; }
 

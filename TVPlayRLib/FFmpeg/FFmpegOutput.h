@@ -11,12 +11,12 @@ namespace TVPlayR {
 			FFmpegOutput(const FFOutputParams params);
 			~FFmpegOutput();
 			// Inherited via OutputDevice
-			virtual bool AssignToPlayer(const Core::Player& player) override;
-			virtual void ReleasePlayer() override;
-			virtual void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
-			virtual void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
-			virtual void Push(FFmpeg::AVSync& sync) override;
-			virtual void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) override;
+			bool AssignToPlayer(const Core::Player& player) override;
+			void ReleasePlayer() override;
+			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
+			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
+			void Push(FFmpeg::AVSync& sync) override;
+			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) override;
 			// FFmpegOutput
 			const FFOutputParams& GetStreamOutputParams();
 		private:

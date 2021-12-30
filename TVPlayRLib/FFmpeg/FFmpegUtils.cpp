@@ -2,6 +2,7 @@
 #include "FFmpegUtils.h"
 #include "../Core/VideoFormat.h"
 #include "../PixelFormat.h"
+#include "../FieldOrder.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -35,8 +36,10 @@ namespace TVPlayR {
 			frame->height = format.height();
 			frame->display_picture_number = -1;
 			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
-			frame->pict_type = AV_PICTURE_TYPE_I;
+			frame->pict_type = AV_PICTURE_TYPE_NONE;
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
+			frame->interlaced_frame = format.interlaced();
+			frame->top_field_first = format.field_order() == TVPlayR::FieldOrder::TopFieldFirst;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
 			if (pix_fmt == TVPlayR::PixelFormat::bgra)
 			{

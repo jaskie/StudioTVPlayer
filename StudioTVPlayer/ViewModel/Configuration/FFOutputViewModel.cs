@@ -22,17 +22,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             _streamOutput = streamOutput;
             _url = streamOutput.Url;
-            _videoCodec = streamOutput.VideoCodec;
-            _audioCodec = streamOutput.AudioCodec;
-            _videoBitrate = streamOutput.VideoBitrate;
-            _audioBitrate = streamOutput.AudioBitrate;
-            _videoFilter = streamOutput.VideoFilter;
-            _outputMetadata = streamOutput.OutputMetadata;
-            _audioMetadata = streamOutput.AudioMetadata;
-            _videoMetadata = streamOutput.VideoMetadata;
-            _options = streamOutput.Options;
-            _videoStreamId = streamOutput.VideoStreamId;
-            _audioStreamId = streamOutput.AudioStreamId;
+            _videoCodec = streamOutput.EncoderSettings.VideoCodec;
+            _audioCodec = streamOutput.EncoderSettings.AudioCodec;
+            _videoBitrate = streamOutput.EncoderSettings.VideoBitrate;
+            _audioBitrate = streamOutput.EncoderSettings.AudioBitrate;
+            _videoFilter = streamOutput.EncoderSettings.VideoFilter;
+            _outputMetadata = streamOutput.EncoderSettings.OutputMetadata;
+            _audioMetadata = streamOutput.EncoderSettings.AudioMetadata;
+            _videoMetadata = streamOutput.EncoderSettings.VideoMetadata;
+            _options = streamOutput.EncoderSettings.Options;
+            _videoStreamId = streamOutput.EncoderSettings.VideoStreamId;
+            _audioStreamId = streamOutput.EncoderSettings.AudioStreamId;
         }
 
         public string Url { get => _url; set => Set(ref _url, value); }
@@ -55,17 +55,20 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             base.Apply();
             _streamOutput.Url = _url;
-            _streamOutput.VideoCodec = _videoCodec;
-            _streamOutput.AudioCodec = _audioCodec;
-            _streamOutput.VideoBitrate = _videoBitrate;
-            _streamOutput.AudioBitrate = _audioBitrate;
-            _streamOutput.VideoFilter = _videoFilter;
-            _streamOutput.OutputMetadata = _outputMetadata;
-            _streamOutput.AudioMetadata = _audioMetadata;
-            _streamOutput.VideoMetadata  =_videoMetadata;
-            _streamOutput.Options = _options;
-            _streamOutput.VideoStreamId = _videoStreamId;
-            _streamOutput.AudioStreamId = _audioStreamId;
+            _streamOutput.EncoderSettings = new EncoderSettings
+            {
+                VideoCodec = _videoCodec,
+                AudioCodec = _audioCodec,
+                VideoBitrate = _videoBitrate,
+                AudioBitrate = _audioBitrate,
+                VideoFilter = _videoFilter,
+                OutputMetadata = _outputMetadata,
+                AudioMetadata = _audioMetadata,
+                VideoMetadata = _videoMetadata,
+                Options = _options,
+                VideoStreamId = _videoStreamId,
+                AudioStreamId = _audioStreamId
+            };
         }
         protected override string ReadErrorInfo(string propertyName)
         {

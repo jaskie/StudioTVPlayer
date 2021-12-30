@@ -4,19 +4,6 @@
     {
         private TVPlayR.FFOutput _ffOutput;
 
-        public string Url { get; set; }
-        public string VideoCodec { get; set; }
-        public string AudioCodec { get; set; }
-        public int VideoBitrate { get; set; }
-        public int AudioBitrate { get; set; }
-        public string VideoFilter { get; set; }
-        public string OutputMetadata { get; set; }
-        public string AudioMetadata { get; set; }
-        public string VideoMetadata { get; set; }
-        public string Options { get; set; }
-        public int VideoStreamId { get; set; }
-        public int AudioStreamId { get; set; }
-
         public override void Dispose()
         {
             if (_ffOutput is null)
@@ -26,18 +13,22 @@
             _ffOutput = null;
         }
 
+        public string Url { get; set; }
+
+        public EncoderSettings EncoderSettings { get; set; }
+
         public override TVPlayR.OutputBase Output => _ffOutput;
 
         public override void Initialize(TVPlayR.Player player)
         {
             _ffOutput = new TVPlayR.FFOutput(
                 Url,
-                VideoCodec, AudioCodec,
-                VideoBitrate, AudioBitrate,
-                Options, 
-                VideoFilter,
-                OutputMetadata, VideoMetadata, AudioMetadata,
-                VideoStreamId, AudioStreamId
+                EncoderSettings.VideoCodec, EncoderSettings.AudioCodec,
+                EncoderSettings.VideoBitrate, EncoderSettings.AudioBitrate,
+                EncoderSettings.Options,
+                EncoderSettings.VideoFilter,
+                EncoderSettings.OutputMetadata, EncoderSettings.VideoMetadata, EncoderSettings.AudioMetadata,
+                EncoderSettings.VideoStreamId, EncoderSettings.AudioStreamId
                 );
             base.Initialize(player);
         }

@@ -168,10 +168,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var vm = new FFOutputViewModel(new Model.FFOutput
             {
                 IsFrameClock = !Outputs.Any(a => a.IsFrameClock),
-                VideoBitrate = 4000,
-                VideoCodec = FFOutputViewModel.VideoCodecs.FirstOrDefault(),
-                AudioBitrate = 128,
-                AudioCodec = FFOutputViewModel.AudioCodecs.FirstOrDefault(),
+                EncoderSettings = new Model.EncoderSettings
+                {
+                    VideoBitrate = 4000,
+                    VideoCodec = Model.EncoderSettings.VideoCodecs.FirstOrDefault(),
+                    AudioBitrate = 128,
+                    AudioCodec = Model.EncoderSettings.AudioCodecs.FirstOrDefault()
+                }
             });
             AddOutput(vm);
         }

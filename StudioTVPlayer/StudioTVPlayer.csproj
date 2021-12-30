@@ -106,6 +106,7 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
+    <Compile Include="Model\EncoderSettings.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\InputBase.cs" />
     <Compile Include="Model\LiveInputRundownItem.cs" />

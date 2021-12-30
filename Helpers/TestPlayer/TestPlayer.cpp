@@ -91,7 +91,7 @@ int main()
 		input->SetFramePlayedCallback([&](int64_t time) {});
 		input->Play();
 		input->SetIsLoop(true);
-		player.Load(input);
+		//player.Load(input);
 		while (true)
 		{
 			char i = std::cin.get();

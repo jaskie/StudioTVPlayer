@@ -43,7 +43,7 @@ namespace TVPlayR {
 				, background_rect_(GetBackgroundRect())
 				, background_(Gdiplus::Color(150, 16, 16, 16))
 				, foreground_(Gdiplus::Color(255, 232, 232, 232))
-				, font_(L"Tahoma", static_cast<Gdiplus::REAL>(video_format_.height() / 9), Gdiplus::FontStyle::FontStyleBold)
+				, font_(L"Tahoma", static_cast<Gdiplus::REAL>(video_format_.height() / 7), Gdiplus::FontStyle::FontStyleBold, Gdiplus::Unit::UnitPixel)
 				, timecode_position_(background_rect_.Width / (scale_x_ * 2), static_cast<Gdiplus::REAL>(background_rect_.Height * 21 / 40))
 				, scale_x_(static_cast<float>(video_format_.SampleAspectRatio().Denominator()) / video_format_.SampleAspectRatio().Numerator())
 			{

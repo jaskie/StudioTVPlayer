@@ -892,6 +892,13 @@ parameters (if the filter supports it) to a file.
 If a file with the same name exists it will be overwritten.
 </p>
 </dd>
+<dt><samp>use_video_device_timestamps</samp></dt>
+<dd><p>If set to <samp>false</samp>, the timestamp for video frames will be
+derived from the wallclock instead of the timestamp provided by
+the capture device. This allows working around devices that
+provide unreliable timestamps.
+</p>
+</dd>
 </dl>
 
 <a name="Examples-2"></a>

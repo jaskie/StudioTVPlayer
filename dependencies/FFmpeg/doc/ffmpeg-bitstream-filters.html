@@ -179,7 +179,7 @@ This can only be set for 4:2:0 streams.
 
 </dd>
 <dt><samp>tick_rate</samp></dt>
-<dd><p>Set the tick rate (<em>num_units_in_display_tick / time_scale</em>) in
+<dd><p>Set the tick rate (<em>time_scale / num_units_in_display_tick</em>) in
 the timing info in the sequence header.
 </p></dd>
 <dt><samp>num_ticks_per_picture</samp></dt>
@@ -366,7 +366,7 @@ E.2.1 and figure E-1).
 </p>
 </dd>
 <dt><samp>tick_rate</samp></dt>
-<dd><p>Set the tick rate (num_units_in_tick / time_scale) in the VUI
+<dd><p>Set the tick rate (time_scale / num_units_in_tick) in the VUI
 parameters.  This is the smallest time unit representable in the
 stream, and in many cases represents the field rate of the stream
 (double the frame rate).
@@ -489,8 +489,8 @@ E.3.1 and figure E.1).
 </p>
 </dd>
 <dt><samp>tick_rate</samp></dt>
-<dd><p>Set the tick rate in the VPS and VUI parameters (num_units_in_tick /
-time_scale).  Combined with <samp>num_ticks_poc_diff_one</samp>, this can
+<dd><p>Set the tick rate in the VPS and VUI parameters (time_scale /
+num_units_in_tick). Combined with <samp>num_ticks_poc_diff_one</samp>, this can
 set a constant framerate in the stream.  Note that it is likely to be
 overridden by container parameters when the stream is in a container.
 </p>

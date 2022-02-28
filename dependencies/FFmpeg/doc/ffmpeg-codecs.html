@@ -5184,6 +5184,10 @@ is kept undocumented for some reason.
 Only the mpeg2 and h264 decoders provide these. Default is 1 (on).
 </p>
 </dd>
+<dt><samp>udu_sei <var>boolean</var></samp></dt>
+<dd><p>Import user data unregistered SEI if available into output. Default is 0 (off).
+</p>
+</dd>
 <dt><samp>x264-params (N.A.)</samp></dt>
 <dd><p>Override the x264 configuration using a :-separated list of key=value
 parameters.
@@ -5278,6 +5282,10 @@ during configuration. You need to explicitly configure the build with
 <dt><samp>forced-idr</samp></dt>
 <dd><p>Normally, when forcing a I-frame type, the encoder can select any type
 of I-frame. This option forces it to choose an IDR-frame.
+</p>
+</dd>
+<dt><samp>udu_sei <var>boolean</var></samp></dt>
+<dd><p>Import user data unregistered SEI if available into output. Default is 0 (off).
 </p>
 </dd>
 <dt><samp>x265-params</samp></dt>

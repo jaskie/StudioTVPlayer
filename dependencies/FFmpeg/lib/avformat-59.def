@@ -5,6 +5,8 @@ EXPORTS
     av_codec_get_tag
     av_codec_get_tag2
     av_demuxer_iterate
+    av_disposition_from_string
+    av_disposition_to_string
     av_dump_format
     av_filename_number_test
     av_find_best_stream
@@ -44,6 +46,7 @@ EXPORTS
     av_sdp_create
     av_seek_frame
     av_stream_add_side_data
+    av_stream_get_class
     av_stream_get_codec_timebase
     av_stream_get_end_pts
     av_stream_get_parser

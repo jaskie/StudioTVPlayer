@@ -349,21 +349,19 @@ FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel accelerati
 
 FFmpegInput::~FFmpegInput(){}
 AVSync FFmpegInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
-bool FFmpegInput::Seek(const std::int64_t time)        { return impl_->Seek(time); }
-bool FFmpegInput::IsEof() const					{ return impl_->is_eof_; }
+bool FFmpegInput::Seek(const std::int64_t time) { return impl_->Seek(time); }
+bool FFmpegInput::IsEof() const { return impl_->is_eof_; }
 bool FFmpegInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
 void FFmpegInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
-void FFmpegInput::RemoveFromPlayer(const Core::Player& player)				{ impl_->RemoveFromPlayer(player);}
-void FFmpegInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview)
-{
-}
-void FFmpegInput::Play()							{ impl_->Play(); }
-void FFmpegInput::Pause()							{ impl_->Pause(); }
-bool FFmpegInput::IsPlaying()	const				{ return impl_->is_playing_; }
+void FFmpegInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player);}
+void FFmpegInput::AddPreview(Preview::InputPreview& preview) { } //TODO: implement
+void FFmpegInput::Play() { impl_->Play(); }
+void FFmpegInput::Pause() { impl_->Pause(); }
+bool FFmpegInput::IsPlaying() const { return impl_->is_playing_; }
 void FFmpegInput::SetIsLoop(bool is_loop) { impl_->SetIsLoop(is_loop); }
-std::int64_t FFmpegInput::GetAudioDuration() const		{ return impl_->GetAudioDuration(); }
-std::int64_t FFmpegInput::GetVideoStart() const		{ return impl_->GetVideoStart(); }
-std::int64_t FFmpegInput::GetVideoDuration() const		{ return impl_->GetVideoDuration(); }
+std::int64_t FFmpegInput::GetAudioDuration() const { return impl_->GetAudioDuration(); }
+std::int64_t FFmpegInput::GetVideoStart() const { return impl_->GetVideoStart(); }
+std::int64_t FFmpegInput::GetVideoDuration() const { return impl_->GetVideoDuration(); }
 AVRational FFmpeg::FFmpegInput::GetTimeBase() const { return impl_->GetTimeBase(); }
 AVRational FFmpeg::FFmpegInput::GetFrameRate() const { return impl_->GetFrameRate(); }
 int FFmpeg::FFmpegInput::GetWidth() const { return impl_->GetWidth(); }
@@ -371,7 +369,7 @@ int FFmpeg::FFmpegInput::GetHeight() const { return impl_->GetHeight(); }
 TVPlayR::FieldOrder FFmpeg::FFmpegInput::GetFieldOrder() { return impl_->GetFieldOrder(); }
 int FFmpeg::FFmpegInput::GetAudioChannelCount() { return impl_->GetAudioChannelCount(); }
 bool FFmpegInput::HaveAlphaChannel() const { return impl_->HaveAlphaChannel(); }
-int FFmpegInput::StreamCount() const				{ return impl_->StreamCount(); }
+int FFmpegInput::StreamCount() const { return impl_->StreamCount(); }
 const Core::StreamInfo& FFmpegInput::GetStreamInfo(int index) const { return impl_->GetStreamInfo(index); }
 void FFmpegInput::SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map) { impl_->SetupAudio(audio_channel_map); }
 void FFmpegInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }

@@ -12,7 +12,7 @@ namespace TVPlayR {
 	public ref class InputPreview sealed
 	{
 	private:
-		const std::shared_ptr<Preview::InputPreview>* _preview;
+		Preview::InputPreview* _preview;
 		WriteableBitmap^ _target;
 		std::shared_ptr<AVFrame>* _buffer_frame = nullptr;
 		delegate void FramePlayedDelegate(std::shared_ptr<AVFrame>);
@@ -25,7 +25,7 @@ namespace TVPlayR {
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
 		void DrawFrame();
 	internal:
-		virtual std::shared_ptr<Preview::InputPreview> GetNative();
+		virtual Preview::InputPreview& GetNative();
 	public:
 		InputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
 		~InputPreview();

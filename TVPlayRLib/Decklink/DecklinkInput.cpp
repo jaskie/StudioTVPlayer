@@ -29,7 +29,7 @@ namespace TVPlayR {
 			const bool													is_wide_;
 			const bool													capture_video_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
-			std::vector<std::shared_ptr<Preview::InputPreview>>			previews_;
+			std::vector<std::reference_wrapper<Preview::InputPreview>>	previews_;
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
 			const int													audio_channels_count_;
@@ -123,7 +123,7 @@ namespace TVPlayR {
 				for (auto& provider : player_providers_)
 					provider->Push(video, audio, timecode);
 				for (auto& preview : previews_)
-					preview->Push(video);
+					preview.get().Push(video);
 				if (frame_played_callback_)
 					frame_played_callback_(timecode);
 				return S_OK;
@@ -158,16 +158,16 @@ namespace TVPlayR {
 				player_providers_.erase(provider);
 			}
 
-			void AddPreview(std::shared_ptr<Preview::InputPreview>& preview)
+			void AddPreview(Preview::InputPreview& preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				previews_.push_back(preview);
 			}
 
-			void RemovePreview(std::shared_ptr<Preview::InputPreview>& preview)
+			void RemovePreview(const Preview::InputPreview& preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				previews_.erase(std::remove(previews_.begin(), previews_.end(), preview), previews_.end());
+				//previews_.erase(std::remove(previews_.begin(), previews_.end(), preview), previews_.end());
 			}
 
 			int GetWidth() const
@@ -211,8 +211,8 @@ namespace TVPlayR {
 		bool DecklinkInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
 		void DecklinkInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
 		void DecklinkInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player); }
-		void DecklinkInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->AddPreview(preview); }
-		void DecklinkInput::RemovePreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->RemovePreview(preview); }
+		void DecklinkInput::AddPreview(Preview::InputPreview& preview) { impl_->AddPreview(preview); }
+		void DecklinkInput::RemovePreview(Preview::InputPreview& preview) { impl_->RemovePreview(preview); }
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }

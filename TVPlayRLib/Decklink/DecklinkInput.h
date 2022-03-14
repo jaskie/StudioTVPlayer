@@ -22,8 +22,8 @@ namespace TVPlayR {
 			bool IsAddedToPlayer(const Core::Player& player) override;
 			void AddToPlayer(const Core::Player& player) override;
 			void RemoveFromPlayer(const Core::Player& player) override;
-			void AddPreview(std::shared_ptr<Preview::InputPreview> preview);
-			void RemovePreview(std::shared_ptr<Preview::InputPreview> preview);
+			void AddPreview(Preview::InputPreview& preview) override;
+			void RemovePreview(Preview::InputPreview& preview);
 			void Play() override;
 			void Pause() override;
 			bool IsPlaying() const override;

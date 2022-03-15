@@ -108,6 +108,8 @@ namespace TVPlayR {
 
 			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
 			{
+				if (!buffer)
+					return;
 				unsigned int samples_written = 0;
 				if (!internal_keyer_)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);

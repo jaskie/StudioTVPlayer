@@ -55,7 +55,7 @@ struct Decoder::implementation : Common::DebugTarget
 		, hw_device_ctx_(NULL, [](AVBufferRef* p) { av_buffer_unref(&p); })
 	{
 		if (!ctx_ || !stream || !codec)
-			return;
+			THROW_EXCEPTION("Codec context not created");
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_to_context(ctx_.get(), stream->codecpar));
 		if (acceleration != Core::HwAccel::none && codec && (codec->id == AV_CODEC_ID_H264 || codec->id == AV_CODEC_ID_HEVC))
 		{

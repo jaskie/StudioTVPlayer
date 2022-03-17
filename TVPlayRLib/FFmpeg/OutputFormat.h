@@ -5,7 +5,6 @@ namespace TVPlayR {
 		class OutputFormat final : private Common::NonCopyable, private Common::DebugTarget
 		{
 		public:
-			typedef std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> AVFormatContextPtr;
 			OutputFormat(const std::string& url, AVDictionary*& options);
 			void Push(const std::shared_ptr<AVPacket>& packet);
 			void Flush();
@@ -16,7 +15,7 @@ namespace TVPlayR {
 		private:
 			const std::string url_;
 			AVDictionary*& options_;
-			AVFormatContextPtr format_ctx_;
+			std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> format_ctx_;
 			bool is_initialized_ = false;
 			bool is_flushed_ = false;
 			std::deque<std::shared_ptr<AVPacket>> initialization_queue_;

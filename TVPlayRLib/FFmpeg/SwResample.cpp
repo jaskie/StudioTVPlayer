@@ -22,6 +22,7 @@ namespace TVPlayR {
 			resampled->channels = dest_channels_;
 			resampled->channel_layout = dest_channel_layout_;
 			THROW_ON_FFMPEG_ERROR(swr_convert_frame(swr_.get(), resampled.get(), frame.get()));
+			resampled->pts = frame->pts;
 			return resampled;
 		}
 

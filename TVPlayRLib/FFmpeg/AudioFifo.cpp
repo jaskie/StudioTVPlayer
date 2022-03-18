@@ -49,7 +49,7 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 		}
 	}
 	else
-	DebugPrintLine("Frame ignored");
+		DebugPrintLine("Frame ignored");
 	return true;
 }
 

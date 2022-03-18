@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -46,7 +47,10 @@ namespace StudioTVPlayer.Model
 
         public void Queue(MediaFile media, CancellationToken cancellationToken)
         {
-            media.IsVerified = false;
+            if (_cancellationTokenSource.IsCancellationRequested)
+                return;
+            if (_mediaQueue.Any(vd => vd.Media == media && vd.Width == DefaultThumbnailWidth && vd.Height == DefaultThumbnailHeight))
+                return;
             _mediaQueue.Add(new MediaVerifyData { Media = media, Width = DefaultThumbnailWidth, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
         }
 
@@ -101,7 +105,7 @@ namespace StudioTVPlayer.Model
             {
                 try
                 {
-                    var vd = _mediaQueue.Take(_cancellationTokenSource.Token);
+                    MediaVerifyData vd = _mediaQueue.Take(_cancellationTokenSource.Token);
 
                     if (vd.CancellationToken.IsCancellationRequested)
                         continue;

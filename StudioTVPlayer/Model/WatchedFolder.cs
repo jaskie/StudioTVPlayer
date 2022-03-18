@@ -130,7 +130,6 @@ namespace StudioTVPlayer.Model
             if (media == null)
                 return;
             AddToVerificationQueue(media);
-            MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Change));
         }
 
         private void Fs_MediaRenamed(object sender, RenamedEventArgs e)

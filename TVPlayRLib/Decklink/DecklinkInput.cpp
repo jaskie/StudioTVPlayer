@@ -117,15 +117,17 @@ namespace TVPlayR {
 				if (current_format_.type() == Core::VideoFormatType::invalid)
 					return S_OK;
 
-				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
-				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz);
-				std::int64_t timecode = TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate());
+				FFmpeg::AVSync sync(
+					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
+					AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_),
+					TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate())
+				);
 				for (auto& provider : player_providers_)
-					provider->Push(video, audio, timecode);
+					provider->Push(sync);
 				for (auto& preview : previews_)
-					preview.get().Push(video);
+					preview.get().Push(sync);
 				if (frame_played_callback_)
-					frame_played_callback_(timecode);
+					frame_played_callback_(sync.Timecode);
 				return S_OK;
 			}
 
@@ -167,7 +169,10 @@ namespace TVPlayR {
 			void RemovePreview(const Preview::InputPreview& preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				//previews_.erase(std::remove(previews_.begin(), previews_.end(), preview), previews_.end());
+				auto item = std::find_if(previews_.begin(), previews_.end(), [&](const std::reference_wrapper<Preview::InputPreview>& p) { return &p.get() == &preview; });
+				if (item == previews_.end())
+					return;
+				previews_.erase(item);
 			}
 
 			int GetWidth() const

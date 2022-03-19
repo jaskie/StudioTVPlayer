@@ -7,7 +7,7 @@ namespace TVPlayR {
 		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
-		class AVSync;
+		struct AVSync;
 		class AudioFifo;
 
 class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget

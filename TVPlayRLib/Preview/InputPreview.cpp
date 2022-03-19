@@ -1,6 +1,7 @@
 #include "../pch.h"
 #include "InputPreview.h"
 #include "../FFmpeg/SwScale.h"
+#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Preview {
@@ -56,6 +57,6 @@ namespace TVPlayR {
 			impl_->SetFramePlayedCallback(frame_played_callback);
 		}
 		
-		void InputPreview::Push(std::shared_ptr<AVFrame> video) { impl_->Push(video); }
+		void InputPreview::Push(FFmpeg::AVSync& sync) { impl_->Push(sync.Video); }
 	}
 }

@@ -1,6 +1,9 @@
 #pragma once
 
 namespace TVPlayR {
+	namespace FFmpeg {
+		struct AVSync;
+	}
 	namespace Preview {
 
 		class InputPreview final : Common::NonCopyable
@@ -10,7 +13,7 @@ namespace TVPlayR {
 			~InputPreview();
 			typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
 			void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback);
-			void Push(std::shared_ptr<AVFrame> video);
+			void Push(FFmpeg::AVSync& sync);
 		private:
 			struct implementation;
 			std::unique_ptr<implementation> impl_;

@@ -5,7 +5,7 @@ namespace TVPlayR {
 		enum class PixelFormat;	
 	
 	namespace FFmpeg {
-		class AVSync;
+		struct AVSync;
 	}
 	namespace Core {
 		enum class VideoFormatType;

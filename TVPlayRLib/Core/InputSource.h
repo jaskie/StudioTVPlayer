@@ -7,7 +7,7 @@ namespace TVPlayR {
 		class InputPreview;
 	}
 	namespace FFmpeg {
-		class AVSync;
+		struct AVSync;
 	}
 
 	namespace Core {

@@ -2,13 +2,12 @@
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		class AVSync
+		struct AVSync
 		{
-		public:
-			AVSync(std::shared_ptr<AVFrame> audio, std::shared_ptr<AVFrame> video, std::int64_t time)
+			AVSync(std::shared_ptr<AVFrame> audio, std::shared_ptr<AVFrame> video, std::int64_t timecode)
 				: Audio(audio)
 				, Video(video)
-				, Timecode(time)
+				, Timecode(timecode)
 			{ }
 			AVSync() : AVSync(nullptr, nullptr, 0LL) {}
 			AVSync(AVSync&& other) = default;

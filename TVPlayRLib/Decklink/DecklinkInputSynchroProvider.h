@@ -9,7 +9,7 @@ namespace TVPlayR {
 		class Player;
 	}
 	namespace FFmpeg {
-		class AVSync;
+		struct AVSync;
 		class PlayerScaler;
 	}
 	namespace Common {
@@ -24,7 +24,7 @@ public:
 	DecklinkInputSynchroProvider(const Core::Player& player, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video, int audio_channels);
 	~DecklinkInputSynchroProvider();
 	const Core::Player& Player() const;
-	void Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, std::int64_t timecode);
+	void Push(FFmpeg::AVSync& sync);
 	FFmpeg::AVSync PullSync(int audio_samples_count);
 	void Reset(AVRational input_frame_rate);
 private:

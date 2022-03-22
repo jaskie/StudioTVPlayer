@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DecklinkInput.h"
 #include "Decklink/DecklinkInput.h"
-#include "InputPreview.h"
+#include "PreviewSink.h"
 #include "VideoFormatEventArgs.h"
 #include "FieldOrder.h"
 
@@ -28,14 +28,14 @@ namespace TVPlayR {
 		decklink->SetFormatChangedCallback(static_cast<Decklink::FORMAT_CALLBACK>(formatChangedIp.ToPointer()));
 	}
 
-	void DecklinkInput::AddPreview(InputPreview^ preview)
+	void DecklinkInput::AddPreview(PreviewSink^ preview)
 	{
-		GetDecklinkInput()->AddPreview(preview->GetNative());
+		GetDecklinkInput()->AddPreview(preview->GetNativeSink());
 	}
 
-	void DecklinkInput::RemovePreview(InputPreview^ preview)
+	void DecklinkInput::RemovePreview(PreviewSink^ preview)
 	{
-		GetDecklinkInput()->RemovePreview(preview->GetNative());
+		GetDecklinkInput()->RemovePreview(preview->GetNativeSink());
 	}
 
 	DecklinkInput::~DecklinkInput()

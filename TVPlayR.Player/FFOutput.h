@@ -5,9 +5,6 @@ using namespace System;
 
 namespace TVPlayR {
 
-	namespace Core {
-		class OutputDevice;
-	}
 	namespace FFmpeg {
 		class FFmpegOutput;
 	}
@@ -41,6 +38,7 @@ namespace TVPlayR {
 		static array<String^>^ _audioCodecs = gcnew array<String^> { "aac", "ac3", "libmp3lame", "mp2" };
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
+		virtual std::shared_ptr<Core::OutputSink> GetNativeSink() override;
 	};
 
 }

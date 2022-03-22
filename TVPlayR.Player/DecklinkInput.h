@@ -5,7 +5,7 @@ using namespace System;
 using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
-	ref class InputPreview;
+	ref class PreviewSink;
 	ref class VideoFormatEventArgs;
 	enum class DecklinkTimecodeSource;
 
@@ -30,8 +30,8 @@ namespace TVPlayR {
 	internal:
 		DecklinkInput(std::shared_ptr<Decklink::DecklinkInput> decklink, String^ modelName);
 	public:
-		void AddPreview(InputPreview^ preview);
-		void RemovePreview(InputPreview^ preview);
+		void AddPreview(PreviewSink^ preview);
+		void RemovePreview(PreviewSink^ preview);
 		~DecklinkInput();
 		!DecklinkInput();
 		event EventHandler<VideoFormatEventArgs^>^ FormatChanged;

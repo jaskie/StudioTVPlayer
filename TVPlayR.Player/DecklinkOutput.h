@@ -15,6 +15,7 @@ namespace TVPlayR {
 
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
+		virtual std::shared_ptr<Core::OutputSink> GetNativeSink() override;
 		DecklinkOutput(std::shared_ptr<Decklink::DecklinkOutput>& decklink);
 
 	public:

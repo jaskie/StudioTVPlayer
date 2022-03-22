@@ -1,4 +1,5 @@
 #pragma once
+#include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -6,11 +7,11 @@ namespace TVPlayR {
 	}
 	namespace Preview {
 
-		class InputPreview final : Common::NonCopyable
+		class PreviewSink final : public Core::OutputSink
 		{
 		public:
-			explicit InputPreview(int output_width, int output_height);
-			~InputPreview();
+			explicit PreviewSink(int output_width, int output_height);
+			~PreviewSink();
 			typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
 			void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback);
 			void Push(FFmpeg::AVSync& sync);

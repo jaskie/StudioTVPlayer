@@ -9,8 +9,8 @@ namespace TVPlayR {
 	}
 
 	ref class DecklinkOutput;
-	ref class OutputPreview;
 	ref class InputBase;
+	ref class OutputSink;
 	ref class OutputBase;
 	ref class OverlayBase;
 	ref class VideoFormat;
@@ -27,14 +27,15 @@ namespace TVPlayR {
 		delegate void AudioVolumeDelegate(std::vector<float>&, float);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
-		System::Collections::Generic::List<OutputBase^>^ _outputs = gcnew System::Collections::Generic::List<OutputBase^>();
+		System::Collections::Generic::List<OutputSink^>^ _outputs = gcnew System::Collections::Generic::List<OutputSink^>();
 		void AudioVolumeCallback(std::vector<float>& audio_volume, float coherence);
 	public:
 		Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
 		~Player();
 		!Player();
-		bool AddOutput(OutputBase^ output, bool setAsClockBase);
-		void RemoveOutput(OutputBase^ output);
+		void SetFrameClock(OutputBase^ output);
+		void AddOutputSink(OutputSink^ sink);
+		void RemoveOutputSink(OutputSink^ sink);
 		void AddOverlay(OverlayBase^ overlay);
 		void Load(InputBase^ file);
 		void Preload(InputBase^ file);

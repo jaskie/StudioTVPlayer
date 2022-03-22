@@ -17,7 +17,7 @@ namespace TVPlayR {
 			const Player& player_;
 			const std::string name_;
 			std::mutex devices_mutex_;
-			std::vector<std::shared_ptr<OutputDevice>> output_devices_;
+			std::vector<std::shared_ptr<OutputSink>> outputs_;
 			std::mutex frame_clock_mutex_;
 			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
@@ -71,9 +71,9 @@ namespace TVPlayR {
 				{
 					std::vector<float> volume(player_.AudioChannelsCount(), 0.0);
 					float coherence = 0.0;
+					DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
 					if (playing_source_)
 					{
-						DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
 						auto sync = playing_source_->PullSync(player_, audio_samples_count);
 						auto& audio = sync.Audio;
 						auto& video = sync.Video;
@@ -103,23 +103,22 @@ namespace TVPlayR {
 				for (auto& overlay : overlays_)
 					sync = overlay->Transform(sync);
 				std::lock_guard<std::mutex> lock(devices_mutex_);
-				for (auto& device : output_devices_)
+				for (auto& device : outputs_)
 					device->Push(sync);
 			}
 
-			void AddOutput(std::shared_ptr<OutputDevice>& device)
+			void AddOutputSink(std::shared_ptr<OutputSink>& device)
 			{
 				assert(device);
 				std::lock_guard<std::mutex> lock(devices_mutex_);
-				output_devices_.push_back(device);
+				outputs_.push_back(device);
 			}
 
-			void RemoveOutput(std::shared_ptr<OutputDevice>& device)
+			void RemoveOutputSink(std::shared_ptr<OutputSink>& device)
 			{
 				assert(device);
-				device->ReleasePlayer();
 				std::lock_guard<std::mutex> lock(devices_mutex_);
-				output_devices_.erase(std::remove(output_devices_.begin(), output_devices_.end(), device), output_devices_.end());
+				outputs_.erase(std::remove(outputs_.begin(), outputs_.end(), device), outputs_.end());
 			}
 
 			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
@@ -189,16 +188,13 @@ namespace TVPlayR {
 		
 		Player::~Player() {}
 
-		bool Player::AddOutput(std::shared_ptr<OutputDevice> device) {
-			if (!device->AssignToPlayer(*this))
-				return false;
-			impl_->AddOutput(device);
-			return true;
+		void Player::AddOutputSink(std::shared_ptr<OutputSink> sink) {
+			impl_->AddOutputSink(sink);
 		}
 
-		void Player::RemoveOutput(std::shared_ptr<OutputDevice> device)
+		void Player::RemoveOutputSink(std::shared_ptr<OutputSink> sink)
 		{
-			impl_->RemoveOutput(device);
+			impl_->RemoveOutputSink(sink);
 		}
 
 		void Player::SetFrameClock(std::shared_ptr<OutputDevice> clock) { impl_->SetFrameClock(clock); }

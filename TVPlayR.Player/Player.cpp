@@ -8,7 +8,7 @@
 #include "OutputBase.h"
 #include "OverlayBase.h"
 #include "DecklinkOutput.h"
-#include "OutputPreview.h"
+#include "PreviewSink.h"
 #include "FileInput.h"
 #include "ClrStringHelper.h"
 #include "AudioVolumeEventArgs.h"
@@ -45,32 +45,31 @@ namespace TVPlayR {
 	Player::!Player()
 	{
 		_player->SetAudioVolumeCallback(nullptr);
-		for each (OutputBase ^ output in _outputs)
+		for each (OutputSink ^ output in _outputs)
 		{
-			std::shared_ptr<Core::OutputDevice> native_ouptut = output->GetNativeDevice();
-			if (native_ouptut)
-				_player->RemoveOutput(native_ouptut);
+			std::shared_ptr<Core::OutputSink> native_sink = output->GetNativeSink();
+			if (native_sink)
+				_player->RemoveOutputSink(native_sink);
 		}
 		_audioVolumeHandle.Free();
 		delete _player;
 	}
 
-	bool Player::AddOutput(OutputBase^ output, bool setAsClockBase)
+	void Player::SetFrameClock(OutputBase^ output)
 	{
-		if (output == nullptr)
-			return false;
-		if (setAsClockBase)
-			_player->SetFrameClock(output->GetNativeDevice());
-		if (!_player->AddOutput(output->GetNativeDevice()))
-			return false;
-		_outputs->Add(output);
-		return true;
+		_player->SetFrameClock(output->GetNativeDevice());
 	}
 
-	void Player::RemoveOutput(OutputBase^ output)
+	void Player::AddOutputSink(OutputSink^ sink)
 	{
-		if (_outputs->Remove(output))
-			_player->RemoveOutput(output->GetNativeDevice());
+		_player->AddOutputSink(sink->GetNativeSink());
+		_outputs->Add(sink);
+	}
+
+	void Player::RemoveOutputSink(OutputSink^ sink)
+	{
+		if (_outputs->Remove(sink))
+			_player->RemoveOutputSink(sink->GetNativeSink());
 	}
 
 	void Player::AddOverlay(OverlayBase^ overlay)

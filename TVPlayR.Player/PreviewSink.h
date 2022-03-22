@@ -1,4 +1,5 @@
 #pragma once
+#include "OutputBase.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
@@ -6,13 +7,13 @@ using namespace System::Windows::Media::Imaging;
 namespace TVPlayR {
 
 	namespace Preview {
-		class InputPreview;
+		class PreviewSink;
 	}
 
-	public ref class InputPreview sealed
+	public ref class PreviewSink sealed : public OutputSink
 	{
 	private:
-		Preview::InputPreview* _preview;
+		std::shared_ptr<Preview::PreviewSink>* _preview;
 		WriteableBitmap^ _target;
 		std::shared_ptr<AVFrame>* _buffer_frame = nullptr;
 		delegate void FramePlayedDelegate(std::shared_ptr<AVFrame>);
@@ -25,11 +26,11 @@ namespace TVPlayR {
 		void FramePlayedCallback(std::shared_ptr<AVFrame> frame);
 		void DrawFrame();
 	internal:
-		virtual Preview::InputPreview& GetNative();
+		virtual std::shared_ptr<Core::OutputSink> GetNativeSink() override;
 	public:
-		InputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
-		~InputPreview();
-		!InputPreview();
+		PreviewSink(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height);
+		~PreviewSink();
+		!PreviewSink();
 		property WriteableBitmap^ PreviewSource
 		{
 			WriteableBitmap^ get() { return _target; }

@@ -131,9 +131,6 @@
     <ClInclude Include="Core\AudioVolume.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Preview\OutputPreview.h">
-      <Filter>Preview</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Debug.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -176,7 +173,7 @@
     <ClInclude Include="Core\TimecodeOverlay.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Preview\InputPreview.h">
+    <ClInclude Include="Preview\PreviewSink.h">
       <Filter>Preview</Filter>
     </ClInclude>
     <ClInclude Include="FFmpeg\Encoder.h">
@@ -252,9 +249,6 @@
     <ClCompile Include="Core\AudioVolume.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Preview\OutputPreview.cpp">
-      <Filter>Preview</Filter>
-    </ClCompile>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
@@ -285,7 +279,7 @@
     <ClCompile Include="Core\TimecodeOverlay.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Preview\InputPreview.cpp">
+    <ClCompile Include="Preview\PreviewSink.cpp">
       <Filter>Preview</Filter>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkUtils.cpp">

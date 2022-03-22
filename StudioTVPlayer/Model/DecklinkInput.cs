@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Model
     public class DecklinkInput : InputBase, IDisposable
     {
         private TVPlayR.DecklinkInput _input;
-        private TVPlayR.InputPreview _preview;
+        private TVPlayR.PreviewSink _preview;
 
         [XmlAttribute]
         public int DeviceIndex { get; set; }
@@ -38,7 +38,7 @@ namespace StudioTVPlayer.Model
                 _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true);
                 _input.FormatChanged += Input_FormatChanged;
                 
-                _preview = new TVPlayR.InputPreview(Application.Current.Dispatcher, 160, 90);
+                _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);
                 _input.AddPreview(_preview);
                 return true;
             }

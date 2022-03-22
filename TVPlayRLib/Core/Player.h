@@ -5,6 +5,7 @@ namespace TVPlayR {
 
 	namespace Core {
 		class InputSource;
+		class OutputSink;
 		class OutputDevice;
 		class OverlayBase;
 		class VideoFormat;
@@ -16,8 +17,8 @@ public:
 	typedef std::function<void(std::vector<float>&, float)> AUDIO_VOLUME_CALLBACK;
 	Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
 	~Player();
-	bool AddOutput(std::shared_ptr<OutputDevice> device);
-	void RemoveOutput(std::shared_ptr<OutputDevice> device);
+	void AddOutputSink(std::shared_ptr<OutputSink> device);
+	void RemoveOutputSink(std::shared_ptr<OutputSink> device);
 	void SetFrameClock(std::shared_ptr<OutputDevice> clock);
 	void Load(std::shared_ptr<InputSource> source);
 	void Preload(std::shared_ptr<InputSource> source);

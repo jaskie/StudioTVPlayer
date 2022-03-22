@@ -21,7 +21,7 @@ namespace StudioTVPlayer.Model
         private bool _livePreview;
 
         private TVPlayR.Player _player;
-        private TVPlayR.OutputPreview _outputPreview;
+        private TVPlayR.PreviewSink _outputPreview;
 
         private List<OutputBase> _outputs = new List<OutputBase>();
         private bool _disablePlayedItems;
@@ -92,7 +92,9 @@ namespace StudioTVPlayer.Model
             foreach (var output in Outputs)
             {
                 output.Initialize(_player);
-                _player.AddOutput(output.Output, output.IsFrameClock);
+                if (output.IsFrameClock)
+                    _player.SetFrameClock(output.Output);
+                _player.AddOutputSink(output.Output);
             }
             _player.AudioVolume += Player_AudioVolume;
         }
@@ -111,8 +113,8 @@ namespace StudioTVPlayer.Model
                 throw new ApplicationException($"Player {Name} not initialized");
             if (_outputPreview is null)
             {
-                _outputPreview = new TVPlayR.OutputPreview(Application.Current.Dispatcher, width, height);
-                _player.AddOutput(_outputPreview, false);
+                _outputPreview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, width, height);
+                _player.AddOutputSink(_outputPreview);
             }
             return _outputPreview.PreviewSource;
         }
@@ -123,7 +125,7 @@ namespace StudioTVPlayer.Model
                 return;
             foreach (var o in Outputs)
             {
-                _player.RemoveOutput(o.Output);
+                _player.RemoveOutputSink(o.Output);
                 o.Dispose();
             }
             if (!(_outputPreview is null))

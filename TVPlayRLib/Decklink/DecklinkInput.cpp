@@ -7,7 +7,7 @@
 #include "../Core/VideoFormat.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FieldOrder.h"
-#include "../Preview/InputPreview.h"
+#include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -29,7 +29,7 @@ namespace TVPlayR {
 			const bool													is_wide_;
 			const bool													capture_video_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
-			std::vector<std::reference_wrapper<Preview::InputPreview>>	previews_;
+			std::vector<std::shared_ptr<Core::OutputSink>>				previews_;
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
 			const int													audio_channels_count_;
@@ -125,7 +125,7 @@ namespace TVPlayR {
 				for (auto& provider : player_providers_)
 					provider->Push(sync);
 				for (auto& preview : previews_)
-					preview.get().Push(sync);
+					preview->Push(sync);
 				if (frame_played_callback_)
 					frame_played_callback_(sync.Timecode);
 				return S_OK;
@@ -160,16 +160,16 @@ namespace TVPlayR {
 				player_providers_.erase(provider);
 			}
 
-			void AddPreview(Preview::InputPreview& preview)
+			void AddPreview(std::shared_ptr<Core::OutputSink> preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				previews_.push_back(preview);
 			}
 
-			void RemovePreview(const Preview::InputPreview& preview)
+			void RemovePreview(std::shared_ptr<Core::OutputSink> preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				auto item = std::find_if(previews_.begin(), previews_.end(), [&](const std::reference_wrapper<Preview::InputPreview>& p) { return &p.get() == &preview; });
+				auto item = std::find_if(previews_.begin(), previews_.end(), [&](const std::shared_ptr<Core::OutputSink>& p) { return p == preview; });
 				if (item == previews_.end())
 					return;
 				previews_.erase(item);
@@ -216,8 +216,8 @@ namespace TVPlayR {
 		bool DecklinkInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
 		void DecklinkInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
 		void DecklinkInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player); }
-		void DecklinkInput::AddPreview(Preview::InputPreview& preview) { impl_->AddPreview(preview); }
-		void DecklinkInput::RemovePreview(Preview::InputPreview& preview) { impl_->RemovePreview(preview); }
+		void DecklinkInput::AddPreview(std::shared_ptr<Core::OutputSink> preview) { impl_->AddPreview(preview); }
+		void DecklinkInput::RemovePreview(std::shared_ptr<Core::OutputSink> preview) { impl_->RemovePreview(preview); }
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }

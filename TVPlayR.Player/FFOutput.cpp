@@ -57,4 +57,6 @@ namespace TVPlayR
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }
 
+    std::shared_ptr<Core::OutputSink> FFOutput::GetNativeSink() { return _native_output ? *_native_output : nullptr; }
+    
 }

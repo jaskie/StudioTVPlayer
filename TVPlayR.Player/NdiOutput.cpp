@@ -44,6 +44,11 @@ namespace TVPlayR {
 	{
 		return _ndi == nullptr ? nullptr : *_ndi;
 	}
+	
+	std::shared_ptr<Core::OutputSink> NdiOutput::GetNativeSink()
+	{
+		return _ndi == nullptr ? nullptr : *_ndi;
+	}
 
 
 }

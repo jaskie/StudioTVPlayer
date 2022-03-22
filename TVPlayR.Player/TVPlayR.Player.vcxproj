@@ -96,11 +96,10 @@
     <ClInclude Include="HardwareAcceleration.h" />
     <ClInclude Include="FileInput.h" />
     <ClInclude Include="InputBase.h" />
-    <ClInclude Include="InputPreview.h" />
+    <ClInclude Include="PreviewSink.h" />
     <ClInclude Include="NdiOutput.h" />
     <ClInclude Include="OutputBase.h" />
     <ClInclude Include="OverlayBase.h" />
-    <ClInclude Include="OutputPreview.h" />
     <ClInclude Include="Rational.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Player.h" />
@@ -113,7 +112,7 @@
     <ClCompile Include="DecklinkIterator.cpp" />
     <ClCompile Include="FileInfo.cpp" />
     <ClCompile Include="InputBase.cpp" />
-    <ClCompile Include="InputPreview.cpp" />
+    <ClCompile Include="PreviewSink.cpp" />
     <ClCompile Include="FFOutput.cpp" />
     <ClCompile Include="TimecodeOverlay.cpp" />
     <ClCompile Include="VersionInfo.h">
@@ -127,7 +126,6 @@
     <ClCompile Include="DecklinkOutput.cpp" />
     <ClCompile Include="FileInput.cpp" />
     <ClCompile Include="NdiOutput.cpp" />
-    <ClCompile Include="OutputPreview.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

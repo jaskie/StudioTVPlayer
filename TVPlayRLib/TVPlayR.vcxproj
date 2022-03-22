@@ -95,7 +95,7 @@
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
     <ClInclude Include="FFmpeg\OutputFormat.h" />
     <ClInclude Include="FFmpeg\OutputVideoFilter.h" />
-    <ClInclude Include="Preview\InputPreview.h" />
+    <ClInclude Include="Preview\PreviewSink.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BlockingCollection.h" />
     <ClInclude Include="Common\Debug.h" />
@@ -139,7 +139,6 @@
     <ClInclude Include="FFmpeg\FFmpegUtils.h" />
     <ClInclude Include="FFmpeg\VideoFilterBase.h" />
     <ClInclude Include="FFmpeg\ThumbnailFilter.h" />
-    <ClInclude Include="Preview\OutputPreview.h" />
     <ClInclude Include="Ndi\NdiUtils.h" />
     <ClInclude Include="Ndi\NdiOutput.h" />
     <ClInclude Include="Core\TimecodeOverlay.h" />
@@ -251,7 +250,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Preview\InputPreview.cpp">
+    <ClCompile Include="Preview\PreviewSink.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -276,10 +275,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFmpeg\ThumbnailFilter.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Preview\OutputPreview.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

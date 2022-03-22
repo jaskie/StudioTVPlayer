@@ -1,12 +1,12 @@
 #include "../pch.h"
-#include "InputPreview.h"
+#include "PreviewSink.h"
 #include "../FFmpeg/SwScale.h"
 #include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Preview {
 
-		struct InputPreview::implementation
+		struct PreviewSink::implementation
 		{
 			const int output_width_;
 			const int output_height_;
@@ -46,17 +46,17 @@ namespace TVPlayR {
 
 		};
 
-		InputPreview::InputPreview(int output_width, int output_height)
+		PreviewSink::PreviewSink(int output_width, int output_height)
 			:impl_(std::make_unique<implementation>(output_width, output_height))
 		{ }
 
-		InputPreview::~InputPreview() {	}
+		PreviewSink::~PreviewSink() {	}
 		
-		void InputPreview::SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback)
+		void PreviewSink::SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback)
 		{
 			impl_->SetFramePlayedCallback(frame_played_callback);
 		}
 		
-		void InputPreview::Push(FFmpeg::AVSync& sync) { impl_->Push(sync.Video); }
+		void PreviewSink::Push(FFmpeg::AVSync& sync) { impl_->Push(sync.Video); }
 	}
 }

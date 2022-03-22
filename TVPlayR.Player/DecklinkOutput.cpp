@@ -8,6 +8,11 @@ namespace TVPlayR {
 	{
 		return _decklink == nullptr ? nullptr : *_decklink;
 	}
+	std::shared_ptr<Core::OutputSink> DecklinkOutput::GetNativeSink()
+	{
+		return _decklink == nullptr ? nullptr : *_decklink;
+	}
+
 	DecklinkOutput::DecklinkOutput(std::shared_ptr<Decklink::DecklinkOutput>& decklink)
 		: _decklink(new std::shared_ptr<Decklink::DecklinkOutput>(decklink))
 	{

@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
@@ -12,22 +13,20 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public string GroupNames { get; set; }
 
+        public override TVPlayR.OutputBase Output => _outputDevice;
 
-        public override TVPlayR.OutputBase GetOutput()
-        {
-            return _outputDevice;
-        }
-
-        public override void Initialize()
+        public override void Initialize(TVPlayR.Player player)
         {
             _outputDevice?.Dispose();
             _outputDevice = new TVPlayR.NdiOutput(SourceName, GroupNames);
+            base.Initialize(player);
         }
 
         public override void Dispose()
         {
             if (_outputDevice is null)
                 return;
+            base.Dispose();
             _outputDevice.Dispose();
             _outputDevice = null;
         }

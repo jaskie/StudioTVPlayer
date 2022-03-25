@@ -1,23 +1,26 @@
 #pragma once
-#include "../Common/NonCopyable.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		class OutputFormat final : Common::NonCopyable, Common::DebugTarget
+		class OutputFormat final : private Common::NonCopyable, private Common::DebugTarget
 		{
 		public:
-			typedef std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> AVFormatContextPtr;
-			OutputFormat(const std::string& file_name);
-			void Push(std::shared_ptr<AVPacket> packet);
-			const AVFormatContextPtr& Ctx() const { return format_ctx_; }
-			const std::string& GetFileName() const { return file_name_; }
+			OutputFormat(const std::string& url, AVDictionary*& options);
+			void Push(const std::shared_ptr<AVPacket>& packet);
+			void Flush();
+			void Initialize(const std::string& stream_metadata);
+			AVFormatContext* Ctx() const { return format_ctx_.get(); }
+			const std::string& GetUrl() const { return url_; }
+			bool IsFlushed() const { return is_flushed_; }
 		private:
-			AVFormatContextPtr format_ctx_;
-			const std::string file_name_;
-			AVFormatContext* AllocFormatContext(const std::string& file_name);
+			const std::string url_;
+			AVDictionary*& options_;
+			std::unique_ptr<AVFormatContext, std::function<void(AVFormatContext*)>> format_ctx_;
+			bool is_initialized_ = false;
+			bool is_flushed_ = false;
+			std::deque<std::shared_ptr<AVPacket>> initialization_queue_;
+			AVFormatContext* AllocFormatContext(const std::string& url);
 			void FreeFormatContext(AVFormatContext* ctx);
-
 		};
 
 	}

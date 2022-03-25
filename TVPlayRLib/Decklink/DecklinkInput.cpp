@@ -1,13 +1,13 @@
 #include "../pch.h"
 #include "DecklinkInput.h"
 #include "DecklinkUtils.h"
+#include "../DecklinkTimecodeSource.h"
 #include "DecklinkInputSynchroProvider.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 #include "../Core/VideoFormat.h"
+#include "../FFmpeg/AVSync.h"
 #include "../FieldOrder.h"
 #include "../Preview/InputPreview.h"
-#include "../Common/Debug.h"
-
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -23,12 +23,13 @@ namespace TVPlayR {
 
 		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget
 		{
+			const BMDAudioSampleType									AUDIO_SAMPLE_TYPE = BMDAudioSampleType::bmdAudioSampleType32bitInteger;
 			CComQIPtr<IDeckLinkInput>									input_;
 			const bool													is_autodetection_supported_;
 			const bool													is_wide_;
 			const bool													capture_video_;
-			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	channel_prividers_;
-			std::vector<std::shared_ptr<Preview::InputPreview>>			previews_;
+			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
+			std::vector<std::reference_wrapper<Preview::InputPreview>>	previews_;
 			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
 			const int													audio_channels_count_;
@@ -74,7 +75,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
 				if (audio_channels_count_ > 0)
 				{
-					if (FAILED(input_->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType32bitInteger, audio_channels_count_)))
+					if (FAILED(input_->EnableAudioInput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, AUDIO_SAMPLE_TYPE, audio_channels_count_)))
 						THROW_EXCEPTION("DecklinkInput: EnableAudioInput failed");
 				}
 				if (FAILED(input_->StartStreams()))
@@ -93,7 +94,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: DisableVideoInput failed");
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode* newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override
+			STDMETHODIMP VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode* newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override
 			{
 				if (notificationEvents & bmdVideoInputDisplayModeChanged)
 				{
@@ -101,7 +102,7 @@ namespace TVPlayR {
 					current_format_ = BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_);
 					if (current_format_.type() == Core::VideoFormatType::invalid)
 						return S_OK;
-					for (auto& provider : channel_prividers_)
+					for (auto& provider : player_providers_)
 						provider->Reset(current_format_.FrameRate().av());
 					OpenInput(newDisplayMode);
 					if (format_changed_callback_)
@@ -110,63 +111,68 @@ namespace TVPlayR {
 				return S_OK;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
+			STDMETHODIMP VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (current_format_.type() == Core::VideoFormatType::invalid)
 					return S_OK;
 
-				std::shared_ptr<AVFrame> video = AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_);
-				std::shared_ptr<AVFrame> audio = AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AV_SAMPLE_FMT_S32, bmdAudioSampleRate48kHz);
-				int64_t timecode = TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate());
-				for (auto& provider : channel_prividers_)
-					provider->Push(video, audio, timecode);
+				FFmpeg::AVSync sync(
+					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
+					AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_),
+					TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate())
+				);
+				for (auto& provider : player_providers_)
+					provider->Push(sync);
 				for (auto& preview : previews_)
-					preview->Push(video);
+					preview.get().Push(sync);
 				if (frame_played_callback_)
-					frame_played_callback_(timecode);
+					frame_played_callback_(sync.Timecode);
 				return S_OK;
 			}
 
-			virtual HRESULT STDMETHODCALLTYPE	QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
+			STDMETHODIMP						QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
 			virtual ULONG STDMETHODCALLTYPE		AddRef() override { return 1; }
 			virtual ULONG STDMETHODCALLTYPE		Release() override { return 1; }
 
-			bool IsAddedToChannel(const Core::Channel& channel)
+			bool IsAddedToPlayer(const Core::Player& player)
 			{
-				return std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& provider) { return &provider->Channel() == &channel; }) != channel_prividers_.end();
+				return std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& provider) { return &provider->Player() == &player; }) != player_providers_.end();
 			}
 
-			void AddToChannel(const Core::Channel& channel)
+			void AddToPlayer(const Core::Player& player)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				if (!IsAddedToChannel(channel))
+				if (!IsAddedToPlayer(player))
 				{
-					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(channel, timecode_source_, capture_video_);
+					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, timecode_source_, capture_video_, audio_channels_count_);
 					provider->Reset(current_format_.FrameRate().av());
-					channel_prividers_.emplace_back(std::move(provider));
+					player_providers_.emplace_back(std::move(provider));
 				}
 			}
 
-			void RemoveFromChannel(const Core::Channel& channel)
+			void RemoveFromPlayer(const Core::Player& player)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Channel() == &channel; });
-				if (provider == channel_prividers_.end())
+				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
+				if (provider == player_providers_.end())
 					return;
-				channel_prividers_.erase(provider);
+				player_providers_.erase(provider);
 			}
 
-			void AddPreview(std::shared_ptr<Preview::InputPreview>& preview)
+			void AddPreview(Preview::InputPreview& preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				previews_.push_back(preview);
 			}
 
-			void RemovePreview(std::shared_ptr<Preview::InputPreview>& preview)
+			void RemovePreview(const Preview::InputPreview& preview)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				previews_.erase(std::remove(previews_.begin(), previews_.end(), preview), previews_.end());
+				auto item = std::find_if(previews_.begin(), previews_.end(), [&](const std::reference_wrapper<Preview::InputPreview>& p) { return &p.get() == &preview; });
+				if (item == previews_.end())
+					return;
+				previews_.erase(item);
 			}
 
 			int GetWidth() const
@@ -184,10 +190,10 @@ namespace TVPlayR {
 				return audio_channels_count_;
 			}
 
-			FFmpeg::AVSync PullSync(const Core::Channel& channel, int audio_samples_count)
+			FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count)
 			{
-				auto provider = std::find_if(channel_prividers_.begin(), channel_prividers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Channel() == &channel; });
-				if (provider == channel_prividers_.end())
+				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
+				if (provider == player_providers_.end())
 					return FFmpeg::AVSync();
 				return (*provider)->PullSync(audio_samples_count);
 			}
@@ -205,13 +211,13 @@ namespace TVPlayR {
 		
 		DecklinkInput::~DecklinkInput()	{ }
 		
-		FFmpeg::AVSync DecklinkInput::PullSync(const Core::Channel& channel, int audio_samples_count) { return impl_->PullSync(channel, audio_samples_count); }
+		FFmpeg::AVSync DecklinkInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(player, audio_samples_count); }
 
-		bool DecklinkInput::IsAddedToChannel(const Core::Channel& channel) { return impl_->IsAddedToChannel(channel); }
-		void DecklinkInput::AddToChannel(const Core::Channel& channel) { impl_->AddToChannel(channel); }
-		void DecklinkInput::RemoveFromChannel(const Core::Channel& channel) { impl_->RemoveFromChannel(channel); }
-		void DecklinkInput::AddPreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->AddPreview(preview); }
-		void DecklinkInput::RemovePreview(std::shared_ptr<Preview::InputPreview> preview) { impl_->RemovePreview(preview); }
+		bool DecklinkInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
+		void DecklinkInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
+		void DecklinkInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player); }
+		void DecklinkInput::AddPreview(Preview::InputPreview& preview) { impl_->AddPreview(preview); }
+		void DecklinkInput::RemovePreview(Preview::InputPreview& preview) { impl_->RemovePreview(preview); }
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }

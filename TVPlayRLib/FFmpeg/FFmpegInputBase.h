@@ -1,7 +1,6 @@
 #pragma once
 
 #include "InputFormat.h"
-#include "../Common/NonCopyable.h"
 
 namespace TVPlayR {
 	enum class FieldOrder;
@@ -13,8 +12,6 @@ namespace TVPlayR {
 	namespace FFmpeg {
 		class Decoder;
 		
-		namespace internal {
-
 struct FFmpegInputBase : Common::NonCopyable
 {
 protected:
@@ -30,9 +27,9 @@ public:
 	bool IsStream() const;
 	int StreamCount() const;
 	const Core::StreamInfo& GetStreamInfo(int index) const;
-	int64_t GetAudioDuration();
-	int64_t GetVideoStart() const;
-	int64_t GetVideoDuration() const;
+	std::int64_t GetAudioDuration();
+	std::int64_t GetVideoStart() const;
+	std::int64_t GetVideoDuration() const;
 	AVRational GetTimeBase() const;
 	AVRational GetFrameRate() const;
 	int GetWidth() const;
@@ -42,4 +39,4 @@ public:
 	int GetAudioChannelCount() const;
 };
 
-}}}
+}}

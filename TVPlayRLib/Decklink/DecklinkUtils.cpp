@@ -1,13 +1,15 @@
 #include "../pch.h"
 #include "DecklinkUtils.h"
+#include "../PixelFormat.h"
 #include "../FieldOrder.h"
+#include "../Core/VideoFormat.h"
 #include "../DecklinkTimecodeSource.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {
 
-		BMDPixelFormat BMDPixelFormatFromVideoFormat(TVPlayR::PixelFormat format)
+		BMDPixelFormat BMDPixelFormatFromPixelFormat(TVPlayR::PixelFormat format)
 		{
 			switch (format)
 			{
@@ -114,12 +116,24 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, AVSampleFormat sample_format, BMDTimeScale sample_rate)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate)
 		{
 			void* audio_bytes = nullptr;
 			if (!audio_packet || FAILED(audio_packet->GetBytes(&audio_bytes)) || !audio_bytes)
 				return nullptr;
 			std::shared_ptr<AVFrame> audio = FFmpeg::AllocFrame();
+			switch (sample_type)
+			{
+			case BMDAudioSampleType::bmdAudioSampleType16bitInteger:
+				audio->format = AVSampleFormat::AV_SAMPLE_FMT_S16;
+				break;
+			case BMDAudioSampleType::bmdAudioSampleType32bitInteger:
+				audio->format = AVSampleFormat::AV_SAMPLE_FMT_S32;
+				break;
+			default:
+				THROW_EXCEPTION("Invalid input sample type")
+			}
+			audio->sample_rate = BMDAudioSampleRate::bmdAudioSampleRate48kHz;
 			audio->format = AV_SAMPLE_FMT_S32;
 			audio->nb_samples = audio_packet->GetSampleFrameCount();
 			BMDTimeValue packetTime;
@@ -132,19 +146,19 @@ namespace TVPlayR {
 			return audio;
 		}
 
-		int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
+		std::int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
 		{
 			CComPtr<IDeckLinkTimecode> timecode;
 			if (video_frame && SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
 			{
 				unsigned char hours, minutes, seconds, frames;
 				if (timecode && SUCCEEDED(timecode->GetComponents(&hours, &minutes, &seconds, &frames)))
-					return ((((hours * 60LL) + minutes) * 60LL) + seconds) * AV_TIME_BASE + av_rescale(static_cast<int64_t>(frames) * AV_TIME_BASE, frame_rate.Denominator(), frame_rate.Numerator());
+					return ((((hours * 60LL) + minutes) * 60LL) + seconds) * AV_TIME_BASE + av_rescale(static_cast<std::int64_t>(frames) * AV_TIME_BASE, frame_rate.Denominator(), frame_rate.Numerator());
 			}
 			return AV_NOPTS_VALUE;
 		}
 
-		int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
+		std::int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
 		{
 			switch (timecode_source)
 			{

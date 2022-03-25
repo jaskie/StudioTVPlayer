@@ -1,22 +1,20 @@
 #pragma once
-#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		class AVSync
+		struct AVSync
 		{
-		public:
-			AVSync(std::shared_ptr<AVFrame> audio, std::shared_ptr<AVFrame> video, int64_t time)
+			AVSync(std::shared_ptr<AVFrame> audio, std::shared_ptr<AVFrame> video, std::int64_t timecode)
 				: Audio(audio)
 				, Video(video)
-				, Timecode(time)
+				, Timecode(timecode)
 			{ }
 			AVSync() : AVSync(nullptr, nullptr, 0LL) {}
 			AVSync(AVSync&& other) = default;
 			AVSync(const AVSync& other) = default;
 			std::shared_ptr<AVFrame> Audio;
 			std::shared_ptr<AVFrame> Video;
-			int64_t Timecode;
+			std::int64_t Timecode;
 			AVSync operator=(AVSync&& other) noexcept
 			{
 				if (&other == this)

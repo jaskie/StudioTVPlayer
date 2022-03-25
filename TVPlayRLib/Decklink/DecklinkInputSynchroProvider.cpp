@@ -1,39 +1,47 @@
 #include "../pch.h"
 #include "DecklinkInputSynchroProvider.h"
+#include "../DecklinkTimecodeSource.h"
 #include "DecklinkUtils.h"
-#include "../Core/Channel.h"
+#include "../Core/Player.h"
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
-
+#include "../FFmpeg/PlayerScaler.h"
 
 namespace TVPlayR {
 	namespace Decklink {
-		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Channel& channel, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video)
-			: channel_(channel)
-			, audio_fifo_(channel.AudioSampleFormat(), channel.AudioChannelsCount(), channel.AudioSampleRate(), av_make_q(1, channel.AudioSampleRate()), 0LL, AV_TIME_BASE/10)
+		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Player& player, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video, int audio_channels)
+			: player_(player)
+			, audio_fifo_(player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), av_make_q(1, player.AudioSampleRate()), 0LL, AV_TIME_BASE/10)
 			, process_video_(process_video)
-			, input_frame_rate_(channel.Format().FrameRate().av())
+			, input_frame_rate_(player.Format().FrameRate().av())
 			, frame_queue_(2)
-			, last_video_(AV_NOPTS_VALUE, FFmpeg::CreateEmptyVideoFrame(channel.Format(), channel.PixelFormat()))
-			, executor_("Input provider for " + channel.Name())
+			, last_video_(AV_NOPTS_VALUE, FFmpeg::CreateEmptyVideoFrame(player.Format(), player.PixelFormat()))
+			, audio_resampler_(audio_channels, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32, player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat())
+			, executor_("Input provider for " + player.Name())
 		{
 		}
 
-		const Core::Channel& DecklinkInputSynchroProvider::Channel() const { return channel_; }
+		DecklinkInputSynchroProvider::~DecklinkInputSynchroProvider()
+		{
+		}
 
-		void DecklinkInputSynchroProvider::Push(const std::shared_ptr<AVFrame>& video, const std::shared_ptr<AVFrame>& audio, int64_t timecode)
+		const Core::Player& DecklinkInputSynchroProvider::Player() const { return player_; }
+
+		void DecklinkInputSynchroProvider::Push(FFmpeg::AVSync& sync)
 		{
 			executor_.begin_invoke([=] {
-				if (process_video_ && video)
+				if (process_video_ && sync.Video)
 				{
 					if (!scaler_)
-						scaler_ = std::make_unique<FFmpeg::ChannelScaler>(channel_);
-					scaler_->Push(video, input_frame_rate_, av_inv_q(input_frame_rate_));
+						scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_);
+					scaler_->Push(sync.Video, input_frame_rate_, av_inv_q(input_frame_rate_));
 					while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
-						frame_queue_.try_add(queue_item_t(timecode, received_video));
+						frame_queue_.try_add(queue_item_t(sync.Timecode, received_video));
 				}
-				if (audio)
-					audio_fifo_.TryPush(audio);
+				if (sync.Audio)
+				{
+					audio_fifo_.TryPush(audio_resampler_.Resample(sync.Audio));
+				}
 			});
 		}
 

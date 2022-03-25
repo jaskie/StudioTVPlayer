@@ -8,7 +8,7 @@ class ThumbnailFilter final : public VideoFilterBase
 {
 public:
 	ThumbnailFilter(int width, int height, std::shared_ptr<AVFrame> frame);
-	virtual std::shared_ptr<AVFrame> Pull() override;
+	std::shared_ptr<AVFrame> Pull() override;
 private:
 	const std::shared_ptr<AVFrame> input_frame_;
 	std::shared_ptr<AVFrame> result_frame_;

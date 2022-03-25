@@ -1,11 +1,13 @@
 #pragma once
 
 #include "OutputBase.h"
-#include "Ndi/NdiOutput.h"
 
 using namespace System;
 
 namespace TVPlayR {
+	namespace Ndi {
+		class NdiOutput;
+	}
 
 	public ref class NdiOutput sealed : public OutputBase
 	{
@@ -25,8 +27,10 @@ namespace TVPlayR {
 		{
 			String^ get() { return _groupNames; }
 		}
+		virtual void AddOverlay(OverlayBase^ overlay) override;
+		virtual void RemoveOverlay(OverlayBase^ overlay) override;
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override { return _ndi == nullptr ? nullptr : *_ndi; }
+		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
 	};
 
 }

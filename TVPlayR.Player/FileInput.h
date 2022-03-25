@@ -1,8 +1,5 @@
 #pragma once
-#include "FFmpeg/FFmpegInput.h"
 #include "HardwareAcceleration.h"
-#include "FieldOrder.h"
-#include "Rational.h"
 #include "InputBase.h"
 
 using namespace System;
@@ -11,6 +8,12 @@ using namespace System::Windows::Media::Imaging;
 using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
+
+	value class Rational;
+	enum class FieldOrder;
+	namespace FFmpeg {
+		class FFmpegInput;
+	}
 
 	public ref class FileInput : public InputBase
 	{
@@ -22,28 +25,22 @@ namespace TVPlayR {
 		bool Seek(TimeSpan time);
 		void Play();
 		void Pause();
-		property TimeSpan AudioDuration { TimeSpan get() { return TimeSpan(GetFFmpegInput()->GetAudioDuration() * 10); } }
-		property TimeSpan VideoDuration { TimeSpan get() { return TimeSpan(GetFFmpegInput()->GetVideoDuration() * 10); } }
-		property TimeSpan VideoStart { TimeSpan get() { return TimeSpan(GetFFmpegInput()->GetVideoStart() * 10); } }
+		property TimeSpan AudioDuration { TimeSpan get(); }
+		property TimeSpan VideoDuration { TimeSpan get(); }
+		property TimeSpan VideoStart { TimeSpan get(); }
 		property String^ FileName { String^ get() { return _fileName; } }
-		property int Width { int get() { return GetFFmpegInput()->GetWidth(); } }
-		property int Height { int get() { return GetFFmpegInput()->GetHeight(); } }
-		property bool IsPlaying { bool get() { return GetFFmpegInput()->IsPlaying(); } }
-		property bool IsEof { bool get() { return GetFFmpegInput()->IsEof(); } }
-		property TVPlayR::FieldOrder FieldOrder { TVPlayR::FieldOrder get() { return static_cast<TVPlayR::FieldOrder>(GetFFmpegInput()->GetFieldOrder()); } }
-		property TVPlayR::Rational FrameRate { TVPlayR::Rational get() { return TVPlayR::Rational(GetFFmpegInput()->GetFrameRate()); } }
-		property int AudioChannelCount { int get() { return GetFFmpegInput()->GetAudioChannelCount(); }}
-		property bool HaveAlphaChannel { bool get() { return GetFFmpegInput()->HaveAlphaChannel(); }}
+		property int Width { int get(); }
+		property int Height { int get(); }
+		property bool IsPlaying { bool get(); }
+		property bool IsEof { bool get(); }
+		property TVPlayR::FieldOrder FieldOrder { TVPlayR::FieldOrder get(); }
+		property TVPlayR::Rational FrameRate { TVPlayR::Rational get(); }
+		property int AudioChannelCount { int get(); }
+		property bool HaveAlphaChannel { bool get(); }
 		property bool IsLoop 
 		{
 			bool get() { return _isLoop; }
-			void set(bool isLoop)
-			{
-				if (isLoop == _isLoop)
-					return;
-				GetFFmpegInput()->SetIsLoop(isLoop);
-				_isLoop = isLoop;
-			}
+			void set(bool isLoop);
 		}
 		event EventHandler^ Stopped;
 
@@ -57,7 +54,7 @@ namespace TVPlayR {
 		StoppedDelegate^ _stoppedDelegate;
 		GCHandle _stoppedHandle;
 		void StoppedCallback();
-		std::shared_ptr<FFmpeg::FFmpegInput> GetFFmpegInput() { return std::dynamic_pointer_cast<FFmpeg::FFmpegInput>(InputBase::GetNativeSource()); }
+		std::shared_ptr<FFmpeg::FFmpegInput> GetFFmpegInput();
 	protected:
 		virtual String^ GetName() override { return _fileName; }
 	};

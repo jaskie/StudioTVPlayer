@@ -1,8 +1,11 @@
 #pragma once
 #include "../Common/NonCopyable.h"
-#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
+	namespace FFmpeg {
+		struct AVSync;
+	}
+
 	namespace Core {
 
 class OverlayBase : public Common::NonCopyable

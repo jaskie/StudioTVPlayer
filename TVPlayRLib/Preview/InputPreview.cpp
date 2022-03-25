@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "InputPreview.h"
 #include "../FFmpeg/SwScale.h"
-#include "../Common/Executor.h"
+#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
 	namespace Preview {
@@ -11,8 +11,9 @@ namespace TVPlayR {
 			const int output_width_;
 			const int output_height_;
 			std::shared_ptr<FFmpeg::SwScale> preview_scaler_;
-			Common::Executor executor_;
 			FRAME_PLAYED_CALLBACK frame_played_callback_ = nullptr;
+			Common::Executor executor_;
+
 			implementation(int output_width, int output_height)
 				: output_width_(output_width)
 				, output_height_(output_height)
@@ -56,6 +57,6 @@ namespace TVPlayR {
 			impl_->SetFramePlayedCallback(frame_played_callback);
 		}
 		
-		void InputPreview::Push(std::shared_ptr<AVFrame> video) { impl_->Push(video); }
+		void InputPreview::Push(FFmpeg::AVSync& sync) { impl_->Push(sync.Video); }
 	}
 }

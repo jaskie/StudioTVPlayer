@@ -7,16 +7,20 @@ namespace StudioTVPlayer.ViewModel.Configuration
     public abstract class OutputViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
         private bool _isFrameClock;
+        private bool _timecodeOverlay;
 
         public OutputViewModelBase(OutputBase output)
         {
             Output = output;
             _isFrameClock = output.IsFrameClock;
+            _timecodeOverlay = output.TimecodeOverlay;
         }
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 
         public bool IsFrameClock { get => _isFrameClock; set => Set(ref _isFrameClock, value); }
+
+        public bool TimecodeOverlay { get => _timecodeOverlay; set => Set(ref _timecodeOverlay, value); }
 
         public string Error => string.Empty;
 
@@ -29,6 +33,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (!IsModified)
                 return;
             Output.IsFrameClock = _isFrameClock;
+            Output.TimecodeOverlay = _timecodeOverlay;
         }
 
         protected virtual string ReadErrorInfo(string propertyName)

@@ -52,8 +52,8 @@
                 </Style>
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type playerViewModels:MediaPlayerViewModel}">
-                    <playerViews:MediaPlayerView />
+                <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">
+                    <playerViews:PlayerView />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListBox>

@@ -1,0 +1,120 @@
+﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.PlayerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:local="clr-namespace:StudioTVPlayer.View.Configuration"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:PlayerViewModel}"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <GroupBox Header="Player properties">
+                <Grid Margin="0 0 0 5" >
+                    <Grid.Resources>
+                        <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}"/>
+                        <Style TargetType="CheckBox" BasedOn="{StaticResource ConfigurationCheckBoxStyle}"/>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Column="0" Grid.Row="0">Player name</Label>
+                    <TextBox Grid.Column="0" Grid.Row="1" Margin="5 0" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                    <Label Grid.Column="1" Grid.Row="0">Video format</Label>
+                    <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding SelectedVideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name" />
+                    <Label Grid.Column="0" Grid.Row="2">Pixel format</Label>
+                    <ComboBox Grid.Column="0" Grid.Row="3" ItemsSource="{Binding PixelFormats}" SelectedItem="{Binding SelectedPixelFormat}"/>
+                    <CheckBox Grid.Column="1" Grid.Row="3" IsChecked="{Binding LivePreview}" >
+                        <CheckBox.ToolTip>
+                            <TextBlock>
+                            Shows playing output in application.<LineBreak/>
+                            This consumes extra CPU processing power.
+                            </TextBlock>
+                        </CheckBox.ToolTip>
+                        Live preview
+                    </CheckBox>
+                    <CheckBox Grid.Column="1" Grid.Row="4" IsChecked="{Binding DisablePlayedItems}">Disable rundown items that were played</CheckBox>
+                    <CheckBox Grid.Column="1" Grid.Row="5" IsChecked="{Binding AddItemsWithAutoPlay}">Add rundown items with auto-play enabled</CheckBox>
+                    <Label Grid.Column="0" Grid.Row="4">Player clock source</Label>
+                    <ComboBox Grid.Column="0" Grid.Row="5" ItemsSource="{Binding Outputs}" SelectedItem="{Binding FrameClockSource, ValidatesOnDataErrors=True}" >
+                        <ComboBox.Resources>
+                            <DataTemplate DataType="{x:Type vm:DecklinkOutputViewModel}">
+                                <TextBlock Text="{Binding SelectedDevice.DisplayName, StringFormat={}Blackmagic {0:s}}"/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:NdiOutputViewModel}">
+                                <TextBlock Text="{Binding SourceName, StringFormat={}NDI: {0}}"/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:FFOutputViewModel}">
+                                <TextBlock Text="{Binding Url, StringFormat={}FFmpeg: {0}}"/>
+                            </DataTemplate>
+                        </ComboBox.Resources>
+                    </ComboBox>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Outputs">
+                <StackPanel>
+                    <ListBox ItemsSource="{Binding Outputs}" Grid.IsSharedSizeScope="True" Margin="5" BorderThickness="1 1 1 0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}">
+                                <Style.Triggers>
+                                    <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                        <Setter Property="Grid.Background" Value="{DynamicResource MahApps.Brushes.ThemeBackground}"></Setter>
+                                    </Trigger>
+                                    <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                        <Setter Property="Grid.Background" Value="{DynamicResource MahApps.Brushes.Gray8}"></Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                                <Setter Property="BorderThickness" Value="0 0 0 1"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Separator}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ListBox.Resources>
+                            <DataTemplate DataType="{x:Type vm:DecklinkOutputViewModel}">
+                                <local:DecklinkOutputView/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:NdiOutputViewModel}">
+                                <local:NdiOutputView/>
+                            </DataTemplate>
+                            <DataTemplate DataType="{x:Type vm:FFOutputViewModel}">
+                                <local:StreamOutputView/>
+                            </DataTemplate>
+                        </ListBox.Resources>
+                    </ListBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Margin="10" Command="{Binding AddDecklinkOutputCommand}" >
+                            <StackPanel Orientation="Horizontal">
+                                <mah:FontIcon Glyph="&#xE710;" />
+                                <Label FontSize="16" FontWeight="Normal">Add decklink output</Label>
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="10" Command="{Binding AddNdiOutputCommand}" >
+                            <StackPanel Orientation="Horizontal">
+                                <mah:FontIcon Glyph="&#xE710;" />
+                                <Label FontSize="16" FontWeight="Normal">Add NDI output</Label>
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="10" Command="{Binding AddStreamOutputCommand}" >
+                            <StackPanel Orientation="Horizontal">
+                                <mah:FontIcon Glyph="&#xE710;" />
+                                <Label FontSize="16" FontWeight="Normal">Add FFmpeg stream output</Label>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

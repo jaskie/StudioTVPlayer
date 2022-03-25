@@ -30,7 +30,6 @@
 #include <future>
 #include <thread>
 #include <atomic>
-#include "Decklink/DeckLinkAPI_h.h"
 
 extern "C"
 {
@@ -48,9 +47,19 @@ extern "C"
 #include "libavutil/samplefmt.h"
 #include "libavutil/audio_fifo.h"
 #include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
 #include "libavutil/timecode.h"
 #include "libavutil/imgutils.h"
 #include "Processing.NDI.Lib.h"
 }
+
+#include "Decklink/DeckLinkAPI_h.h"
+#include "Common/Exceptions.h"
+#include "Common/NonCopyable.h"
+#include "Common/Semaphore.h"
+#include "Common/BlockingCollection.h"
+#include "Common/Executor.h"
+#include "Common/Rational.h"
+#include "Common/Debug.h"
 
 #endif //PCH_H

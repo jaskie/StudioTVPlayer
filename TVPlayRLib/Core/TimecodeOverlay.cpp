@@ -1,6 +1,7 @@
 #include "../pch.h"
-#include <gdiplus.h>
 #include "TimecodeOverlay.h"
+#include <gdiplus.h>
+#include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/SwScale.h"
 #include "VideoFormat.h"
 #include "../PixelFormat.h"
@@ -42,7 +43,7 @@ namespace TVPlayR {
 				, background_rect_(GetBackgroundRect())
 				, background_(Gdiplus::Color(150, 16, 16, 16))
 				, foreground_(Gdiplus::Color(255, 232, 232, 232))
-				, font_(L"Tahoma", static_cast<Gdiplus::REAL>(video_format_.height() / 9), Gdiplus::FontStyle::FontStyleBold)
+				, font_(L"Tahoma", static_cast<Gdiplus::REAL>(video_format_.height() / 7), Gdiplus::FontStyle::FontStyleBold, Gdiplus::Unit::UnitPixel)
 				, timecode_position_(background_rect_.Width / (scale_x_ * 2), static_cast<Gdiplus::REAL>(background_rect_.Height * 21 / 40))
 				, scale_x_(static_cast<float>(video_format_.SampleAspectRatio().Denominator()) / video_format_.SampleAspectRatio().Numerator())
 			{
@@ -74,7 +75,7 @@ namespace TVPlayR {
 				return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Timecode);
 			}
 
-			void Draw(std::shared_ptr<AVFrame>& video, int64_t time)
+			void Draw(std::shared_ptr<AVFrame>& video, std::int64_t time)
 			{
 				Gdiplus::Bitmap frame_bitmap(video->width, video->height, video->linesize[0], PixelFormat32bppARGB, video->data[0]);
 				Gdiplus::Graphics frame_graphics(&frame_bitmap);

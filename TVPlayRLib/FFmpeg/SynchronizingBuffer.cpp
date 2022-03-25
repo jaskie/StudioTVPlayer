@@ -2,27 +2,28 @@
 #include "SynchronizingBuffer.h"
 #include "AVSync.h"
 #include "AudioFifo.h"
-#include "../Core/Channel.h"
-#include "../Common/Debug.h"
+#include "../Core/Player.h"
+#include "../Core/VideoFormat.h"
 #include "FFmpegUtils.h"
+
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync)
-		: Common::DebugTarget(false, "SynchronizingBuffer " + channel->Name())
-		, video_format_(channel->Format().type())
-		, video_frame_rate_(channel->Format().FrameRate().av())
-		, sample_rate_(channel->AudioSampleRate())
+	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync)
+		: Common::DebugTarget(false, "SynchronizingBuffer " + player->Name())
+		, video_format_(player->Format().type())
+		, video_frame_rate_(player->Format().FrameRate().av())
+		, sample_rate_(player->AudioSampleRate())
 		, audio_time_base_(av_make_q(1, sample_rate_))
-		, audio_channel_count_(channel->AudioChannelsCount())
+		, audio_channel_count_(player->AudioChannelsCount())
 		, have_video_(true)
-		, have_audio_(channel->AudioChannelsCount() > 0)
+		, have_audio_(player->AudioChannelsCount() > 0)
 		, is_playing_(is_playing)
 		, video_queue_size_(av_rescale(duration, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 		, sync_(initial_sync)
 		, is_flushed_(false)
-		, audio_sample_format_(channel->AudioSampleFormat())
+		, audio_sample_format_(player->AudioSampleFormat())
 		, audio_fifo_size_(static_cast<int>(av_rescale(duration, sample_rate_, AV_TIME_BASE)))
 		, duration_(duration)
 	{
@@ -94,10 +95,10 @@ namespace TVPlayR {
 			return true;
 		return video_queue_.size() >= video_queue_size_
 			&& (!fifo_ || fifo_->SamplesCount() > audio_fifo_size_);
-		/*int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
-		int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, video_time_base_);
-		int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
-		int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
+		/*std::int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, video_time_base_);
+		std::int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, video_time_base_);
+		std::int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
+		std::int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
 		return max_video - min_video >= duration_ &&
 					(!fifo_ || max_audio - min_audio >= duration_);*/
 	}
@@ -117,7 +118,7 @@ namespace TVPlayR {
 		DebugPrintLine(is_playing ? "Playing" : "Paused");
 	}
 	
-	void SynchronizingBuffer::Seek(int64_t time) 
+	void SynchronizingBuffer::Seek(std::int64_t time) 
 	{ 
 		if (fifo_)
 			fifo_->Reset(time);
@@ -141,7 +142,7 @@ namespace TVPlayR {
 		fifo_.reset();
 	}
 	
-	void SynchronizingBuffer::SetSynchro(int64_t time) 
+	void SynchronizingBuffer::SetSynchro(std::int64_t time) 
 	{ 
 		sync_ = time;
 		DebugPrintLine(("Sync set to: " + std::to_string(time / 1000)));
@@ -162,10 +163,10 @@ namespace TVPlayR {
 	void SynchronizingBuffer::Sweep()
 	{
 		return;
-		/*int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, input_video_time_base_);
-		int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, input_video_time_base_);
-		int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
-		int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
+		/*std::int64_t min_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.front()->pts, input_video_time_base_);
+		std::int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, input_video_time_base_);
+		std::int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
+		std::int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
 		if (min_audio == AV_NOPTS_VALUE)
 			while (video_queue_.size() > av_rescale(2 * duration_, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 				video_queue_.pop_front();

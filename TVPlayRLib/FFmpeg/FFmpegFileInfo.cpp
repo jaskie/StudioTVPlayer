@@ -6,12 +6,11 @@
 #include "../FieldOrder.h"
 #include "../Core/AudioChannelMapEntry.h"
 #include "../Core/StreamInfo.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-struct FFmpegFileInfo::implementation : internal::FFmpegInputBase
+struct FFmpegFileInfo::implementation : FFmpegInputBase
 {
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
@@ -21,7 +20,7 @@ struct FFmpegFileInfo::implementation : internal::FFmpegInputBase
 		InitializeVideoDecoder();
 	}
 
-	std::shared_ptr<AVFrame> GetFrameAt(int64_t time)
+	std::shared_ptr<AVFrame> GetFrameAt(std::int64_t time)
 	{
 		if (!input_.IsValid())
 			return nullptr;
@@ -55,10 +54,10 @@ FFmpegFileInfo::FFmpegFileInfo(const std::string & file_name, Core::HwAccel acce
 { }
 
 FFmpegFileInfo::~FFmpegFileInfo() {}
-std::shared_ptr<AVFrame> FFmpegFileInfo::GetFrameAt(int64_t time)		{ return impl_->GetFrameAt(time); }
-int64_t FFmpegFileInfo::GetAudioDuration() const						{ return impl_->GetAudioDuration(); }
-int64_t FFmpegFileInfo::GetVideoStart() const							{ return impl_->GetVideoStart(); }
-int64_t FFmpegFileInfo::GetVideoDuration() const						{ return impl_->GetVideoDuration(); }
+std::shared_ptr<AVFrame> FFmpegFileInfo::GetFrameAt(std::int64_t time)		{ return impl_->GetFrameAt(time); }
+std::int64_t FFmpegFileInfo::GetAudioDuration() const						{ return impl_->GetAudioDuration(); }
+std::int64_t FFmpegFileInfo::GetVideoStart() const							{ return impl_->GetVideoStart(); }
+std::int64_t FFmpegFileInfo::GetVideoDuration() const						{ return impl_->GetVideoDuration(); }
 AVRational FFmpegFileInfo::GetTimeBase() const							{ return impl_->GetTimeBase(); }
 AVRational FFmpegFileInfo::GetFrameRate() const							{ return impl_->GetFrameRate(); }
 int FFmpegFileInfo::GetWidth() const									{ return impl_->GetWidth(); }

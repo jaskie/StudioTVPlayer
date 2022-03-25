@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "InputPreview.h"
+#include "Preview/InputPreview.h"
 
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
@@ -7,7 +8,7 @@ using namespace System::Threading;
 namespace TVPlayR
 {
     InputPreview::InputPreview(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height)
-        : _preview(new std::shared_ptr<Preview::InputPreview>(new Preview::InputPreview(width, height)))
+        : _preview(new Preview::InputPreview(width, height))
         , _ui_dispatcher(ui_dispatcher)
         , _draw_frame_action(gcnew Action(this, &InputPreview::DrawFrame))
         , _frame_played_semaphore(gcnew System::Threading::SemaphoreSlim(1))
@@ -17,7 +18,7 @@ namespace TVPlayR
         _framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
         IntPtr framePlayedIp = Marshal::GetFunctionPointerForDelegate(_framePlayedDelegate);
         _target = gcnew WriteableBitmap(width, height, 96, 96, Windows::Media::PixelFormats::Pbgra32, nullptr);
-        (*_preview)->SetFramePlayedCallback(static_cast<Preview::InputPreview::FRAME_PLAYED_CALLBACK>(framePlayedIp.ToPointer()));
+        _preview->SetFramePlayedCallback(static_cast<Preview::InputPreview::FRAME_PLAYED_CALLBACK>(framePlayedIp.ToPointer()));
     }
 
     InputPreview::~InputPreview()
@@ -81,5 +82,9 @@ namespace TVPlayR
         {
             target->Unlock();
         }
+    }
+    Preview::InputPreview& InputPreview::GetNative()
+    {
+        return *_preview;
     }
 }

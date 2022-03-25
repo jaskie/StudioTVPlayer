@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Exceptions.h"
-#include "BlockingCollection.h"
-
 namespace TVPlayR {
     namespace Common {
 
@@ -34,21 +31,17 @@ namespace TVPlayR {
     {
     private:
         Executor(const Executor&);
-
-        const std::string name_;
-        std::atomic_bool  is_running_ = true;
         BlockingCollection<std::function<void()>>  queue_;
+        std::atomic_bool  is_running_ = true;
         std::thread       thread_;
 
     public:
         Executor(const std::string& name)
-            : thread_(&Executor::run, this)
-            , name_(name)
+            : thread_(&Executor::run, this, name)
         { }
 
         Executor(const std::string& name, size_t max_queue_size)
-            : thread_(&Executor::run, this)
-            , name_(name)
+            : thread_(&Executor::run, this, name)
             , queue_(max_queue_size)
         { }
 
@@ -115,9 +108,9 @@ namespace TVPlayR {
         bool is_current() const { return std::this_thread::get_id() == thread_.get_id(); }
 
     private:
-        void run()
+        void run(std::string name)
         {
-            SetThreadName(::GetCurrentThreadId(), name_.c_str());
+            SetThreadName(::GetCurrentThreadId(), name.c_str());
             std::function<void()> task;
             while (is_running_) {
                 try {

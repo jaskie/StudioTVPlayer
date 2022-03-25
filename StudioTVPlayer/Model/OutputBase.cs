@@ -5,13 +5,28 @@ namespace StudioTVPlayer.Model
 {
     public abstract class OutputBase: IDisposable
     {
+        private TVPlayR.OverlayBase _overlay;
+        
         [XmlAttribute]
         public bool IsFrameClock { get; set; }
 
-        public abstract void Initialize();
+        [XmlAttribute]
+        public bool TimecodeOverlay { get; set; }
 
-        public abstract TVPlayR.OutputBase GetOutput();
+        public virtual void Initialize(TVPlayR.Player player) 
+        {
+            if (TimecodeOverlay)
+            {
+                _overlay = new TVPlayR.TimecodeOverlay(player.VideoFormat, player.PixelFormat);
+                Output.AddOverlay(_overlay);
+            }
+        }
 
-        public abstract void Dispose();
+        public abstract TVPlayR.OutputBase Output { get; }
+
+        public virtual void Dispose()
+        {
+            (_overlay as IDisposable)?.Dispose();
+        }
     }
 }

@@ -2,7 +2,6 @@
 #include "FFmpegUtils.h"
 #include "Decoder.h"
 #include "AudioFifo.h"
-#include "../Common/Debug.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -20,7 +19,7 @@ AVPixelFormat GetHwPixelFormat(AVCodecContext* ctx, const enum AVPixelFormat* pi
 
 struct Decoder::implementation : Common::DebugTarget
 {
-	const int64_t start_ts_;
+	const std::int64_t start_ts_;
 	const Core::HwAccel acceleration_;
 	const std::string hw_device_index_;
 	std::unique_ptr<AVBufferRef, void(*)(AVBufferRef*)> hw_device_ctx_;
@@ -34,11 +33,11 @@ struct Decoder::implementation : Common::DebugTarget
 	const AVRational time_base_;
 	AVStream* const stream_;
 	const AVMediaType media_type_;
-	int64_t seek_pts_;
-	const int64_t duration_;
+	std::int64_t seek_pts_;
+	const std::int64_t duration_;
 	std::mutex mutex_;
 
-	implementation(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
+	implementation(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
 		: Common::DebugTarget(false, "Decoder")
 		, ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
 		, start_ts_(stream ? stream->start_time : 0LL)
@@ -56,7 +55,7 @@ struct Decoder::implementation : Common::DebugTarget
 		, hw_device_ctx_(NULL, [](AVBufferRef* p) { av_buffer_unref(&p); })
 	{
 		if (!ctx_ || !stream || !codec)
-			return;
+			THROW_EXCEPTION("Codec context not created");
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_to_context(ctx_.get(), stream->codecpar));
 		if (acceleration != Core::HwAccel::none && codec && (codec->id == AV_CODEC_ID_H264 || codec->id == AV_CODEC_ID_HEVC))
 		{
@@ -194,7 +193,7 @@ struct Decoder::implementation : Common::DebugTarget
 		DebugPrintLine("Decoder flushed");
 	}
 
-	void Seek(const int64_t seek_time)
+	void Seek(const std::int64_t seek_time)
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		avcodec_flush_buffers(ctx_.get());
@@ -206,11 +205,11 @@ struct Decoder::implementation : Common::DebugTarget
 
 };
 
-Decoder::Decoder(const AVCodec* codec, AVStream* const stream, int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
+Decoder::Decoder(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
 	: impl_(std::make_unique<implementation>(codec, stream, seek_time, acceleration, hw_device_index))
 { }
 
-Decoder::Decoder(const AVCodec * codec, AVStream * const stream, int64_t seek_time)
+Decoder::Decoder(const AVCodec * codec, AVStream * const stream, std::int64_t seek_time)
 	: Decoder(codec, stream, seek_time, Core::HwAccel::none, "")
 { }
 
@@ -224,7 +223,7 @@ bool Decoder::IsFlushed() const { return impl_->is_flushed_; }
 
 void Decoder::Flush() { impl_->Flush(); }
 
-void Decoder::Seek(const int64_t seek_time) { impl_->Seek(seek_time); }
+void Decoder::Seek(const std::int64_t seek_time) { impl_->Seek(seek_time); }
 
 bool Decoder::IsEof() const { return impl_->is_eof_; }
 
@@ -234,7 +233,7 @@ int Decoder::AudioSampleRate() const { return impl_->sample_rate_; }
 
 int Decoder::StreamIndex() const { return impl_->stream_index_; }
 
-uint64_t Decoder::AudioChannelLayout() const { return impl_->ctx_ ? impl_->ctx_->channel_layout : 0ULL; }
+std::uint64_t Decoder::AudioChannelLayout() const { return impl_->ctx_ ? impl_->ctx_->channel_layout : 0ULL; }
 
 AVSampleFormat Decoder::AudioSampleFormat() const { return impl_->ctx_ ? impl_->ctx_->sample_fmt : AVSampleFormat::AV_SAMPLE_FMT_NONE; }
 

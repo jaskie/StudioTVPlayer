@@ -1,5 +1,4 @@
 #pragma once
-#include "Common/Exceptions.h"
 
 namespace TVPlayR {
 

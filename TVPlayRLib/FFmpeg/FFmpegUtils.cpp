@@ -2,18 +2,45 @@
 #include "FFmpegUtils.h"
 #include "../Core/VideoFormat.h"
 #include "../PixelFormat.h"
+#include "../FieldOrder.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
+
+
+		std::shared_ptr<AVPacket> AllocPacket()
+		{
+			return std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* p) { av_packet_free(&p); });
+		}
+
+		static void FreeFrame(AVFrame* f) { av_frame_free(&f); }
+
+		std::shared_ptr<AVFrame> AllocFrame()
+		{
+			return std::shared_ptr<AVFrame>(av_frame_alloc(), FreeFrame);
+		}
+
+		std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source)
+		{
+			AVFrame* frame = av_frame_alloc();
+			THROW_ON_FFMPEG_ERROR(av_frame_ref(frame, source.get()));
+			return std::shared_ptr<AVFrame>(frame, FreeFrame);
+		}
+
 		std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt)
 		{
-			auto frame = AllocFrame();
+			AVFrame* frame = av_frame_alloc();
+			if (!frame)
+				THROW_EXCEPTION("Frame not allocated");
 			frame->width = format.width();
 			frame->height = format.height();
 			frame->display_picture_number = -1;
 			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
-			frame->pict_type = AV_PICTURE_TYPE_I;
-			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
+			frame->pict_type = AV_PICTURE_TYPE_NONE;
+			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
+			frame->interlaced_frame = format.interlaced();
+			frame->top_field_first = format.field_order() == TVPlayR::FieldOrder::TopFieldFirst;
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
 			if (pix_fmt == TVPlayR::PixelFormat::bgra)
 			{
 				// to make transparent alpha
@@ -24,23 +51,25 @@ namespace TVPlayR {
 				ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };
 				THROW_ON_FFMPEG_ERROR(av_image_fill_black(frame->data, linesize, static_cast<AVPixelFormat>(frame->format), AVColorRange::AVCOL_RANGE_MPEG, frame->width, frame->height));
 			}
-			return frame;
+			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
 		std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format)
 		{
-			if (samples_count < 0)
-				samples_count = 0;
+			if (samples_count <= 0)
+				return nullptr;
 			assert(num_channels <= 63);
-			auto frame = AllocFrame();
+			AVFrame* frame = av_frame_alloc();
+			if (!frame)
+				THROW_EXCEPTION("Frame not allocated");
 			frame->format = format;
 			frame->channels = num_channels;
 			frame->channel_layout = 0x7FFFFFFFFFFFFFFFULL >> (63 - num_channels);
 			frame->nb_samples = samples_count;
 			frame->sample_rate = 48000;
-			av_frame_get_buffer(frame.get(), 0);
-			av_samples_set_silence(frame->data, 0, frame->nb_samples, frame->channels, static_cast<AVSampleFormat>(frame->format));
-			return frame;
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
+			THROW_ON_FFMPEG_ERROR(av_samples_set_silence(frame->data, 0, frame->nb_samples, frame->channels, static_cast<AVSampleFormat>(frame->format)));
+			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
 		void DumpFilter(const std::string& filter_str, AVFilterGraph* graph)
@@ -62,34 +91,21 @@ namespace TVPlayR {
 			case AV_PIX_FMT_ABGR:
 			case AV_PIX_FMT_BGRA:
 			case AV_PIX_FMT_YA8:
-			case AV_PIX_FMT_YA16BE:
-			case AV_PIX_FMT_YA16LE:
-			case AV_PIX_FMT_GBRAPF32BE:
-			case AV_PIX_FMT_GBRAPF32LE:
+			case AV_PIX_FMT_YA16:
+			case AV_PIX_FMT_GBRAPF32:
 			case AV_PIX_FMT_YUVA422P:
 			case AV_PIX_FMT_YUVA444P:
-			case AV_PIX_FMT_YUVA420P9LE:
-			case AV_PIX_FMT_YUVA420P9BE:
-			case AV_PIX_FMT_YUVA422P9BE:
-			case AV_PIX_FMT_YUVA422P9LE:
-			case AV_PIX_FMT_YUVA444P9BE:
-			case AV_PIX_FMT_YUVA444P9LE:
-			case AV_PIX_FMT_YUVA420P10BE:
-			case AV_PIX_FMT_YUVA420P10LE:
-			case AV_PIX_FMT_YUVA422P10BE:
-			case AV_PIX_FMT_YUVA422P10LE:
-			case AV_PIX_FMT_YUVA444P10BE:
-			case AV_PIX_FMT_YUVA444P10LE:
-			case AV_PIX_FMT_YUVA420P16BE:
-			case AV_PIX_FMT_YUVA420P16LE:
-			case AV_PIX_FMT_YUVA422P16BE:
-			case AV_PIX_FMT_YUVA422P16LE:
-			case AV_PIX_FMT_YUVA444P16BE:
-			case AV_PIX_FMT_YUVA444P16LE:
-			case AV_PIX_FMT_YUVA422P12BE:
-			case AV_PIX_FMT_YUVA422P12LE:
-			case AV_PIX_FMT_YUVA444P12BE:
-			case AV_PIX_FMT_YUVA444P12LE:
+			case AV_PIX_FMT_YUVA420P9:
+			case AV_PIX_FMT_YUVA422P9:
+			case AV_PIX_FMT_YUVA444P9:
+			case AV_PIX_FMT_YUVA420P10:
+			case AV_PIX_FMT_YUVA422P10:
+			case AV_PIX_FMT_YUVA444P10:
+			case AV_PIX_FMT_YUVA420P16:
+			case AV_PIX_FMT_YUVA422P16:
+			case AV_PIX_FMT_YUVA444P16:
+			case AV_PIX_FMT_YUVA422P12:
+			case AV_PIX_FMT_YUVA444P12:
 				return true;
 			default:
 				return false;

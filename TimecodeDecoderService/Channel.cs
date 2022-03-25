@@ -14,7 +14,7 @@ namespace TimecodeDecoderService
     public class Channel: IDisposable
     {
 
-        private TVPlayR.Channel _channel;
+        private TVPlayR.Player _player;
         private TVPlayR.DecklinkInput _decklinkInput;
         private TVPlayR.DecklinkOutput _decklinkOutput;
         private TVPlayR.TimecodeOverlay _timecodeOverlay;
@@ -38,15 +38,15 @@ namespace TimecodeDecoderService
         {
             if (!(_decklinkOutput is null))
             {
-                _channel.RemoveOutput(_decklinkOutput);
+                _player.RemoveOutput(_decklinkOutput);
                 _decklinkOutput.Dispose();
                 _decklinkOutput = null;
             }
-            if (!(_channel is null))
+            if (!(_player is null))
             {
-                _channel.Clear();
-                _channel?.Dispose();
-                _channel = null;
+                _player.Clear();
+                _player?.Dispose();
+                _player = null;
             }
             _decklinkInput?.Dispose();
             _decklinkInput = null;
@@ -62,13 +62,13 @@ namespace TimecodeDecoderService
                 ?? throw new ApplicationException("Input Decklink not found");
             var outputDecklink = TVPlayR.DecklinkIterator.Devices.ElementAtOrDefault(Output)
                 ?? throw new ApplicationException("Output Decklink not found");
-            _channel = new TVPlayR.Channel($"Input {Input} Output {Output} Keyer {Keyer} Format {VideoFormat}", format, TVPlayR.PixelFormat.bgra, 2);
+            _player = new TVPlayR.Player($"Input {Input} Output {Output} Keyer {Keyer} Format {VideoFormat}", format, TVPlayR.PixelFormat.bgra, 2);
             _decklinkInput = TVPlayR.DecklinkIterator.CreateInput(inputDecklink, format, 2, TcSource, Keyer != Keyer.Internal);
             _decklinkOutput = TVPlayR.DecklinkIterator.CreateOutput(outputDecklink, Keyer == Keyer.Internal);
-            _timecodeOverlay = new TVPlayR.TimecodeOverlay(format, _channel.PixelFormat);
-            _channel.AddOverlay(_timecodeOverlay);
-            _channel.AddOutput(_decklinkOutput, true);
-            _channel.Load(_decklinkInput);
+            _timecodeOverlay = new TVPlayR.TimecodeOverlay(format, _player.PixelFormat);
+            _player.AddOverlay(_timecodeOverlay);
+            _player.AddOutput(_decklinkOutput, true);
+            _player.Load(_decklinkInput);
         }
     }
 }

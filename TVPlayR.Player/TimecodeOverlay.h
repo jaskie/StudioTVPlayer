@@ -1,12 +1,14 @@
 #pragma once
 #include "OverlayBase.h"
-#include "Core/TimecodeOverlay.h"
 
 using namespace System;
 
 namespace TVPlayR {
     ref class VideoFormat;
     enum class PixelFormat;
+    namespace Core {
+        class TimecodeOverlay;
+    }
 
     public ref class TimecodeOverlay : public OverlayBase
     {

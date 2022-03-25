@@ -41,7 +41,7 @@ namespace StudioTVPlayer.Model
                 if (!Set(ref _filter, value))
                     return;
                 var filterParts = value.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries);
-                _filterWildcards = filterParts.Select(p => new Wildcard(p)).ToArray();
+                _filterWildcards = filterParts.Select(p => new Wildcard(p.ToLower())).ToArray();
             }
         }
 
@@ -91,7 +91,7 @@ namespace StudioTVPlayer.Model
 
         private bool Accept(string fullPath)
         {            
-            return (!IsFilteredByDate || File.GetCreationTime(fullPath).Date == _filterDate.Date)  && (_filterWildcards == null || _filterWildcards.Length == 0 || _filterWildcards.Any(w => w.IsMatch(fullPath)));
+            return (!IsFilteredByDate || File.GetCreationTime(fullPath).Date == _filterDate.Date)  && (_filterWildcards == null || _filterWildcards.Length == 0 || _filterWildcards.Any(w => w.IsMatch(fullPath.ToLower())));
         }
 
  
@@ -130,7 +130,6 @@ namespace StudioTVPlayer.Model
             if (media == null)
                 return;
             AddToVerificationQueue(media);
-            MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Change));
         }
 
         private void Fs_MediaRenamed(object sender, RenamedEventArgs e)

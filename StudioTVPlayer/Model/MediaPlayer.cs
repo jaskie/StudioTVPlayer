@@ -16,15 +16,15 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _playingRundownItem;
         private RundownItemBase _nextRundownItem;
 
-        public MediaPlayer(Channel channel)
+        public MediaPlayer(Player player)
         {
-            Channel = channel;
-            Channel.AudioVolume += Channel_AudioVolume;
+            Player = player;
+            player.AudioVolume += Player_AudioVolume;
         }
 
         public IReadOnlyCollection<RundownItemBase> Rundown => _rundown;
 
-        public Channel Channel { get; }
+        public Player Player { get; }
 
         public RundownItemBase PlayingRundownItem
         {
@@ -46,7 +46,7 @@ namespace StudioTVPlayer.Model
 
         public bool IsEof => (PlayingRundownItem?.Input as TVPlayR.FileInput)?.IsEof ?? true;
 
-        public TimeSpan OneFrame => Channel.VideoFormat.FrameNumberToTime(1);
+        public TimeSpan OneFrame => Player.VideoFormat.FrameNumberToTime(1);
 
         public bool Play()
         {
@@ -92,6 +92,8 @@ namespace StudioTVPlayer.Model
 
         private void AddToQueue(RundownItemBase rundownItem, int index)
         {
+            if (Player.AddItemsWithAutoPlay)
+                rundownItem.IsAutoStart = true;
             if (index < _rundown.Count)
             {
                 _rundown.Insert(index, rundownItem);
@@ -109,13 +111,13 @@ namespace StudioTVPlayer.Model
         }
 
 
-        public bool IsAplha => Channel.PixelFormat == TVPlayR.PixelFormat.bgra;
+        public bool IsAplha => Player.PixelFormat == TVPlayR.PixelFormat.bgra;
 
         public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
 
         public ImageSource GetPreview(int width, int height)
         {
-            return Channel.GetPreview(width, height);
+            return Player.GetPreview(width, height);
         }
 
         public void MoveItem(int srcIndex, int destIndex)
@@ -158,8 +160,8 @@ namespace StudioTVPlayer.Model
                         Debug.Fail("Invalid rundownItem type");
                         break;
                 }
-                rundownItem.Prepare(Channel.AudioChannelCount);
-                Channel.Load(rundownItem.Input);
+                rundownItem.Prepare(Player.AudioChannelCount);
+                Player.Load(rundownItem.Input);
                 if (rundownItem.IsAutoStart)
                     rundownItem.Play();
             }
@@ -180,16 +182,16 @@ namespace StudioTVPlayer.Model
             return file.Seek(timeSpan);
         }
 
-        public void SetVolume(double value)
+        public void SetVolume(float value)
         {
-            Channel.SetVolume(value);
+            Player.SetVolume(value);
         }
 
         public void Clear()
         {
             PlayingRundownItem = null;
             SetNext(null);
-            Channel.Clear();
+            Player.Clear();
         }
 
         public void DeleteDisabled()
@@ -265,8 +267,8 @@ namespace StudioTVPlayer.Model
                 return;
             if (current.Media.Duration - e.Time < PreloadTime)
                 return;
-            if (nextItem.Prepare(Channel.AudioChannelCount))
-                Channel.Preload(nextItem.Input);
+            if (nextItem.Prepare(Player.AudioChannelCount))
+                Player.Preload(nextItem.Input);
         }
 
         private void SetNext(RundownItemBase item)
@@ -285,7 +287,7 @@ namespace StudioTVPlayer.Model
                 SetNext(FindNextAutoPlayItem());
         }
 
-        private void Channel_AudioVolume(object sender, AudioVolumeEventArgs e)
+        private void Player_AudioVolume(object sender, AudioVolumeEventArgs e)
         {
             AudioVolume?.Invoke(this, e);
         }
@@ -299,7 +301,7 @@ namespace StudioTVPlayer.Model
 
         public void Dispose()
         {
-            Channel.AudioVolume -= Channel_AudioVolume;
+            Player.AudioVolume -= Player_AudioVolume;
             PlayingRundownItem = null;
             foreach (var item in _rundown)
             {

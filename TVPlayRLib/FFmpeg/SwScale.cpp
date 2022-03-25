@@ -2,7 +2,6 @@
 #include "SwScale.h"
 #include "FFmpegUtils.h"
 
-
 namespace TVPlayR {
 	namespace FFmpeg {
 
@@ -26,7 +25,7 @@ namespace TVPlayR {
 			out_frame->pts = in_frame->pts;
 			out_frame->interlaced_frame = in_frame->interlaced_frame;
 			out_frame->top_field_first = in_frame->top_field_first;
-			av_frame_get_buffer(out_frame.get(), 0);
+			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(out_frame.get(), 0));
 			if (sws_scale(sws_.get(), in_frame->data, in_frame->linesize, 0, in_frame->height, out_frame->data, out_frame->linesize) != dest_height_)
 				THROW_EXCEPTION("sws_scale failed");
 			return out_frame;

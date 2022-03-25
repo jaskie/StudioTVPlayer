@@ -3,8 +3,14 @@
 #include "Decklink/DecklinkInput.h"
 #include "InputPreview.h"
 #include "VideoFormatEventArgs.h"
+#include "FieldOrder.h"
 
 namespace TVPlayR {
+
+	const std::shared_ptr<Decklink::DecklinkInput> DecklinkInput::GetDecklinkInput()
+	{
+		return std::dynamic_pointer_cast<Decklink::DecklinkInput>(InputBase::GetNativeSource());
+	}
 
 	void DecklinkInput::FormatChangedCallback(Core::VideoFormatType newFormat)
 	{

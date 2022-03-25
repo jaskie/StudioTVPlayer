@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "NdiOutput.h"
 #include "ClrStringHelper.h"
+#include "OverlayBase.h"
+#include "Ndi/NdiOutput.h"
 
 namespace TVPlayR {
 
@@ -22,6 +24,25 @@ namespace TVPlayR {
 			return;
 		delete _ndi;
 		_ndi = nullptr;
+	}
+
+	void NdiOutput::AddOverlay(OverlayBase^ overlay)
+	{
+		if (!_ndi)
+			return;
+		(*_ndi)->AddOverlay(overlay->GetNativeObject());
+	}
+
+	void NdiOutput::RemoveOverlay(OverlayBase^ overlay)
+	{
+		if (!_ndi)
+			return;
+		(*_ndi)->RemoveOverlay(overlay->GetNativeObject());
+	}
+
+	std::shared_ptr<Core::OutputDevice> NdiOutput::GetNativeDevice()
+	{
+		return _ndi == nullptr ? nullptr : *_ndi;
 	}
 
 

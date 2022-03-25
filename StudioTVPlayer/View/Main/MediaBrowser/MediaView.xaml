@@ -24,7 +24,7 @@
             </ContextMenu.Style>
             <ContextMenu.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Channel.Name, StringFormat={}Add to {0}}" />
+                    <TextBlock Text="{Binding Player.Name, StringFormat={}Add to {0}}" />
                 </DataTemplate>
             </ContextMenu.ItemTemplate>
             <ContextMenu.ItemContainerStyle>

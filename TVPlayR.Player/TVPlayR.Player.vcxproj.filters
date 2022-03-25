@@ -21,7 +21,7 @@
     <ClInclude Include="DecklinkOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Channel.h">
+    <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FileInput.h">
@@ -54,7 +54,7 @@
     <ClInclude Include="DecklinkIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StreamOutput.h">
+    <ClInclude Include="FFOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DecklinkInput.h">
@@ -81,6 +81,9 @@
     <ClInclude Include="VideoFormatEventArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DecklinkInfo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -92,7 +95,7 @@
     <ClCompile Include="DecklinkOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Channel.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileInput.cpp">
@@ -110,10 +113,7 @@
     <ClCompile Include="DecklinkIterator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DecklinkInfo.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StreamOutput.cpp">
+    <ClCompile Include="FFOutput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DecklinkInput.cpp">
@@ -132,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DecklinkInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,20 +1,24 @@
 #pragma once
-#include "../Common/NonCopyable.h"
-#include "../FFmpeg/AVSync.h"
 
 namespace TVPlayR {
+
+	namespace FFmpeg {
+		struct AVSync;
+	}
+
 	namespace Core {
 
-class Channel;
+class Player;
+class OverlayBase;
 
-class OutputDevice : public Common::NonCopyable
+class OutputDevice : private Common::NonCopyable
 {
-private:
-	Channel* channel_ = nullptr;
 public:
 	typedef std::function<void(int audio_samples_required)> FRAME_REQUESTED_CALLBACK;
-	virtual bool AssignToChannel(const Channel& channel) = 0;
-	virtual void ReleaseChannel() = 0;
+	virtual bool AssignToPlayer(const Player& channel) = 0;
+	virtual void ReleasePlayer() = 0;
+	virtual void AddOverlay(std::shared_ptr<OverlayBase>& overlay) = 0;
+	virtual void RemoveOverlay(std::shared_ptr<OverlayBase>& overlay) = 0;
 	virtual void Push(FFmpeg::AVSync& sync) = 0;
 	virtual void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) = 0;
 };

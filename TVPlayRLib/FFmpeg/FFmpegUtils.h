@@ -1,6 +1,4 @@
 #pragma once
-#include "../Common/Exceptions.h"
-#include "../Common/Debug.h"
 
 #define FF(value) (value >= 0)
 
@@ -23,28 +21,24 @@ if (error_code < 0) \
 	throw TVPlayR::Common::TVPlayRException(exception_message);\
 	}
 
-inline std::shared_ptr<AVPacket> AllocPacket()
-{
-	return std::shared_ptr<AVPacket>(av_packet_alloc(), [](AVPacket* p) { av_packet_free(&p); });
-}
+std::shared_ptr<AVPacket> AllocPacket();
 
-inline std::shared_ptr<AVFrame> AllocFrame()
-{
-	return std::shared_ptr<AVFrame>(av_frame_alloc(), [](AVFrame* ptr) { av_frame_free(&ptr); });
-}
+std::shared_ptr<AVFrame> AllocFrame();
 
-inline int64_t PtsToTime(int64_t pts, const AVRational time_base)
+std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source);
+
+inline std::int64_t PtsToTime(std::int64_t pts, const AVRational time_base)
 {
 	if (pts == AV_NOPTS_VALUE)
 		return pts;
 	return av_rescale(pts * AV_TIME_BASE, time_base.num, time_base.den);
 }
 
-inline int64_t TimeToPts(int64_t time, const AVRational time_base)
+inline std::int64_t TimeToPts(std::int64_t time, const AVRational time_base)
 {
 	if (time == AV_NOPTS_VALUE || time == 0)
 		return time;
-	return av_rescale(time, time_base.den, static_cast<int64_t>(time_base.num) * AV_TIME_BASE);
+	return av_rescale(time, time_base.den, static_cast<std::int64_t>(time_base.num) * AV_TIME_BASE);
 }
 
 std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt);

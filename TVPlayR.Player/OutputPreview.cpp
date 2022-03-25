@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "OutputPreview.h"
+#include "Preview/OutputPreview.h"
 
 using namespace System::Runtime::InteropServices;
 using namespace System::Threading;
@@ -35,6 +36,16 @@ namespace TVPlayR
             return;
         _shutdown_cts->Cancel();
         _framePlayedHandle.Free();
+    }
+
+    void OutputPreview::AddOverlay(OverlayBase^ overlay)
+    {
+        throw gcnew System::NotImplementedException();
+    }
+
+    void OutputPreview::RemoveOverlay(OverlayBase^ overlay)
+    {
+        throw gcnew System::NotImplementedException();
     }
 
     void OutputPreview::FramePlayedCallback(std::shared_ptr<AVFrame> frame)
@@ -80,5 +91,9 @@ namespace TVPlayR
         {
             target->Unlock();
         }
+    }
+    std::shared_ptr<Core::OutputDevice> OutputPreview::GetNativeDevice()
+    {
+        return _preview == nullptr ? nullptr : *_preview;
     }
 }

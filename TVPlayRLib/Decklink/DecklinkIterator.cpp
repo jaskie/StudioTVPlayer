@@ -1,9 +1,9 @@
 #include "../pch.h"
+#include "ApiVersion.h"
 #include "DecklinkOutput.h"
 #include "DecklinkInfo.h"
 #include "DecklinkIterator.h"
 #include "DecklinkInput.h"
-#include "../Common/Exceptions.h"
 #include "../Core/VideoFormat.h"
 
 namespace TVPlayR {
@@ -46,7 +46,7 @@ namespace TVPlayR {
 			std::shared_ptr<ApiVersion> GetVersion()
 			{
 				auto iterator = create_iterator();
-				int64_t deckLinkVersion;
+				std::int64_t deckLinkVersion;
 				CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(iterator);
 				if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))
 					return std::make_shared<ApiVersion>(static_cast<int>((deckLinkVersion & 0xFF000000) >> 24), static_cast<int>((deckLinkVersion & 0x00FF0000) >> 16), static_cast<int>((deckLinkVersion & 0x0000FF00) >> 8));
@@ -71,7 +71,7 @@ namespace TVPlayR {
 		DecklinkIterator::~DecklinkIterator() {}
 		std::shared_ptr<DecklinkInfo> DecklinkIterator::operator[](size_t pos) { return impl_->operator[](pos); }
 		std::shared_ptr<DecklinkOutput> DecklinkIterator::CreateOutput(const DecklinkInfo& info, bool internal_keyer) { return impl_->CreateOutput(info, internal_keyer); }
-		std::shared_ptr<DecklinkInput> DecklinkIterator::CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video) { return impl_->CreateInput(info, format, audio_channels_count, timecode_source, capture_video); }
+		std::shared_ptr<DecklinkInput> DecklinkIterator::CreateInput(const Decklink::DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video) { return impl_->CreateInput(info, format, audio_channels_count, timecode_source, capture_video); }
 		size_t DecklinkIterator::Size() const { return impl_->Size(); }
 		std::shared_ptr<ApiVersion> DecklinkIterator::GetVersion() { return impl_->GetVersion(); }
 	}

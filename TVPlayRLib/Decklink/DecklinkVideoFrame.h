@@ -1,8 +1,10 @@
 #pragma once
-#include "../Core/VideoFormat.h"
 #include "DecklinkTimecode.h"
 
 namespace TVPlayR {
+	namespace Core	{
+		class VideoFormat;
+	}
 	namespace Decklink {
 
 		class DecklinkVideoFrame final : public IDeckLinkVideoFrame
@@ -13,7 +15,7 @@ namespace TVPlayR {
 			Core::VideoFormat& format_;
 			DecklinkTimecode timecode_;
 		public:
-			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t timecode);
+			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, std::int64_t timecode);
 			~DecklinkVideoFrame();
 			//IUnknown
 			STDMETHOD(QueryInterface(REFIID, LPVOID*));
@@ -31,7 +33,7 @@ namespace TVPlayR {
 			STDMETHOD(GetAncillaryData(IDeckLinkVideoFrameAncillary** ancillary)) { return E_FAIL; }
 
 			//other
-			STDMETHOD_(int64_t, GetPts()) { return frame_->pts; }
+			STDMETHOD_(std::int64_t, GetPts()) { return frame_->pts; }
 		};
 
 	}

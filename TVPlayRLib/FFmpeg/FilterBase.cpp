@@ -9,7 +9,7 @@ FilterBase::FilterBase()
 {
 }
 
-int64_t FilterBase::TimeFromTs(int64_t ts) const
+std::int64_t FilterBase::TimeFromTs(std::int64_t ts) const
 {
 	return PtsToTime(ts, OutputTimeBase());
 }

@@ -1,7 +1,9 @@
 #pragma once
-#include "Common/rational.h"
 
 namespace TVPlayR {
+	namespace Common {
+		template <class T> class Rational;
+	}
 	public value class Rational sealed
 	{
 	private:

@@ -51,8 +51,8 @@
             </Button>
         </StackPanel>
         <TabControl Grid.Row="1" mah:TabControlHelper.Underlined="SelectedTabItem">
-            <TabItem Header="Channels">
-                <views:ChannelsView Margin="5" DataContext="{Binding Channels}"/>
+            <TabItem Header="Players">
+                <views:PlayersView Margin="5" DataContext="{Binding Players}"/>
             </TabItem>
             <TabItem Header="Watched folders">
                 <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />

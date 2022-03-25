@@ -1,11 +1,12 @@
 #include "../pch.h"
 #include "DecklinkVideoFrame.h"
+#include "../Core/VideoFormat.h"
 #include "../FFmpeg/FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {
 				
-		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, int64_t timecode)
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, std::int64_t timecode)
 			: frame_(frame)
 			, timecode_(format, timecode)
 			, ref_count_(0)
@@ -45,8 +46,10 @@ namespace TVPlayR {
 				return BMDPixelFormat::bmdFormat8BitARGB;
 			case AV_PIX_FMT_BGRA:
 				return BMDPixelFormat::bmdFormat8BitBGRA;
-			default:
+			case AV_PIX_FMT_UYVY422:
 				return BMDPixelFormat::bmdFormat8BitYUV;
+			default:
+				return BMDPixelFormat(0);
 			}
 		}
 

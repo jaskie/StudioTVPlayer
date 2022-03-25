@@ -1,31 +1,32 @@
 #include "../pch.h"
 #include "InputFormat.h"
 #include "FFmpegUtils.h"
-#include "../Common/Executor.h"
+#include "../Core/HwAccel.h"
+#include "../Core/StreamInfo.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		AVFormatContext* CreateContext(const std::string& file_name)
+		AVFormatContext* CreateContext(const std::string& file_name, bool dump)
 		{
 			AVFormatContext* ctx = NULL;
 			THROW_ON_FFMPEG_ERROR(avformat_open_input(&ctx, file_name.c_str(), NULL, NULL) == 0 && ctx);
 			if (!ctx)
-				THROW_EXCEPTION("Format context not created for " + file_name)
-#ifdef DEBUG
-			av_dump_format(ctx, 0, file_name.c_str(), 0);
-#endif // DEBUG
+				THROW_EXCEPTION("Format context not created for " + file_name);
+			if (dump)
+				av_dump_format(ctx, 0, file_name.c_str(), 0);
 			return ctx;
 		}
 
 
 InputFormat::InputFormat(const std::string& file_name)
-	: format_context_(CreateContext(file_name), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
+	: DebugTarget(false, "Input format: " + file_name)
+	, format_context_(CreateContext(file_name, IsDebugOutput()), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
 	, file_name_(file_name)
 {
 }
 
-int64_t InputFormat::ReadStartTimecode() const
+std::int64_t InputFormat::ReadStartTimecode() const
 {
 	for (const Core::StreamInfo& stream : streams_)
 	{
@@ -36,7 +37,7 @@ int64_t InputFormat::ReadStartTimecode() const
 		{
 			AVTimecode tc;
 			if (FF(av_timecode_init_from_string(&tc, stream.Stream->r_frame_rate, tcr->value, NULL)))
-				return av_rescale((int64_t)tc.start * AV_TIME_BASE, tc.rate.den, tc.rate.num);
+				return av_rescale((std::int64_t)tc.start * AV_TIME_BASE, tc.rate.den, tc.rate.num);
 		}
 	}
 	return 0LL;
@@ -75,6 +76,7 @@ std::shared_ptr<AVPacket> InputFormat::PullPacket()
 	if (format_context_)
 	{
 		auto packet = AllocPacket();
+		std::lock_guard<std::mutex> lock(seek_mutex_);
 		int ret = av_read_frame(format_context_.get(), packet.get());
 		switch (ret)
 		{
@@ -101,8 +103,9 @@ bool InputFormat::CanSeek() const
 	return stream->Duration > AV_TIME_BASE/10 || stream->Stream->nb_frames > 1 ;
 }
 
-bool InputFormat::Seek(int64_t time)
+bool InputFormat::Seek(std::int64_t time)
 {
+	std::lock_guard<std::mutex> lock(seek_mutex_);
 	if (!CanSeek())
 		return false;
 	if (FF(av_seek_frame(format_context_.get(), -1, time, AVSEEK_FLAG_BACKWARD)))

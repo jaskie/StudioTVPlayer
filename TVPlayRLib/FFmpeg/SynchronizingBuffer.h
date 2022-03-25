@@ -1,22 +1,19 @@
 #pragma once
 
-#include "../Common/Debug.h"
-#include "../Common/NonCopyable.h"
-
 namespace TVPlayR {
 	namespace Core 
 	{
-		class Channel;
+		class Player;
 		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
-		class AVSync;
+		struct AVSync;
 		class AudioFifo;
 
 class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 {
 public:
-	SynchronizingBuffer(const Core::Channel * channel, bool is_playing, int64_t duration, int64_t initial_sync);
+	SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync);
 	~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
@@ -24,9 +21,9 @@ public:
 	bool IsFull() const;
 	bool IsReady() const;
 	void SetIsPlaying(bool is_playing);
-	void Seek(int64_t time);
+	void Seek(std::int64_t time);
 	void Loop();
-	void SetSynchro(int64_t time);
+	void SetSynchro(std::int64_t time);
 	bool IsFlushed() const;
 	bool IsEof();
 	void Flush();
@@ -41,10 +38,10 @@ private:
 	const bool have_audio_;
 	std::atomic_bool is_playing_;
 	std::atomic_bool is_flushed_;
-	int64_t sync_;
+	std::int64_t sync_;
 	const size_t video_queue_size_;
 	const int audio_fifo_size_;
-	const int64_t duration_;
+	const std::int64_t duration_;
 	std::deque<std::shared_ptr<AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
 	std::unique_ptr<AudioFifo> fifo_loop_;

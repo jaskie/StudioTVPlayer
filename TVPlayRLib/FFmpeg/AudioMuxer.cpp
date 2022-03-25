@@ -8,7 +8,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
+AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, std::int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
 	: Common::DebugTarget(false, "Audio muxer")
 	, FilterBase::FilterBase()
 	, decoders_(decoders)
@@ -64,7 +64,7 @@ AVRational AudioMuxer::OutputTimeBase() const
 	return av_buffersink_get_time_base(sink_ctx_);
 }
 
-uint64_t AudioMuxer::OutputChannelLayout()
+std::uint64_t AudioMuxer::OutputChannelLayout()
 {
 	return av_buffersink_get_channel_layout(sink_ctx_);
 }
@@ -135,7 +135,7 @@ void AudioMuxer::Reset()
 void AudioMuxer::Initialize()
 {
 	if (std::find_if(decoders_.begin(), decoders_.end(), [](const std::unique_ptr<Decoder>& decoder) -> bool { return decoder->MediaType() != AVMEDIA_TYPE_AUDIO; }) != decoders_.end())
-		THROW_EXCEPTION("AudioMuxer::CreateFilterChain() got non-audio stream")
+		THROW_EXCEPTION("AudioMuxer::Initialize() got non-audio stream")
 
 	source_ctx_.clear();
 	is_eof_ = false;
@@ -143,7 +143,7 @@ void AudioMuxer::Initialize()
 	graph_.reset(avfilter_graph_alloc());
 
 	AVSampleFormat out_sample_fmts[] = { audio_sample_format_, AV_SAMPLE_FMT_NONE };
-	int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
+	std::int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
 	int out_sample_rates[] = { output_sample_rate_, -1 };
 
 	AVFilterInOut * inputs = avfilter_inout_alloc();

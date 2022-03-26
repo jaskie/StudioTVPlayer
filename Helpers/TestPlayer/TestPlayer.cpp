@@ -66,7 +66,7 @@ int main()
 		if (!ndi->AssignToPlayer(player))
 			throw std::exception("Could not assign output to player");
 		player.AddOutputSink(ndi);
-		player.SetFrameClock(ndi);
+		player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
 		//player.AddOutput(ndi);
 		//FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
@@ -124,7 +124,6 @@ int main()
 				else	 
 					input->Play();
 		}
-		player.SetFrameClock(nullptr);
 		ndi->ReleasePlayer();
 		player.RemoveOutputSink(ndi);
 		//player.RemoveOutputSink(decklink_output);

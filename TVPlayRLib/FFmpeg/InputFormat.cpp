@@ -20,8 +20,8 @@ namespace TVPlayR {
 
 
 InputFormat::InputFormat(const std::string& file_name)
-	: DebugTarget(false, "Input format: " + file_name)
-	, format_context_(CreateContext(file_name, IsDebugOutput()), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
+	: DebugTarget(Common::DebugSeverity::info, "Input format: " + file_name)
+	, format_context_(CreateContext(file_name, DebugSeverity() <= Common::DebugSeverity::info), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
 	, file_name_(file_name)
 {
 }

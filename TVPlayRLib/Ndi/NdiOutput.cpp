@@ -10,6 +10,7 @@
 namespace TVPlayR {
 	namespace Ndi {
 		
+		using namespace std::chrono;
 		struct NdiOutput::implementation : Common::DebugTarget
 		{
 			const std::string source_name_;
@@ -17,27 +18,28 @@ namespace TVPlayR {
 			const NDIlib_send_instance_t send_instance_;
 			Core::VideoFormat format_;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
+			std::vector<Core::ClockTarget*> clock_targets_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
-			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
 			std::int64_t audio_samples_requested_ = 0LL;
 			std::int64_t video_frames_requested_ = 0LL;
 			Common::Executor executor_;
 
 			implementation(const std::string& source_name, const std::string& group_names)
-				: Common::DebugTarget(false, "NDI output " + source_name)
+				: Common::DebugTarget(Common::DebugSeverity::info, "NDI output " + source_name)
 				, executor_("NDI output " + source_name)
-				, buffer_(4)
+				, buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, source_name_(source_name)
 				, ndi_(LoadNdi())
 				, send_instance_(ndi_ ? CreateSend(ndi_, source_name, group_names) : nullptr)
-			{				
+			{		
 			}
 
 			~implementation()
 			{
+				DebugPrintLine(Common::DebugSeverity::debug, "Destroying");
 				ReleasePlayer();
 				executor_.stop();
 				if (send_instance_)
@@ -50,18 +52,16 @@ namespace TVPlayR {
 				{
 					if (format_.type() != Core::VideoFormatType::invalid)
 					{
-						DebugPrintLine("Already assigned to another player");
+						DebugPrintLine(Common::DebugSeverity::warning, "Already assigned to another player");
 						return false;
 					}
 					format_ = player.Format();
 					audio_sample_rate_ = player.AudioSampleRate();
 					audio_channels_count_ = player.AudioChannelsCount();
-					if (frame_requested_callback_)
-						executor_.begin_invoke([this] 
-						{ 
-							DebugPrintLine("AssignToPlayer - calling InitializeFrameRequester()");
-							InitializeFrameRequester();
-						}); 
+					audio_samples_requested_ = 0LL;
+					video_frames_requested_ = 0LL;
+					RequestNextFrame();
+					Tick();
 					return true;
 				});
 			}
@@ -93,7 +93,7 @@ namespace TVPlayR {
 			void Push(FFmpeg::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("Frame dropped");
+					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped");
 			}
 						
 			void Tick()
@@ -113,43 +113,27 @@ namespace TVPlayR {
 							auto ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
 							ndi_->util_send_send_audio_interleaved_32f(send_instance_, &ndi_audio);
 						}
-						RequestFrameFromPlayer();
 					}
+					else
+						std::this_thread::sleep_for(20ms);
+					RequestNextFrame();
+					executor_.begin_invoke([this] { Tick(); }); // next frame
 				}
-				executor_.begin_invoke([this] { Tick(); }); // next frame
 			}
 
-			void RequestFrameFromPlayer()
+			void RequestNextFrame()
 			{
 				assert(executor_.is_current());
-				if (!frame_requested_callback_)
-					return;
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
-				frame_requested_callback_(audio_samples_required);
+				for (Core::ClockTarget * target : clock_targets_)
+					target->RequestFrame(audio_samples_required);
 				video_frames_requested_++;
 				audio_samples_requested_ += audio_samples_required;
 			}
 
-			void InitializeFrameRequester()
+			void RegisterClockTarget(Core::ClockTarget * target)
 			{
-				assert(executor_.is_current());
-				audio_samples_requested_ = 0LL;
-				video_frames_requested_ = 0LL;
-				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
-					RequestFrameFromPlayer();
-				Tick();
-			}
-
-			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
-			{
-				executor_.invoke([&] { 
-					frame_requested_callback_ = frame_requested_callback;
-					if (frame_requested_callback && format_.type() != Core::VideoFormatType::invalid)
-					{
-						DebugPrintLine("SetFrameRequestedCallback - calling InitializeFrameRequester()");
-						InitializeFrameRequester();
-					}
-				});
+				executor_.invoke([=] { clock_targets_.push_back(target); });
 			}
 
 		};
@@ -166,11 +150,9 @@ namespace TVPlayR {
 		void NdiOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
 		void NdiOutput::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
+
+		void NdiOutput::RegisterClockTarget(Core::ClockTarget* target) { impl_->RegisterClockTarget(target); }
 		
-		void NdiOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
-		{
-			impl_->SetFrameRequestedCallback(frame_requested_callback);
-		}
 	}
 }
 

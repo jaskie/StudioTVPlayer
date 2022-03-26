@@ -14,8 +14,10 @@ public:
 	void ReleasePlayer() override;
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
+	//OutputSink
 	void Push(FFmpeg::AVSync& sync) override;
-	void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) override;
+	//FrameClockSource
+	virtual void RegisterClockTarget(Core::ClockTarget* target) override;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

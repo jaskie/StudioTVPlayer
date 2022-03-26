@@ -55,9 +55,9 @@ namespace TVPlayR {
 		delete _player;
 	}
 
-	void Player::SetFrameClock(OutputBase^ output)
+	void Player::SetFrameClockSource(OutputBase^ output)
 	{
-		_player->SetFrameClock(output->GetNativeDevice());
+		_player->SetFrameClockSource(*output->GetNativeDevice());
 	}
 
 	void Player::AddOutputSink(OutputSink^ sink)

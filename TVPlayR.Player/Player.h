@@ -33,7 +33,7 @@ namespace TVPlayR {
 		Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
 		~Player();
 		!Player();
-		void SetFrameClock(OutputBase^ output);
+		void SetFrameClockSource(OutputBase^ output);
 		void AddOutputSink(OutputSink^ sink);
 		void RemoveOutputSink(OutputSink^ sink);
 		void AddOverlay(OverlayBase^ overlay);

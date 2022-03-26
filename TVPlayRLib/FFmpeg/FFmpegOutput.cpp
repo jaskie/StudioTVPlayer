@@ -36,7 +36,7 @@ namespace TVPlayR {
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
-			FRAME_REQUESTED_CALLBACK frame_requested_callback_ = nullptr;
+			std::vector<Core::ClockTarget*> clock_targets_;
 			std::int64_t video_frames_requested_ = 0LL;
 			std::int64_t audio_samples_requested_ = 0LL;
 			std::int64_t video_frames_pushed_ = 0LL;
@@ -45,10 +45,9 @@ namespace TVPlayR {
 			clock::time_point stream_start_time_;
 			Common::Executor executor_;
 
-			implementation(const Core::Player& player, const FFOutputParams& params, FRAME_REQUESTED_CALLBACK frame_requested_callback)
-				: Common::DebugTarget(false, "FFmpeg output: " + params.Url)
+			implementation(const Core::Player& player, const FFOutputParams& params)
+				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
 				, params_(params)
-				, frame_requested_callback_(frame_requested_callback)
 				, format_(player.Format())
 				, src_pixel_format_(PixelFormatToFFmpegFormat(player.PixelFormat()))
 				, audio_sample_rate_(player.AudioSampleRate())
@@ -65,8 +64,6 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(player.Format().FrameRate().av(), params.VideoFilter, video_codec_->pix_fmts[0]);
-				if (frame_requested_callback)
-					executor_.begin_invoke([this] { InitializeFrameRequester(); });
 			}
 
 			~implementation()
@@ -86,7 +83,7 @@ namespace TVPlayR {
 				audio_samples_requested_ = 0LL;
 				video_frames_requested_ = 0LL;
 				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
-					RequestFrameFromPlayer();
+					RequestNextFrame();
 				Tick();
 			}
 			
@@ -132,24 +129,21 @@ namespace TVPlayR {
 					}
 				}
 				else
-					DebugPrintLine("Buffer didn't return frame");
-				if (frame_requested_callback_)
-				{
-					RequestFrameFromPlayer();
-					if (!output_format_.IsFlushed())
-						executor_.begin_invoke([this]
-					{
-						WaitForNextFrameTime();
-						Tick();
-					});
-				}
+					DebugPrintLine(Common::DebugSeverity::info, "Buffer didn't return frame");
+				if (!output_format_.IsFlushed())
+					executor_.begin_invoke([this]
+						{
+							WaitForNextFrameTime();
+							Tick();
+						});
 			}
 
-			void RequestFrameFromPlayer()
+			void RequestNextFrame()
 			{
 				assert(executor_.is_current());
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
-				frame_requested_callback_(audio_samples_required);
+				for (Core::ClockTarget* target : clock_targets_)
+					target->RequestFrame(audio_samples_required);
 				video_frames_requested_++;
 				audio_samples_requested_ += audio_samples_required;
 			}
@@ -174,11 +168,11 @@ namespace TVPlayR {
 				auto wait_time = next_frame_time - current_time;
 				if (wait_time > clock::duration::zero())
 				{
-					DebugPrintLine("Waiting " + std::to_string(wait_time.count() / 1000000) + " ms");
+					DebugPrintLine(Common::DebugSeverity::trace, "Waiting " + std::to_string(wait_time.count() / 1000000) + " ms");
 					std::this_thread::sleep_for(wait_time);
 				}
 				else
-					DebugPrintLine("Negative wait time");
+					DebugPrintLine(Common::DebugSeverity::warning, "Negative wait time");
 			}
 
 			void InitializeOuputIfPossible()
@@ -192,7 +186,7 @@ namespace TVPlayR {
 					char* unused_options;
 					if (av_dict_count(options_) > 0 && av_dict_get_string(options_, &unused_options, '=', ',') >= 0 && unused_options)
 					{
-						DebugPrintLine("Following options were not parsed: " + std::string(unused_options));
+						DebugPrintLine(Common::DebugSeverity::error, "Following options were not parsed: " + std::string(unused_options));
 						av_free(unused_options);
 					}
 					av_dict_free(&options_);
@@ -224,22 +218,12 @@ namespace TVPlayR {
 				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
 				if (buffer_.try_emplace(AVSync(audio, video, sync.Timecode)) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine("Frame dropped");
-				executor_.begin_invoke([this]
-				{
-					if (frame_requested_callback_)
-						return;
-					Tick();
-				});
+					DebugPrintLine(Common::DebugSeverity::warning,  "Frame dropped");
 			}
 
-			void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback)
+			void RegisterClockTarget(Core::ClockTarget* target)
 			{
-				executor_.invoke([&] { 
-					frame_requested_callback_ = frame_requested_callback; 
-					if (frame_requested_callback)
-						InitializeFrameRequester();
-				});
+				clock_targets_.push_back(target);
 			}
 
 		};
@@ -253,7 +237,7 @@ namespace TVPlayR {
 		{
 			if (impl_)
 				return false;
-			impl_ = std::make_unique<implementation>(player, params_, frame_requested_callback_);
+			impl_ = std::make_unique<implementation>(player, params_);
 			for (auto& overlay : overlays_)
 				impl_->AddOverlay(overlay);
 			return true;
@@ -279,12 +263,13 @@ namespace TVPlayR {
 			if (impl_) 
 				impl_->Push(sync);
 		}
-		void FFmpegOutput::SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) 
-		{ 
-			frame_requested_callback_ = frame_requested_callback;
+
+		void FFmpegOutput::RegisterClockTarget(Core::ClockTarget* target)
+		{
 			if (impl_)
-				impl_->SetFrameRequestedCallback(frame_requested_callback); 
+				impl_->RegisterClockTarget(target);
 		}
+
 		const FFOutputParams& FFmpegOutput::GetStreamOutputParams() { return params_; }
 	}
 }

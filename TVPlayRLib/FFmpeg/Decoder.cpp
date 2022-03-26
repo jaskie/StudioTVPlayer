@@ -38,7 +38,7 @@ struct Decoder::implementation : Common::DebugTarget
 	std::mutex mutex_;
 
 	implementation(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
-		: Common::DebugTarget(false, "Decoder")
+		: Common::DebugTarget(Common::DebugSeverity::info, "Decoder")
 		, ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
 		, start_ts_(stream ? stream->start_time : 0LL)
 		, duration_(stream ? stream->duration: 0LL)
@@ -103,16 +103,16 @@ struct Decoder::implementation : Common::DebugTarget
 		if (packet)
 		{
 			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				DebugPrintLine(("Queued video packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000)));
+				DebugPrintLine(Common::DebugSeverity::trace, "Queued video packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000));
 			if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-				DebugPrintLine(("Queued audio packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000)));
+				DebugPrintLine(Common::DebugSeverity::trace, "Queued audio packet to decoder:  " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000));
 		}
 		else
 		{
 			if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-				DebugPrintLine("Queued flush packet to video decoder");
+				DebugPrintLine(Common::DebugSeverity::debug, "Queued flush packet to video decoder");
 			if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-				DebugPrintLine("Queued flush packet to audio decoder");
+				DebugPrintLine(Common::DebugSeverity::debug, "Queued flush packet to audio decoder");
 		}
 #endif 
 	}
@@ -125,9 +125,9 @@ struct Decoder::implementation : Common::DebugTarget
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			if (packet)
-				DebugPrintLine(("Pushed video packet to video decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000)));
+				DebugPrintLine(Common::DebugSeverity::trace, "Pushed video packet to video decoder: " + std::to_string(PtsToTime(packet->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(packet->duration, time_base_) / 1000));
 			else
-				DebugPrintLine("Pushed flush packet to video decoder");
+				DebugPrintLine(Common::DebugSeverity::debug, "Pushed flush packet to video decoder");
 #endif
 		int ret = avcodec_send_packet(ctx_.get(), packet.get());
 		switch (ret)
@@ -136,7 +136,7 @@ struct Decoder::implementation : Common::DebugTarget
 			packet_queue_.pop_front();
 			break;
 		case AVERROR(EAGAIN):
-			DebugPrintLine("PushNextPacket: error EAGAIN");
+			DebugPrintLine(Common::DebugSeverity::debug, "PushNextPacket: error EAGAIN");
 			break;
 		case AVERROR_EOF:
 			THROW_EXCEPTION("Packet pushed after flush");
@@ -168,9 +168,9 @@ struct Decoder::implementation : Common::DebugTarget
 				}
 #ifdef DEBUG
 				if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-					DebugPrintLine(("Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type)));
+					DebugPrintLine(Common::DebugSeverity::trace, "Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type));
 				if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-					DebugPrintLine(("Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000)));
+					DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000));
 #endif 
 				return frame;
 			}
@@ -190,7 +190,7 @@ struct Decoder::implementation : Common::DebugTarget
 	{
 		is_flushed_ = true; 
 		Push(nullptr);
-		DebugPrintLine("Decoder flushed");
+		DebugPrintLine(Common::DebugSeverity::info, "Decoder flushed");
 	}
 
 	void Seek(const std::int64_t seek_time)

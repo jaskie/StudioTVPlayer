@@ -39,7 +39,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: FFmpegInputBase(file_name, acceleration, hw_device)
-		, Common::DebugTarget(false, "FFmpegInput " + file_name)
+		, Common::DebugTarget(Common::DebugSeverity::info, "FFmpegInput " + file_name)
 		, producer_(&implementation::ProducerTheradStart, this)
 	{ 
 		input_.LoadStreamData();
@@ -216,7 +216,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 				std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 				if (buffer_)
 					buffer_->Loop();
-				DebugPrintLine("Loop");
+				DebugPrintLine(Common::DebugSeverity::info, "Loop");
 			}
 			else
 			{
@@ -263,7 +263,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		std::lock_guard<std::mutex> lock(buffer_mutex_);
 		if (&player == player_)
 		{
-			DebugPrintLine("Already added to this player");
+			DebugPrintLine(Common::DebugSeverity::error, "Already added to this player");
 			return;
 		}
 		if (player_)
@@ -287,7 +287,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		std::lock_guard<std::mutex> lock(buffer_content_mutex_);
 		if (input_.Seek(time))
 		{
-			DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
+			DebugPrintLine(Common::DebugSeverity::info, "Seek: " + std::to_string(time / 1000));
 			if (video_decoder_)
 				video_decoder_->Seek(time);
 			for (auto& decoder : audio_decoders_)

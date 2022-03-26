@@ -30,6 +30,7 @@
 #include <future>
 #include <thread>
 #include <atomic>
+#include <chrono>
 
 extern "C"
 {

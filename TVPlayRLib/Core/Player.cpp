@@ -18,8 +18,6 @@ namespace TVPlayR {
 			const std::string name_;
 			std::mutex devices_mutex_;
 			std::vector<std::shared_ptr<OutputSink>> outputs_;
-			std::mutex frame_clock_mutex_;
-			std::shared_ptr<OutputDevice> frame_clock_;
 			std::shared_ptr<InputSource> playing_source_;
 			AudioVolume audio_volume_;
 			const VideoFormat format_;
@@ -34,14 +32,13 @@ namespace TVPlayR {
 			Common::Executor executor_;
 		
 			implementation(const Player& player, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
-				: Common::DebugTarget(false, "Player " + name)
+				: Common::DebugTarget(Common::DebugSeverity::info, "Player " + name)
 				, player_(player)
 				, name_(name)
 				, format_(format)
 				, pixel_format_(pixel_format)
 				, audio_channels_count_(audio_channels_count)
 				, audio_sample_rate_(audio_sample_rate)
-				, frame_clock_(nullptr)
 				, playing_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
 				, executor_("Player: " + name)
@@ -50,17 +47,10 @@ namespace TVPlayR {
 
 			~implementation()
 			{
-				{
-					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
-					if (audio_volume_callback_)
-						audio_volume_callback_ = nullptr;
-				}
-				{
-					std::lock_guard<std::mutex> lock(frame_clock_mutex_);
-					if (frame_clock_)
-						frame_clock_->SetFrameRequestedCallback(nullptr);
-					frame_clock_ = nullptr;
-				}
+				DebugPrintLine(Common::DebugSeverity::info, "Destroying");
+				std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
+				if (audio_volume_callback_)
+					audio_volume_callback_ = nullptr;
 			}
 
 			void RequestFrame(int audio_samples_count)
@@ -71,7 +61,7 @@ namespace TVPlayR {
 				{
 					std::vector<float> volume(player_.AudioChannelsCount(), 0.0);
 					float coherence = 0.0;
-					DebugPrintLine(("Requested frame with " + std::to_string(audio_samples_count) + " samples of audio").c_str());
+					DebugPrintLine(Common::DebugSeverity::trace, "Requested frame with " + std::to_string(audio_samples_count) + " samples of audio");
 					if (playing_source_)
 					{
 						auto sync = playing_source_->PullSync(player_, audio_samples_count);
@@ -121,14 +111,9 @@ namespace TVPlayR {
 				outputs_.erase(std::remove(outputs_.begin(), outputs_.end(), device), outputs_.end());
 			}
 
-			void SetFrameClock(std::shared_ptr<OutputDevice>& clock)
+			void SetFrameClockSource(Player* self, FrameClockSource& clock)
 			{
-				std::lock_guard<std::mutex> lock(frame_clock_mutex_);
-				if (frame_clock_)
-					frame_clock_->SetFrameRequestedCallback(nullptr);
-				frame_clock_ = clock;
-				if (clock)
-					clock->SetFrameRequestedCallback(std::bind(&implementation::RequestFrame, this, std::placeholders::_1));
+				clock.RegisterClockTarget(self);
 			}
 
 			void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback)
@@ -197,7 +182,9 @@ namespace TVPlayR {
 			impl_->RemoveOutputSink(sink);
 		}
 
-		void Player::SetFrameClock(std::shared_ptr<OutputDevice> clock) { impl_->SetFrameClock(clock); }
+		void Player::SetFrameClockSource(FrameClockSource& clock) { impl_->SetFrameClockSource(this, clock); }
+
+		void Player::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 
 		void Player::Load(std::shared_ptr<InputSource> source) 
 		{

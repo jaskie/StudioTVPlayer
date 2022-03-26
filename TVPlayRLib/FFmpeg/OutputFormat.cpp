@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
-			: Common::DebugTarget(false, "OutputFormat " + url)
+			: Common::DebugTarget(Common::DebugSeverity::info, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
 			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
@@ -17,16 +17,16 @@ namespace TVPlayR {
 			if (!is_initialized_)
 			{
 				initialization_queue_.emplace_back(packet);
-				DebugPrintLine("Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				DebugPrintLine(Common::DebugSeverity::debug, "Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
 				return;
 			}
-			DebugPrintLine("Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+			DebugPrintLine(Common::DebugSeverity::trace, "Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 		}
 
 		void OutputFormat::Flush()
 		{
-			DebugPrintLine("Flushing");
+			DebugPrintLine(Common::DebugSeverity::debug, "Flushing");
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), NULL));
 			is_flushed_ = true;
 		}
@@ -34,18 +34,18 @@ namespace TVPlayR {
 		void OutputFormat::Initialize(const std::string& stream_metadata)
 		{
 			assert(!is_initialized_);
-			DebugPrintLine("Writing header");
+			DebugPrintLine(Common::DebugSeverity::debug, "Writing header");
 			format_ctx_->metadata = ReadOptions(stream_metadata);
 			format_ctx_->max_delay = AV_TIME_BASE * 7 / 10;
 			format_ctx_->flags = AVFMT_FLAG_FLUSH_PACKETS | format_ctx_->flags;
 			THROW_ON_FFMPEG_ERROR(avformat_write_header(format_ctx_.get(), &options_));
-			if (IsDebugOutput())
+			if (DebugSeverity() <= Common::DebugSeverity::info)
 				av_dump_format(format_ctx_.get(), 0, url_.c_str(), true);
 			while (!initialization_queue_.empty())
 			{
 				std::shared_ptr<AVPacket> packet = initialization_queue_.front();
 				initialization_queue_.pop_front();
-				DebugPrintLine("Sending queued packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				DebugPrintLine(Common::DebugSeverity::trace, "Sending queued packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
 				THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 			}
 			is_initialized_ = true;
@@ -75,12 +75,12 @@ namespace TVPlayR {
 		void OutputFormat::FreeFormatContext(AVFormatContext* ctx)
 		{
 			if (!FF(av_write_trailer(ctx)))
-				DebugPrintLine("av_write_trailer failed");
+				DebugPrintLine(Common::DebugSeverity::warning, "av_write_trailer failed");
 			if (!(ctx->oformat->flags & AVFMT_NOFILE))
 				if (!FF(avio_close(ctx->pb)))
-					DebugPrintLine("avio_close failed");
+					DebugPrintLine(Common::DebugSeverity::warning, "avio_close failed");
 			avformat_free_context(ctx);
-			DebugPrintLine("avformat_free_context");
+			DebugPrintLine(Common::DebugSeverity::info, "avformat_free_context");
 		}
 
 		

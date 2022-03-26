@@ -9,7 +9,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, std::int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
-	: Common::DebugTarget(false, "Audio muxer")
+	: Common::DebugTarget(Common::DebugSeverity::info, "Audio muxer")
 	, FilterBase::FilterBase()
 	, decoders_(decoders)
 	, input_time_base_(decoders.empty() ? av_make_q(1, sample_rate) : decoders[0]->TimeBase())
@@ -79,7 +79,7 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	auto dest = std::find_if(std::begin(source_ctx_), std::end(source_ctx_), [&stream_index](const std::pair<int, AVFilterContext*>& ctx) {return ctx.first == stream_index; });
 	if (dest == std::end(source_ctx_))
 	THROW_EXCEPTION("AudioMuxer: stream not found");
-	DebugPrintLine(("Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000)));
+	DebugPrintLine(Common::DebugSeverity::trace, "Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000));
 	int ret = av_buffersrc_write_frame(dest->second, frame.get());
 	switch (ret)
 	{
@@ -101,7 +101,7 @@ std::shared_ptr<AVFrame> AudioMuxer::Pull()
 	switch (ret)
 	{
 		case 0: 
-			DebugPrintLine(("Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000)));
+			DebugPrintLine(Common::DebugSeverity::trace, "Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000));
 			return frame;
 		case AVERROR(EAGAIN):
 			break;
@@ -196,7 +196,7 @@ void AudioMuxer::Initialize()
 			THROW_EXCEPTION("avfilter_graph_parse_ptr failed")
 		if (avfilter_graph_config(graph_.get(), NULL) < 0)
 			THROW_EXCEPTION("avfilter_graph_config failed")
-		if (IsDebugOutput())
+		if (DebugSeverity() <= Common::DebugSeverity::debug)
 			DumpFilter(filter_str_, graph_.get());
 	}
 	catch (const std::exception& e)

@@ -9,7 +9,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, std::shared_ptr<AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id)
-		: Common::DebugTarget(false, "Video encoder for " + output_format.GetUrl())
+		: Common::DebugTarget(Common::DebugSeverity::info, "Video encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_frame->width, video_frame->height, time_base, frame_rate, video_frame->sample_aspect_ratio, video_frame->interlaced_frame))
 		, format_(enc_ctx_->pix_fmt)
@@ -19,7 +19,7 @@ namespace TVPlayR {
 
 
 	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
-		: Common::DebugTarget(false, "Audio encoder for " + output_format.GetUrl())
+		: Common::DebugTarget(Common::DebugSeverity::info, "Audio encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
 		, format_(enc_ctx_->sample_fmt)
@@ -36,7 +36,7 @@ namespace TVPlayR {
 	{
 		if (!encoder)
 		{
-			DebugPrintLine("Encoder not found");
+			DebugPrintLine(Common::DebugSeverity::error, "Encoder not found");
 			return nullptr;
 		}
 		AVCodecContext* ctx = avcodec_alloc_context3(encoder);
@@ -60,7 +60,7 @@ namespace TVPlayR {
 	{
 		if (!encoder)
 		{
-			DebugPrintLine("Encoder not found");
+			DebugPrintLine(Common::DebugSeverity::error, "Encoder not found");
 			return nullptr;
 		}
 		AVCodecContext* ctx = avcodec_alloc_context3(encoder);
@@ -147,9 +147,9 @@ namespace TVPlayR {
 	bool Encoder::InternalPush(AVFrame* frame)
 	{
 		if (frame)
-			DebugPrintLine("InternalPush pts=" + std::to_string(frame->pts));
+			DebugPrintLine(Common::DebugSeverity::trace, "InternalPush pts=" + std::to_string(frame->pts));
 		else
-			DebugPrintLine("InternalPush flush frame");
+			DebugPrintLine(Common::DebugSeverity::debug, "InternalPush flush frame");
 		int ret = avcodec_send_frame(enc_ctx_.get(), frame);
 		switch (ret)
 		{
@@ -200,7 +200,7 @@ namespace TVPlayR {
 			case 0:
 				av_packet_rescale_ts(packet.get(), enc_ctx_->time_base, stream_->time_base);
 				packet->stream_index = stream_->index;
-				DebugPrintLine("Pull packet stream=" + std::to_string(packet->stream_index) + ", time=" + std::to_string(PtsToTime(packet->pts, stream_->time_base)/1000));
+				DebugPrintLine(Common::DebugSeverity::trace, "Pull packet stream=" + std::to_string(packet->stream_index) + ", time=" + std::to_string(PtsToTime(packet->pts, stream_->time_base)/1000));
 				return packet;
 			case AVERROR(EAGAIN):
 				if (!frame_buffer_.empty())

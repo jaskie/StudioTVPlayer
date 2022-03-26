@@ -41,7 +41,7 @@ namespace TVPlayR {
 
 
 			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video)
-				: Common::DebugTarget(false, "Decklink input")
+				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink input")
 				, input_(decklink)
 				, is_wide_(!(initial_format == Core::VideoFormatType::ntsc || initial_format == Core::VideoFormatType::pal))
 				, is_autodetection_supported_(IsAutodetectionSupprted(decklink))

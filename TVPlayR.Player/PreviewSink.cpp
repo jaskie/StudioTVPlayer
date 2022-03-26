@@ -86,6 +86,6 @@ namespace TVPlayR
     }
     std::shared_ptr<Core::OutputSink> PreviewSink::GetNativeSink()
     {
-        return *_preview;
+        return _preview ? *_preview : nullptr;
     }
 }

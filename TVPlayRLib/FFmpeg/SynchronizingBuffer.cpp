@@ -11,7 +11,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync)
-		: Common::DebugTarget(false, "SynchronizingBuffer " + player->Name())
+		: Common::DebugTarget(Common::DebugSeverity::info, "SynchronizingBuffer " + player->Name())
 		, video_format_(player->Format().type())
 		, video_frame_rate_(player->Format().FrameRate().av())
 		, sample_rate_(player->AudioSampleRate())
@@ -36,17 +36,17 @@ namespace TVPlayR {
 		if (!(frame && have_audio_))
 			return;
 		assert(!is_flushed_);
-		DebugPrintLine("Push audio " + std::to_string(static_cast<float>(PtsToTime(frame->pts, audio_time_base_)) / AV_TIME_BASE));
+		DebugPrintLine(Common::DebugSeverity::trace, "Push audio " + std::to_string(static_cast<float>(PtsToTime(frame->pts, audio_time_base_)) / AV_TIME_BASE));
 		Sweep();
 		if (!fifo_)
 		{
 			fifo_ = std::make_unique<AudioFifo>(audio_sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), duration_ * 4);
-			DebugPrintLine("New fifo created");
+			DebugPrintLine(Common::DebugSeverity::info, "New fifo created");
 		}
 		if (!fifo_->TryPush(frame))
 		{
 			fifo_->Reset(PtsToTime(frame->pts, audio_time_base_));
-			DebugPrintLine("Audio fifo overflow. Flushing.");
+			DebugPrintLine(Common::DebugSeverity::warning, "Audio fifo overflow. Flushing.");
 			fifo_->TryPush(frame);
 		}
 	}
@@ -56,13 +56,13 @@ namespace TVPlayR {
 		if (!(frame && have_video_))
 			return;
 		input_video_time_base_ = time_base;
-		DebugPrintLine("Push video " + std::to_string(static_cast<float>(PtsToTime(frame->pts, input_video_time_base_)) / AV_TIME_BASE));
+		DebugPrintLine(Common::DebugSeverity::trace, "Push video " + std::to_string(static_cast<float>(PtsToTime(frame->pts, input_video_time_base_)) / AV_TIME_BASE));
 		assert(!is_flushed_);
 		Sweep();
 		if (video_queue_.size() > video_frame_rate_.num * 10 / video_frame_rate_.den) // approx. 10 seconds
 		{
 			video_queue_.clear();
-			DebugPrintLine("Video queue overflow. Flushing.");
+			DebugPrintLine(Common::DebugSeverity::warning, "Video queue overflow. Flushing.");
 		}
 		video_queue_.push_back(frame);
 	}
@@ -76,7 +76,7 @@ namespace TVPlayR {
 		if (fifo_loop_ && fifo_loop_->SamplesCount() <= av_rescale(sample_rate_ / 2, input_video_time_base_.num, input_video_time_base_.den)) // less than half frame samples left
 		{
 			fifo_loop_.reset();
-			DebugPrintLine("Loop fifo is destroyed");
+			DebugPrintLine(Common::DebugSeverity::info, "Loop fifo is destroyed");
 		}
 		if ((is_playing_ || !last_video_) && !video_queue_.empty())
 			last_video_ = video_queue_.front();
@@ -84,7 +84,7 @@ namespace TVPlayR {
 			video_queue_.pop_front();
 #ifdef DEBUG
 		if (audio && audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
-			DebugPrintLine(("Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms"));
+			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
 		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_));
 	}
@@ -115,7 +115,7 @@ namespace TVPlayR {
 	void SynchronizingBuffer::SetIsPlaying(bool is_playing) 
 	{
 		is_playing_ = is_playing;
-		DebugPrintLine(is_playing ? "Playing" : "Paused");
+		DebugPrintLine(Common::DebugSeverity::info, is_playing ? "Playing" : "Paused");
 	}
 	
 	void SynchronizingBuffer::Seek(std::int64_t time) 
@@ -125,7 +125,7 @@ namespace TVPlayR {
 		video_queue_.clear();
 		last_video_.reset();
 		is_flushed_ = false;
-		DebugPrintLine(("Seek: " + std::to_string(time / 1000)));
+		DebugPrintLine(Common::DebugSeverity::info, "Seek: " + std::to_string(time / 1000));
 	}
 
 	void SynchronizingBuffer::Loop()
@@ -133,7 +133,7 @@ namespace TVPlayR {
 		if (!fifo_)
 			return;
 		int samples_over = static_cast<int>(fifo_->SamplesCount() - (video_queue_.size() * sample_rate_ * video_frame_rate_.den / video_frame_rate_.num));
-		DebugPrintLine(("Loop, samples over=" + std::to_string(samples_over)));
+		DebugPrintLine(Common::DebugSeverity::info, "Loop, samples over=" + std::to_string(samples_over));
 		if (samples_over > 0)
 			fifo_->DiscardSamples(samples_over);
 		if (samples_over < 0)
@@ -145,7 +145,7 @@ namespace TVPlayR {
 	void SynchronizingBuffer::SetSynchro(std::int64_t time) 
 	{ 
 		sync_ = time;
-		DebugPrintLine(("Sync set to: " + std::to_string(time / 1000)));
+		DebugPrintLine(Common::DebugSeverity::info, "Sync set to: " + std::to_string(time / 1000));
 	}
 	
 	bool SynchronizingBuffer::IsFlushed() const { return is_flushed_; }
@@ -155,7 +155,7 @@ namespace TVPlayR {
 	void SynchronizingBuffer::Flush()
 	{
 		is_flushed_ = true;
-		DebugPrintLine("Buffer flushed");
+		DebugPrintLine(Common::DebugSeverity::info, "Buffer flushed");
 	}
 	
 	const Core::VideoFormatType SynchronizingBuffer::VideoFormat() { return video_format_; }

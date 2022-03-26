@@ -1,40 +1,49 @@
 #pragma once
 
-#define DebugPrintLineIf(c, s) \
-if (c) \
-	DebugPrintLine(s)
+#define DebugPrintLineIf(condition, severity, message) \
+if (condition) \
+	DebugPrintLine(severity, message)
 
 namespace TVPlayR {
 	namespace Common {
+
+enum class DebugSeverity
+{
+	trace,
+	debug,
+	info,
+	warning,
+	error,
+	fatal
+};
 
 class DebugTarget
 {
 private:
 	const std::string name_;
-	bool debug_output_;
+	const enum DebugSeverity severity_;
 	inline void DebugPrint(const char* s)
 	{
-			OutputDebugStringA(s);
+		OutputDebugStringA(s);
 	}
 
 protected:
-	DebugTarget(bool debug_output, const std::string name)
+	DebugTarget(enum DebugSeverity severity, const std::string name)
 		: name_(name)
-		, debug_output_(debug_output)
+		, severity_(severity)
 	{}
 
-	inline void DebugPrintLine(const std::string& s)
+	inline void DebugPrintLine(enum DebugSeverity severity, const std::string& s)
 	{
 #ifdef DEBUG
-		if (debug_output_)
+		if (severity >= severity_)
 		{
 			DebugPrint((name_ + ": " + s + "\n").c_str());
 		}
 #endif // DEBUG
 	}
 
-
-	inline bool IsDebugOutput() const { return debug_output_; }
+	inline enum DebugSeverity DebugSeverity() const { return severity_; }
 };
 
 }	

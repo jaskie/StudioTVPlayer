@@ -6,7 +6,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, std::int64_t seek_time, std::int64_t fifo_duration)
-	: Common::DebugTarget(false, "AduioFifo")
+	: Common::DebugTarget(Common::DebugSeverity::info, "AduioFifo")
 	, aduio_fifo_(av_audio_fifo_alloc(sample_fmt, channels_count, static_cast<int>(fifo_duration * sample_rate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
 	, sample_rate_(sample_rate)
 	, time_base_(time_base)
@@ -19,7 +19,7 @@ AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_r
 bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 {
 	assert(frame->format == sample_fmt_);
-    DebugPrintLine(("Pushed audio frame to fifo: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + " ms"));
+    DebugPrintLine(Common::DebugSeverity::trace, "Pushed audio frame to fifo: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + " ms");
 	int fifo_space = av_audio_fifo_space(aduio_fifo_.get());
 	int fifo_size = av_audio_fifo_size(aduio_fifo_.get());
 	if (frame->nb_samples * 2 > fifo_space + fifo_size)
@@ -49,7 +49,7 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 		}
 	}
 	else
-		DebugPrintLine("Frame ignored");
+		DebugPrintLine(Common::DebugSeverity::debug, "Frame ignored");
 	return true;
 }
 
@@ -77,10 +77,10 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 	if (samples_from_fifo < nb_samples)
 	{
 		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channels_count_, sample_fmt_);
-		DebugPrintLine(("Filled audio with silence at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms"));
+		DebugPrintLine(Common::DebugSeverity::debug, "Filled audio with silence at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms");
 	}
 	else
-		DebugPrintLine(("Pulled audio frame from fifo at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms"));
+		DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from fifo at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms");
 	return frame;
 }
 
@@ -91,7 +91,7 @@ void AudioFifo::DiscardSamples(int nb_samples)
 		nb_samples = samples_in_fifo;
 	if (nb_samples <= 0)
 		return;
-	DebugPrintLine(("Audio samples discarded: " + std::to_string(nb_samples)));
+	DebugPrintLine(Common::DebugSeverity::debug,"Audio samples discarded: " + std::to_string(nb_samples));
 	if (av_audio_fifo_drain(aduio_fifo_.get(), nb_samples) == 0)
 		start_sample_ += nb_samples;
 }

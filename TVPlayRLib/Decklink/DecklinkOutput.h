@@ -2,6 +2,7 @@
 #include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
+
 	namespace Decklink {
 
 class DecklinkOutput final : public Core::OutputDevice
@@ -17,7 +18,7 @@ public:
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void Push(FFmpeg::AVSync& sync) override;
-	void SetFrameRequestedCallback(FRAME_REQUESTED_CALLBACK frame_requested_callback) override;
+	void RegisterClockTarget(Core::ClockTarget * target);
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

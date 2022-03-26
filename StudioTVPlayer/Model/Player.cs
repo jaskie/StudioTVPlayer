@@ -93,7 +93,7 @@ namespace StudioTVPlayer.Model
             {
                 output.Initialize(_player);
                 if (output.IsFrameClock)
-                    _player.SetFrameClock(output.Output);
+                    _player.SetFrameClockSource(output.Output);
                 _player.AddOutputSink(output.Output);
             }
             _player.AudioVolume += Player_AudioVolume;

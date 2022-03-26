@@ -40,13 +40,13 @@ namespace TVPlayR {
 			~implementation()
 			{
 				DebugPrintLine(Common::DebugSeverity::debug, "Destroying");
-				ReleasePlayer();
+				Uninitialize();
 				executor_.stop();
 				if (send_instance_)
 					ndi_->send_destroy(send_instance_);
 			}
 
-			bool AssignToPlayer(const Core::Player& player)
+			bool InitializeFor(const Core::Player& player)
 			{
 				return executor_.invoke([&] 
 				{
@@ -66,7 +66,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void ReleasePlayer()
+			void Uninitialize()
 			{
 				executor_.invoke([this] 
 				{ 
@@ -131,19 +131,25 @@ namespace TVPlayR {
 				audio_samples_requested_ += audio_samples_required;
 			}
 
-			void RegisterClockTarget(Core::ClockTarget * target)
+			void RegisterClockTarget(Core::ClockTarget* target)
 			{
 				executor_.invoke([=] { clock_targets_.push_back(target); });
 			}
+
+			void UnregisterClockTarget(Core::ClockTarget* target)
+			{
+				executor_.invoke([=] { clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), target), clock_targets_.end()); });
+			}
+
 
 		};
 			
 		NdiOutput::NdiOutput(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		NdiOutput::~NdiOutput() { }
 
-		bool NdiOutput::AssignToPlayer(const Core::Player& player) { return impl_->AssignToPlayer(player); }
+		bool NdiOutput::InitializeFor(const Core::Player& player) { return impl_->InitializeFor(player); }
 
-		void NdiOutput::ReleasePlayer() { impl_->ReleasePlayer(); }
+		void NdiOutput::Uninitialize() { impl_->Uninitialize(); }
 
 		void NdiOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->AddOverlay(overlay); }
 
@@ -151,7 +157,9 @@ namespace TVPlayR {
 
 		void NdiOutput::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
 
-		void NdiOutput::RegisterClockTarget(Core::ClockTarget* target) { impl_->RegisterClockTarget(target); }
+		void NdiOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
+
+		void NdiOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(&target); }
 		
 	}
 }

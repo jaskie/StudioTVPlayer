@@ -56,36 +56,37 @@ int main()
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
 		player.SetFrameClock(decklink_output);
-		if (!decklink_output->AssignToPlayer(player))
+		if (!decklink_output->InitializeFor(player))
 			throw std::exception();
 		player.AddOutputSink(decklink_output);
 		*/
 		//using namespace std::chrono_literals;
 
 		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
-		if (!ndi->AssignToPlayer(player))
+		if (!ndi->InitializeFor(player))
 			throw std::exception("Could not assign output to player");
 		player.AddOutputSink(ndi);
-		player.SetFrameClockSource(*ndi);
+		//player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
 		//player.AddOutput(ndi);
-		//FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
-		//	"libx264",															// VideoCodec
-		//	"aac", 																	// AudioCodec
-		//	4000,																	// VideoBitrate
-		//	128, 																	// AudioBitrate
-		//	"g=18,bf=0",															// Options
-		//	"",//"bwdif,scale=384x216,interlace",										// VideoFilter
-		//	"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
-		//	"",															// VideoMetadata
-		//	"language=pol",												// AudioMetadata
-		//	121, // VideoStreamId
-		//	122  // AudioStreamId
-		//};
+		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
+			"libx264",															// VideoCodec
+			"aac", 																	// AudioCodec
+			4000,																	// VideoBitrate
+			128, 																	// AudioBitrate
+			"g=18,bf=0",															// Options
+			"",//"bwdif,scale=384x216,interlace",										// VideoFilter
+			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
+			"",															// VideoMetadata
+			"language=pol",												// AudioMetadata
+			121, // VideoStreamId
+			122  // AudioStreamId
+		};
 		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
-		//auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
-		//player.SetFrameClock(stream);
-		//player.AddOutput(stream);
+		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
+		player.SetFrameClockSource(*stream);
+		stream->InitializeFor(player);
+		player.AddOutputSink(stream);
 
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
@@ -124,7 +125,7 @@ int main()
 				else	 
 					input->Play();
 		}
-		ndi->ReleasePlayer();
+		ndi->Uninitialize();
 		player.RemoveOutputSink(ndi);
 		//player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);

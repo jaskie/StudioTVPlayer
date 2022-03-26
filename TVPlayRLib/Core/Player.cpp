@@ -111,7 +111,7 @@ namespace TVPlayR {
 				outputs_.erase(std::remove(outputs_.begin(), outputs_.end(), device), outputs_.end());
 			}
 
-			void SetFrameClockSource(Player* self, FrameClockSource& clock)
+			void SetFrameClockSource(Player& self, FrameClockSource& clock)
 			{
 				clock.RegisterClockTarget(self);
 			}
@@ -182,7 +182,7 @@ namespace TVPlayR {
 			impl_->RemoveOutputSink(sink);
 		}
 
-		void Player::SetFrameClockSource(FrameClockSource& clock) { impl_->SetFrameClockSource(this, clock); }
+		void Player::SetFrameClockSource(FrameClockSource& clock) { impl_->SetFrameClockSource(*this, clock); }
 
 		void Player::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 

@@ -10,14 +10,16 @@ public:
 	NdiOutput(const std::string& source_name, const std::string& group_names);
 	~NdiOutput();
 	//OutputDevice
-	bool AssignToPlayer(const Core::Player& player) override;
-	void ReleasePlayer() override;
+	bool InitializeFor(const Core::Player& player) override;
+	void Uninitialize() override;
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	//OutputSink
 	void Push(FFmpeg::AVSync& sync) override;
 	//FrameClockSource
-	virtual void RegisterClockTarget(Core::ClockTarget* target) override;
+	virtual void RegisterClockTarget(Core::ClockTarget& target) override;
+	virtual void UnregisterClockTarget(Core::ClockTarget& target) override;
+
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

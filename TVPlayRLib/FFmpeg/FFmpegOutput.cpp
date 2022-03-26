@@ -20,10 +20,10 @@ namespace TVPlayR {
 
 		struct FFmpegOutput::implementation : Common::DebugTarget
 		{
-			const FFOutputParams& params_;
+			const FFOutputParams params_;
 			AVDictionary* options_ = nullptr;
 			Core::VideoFormat format_;
-			const AVPixelFormat src_pixel_format_;
+			AVPixelFormat src_pixel_format_;
 			int audio_channels_count_;
 			int audio_sample_rate_;
 			OutputFormat output_format_;
@@ -31,7 +31,7 @@ namespace TVPlayR {
 			const AVCodec* audio_codec_;
 			std::unique_ptr<SwScale> video_scaler_;
 			std::unique_ptr<OutputVideoFilter> video_filter_;
-			SwResample audio_resampler_;
+			std::unique_ptr<SwResample> audio_resampler_;
 			std::unique_ptr<Encoder> video_encoder_;
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
@@ -45,25 +45,18 @@ namespace TVPlayR {
 			clock::time_point stream_start_time_;
 			Common::Executor executor_;
 
-			implementation(const Core::Player& player, const FFOutputParams& params)
+			implementation(const FFOutputParams& params)
 				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
 				, params_(params)
-				, format_(player.Format())
-				, src_pixel_format_(PixelFormatToFFmpegFormat(player.PixelFormat()))
-				, audio_sample_rate_(player.AudioSampleRate())
-				, audio_channels_count_(player.AudioChannelsCount())
+				, format_(Core::VideoFormatType::invalid)
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, options_)
-				, audio_resampler_(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]))
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
 				, executor_("Stream output: " + params.Url)
 			{
-				if (params.VideoFilter.empty())
-					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
-				else
-					video_filter_ = std::make_unique<OutputVideoFilter>(player.Format().FrameRate().av(), params.VideoFilter, video_codec_->pix_fmts[0]);
+				executor_.begin_invoke([this] {	Tick();	});
 			}
 
 			~implementation()
@@ -74,6 +67,27 @@ namespace TVPlayR {
 					PushToEncoder(audio_encoder_, nullptr);
 					output_format_.Flush();
 				});
+			}
+
+			bool InitializeFor(const Core::Player& player)
+			{
+				if (format_.type() != Core::VideoFormatType::invalid)
+					return false;
+				format_ = player.Format();
+				src_pixel_format_ =  PixelFormatToFFmpegFormat(player.PixelFormat());
+				audio_channels_count_ = player.AudioChannelsCount();
+				audio_sample_rate_ = player.AudioSampleRate();
+				audio_resampler_ = std::make_unique<SwResample>(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]));
+				if (params_.VideoFilter.empty())
+					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
+				else
+					video_filter_ = std::make_unique<OutputVideoFilter>(player.Format().FrameRate().av(), params_.VideoFilter, video_codec_->pix_fmts[0]);
+				return true;
+			}
+
+			void Uninitialize()
+			{
+				format_ = Core::VideoFormatType::invalid;
 			}
 
 			void InitializeFrameRequester()
@@ -120,22 +134,16 @@ namespace TVPlayR {
 					}
 					if (!audio_encoder_)
 					{
-						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_.OutputSampleRate(), audio_resampler_.OutputChannelCount(), &options_, params_.AudioMetadata, params_.AudioStreamId);
+						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_->OutputSampleRate(), audio_resampler_->OutputChannelCount(), &options_, params_.AudioMetadata, params_.AudioStreamId);
 						InitializeOuputIfPossible();
 					}
 					if (sync.Audio)
 					{
-						PushToEncoder(audio_encoder_, audio_resampler_.Resample(sync.Audio));
+						PushToEncoder(audio_encoder_, audio_resampler_->Resample(sync.Audio));
 					}
 				}
 				else
 					DebugPrintLine(Common::DebugSeverity::info, "Buffer didn't return frame");
-				if (!output_format_.IsFlushed())
-					executor_.begin_invoke([this]
-						{
-							WaitForNextFrameTime();
-							Tick();
-						});
 			}
 
 			void RequestNextFrame()
@@ -218,57 +226,46 @@ namespace TVPlayR {
 				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
 				if (buffer_.try_emplace(AVSync(audio, video, sync.Timecode)) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine(Common::DebugSeverity::warning,  "Frame dropped");
+					DebugPrintLine(Common::DebugSeverity::warning, "Frame dropped");
+				executor_.begin_invoke([this]
+					{
+						if (!clock_targets_.empty())
+							WaitForNextFrameTime();
+						Tick();
+					});
 			}
 
 			void RegisterClockTarget(Core::ClockTarget* target)
 			{
-				clock_targets_.push_back(target);
+				executor_.invoke([=] { clock_targets_.push_back(target); });
 			}
+
+			void UnregisterClockTarget(Core::ClockTarget* target)
+			{
+				executor_.invoke([=] { clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), target), clock_targets_.end()); });
+			}
+
 
 		};
 
 		FFmpegOutput::FFmpegOutput(const FFOutputParams params)
-			: params_(params)
+			: impl_(std::make_unique<implementation>(params))
 		{ }
 
 		FFmpegOutput::~FFmpegOutput() { }
-		bool FFmpegOutput::AssignToPlayer(const Core::Player& player)
-		{
-			if (impl_)
-				return false;
-			impl_ = std::make_unique<implementation>(player, params_);
-			for (auto& overlay : overlays_)
-				impl_->AddOverlay(overlay);
-			return true;
-		}
-		void FFmpegOutput::ReleasePlayer() { impl_.reset(); }
+		bool FFmpegOutput::InitializeFor(const Core::Player& player) { return impl_->InitializeFor(player); }
+		
+		void FFmpegOutput::Uninitialize() { impl_->Uninitialize(); }
+		
+		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 	{ impl_->AddOverlay(overlay); }
 
-		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 
-		{ 
-			overlays_.emplace_back(overlay);
-			if (impl_)
-				impl_->AddOverlay(overlay); 
-		}
+		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
-		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 
-		{
-			overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
-			if (impl_)
-				impl_->RemoveOverlay(overlay); 
-		}
+		void FFmpegOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
 
-		void FFmpegOutput::Push(FFmpeg::AVSync& sync)
-		{
-			if (impl_) 
-				impl_->Push(sync);
-		}
+		void FFmpegOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
 
-		void FFmpegOutput::RegisterClockTarget(Core::ClockTarget* target)
-		{
-			if (impl_)
-				impl_->RegisterClockTarget(target);
-		}
+		void FFmpegOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(&target); }
 
 		const FFOutputParams& FFmpegOutput::GetStreamOutputParams() { return params_; }
 	}

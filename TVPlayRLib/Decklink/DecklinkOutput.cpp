@@ -49,7 +49,7 @@ namespace TVPlayR {
 			~implementation()
 			{
 				output_->SetScheduledFrameCompletionCallback(nullptr);
-				ReleasePlayer();
+				Uninitialize();
 			}
 
 			bool OpenOutput(BMDDisplayMode mode, BMDPixelFormat pixel_format, int audio_channels_count)
@@ -131,7 +131,7 @@ namespace TVPlayR {
 				return true;
 			}
 
-			bool AssignToPlayer(const Core::Player& player)
+			bool InitializeFor(const Core::Player& player)
 			{
 				if (!OpenOutput(GetDecklinkDisplayMode(player.Format().type()), BMDPixelFormatFromPixelFormat(player.PixelFormat()), player.AudioChannelsCount()))
 					return false;
@@ -147,7 +147,7 @@ namespace TVPlayR {
 				return true;
 			}
 
-			void ReleasePlayer()
+			void Uninitialize()
 			{
 				if (format_.type() == Core::VideoFormatType::invalid)
 					return;
@@ -161,9 +161,14 @@ namespace TVPlayR {
 				audio_resampler_.reset();
 			}
 
-			void RegisterClockTarget(Core::ClockTarget* target)
+			void RegisterClockTarget(Core::ClockTarget& target)
 			{
+				clock_targets_.push_back(&target);
+			}
 
+			void UnregisterClockTarget(Core::ClockTarget& target)
+			{
+				clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), &target), clock_targets_.end());
 			}
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
@@ -262,12 +267,13 @@ namespace TVPlayR {
 
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
-		bool DecklinkOutput::AssignToPlayer(const Core::Player& player) { return impl_->AssignToPlayer(player); }
-		void DecklinkOutput::ReleasePlayer()	{ impl_->ReleasePlayer(); }
+		bool DecklinkOutput::InitializeFor(const Core::Player& player) { return impl_->InitializeFor(player); }
+		void DecklinkOutput::Uninitialize()	{ impl_->Uninitialize(); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 		void DecklinkOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
-		void DecklinkOutput::RegisterClockTarget(Core::ClockTarget* target) { impl_->RegisterClockTarget(target); }
+		void DecklinkOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(target); }
+		void DecklinkOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(target); }
 	}
 }
 

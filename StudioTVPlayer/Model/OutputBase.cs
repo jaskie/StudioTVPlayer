@@ -15,6 +15,7 @@ namespace StudioTVPlayer.Model
 
         public virtual void Initialize(TVPlayR.Player player) 
         {
+            Output.InitializeFor(player);
             if (TimecodeOverlay)
             {
                 _overlay = new TVPlayR.TimecodeOverlay(player.VideoFormat, player.PixelFormat);

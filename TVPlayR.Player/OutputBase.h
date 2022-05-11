@@ -4,6 +4,7 @@ using namespace System;
 
 namespace TVPlayR {
 	ref class OverlayBase;
+	ref class Player;
 	namespace Core {
 		class OutputSink;
 		class OutputDevice;
@@ -21,5 +22,6 @@ namespace TVPlayR {
 	public:
 		virtual void AddOverlay(OverlayBase^ overlay) abstract;
 		virtual void RemoveOverlay(OverlayBase^ overlay) abstract;
+		virtual void InitializeFor(Player^ player) abstract;
 	};
 }

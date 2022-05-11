@@ -25,6 +25,11 @@ namespace TVPlayR {
 		AudioVolume(this, gcnew AudioVolumeEventArgs(result, coherence));
 	}
 
+	Core::Player& Player::GetNativePlayer()
+	{
+		return *_player;
+	}
+
 	Player::Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount)
 		: _player(new Core::Player(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), pixelFormat, audioChannelCount, 48000))
 		, _videoFormat(videoFormat)

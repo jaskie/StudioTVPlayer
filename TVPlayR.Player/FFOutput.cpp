@@ -4,6 +4,7 @@
 #include "OverlayBase.h"
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
+#include "Player.h"
 
 namespace TVPlayR
 {
@@ -53,6 +54,12 @@ namespace TVPlayR
         if (!_native_output)
             return;
         (*_native_output)->RemoveOverlay(overlay->GetNativeObject());
+    }
+
+    void FFOutput::InitializeFor(Player^ player)
+    {
+        (*_native_output)->InitializeFor(player->GetNativePlayer());
+
     }
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }

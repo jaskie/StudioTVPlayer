@@ -29,6 +29,8 @@ namespace TVPlayR {
 		}
 		virtual void AddOverlay(OverlayBase^ overlay) override;
 		virtual void RemoveOverlay(OverlayBase^ overlay) override;
+		virtual void InitializeFor(Player^ player) override;
+
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
 		virtual std::shared_ptr<Core::OutputSink> GetNativeSink() override;

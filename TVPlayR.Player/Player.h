@@ -29,6 +29,8 @@ namespace TVPlayR {
 		GCHandle _audioVolumeHandle;
 		System::Collections::Generic::List<OutputSink^>^ _outputs = gcnew System::Collections::Generic::List<OutputSink^>();
 		void AudioVolumeCallback(std::vector<float>& audio_volume, float coherence);
+	internal:
+		Core::Player& GetNativePlayer();
 	public:
 		Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount);
 		~Player();

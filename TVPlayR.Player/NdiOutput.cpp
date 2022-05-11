@@ -3,6 +3,7 @@
 #include "ClrStringHelper.h"
 #include "OverlayBase.h"
 #include "Ndi/NdiOutput.h"
+#include "Player.h"
 
 namespace TVPlayR {
 
@@ -38,6 +39,11 @@ namespace TVPlayR {
 		if (!_ndi)
 			return;
 		(*_ndi)->RemoveOverlay(overlay->GetNativeObject());
+	}
+
+	void NdiOutput::InitializeFor(Player^ player)
+	{
+		(*_ndi)->InitializeFor(player->GetNativePlayer());
 	}
 
 	std::shared_ptr<Core::OutputDevice> NdiOutput::GetNativeDevice()

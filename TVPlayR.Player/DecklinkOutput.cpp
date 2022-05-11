@@ -2,6 +2,7 @@
 #include "DecklinkOutput.h"
 #include "OverlayBase.h"
 #include "Decklink/DecklinkOutput.h"
+#include "Player.h"
 
 namespace TVPlayR {
 	std::shared_ptr<Core::OutputDevice> DecklinkOutput::GetNativeDevice()
@@ -30,6 +31,11 @@ namespace TVPlayR {
 		if (!_decklink)
 			return;
 		(*_decklink)->RemoveOverlay(overlay->GetNativeObject());
+	}
+
+	void DecklinkOutput::InitializeFor(Player^ player)
+	{
+		(*_decklink)->InitializeFor(player->GetNativePlayer());
 	}
 
 	DecklinkOutput::~DecklinkOutput()

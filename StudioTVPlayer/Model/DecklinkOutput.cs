@@ -10,6 +10,9 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public int DeviceIndex { get; set; }
 
+        [XmlAttribute]
+        public TVPlayR.DecklinkKeyer Keyer { get; set; }
+
         public override void Dispose()
         {
             if (_output is null)
@@ -24,7 +27,7 @@ namespace StudioTVPlayer.Model
         public override void Initialize(TVPlayR.Player player)
         {
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, false);
+            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, Keyer);
             base.Initialize(player);
         }
 

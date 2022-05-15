@@ -188,7 +188,10 @@
     <ClInclude Include="FFmpeg\SwResample.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\OutputVideoFilter.h" />
+    <ClInclude Include="DecklinkKeyer.h" />
+    <ClInclude Include="FFmpeg\OutputVideoFilter.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -294,7 +297,9 @@
     <ClCompile Include="FFmpeg\SwResample.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
-    <ClCompile Include="FFmpeg\OutputVideoFilter.cpp" />
+    <ClCompile Include="FFmpeg\OutputVideoFilter.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

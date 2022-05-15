@@ -6,6 +6,7 @@
 #include "VideoFormat.h"
 #include "Decklink/DecklinkIterator.h"
 #include "DecklinkTimecodeSource.h"
+#include "DecklinkKeyer.h"
 
 namespace TVPlayR {
 
@@ -23,9 +24,9 @@ namespace TVPlayR {
 		Refresh();
 	}
 
-	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink, bool enableInternalKeyer)
+	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink, DecklinkKeyer keyer)
 	{
-		auto native_output = _iterator->CreateOutput(*decklink->GetNativeInfo(), enableInternalKeyer);
+		auto native_output = _iterator->CreateOutput(*decklink->GetNativeInfo(), keyer);
 		return gcnew DecklinkOutput(native_output);
 	}
 

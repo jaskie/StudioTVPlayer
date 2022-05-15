@@ -9,6 +9,7 @@ namespace TVPlayR {
 	ref class DecklinkInput;
 	ref class VideoFormat;
 	enum class DecklinkTimecodeSource;
+	enum class DecklinkKeyer;
 
 	namespace Decklink {
 		class DecklinkIterator;
@@ -26,7 +27,7 @@ namespace TVPlayR {
 		static property array<DecklinkInfo^>^ Devices {
 			array<DecklinkInfo^>^ get() { return _devices; }
 		}
-		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink, bool enableInternalKeyer);
+		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink, DecklinkKeyer keyer);
 		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo);
 	};
 

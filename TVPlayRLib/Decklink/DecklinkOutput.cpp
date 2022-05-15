@@ -16,7 +16,7 @@ namespace TVPlayR {
 		struct DecklinkOutput::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget
 		{
 			const CComQIPtr<IDeckLinkOutput> output_;
-			const CComQIPtr<IDeckLinkKeyer> keyer_;
+			const CComQIPtr<IDeckLinkKeyer> decklink_keyer_;
 			const CComQIPtr<IDeckLinkAttributes> attributes_;
 			int index_;
 			Core::VideoFormat format_;
@@ -30,18 +30,18 @@ namespace TVPlayR {
 			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
-			const bool internal_keyer_;
+			const DecklinkKeyer keyer_;
 			std::unique_ptr<FFmpeg::SwResample> audio_resampler_;
 
-			implementation(IDeckLink* decklink, bool internal_keyer, int index)
+			implementation(IDeckLink* decklink, DecklinkKeyer keyer, int index)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
-				, keyer_(decklink)
+				, decklink_keyer_(decklink)
 				, buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
-				, internal_keyer_(internal_keyer)
+				, keyer_(keyer)
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
 			}
@@ -63,16 +63,27 @@ namespace TVPlayR {
 				if (pixel_format == BMDPixelFormat::bmdFormat8BitBGRA)
 				{
 					BOOL support = FALSE;
-					if (internal_keyer_ && SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) && support)
-						keyer_->Enable(FALSE);
-					else if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) && support)
-						keyer_->Enable(TRUE);
-					if (support)
-						keyer_->SetLevel(255);
+					switch (keyer_)
+					{
+					case DecklinkKeyer::Internal:
+						if (FAILED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) || !support)
+							break;
+						decklink_keyer_->Enable(FALSE);
+						decklink_keyer_->SetLevel(255);
+						break;
+					case DecklinkKeyer::External:
+						if (FAILED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) || !support)
+							break;
+						decklink_keyer_->Enable(TRUE);
+						decklink_keyer_->SetLevel(255);
+						break;
+					default:
+						break;
+					}
 				}
 				if (FAILED(output_->EnableVideoOutput(mode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
 					return false;
-				if (!internal_keyer_)
+				if (keyer_ != DecklinkKeyer::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
 				return true;
 			}
@@ -109,10 +120,10 @@ namespace TVPlayR {
 				if (!buffer)
 					return;
 				unsigned int samples_written = 0;
-				if (!internal_keyer_)
+				if (keyer_ != DecklinkKeyer::Internal)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
-				DebugPrintLineIf(!internal_keyer_ && samples_written != buffer->nb_samples, Common::DebugSeverity::warning, "Not all samples written: " + std::to_string(samples_written) + " from buffer of " + std::to_string(buffer->nb_samples));
+				DebugPrintLineIf(keyer_ != DecklinkKeyer::Internal && samples_written != buffer->nb_samples, Common::DebugSeverity::warning, "Not all samples written: " + std::to_string(samples_written) + " from buffer of " + std::to_string(buffer->nb_samples));
 			}
 
 			int AudioSamplesRequired() const
@@ -155,7 +166,7 @@ namespace TVPlayR {
 				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				BMDTimeValue actual_stop;
 				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
-				if (!internal_keyer_)
+				if (keyer_ != DecklinkKeyer::Internal)
 					output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
 				audio_resampler_.reset();
@@ -259,8 +270,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkOutput::DecklinkOutput(IDeckLink * decklink, bool internal_keyer, int index)
-			: impl_(std::make_unique<implementation>(decklink, internal_keyer, index))
+		DecklinkOutput::DecklinkOutput(IDeckLink * decklink, DecklinkKeyer keyer, int index)
+			: impl_(std::make_unique<implementation>(decklink, keyer, index))
 		{}
 
 		DecklinkOutput::~DecklinkOutput() { }

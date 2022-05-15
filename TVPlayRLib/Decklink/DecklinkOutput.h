@@ -1,5 +1,6 @@
 #pragma once
 #include "../Core/OutputDevice.h"
+#include "../DecklinkKeyer.h"
 
 namespace TVPlayR {
 
@@ -8,7 +9,7 @@ namespace TVPlayR {
 class DecklinkOutput final : public Core::OutputDevice
 {
 public:
-	explicit DecklinkOutput(IDeckLink* decklink, bool internal_keyer, int index);
+	explicit DecklinkOutput(IDeckLink* decklink, DecklinkKeyer keyer, int index);
 	~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;

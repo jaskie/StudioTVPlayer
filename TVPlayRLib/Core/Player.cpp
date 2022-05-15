@@ -78,7 +78,7 @@ namespace TVPlayR {
 					{
 						auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_);
 						assert(audio_samples_count == 0 || audio->nb_samples == audio_samples_count);
-						AddOverlayAndPushToOutputs(empty_video_, audio, 0LL);
+						AddOverlayAndPushToOutputs(empty_video_, audio, AV_NOPTS_VALUE);
 					}
 					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 					if (audio_volume_callback_)

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DecklinkInfo.h"
 #include "Decklink/DecklinkInfo.h"
+#include "DecklinkKeyer.h"
 
 namespace TVPlayR
 {
@@ -30,6 +31,11 @@ namespace TVPlayR
 	System::String^ DecklinkInfo::ModelName::get()
 	{
 		return gcnew System::String((*native_info_)->GetModelName().c_str());
+	}
+
+	bool DecklinkInfo::SupportsKeyer(DecklinkKeyer keyer)
+	{
+		return (*native_info_)->SupportsKeyer(keyer);
 	}
 
 	const std::shared_ptr<Decklink::DecklinkInfo> DecklinkInfo::GetNativeInfo() { return *native_info_; }

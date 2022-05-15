@@ -4,6 +4,9 @@ using namespace System;
 using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
+	
+	enum class DecklinkKeyer;
+
 	namespace Decklink {
 		class DecklinkInfo;
 	}
@@ -26,6 +29,8 @@ namespace TVPlayR {
 		property System::String^ DisplayName { System::String^ get(); }
 
 		property System::String^ ModelName { System::String^ get(); }
+
+		bool SupportsKeyer(DecklinkKeyer keyer);
 		
 	internal:
 		DecklinkInfo(std::shared_ptr<Decklink::DecklinkInfo>& info);

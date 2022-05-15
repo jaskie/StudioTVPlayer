@@ -1,9 +1,8 @@
 #pragma once
 #include "../Core/OutputDevice.h"
-#include "../DecklinkKeyer.h"
 
 namespace TVPlayR {
-
+	enum class DecklinkKeyer;
 	namespace Decklink {
 
 class DecklinkOutput final : public Core::OutputDevice

@@ -37,5 +37,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             return !(SelectedDevice is null) && string.IsNullOrEmpty(this[nameof(SelectedDevice)]);
         }
+
+        protected override string ReadErrorInfo(string propertyName)
+        {
+            switch(propertyName)
+            {
+                case nameof(SelectedKeyer):
+                    if (SelectedDevice?.SupportsKeyer(SelectedKeyer) == false)
+                        return $"{SelectedDevice.ModelName} can't support {SelectedKeyer} keyer.";
+                    break;
+            }
+            return base.ReadErrorInfo(propertyName);
+        }
     }
 }

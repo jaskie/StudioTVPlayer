@@ -9,6 +9,7 @@
 #include "../FFmpeg/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 #include "../FFmpeg/SwResample.h"
+#include "../DecklinkKeyer.h"
 
 namespace TVPlayR {
 	namespace Decklink {

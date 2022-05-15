@@ -49,7 +49,7 @@ namespace TVPlayR {
 		{
 			frame_queue_.try_take(last_video_);
 			auto audio = audio_fifo_.Pull(audio_samples_count);
-			return FFmpeg::AVSync(audio, last_video_.second, last_video_.first);
+			return FFmpeg::AVSync(audio, last_video_.second, last_video_.first, AV_NOPTS_VALUE, AV_NOPTS_VALUE);
 		}
 
 		void DecklinkInputSynchroProvider::Reset(AVRational input_frame_rate)

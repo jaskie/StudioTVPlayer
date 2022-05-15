@@ -120,7 +120,9 @@ namespace TVPlayR {
 				FFmpeg::AVSync sync(
 					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
 					AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_),
-					TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate())
+					TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()),
+					AV_NOPTS_VALUE,
+					AV_NOPTS_VALUE
 				);
 				for (auto& provider : player_providers_)
 					provider->Push(sync);

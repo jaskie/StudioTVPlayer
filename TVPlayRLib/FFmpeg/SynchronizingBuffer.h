@@ -27,7 +27,7 @@ public:
 	bool IsFlushed() const;
 	bool IsEof();
 	void Flush();
-	const Core::VideoFormatType VideoFormat();
+	const Core::VideoFormatType VideoFormat() const;
 private:
 	const int sample_rate_;
 	const int audio_channel_count_;

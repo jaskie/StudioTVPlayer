@@ -86,7 +86,7 @@ namespace TVPlayR {
 		if (audio && audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
 			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
-		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_));
+		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_), AV_NOPTS_VALUE, AV_NOPTS_VALUE);
 	}
 	
 	bool SynchronizingBuffer::IsFull() const 
@@ -158,7 +158,7 @@ namespace TVPlayR {
 		DebugPrintLine(Common::DebugSeverity::info, "Buffer flushed");
 	}
 	
-	const Core::VideoFormatType SynchronizingBuffer::VideoFormat() { return video_format_; }
+	const Core::VideoFormatType SynchronizingBuffer::VideoFormat() const { return video_format_; }
 
 	void SynchronizingBuffer::Sweep()
 	{

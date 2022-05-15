@@ -225,7 +225,7 @@ namespace TVPlayR {
 				audio_samples_pushed_ += audio->nb_samples;
 				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
-				if (buffer_.try_emplace(AVSync(audio, video, sync.Timecode)) != Common::BlockingCollectionStatus::Ok)
+				if (buffer_.try_emplace(AVSync(audio, video, sync.Timecode, sync.TimeFromBegin, sync.TimeToEnd)) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::warning, "Frame dropped");
 				executor_.begin_invoke([this]
 					{

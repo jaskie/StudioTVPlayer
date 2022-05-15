@@ -27,6 +27,8 @@ std::shared_ptr<AVFrame> AllocFrame();
 
 std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source);
 
+std::shared_ptr<AVFrame> CopyFrame(const std::shared_ptr<AVFrame>& source);
+
 inline std::int64_t PtsToTime(std::int64_t pts, const AVRational time_base)
 {
 	if (pts == AV_NOPTS_VALUE)

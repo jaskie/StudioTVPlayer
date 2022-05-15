@@ -11,14 +11,14 @@ namespace StudioTVPlayer.Model
         public bool IsFrameClock { get; set; }
 
         [XmlAttribute]
-        public bool TimecodeOverlay { get; set; }
+        public TVPlayR.TimecodeOverlaySource TimecodeOverlay { get; set; }
 
         public virtual void Initialize(TVPlayR.Player player) 
         {
             Output.InitializeFor(player);
-            if (TimecodeOverlay)
+            if (TimecodeOverlay != TVPlayR.TimecodeOverlaySource.None)
             {
-                _overlay = new TVPlayR.TimecodeOverlay(player.VideoFormat, player.PixelFormat);
+                _overlay = new TVPlayR.TimecodeOverlay(TimecodeOverlay, player.VideoFormat, player.PixelFormat);
                 Output.AddOverlay(_overlay);
             }
         }

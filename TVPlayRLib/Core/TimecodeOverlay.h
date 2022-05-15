@@ -3,7 +3,8 @@
 #include "OverlayBase.h"
 namespace TVPlayR {
 		enum class PixelFormat;	
-	
+		enum class TimecodeOverlaySource;
+
 	namespace FFmpeg {
 		struct AVSync;
 	}
@@ -13,7 +14,7 @@ namespace TVPlayR {
 class TimecodeOverlay final :  public OverlayBase
 {
 public:
-	TimecodeOverlay(const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format);
+	TimecodeOverlay(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format);
 	~TimecodeOverlay();
 	FFmpeg::AVSync Transform(FFmpeg::AVSync& sync) override;
 private:

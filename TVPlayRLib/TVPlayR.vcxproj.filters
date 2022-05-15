@@ -192,6 +192,7 @@
     <ClInclude Include="FFmpeg\OutputVideoFilter.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
+    <ClInclude Include="TimecodeOverlaySource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">

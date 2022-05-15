@@ -6,6 +6,7 @@ using namespace System;
 namespace TVPlayR {
     ref class VideoFormat;
     enum class PixelFormat;
+    enum class TimecodeOverlaySource;
     namespace Core {
         class TimecodeOverlay;
     }
@@ -13,7 +14,7 @@ namespace TVPlayR {
     public ref class TimecodeOverlay : public OverlayBase
     {
     public:
-        TimecodeOverlay(VideoFormat^ videoFormat, PixelFormat pixelFormat);
+        TimecodeOverlay(const TimecodeOverlaySource source, VideoFormat^ videoFormat, const PixelFormat pixelFormat);
     public:
         ~TimecodeOverlay();
         !TimecodeOverlay();

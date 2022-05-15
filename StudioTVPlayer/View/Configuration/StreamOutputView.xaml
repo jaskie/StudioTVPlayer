@@ -49,7 +49,9 @@
         <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center">Audio</TextBlock>
         <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center">Output</TextBlock>
         <Label Grid.Row="4" Grid.Column="0">Codec</Label>
-        <CheckBox Grid.Row="4" Grid.Column="2" IsChecked="{Binding TimecodeOverlay}" VerticalAlignment="Center" Margin="5 0" ToolTip="Adds timecode overlay to video">Display timecode</CheckBox>
+        <Label Grid.Row="4" Grid.Column="2" Style="{StaticResource ConfigurationLabelStyle}">Timecode overlay</Label>
+        <ComboBox Grid.Row="5" Grid.Column="2" SelectedItem="{Binding TimecodeOverlay}" ItemsSource="{Binding TimecodeOverlaySources}" />
+
         <ComboBox Grid.Row="5" Grid.Column="0" ItemsSource="{Binding VideoCodecs}" SelectedItem="{Binding VideoCodec, ValidatesOnDataErrors=True}"/>
         <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AudioCodecs}" SelectedItem="{Binding AudioCodec, ValidatesOnDataErrors=True}"/>
         <Label Grid.Row="6">Bitrate (kbps)</Label>

@@ -5,6 +5,7 @@
 #include "../FFmpeg/SwScale.h"
 #include "VideoFormat.h"
 #include "../PixelFormat.h"
+#include "../TimecodeOverlaySource.h"
 
 
 namespace TVPlayR {
@@ -94,7 +95,7 @@ namespace TVPlayR {
 			}
 		};
 
-		TimecodeOverlay::TimecodeOverlay(const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
+		TimecodeOverlay::TimecodeOverlay(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
 			: impl_(std::make_unique<implementation>(video_format, output_pixel_format))
 		{ }
 

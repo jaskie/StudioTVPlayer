@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:NdiOutputViewModel}"
-             d:DesignHeight="95" d:DesignWidth="400">
+             d:DesignHeight="125" d:DesignWidth="400">
     <UserControl.Resources>
         <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
             <Setter Property="Margin" Value="5 0"/>
@@ -24,7 +24,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.ColumnSpan="2" HorizontalAlignment="Center" FontSize="14">NDI output</TextBlock>
@@ -32,7 +33,8 @@
         <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding SourceName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI source name (mandatory)"/>
         <Label Grid.Row="1" Grid.Column="1">Group names</Label>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding GroupNames, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group names (default - leave empty)"/>
-        <CheckBox Grid.Row="3" Grid.Column="0" Margin="5" IsChecked="{Binding TimecodeOverlay}">Display timecode</CheckBox>
-        <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove this output" />
+        <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource ConfigurationLabelStyle}">Timecode overlay</Label>
+        <ComboBox Grid.Row="4" Grid.Column="0" Margin="5 0" SelectedItem="{Binding TimecodeOverlay}" ItemsSource="{Binding TimecodeOverlaySources}" />
+        <Button Grid.RowSpan="5" Grid.Column="2" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove this output" />
     </Grid>
 </UserControl>

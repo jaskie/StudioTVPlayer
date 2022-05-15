@@ -145,6 +145,7 @@
     <ClInclude Include="Core\TimecodeOverlay.h" />
     <ClInclude Include="FFmpeg\SwScale.h" />
     <ClInclude Include="FFmpeg\SwResample.h" />
+    <ClInclude Include="TimecodeOverlaySource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">

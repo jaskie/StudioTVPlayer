@@ -4,10 +4,10 @@ namespace TVPlayR {
 	namespace Core 
 	{
 		class Player;
+		struct AVSync;
 		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
-		struct AVSync;
 		class AudioFifo;
 
 class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
@@ -17,7 +17,7 @@ public:
 	~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
-	AVSync PullSync(int audio_samples_count);
+	Core::AVSync PullSync(int audio_samples_count);
 	bool IsFull() const;
 	bool IsReady() const;
 	void SetIsPlaying(bool is_playing);

@@ -6,7 +6,7 @@
 #include "OutputDevice.h"
 #include "AudioVolume.h"
 #include "../FFmpeg/FFmpegUtils.h"
-#include "../FFmpeg/AVSync.h"
+#include "AVSync.h"
 #include "OverlayBase.h"
 
 namespace TVPlayR {
@@ -72,13 +72,13 @@ namespace TVPlayR {
 							video = empty_video_;
 						if (audio)
 							volume = audio_volume_.ProcessVolume(audio, &coherence);
-						AddOverlayAndPushToOutputs(video, audio, sync.Timecode, sync.TimeFromBegin, sync.TimeToEnd);
+						AddOverlayAndPushToOutputs(video, audio, sync.TimeInfo);
 					}
 					else
 					{
 						auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channels_count_, audio_sample_format_);
 						assert(audio_samples_count == 0 || audio->nb_samples == audio_samples_count);
-						AddOverlayAndPushToOutputs(empty_video_, audio, AV_NOPTS_VALUE, AV_NOPTS_VALUE, AV_NOPTS_VALUE);
+						AddOverlayAndPushToOutputs(empty_video_, audio, FrameTimeInfo());
 					}
 					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 					if (audio_volume_callback_)
@@ -87,9 +87,9 @@ namespace TVPlayR {
 			}
 
 			// used only in executor thread
-			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, std::int64_t timecode, std::int64_t time_from_begin, std::int64_t time_to_end)
+			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, FrameTimeInfo time_info)
 			{
-				FFmpeg::AVSync sync(audio, video, timecode, time_from_begin, time_to_end);
+				Core::AVSync sync(audio, video, time_info);
 				for (auto& overlay : overlays_)
 					sync = overlay->Transform(sync);
 				std::lock_guard<std::mutex> lock(devices_mutex_);

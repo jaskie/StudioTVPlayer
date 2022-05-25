@@ -10,7 +10,7 @@
 #include "SwScale.h"
 #include "SwResample.h"
 #include "OutputVideoFilter.h"
-#include "AVSync.h"
+#include "../Core/AVSync.h"
 #include "FFmpegUtils.h"
 
 namespace TVPlayR {
@@ -34,7 +34,7 @@ namespace TVPlayR {
 			std::unique_ptr<SwResample> audio_resampler_;
 			std::unique_ptr<Encoder> video_encoder_;
 			std::unique_ptr<Encoder> audio_encoder_;
-			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
+			Common::BlockingCollection<Core::AVSync> buffer_;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			std::vector<Core::ClockTarget*> clock_targets_;
 			std::int64_t video_frames_requested_ = 0LL;
@@ -104,7 +104,7 @@ namespace TVPlayR {
 			void Tick()
 			{
 				assert(executor_.is_current());
-				AVSync sync;
+				Core::AVSync sync;
 				if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 				{
 					for (auto& overlay : overlays_)
@@ -217,7 +217,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(FFmpeg::AVSync& sync)
+			void Push(Core::AVSync& sync)
 			{
 				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
 				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
@@ -225,7 +225,7 @@ namespace TVPlayR {
 				audio_samples_pushed_ += audio->nb_samples;
 				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
-				if (buffer_.try_emplace(AVSync(audio, video, sync.Timecode, sync.TimeFromBegin, sync.TimeToEnd)) != Common::BlockingCollectionStatus::Ok)
+				if (buffer_.try_emplace(Core::AVSync(audio, video, sync.TimeInfo)) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::warning, "Frame dropped");
 				executor_.begin_invoke([this]
 					{
@@ -261,7 +261,7 @@ namespace TVPlayR {
 
 		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
-		void FFmpegOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
+		void FFmpegOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
 
 		void FFmpegOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
 

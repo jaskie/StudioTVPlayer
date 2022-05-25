@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "SynchronizingBuffer.h"
-#include "AVSync.h"
+#include "../Core/AVSync.h"
 #include "AudioFifo.h"
 #include "../Core/Player.h"
 #include "../Core/VideoFormat.h"
@@ -67,7 +67,7 @@ namespace TVPlayR {
 		video_queue_.push_back(frame);
 	}
 	
-	AVSync SynchronizingBuffer::PullSync(int audio_samples_count)
+	Core::AVSync SynchronizingBuffer::PullSync(int audio_samples_count)
 	{ 
 		auto& fifo = (fifo_loop_) ? fifo_loop_ : fifo_;
 		std::shared_ptr<AVFrame> audio = is_playing_ && fifo
@@ -86,7 +86,7 @@ namespace TVPlayR {
 		if (audio && audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
 			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
-		return AVSync(audio, last_video_, PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_), AV_NOPTS_VALUE, AV_NOPTS_VALUE);
+		return Core::AVSync(audio, last_video_, Core::FrameTimeInfo{ PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_), AV_NOPTS_VALUE, AV_NOPTS_VALUE });
 	}
 	
 	bool SynchronizingBuffer::IsFull() const 

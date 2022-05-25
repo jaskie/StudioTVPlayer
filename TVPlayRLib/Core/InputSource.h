@@ -3,13 +3,10 @@
 namespace TVPlayR {
 	enum class FieldOrder;
 
-	namespace FFmpeg {
-		struct AVSync;
-	}
-
 	namespace Core {
 		class Player;
 		class OutputSink;
+		struct AVSync;
 
 class InputSource : Common::NonCopyable
 {
@@ -17,7 +14,7 @@ public:
 	typedef std::function<void(std::int64_t)> TIME_CALLBACK;
 	typedef std::function<void()> STOPPED_CALLBACK;
 	typedef std::function<void()> LOADED_CALLBACK;
-	virtual FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count) = 0;
+	virtual Core::AVSync PullSync(const Core::Player& player, int audio_samples_count) = 0;
 	virtual bool IsAddedToPlayer(const Player& player) = 0;
 	virtual void AddToPlayer(const Player& player) = 0;
 	virtual void RemoveFromPlayer(const Core::Player& player) = 0;

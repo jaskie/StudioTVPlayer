@@ -2,7 +2,7 @@
 #include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
-	namespace FFmpeg {
+	namespace Core {
 		struct AVSync;
 	}
 	namespace Preview {
@@ -14,7 +14,7 @@ namespace TVPlayR {
 			~PreviewSink();
 			typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
 			void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback);
-			void Push(FFmpeg::AVSync& sync);
+			void Push(Core::AVSync& sync);
 		private:
 			struct implementation;
 			std::unique_ptr<implementation> impl_;

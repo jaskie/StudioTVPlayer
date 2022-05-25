@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "TimecodeOverlay.h"
 #include <gdiplus.h>
-#include "../FFmpeg/AVSync.h"
+#include "AVSync.h"
 #include "../FFmpeg/SwScale.h"
 #include "../FFmpeg/FFmpegUtils.h"
 #include "VideoFormat.h"
@@ -61,7 +61,7 @@ namespace TVPlayR {
 				return Gdiplus::Rect((video_format_.width() - width) / 2 , video_format_.height() - (height * 4 / 3) , width, height);
 			}
 
-			FFmpeg::AVSync Transform(FFmpeg::AVSync& sync)
+			Core::AVSync Transform(Core::AVSync& sync)
 			{
 				if (!sync.Video)
 					return sync;
@@ -72,9 +72,9 @@ namespace TVPlayR {
 				if (!in_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
 					in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
 				std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ? in_scaler_->Scale(input_frame) : FFmpeg::CopyFrame(input_frame);
-				Draw(rgba_frame, sync.Timecode);
+				Draw(rgba_frame, sync.TimeInfo.Timecode);
 				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
-				return FFmpeg::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.Timecode, sync.TimeFromBegin, sync.TimeToEnd);
+				return Core::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.TimeInfo);
 			}
 
 			void Draw(std::shared_ptr<AVFrame>& video, std::int64_t time)
@@ -102,6 +102,6 @@ namespace TVPlayR {
 
 		TimecodeOverlay::~TimecodeOverlay() { }
 
-		FFmpeg::AVSync TimecodeOverlay::Transform(FFmpeg::AVSync& sync) { return impl_->Transform(sync); }
+		Core::AVSync TimecodeOverlay::Transform(Core::AVSync& sync) { return impl_->Transform(sync); }
 	}
 }

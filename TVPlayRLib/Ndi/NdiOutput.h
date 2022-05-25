@@ -15,7 +15,7 @@ public:
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	//OutputSink
-	void Push(FFmpeg::AVSync& sync) override;
+	void Push(Core::AVSync& sync) override;
 	//FrameClockSource
 	virtual void RegisterClockTarget(Core::ClockTarget& target) override;
 	virtual void UnregisterClockTarget(Core::ClockTarget& target) override;

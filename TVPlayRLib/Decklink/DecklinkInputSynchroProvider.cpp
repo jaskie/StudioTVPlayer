@@ -3,7 +3,7 @@
 #include "../DecklinkTimecodeSource.h"
 #include "DecklinkUtils.h"
 #include "../Core/Player.h"
-#include "../FFmpeg/AVSync.h"
+#include "../Core/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 #include "../FFmpeg/PlayerScaler.h"
 
@@ -27,7 +27,7 @@ namespace TVPlayR {
 
 		const Core::Player& DecklinkInputSynchroProvider::Player() const { return player_; }
 
-		void DecklinkInputSynchroProvider::Push(FFmpeg::AVSync& sync)
+		void DecklinkInputSynchroProvider::Push(Core::AVSync& sync)
 		{
 			executor_.begin_invoke([=] {
 				if (process_video_ && sync.Video)
@@ -36,7 +36,7 @@ namespace TVPlayR {
 						scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_);
 					scaler_->Push(sync.Video, input_frame_rate_, av_inv_q(input_frame_rate_));
 					while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
-						frame_queue_.try_add(queue_item_t(sync.Timecode, received_video));
+						frame_queue_.try_add(queue_item_t(sync.TimeInfo.Timecode, received_video));
 				}
 				if (sync.Audio)
 				{
@@ -45,11 +45,11 @@ namespace TVPlayR {
 			});
 		}
 
-		FFmpeg::AVSync DecklinkInputSynchroProvider::PullSync(int audio_samples_count)
+		Core::AVSync DecklinkInputSynchroProvider::PullSync(int audio_samples_count)
 		{
 			frame_queue_.try_take(last_video_);
 			auto audio = audio_fifo_.Pull(audio_samples_count);
-			return FFmpeg::AVSync(audio, last_video_.second, last_video_.first, AV_NOPTS_VALUE, AV_NOPTS_VALUE);
+			return Core::AVSync(audio, last_video_.second, Core::FrameTimeInfo { last_video_.first, AV_NOPTS_VALUE, AV_NOPTS_VALUE });
 		}
 
 		void DecklinkInputSynchroProvider::Reset(AVRational input_frame_rate)

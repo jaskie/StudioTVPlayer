@@ -5,7 +5,7 @@
 #include "DecklinkInputSynchroProvider.h"
 #include "../Core/Player.h"
 #include "../Core/VideoFormat.h"
-#include "../FFmpeg/AVSync.h"
+#include "../Core/AVSync.h"
 #include "../FieldOrder.h"
 #include "../Core/OutputDevice.h"
 
@@ -117,19 +117,20 @@ namespace TVPlayR {
 				if (current_format_.type() == Core::VideoFormatType::invalid)
 					return S_OK;
 
-				FFmpeg::AVSync sync(
+				Core::AVSync sync(
 					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
 					AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_),
+					Core::FrameTimeInfo {
 					TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()),
 					AV_NOPTS_VALUE,
-					AV_NOPTS_VALUE
+					AV_NOPTS_VALUE }
 				);
 				for (auto& provider : player_providers_)
 					provider->Push(sync);
 				for (auto& preview : previews_)
 					preview->Push(sync);
 				if (frame_played_callback_)
-					frame_played_callback_(sync.Timecode);
+					frame_played_callback_(sync.TimeInfo.Timecode);
 				return S_OK;
 			}
 
@@ -192,11 +193,11 @@ namespace TVPlayR {
 				return audio_channels_count_;
 			}
 
-			FFmpeg::AVSync PullSync(const Core::Player& player, int audio_samples_count)
+			Core::AVSync PullSync(const Core::Player& player, int audio_samples_count)
 			{
 				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
 				if (provider == player_providers_.end())
-					return FFmpeg::AVSync();
+					return Core::AVSync();
 				return (*provider)->PullSync(audio_samples_count);
 			}
 
@@ -213,7 +214,7 @@ namespace TVPlayR {
 		
 		DecklinkInput::~DecklinkInput()	{ }
 		
-		FFmpeg::AVSync DecklinkInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(player, audio_samples_count); }
+		Core::AVSync DecklinkInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(player, audio_samples_count); }
 
 		bool DecklinkInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
 		void DecklinkInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }

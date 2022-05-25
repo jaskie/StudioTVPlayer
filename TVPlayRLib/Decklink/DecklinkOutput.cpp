@@ -6,7 +6,7 @@
 #include "DecklinkUtils.h"
 #include "DecklinkVideoFrame.h"
 #include "../Core/OverlayBase.h"
-#include "../FFmpeg/AVSync.h"
+#include "../Core/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 #include "../FFmpeg/SwResample.h"
 #include "../DecklinkKeyer.h"
@@ -28,7 +28,7 @@ namespace TVPlayR {
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 2;
-			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
+			Common::BlockingCollection<Core::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
 			const DecklinkKeyer keyer_;
@@ -195,7 +195,7 @@ namespace TVPlayR {
 				overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
 			}
 
-			void Push(FFmpeg::AVSync& sync)
+			void Push(Core::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped when pushed\n");
@@ -211,7 +211,7 @@ namespace TVPlayR {
 				for (Core::ClockTarget* target : clock_targets_)
 					target->RequestFrame(audio_samples_required);
 
-				FFmpeg::AVSync sync;
+				Core::AVSync sync;
 				if (buffer_.try_take(sync) == Common::BlockingCollectionStatus::Ok)
 				{
 					{
@@ -219,7 +219,7 @@ namespace TVPlayR {
 						for (auto& overlay : overlays_)
 							sync = overlay->Transform(sync);
 					}
-					ScheduleVideo(sync.Video, sync.Timecode);
+					ScheduleVideo(sync.Video, sync.TimeInfo.Timecode);
 					if (sync.Audio)
 					{
 						ScheduleAudio(audio_resampler_? audio_resampler_->Resample(sync.Audio) : sync.Audio);
@@ -283,7 +283,7 @@ namespace TVPlayR {
 		void DecklinkOutput::Uninitialize()	{ impl_->Uninitialize(); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
-		void DecklinkOutput::Push(FFmpeg::AVSync& sync) { impl_->Push(sync); }
+		void DecklinkOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
 		void DecklinkOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(target); }
 		void DecklinkOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(target); }
 	}

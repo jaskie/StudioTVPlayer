@@ -113,9 +113,6 @@
     <ClInclude Include="Core\MediaType.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\AVSync.h">
-      <Filter>FFmpeg</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Semaphore.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -193,6 +190,12 @@
       <Filter>FFmpeg</Filter>
     </ClInclude>
     <ClInclude Include="TimecodeOverlaySource.h" />
+    <ClInclude Include="Core\FrameTimeInfo.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AVSync.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">

@@ -2,20 +2,17 @@
 
 namespace TVPlayR {
 
-	namespace FFmpeg {
-		struct AVSync;
-	}
-
 	namespace Core {
 
 		class ClockTarget;
 		class Player;
 		class OverlayBase;
+		struct AVSync;
 
 class OutputSink
 {
 public:
-	virtual void Push(FFmpeg::AVSync& sync) = 0;
+	virtual void Push(Core::AVSync& sync) = 0;
 };
 
 class FrameClockSource {

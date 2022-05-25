@@ -2,7 +2,7 @@
 #include "FFmpegInput.h"
 #include "FFmpegInputBase.h"
 #include "FFmpegUtils.h"
-#include "AVSync.h"
+#include "../Core/AVSync.h"
 #include "Decoder.h"
 #include "../Core/Player.h"
 #include "AudioMuxer.h"
@@ -228,10 +228,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 #pragma endregion
 
 
-	AVSync PullSync(int audio_samples_count)
+	Core::AVSync PullSync(int audio_samples_count)
 	{	
 		bool finished = false;
-		AVSync sync;
+		Core::AVSync sync;
 		{
 			std::unique_lock<std::mutex> lock(buffer_content_mutex_);
 			if (!(buffer_ && buffer_->IsReady()))
@@ -242,7 +242,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			finished = buffer_->IsEof();
 		}
 		if (frame_played_callback_)
-			frame_played_callback_(sync.Timecode);
+			frame_played_callback_(sync.TimeInfo.Timecode);
 		if (finished)
 		{
 			is_eof_ = true;
@@ -348,7 +348,7 @@ FFmpegInput::FFmpegInput(const std::string & file_name, Core::HwAccel accelerati
 { }
 
 FFmpegInput::~FFmpegInput(){}
-AVSync FFmpegInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
+Core::AVSync FFmpegInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(audio_samples_count); }
 bool FFmpegInput::Seek(const std::int64_t time) { return impl_->Seek(time); }
 bool FFmpegInput::IsEof() const { return impl_->is_eof_; }
 bool FFmpegInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }

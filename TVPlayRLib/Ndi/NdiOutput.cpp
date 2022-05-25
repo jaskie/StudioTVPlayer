@@ -5,7 +5,7 @@
 #include "../Core/VideoFormat.h"
 #include "../Core/Player.h"
 #include "../Core/OverlayBase.h"
-#include "../FFmpeg/AVSync.h"
+#include "../Core/AVSync.h"
 
 namespace TVPlayR {
 	namespace Ndi {
@@ -21,7 +21,7 @@ namespace TVPlayR {
 			std::vector<Core::ClockTarget*> clock_targets_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
-			Common::BlockingCollection<FFmpeg::AVSync> buffer_;
+			Common::BlockingCollection<Core::AVSync> buffer_;
 			std::int64_t audio_samples_requested_ = 0LL;
 			std::int64_t video_frames_requested_ = 0LL;
 			Common::Executor executor_;
@@ -90,7 +90,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(FFmpeg::AVSync& sync)
+			void Push(Core::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped");
@@ -101,16 +101,16 @@ namespace TVPlayR {
 				assert(executor_.is_current());
 				if (format_.type() != Core::VideoFormatType::invalid)
 				{
-					FFmpeg::AVSync buffer;
+					Core::AVSync buffer;
 					if (buffer_.try_take(buffer) == Common::BlockingCollectionStatus::Ok)
 					{
 						for (auto& overlay : overlays_)
 							buffer = overlay->Transform(buffer);
-						NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.Timecode);
+						NDIlib_video_frame_v2_t ndi_video = CreateVideoFrame(format_, buffer.Video, buffer.TimeInfo.Timecode);
 						ndi_->send_send_video_v2(send_instance_, &ndi_video);
 						if (buffer.Audio)
 						{
-							auto ndi_audio = CreateAudioFrame(buffer.Audio, buffer.Timecode);
+							auto ndi_audio = CreateAudioFrame(buffer.Audio, buffer.TimeInfo.Timecode);
 							ndi_->util_send_send_audio_interleaved_32f(send_instance_, &ndi_audio);
 						}
 					}
@@ -155,7 +155,7 @@ namespace TVPlayR {
 
 		void NdiOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
-		void NdiOutput::Push(FFmpeg::AVSync & sync) { impl_->Push(sync); }
+		void NdiOutput::Push(Core::AVSync & sync) { impl_->Push(sync); }
 
 		void NdiOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
 

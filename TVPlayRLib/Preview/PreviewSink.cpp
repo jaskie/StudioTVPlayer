@@ -1,7 +1,7 @@
 #include "../pch.h"
 #include "PreviewSink.h"
 #include "../FFmpeg/SwScale.h"
-#include "../FFmpeg/AVSync.h"
+#include "../Core/AVSync.h"
 
 namespace TVPlayR {
 	namespace Preview {
@@ -57,6 +57,6 @@ namespace TVPlayR {
 			impl_->SetFramePlayedCallback(frame_played_callback);
 		}
 		
-		void PreviewSink::Push(FFmpeg::AVSync& sync) { impl_->Push(sync.Video); }
+		void PreviewSink::Push(Core::AVSync& sync) { impl_->Push(sync.Video); }
 	}
 }

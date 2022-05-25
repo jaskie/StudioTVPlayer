@@ -96,6 +96,7 @@
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
     <ClInclude Include="FFmpeg\OutputFormat.h" />
     <ClInclude Include="FFmpeg\OutputVideoFilter.h" />
+    <ClInclude Include="Core\FrameTimeInfo.h" />
     <ClInclude Include="Preview\PreviewSink.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BlockingCollection.h" />
@@ -128,7 +129,7 @@
     <ClInclude Include="Decklink\DecklinkUtils.h" />
     <ClInclude Include="FFmpeg\AudioFifo.h" />
     <ClInclude Include="FFmpeg\AudioMuxer.h" />
-    <ClInclude Include="FFmpeg\AVSync.h" />
+    <ClInclude Include="Core\AVSync.h" />
     <ClInclude Include="FFmpeg\SynchronizingBuffer.h" />
     <ClInclude Include="FFmpeg\Decoder.h" />
     <ClInclude Include="FFmpeg\FilterBase.h" />

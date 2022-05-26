@@ -10,7 +10,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync)
+	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync, std::int64_t start_timecode)
 		: Common::DebugTarget(Common::DebugSeverity::info, "SynchronizingBuffer " + player->Name())
 		, video_format_(player->Format().type())
 		, video_frame_rate_(player->Format().FrameRate().av())
@@ -26,6 +26,7 @@ namespace TVPlayR {
 		, audio_sample_format_(player->AudioSampleFormat())
 		, audio_fifo_size_(static_cast<int>(av_rescale(duration, sample_rate_, AV_TIME_BASE)))
 		, duration_(duration)
+		, start_timecode_(start_timecode)
 	{
 	}
 
@@ -86,7 +87,8 @@ namespace TVPlayR {
 		if (audio && audio->pts != AV_NOPTS_VALUE && last_video_ && last_video_->pts != AV_NOPTS_VALUE)
 			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
-		return Core::AVSync(audio, last_video_, Core::FrameTimeInfo{ PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_), AV_NOPTS_VALUE, AV_NOPTS_VALUE });
+		std::int64_t time = PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_);
+		return Core::AVSync(audio, last_video_, Core::FrameTimeInfo{ time + start_timecode_, time, duration_ - time});
 	}
 	
 	bool SynchronizingBuffer::IsFull() const 

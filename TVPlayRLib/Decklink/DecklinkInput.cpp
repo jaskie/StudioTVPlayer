@@ -130,7 +130,7 @@ namespace TVPlayR {
 				for (auto& preview : previews_)
 					preview->Push(sync);
 				if (frame_played_callback_)
-					frame_played_callback_(sync.TimeInfo.Timecode);
+					frame_played_callback_(sync.TimeInfo.TimeFromBegin);
 				return S_OK;
 			}
 

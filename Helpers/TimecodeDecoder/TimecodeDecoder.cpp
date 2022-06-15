@@ -40,6 +40,8 @@ extern "C"
 #include "Core/VideoFormat.h"
 #include "PixelFormat.h"
 #include "DecklinkTimecodeSource.h"
+#include "TimecodeOverlaySource.h"
+#include "DecklinkKeyer.h"
 #include "Ndi/NdiOutput.h"
 #include "FFmpeg/FFmpegInput.h"
 
@@ -57,22 +59,24 @@ int main()
 	int device_index = 1;
 	//for (size_t i = 0; i < iterator.Size(); i++)
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-	auto output = iterator.CreateOutput(*iterator[device_index], true);
+	auto output = iterator.CreateOutput(*iterator[device_index], TVPlayR::DecklinkKeyer::Default);
 	auto ndi = std::make_shared<Ndi::NdiOutput>("NDI Output", "");
-	auto overlay = std::make_shared<Core::TimecodeOverlay>(player.Format().type(), player.PixelFormat());
+	auto overlay = std::make_shared<Core::TimecodeOverlay>(TVPlayR::TimecodeOverlaySource::TimeToEnd, player.Format().type(), player.PixelFormat());
+	output->InitializeFor(player);
+	ndi->InitializeFor(player);
 	player.AddOverlay(overlay);
-	player.SetFrameClock(ndi);
-	player.AddOutput(output);
-	player.AddOutput(ndi);
+	player.SetFrameClockSource(*output);
+	player.AddOutputSink(output);
+	player.AddOutputSink(ndi);
 
-	auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::VITC, false);
-	//auto input = std::make_shared<FFmpeg::FFmpegInput>("d:\\TEMP\\test5.mov", Core::HwAccel::none, "");
-	//input-SetIsLoop(true);
+	//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::VITC, false);
+	auto input = std::make_shared<FFmpeg::FFmpegInput>("d:\\TEMP\\test5.mov", Core::HwAccel::none, "");
+	input->SetIsLoop(true);
 
 	input->Play();
 	player.Load(input);
 	std::getchar();
-	player.RemoveOutput(ndi);
+	player.RemoveOutputSink(ndi);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

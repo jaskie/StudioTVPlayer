@@ -8,7 +8,7 @@ namespace TVPlayR {
 	enum class TimecodeOverlaySource {
 		None,
 		Timecode,
-		TimeFromStart,
+		TimeFromBegin,
 		TimeToEnd,
 		WallTime
 	};

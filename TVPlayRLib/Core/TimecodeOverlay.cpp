@@ -8,7 +8,6 @@
 #include "../PixelFormat.h"
 #include "../TimecodeOverlaySource.h"
 
-
 namespace TVPlayR {
 	namespace Core {
 
@@ -26,6 +25,7 @@ namespace TVPlayR {
 		{
 
 			const GdiplusInitializer			gdiplus_initializer_;
+			const TimecodeOverlaySource			timecode_source_;
 			const VideoFormat					video_format_;
 			const TVPlayR::PixelFormat			output_pixel_format_;
 			std::unique_ptr<FFmpeg::SwScale>	in_scaler_;
@@ -39,8 +39,9 @@ namespace TVPlayR {
 			Gdiplus::PointF						timecode_position_;
 
 
-			implementation::implementation(const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
-				: video_format_(video_format)
+			implementation::implementation(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
+				: timecode_source_(source)
+				, video_format_(video_format)
 				, output_pixel_format_(output_pixel_format)
 				, background_rect_(GetBackgroundRect())
 				, background_(Gdiplus::Color(150, 16, 16, 16))
@@ -72,20 +73,38 @@ namespace TVPlayR {
 				if (!in_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
 					in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
 				std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ? in_scaler_->Scale(input_frame) : FFmpeg::CopyFrame(input_frame);
-				Draw(rgba_frame, sync.TimeInfo.Timecode);
+				std::int64_t time(AV_NOPTS_VALUE);
+				switch (timecode_source_)
+				{
+				case TimecodeOverlaySource::Timecode:
+					time = sync.TimeInfo.Timecode;
+					break;
+				case TimecodeOverlaySource::TimeFromBegin:
+					time = sync.TimeInfo.TimeFromBegin;
+					break;
+				case TimecodeOverlaySource::TimeToEnd:
+					time = sync.TimeInfo.TimeToEnd;
+					break;
+				case TimecodeOverlaySource::WallTime:
+					SYSTEMTIME system_time;
+					::GetLocalTime(&system_time);
+					time = ((static_cast<int64_t>(system_time.wHour) * 60 + system_time.wMinute) * 60 + system_time.wSecond) * AV_TIME_BASE + system_time.wMilliseconds * 1000;
+					break;
+				}
+				std::string timecode_str = time == AV_NOPTS_VALUE ?
+					"NO TC DATA" :
+					video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
+				Draw(rgba_frame, timecode_str);
 				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
 				return Core::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.TimeInfo);
 			}
 
-			void Draw(std::shared_ptr<AVFrame>& video, std::int64_t time)
+			void Draw(std::shared_ptr<AVFrame>& video, std::string timecode_str)
 			{
 				Gdiplus::Bitmap frame_bitmap(video->width, video->height, video->linesize[0], PixelFormat32bppARGB, video->data[0]);
 				Gdiplus::Graphics frame_graphics(&frame_bitmap);
 				frame_graphics.FillRectangle(&background_, background_rect_);
-				std::string timecode = time == AV_NOPTS_VALUE ?
-					"NO TC DATA" :
-					video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
-				CA2W ca2w(timecode.c_str());
+				CA2W ca2w(timecode_str.c_str());
 				Gdiplus::Bitmap overlay_bitmap(background_rect_.Width, background_rect_.Height, PixelFormat32bppARGB);
 				Gdiplus::Graphics overlay_graphics(&overlay_bitmap);
 				overlay_graphics.ScaleTransform(scale_x_, 1.0);
@@ -97,7 +116,7 @@ namespace TVPlayR {
 		};
 
 		TimecodeOverlay::TimecodeOverlay(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
-			: impl_(std::make_unique<implementation>(video_format, output_pixel_format))
+			: impl_(std::make_unique<implementation>(source, video_format, output_pixel_format))
 		{ }
 
 		TimecodeOverlay::~TimecodeOverlay() { }

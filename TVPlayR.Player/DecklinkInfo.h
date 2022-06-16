@@ -29,6 +29,10 @@ namespace TVPlayR {
 		property System::String^ DisplayName { System::String^ get(); }
 
 		property System::String^ ModelName { System::String^ get(); }
+		
+		property bool HaveOutput { bool get(); }
+
+		property bool HaveInput { bool get(); }
 
 		bool SupportsKeyer(DecklinkKeyer keyer);
 		

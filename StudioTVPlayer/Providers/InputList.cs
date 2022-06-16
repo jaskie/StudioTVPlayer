@@ -1,6 +1,7 @@
 ﻿using StudioTVPlayer.Helpers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Providers
@@ -54,6 +55,8 @@ namespace StudioTVPlayer.Providers
             Save();
             return input;
         }
+
+        public bool CanAddDecklinkInput => TVPlayR.DecklinkIterator.Devices.Any(d => d.HaveInput);
 
     }
 }

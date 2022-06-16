@@ -100,6 +100,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public ICommand AddDecklinkOutputCommand { get; }
         public ICommand AddNdiOutputCommand { get; }
 
+        public bool CanAddDecklinkOutput => TVPlayR.DecklinkIterator.Devices.Any(o => o.HaveOutput);
+
         public string Error => string.Empty;
 
         public string this[string columnName]

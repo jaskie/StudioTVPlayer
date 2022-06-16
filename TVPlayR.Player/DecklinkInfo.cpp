@@ -38,6 +38,11 @@ namespace TVPlayR
 		return (*native_info_)->SupportsKeyer(keyer);
 	}
 
+	bool DecklinkInfo::HaveOutput::get() { return (*native_info_)->HaveOutput();}
+
+	bool DecklinkInfo::HaveInput::get() { return (*native_info_)->HaveInput(); }
+
+
 	const std::shared_ptr<Decklink::DecklinkInfo> DecklinkInfo::GetNativeInfo() { return *native_info_; }
 
 

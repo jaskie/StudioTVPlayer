@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Margin="10" FontSize="14" Command="{Binding AddDecklinkInputCommand}" HorizontalAlignment="Left">
+        <Button Grid.Row="0" Margin="10" FontSize="14" Command="{Binding AddDecklinkInputCommand}" Visibility="{Binding CanAddInput, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal">
                 <mah:FontIcon Glyph="&#xE710;" />
                 <TextBlock Margin="5 0 0 0" FontWeight="Normal">Add input</TextBlock>

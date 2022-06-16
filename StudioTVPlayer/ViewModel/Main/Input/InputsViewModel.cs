@@ -30,6 +30,10 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         }
 
         public ICommand AddDecklinkInputCommand { get; }
+                
+        public IList<InputViewModelBase> Inputs { get; }
+
+        public bool CanAddInput => InputList.Current.CanAddDecklinkInput;
 
         private void AddDecklinkInput(object _)
         {
@@ -39,8 +43,6 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             Inputs.Add(vm);
         }
 
-        public IList<InputViewModelBase> Inputs { get; }
-        
         private void Input_RemoveRequested(object sender, EventArgs e)
         {
             var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));

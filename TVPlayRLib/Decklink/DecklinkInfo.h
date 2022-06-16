@@ -13,6 +13,8 @@ namespace TVPlayR {
 			std::wstring GetDisplayName() const;
 			std::wstring GetModelName() const;
 			bool SupportsKeyer(DecklinkKeyer keyer);
+			bool HaveInput() const;
+			bool HaveOutput() const;
 			int Index() const;
 		private:
 			IDeckLink* GetDecklink() const;

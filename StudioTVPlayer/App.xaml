@@ -18,6 +18,7 @@
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
             <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
+            <converters:DescriptionConverter x:Key="DescriptionConverter"/>
 
             <DataTemplate x:Key="mediaDragTemplate">
                 <Image Height="90" Source="{Binding Thumbnail}">

@@ -30,5 +30,4 @@ namespace TVPlayR {
 		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink, DecklinkKeyer keyer);
 		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo);
 	};
-
 }

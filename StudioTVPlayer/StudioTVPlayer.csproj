@@ -97,6 +97,7 @@
     <Compile Include="Controls\TimecodeEdit.cs" />
     <Compile Include="Converters\EnumDescriptionTypeConverter.cs" />
     <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\DescriptionConverter.cs" />
     <Compile Include="Converters\NotNullToBooleanConverter.cs" />
     <Compile Include="Helpers\AttachedProperties\ControlProperties.cs" />
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />

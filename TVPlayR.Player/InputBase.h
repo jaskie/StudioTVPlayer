@@ -8,6 +8,7 @@ namespace TVPlayR
 	ref class TimeEventArgs;
 	namespace Core {
 		class InputSource;
+		struct FrameTimeInfo;
 	}
 	public ref class InputBase abstract
 	{
@@ -23,9 +24,9 @@ namespace TVPlayR
 		virtual String^ GetName() abstract;
 	private:
 		const std::shared_ptr<Core::InputSource>* _nativeSource;
-		delegate void FramePlayedDelegate(std::int64_t);
+		delegate void FramePlayedDelegate(Core::FrameTimeInfo& time_info);
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
-		void FramePlayedCallback(std::int64_t time);
+		void FramePlayedCallback(Core::FrameTimeInfo& time_info);
 	};
 }

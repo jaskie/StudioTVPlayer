@@ -360,14 +360,14 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             OnUiThread(() =>
             {
-                DisplayTime = e.Time;
+                DisplayTime = e.Timecode;
                 if (!IsLive)
                 {
-                    OutTime = CurrentItemDuration - e.Time - _mediaPlayer.OneFrame;
+                    OutTime = CurrentItemDuration - e.TimeFromBegin - _mediaPlayer.OneFrame;
                     OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _mediaPlayer.OneFrame;
                     if (IsPlaying)
                     {
-                        _sliderPosition = e.Time.TotalMilliseconds;
+                        _sliderPosition = e.TimeFromBegin.TotalMilliseconds;
                         NotifyPropertyChanged(nameof(SliderPosition));
                     }
                 }

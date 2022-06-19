@@ -4,11 +4,15 @@ namespace StudioTVPlayer.Model.Args
 {
     public class TimeEventArgs: EventArgs
     {
-        public TimeEventArgs(TimeSpan time)
+        public TimeEventArgs(TimeSpan timecode, TimeSpan timeFromBegin, TimeSpan timeToEnd)
         {
-            Time = time;
+            Timecode = timecode;
+            TimeFromBegin = timeFromBegin;
+            TimeToEnd = timeToEnd;
         }
 
-        public TimeSpan Time { get; }
+        public TimeSpan Timecode { get; }
+        public TimeSpan TimeFromBegin { get; }
+        public TimeSpan TimeToEnd { get; }
     }
 }

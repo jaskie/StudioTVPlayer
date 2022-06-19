@@ -6,12 +6,13 @@ namespace TVPlayR {
 	namespace Core {
 		class Player;
 		class OutputSink;
+		struct FrameTimeInfo;
 		struct AVSync;
 
 class InputSource : Common::NonCopyable
 {
 public:
-	typedef std::function<void(std::int64_t)> TIME_CALLBACK;
+	typedef std::function<void(FrameTimeInfo&)> TIME_CALLBACK;
 	typedef std::function<void()> STOPPED_CALLBACK;
 	typedef std::function<void()> LOADED_CALLBACK;
 	virtual Core::AVSync PullSync(const Core::Player& player, int audio_samples_count) = 0;

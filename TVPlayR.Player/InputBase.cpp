@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "InputBase.h"
 #include "Core/InputSource.h"
+#include "Core/FrameTimeInfo.h"
 #include "TimeEventArgs.h"
 #include "FieldOrder.h"
 
@@ -12,7 +13,7 @@ namespace TVPlayR
 		_framePlayedDelegate = gcnew FramePlayedDelegate(this, &InputBase::FramePlayedCallback);
 		_framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
 		IntPtr framePlayedIp = Marshal::GetFunctionPointerForDelegate(_framePlayedDelegate);
-		typedef void(__stdcall* TIME_CALLBACK)(std::int64_t); // compatible with Core::InputSource::TIME_CALLBACK
+		typedef void(__stdcall* TIME_CALLBACK)(Core::FrameTimeInfo& time_info); // compatible with Core::InputSource::TIME_CALLBACK
 		(*_nativeSource)->SetFramePlayedCallback(static_cast<TIME_CALLBACK>(framePlayedIp.ToPointer()));
 	}
 
@@ -31,9 +32,9 @@ namespace TVPlayR
 		_nativeSource = nullptr;
 	}
 
-	void InputBase::FramePlayedCallback(std::int64_t time)
+	void InputBase::FramePlayedCallback(Core::FrameTimeInfo& time_info)
 	{
-		FramePlayed(this, gcnew TimeEventArgs(TimeSpan(time * 10)));
+		FramePlayed(this, gcnew TimeEventArgs(TimeSpan(time_info.Timecode * 10), TimeSpan(time_info.TimeFromBegin * 10), TimeSpan(time_info.TimeToEnd * 10)));
 	}
 
 

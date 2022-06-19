@@ -258,14 +258,14 @@ namespace StudioTVPlayer.Model
 
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
-            FramePlayed?.Invoke(this, new TimeEventArgs(e.Time));
+            FramePlayed?.Invoke(this, new TimeEventArgs(e.Timecode, e.TimeFromBegin, e.TimeToEnd));
             var current = sender as FileRundownItem;
             if (current == null)
                 return;
             var nextItem = _nextRundownItem;
             if (nextItem is null)
                 return;
-            if (current.Media.Duration - e.Time < PreloadTime)
+            if (current.Media.Duration - e.TimeFromBegin < PreloadTime)
                 return;
             if (nextItem.Prepare(Player.AudioChannelCount))
                 Player.Preload(nextItem.Input);

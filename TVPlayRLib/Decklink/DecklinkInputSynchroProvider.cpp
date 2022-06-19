@@ -15,7 +15,7 @@ namespace TVPlayR {
 			, process_video_(process_video)
 			, input_frame_rate_(player.Format().FrameRate().av())
 			, frame_queue_(2)
-			, last_video_(AV_NOPTS_VALUE, FFmpeg::CreateEmptyVideoFrame(player.Format(), player.PixelFormat()))
+			, last_video_(Core::FrameTimeInfo(), FFmpeg::CreateEmptyVideoFrame(player.Format(), player.PixelFormat()))
 			, audio_resampler_(audio_channels, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32, player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat())
 			, executor_("Input provider for " + player.Name())
 		{
@@ -36,7 +36,7 @@ namespace TVPlayR {
 						scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_);
 					scaler_->Push(sync.Video, input_frame_rate_, av_inv_q(input_frame_rate_));
 					while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
-						frame_queue_.try_add(queue_item_t(sync.TimeInfo.Timecode, received_video));
+						frame_queue_.try_add(queue_item_t(sync.TimeInfo, received_video));
 				}
 				if (sync.Audio)
 				{
@@ -49,7 +49,7 @@ namespace TVPlayR {
 		{
 			frame_queue_.try_take(last_video_);
 			auto audio = audio_fifo_.Pull(audio_samples_count);
-			return Core::AVSync(audio, last_video_.second, Core::FrameTimeInfo { last_video_.first, AV_NOPTS_VALUE, AV_NOPTS_VALUE });
+			return Core::AVSync(audio, last_video_.second, last_video_.first);
 		}
 
 		void DecklinkInputSynchroProvider::Reset(AVRational input_frame_rate)

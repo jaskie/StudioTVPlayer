@@ -34,7 +34,7 @@ namespace TVPlayR
 
 	void InputBase::FramePlayedCallback(Core::FrameTimeInfo& time_info)
 	{
-		FramePlayed(this, gcnew TimeEventArgs(TimeSpan(time_info.Timecode * 10), TimeSpan(time_info.TimeFromBegin * 10), TimeSpan(time_info.TimeToEnd * 10)));
+		FramePlayed(this, gcnew TimeEventArgs(time_info.TimeFromBegin, time_info.TimeToEnd, time_info.Timecode));
 	}
 
 

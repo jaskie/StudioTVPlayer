@@ -63,7 +63,7 @@ namespace StudioTVPlayer.Model
 
 
         public event EventHandler<RundownItemEventArgs> Loaded;
-        public event EventHandler<TimeEventArgs> FramePlayed;
+        public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
@@ -258,7 +258,7 @@ namespace StudioTVPlayer.Model
 
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
-            FramePlayed?.Invoke(this, new TimeEventArgs(e.Timecode, e.TimeFromBegin, e.TimeToEnd));
+            FramePlayed?.Invoke(this, e);
             var current = sender as FileRundownItem;
             if (current == null)
                 return;

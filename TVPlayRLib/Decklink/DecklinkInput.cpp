@@ -30,8 +30,8 @@ namespace TVPlayR {
 			const bool													capture_video_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
 			std::vector<std::shared_ptr<Core::OutputSink>>				previews_;
-			BMDTimeValue												frame_duration_ = 0LL;
 			BMDTimeScale												time_scale_ = 1LL;
+			std::int64_t												last_frame_time_ = 0;
 			const int													audio_channels_count_;
 			const TVPlayR::DecklinkTimecodeSource						timecode_source_;
 			Core::VideoFormat											current_format_;
@@ -69,7 +69,8 @@ namespace TVPlayR {
 
 			void OpenInput(IDeckLinkDisplayMode* displayMode)
 			{
-				if (FAILED(displayMode->GetFrameRate(&frame_duration_, &time_scale_)))
+				BMDTimeValue frame_duration;
+				if (FAILED(displayMode->GetFrameRate(&frame_duration, &time_scale_)))
 					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
 				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_autodetection_supported_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
@@ -116,15 +117,17 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (current_format_.type() == Core::VideoFormatType::invalid)
 					return S_OK;
-
+				BMDTimeValue bmd_time, bmd_duration;
+				if (SUCCEEDED(videoFrame->GetStreamTime(&bmd_time, &bmd_duration, time_scale_)))
+					last_frame_time_ = bmd_time * AV_TIME_BASE / time_scale_;
 				Core::AVSync sync(
 					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
 					AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_),
 					Core::FrameTimeInfo {
-					TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()),
-					AV_NOPTS_VALUE,
-					AV_NOPTS_VALUE }
-				);
+						TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()),
+						last_frame_time_,
+						AV_NOPTS_VALUE }
+					);
 				for (auto& provider : player_providers_)
 					provider->Push(sync);
 				for (auto& preview : previews_)

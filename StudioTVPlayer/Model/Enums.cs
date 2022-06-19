@@ -25,6 +25,12 @@ namespace StudioTVPlayer.Model
         BottomFieldFirst
     }
 
+    public enum TimeDisplaySource
+    {
+        TimeFromBegin,
+        Timecode
+    }
+
     public enum SortDirection
     {
         Ascending,

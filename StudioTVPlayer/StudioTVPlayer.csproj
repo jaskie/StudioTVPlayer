@@ -98,6 +98,7 @@
     <Compile Include="Converters\EnumDescriptionTypeConverter.cs" />
     <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DescriptionConverter.cs" />
+    <Compile Include="Converters\NotNullToVisibilityConverter.cs" />
     <Compile Include="Converters\NotNullToBooleanConverter.cs" />
     <Compile Include="Helpers\AttachedProperties\ControlProperties.cs" />
     <Compile Include="Helpers\AttachedProperties\EventToCommand.cs" />
@@ -117,7 +118,6 @@
     <Compile Include="Model\DecklinkOutput.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\MediaPlayer.cs" />
-    <Compile Include="Model\Args\TimeEventArgs.cs" />
     <Compile Include="Model\NdiOutput.cs" />
     <Compile Include="Model\OutputBase.cs" />
     <Compile Include="Model\FileRundownItem.cs" />

@@ -90,8 +90,10 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			player_,
 			is_playing_,
 			AV_TIME_BASE, // 1s
-			0, 
-			input_.ReadStartTimecode());
+			0,
+			input_.ReadStartTimecode(),
+			GetVideoDuration()
+			);
 	}
 
 	void InitializeAudioDecoders()

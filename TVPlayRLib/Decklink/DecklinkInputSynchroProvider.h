@@ -1,6 +1,7 @@
 #pragma once
 #include "../FFmpeg/AudioFifo.h"
 #include "../FFmpeg/SwResample.h"
+#include "../Core/FrameTimeInfo.h"
 
 namespace TVPlayR {
 	enum class DecklinkTimecodeSource;
@@ -8,6 +9,7 @@ namespace TVPlayR {
 	namespace Core {
 		class Player;
 		struct AVSync;
+		struct FrameTimeInfo;
 	}
 	namespace FFmpeg {
 		class PlayerScaler;
@@ -28,7 +30,7 @@ public:
 	Core::AVSync PullSync(int audio_samples_count);
 	void Reset(AVRational input_frame_rate);
 private:
-	typedef std::pair<std::int64_t, std::shared_ptr<AVFrame>> queue_item_t;
+	typedef std::pair<Core::FrameTimeInfo, std::shared_ptr<AVFrame>> queue_item_t;
 	const Core::Player&							player_;
 	std::unique_ptr<FFmpeg::PlayerScaler>		scaler_;
 	const bool									process_video_;

@@ -72,7 +72,7 @@ namespace TVPlayR {
 		{
 			const Core::StreamInfo* stream = input_.GetVideoStream();
 			if (stream == nullptr)
-				return 0LL;
+				return AV_NOPTS_VALUE;
 			return stream->Duration;
 		}
 

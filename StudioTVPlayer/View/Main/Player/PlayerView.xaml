@@ -99,7 +99,7 @@
                                            IsReadOnly="{Binding IsLive}"
                                            />
                 </Grid>
-                <Grid Margin="0,5,0,0" Grid.Column="1" Grid.Row="1" Visibility="{Binding IsSeekable, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid Margin="0,5,0,0" Grid.Column="1" Grid.Row="1" Visibility="{Binding OutTime, Converter={StaticResource NotNullToVisibilityConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition />

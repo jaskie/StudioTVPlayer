@@ -22,8 +22,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private const double AudioLevelMaxValue = -6.0;
         private const double AudioLevelMinValue = -60.0;
         private bool _isFocused;
-        private TimeSpan _displayTime;
-        private TimeSpan _outTime;
+        private TimeSpan? _displayTime;
+        private TimeSpan? _outTime;
         private double _sliderPosition;
         private bool _isDisposed;
         private RundownItemViewModelBase _currentRundownItem;
@@ -32,6 +32,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private float _volume;
         private ImageSource _preview;
         private bool _outTimeBlink;
+        private TimeSpan _timeFromBegin;
+        private TimeDisplaySource _timeDisplaySource;
 
         public PlayerViewModel(Model.MediaPlayer player)
         {
@@ -42,7 +44,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             UnloadCommand = new UiCommand(Unload, _ => CurrentRundownItem != null);
             LoadNextItemCommand = new UiCommand(LoadNextItem, CanLoadNextItem);
             DeleteDisabledCommand = new UiCommand(DeleteDisabled, _ => Rundown.Any(i => i.RundownItem.IsDisabled));
-            DisplayTimecodeEditCommand = new UiCommand(_ => Seek(DisplayTime));
+            DisplayTimecodeEditCommand = new UiCommand(_ => { if (DisplayTime.HasValue) Seek(DisplayTime.Value); });
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             Name = player.Player.Name;
             VideoFormat = player.Player.VideoFormat;
@@ -57,7 +59,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
             Rundown = new ObservableCollection<RundownItemViewModelBase>(player.Rundown.Select(CreateRundownItemViewModel));
-                
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
             _mediaPlayer = player;
         }
@@ -74,18 +75,51 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             set => Set(ref _isFocused, value);
         }
 
-        public TimeSpan DisplayTime
+        public TimeSpan? DisplayTime
         {
             get => _displayTime;
             set => Set(ref _displayTime, value);
         }
+
+        public TimeDisplaySource TimeDisplaySource
+        {
+            get => _timeDisplaySource;
+            set
+            {
+                if (_timeDisplaySource == value)
+                    return;
+                _timeDisplaySource = value;
+                switch(value)
+                {
+                    case TimeDisplaySource.TimeFromBegin:
+                        Set(ref _displayTime, TimeFromBegin, nameof(DisplayTime));
+                        break;
+                    case TimeDisplaySource.Timecode:
+                        Set(ref _displayTime, Timecode, nameof(DisplayTime));
+                        break;
+                }
+            }
+        }
+
+        public TimeSpan TimeFromBegin
+        {
+            get => _timeFromBegin;
+            set
+            {
+                if (_timeFromBegin == value)
+                    return;
+                _timeFromBegin = value;
+            }
+        }
+
+        public TimeSpan Timecode { get; set; }
 
         public TimeSpan CurrentItemStartTime => (CurrentRundownItem?.RundownItem as FileRundownItem)?.Media.StartTime ?? TimeSpan.Zero;
 
         public TimeSpan CurrentItemDuration => (CurrentRundownItem?.RundownItem as FileRundownItem)?.Media.Duration ?? TimeSpan.Zero;
 
 
-        public TimeSpan OutTime
+        public TimeSpan? OutTime
         {
             get => _outTime;
             set => Set(ref _outTime, value);
@@ -100,7 +134,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 if (!Set(ref _sliderPosition, value))
                     return;
-                Seek(TimeSpan.FromMilliseconds(value));
+                Seek(TimeSpan.FromSeconds(value));
             }
         }
 
@@ -163,8 +197,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     return;
                 if (value is null)
                 {
-                    DisplayTime = TimeSpan.Zero;
-                    OutTime = TimeSpan.Zero;
+                    DisplayTime = null;
+                    OutTime = null;
                     OutTimeBlink = false;
                 }
                 else
@@ -175,7 +209,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     if (_mediaPlayer.Player.DisablePlayedItems)
                         oldItem.RundownItem.IsDisabled = true;
                 }
-                _sliderPosition = CurrentItemStartTime.TotalMilliseconds;
+                _sliderPosition = CurrentItemStartTime.TotalSeconds;
                 NotifyPropertyChanged(nameof(IsPlaying));
                 NotifyPropertyChanged(nameof(SliderPosition));
                 NotifyPropertyChanged(nameof(CurrentItemStartTime));
@@ -201,7 +235,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (param == null)
                 return;
             await Pause();
-            var frameNumber = VideoFormat.TimeToFrameNumber(_displayTime);
+            var frameNumber = VideoFormat.TimeToFrameNumber(_displayTime.Value);
             switch (param.ToString())
             {
                 case "-1":
@@ -236,7 +270,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             if (!_mediaPlayer.Seek(time))
                 return;
-            _sliderPosition = time.TotalMilliseconds;
+            _sliderPosition = time.TotalSeconds;
             NotifyPropertyChanged(nameof(SliderPosition));
         }
 
@@ -356,21 +390,25 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             return true;
         }
 
-        private void MediaPlayer_Progress(object sender, Model.Args.TimeEventArgs e)
+        private void MediaPlayer_Progress(object sender, TVPlayR.TimeEventArgs e)
         {
             OnUiThread(() =>
             {
-                DisplayTime = e.Timecode;
-                if (!IsLive)
+                switch (TimeDisplaySource)
                 {
-                    OutTime = CurrentItemDuration - e.TimeFromBegin - _mediaPlayer.OneFrame;
-                    OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _mediaPlayer.OneFrame;
-                    if (IsPlaying)
-                    {
-                        _sliderPosition = e.TimeFromBegin.TotalMilliseconds;
-                        NotifyPropertyChanged(nameof(SliderPosition));
-                    }
+                    case TimeDisplaySource.TimeFromBegin:
+                        DisplayTime = e.TimeFromBegin;
+                        break;
+                    case TimeDisplaySource.Timecode:
+                        DisplayTime = e.Timecode;
+                        break;
+                    default:
+                        DisplayTime = null;
+                        break;
                 }
+                OutTime = e.TimeToEnd;
+                OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _mediaPlayer.OneFrame;
+                Set(ref _sliderPosition, e.TimeFromBegin.TotalSeconds, nameof(SliderPosition));
             });
         }
 

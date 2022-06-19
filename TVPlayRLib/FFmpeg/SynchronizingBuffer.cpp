@@ -10,7 +10,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync, std::int64_t start_timecode)
+	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t capacity, std::int64_t initial_sync, std::int64_t start_timecode, std::int64_t media_duration)
 		: Common::DebugTarget(Common::DebugSeverity::info, "SynchronizingBuffer " + player->Name())
 		, video_format_(player->Format().type())
 		, video_frame_rate_(player->Format().FrameRate().av())
@@ -20,13 +20,14 @@ namespace TVPlayR {
 		, have_video_(true)
 		, have_audio_(player->AudioChannelsCount() > 0)
 		, is_playing_(is_playing)
-		, video_queue_size_(av_rescale(duration, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
+		, video_queue_size_(av_rescale(capacity, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 		, sync_(initial_sync)
 		, is_flushed_(false)
 		, audio_sample_format_(player->AudioSampleFormat())
-		, audio_fifo_size_(static_cast<int>(av_rescale(duration, sample_rate_, AV_TIME_BASE)))
-		, duration_(duration)
+		, audio_fifo_size_(static_cast<int>(av_rescale(capacity, sample_rate_, AV_TIME_BASE)))
+		, capacity_(capacity)
 		, start_timecode_(start_timecode)
+		, media_duration_(media_duration)
 	{
 	}
 
@@ -41,7 +42,7 @@ namespace TVPlayR {
 		Sweep();
 		if (!fifo_)
 		{
-			fifo_ = std::make_unique<AudioFifo>(audio_sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), duration_ * 4);
+			fifo_ = std::make_unique<AudioFifo>(audio_sample_format_, audio_channel_count_, sample_rate_, audio_time_base_, PtsToTime(frame->pts, audio_time_base_), capacity_ * 4);
 			DebugPrintLine(Common::DebugSeverity::info, "New fifo created");
 		}
 		if (!fifo_->TryPush(frame))
@@ -88,7 +89,7 @@ namespace TVPlayR {
 			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(last_video_->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(last_video_->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
 		std::int64_t time = PtsToTime(last_video_ ? last_video_->pts : AV_NOPTS_VALUE, input_video_time_base_);
-		return Core::AVSync(audio, last_video_, Core::FrameTimeInfo{ time + start_timecode_, time, duration_ - time});
+		return Core::AVSync(audio, last_video_, Core::FrameTimeInfo{ time + start_timecode_, time, media_duration_ == AV_NOPTS_VALUE ? AV_NOPTS_VALUE : media_duration_ - time});
 	}
 	
 	bool SynchronizingBuffer::IsFull() const 
@@ -101,8 +102,8 @@ namespace TVPlayR {
 		std::int64_t max_video = video_queue_.empty() ? AV_NOPTS_VALUE : PtsToTime(video_queue_.back()->pts, video_time_base_);
 		std::int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
 		std::int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
-		return max_video - min_video >= duration_ &&
-					(!fifo_ || max_audio - min_audio >= duration_);*/
+		return max_video - min_video >= capacity_ &&
+					(!fifo_ || max_audio - min_audio >= capacity_);*/
 	}
 	bool SynchronizingBuffer::IsReady() const 
 	{ 
@@ -170,9 +171,9 @@ namespace TVPlayR {
 		std::int64_t min_audio = fifo_ ? fifo_->TimeMin() : AV_NOPTS_VALUE;
 		std::int64_t max_audio = fifo_ ? fifo_->TimeMax() : AV_NOPTS_VALUE;
 		if (min_audio == AV_NOPTS_VALUE)
-			while (video_queue_.size() > av_rescale(2 * duration_, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
+			while (video_queue_.size() > av_rescale(2 * capacity_, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 				video_queue_.pop_front();
-		if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > 2 * duration_)
-			fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * duration_, sample_rate_, AV_TIME_BASE)));*/
+		if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > 2 * capacity_)
+			fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * capacity_, sample_rate_, AV_TIME_BASE)));*/
 	}
 }}

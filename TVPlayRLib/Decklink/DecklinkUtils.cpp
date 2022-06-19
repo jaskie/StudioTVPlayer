@@ -109,8 +109,7 @@ namespace TVPlayR {
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 			assert(decklink_frame->GetRowBytes() == frame->linesize[0]);
 			std::memcpy(frame->data[0], video_bytes, frame->linesize[0] * frame->height);
-			BMDTimeValue frameTime;
-			BMDTimeValue frameDuration;
+			BMDTimeValue frameTime, frameDuration;
 			if (SUCCEEDED(decklink_frame->GetStreamTime(&frameTime, &frameDuration, time_scale)))
 				frame->pts = frameTime / frameDuration;
 			return frame;

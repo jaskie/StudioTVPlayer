@@ -12,9 +12,9 @@ namespace StudioTVPlayer.Controls
         public static readonly DependencyProperty TimeProperty =
             DependencyProperty.Register(
                 nameof(Time),
-                typeof(TimeSpan),
+                typeof(TimeSpan?),
                 typeof(TimecodeEdit),
-                new FrameworkPropertyMetadata(TimeSpan.Zero, OnTimeChanged));
+                new FrameworkPropertyMetadata(null, OnTimeChanged));
 
         public static readonly DependencyProperty VideoFormatProperty =
             DependencyProperty.Register(
@@ -56,8 +56,8 @@ namespace StudioTVPlayer.Controls
 
         private static void OnEnterPressedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is TextBox element)                 
-                element.KeyDown += EnterPressed;                                  
+            if (d is TextBox element)
+                element.KeyDown += EnterPressed;
         }
 
         private static void EnterPressed(object sender, KeyEventArgs e)
@@ -74,16 +74,16 @@ namespace StudioTVPlayer.Controls
         private static void OnTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (!(d is TimecodeEdit element && element.VideoFormat is TVPlayR.VideoFormat vf)) return;
-            element.Text = vf.FrameNumberToString(vf.TimeToFrameNumber(element.Time));
+            element.Text = element.Time.HasValue ? vf.FrameNumberToString(vf.TimeToFrameNumber(element.Time.Value)) : string.Empty;
         }
 
         public static void SetEnterPressedCommand(UIElement element, ICommand value) => element.SetValue(EnterPressedCommandProperty, value);
 
         public static ICommand GetEnterPressedCommand(UIElement element) => (ICommand)element.GetValue(EnterPressedCommandProperty);
 
-        public TimeSpan Time
+        public TimeSpan? Time
         {
-            get => (TimeSpan)GetValue(TimeProperty);
+            get => (TimeSpan?)GetValue(TimeProperty);
             set => SetValue(TimeProperty, value);
         }
 

@@ -91,10 +91,8 @@ namespace TVPlayR {
 					time = ((static_cast<int64_t>(system_time.wHour) * 60 + system_time.wMinute) * 60 + system_time.wSecond) * AV_TIME_BASE + system_time.wMilliseconds * 1000;
 					break;
 				}
-				std::string timecode_str = time == AV_NOPTS_VALUE ?
-					"NO TC DATA" :
-					video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
-				Draw(rgba_frame, timecode_str);
+				if (time != AV_NOPTS_VALUE)
+					Draw(rgba_frame, GetTimeString(time));
 				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
 				return Core::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.TimeInfo);
 			}
@@ -113,6 +111,12 @@ namespace TVPlayR {
 				frame_graphics.DrawImage(&overlay_bitmap, background_rect_);
 				frame_graphics.Flush(Gdiplus::FlushIntentionSync);
 			}
+
+			std::string GetTimeString(int64_t time)
+			{
+				return video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
+			}
+
 		};
 
 		TimecodeOverlay::TimecodeOverlay(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)

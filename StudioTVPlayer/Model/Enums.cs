@@ -31,25 +31,6 @@ namespace StudioTVPlayer.Model
         Timecode
     }
 
-    public enum SortDirection
-    {
-        Ascending,
-        Descending
-    }
-
-    public enum FFMeta
-    {
-        All,
-        Duration,
-        Thumbnail
-    }
-
-    public enum ThumbnailType
-    {
-        NoPreview,
-        Loading
-    }
-
     public enum MediaEventKind
     {
         Create,

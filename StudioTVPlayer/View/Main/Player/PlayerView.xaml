@@ -190,8 +190,8 @@
             </UniformGrid>
             <Slider Grid.Row="4" Margin="5" IsMoveToPointEnabled="True" 
                     IsEnabled="{Binding IsSeekable}"
-                    Minimum="{Binding CurrentItemStartTime.TotalMilliseconds}"
-                    Maximum="{Binding CurrentItemDuration.TotalMilliseconds}" 
+                    Minimum="{Binding CurrentItemStartTime.TotalSeconds}"
+                    Maximum="{Binding CurrentItemDuration.TotalSeconds}" 
                     Thumb.DragStarted="Slider_DragStarted"
                     Thumb.DragCompleted="Slider_DragCompleted"
                     Value="{Binding SliderPosition, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">

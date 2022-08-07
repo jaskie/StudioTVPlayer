@@ -196,6 +196,9 @@
     <ClInclude Include="Core\AVSync.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="FFmpeg\PauseBuffer.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -302,6 +305,9 @@
       <Filter>FFmpeg</Filter>
     </ClCompile>
     <ClCompile Include="FFmpeg\OutputVideoFilter.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\PauseBuffer.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
   </ItemGroup>

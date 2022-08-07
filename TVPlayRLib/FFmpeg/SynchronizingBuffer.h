@@ -1,4 +1,5 @@
 #pragma once
+#include "PauseBuffer.h"
 
 namespace TVPlayR {
 	namespace Core 
@@ -13,7 +14,7 @@ namespace TVPlayR {
 class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 {
 public:
-	SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync, std::int64_t start_timecode, std::int64_t media_duration);
+	SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync, std::int64_t start_timecode, std::int64_t media_duration, FieldOrder field_order);
 	~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
@@ -47,7 +48,7 @@ private:
 	std::deque<std::shared_ptr<AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
 	std::unique_ptr<AudioFifo> fifo_loop_;
-	std::shared_ptr<AVFrame> last_video_;
+	PauseBuffer pause_frame_;
 	const Core::VideoFormatType video_format_;
 	const AVSampleFormat audio_sample_format_;
 	void Sweep();

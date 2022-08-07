@@ -37,7 +37,7 @@ namespace TVPlayR {
 			frame->pict_type = source->pict_type;
 			frame->sample_aspect_ratio = source->sample_aspect_ratio;
 			frame->interlaced_frame = source->interlaced_frame;
-			frame->top_field_first = source->interlaced_frame;
+			frame->top_field_first = source->top_field_first;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
 			av_image_copy(frame->data, frame->linesize, const_cast<const uint8_t**>(source->data), const_cast<const int*>(source->linesize), static_cast<AVPixelFormat>(source->format), source->width, source->height);
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);

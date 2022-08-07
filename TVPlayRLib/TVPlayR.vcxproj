@@ -97,6 +97,7 @@
     <ClInclude Include="FFmpeg\OutputFormat.h" />
     <ClInclude Include="FFmpeg\OutputVideoFilter.h" />
     <ClInclude Include="Core\FrameTimeInfo.h" />
+    <ClInclude Include="FFmpeg\PauseBuffer.h" />
     <ClInclude Include="Preview\PreviewSink.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BlockingCollection.h" />
@@ -250,6 +251,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFmpeg\OutputVideoFilter.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\PauseBuffer.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

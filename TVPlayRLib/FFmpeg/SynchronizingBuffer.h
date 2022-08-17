@@ -48,7 +48,7 @@ private:
 	std::deque<std::shared_ptr<AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
 	std::unique_ptr<AudioFifo> fifo_loop_;
-	PauseBuffer pause_frame_;
+	PauseBuffer pause_buffer_;
 	const Core::VideoFormatType video_format_;
 	const AVSampleFormat audio_sample_format_;
 	void Sweep();

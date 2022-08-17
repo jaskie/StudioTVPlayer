@@ -28,7 +28,7 @@ namespace TVPlayR {
 		, capacity_(capacity)
 		, start_timecode_(start_timecode)
 		, media_duration_(media_duration)
-		, pause_frame_(field_order, is_playing)
+		, pause_buffer_(field_order, is_playing)
 	{
 	}
 
@@ -81,16 +81,16 @@ namespace TVPlayR {
 			fifo_loop_.reset();
 			DebugPrintLine(Common::DebugSeverity::info, "Loop fifo is destroyed");
 		}
-		if ((is_playing_ || !pause_frame_.GetFrame()) && !video_queue_.empty())
-			pause_frame_.SetFrame(video_queue_.front());
+		if ((is_playing_ || !pause_buffer_.GetFrame()) && !video_queue_.empty())
+			pause_buffer_.SetFrame(video_queue_.front());
 		if (is_playing_ && !video_queue_.empty())
 			video_queue_.pop_front();
 #ifdef DEBUG
-		if (audio && audio->pts != AV_NOPTS_VALUE && !pause_frame_.IsEmpty() && pause_frame_.GetFrame()->pts != AV_NOPTS_VALUE)
-			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(pause_frame_.Pts(), input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(pause_frame_.Pts(), input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
+		if (audio && audio->pts != AV_NOPTS_VALUE && !pause_buffer_.IsEmpty() && pause_buffer_.GetFrame()->pts != AV_NOPTS_VALUE)
+			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(pause_buffer_.Pts(), input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(pause_buffer_.Pts(), input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
-		std::int64_t time = PtsToTime(pause_frame_.Pts(), input_video_time_base_);
-		return Core::AVSync(audio, pause_frame_.GetFrame(), Core::FrameTimeInfo{ time + start_timecode_, time, media_duration_ == AV_NOPTS_VALUE ? AV_NOPTS_VALUE : media_duration_ - time});
+		std::int64_t time = PtsToTime(pause_buffer_.Pts(), input_video_time_base_);
+		return Core::AVSync(audio, pause_buffer_.GetFrame(), Core::FrameTimeInfo{ time + start_timecode_, time, media_duration_ == AV_NOPTS_VALUE ? AV_NOPTS_VALUE : media_duration_ - time});
 	}
 	
 	bool SynchronizingBuffer::IsFull() const 
@@ -113,13 +113,13 @@ namespace TVPlayR {
 		if (is_playing_)
 			return !video_queue_.empty() && (!fifo_ || fifo_->SamplesCount() > av_rescale(sample_rate_, input_video_time_base_.num, input_video_time_base_.den));
 		else
-			return !pause_frame_.IsEmpty() || !video_queue_.empty();
+			return !pause_buffer_.IsEmpty() || !video_queue_.empty();
 	}
 	
 	void SynchronizingBuffer::SetIsPlaying(bool is_playing) 
 	{
 		is_playing_ = is_playing;
-		pause_frame_.SetIsPlaying(is_playing);
+		pause_buffer_.SetIsPlaying(is_playing);
 		DebugPrintLine(Common::DebugSeverity::info, is_playing ? "Playing" : "Paused");
 	}
 	
@@ -128,7 +128,7 @@ namespace TVPlayR {
 		if (fifo_)
 			fifo_->Reset(time);
 		video_queue_.clear();
-		pause_frame_.Clear();
+		pause_buffer_.Clear();
 		is_flushed_ = false;
 		DebugPrintLine(Common::DebugSeverity::info, "Seek: " + std::to_string(time / 1000));
 	}

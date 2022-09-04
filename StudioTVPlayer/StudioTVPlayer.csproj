@@ -108,6 +108,7 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
+    <Compile Include="Model\EncoderPreset.cs" />
     <Compile Include="Model\EncoderSettings.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\InputBase.cs" />
@@ -319,6 +320,9 @@
       <Project>{8d4ba75e-812d-41e1-8b0f-de6540d2f84b}</Project>
       <Name>TVPlayR.Player</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\EmbeddedPresets.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

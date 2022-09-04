@@ -173,9 +173,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 EncoderSettings = new Model.EncoderSettings
                 {
                     VideoBitrate = 4000,
-                    VideoCodec = Model.EncoderSettings.VideoCodecs.FirstOrDefault(),
+                    VideoCodec = TVPlayR.FFOutput.VideoCodecs.FirstOrDefault(),
                     AudioBitrate = 128,
-                    AudioCodec = Model.EncoderSettings.AudioCodecs.FirstOrDefault()
+                    AudioCodec = TVPlayR.FFOutput.AudioCodecs.FirstOrDefault()
                 }
             });
             AddOutput(vm);

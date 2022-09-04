@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PresetList>
+  <EncoderPreset PresetName="H.264 4Mbps"
+                 VideoCodec="libx264"
+                 VideoBitrate="4096"
+                 AudioCodec="aac"
+                 AudioBitrate="128"
+                 Options="preset=veryfast,g=30"
+                 >
+    <Description>Preview quality, 4 Mbps H.264 CPU-encoded video, 128 kbps audio</Description>
+  </EncoderPreset>
+  <EncoderPreset PresetName="XDCAM HD422 50Mbps"
+                 VideoCodec="mpeg2video"
+                 VideoBitrate="50000"
+                 AudioCodec="pcm_s16le"
+                 Options=""
+                 >
+    <Description>Popular HD production format, 50 Mbps video, PCM audio</Description>
+  </EncoderPreset>
+</PresetList>

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using StudioTVPlayer.Providers;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
@@ -14,5 +16,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         protected abstract string ReadErrorInfo(string propertyName);
 
         public abstract void Dispose();
+
+        public static IEnumerable<Model.EncoderPreset> RecordingPresets => GlobalApplicationData.Current.EncoderPresets;
     }
 }

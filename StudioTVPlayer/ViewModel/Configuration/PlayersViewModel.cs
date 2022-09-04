@@ -92,7 +92,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach (var player in Players)
                 player.Apply();
-            GlobalApplicationData.Current.UpdateChannels(Players.Select(c => c.Player).ToList());
+            GlobalApplicationData.Current.UpdatePlayers(Players.Select(c => c.Player).ToList());
         }
 
         public override bool IsValid()

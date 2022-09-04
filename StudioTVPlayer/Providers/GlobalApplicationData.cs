@@ -11,19 +11,22 @@ namespace StudioTVPlayer.Providers
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
 
-        private GlobalApplicationData()
-        { }
+        private GlobalApplicationData() 
+        {
+            EncoderPresets = LoadEncoderPresets();
+        }
 
         public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
 
         
-        public IList<MediaPlayer> Players { get; } = new List<MediaPlayer>();
-
+        public IList<MediaPlayer> MediaPlayers { get; } = new List<MediaPlayer>();
+        
+        public IEnumerable<EncoderPreset> EncoderPresets { get; private set; }
 
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
-            foreach (var player in Players)
+            foreach (var player in MediaPlayers)
                 player.Dispose();
             foreach (var channel in Configuration.Current.Players)
                 channel.Dispose();
@@ -31,49 +34,60 @@ namespace StudioTVPlayer.Providers
                 input.Dispose();
         }
 
-        public void UpdateChannels(List<Player> channels)
+        public void UpdatePlayers(List<Player> players)
         {
-            foreach (var channel in channels)
+            foreach (var player in players)
             {
-                if (!channel.IsInitialized)
+                if (!player.IsInitialized)
                 {
-                    channel.Initialize();
-                    var player = Players.FirstOrDefault(p => p.Player == channel);
-                    if (player == null)
-                        Players.Add(new MediaPlayer(channel));
+                    player.Initialize();
+                    var mediaPlayer = MediaPlayers.FirstOrDefault(p => p.Player == player);
+                    if (mediaPlayer == null)
+                        MediaPlayers.Add(new MediaPlayer(player));
                     else
                     {
-                        var index = Players.IndexOf(player);
-                        player.Dispose();
-                        Players[index] = new MediaPlayer(channel);
+                        var index = MediaPlayers.IndexOf(mediaPlayer);
+                        mediaPlayer.Dispose();
+                        MediaPlayers[index] = new MediaPlayer(player);
                     }
                 }
             }
-            foreach (var channel in Configuration.Current.Players.ToList())
+            foreach (var player in Configuration.Current.Players.ToList())
             {
-                if (!channels.Contains(channel))
+                if (!players.Contains(player))
                 {
-                    var player = Players.FirstOrDefault(p => p.Player == channel);
-                    if (!(player is null))
+                    var mediaPlayer = MediaPlayers.FirstOrDefault(p => p.Player == player);
+                    if (!(mediaPlayer is null))
                     {
-                        player.Dispose();
-                        Players.Remove(player);
+                        mediaPlayer.Dispose();
+                        MediaPlayers.Remove(mediaPlayer);
                     }
-                    channel.Dispose();
+                    player.Dispose();
                 }
             }
-            Configuration.Current.Players = channels;
+            Configuration.Current.Players = players;
         }
 
         public void Initialize()
         {
-            foreach(var channel in Configuration.Current.Players)
+            foreach(var player in Configuration.Current.Players)
             {
-                channel.Initialize();
-                Players.Add(new MediaPlayer(channel));
+                player.Initialize();
+                MediaPlayers.Add(new MediaPlayer(player));
             }
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
+        }
+
+
+        public IEnumerable<EncoderPreset> LoadEncoderPresets()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<EncoderPreset>), new System.Xml.Serialization.XmlRootAttribute("PresetList"));
+            var presets = (List<EncoderPreset>)serializer.Deserialize(resourceStream);
+            presets.ForEach(p => p.IsEmbedded = true);
+            return presets;
         }
 
     }

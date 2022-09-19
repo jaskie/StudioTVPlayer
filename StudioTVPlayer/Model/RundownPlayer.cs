@@ -5,27 +5,21 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public class MediaPlayer : IDisposable
+    public class RundownPlayer : Player
     {
         private readonly List<RundownItemBase> _rundown = new List<RundownItemBase>();
         private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
         private RundownItemBase _playingRundownItem;
         private RundownItemBase _nextRundownItem;
 
-        public MediaPlayer(Player player)
-        {
-            Player = player;
-            player.AudioVolume += Player_AudioVolume;
-        }
-
+        [XmlIgnore]
         public IReadOnlyCollection<RundownItemBase> Rundown => _rundown;
 
-        public Player Player { get; }
-
+        [XmlIgnore]
         public RundownItemBase PlayingRundownItem
         {
             get => _playingRundownItem;
@@ -40,13 +34,23 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        [XmlIgnore]
         public bool IsLoop { get; set; }
 
+        [XmlIgnore]
         public bool DisableAfterUnload { get; set; }
 
+        [XmlIgnore]
         public bool IsEof => (PlayingRundownItem?.Input as TVPlayR.FileInput)?.IsEof ?? true;
 
-        public TimeSpan OneFrame => Player.VideoFormat.FrameNumberToTime(1);
+        [XmlIgnore]
+        public TimeSpan OneFrame => VideoFormat.FrameNumberToTime(1);
+
+        [XmlIgnore]
+        public bool IsAplha => PixelFormat == TVPlayR.PixelFormat.bgra;
+
+        [XmlIgnore]
+        public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
 
         public bool Play()
         {
@@ -61,12 +65,10 @@ namespace StudioTVPlayer.Model
             PlayingRundownItem?.Pause();
         }
 
-
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
-        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
         public event EventHandler<RundownItemEventArgs> Removed;
 
         public void Load(RundownItemBase item)
@@ -92,7 +94,7 @@ namespace StudioTVPlayer.Model
 
         private void AddToQueue(RundownItemBase rundownItem, int index)
         {
-            if (Player.AddItemsWithAutoPlay)
+            if (AddItemsWithAutoPlay)
                 rundownItem.IsAutoStart = true;
             if (index < _rundown.Count)
             {
@@ -108,16 +110,6 @@ namespace StudioTVPlayer.Model
             }
             else
                 throw new ArgumentException(nameof(index));
-        }
-
-
-        public bool IsAplha => Player.PixelFormat == TVPlayR.PixelFormat.bgra;
-
-        public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
-
-        public ImageSource GetPreview(int width, int height)
-        {
-            return Player.GetPreview(width, height);
         }
 
         public void MoveItem(int srcIndex, int destIndex)
@@ -160,8 +152,8 @@ namespace StudioTVPlayer.Model
                         Debug.Fail("Invalid rundownItem type");
                         break;
                 }
-                rundownItem.Prepare(Player.AudioChannelCount);
-                Player.Load(rundownItem.Input);
+                rundownItem.Prepare(AudioChannelCount);
+                base.Load(rundownItem.Input);
                 if (rundownItem.IsAutoStart)
                     rundownItem.Play();
             }
@@ -182,16 +174,11 @@ namespace StudioTVPlayer.Model
             return file.Seek(timeSpan);
         }
 
-        public void SetVolume(float value)
-        {
-            Player.SetVolume(value);
-        }
-
-        public void Clear()
+        public override void Clear()
         {
             PlayingRundownItem = null;
             SetNext(null);
-            Player.Clear();
+            base.Clear();
         }
 
         public void DeleteDisabled()
@@ -267,8 +254,8 @@ namespace StudioTVPlayer.Model
                 return;
             if (current.Media.Duration - e.TimeFromBegin < PreloadTime)
                 return;
-            if (nextItem.Prepare(Player.AudioChannelCount))
-                Player.Preload(nextItem.Input);
+            if (nextItem.Prepare(AudioChannelCount))
+                Preload(nextItem.Input);
         }
 
         private void SetNext(RundownItemBase item)
@@ -287,10 +274,6 @@ namespace StudioTVPlayer.Model
                 SetNext(FindNextAutoPlayItem());
         }
 
-        private void Player_AudioVolume(object sender, AudioVolumeEventArgs e)
-        {
-            AudioVolume?.Invoke(this, e);
-        }
 
         private void RundownItem_RemoveRequested(object sender, EventArgs e)
         {
@@ -299,9 +282,9 @@ namespace StudioTVPlayer.Model
         }
 
 
-        public void Dispose()
+        public override void Dispose()
         {
-            Player.AudioVolume -= Player_AudioVolume;
+            base.Dispose();
             PlayingRundownItem = null;
             foreach (var item in _rundown)
             {

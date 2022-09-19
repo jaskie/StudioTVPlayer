@@ -118,7 +118,7 @@
     <Compile Include="Model\DecklinkInput.cs" />
     <Compile Include="Model\DecklinkOutput.cs" />
     <Compile Include="Model\Enums.cs" />
-    <Compile Include="Model\MediaPlayer.cs" />
+    <Compile Include="Model\RundownPlayer.cs" />
     <Compile Include="Model\NdiOutput.cs" />
     <Compile Include="Model\OutputBase.cs" />
     <Compile Include="Model\FileRundownItem.cs" />

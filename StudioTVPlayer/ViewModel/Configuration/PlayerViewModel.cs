@@ -19,7 +19,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
 
-        public PlayerViewModel(Model.Player player)
+        public PlayerViewModel(Model.RundownPlayer player)
         {
             Player = player;
             _name = player.Name;
@@ -57,7 +57,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
         }
 
-        internal Model.Player Player { get; }
+        internal Model.RundownPlayer Player { get; }
 
         public string Name
         {

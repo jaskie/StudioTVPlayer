@@ -151,7 +151,7 @@ namespace StudioTVPlayer.Model
             _player.Preload(item);
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             _player.Clear();
         }
@@ -173,7 +173,7 @@ namespace StudioTVPlayer.Model
             AudioVolume?.Invoke(this, new AudioVolumeEventArgs(e.AudioVolume));
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (!IsInitialized)
                 return;

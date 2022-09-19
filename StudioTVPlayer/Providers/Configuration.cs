@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Providers
 
         [XmlArray]
         [XmlArrayItem("Player")]
-        public List<Player> Players { get; set; } = new List<Player>();
+        public List<RundownPlayer> Players { get; set; } = new List<RundownPlayer>();
 
         public static Configuration Current { get; } = Load();
 

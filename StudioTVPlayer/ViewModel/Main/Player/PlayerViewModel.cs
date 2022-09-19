@@ -17,7 +17,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class PlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
-        private readonly Model.MediaPlayer _mediaPlayer;
+        private readonly Model.RundownPlayer _mediaPlayer;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
         private const double AudioLevelMaxValue = -6.0;
         private const double AudioLevelMinValue = -60.0;
@@ -35,7 +35,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private TimeSpan _timeFromBegin;
         private TimeDisplaySource _timeDisplaySource;
 
-        public PlayerViewModel(Model.MediaPlayer player)
+        public PlayerViewModel(Model.RundownPlayer player)
         {
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
@@ -46,16 +46,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             DeleteDisabledCommand = new UiCommand(DeleteDisabled, _ => Rundown.Any(i => i.RundownItem.IsDisabled));
             DisplayTimecodeEditCommand = new UiCommand(_ => { if (DisplayTime.HasValue) Seek(DisplayTime.Value); });
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
-            Name = player.Player.Name;
-            VideoFormat = player.Player.VideoFormat;
-            AudioLevelBars = Enumerable.Repeat(0, player.Player.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
+            Name = player.Name;
+            VideoFormat = player.VideoFormat;
+            AudioLevelBars = Enumerable.Repeat(0, player.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
             player.Loaded += MediaPlayer_Loaded;
             player.FramePlayed += MediaPlayer_Progress;
             player.Stopped += MediaPlayer_Stopped;
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
             player.Removed += MediaPlayer_Removed;
-            if (player.Player.LivePreview)
+            if (player.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
             Rundown = new ObservableCollection<RundownItemViewModelBase>(player.Rundown.Select(CreateRundownItemViewModel));
@@ -206,7 +206,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 if (oldItem != null)
                 {
                     oldItem.IsLoaded = false;
-                    if (_mediaPlayer.Player.DisablePlayedItems)
+                    if (_mediaPlayer.DisablePlayedItems)
                         oldItem.RundownItem.IsDisabled = true;
                 }
                 _sliderPosition = CurrentItemStartTime.TotalSeconds;
@@ -423,7 +423,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void MediaPlayer_Loaded(object sender, Model.Args.RundownItemEventArgs e)
         {
             CurrentRundownItem = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
-            if (!_mediaPlayer.Player.LivePreview)
+            if (!_mediaPlayer.LivePreview)
                 Preview = CurrentRundownItem?.Thumbnail;
         }
 

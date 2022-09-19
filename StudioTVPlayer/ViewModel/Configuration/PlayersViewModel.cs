@@ -79,7 +79,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddPlayer(object obj)
         {
-            var player = new Player { Name = $"Player {Players.Count + 1}" };
+            var player = new RundownPlayer { Name = $"Player {Players.Count + 1}" };
             var vm = new PlayerViewModel(player);
             vm.RemoveRequested += Player_RemoveRequested;
             vm.CheckErrorInfo += Player_CheckErrorInfo;
@@ -92,7 +92,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach (var player in Players)
                 player.Apply();
-            GlobalApplicationData.Current.UpdatePlayers(Players.Select(c => c.Player).ToList());
+            GlobalApplicationData.Current.UpdatePlayers(Players.Select(vm => vm.Player).ToList());
         }
 
         public override bool IsValid()

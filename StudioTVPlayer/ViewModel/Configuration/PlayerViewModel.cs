@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Model.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,19 +20,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
 
-        public PlayerViewModel(Model.RundownPlayer player)
+        public PlayerViewModel(Player player)
         {
             Player = player;
             _name = player.Name;
-            OutputViewModelBase viewModelSelector(Model.OutputBase o)
+            OutputViewModelBase viewModelSelector(OutputBase o)
             {
                 switch (o)
                 {
-                    case Model.DecklinkOutput decklink:
+                    case DecklinkOutput decklink:
                         return new DecklinkOutputViewModel(decklink);
-                    case Model.NdiOutput ndi:
+                    case NdiOutput ndi:
                         return new NdiOutputViewModel(ndi);
-                    case Model.FFOutput stream:
+                    case FFOutput stream:
                         return new FFOutputViewModel(stream);
                     default:
                         throw new ApplicationException("Invalid type provided");
@@ -47,7 +48,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 if (output.IsFrameClock)
                     _frameClockSource = output;
             }
-            _selectedVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(vf => vf.Name == player.VideoFormatName);
+            _selectedVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(vf => vf.Name == player.VideoFormat);
             _selectedPixelFormat = player.PixelFormat;
             _livePreview = player.LivePreview;
             _disablePlayedItems = player.DisablePlayedItems;
@@ -57,7 +58,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
         }
 
-        internal Model.RundownPlayer Player { get; }
+        internal Player Player { get; }
 
         public string Name
         {
@@ -134,13 +135,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (!IsModified)
                 return;
-            if (Outputs.Any(o => o.IsModified) || Player.PixelFormat != SelectedPixelFormat || Player.VideoFormat != SelectedVideoFormat || Player.LivePreview != LivePreview)
-                Player.Uninitialize();
             foreach (var output in Outputs)
                 output.Apply();
             Player.Name = Name;
             Player.PixelFormat = SelectedPixelFormat;
-            Player.VideoFormat = SelectedVideoFormat;
+            Player.VideoFormat = SelectedVideoFormat.Name;
             Player.LivePreview = LivePreview;
             Player.DisablePlayedItems = DisablePlayedItems;
             Player.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
@@ -155,19 +154,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddNdiOutput(object _)
         {
-            var vm = new NdiOutputViewModel(new Model.NdiOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock), SourceName = Name });
+            var vm = new NdiOutputViewModel(new Model.Configuration.NdiOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock), SourceName = Name });
             AddOutput(vm);
         }
 
         private void AddDecklinkOutput(object _)
         {
-            var vm = new DecklinkOutputViewModel(new Model.DecklinkOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock) });
+            var vm = new DecklinkOutputViewModel(new Model.Configuration.DecklinkOutput() { IsFrameClock = !Outputs.Any(a => a.IsFrameClock) });
             AddOutput(vm);
         }
 
         private void AddStreamOutput(object _)
         {
-            var vm = new FFOutputViewModel(new Model.FFOutput
+            var vm = new FFOutputViewModel(new FFOutput
             {
                 IsFrameClock = !Outputs.Any(a => a.IsFrameClock),
                 EncoderSettings = new Model.EncoderSettings

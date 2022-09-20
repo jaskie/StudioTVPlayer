@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
@@ -16,10 +15,11 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _playingRundownItem;
         private RundownItemBase _nextRundownItem;
 
-        [XmlIgnore]
+        public RundownPlayer(Configuration.Player configuration): base(configuration)
+        { }
+
         public IReadOnlyCollection<RundownItemBase> Rundown => _rundown;
 
-        [XmlIgnore]
         public RundownItemBase PlayingRundownItem
         {
             get => _playingRundownItem;
@@ -34,22 +34,16 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        [XmlIgnore]
         public bool IsLoop { get; set; }
 
-        [XmlIgnore]
         public bool DisableAfterUnload { get; set; }
 
-        [XmlIgnore]
         public bool IsEof => (PlayingRundownItem?.Input as TVPlayR.FileInput)?.IsEof ?? true;
 
-        [XmlIgnore]
         public TimeSpan OneFrame => VideoFormat.FrameNumberToTime(1);
 
-        [XmlIgnore]
         public bool IsAplha => PixelFormat == TVPlayR.PixelFormat.bgra;
 
-        [XmlIgnore]
         public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
 
         public bool Play()

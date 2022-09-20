@@ -28,41 +28,25 @@ namespace StudioTVPlayer.Providers
             MediaVerifier.Current.Dispose();
             foreach (var player in RundownPlayers)
                 player.Dispose();
-            foreach (var channel in Configuration.Current.Players)
-                channel.Dispose();
             foreach (var input in InputList.Current.Inputs)
                 input.Dispose();
         }
 
-        public void UpdatePlayers(List<RundownPlayer> players)
+        public void UpdatePlayers(List<Model.Configuration.Player> players)
         {
+            var playersToRemove = RundownPlayers.Where(p => !players.Contains(p.Configuration)).ToList();
+            foreach (var runodwnPlayer in playersToRemove)
+            {
+                runodwnPlayer.Dispose();
+                RundownPlayers.Remove(runodwnPlayer);
+            }
             foreach (var player in players)
             {
-                if (!player.IsInitialized)
+                var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == player) ?? new RundownPlayer(player);
+                if (!rundownPlayer.IsInitialized)
                 {
-                    player.Initialize();
-                    var rundownPlayer = RundownPlayers.FirstOrDefault(p => p == player);
-                    if (rundownPlayer == null)
-                        RundownPlayers.Add(player);
-                    else
-                    {
-                        var index = RundownPlayers.IndexOf(rundownPlayer);
-                        rundownPlayer.Dispose();
-                        RundownPlayers[index] = player;
-                    }
-                }
-            }
-            foreach (var player in Configuration.Current.Players.ToList())
-            {
-                if (!players.Contains(player))
-                {
-                    var mediaPlayer = RundownPlayers.FirstOrDefault(p => p == player);
-                    if (!(mediaPlayer is null))
-                    {
-                        mediaPlayer.Dispose();
-                        RundownPlayers.Remove(mediaPlayer);
-                    }
-                    player.Dispose();
+                    rundownPlayer.Initialize();
+                    RundownPlayers.Add(rundownPlayer);
                 }
             }
             Configuration.Current.Players = players;
@@ -70,11 +54,7 @@ namespace StudioTVPlayer.Providers
 
         public void Initialize()
         {
-            foreach(var player in Configuration.Current.Players)
-            {
-                player.Initialize();
-                RundownPlayers.Add(player);
-            }
+            UpdatePlayers(Configuration.Current.Players);
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
         }

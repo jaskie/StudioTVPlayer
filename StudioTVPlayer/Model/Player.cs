@@ -7,19 +7,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
     public class Player : INotifyPropertyChanged, IDisposable
     {
-        private string _name = string.Empty;
-
-        private TVPlayR.VideoFormat _videoFormat;
-        private string _videoFormatName;
-        private TVPlayR.PixelFormat _pixelFormat;
-        private bool _livePreview;
-
         private TVPlayR.Player _player;
         private TVPlayR.PreviewSink _outputPreview;
 
@@ -27,31 +19,40 @@ namespace StudioTVPlayer.Model
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
 
-        [XmlAttribute]
-        public string Name { get => _name; set => _name = value; }
-
-        [XmlIgnore]
-        public TVPlayR.VideoFormat VideoFormat
+        public Player(Configuration.Player configuration)
         {
-            get => _videoFormat; 
-            set
+            Configuration = configuration;
+            VideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == configuration.Name);
+            foreach (var outputConfiguration in configuration.Outputs)
             {
-                if (!Set(ref _videoFormat, value))
-                    return;
-                VideoFormatName = value.Name;
+                OutputBase output;
+                switch (outputConfiguration)
+                {
+                    case Configuration.DecklinkOutput decklink:
+                        output = new DecklinkOutput(decklink);
+                        break;
+                    case Configuration.NdiOutput ndi:
+                        output = new NdiOutput(ndi);
+                        break;
+                    case Configuration.FFOutput ff:
+                        output = new FFOutput(ff);
+                        break;
+                    default:
+                        throw new ApplicationException("Invalid output configuration type");
+                }
+                _outputs.Add(output);
             }
         }
 
-        [XmlAttribute(nameof(VideoFormat))]
-        public string VideoFormatName { get => _videoFormatName; set => _videoFormatName = value; }
+        public Configuration.Player Configuration { get; }
 
-        [XmlAttribute]
-        public TVPlayR.PixelFormat PixelFormat { get => _pixelFormat; set => Set(ref _pixelFormat, value); }
+        public string Name => Configuration.Name;
 
-        [XmlArray]
-        [XmlArrayItem(typeof(DecklinkOutput))]
-        [XmlArrayItem(typeof(NdiOutput))]
-        [XmlArrayItem(typeof(FFOutput))]
+        public TVPlayR.VideoFormat VideoFormat { get; private set; }
+
+
+        public TVPlayR.PixelFormat PixelFormat => Configuration.PixelFormat;
+
         public OutputBase[] Outputs
         {
             get => _outputs.ToArray();
@@ -66,29 +67,22 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        [XmlAttribute]
-        public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
+        public bool LivePreview => Configuration.LivePreview;
 
-        [XmlAttribute]
         public bool DisablePlayedItems { get => _disablePlayedItems; set => _disablePlayedItems = value; }
 
-        [XmlAttribute]
         public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => _addItemsWithAutoPlay = value; }
 
-        [XmlIgnore]
         public bool IsInitialized => _player != null;
 
-        [XmlIgnore]
         public int AudioChannelCount { get; } = 2;
-
+        
         public void Initialize()
         {
             if (_player != null)
                 throw new ApplicationException($"Player {Name} already initialized");
-            _videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormatName);
-            if (_videoFormat == null)
-                return;
-            _player = new TVPlayR.Player(_name, _videoFormat, PixelFormat, AudioChannelCount);
+            VideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
+            _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);
             foreach (var output in Outputs)
             {
                 output.Initialize(_player);

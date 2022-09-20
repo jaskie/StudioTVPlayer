@@ -1,17 +1,20 @@
 ﻿using System.Linq;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
     public class DecklinkOutput: OutputBase
     {
         private TVPlayR.DecklinkOutput _output;
+        private readonly Configuration.DecklinkOutput _configuration;
 
-        [XmlAttribute]
-        public int DeviceIndex { get; set; }
+        public DecklinkOutput(Configuration.DecklinkOutput configuration): base(configuration)
+        {
+            _configuration = configuration;
+        }
 
-        [XmlAttribute]
-        public TVPlayR.DecklinkKeyer Keyer { get; set; }
+        public int DeviceIndex => _configuration.DeviceIndex;
+
+        public TVPlayR.DecklinkKeyer Keyer => _configuration.Keyer;
 
         public override void Dispose()
         {
@@ -30,7 +33,5 @@ namespace StudioTVPlayer.Model
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, Keyer);
             base.Initialize(player);
         }
-
-
     }
 }

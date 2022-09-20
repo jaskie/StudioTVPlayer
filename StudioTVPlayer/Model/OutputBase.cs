@@ -1,17 +1,20 @@
 ﻿using System;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
     public abstract class OutputBase: IDisposable
     {
         private TVPlayR.OverlayBase _overlay;
-        
-        [XmlAttribute]
-        public bool IsFrameClock { get; set; }
+        private readonly Configuration.OutputBase _configuration;
 
-        [XmlAttribute]
-        public TVPlayR.TimecodeOverlaySource TimecodeOverlay { get; set; }
+        public OutputBase(Configuration.OutputBase configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public bool IsFrameClock => _configuration.IsFrameClock;
+
+        public TVPlayR.TimecodeOverlaySource TimecodeOverlay => _configuration.TimecodeOverlay;
 
         public virtual void Initialize(TVPlayR.Player player) 
         {

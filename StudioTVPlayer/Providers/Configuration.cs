@@ -9,15 +9,23 @@ namespace StudioTVPlayer.Providers
     public class Configuration
     {
         private const string ConfigurationFile = "configuration.xml";
+        private List<Model.Configuration.Player> _players = new List<Model.Configuration.Player>();
 
         [XmlArray]
         [XmlArrayItem("WatchedFolder")]
         public List<WatchedFolder> WatchedFolders { get; set; } = new List<WatchedFolder>();
 
         [XmlArray]
-        [XmlArrayItem("Player")]
-        public List<RundownPlayer> Players { get; set; } = new List<RundownPlayer>();
-
+        public List<Model.Configuration.Player> Players
+        {
+            get => _players; 
+            set
+            {
+                foreach (var player in value)
+                    player.IsModified = false;
+                _players = value;
+            }
+        }
         public static Configuration Current { get; } = Load();
 
         private static Configuration Load()

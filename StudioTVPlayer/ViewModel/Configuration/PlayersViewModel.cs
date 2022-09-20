@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
+using StudioTVPlayer.Model.Configuration;
 using StudioTVPlayer.Providers;
 
 namespace StudioTVPlayer.ViewModel.Configuration
@@ -79,7 +79,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddPlayer(object obj)
         {
-            var player = new RundownPlayer { Name = $"Player {Players.Count + 1}" };
+            var player = new Player { Name = $"Player {Players.Count + 1}" };
             var vm = new PlayerViewModel(player);
             vm.RemoveRequested += Player_RemoveRequested;
             vm.CheckErrorInfo += Player_CheckErrorInfo;

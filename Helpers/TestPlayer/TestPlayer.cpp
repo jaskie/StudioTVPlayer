@@ -97,7 +97,7 @@ int main()
 		//input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		input->SetFramePlayedCallback([&](int64_t time) {});
+		input->SetFramePlayedCallback([&](Core::FrameTimeInfo& time) {});
 		input->Play();
 		input->SetIsLoop(true);
 		player.Load(input);

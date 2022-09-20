@@ -108,6 +108,12 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
+    <Compile Include="Model\Configuration\ConfigurationItemBase.cs" />
+    <Compile Include="Model\Configuration\DecklinkOutput.cs" />
+    <Compile Include="Model\Configuration\FFOutput.cs" />
+    <Compile Include="Model\Configuration\NdiOutput.cs" />
+    <Compile Include="Model\Configuration\OutputBase.cs" />
+    <Compile Include="Model\Configuration\Player.cs" />
     <Compile Include="Model\EncoderPreset.cs" />
     <Compile Include="Model\EncoderSettings.cs" />
     <Compile Include="Model\Player.cs" />

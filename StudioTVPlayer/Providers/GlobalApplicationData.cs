@@ -6,7 +6,7 @@ using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
 {
-    class GlobalApplicationData 
+    internal class GlobalApplicationData 
     {
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
@@ -49,7 +49,6 @@ namespace StudioTVPlayer.Providers
                     RundownPlayers.Add(rundownPlayer);
                 }
             }
-            Configuration.Current.Players = players;
         }
 
         public void Initialize()

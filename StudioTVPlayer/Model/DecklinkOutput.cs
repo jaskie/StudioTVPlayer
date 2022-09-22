@@ -16,13 +16,20 @@ namespace StudioTVPlayer.Model
 
         public TVPlayR.DecklinkKeyer Keyer => _configuration.Keyer;
 
-        public override void Dispose()
+        public override void UnInitialize()
         {
             if (_output is null)
                 return;
-            base.Dispose();
+            base.UnInitialize();
+            _output.UnInitialize();
+        }
+
+        public override void Dispose()
+        {
+            UnInitialize();
             _output.Dispose();
             _output = null;
+            base.Dispose();
         }
 
         public override TVPlayR.OutputBase Output => _output;

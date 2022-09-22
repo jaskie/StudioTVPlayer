@@ -59,7 +59,11 @@ namespace TVPlayR
     void FFOutput::InitializeFor(Player^ player)
     {
         (*_native_output)->InitializeFor(player->GetNativePlayer());
+    }
 
+    void FFOutput::UnInitialize()
+    {
+        (*_native_output)->Uninitialize();
     }
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }

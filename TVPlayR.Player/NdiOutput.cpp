@@ -46,6 +46,11 @@ namespace TVPlayR {
 		(*_ndi)->InitializeFor(player->GetNativePlayer());
 	}
 
+	void NdiOutput::UnInitialize()
+	{
+		(*_ndi)->Uninitialize();
+	}
+
 	std::shared_ptr<Core::OutputDevice> NdiOutput::GetNativeDevice()
 	{
 		return _ndi == nullptr ? nullptr : *_ndi;

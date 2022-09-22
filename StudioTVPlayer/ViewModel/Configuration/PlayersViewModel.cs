@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model.Configuration;
-using StudioTVPlayer.Providers;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -92,7 +91,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach (var player in Players)
                 player.Apply();
-            GlobalApplicationData.Current.UpdatePlayers(Players.Select(vm => vm.Player).ToList());
+            var playersConfiguration = Players.Select(vm => vm.Player).ToList();
+            Providers.GlobalApplicationData.Current.UpdatePlayers(playersConfiguration);
+            Providers.Configuration.Current.Players = playersConfiguration;
         }
 
         public override bool IsValid()

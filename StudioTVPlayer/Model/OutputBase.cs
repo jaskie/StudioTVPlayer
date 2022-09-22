@@ -5,16 +5,17 @@ namespace StudioTVPlayer.Model
     public abstract class OutputBase: IDisposable
     {
         private TVPlayR.OverlayBase _overlay;
-        private readonly Configuration.OutputBase _configuration;
 
         public OutputBase(Configuration.OutputBase configuration)
         {
-            _configuration = configuration;
+            Configuration = configuration;
         }
 
-        public bool IsFrameClock => _configuration.IsFrameClock;
+        public Configuration.OutputBase Configuration { get; }
 
-        public TVPlayR.TimecodeOverlaySource TimecodeOverlay => _configuration.TimecodeOverlay;
+        public bool IsFrameClock => Configuration.IsFrameClock;
+
+        public TVPlayR.TimecodeOverlaySource TimecodeOverlay => Configuration.TimecodeOverlay;
 
         public virtual void Initialize(TVPlayR.Player player) 
         {
@@ -26,11 +27,17 @@ namespace StudioTVPlayer.Model
             }
         }
 
+        public virtual void UnInitialize()
+        {
+            (_overlay as IDisposable)?.Dispose();
+            _overlay = null;
+        }
+
         public abstract TVPlayR.OutputBase Output { get; }
 
         public virtual void Dispose()
         {
-            (_overlay as IDisposable)?.Dispose();
+            UnInitialize();
         }
     }
 }

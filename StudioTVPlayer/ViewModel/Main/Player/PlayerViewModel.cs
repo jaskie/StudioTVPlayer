@@ -17,7 +17,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class PlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
-        private readonly Model.RundownPlayer _mediaPlayer;
+        private readonly RundownPlayer _mediaPlayer;
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
         private const double AudioLevelMaxValue = -6.0;
         private const double AudioLevelMinValue = -60.0;
@@ -35,7 +35,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private TimeSpan _timeFromBegin;
         private TimeDisplaySource _timeDisplaySource;
 
-        public PlayerViewModel(Model.RundownPlayer player)
+        public PlayerViewModel(RundownPlayer player)
         {
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);

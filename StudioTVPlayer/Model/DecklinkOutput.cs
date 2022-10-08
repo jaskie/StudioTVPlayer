@@ -27,7 +27,7 @@ namespace StudioTVPlayer.Model
         public override void Dispose()
         {
             UnInitialize();
-            _output.Dispose();
+            _output?.Dispose();
             _output = null;
             base.Dispose();
         }

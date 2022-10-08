@@ -6,20 +6,20 @@ using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
 {
-    internal class GlobalApplicationData 
+    internal class GlobalApplicationData
     {
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
+        private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
 
-        private GlobalApplicationData() 
+        private GlobalApplicationData()
         {
             EncoderPresets = LoadEncoderPresets();
         }
 
         public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
 
-        
-        public IList<RundownPlayer> RundownPlayers { get; } = new List<RundownPlayer>();
+        public IReadOnlyList<RundownPlayer> RundownPlayers => _rundownPlayers;
         
         public IEnumerable<EncoderPreset> EncoderPresets { get; private set; }
 
@@ -32,23 +32,26 @@ namespace StudioTVPlayer.Providers
                 input.Dispose();
         }
 
-        public void UpdatePlayers(List<Model.Configuration.Player> players)
+        public void UpdatePlayers(List<Model.Configuration.Player> playersConfiguration)
         {
-            var playersToRemove = RundownPlayers.Where(p => !players.Contains(p.Configuration)).ToList();
-            foreach (var runodwnPlayer in playersToRemove)
+            var rundownPlayers = RundownPlayers.Where(p => !playersConfiguration.Contains(p.Configuration)).ToList();
+            foreach (var rundownPlayer in rundownPlayers)
             {
-                runodwnPlayer.Dispose();
-                RundownPlayers.Remove(runodwnPlayer);
+                rundownPlayer.Dispose();
+                _rundownPlayers.Remove(rundownPlayer);
             }
-            foreach (var player in players)
+            rundownPlayers.Clear();
+            foreach (var player in playersConfiguration)
             {
                 var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == player) ?? new RundownPlayer(player);
+                if (player.IsModified)
+                    rundownPlayer.Uninitialize();
                 if (!rundownPlayer.IsInitialized)
-                {
                     rundownPlayer.Initialize();
-                    RundownPlayers.Add(rundownPlayer);
-                }
+                rundownPlayers.Add(rundownPlayer);
             }
+            _rundownPlayers.Clear();
+            _rundownPlayers.AddRange(rundownPlayers);
         }
 
         public void Initialize()

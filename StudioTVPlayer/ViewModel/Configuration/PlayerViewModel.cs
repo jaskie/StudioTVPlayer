@@ -38,7 +38,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         throw new ApplicationException("Invalid type provided");
                 }
             }
-            _outputs = new ObservableCollection<OutputViewModelBase>(player.Outputs.Select(viewModelSelector));
+            _outputs = new ObservableCollection<OutputViewModelBase>(player.Outputs?.Select(viewModelSelector));
             foreach (var output in _outputs)
             {
                 output.Modified += (o, e) => IsModified = true;

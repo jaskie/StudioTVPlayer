@@ -18,7 +18,7 @@ namespace TVPlayR
         _framePlayedDelegate = gcnew FramePlayedDelegate(this, &PreviewSink::FramePlayedCallback);
         _framePlayedHandle = GCHandle::Alloc(_framePlayedDelegate);
         IntPtr framePlayedIp = Marshal::GetFunctionPointerForDelegate(_framePlayedDelegate);
-        _target = gcnew WriteableBitmap(width, height, 96, 96, Windows::Media::PixelFormats::Pbgra32, nullptr);
+        _target = gcnew WriteableBitmap(width, height, 96, 96, System::Windows::Media::PixelFormats::Pbgra32, nullptr);
         (*_preview)->SetFramePlayedCallback(static_cast<Preview::PreviewSink::FRAME_PLAYED_CALLBACK>(framePlayedIp.ToPointer()));
     }
 

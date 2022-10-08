@@ -117,6 +117,8 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (current_format_.type() == Core::VideoFormatType::invalid)
 					return S_OK;
+				if (videoFrame == nullptr || audioPacket == nullptr)
+					return E_FAIL;
 				BMDTimeValue bmd_time, bmd_duration;
 				if (SUCCEEDED(videoFrame->GetStreamTime(&bmd_time, &bmd_duration, time_scale_)))
 					last_frame_time_ = bmd_time * AV_TIME_BASE / time_scale_;

@@ -11,8 +11,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public MediaFile Media { get; }
 
-        public IList<Model.RundownPlayer> Players => Providers.GlobalApplicationData.Current.RundownPlayers;
-
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
         public TimeSpan StartTime => Media.StartTime;

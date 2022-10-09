@@ -189,7 +189,7 @@
     <ClInclude Include="FFmpeg\OutputVideoFilter.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="TimecodeOverlaySource.h" />
+    <ClInclude Include="TimecodeOutputSource.h" />
     <ClInclude Include="Core\FrameTimeInfo.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -198,6 +198,9 @@
     </ClInclude>
     <ClInclude Include="FFmpeg\PauseBuffer.h">
       <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CoreUtils.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -309,6 +312,9 @@
     </ClCompile>
     <ClCompile Include="FFmpeg\PauseBuffer.cpp">
       <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CoreUtils.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

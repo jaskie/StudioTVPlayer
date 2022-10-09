@@ -40,7 +40,7 @@ extern "C"
 #include "Core/VideoFormat.h"
 #include "PixelFormat.h"
 #include "DecklinkTimecodeSource.h"
-#include "TimecodeOverlaySource.h"
+#include "TimecodeOutputSource.h"
 #include "DecklinkKeyer.h"
 #include "Ndi/NdiOutput.h"
 #include "FFmpeg/FFmpegInput.h"
@@ -61,7 +61,7 @@ int main()
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 	auto output = iterator.CreateOutput(*iterator[device_index], TVPlayR::DecklinkKeyer::Default);
 	auto ndi = std::make_shared<Ndi::NdiOutput>("NDI Output", "");
-	auto overlay = std::make_shared<Core::TimecodeOverlay>(TVPlayR::TimecodeOverlaySource::TimeToEnd, player.Format().type(), player.PixelFormat());
+	auto overlay = std::make_shared<Core::TimecodeOverlay>(TVPlayR::TimecodeOutputSource::TimeToEnd, player.Format().type(), player.PixelFormat());
 	output->InitializeFor(player);
 	ndi->InitializeFor(player);
 	player.AddOverlay(overlay);

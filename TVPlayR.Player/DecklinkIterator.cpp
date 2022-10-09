@@ -7,6 +7,7 @@
 #include "Decklink/DecklinkIterator.h"
 #include "DecklinkTimecodeSource.h"
 #include "DecklinkKeyer.h"
+#include "TimecodeOutputSource.h"
 
 namespace TVPlayR {
 
@@ -24,9 +25,9 @@ namespace TVPlayR {
 		Refresh();
 	}
 
-	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink, DecklinkKeyer keyer)
+	DecklinkOutput^ DecklinkIterator::CreateOutput(DecklinkInfo^ decklink, DecklinkKeyer keyer, TimecodeOutputSource timecode_source)
 	{
-		auto native_output = _iterator->CreateOutput(*decklink->GetNativeInfo(), keyer);
+		auto native_output = _iterator->CreateOutput(*decklink->GetNativeInfo(), keyer, timecode_source);
 		return gcnew DecklinkOutput(native_output);
 	}
 

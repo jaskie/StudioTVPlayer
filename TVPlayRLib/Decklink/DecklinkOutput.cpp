@@ -10,6 +10,8 @@
 #include "../FFmpeg/FFmpegUtils.h"
 #include "../FFmpeg/SwResample.h"
 #include "../DecklinkKeyer.h"
+#include "../TimecodeOutputSource.h"
+#include "../Core/CoreUtils.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -32,9 +34,10 @@ namespace TVPlayR {
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
 			const DecklinkKeyer keyer_;
+			const TimecodeOutputSource timecode_source_;
 			std::unique_ptr<FFmpeg::SwResample> audio_resampler_;
 
-			implementation(IDeckLink* decklink, DecklinkKeyer keyer, int index)
+			implementation(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
@@ -43,6 +46,7 @@ namespace TVPlayR {
 				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
 				, keyer_(keyer)
+				, timecode_source_(timecode_source)
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
 			}
@@ -100,7 +104,7 @@ namespace TVPlayR {
 				for (size_t i = 0; i < buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
-					ScheduleVideo(empty_video_frame, 0LL);
+					ScheduleVideo(empty_video_frame, AV_NOPTS_VALUE);
 				}
 				output_->EndAudioPreroll();
 			}
@@ -219,7 +223,7 @@ namespace TVPlayR {
 						for (auto& overlay : overlays_)
 							sync = overlay->Transform(sync);
 					}
-					ScheduleVideo(sync.Video, sync.TimeInfo.Timecode);
+					ScheduleVideo(sync.Video, Core::TimecodeFromFameTimeInfo(sync.TimeInfo, timecode_source_));
 					if (sync.Audio)
 					{
 						ScheduleAudio(audio_resampler_? audio_resampler_->Resample(sync.Audio) : sync.Audio);
@@ -271,8 +275,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkOutput::DecklinkOutput(IDeckLink * decklink, DecklinkKeyer keyer, int index)
-			: impl_(std::make_unique<implementation>(decklink, keyer, index))
+		DecklinkOutput::DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source)
+			: impl_(std::make_unique<implementation>(decklink, index, keyer, timecode_source))
 		{}
 
 		DecklinkOutput::~DecklinkOutput() { }

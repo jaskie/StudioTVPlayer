@@ -30,7 +30,7 @@ namespace TVPlayR {
 			return count;
 		}
 
-		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return bmdVideoOutputFlagDefault; }
+		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return timecode_.IsValid() ? BMDVideoOutputFlags::bmdVideoOutputRP188 | BMDVideoOutputFlags::bmdVideoOutputVITC : BMDVideoOutputFlags::bmdVideoOutputFlagDefault; }
 
 		long STDMETHODCALLTYPE DecklinkVideoFrame::GetWidth() { return frame_->width; }
 
@@ -64,6 +64,8 @@ namespace TVPlayR {
 		STDMETHODIMP DecklinkVideoFrame::GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode)
 		{
 			if (timecode == nullptr)
+				return E_FAIL;
+			if (!timecode_.IsValid())
 				return E_FAIL;
 			*timecode = &timecode_;
 			return S_OK;

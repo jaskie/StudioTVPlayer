@@ -7,7 +7,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
     public abstract class OutputViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
         private bool _isFrameClock;
-        private TVPlayR.TimecodeOverlaySource _timecodeOverlay;
+        private TVPlayR.TimecodeOutputSource _timecodeOverlay;
 
         public OutputViewModelBase(OutputBase output)
         {
@@ -20,9 +20,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public bool IsFrameClock { get => _isFrameClock; set => Set(ref _isFrameClock, value); }
 
-        public TVPlayR.TimecodeOverlaySource TimecodeOverlay { get => _timecodeOverlay; set => Set(ref _timecodeOverlay, value); }
+        public TVPlayR.TimecodeOutputSource TimecodeOverlay { get => _timecodeOverlay; set => Set(ref _timecodeOverlay, value); }
 
-        public Array TimecodeOverlaySources { get; } = Enum.GetValues(typeof(TVPlayR.TimecodeOverlaySource));
+        public Array TimecodeOutputSources { get; } = Enum.GetValues(typeof(TVPlayR.TimecodeOutputSource));
 
         public string Error => string.Empty;
 

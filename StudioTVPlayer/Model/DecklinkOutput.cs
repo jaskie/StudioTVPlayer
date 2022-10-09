@@ -12,10 +12,6 @@ namespace StudioTVPlayer.Model
             _configuration = configuration;
         }
 
-        public int DeviceIndex => _configuration.DeviceIndex;
-
-        public TVPlayR.DecklinkKeyer Keyer => _configuration.Keyer;
-
         public override void UnInitialize()
         {
             if (_output is null)
@@ -36,8 +32,8 @@ namespace StudioTVPlayer.Model
 
         public override void Initialize(TVPlayR.Player player)
         {
-            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, Keyer);
+            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == _configuration.DeviceIndex);
+            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, _configuration.Keyer, _configuration.TimecodeSource);
             base.Initialize(player);
         }
     }

@@ -34,7 +34,7 @@
         <Label Grid.Row="1" Grid.Column="1">Group names</Label>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding GroupNames, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" ToolTip="NDI group names (default - leave empty)"/>
         <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource ConfigurationLabelStyle}">Timecode overlay</Label>
-        <ComboBox Grid.Row="4" Grid.Column="0" Margin="5 0" SelectedItem="{Binding TimecodeOverlay}" ItemsSource="{Binding TimecodeOverlaySources}" >
+        <ComboBox Grid.Row="4" Grid.Column="0" Margin="5 0" SelectedItem="{Binding TimecodeOverlay}" ItemsSource="{Binding TimecodeOutputSources}" >
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Path=., Converter={StaticResource DescriptionConverter}}"/>

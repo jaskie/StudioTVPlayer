@@ -87,6 +87,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Core\CoreUtils.h" />
     <ClInclude Include="Core\OverlayBase.h" />
     <ClInclude Include="DecklinkKeyer.h" />
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
@@ -147,9 +148,12 @@
     <ClInclude Include="Core\TimecodeOverlay.h" />
     <ClInclude Include="FFmpeg\SwScale.h" />
     <ClInclude Include="FFmpeg\SwResample.h" />
-    <ClInclude Include="TimecodeOverlaySource.h" />
+    <ClInclude Include="TimecodeOutputSource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\CoreUtils.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>

@@ -57,8 +57,8 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: DoesSupportVideoMode failed");				
 				if (support == BMDDisplayModeSupport::bmdDisplayModeNotSupported)
 					THROW_EXCEPTION("DecklinkInput: Display mode not supported");
-				input_->SetCallback(this);
 				OpenInput(initialDisplayMode);
+				input_->SetCallback(this);
 			}
 
 			implementation::~implementation()

@@ -27,6 +27,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                 _input.DeviceIndex = value.Index;
                 if (_input.Initialize())
                     ApplyChanges();
+                NotifyPropertyChanged(nameof(Thumbnail));
             }
         }
 
@@ -42,6 +43,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                 Input.VideoFormat = value.Name;
                 if (Input.Initialize())
                     ApplyChanges();
+                NotifyPropertyChanged(nameof(Thumbnail));
             }
         }
 

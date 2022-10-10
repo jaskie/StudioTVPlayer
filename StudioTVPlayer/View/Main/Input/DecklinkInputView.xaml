@@ -4,35 +4,57 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
+             xmlns:main="clr-namespace:StudioTVPlayer.View.Main"
+             xmlns:mainVm="clr-namespace:StudioTVPlayer.ViewModel.Main"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:DecklinkInputViewModel}}"
              d:DesignHeight="90" d:DesignWidth="400">
     <Grid>
-        <Grid.Resources>
-            <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
-            <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}"/>
-        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition/>
         </Grid.RowDefinitions>
-        <Image Grid.RowSpan="4" Height="90" Width="160" Margin="5 0" Source="{Binding Thumbnail}">
+        <Image Grid.Column="0" Height="90" Width="160" Margin="5 0" Source="{Binding Thumbnail}">
             <Image.Effect>
                 <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
             </Image.Effect>
         </Image>
-        <Label Grid.Column="1">Decklink input</Label>
-        <ComboBox Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
-        <Label Grid.Column="1" Grid.Row="2">Video format</Label>
-        <ComboBox Grid.Column="1" Grid.Row="3" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
-        <Button Grid.RowSpan="4" Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
+        <StackPanel Grid.Column="1">
+            <StackPanel.Resources>
+                <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}" >
+                    <Setter Property="Padding" Value="5 5 0 0"/>
+                </Style>
+                <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}" >
+                    <Setter Property="Margin" Value="5"/>
+                </Style>
+            </StackPanel.Resources>
+            <Label>Decklink input</Label>
+            <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
+            <Label>Video format</Label>
+            <ComboBox ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
+        </StackPanel>
+        <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
+        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recording" Margin="0 0 1 1" IsEnabled="False"
+                  mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Accent3 }" 
+                  mah:ControlsHelper.ContentCharacterCasing="Normal"
+                  >
+            <StackPanel >
+                <Button FontSize="12" HorizontalAlignment="Right" Margin="5 0"
+                        mah:ControlsHelper.ContentCharacterCasing="Normal">Add recorder</Button>
+                <ListBox>
+                    <ListBox.Resources>
+                        <DataTemplate DataType="{x:Type mainVm:RecorderViewModel}">
+                            <main:RecorderView/>
+                        </DataTemplate>
+                    </ListBox.Resources>
+                </ListBox>
+            </StackPanel>
+        </Expander>
     </Grid>
 </UserControl>

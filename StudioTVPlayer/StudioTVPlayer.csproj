@@ -152,6 +152,7 @@
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\LiveInputRundownItemViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\RundownItemViewModelBase.cs" />
+    <Compile Include="ViewModel\Main\RecorderViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
     <Compile Include="ViewModel\Configuration\PlayersViewModel.cs" />
@@ -210,6 +211,9 @@
     </Compile>
     <Compile Include="View\Main\Player\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Main\RecorderView.xaml.cs">
+      <DependentUpon>RecorderView.xaml</DependentUpon>
     </Compile>
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
@@ -290,6 +294,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Main\Player\PlayerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Main\RecorderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

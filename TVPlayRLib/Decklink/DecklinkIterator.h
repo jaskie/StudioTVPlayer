@@ -3,6 +3,7 @@
 namespace TVPlayR {
 
 	enum class DecklinkTimecodeSource;
+	enum class TimecodeOutputSource;
 	enum class DecklinkKeyer;
 
 	namespace Core {
@@ -21,7 +22,7 @@ public:
 	DecklinkIterator();
 	~DecklinkIterator(); 
 	std::shared_ptr<Decklink::DecklinkInfo> operator [] (size_t pos);
-	std::shared_ptr<Decklink::DecklinkOutput> CreateOutput(const DecklinkInfo& info, DecklinkKeyer keyer);
+	std::shared_ptr<Decklink::DecklinkOutput> CreateOutput(const DecklinkInfo& info, DecklinkKeyer keyer, TimecodeOutputSource timecode_source);
 	std::shared_ptr<Decklink::DecklinkInput> CreateInput(const Decklink::DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
 	size_t Size() const;
 	std::shared_ptr<ApiVersion> GetVersion();

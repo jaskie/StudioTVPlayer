@@ -26,7 +26,6 @@
                  dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                  dd:DragDrop.UseDefaultDragAdorner="True"
                  >
-            
             <ListBox.Resources>
                 <DataTemplate DataType="{x:Type vm:DecklinkInputViewModel}">
                     <local:DecklinkInputView/>

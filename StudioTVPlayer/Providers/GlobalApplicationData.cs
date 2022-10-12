@@ -6,74 +6,70 @@ using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
 {
-    class GlobalApplicationData 
+    internal class GlobalApplicationData
     {
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
+        private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
 
         private GlobalApplicationData()
-        { }
+        {
+            EncoderPresets = LoadEncoderPresets();
+        }
 
         public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
 
+        public IReadOnlyList<RundownPlayer> RundownPlayers => _rundownPlayers;
         
-        public IList<MediaPlayer> Players { get; } = new List<MediaPlayer>();
-
+        public IEnumerable<EncoderPreset> EncoderPresets { get; private set; }
 
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
-            foreach (var player in Players)
+            foreach (var player in RundownPlayers)
                 player.Dispose();
-            foreach (var channel in Configuration.Current.Players)
-                channel.Dispose();
             foreach (var input in InputList.Current.Inputs)
                 input.Dispose();
         }
 
-        public void UpdateChannels(List<Player> channels)
+        public void UpdatePlayers(List<Model.Configuration.Player> playersConfiguration)
         {
-            foreach (var channel in channels)
+            var rundownPlayers = RundownPlayers.Where(p => !playersConfiguration.Contains(p.Configuration)).ToList();
+            foreach (var rundownPlayer in rundownPlayers)
             {
-                if (!channel.IsInitialized)
-                {
-                    channel.Initialize();
-                    var player = Players.FirstOrDefault(p => p.Player == channel);
-                    if (player == null)
-                        Players.Add(new MediaPlayer(channel));
-                    else
-                    {
-                        var index = Players.IndexOf(player);
-                        player.Dispose();
-                        Players[index] = new MediaPlayer(channel);
-                    }
-                }
+                rundownPlayer.Dispose();
+                _rundownPlayers.Remove(rundownPlayer);
             }
-            foreach (var channel in Configuration.Current.Players.ToList())
+            rundownPlayers.Clear();
+            foreach (var player in playersConfiguration)
             {
-                if (!channels.Contains(channel))
-                {
-                    var player = Players.FirstOrDefault(p => p.Player == channel);
-                    if (!(player is null))
-                    {
-                        player.Dispose();
-                        Players.Remove(player);
-                    }
-                    channel.Dispose();
-                }
+                var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == player) ?? new RundownPlayer(player);
+                if (player.IsModified)
+                    rundownPlayer.Uninitialize();
+                if (!rundownPlayer.IsInitialized)
+                    rundownPlayer.Initialize();
+                rundownPlayers.Add(rundownPlayer);
             }
-            Configuration.Current.Players = channels;
+            _rundownPlayers.Clear();
+            _rundownPlayers.AddRange(rundownPlayers);
         }
 
         public void Initialize()
         {
-            foreach(var channel in Configuration.Current.Players)
-            {
-                channel.Initialize();
-                Players.Add(new MediaPlayer(channel));
-            }
+            UpdatePlayers(Configuration.Current.Players);
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
+        }
+
+
+        public IEnumerable<EncoderPreset> LoadEncoderPresets()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
+            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<EncoderPreset>), new System.Xml.Serialization.XmlRootAttribute("PresetList"));
+            var presets = (List<EncoderPreset>)serializer.Deserialize(resourceStream);
+            presets.ForEach(p => p.IsEmbedded = true);
+            return presets;
         }
 
     }

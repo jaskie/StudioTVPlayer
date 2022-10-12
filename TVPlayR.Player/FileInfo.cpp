@@ -113,7 +113,7 @@ namespace TVPlayR {
 			if (video == nullptr)
 				return nullptr;
 
-			result = BitmapSource::Create(video->width, video->height, 96, 96, Windows::Media::PixelFormats::Rgb24, nullptr, IntPtr(video->data[0]), video->linesize[0] * video->height, video->linesize[0]);
+			result = BitmapSource::Create(video->width, video->height, 96, 96, System::Windows::Media::PixelFormats::Rgb24, nullptr, IntPtr(video->data[0]), video->linesize[0] * video->height, video->linesize[0]);
 
 		}
 		catch (...)

@@ -1,4 +1,4 @@
-﻿using StudioTVPlayer.Model;
+﻿using StudioTVPlayer.Model.Configuration;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration

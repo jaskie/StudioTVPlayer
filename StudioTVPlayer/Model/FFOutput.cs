@@ -3,6 +3,12 @@
     public class FFOutput : OutputBase
     {
         private TVPlayR.FFOutput _ffOutput;
+        private readonly Configuration.FFOutput _configuration;
+
+        public FFOutput(Configuration.FFOutput configuration) : base(configuration)
+        {
+            _configuration = configuration;
+        }
 
         public override void Dispose()
         {
@@ -13,9 +19,9 @@
             _ffOutput = null;
         }
 
-        public string Url { get; set; }
+        public string Url => _configuration.Url;
 
-        public EncoderSettings EncoderSettings { get; set; }
+        public EncoderSettings EncoderSettings => _configuration.EncoderSettings;
 
         public override TVPlayR.OutputBase Output => _ffOutput;
 

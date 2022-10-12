@@ -22,6 +22,7 @@ namespace TVPlayR {
 		virtual void AddOverlay(OverlayBase^ overlay) override;
 		virtual void RemoveOverlay(OverlayBase^ overlay) override;
 		virtual void InitializeFor(Player^ player) override;
+		virtual void UnInitialize() override;
 		~DecklinkOutput();
 		!DecklinkOutput();
 	};

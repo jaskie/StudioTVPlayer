@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:StudioTVPlayer" 
-             xmlns:converters="clr-namespace:StudioTVPlayer.Converters"
              StartupUri="View\MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -15,22 +14,6 @@
                 <!-- Application local settings -->
                 <ResourceDictionary Source="Resources/AppStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
-            <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
-            <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"/>
-            <converters:DescriptionConverter x:Key="DescriptionConverter"/>
-
-            <DataTemplate x:Key="mediaDragTemplate">
-                <Image Height="90" Source="{Binding Thumbnail}">
-                    <Image.OpacityMask>
-                        <LinearGradientBrush StartPoint="0 1" EndPoint="1 0">
-                            <GradientStop Offset="0" Color="Black"/>
-                            <GradientStop Offset="1" Color="Transparent"/>
-                        </LinearGradientBrush>
-                    </Image.OpacityMask>
-                </Image>
-            </DataTemplate>
         </ResourceDictionary>        
     </Application.Resources>
 </Application>

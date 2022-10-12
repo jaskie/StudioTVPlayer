@@ -9,7 +9,7 @@ namespace TVPlayR {
 #if (_MANAGED == 1)
 	public
 #endif
-	enum class TimecodeOverlaySource {
+	enum class TimecodeOutputSource {
 		None,
 		Timecode,
 #if (_MANAGED == 1)

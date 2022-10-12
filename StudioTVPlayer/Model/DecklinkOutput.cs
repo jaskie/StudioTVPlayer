@@ -1,36 +1,40 @@
 ﻿using System.Linq;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
     public class DecklinkOutput: OutputBase
     {
         private TVPlayR.DecklinkOutput _output;
+        private readonly Configuration.DecklinkOutput _configuration;
 
-        [XmlAttribute]
-        public int DeviceIndex { get; set; }
+        public DecklinkOutput(Configuration.DecklinkOutput configuration): base(configuration)
+        {
+            _configuration = configuration;
+        }
 
-        [XmlAttribute]
-        public TVPlayR.DecklinkKeyer Keyer { get; set; }
-
-        public override void Dispose()
+        public override void UnInitialize()
         {
             if (_output is null)
                 return;
-            base.Dispose();
-            _output.Dispose();
+            base.UnInitialize();
+            _output.UnInitialize();
+        }
+
+        public override void Dispose()
+        {
+            UnInitialize();
+            _output?.Dispose();
             _output = null;
+            base.Dispose();
         }
 
         public override TVPlayR.OutputBase Output => _output;
 
         public override void Initialize(TVPlayR.Player player)
         {
-            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, Keyer);
+            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == _configuration.DeviceIndex);
+            _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, _configuration.Keyer, _configuration.TimecodeSource);
             base.Initialize(player);
         }
-
-
     }
 }

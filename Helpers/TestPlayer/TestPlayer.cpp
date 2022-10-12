@@ -45,7 +45,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		Core::Player player("1", Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
+		Core::Player player("1", Core::VideoFormatType::v2160p5000, PixelFormat::yuv422, 2, 48000);
 	/*	player.SetAudioVolumeCallback([](std::vector<float>& volume, float coherence) {
 			std::cout << coherence << "\n";
 			});
@@ -62,14 +62,13 @@ int main()
 		*/
 		//using namespace std::chrono_literals;
 
-		auto ndi = std::make_shared<Ndi::NdiOutput>("STUDIO_TVPLAYER", "");
+		auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
 		if (!ndi->InitializeFor(player))
 			throw std::exception("Could not assign output to player");
 		player.AddOutputSink(ndi);
-		//player.SetFrameClockSource(*ndi);
+		player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
-		//player.AddOutput(ndi);
-		FFmpeg::FFOutputParams stream_params{ "udp://127.0.0.1:1234?pkt_size=1316", // Url
+		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
 			"libx264",															// VideoCodec
 			"aac", 																	// AudioCodec
 			4000,																	// VideoBitrate
@@ -82,22 +81,23 @@ int main()
 			121, // VideoStreamId
 			122  // AudioStreamId
 		};
+		
 		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
-		auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
-		player.SetFrameClockSource(*stream);
-		stream->InitializeFor(player);
-		player.AddOutputSink(stream);
-
+		//auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
+		//player.SetFrameClockSource(*stream);
+		//stream->InitializeFor(player);
+		//player.AddOutputSink(stream);
+		*/
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\test4.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\polmacedonia.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
 		//input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		input->SetFramePlayedCallback([&](int64_t time) {});
+		input->SetFramePlayedCallback([&](Core::FrameTimeInfo& time) {});
 		input->Play();
 		input->SetIsLoop(true);
 		player.Load(input);

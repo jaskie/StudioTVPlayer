@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -108,6 +109,13 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
+    <Compile Include="Model\Configuration\ConfigurationItemBase.cs" />
+    <Compile Include="Model\Configuration\DecklinkOutput.cs" />
+    <Compile Include="Model\Configuration\FFOutput.cs" />
+    <Compile Include="Model\Configuration\NdiOutput.cs" />
+    <Compile Include="Model\Configuration\OutputBase.cs" />
+    <Compile Include="Model\Configuration\Player.cs" />
+    <Compile Include="Model\EncoderPreset.cs" />
     <Compile Include="Model\EncoderSettings.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\InputBase.cs" />
@@ -117,7 +125,7 @@
     <Compile Include="Model\DecklinkInput.cs" />
     <Compile Include="Model\DecklinkOutput.cs" />
     <Compile Include="Model\Enums.cs" />
-    <Compile Include="Model\MediaPlayer.cs" />
+    <Compile Include="Model\RundownPlayer.cs" />
     <Compile Include="Model\NdiOutput.cs" />
     <Compile Include="Model\OutputBase.cs" />
     <Compile Include="Model\FileRundownItem.cs" />
@@ -144,6 +152,7 @@
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\LiveInputRundownItemViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\RundownItemViewModelBase.cs" />
+    <Compile Include="ViewModel\Main\RecorderViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
     <Compile Include="ViewModel\Configuration\PlayersViewModel.cs" />
@@ -202,6 +211,9 @@
     </Compile>
     <Compile Include="View\Main\Player\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Main\RecorderView.xaml.cs">
+      <DependentUpon>RecorderView.xaml</DependentUpon>
     </Compile>
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
@@ -285,6 +297,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Main\RecorderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -319,6 +335,9 @@
       <Project>{8d4ba75e-812d-41e1-8b0f-de6540d2f84b}</Project>
       <Name>TVPlayR.Player</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\EmbeddedPresets.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

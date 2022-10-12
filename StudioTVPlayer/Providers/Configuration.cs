@@ -1,5 +1,5 @@
 ﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
+using StudioTVPlayer.Model.Configuration;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -9,15 +9,23 @@ namespace StudioTVPlayer.Providers
     public class Configuration
     {
         private const string ConfigurationFile = "configuration.xml";
+        private List<Player> _players = new List<Player>();
 
         [XmlArray]
         [XmlArrayItem("WatchedFolder")]
-        public List<WatchedFolder> WatchedFolders { get; set; } = new List<WatchedFolder>();
+        public List<Model.WatchedFolder> WatchedFolders { get; set; } = new List<Model.WatchedFolder>();
 
         [XmlArray]
-        [XmlArrayItem("Player")]
-        public List<Player> Players { get; set; } = new List<Player>();
-
+        public List<Player> Players
+        {
+            get => _players; 
+            set
+            {
+                foreach (var player in value)
+                    player.IsModified = false;
+                _players = value;
+            }
+        }
         public static Configuration Current { get; } = Load();
 
         private static Configuration Load()

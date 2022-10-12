@@ -3,12 +3,13 @@
 
 namespace TVPlayR {
 	enum class DecklinkKeyer;
+	enum class TimecodeOutputSource;
 	namespace Decklink {
 
 class DecklinkOutput final : public Core::OutputDevice
 {
 public:
-	explicit DecklinkOutput(IDeckLink* decklink, DecklinkKeyer keyer, int index);
+	explicit DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source);
 	~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;

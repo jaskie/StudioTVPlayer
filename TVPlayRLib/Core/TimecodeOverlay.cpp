@@ -6,7 +6,8 @@
 #include "../FFmpeg/FFmpegUtils.h"
 #include "VideoFormat.h"
 #include "../PixelFormat.h"
-#include "../TimecodeOverlaySource.h"
+#include "../TimecodeOutputSource.h"
+#include "CoreUtils.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -25,7 +26,7 @@ namespace TVPlayR {
 		{
 
 			const GdiplusInitializer			gdiplus_initializer_;
-			const TimecodeOverlaySource			timecode_source_;
+			const TimecodeOutputSource			timecode_source_;
 			const VideoFormat					video_format_;
 			const TVPlayR::PixelFormat			output_pixel_format_;
 			std::unique_ptr<FFmpeg::SwScale>	in_scaler_;
@@ -39,7 +40,7 @@ namespace TVPlayR {
 			Gdiplus::PointF						timecode_position_;
 
 
-			implementation::implementation(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
+			implementation::implementation(const TimecodeOutputSource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
 				: timecode_source_(source)
 				, video_format_(video_format)
 				, output_pixel_format_(output_pixel_format)
@@ -73,24 +74,7 @@ namespace TVPlayR {
 				if (!in_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
 					in_scaler_ = std::make_unique<FFmpeg::SwScale>(input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format), input_frame->width, input_frame->height, AV_PIX_FMT_BGRA);
 				std::shared_ptr<AVFrame> rgba_frame = in_scaler_ ? in_scaler_->Scale(input_frame) : FFmpeg::CopyFrame(input_frame);
-				std::int64_t time(AV_NOPTS_VALUE);
-				switch (timecode_source_)
-				{
-				case TimecodeOverlaySource::Timecode:
-					time = sync.TimeInfo.Timecode;
-					break;
-				case TimecodeOverlaySource::TimeFromBegin:
-					time = sync.TimeInfo.TimeFromBegin;
-					break;
-				case TimecodeOverlaySource::TimeToEnd:
-					time = sync.TimeInfo.TimeToEnd;
-					break;
-				case TimecodeOverlaySource::WallTime:
-					SYSTEMTIME system_time;
-					::GetLocalTime(&system_time);
-					time = ((static_cast<int64_t>(system_time.wHour) * 60 + system_time.wMinute) * 60 + system_time.wSecond) * AV_TIME_BASE + system_time.wMilliseconds * 1000;
-					break;
-				}
+				std::int64_t time = TimecodeFromFameTimeInfo(sync.TimeInfo, timecode_source_);
 				if (time != AV_NOPTS_VALUE)
 					Draw(rgba_frame, GetTimeString(time));
 				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
@@ -119,7 +103,7 @@ namespace TVPlayR {
 
 		};
 
-		TimecodeOverlay::TimecodeOverlay(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
+		TimecodeOverlay::TimecodeOverlay(const TimecodeOutputSource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
 			: impl_(std::make_unique<implementation>(source, video_format, output_pixel_format))
 		{ }
 

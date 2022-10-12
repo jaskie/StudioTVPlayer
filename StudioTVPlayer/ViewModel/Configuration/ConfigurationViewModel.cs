@@ -1,5 +1,4 @@
 ﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Providers;
 using System;
 
 namespace StudioTVPlayer.ViewModel.Configuration
@@ -22,7 +21,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void SaveConfiguration(object obj)
         {
             Apply();
-            Providers.Configuration.Current.Save();
             MainViewModel.Instance.ShowPlayoutView();
         }
 
@@ -44,6 +42,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolders.Apply();
             Players.Apply();
+            Providers.Configuration.Current.Save();
             IsModified = false;
         }
 

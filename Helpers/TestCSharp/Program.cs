@@ -17,11 +17,11 @@ namespace TestCSharp
             var videoFormat = VideoFormat.Formats.FirstOrDefault(vf => vf.Name == "1080i50");
             using (Player player = new Player("Channel 1", videoFormat, PixelFormat.yuv422, 2))
             {
-                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[deviceIndex], false))
+                using (DecklinkOutput output = DecklinkIterator.CreateOutput(DecklinkIterator.Devices[deviceIndex], DecklinkKeyer.Default))
                 using (DecklinkInput input = DecklinkIterator.CreateInput(DecklinkIterator.Devices[deviceIndex], videoFormat, 2, DecklinkTimecodeSource.VITC, true))
                 {
 
-                    player.AddOutput(output, true);
+                    player.AddOutputSink(output);
                     var file = new FileInput(@"d:\temp\test5.mov");
                     player.Load(file);
                     file.Play();

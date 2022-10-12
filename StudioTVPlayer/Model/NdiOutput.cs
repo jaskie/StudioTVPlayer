@@ -1,17 +1,18 @@
-﻿using System;
-using System.Xml.Serialization;
-
-namespace StudioTVPlayer.Model
+﻿namespace StudioTVPlayer.Model
 {
     public class NdiOutput: OutputBase
     {
         private TVPlayR.NdiOutput _outputDevice;
+        private readonly Configuration.NdiOutput _configuration;
 
-        [XmlAttribute]
-        public string SourceName { get; set; }
+        public NdiOutput(Configuration.NdiOutput configuration) : base(configuration)
+        {
+            _configuration = configuration;
+        }
 
-        [XmlAttribute]
-        public string GroupNames { get; set; }
+        public string SourceName => _configuration.SourceName;
+
+        public string GroupNames => _configuration.GroupNames;
 
         public override TVPlayR.OutputBase Output => _outputDevice;
 

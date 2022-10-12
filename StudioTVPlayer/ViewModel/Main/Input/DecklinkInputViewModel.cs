@@ -9,9 +9,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         private TVPlayR.DecklinkInfo _selectedDevice;
         private readonly Model.DecklinkInput _input;
 
-        public DecklinkInputViewModel(Model.DecklinkInput input)
+        public DecklinkInputViewModel(Model.DecklinkInput input) : base(input)
         {
-            _input = input;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
             input.InputFormatChanged += Input_InputFormatChanged;
@@ -27,6 +26,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                 _input.DeviceIndex = value.Index;
                 if (_input.Initialize())
                     ApplyChanges();
+                NotifyPropertyChanged(nameof(Thumbnail));
             }
         }
 
@@ -42,14 +42,13 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                 Input.VideoFormat = value.Name;
                 if (Input.Initialize())
                     ApplyChanges();
+                NotifyPropertyChanged(nameof(Thumbnail));
             }
         }
 
         public TVPlayR.VideoFormat[] VideoFormats => TVPlayR.VideoFormat.Formats;
 
         public ImageSource Thumbnail => Input.Thumbnail;
-
-        public override Model.InputBase Input => _input;
 
         public override bool IsValid()
         {
@@ -89,6 +88,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public override void Dispose()
         {
+            if (_input is null)
+                return;
             _input.InputFormatChanged -= Input_InputFormatChanged;
         }
 

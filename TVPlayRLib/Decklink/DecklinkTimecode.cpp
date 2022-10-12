@@ -10,6 +10,11 @@ namespace TVPlayR {
             , format_(format)
         { }
 
+        bool DecklinkTimecode::IsValid() const
+        {
+            return time_ != AV_NOPTS_VALUE;
+        }
+
         STDMETHODIMP DecklinkTimecode::QueryInterface(REFIID, LPVOID*) { return E_NOINTERFACE; }
 
         STDMETHODIMP_(ULONG) DecklinkTimecode::AddRef() { return InterlockedIncrement(&ref_count_); }

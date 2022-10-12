@@ -11,8 +11,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public MediaFile Media { get; }
 
-        public IList<Model.MediaPlayer> Players => Providers.GlobalApplicationData.Current.Players;
-
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
         public TimeSpan StartTime => Media.StartTime;
@@ -41,7 +39,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         private void QueueToPlayer(object obj)
         {
-            var player = obj as Model.MediaPlayer ?? throw new ArgumentException(nameof(obj));
+            var player = obj as Model.RundownPlayer ?? throw new ArgumentException(nameof(obj));
             player.Submit(Media);
         }
 

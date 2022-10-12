@@ -15,6 +15,7 @@ namespace TVPlayR {
             Core::VideoFormat& format_;
         public:
             DecklinkTimecode(Core::VideoFormat& format, std::int64_t time);
+            bool IsValid() const;
             //IUnknown
             STDMETHOD(QueryInterface(REFIID, LPVOID*));
             STDMETHOD_(ULONG, AddRef());

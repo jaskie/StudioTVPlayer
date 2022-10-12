@@ -1,4 +1,4 @@
-﻿using StudioTVPlayer.Model;
+﻿using StudioTVPlayer.Model.Configuration;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -55,7 +55,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             base.Apply();
             _streamOutput.Url = _url;
-            _streamOutput.EncoderSettings = new EncoderSettings
+            _streamOutput.EncoderSettings = new Model.EncoderSettings
             {
                 VideoCodec = _videoCodec,
                 AudioCodec = _audioCodec,

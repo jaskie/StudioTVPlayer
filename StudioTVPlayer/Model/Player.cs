@@ -7,51 +7,52 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public class Player : INotifyPropertyChanged, IDisposable
+    public class Player : IDisposable
     {
-        private string _name = string.Empty;
-
-        private TVPlayR.VideoFormat _videoFormat;
-        private string _videoFormatName;
-        private TVPlayR.PixelFormat _pixelFormat;
-        private bool _livePreview;
-
         private TVPlayR.Player _player;
         private TVPlayR.PreviewSink _outputPreview;
-
         private List<OutputBase> _outputs = new List<OutputBase>();
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
+        private TVPlayR.VideoFormat _videoFormat;
+        private TVPlayR.PixelFormat _pixelFormat;
 
-        [XmlAttribute]
-        public string Name { get => _name; set => _name = value; }
+        public Player(Configuration.Player configuration)
+        {
+            Configuration = configuration;
+        }
+        
+        public Configuration.Player Configuration { get; }
 
-        [XmlIgnore]
+        public string Name => Configuration.Name;
+
         public TVPlayR.VideoFormat VideoFormat
         {
-            get => _videoFormat; 
-            set
+            get => _videoFormat;
+            private set
             {
-                if (!Set(ref _videoFormat, value))
+                if (_videoFormat == value)
                     return;
-                VideoFormatName = value.Name;
+                _videoFormat = value;
+                Uninitialize();
             }
         }
 
-        [XmlAttribute(nameof(VideoFormat))]
-        public string VideoFormatName { get => _videoFormatName; set => _videoFormatName = value; }
+        public TVPlayR.PixelFormat PixelFormat
+        {
+            get => _pixelFormat; 
+            private set
+            {
+                if (_pixelFormat == value)
+                    return;
+                _pixelFormat = value;
+                Uninitialize();
+            }
+        }
 
-        [XmlAttribute]
-        public TVPlayR.PixelFormat PixelFormat { get => _pixelFormat; set => Set(ref _pixelFormat, value); }
-
-        [XmlArray]
-        [XmlArrayItem(typeof(DecklinkOutput))]
-        [XmlArrayItem(typeof(NdiOutput))]
-        [XmlArrayItem(typeof(FFOutput))]
         public OutputBase[] Outputs
         {
             get => _outputs.ToArray();
@@ -66,39 +67,69 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        [XmlAttribute]
-        public bool LivePreview { get => _livePreview; set => Set(ref _livePreview, value); }
+        public bool LivePreview => Configuration.LivePreview;
 
-        [XmlAttribute]
         public bool DisablePlayedItems { get => _disablePlayedItems; set => _disablePlayedItems = value; }
 
-        [XmlAttribute]
         public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => _addItemsWithAutoPlay = value; }
 
-        [XmlIgnore]
         public bool IsInitialized => _player != null;
 
-        [XmlIgnore]
         public int AudioChannelCount { get; } = 2;
 
         public void Initialize()
         {
-            if (_player != null)
-                throw new ApplicationException($"Player {Name} already initialized");
-            _videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormatName);
-            if (_videoFormat == null)
-                return;
-            _player = new TVPlayR.Player(_name, _videoFormat, PixelFormat, AudioChannelCount);
-            foreach (var output in Outputs)
+            var newVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
+            if (!(_player is null))
             {
+                if (!(newVideoFormat == VideoFormat && PixelFormat == Configuration.PixelFormat))
+                {
+                }
+                foreach (var output in Outputs)
+                {
+                    if (!Configuration.Outputs.Contains(output.Configuration))
+                    {
+                        _player.RemoveOutputSink(output.Output);
+                        output.Dispose();
+                        continue;
+                    }
+                    if (output.Configuration.IsModified)
+                    {
+                        _player.RemoveOutputSink(output.Output);
+                        output.UnInitialize();
+                        _player.AddOutputSink(output.Output);
+                        output.Initialize(_player);
+                    }
+                }
+            }
+            VideoFormat = newVideoFormat;
+            PixelFormat = Configuration.PixelFormat;
+            _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);
+            foreach (var outputConfiguration in Configuration.Outputs)
+            {
+                OutputBase output;
+                switch (outputConfiguration)
+                {
+                    case Configuration.DecklinkOutput decklink:
+                        output = new DecklinkOutput(decklink);
+                        break;
+                    case Configuration.NdiOutput ndi:
+                        output = new NdiOutput(ndi);
+                        break;
+                    case Configuration.FFOutput ff:
+                        output = new FFOutput(ff);
+                        break;
+                    default:
+                        throw new ApplicationException("Invalid output configuration type");
+                }
                 output.Initialize(_player);
                 if (output.IsFrameClock)
                     _player.SetFrameClockSource(output.Output);
                 _player.AddOutputSink(output.Output);
+                _outputs.Add(output);
             }
             _player.AudioVolume += Player_AudioVolume;
         }
-
 
         public void SetVolume(float value)
         {
@@ -151,29 +182,19 @@ namespace StudioTVPlayer.Model
             _player.Preload(item);
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             _player.Clear();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
-
-        private bool Set<T>(ref T field, T value, [CallerMemberName] string propertyname = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value))
-                return false;
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
-            return true;
-        }
 
         private void Player_AudioVolume(object sender, TVPlayR.AudioVolumeEventArgs e)
         {
             AudioVolume?.Invoke(this, new AudioVolumeEventArgs(e.AudioVolume));
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (!IsInitialized)
                 return;

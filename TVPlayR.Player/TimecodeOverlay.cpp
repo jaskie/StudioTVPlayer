@@ -3,11 +3,11 @@
 #include "Core/TimecodeOverlay.h"
 #include "VideoFormat.h"
 #include "PixelFormat.h"
-#include "TimecodeOverlaySource.h"
+#include "TimecodeOutputSource.h"
 
 namespace TVPlayR {
     
-    TimecodeOverlay::TimecodeOverlay(const TimecodeOverlaySource source, VideoFormat^ videoFormat, const PixelFormat pixelFormat)
+    TimecodeOverlay::TimecodeOverlay(const TimecodeOutputSource source, VideoFormat^ videoFormat, const PixelFormat pixelFormat)
         : _native_object(new std::shared_ptr<Core::TimecodeOverlay>(new Core::TimecodeOverlay(source, videoFormat->GetNativeEnumType(), pixelFormat)))
     { }
     

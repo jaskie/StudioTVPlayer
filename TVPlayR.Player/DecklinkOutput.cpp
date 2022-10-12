@@ -38,6 +38,11 @@ namespace TVPlayR {
 		(*_decklink)->InitializeFor(player->GetNativePlayer());
 	}
 
+	void DecklinkOutput::UnInitialize()
+	{
+		(*_decklink)->Uninitialize();
+	}
+
 	DecklinkOutput::~DecklinkOutput()
 	{
 		this->!DecklinkOutput();

@@ -43,7 +43,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             Path = watchedFolder.Path;
             IsFilteredByDate = watchedFolder.IsFilteredByDate;
             _selectedDate = watchedFolder.FilterDate;
-            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex, index => SelectedMedia != null && int.Parse(index as string) < Providers.GlobalApplicationData.Current.Players.Count);
+            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex, index => SelectedMedia != null && int.Parse(index as string) < Providers.GlobalApplicationData.Current.RundownPlayers.Count);
             ChangeDateCommand = new UiCommand(ChangeDate, _ => IsFilteredByDate);
             ExploreFolderCommand = new UiCommand(ExploreFolder);
         }
@@ -122,7 +122,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private void QueueToPlayerByIndex(object obj)
         {
             var index = int.Parse(obj as string);
-            Providers.GlobalApplicationData.Current.Players[index].Submit(SelectedMedia.Media);
+            Providers.GlobalApplicationData.Current.RundownPlayers[index].Submit(SelectedMedia.Media);
         }
 
         private void ChangeDate(object days)

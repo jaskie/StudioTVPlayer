@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
 		enum class PixelFormat;	
-		enum class TimecodeOverlaySource;
+		enum class TimecodeOutputSource;
 
 	namespace Core {
 		enum class VideoFormatType;
@@ -12,7 +12,7 @@ namespace TVPlayR {
 class TimecodeOverlay final :  public OverlayBase
 {
 public:
-	TimecodeOverlay(const TimecodeOverlaySource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format);
+	TimecodeOverlay(const TimecodeOutputSource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format);
 	~TimecodeOverlay();
 	Core::AVSync Transform(Core::AVSync& sync) override;
 private:

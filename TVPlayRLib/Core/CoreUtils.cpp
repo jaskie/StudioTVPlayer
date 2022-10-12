@@ -21,6 +21,7 @@ namespace TVPlayR {
 				::GetLocalTime(&system_time);
 				return((static_cast<int64_t>(system_time.wHour) * 60 + system_time.wMinute) * 60 + system_time.wSecond) * AV_TIME_BASE + system_time.wMilliseconds * 1000;
 			}
+			return AV_NOPTS_VALUE;
 		}
 	}
 }

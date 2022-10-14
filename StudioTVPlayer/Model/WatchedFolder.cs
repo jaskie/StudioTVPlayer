@@ -1,5 +1,6 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model.Args;
+using StudioTVPlayer.Providers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace StudioTVPlayer.Model
 {
     public class WatchedFolder
     {
-        private bool _needsInitialization;
+        private bool _isInitialized;
         private string _path;
         private bool _isFilteredByDate;
         private string _filter;
@@ -22,6 +23,7 @@ namespace StudioTVPlayer.Model
         private CancellationTokenSource _cancellationTokenSource;
         private DateTime _filterDate = DateTime.Today;
         private readonly List<MediaFile> _medias = new List<MediaFile>();
+        private readonly object SyncRoot = new object();
 
         [XmlAttribute]
         public string Name { get; set; }
@@ -49,34 +51,42 @@ namespace StudioTVPlayer.Model
 
         public void Initialize()
         {
-            if (!_needsInitialization)
-                return;
-            _cancellationTokenSource?.Cancel();
-            _needsInitialization = false;
-            _cancellationTokenSource = new CancellationTokenSource();
-            _fs = new FileSystemWatcher(Path)
+            lock (SyncRoot)
             {
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite,
-                InternalBufferSize = 64000 //recommended max
-            };
-            _fs.Error += Fs_Error;
-            _fs.Created += Fs_MediaCreated;
-            _fs.Deleted += Fs_MediaDeleted;
-            _fs.Renamed += Fs_MediaRenamed;
-            _fs.Changed += Fs_MediaChanged;
-            _fs.EnableRaisingEvents = true;
-            lock (((IList)_medias).SyncRoot)
-            {
-                _medias.ForEach(m => m.PropertyChanged -= Media_PropertyChanged);
-                _medias.Clear();
-                foreach (var media in Directory.EnumerateFiles(Path)
-                    .Where(Accept)
-                    .Select(path => new MediaFile(path)))
+                if (_isInitialized)
+                    return;
+                _cancellationTokenSource?.Cancel();
+                try
                 {
-                    _medias.Add(media);
-                    media.PropertyChanged += Media_PropertyChanged;
-                    AddToVerificationQueue(media);
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    _fs = new FileSystemWatcher(Path)
+                    {
+                        NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastWrite,
+                        InternalBufferSize = 64000 //recommended max
+                    };
+                    _fs.Error += Fs_Error;
+                    _fs.Created += Fs_MediaCreated;
+                    _fs.Deleted += Fs_MediaDeleted;
+                    _fs.Renamed += Fs_MediaRenamed;
+                    _fs.Changed += Fs_MediaChanged;
+                    _fs.EnableRaisingEvents = true;
+                    lock (((IList)_medias).SyncRoot)
+                    {
+                        _medias.ForEach(m => m.PropertyChanged -= Media_PropertyChanged);
+                        _medias.Clear();
+                        foreach (var media in Directory.EnumerateFiles(Path)
+                            .Where(Accept)
+                            .Reverse()
+                            .Select(path => new MediaFile(path)))
+                        {
+                            _medias.Add(media);
+                            media.PropertyChanged += Media_PropertyChanged;
+                            AddToVerificationQueue(media);
+                        }
+                    }
+                    _isInitialized = true;
                 }
+                catch { }
             }
         }
 
@@ -205,7 +215,7 @@ namespace StudioTVPlayer.Model
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
             field = value;
-            _needsInitialization = true;
+            _isInitialized = false;
             return true;
         }
 

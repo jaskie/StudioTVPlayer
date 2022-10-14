@@ -13,6 +13,8 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
                 <!-- Application local settings -->
                 <ResourceDictionary Source="Resources/AppStyles.xaml"/>
+                <!--Controls default styles-->
+                <ResourceDictionary Source="Controls/Generic.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>        
     </Application.Resources>

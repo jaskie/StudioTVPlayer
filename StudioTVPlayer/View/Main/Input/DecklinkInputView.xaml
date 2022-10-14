@@ -46,8 +46,11 @@
                   >
             <StackPanel >
                 <Button FontSize="12" HorizontalAlignment="Right" Margin="5 0"
+                        Command="{Binding CommandAddRecorder}"
                         mah:ControlsHelper.ContentCharacterCasing="Normal">Add recorder</Button>
-                <ListBox>
+                <ListBox ItemsSource="{Binding Recorders}"
+                         ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
+                         >
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type mainVm:RecorderViewModel}">
                             <main:RecorderView/>

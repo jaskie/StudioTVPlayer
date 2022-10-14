@@ -5,11 +5,11 @@ using System.Windows.Data;
 
 namespace StudioTVPlayer.Converters
 {
-    public class NotNullToVisibilityConverter : IValueConverter
+    public class NullToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is null ? Visibility.Collapsed : Visibility.Visible;
+            return value is null ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

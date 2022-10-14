@@ -7,6 +7,7 @@
     <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
     <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
     <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"/>
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <converters:DescriptionConverter x:Key="DescriptionConverter"/>
     
     <Style TargetType="{x:Type TabPanel}">
@@ -109,6 +110,15 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="SimpleListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}" >
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="Transparent"/>
     </Style>
 
     <DataTemplate x:Key="mediaDragTemplate">

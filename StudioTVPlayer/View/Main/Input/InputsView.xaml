@@ -22,6 +22,7 @@
             </StackPanel>
         </Button>
         <ListBox Grid.Row="1" ItemsSource="{Binding Inputs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                  dd:DragDrop.UseDefaultDragAdorner="True"

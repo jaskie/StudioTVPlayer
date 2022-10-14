@@ -68,7 +68,7 @@
                         <Button Command="{Binding ExploreFolderCommand}"
                             Style="{DynamicResource MahApps.Styles.Button.Reveal}" Margin="5" VerticalAlignment="Bottom">
                             <Button.ToolTip>
-                                <TextBlock Text="{Binding Path, StringFormat={}Explore {0}}"/>
+                                <TextBlock Text="{Binding Path, StringFormat={}Open {0} in Windows Explorer}"/>
                             </Button.ToolTip>
                             <mah:FontIcon FontSize="16" Glyph="&#xE838;"/>
                         </Button>

@@ -95,10 +95,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\FilePicker.cs" />
     <Compile Include="Controls\TimecodeEdit.cs" />
     <Compile Include="Converters\EnumDescriptionTypeConverter.cs" />
     <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DescriptionConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\NotNullToVisibilityConverter.cs" />
     <Compile Include="Converters\NotNullToBooleanConverter.cs" />
     <Compile Include="Helpers\AttachedProperties\ControlProperties.cs" />
@@ -215,6 +217,10 @@
     <Compile Include="View\Main\RecorderView.xaml.cs">
       <DependentUpon>RecorderView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

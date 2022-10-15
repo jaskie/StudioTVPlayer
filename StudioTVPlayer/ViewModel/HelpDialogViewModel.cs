@@ -9,12 +9,10 @@ using System.Threading.Tasks;
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class AboutDialogViewModel: DialogViewModelBase
+    public class HelpDialogViewModel : DialogViewModelBase
     {
-        public AboutDialogViewModel(Action<DialogViewModelBase> closeHandler) : base(closeHandler)
+        public HelpDialogViewModel(Action<DialogViewModelBase> closeHandler) : base(closeHandler)
         {
         }
-
-        public VersionInfo VersionInfo => VersionInfo.Current;
     }
 }

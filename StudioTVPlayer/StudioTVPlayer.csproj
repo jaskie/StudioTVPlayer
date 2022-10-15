@@ -140,6 +140,8 @@
     <Compile Include="Providers\GlobalApplicationData.cs" />
     <Compile Include="Providers\InputList.cs" />
     <Compile Include="Providers\VersionInfo.cs" />
+    <Compile Include="ViewModel\DialogViewModelBase.cs" />
+    <Compile Include="ViewModel\HelpDialogViewModel.cs" />
     <Compile Include="ViewModel\AboutDialogViewModel.cs" />
     <Compile Include="ViewModel\Configuration\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Configuration\DecklinkOutputViewModel.cs" />
@@ -166,6 +168,9 @@
     <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\FileRundownItemViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
+    <Compile Include="View\HelpDialog.xaml.cs">
+      <DependentUpon>HelpDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\AboutDialog.xaml.cs">
       <DependentUpon>AboutDialog.xaml</DependentUpon>
     </Compile>
@@ -224,6 +229,10 @@
     <Page Include="Resources\AppStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\HelpDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\AboutDialog.xaml">
       <SubType>Designer</SubType>

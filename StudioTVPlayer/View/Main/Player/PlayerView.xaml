@@ -12,22 +12,9 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:PlayerViewModel}"
              d:DesignHeight="370" d:DesignWidth="800"
-             attachedProp:ControlProperties.TakesInputBindingPrecedence="True"
-             attachedProp:ControlProperties.EnableIsKeyboardFocusWithin="True"
-             Focusable="True" IsTabStop="True"
-             BorderThickness="2"
-             Margin="3"
-             FocusVisualStyle="{x:Null}"
+             IsTabStop="True"
+             Style="{StaticResource StrongFocusIndicatorUserControl}"
              >
-    <UserControl.Style>
-        <Style TargetType="UserControl">
-            <Style.Triggers>
-                <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Control.Validation}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Style>
 
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding SeekFramesCommand}" CommandParameter="-1" />

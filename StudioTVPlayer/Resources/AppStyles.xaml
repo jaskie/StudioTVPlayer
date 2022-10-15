@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
                     xmlns:converters="clr-namespace:StudioTVPlayer.Converters"
                     >
     <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -114,11 +115,25 @@
 
     <Style x:Key="SimpleListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}" >
         <Setter Property="Padding" Value="0"/>
+        <Setter Property="Focusable" Value="False"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="Transparent"/>
         <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="Transparent"/>
         <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="Transparent"/>
         <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="Transparent"/>
+    </Style>
+
+    <Style x:Key="StrongFocusIndicatorUserControl" TargetType="UserControl">
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Focusable" Value="True"/>
+        <Setter Property="attachedProp:ControlProperties.TakesInputBindingPrecedence" Value="True"/>
+        <Setter Property="attachedProp:ControlProperties.EnableIsKeyboardFocusWithin" Value="True"/>
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Control.Validation}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <DataTemplate x:Key="mediaDragTemplate">

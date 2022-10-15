@@ -33,6 +33,9 @@
             <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
                 <mah:FontIcon Glyph="&#xE713;" />
             </Button>
+            <Button ToolTip="Help" Command="{Binding HelpCommand}">
+                <mah:FontIcon Glyph="&#xE9CE;" />
+            </Button>
             <Button ToolTip="About" Command="{Binding AboutCommand}">
                 <mah:FontIcon Glyph="&#xE946;" />
             </Button>

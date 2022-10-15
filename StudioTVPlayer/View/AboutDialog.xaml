@@ -9,9 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <Separator Height="5" />
-        <TextBlock>Studio TV Player - application created in 
-            <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.tvp.pl">TVP</Hyperlink>
-            , based on <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ffmpeg.org/">FFmpeg</Hyperlink> (core player), 
+        <TextBlock>Studio TV Player is based on <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ffmpeg.org/">FFmpeg</Hyperlink> (core player), and 
             <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://mahapps.com/">MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
         <TextBlock >Versions:</TextBlock>
         <Grid HorizontalAlignment="Left">

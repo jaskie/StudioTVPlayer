@@ -5,22 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser" 
              xmlns:dd="urn:gong-wpf-dragdrop"
-             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:BrowserViewModel}}"
              d:DesignHeight="450" d:DesignWidth="300"
-             BorderThickness="2"
+             Style="{StaticResource StrongFocusIndicatorUserControl}"
              >
-    <UserControl.Style>
-        <Style TargetType="UserControl">
-            <Style.Triggers>
-                <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Control.Validation}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Style>
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Alt" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />
         <KeyBinding Modifiers="Alt" Key="Left" Command="{Binding ChangeDateCommand}" CommandParameter="-1" />

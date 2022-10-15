@@ -38,21 +38,11 @@
         </Grid.RowDefinitions>
         <ListBox Grid.Column="0" Grid.RowSpan="2" ItemsSource="{Binding Players}" 
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
                  >
-            <ItemsControl.ItemContainerStyle>
-                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Padding" Value="0"/>
-                    <Setter Property="Focusable" Value="False"/>
-                    <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
-                    <Setter Property="mah:ItemHelper.DisabledSelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
-                    <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
-                    <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
-                    <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="{DynamicResource MahApps.Brushes.Transparent}" />
-                </Style>
-            </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">
+                    
                     <playerViews:PlayerView />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

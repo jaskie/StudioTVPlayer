@@ -10,7 +10,7 @@ namespace StudioTVPlayer.ViewModel
         protected DialogViewModelBase(Action<DialogViewModelBase> closeHandler)
         {
             CloseCommand = new UiCommand(_ => closeHandler(this));
-            OpenHyperlinkCommand = new UiCommand(o => Process.Start(o as string));
+            OpenHyperlinkCommand = new UiCommand(param => Process.Start(param as string));
         }
 
         public UiCommand CloseCommand { get; }

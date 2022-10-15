@@ -31,14 +31,20 @@ namespace StudioTVPlayer.View
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            base.OnClosing(e);
-            if (!e.Cancel)
-                ViewModel.MainViewModel.Instance.Dispose();
+
         }
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             ViewModel.MainViewModel.Instance.ShowPlayoutView();
+        }
+
+        private void MetroWindow_Closing(object sender, CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            e.Cancel = e.Cancel || ViewModel.MainViewModel.Instance.CanClose();
+            if (!e.Cancel)
+                ViewModel.MainViewModel.Instance.Dispose();
         }
     }
 }

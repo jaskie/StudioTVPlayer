@@ -6,22 +6,85 @@
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:AboutDialogViewModel}}"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel>
+             d:DesignHeight="450" d:DesignWidth="600">
+    <StackPanel >
         <Separator Height="5" />
-        <TextBlock>Keyboard shortcuts:</TextBlock>
-        <Grid HorizontalAlignment="Left">
-            <Grid.Resources>
-                <Style TargetType="TextBlock">
-                    <Setter Property="VerticalAlignment" Value="Center"/>
-                    <Setter Property="HorizontalAlignment" Value="Right"></Setter>
-                </Style>
-            </Grid.Resources>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-        </Grid>
-        <Button Grid.Row="1" IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="OK" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
+        <GroupBox Header="Keyboard shortcuts">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                        <Setter Property="Grid.Column" Value="1"/>
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="5 5 7 5">
+                    <Label FontWeight="Bold">On selected player</Label>
+                    <Separator Height="0.5"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0">One frame forward</Label>
+                        <TextBlock Grid.Row="0">Shift + right arrow</TextBlock>
+                        <Label Grid.Row="1">One frame backrward</Label>
+                        <TextBlock Grid.Row="1">Shift + left arrow</TextBlock>
+                        <Label Grid.Row="2">One second forward</Label>
+                        <TextBlock Grid.Row="2">Ctrl + right arrow</TextBlock>
+                        <Label Grid.Row="3">One second backward</Label>
+                        <TextBlock Grid.Row="3">Ctrl + left arrow</TextBlock>
+                        <Label Grid.Row="4">Cue</Label>
+                        <TextBlock Grid.Row="4">Ctrl + PgUp</TextBlock>
+                        <Label Grid.Row="5">Play / pause</Label>
+                        <TextBlock Grid.Row="5">Space</TextBlock>
+                        <Label Grid.Row="6">Load next clip</Label>
+                        <TextBlock Grid.Row="6">Alt + PgDn</TextBlock>
+                        <Label Grid.Row="7">Clear</Label>
+                        <TextBlock Grid.Row="7">Ctrl + Pause</TextBlock>
+                        <Label Grid.Row="8">Clear disabled (played) clips</Label>
+                        <TextBlock Grid.Row="8">Alt + Del</TextBlock>
+                    </Grid>
+                </StackPanel>
+                <GridSplitter Width="1" HorizontalAlignment="Right" IsEnabled="False"/>
+                <StackPanel Grid.Column="1" Margin="5" >
+                    <Label FontWeight="Bold" >On media list</Label>
+                    <Separator Height="0.5"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" >Add to player</Label>
+                        <TextBlock Grid.Row="0">Shift + number key (1-9) of player</TextBlock>
+                        <Label Grid.Row="1">One day backrward (if filtered)</Label>
+                        <TextBlock Grid.Row="1">Alt + left arrow</TextBlock>
+                        <Label Grid.Row="2">One day forward (if filtered)</Label>
+                        <TextBlock Grid.Row="2">Alt + right arrow</TextBlock>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <Button IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="Close" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
     </StackPanel>
 </UserControl>

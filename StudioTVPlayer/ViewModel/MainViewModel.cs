@@ -63,6 +63,11 @@ namespace StudioTVPlayer.ViewModel
             CurrentViewModel = null;
         }
 
+        public bool CanClose()
+        {
+            return true;
+        }
+
         private async void About(object _)
         {
             var dialog = new MahApps.Metro.Controls.Dialogs.CustomDialog { Title = "About Studio TVPlayer" };
@@ -78,6 +83,5 @@ namespace StudioTVPlayer.ViewModel
             dialog.Content = new View.HelpDialog { DataContext = dialogVm };
             await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
         }
-
     }
 }

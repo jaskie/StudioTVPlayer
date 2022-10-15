@@ -16,6 +16,7 @@
                  ShowSystemMenu="True"
                  dialogs:DialogParticipation.Register="{Binding}"
                  Loaded="MetroWindow_Loaded"
+                 Closing="MetroWindow_Closing"
                  >
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>

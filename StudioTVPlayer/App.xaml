@@ -1,7 +1,6 @@
 ﻿<Application x:Class="StudioTVPlayer.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:StudioTVPlayer" 
              StartupUri="View\MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -12,8 +11,9 @@
                 <!-- Theme setting -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
                 <!-- Application local settings -->
-                <ResourceDictionary Source="Resources/AppStyles.xaml"/>
-                <!--Controls default styles-->
+                <ResourceDictionary Source="Resources/AppResources.xaml" />
+                <ResourceDictionary Source="Resources/AppStyles.xaml" />
+                <!--Custom controls styles-->
                 <ResourceDictionary Source="Controls/Generic.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>        

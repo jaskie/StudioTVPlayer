@@ -1,14 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-                    xmlns:converters="clr-namespace:StudioTVPlayer.Converters"
-                    >
-    <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-    <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
-    <converters:NotNullToBooleanConverter x:Key="NotNullToBooleanConverter"/>
-    <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"/>
-    <converters:DescriptionConverter x:Key="DescriptionConverter"/>
-    
+                    xmlns:attachedProp="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
+                    >   
     <Style TargetType="{x:Type TabPanel}">
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Margin" Value="5 0"/>
@@ -111,15 +105,27 @@
         </Setter>
     </Style>
 
-    <DataTemplate x:Key="mediaDragTemplate">
-        <Image Height="90" Source="{Binding Thumbnail}">
-            <Image.OpacityMask>
-                <LinearGradientBrush StartPoint="0 1" EndPoint="1 0">
-                    <GradientStop Offset="0" Color="Black"/>
-                    <GradientStop Offset="1" Color="Transparent"/>
-                </LinearGradientBrush>
-            </Image.OpacityMask>
-        </Image>
-    </DataTemplate>
+    <Style x:Key="SimpleListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}" >
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="Transparent"/>
+        <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="Transparent"/>
+    </Style>
+
+    <Style x:Key="StrongFocusIndicatorUserControl" TargetType="UserControl">
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Focusable" Value="True"/>
+        <Setter Property="attachedProp:ControlProperties.TakesInputBindingPrecedence" Value="True"/>
+        <Setter Property="attachedProp:ControlProperties.EnableIsKeyboardFocusWithin" Value="True"/>
+        <Style.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Control.Validation}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
 </ResourceDictionary>

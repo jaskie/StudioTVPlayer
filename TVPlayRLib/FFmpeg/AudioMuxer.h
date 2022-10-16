@@ -13,7 +13,6 @@ public:
 	int OutputSampleRate();
 	int OutputChannelsCount();
 	AVRational OutputTimeBase() const override;
-	std::uint64_t OutputChannelLayout();
 	AVSampleFormat OutputSampleFormat();
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
 	std::shared_ptr<AVFrame> Pull() override;

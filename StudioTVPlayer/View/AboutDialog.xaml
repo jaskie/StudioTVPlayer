@@ -9,16 +9,15 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <Separator Height="5" />
-        <TextBlock>Studio TV Player - application created in 
-            <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.tvp.pl">TVP</Hyperlink>
-            , based on <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ffmpeg.org/">FFmpeg</Hyperlink> (core player), 
+        <TextBlock>Studio TV Player is based on <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ffmpeg.org/">FFmpeg</Hyperlink> (core player), and 
             <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://mahapps.com/">MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
         <TextBlock >Versions:</TextBlock>
         <Grid HorizontalAlignment="Left">
             <Grid.Resources>
                 <Style TargetType="TextBlock">
                     <Setter Property="VerticalAlignment" Value="Center"/>
-                    <Setter Property="HorizontalAlignment" Value="Right"></Setter>
+                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                    <Setter Property="Grid.Column" Value="1"/>
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
@@ -35,24 +34,24 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Grid.Row="0">StudioTVPlayer.exe</Label>
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding VersionInfo.Application}"/>
+            <TextBlock Grid.Row="0" Text="{Binding VersionInfo.Application}"/>
             <Label Grid.Row="1">TVPlayR.Player.dll</Label>
-            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding VersionInfo.Wrapper}"/>
+            <TextBlock Grid.Row="1" Text="{Binding VersionInfo.Wrapper}"/>
             <Label Grid.Row="2">avformat</Label>
-            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding VersionInfo.FFmpegAVFormat}"/>
+            <TextBlock Grid.Row="2" Text="{Binding VersionInfo.FFmpegAVFormat}"/>
             <Label Grid.Row="3">avcodec</Label>
-            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding VersionInfo.FFmpegAVCodec}"/>
+            <TextBlock Grid.Row="3" Text="{Binding VersionInfo.FFmpegAVCodec}"/>
             <Label Grid.Row="4">avfilter</Label>
-            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VersionInfo.FFmpegAVFilter}"/>
+            <TextBlock Grid.Row="4" Text="{Binding VersionInfo.FFmpegAVFilter}"/>
             <Label Grid.Row="5">
                 <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.blackmagicdesign.com/products/decklink">Decklink</Hyperlink>
             </Label>
-            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding VersionInfo.Decklink}"/>
+            <TextBlock Grid.Row="5" Text="{Binding VersionInfo.Decklink}"/>
             <Label Grid.Row="6">
                 <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ndi.tv/">NDI</Hyperlink>
             </Label>
-            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding VersionInfo.Ndi}"/>
+            <TextBlock Grid.Row="6" Text="{Binding VersionInfo.Ndi}"/>
         </Grid>
-        <Button Grid.Row="1" IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="OK" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
+        <Button IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="Close" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
     </StackPanel>
 </UserControl>

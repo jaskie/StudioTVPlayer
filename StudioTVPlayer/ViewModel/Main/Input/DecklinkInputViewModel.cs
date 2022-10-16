@@ -11,6 +11,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public DecklinkInputViewModel(Model.DecklinkInput input) : base(input)
         {
+            _input = input;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
             input.InputFormatChanged += Input_InputFormatChanged;

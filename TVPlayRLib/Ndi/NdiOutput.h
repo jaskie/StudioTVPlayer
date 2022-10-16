@@ -10,7 +10,7 @@ public:
 	NdiOutput(const std::string& source_name, const std::string& group_names);
 	~NdiOutput();
 	//OutputDevice
-	bool InitializeFor(const Core::Player& player) override;
+	bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
 	void Uninitialize() override;
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;

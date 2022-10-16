@@ -46,18 +46,18 @@ namespace TVPlayR {
 					ndi_->send_destroy(send_instance_);
 			}
 
-			bool InitializeFor(const Core::Player& player)
+			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				return executor_.invoke([&] 
 				{
 					if (format_.type() != Core::VideoFormatType::invalid)
 					{
-						DebugPrintLine(Common::DebugSeverity::warning, "Already assigned to another player");
+						DebugPrintLine(Common::DebugSeverity::warning, "Already assigned to another source");
 						return false;
 					}
-					format_ = player.Format();
-					audio_sample_rate_ = player.AudioSampleRate();
-					audio_channels_count_ = player.AudioChannelsCount();
+					format_ = video_format;
+					audio_sample_rate_ = audio_sample_rate;
+					audio_channels_count_ = audio_channel_count;
 					audio_samples_requested_ = 0LL;
 					video_frames_requested_ = 0LL;
 					RequestNextFrame();
@@ -147,7 +147,7 @@ namespace TVPlayR {
 		NdiOutput::NdiOutput(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		NdiOutput::~NdiOutput() { }
 
-		bool NdiOutput::InitializeFor(const Core::Player& player) { return impl_->InitializeFor(player); }
+		bool NdiOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 
 		void NdiOutput::Uninitialize() { impl_->Uninitialize(); }
 

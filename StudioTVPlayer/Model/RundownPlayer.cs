@@ -91,19 +91,13 @@ namespace StudioTVPlayer.Model
             if (AddItemsWithAutoPlay)
                 rundownItem.IsAutoStart = true;
             if (index < _rundown.Count)
-            {
                 _rundown.Insert(index, rundownItem);
-                rundownItem.PropertyChanged += RundownItem_PropertyChanged;
-                rundownItem.RemoveRequested += RundownItem_RemoveRequested;
-            }
             else if (index == Rundown.Count)
-            {
                 _rundown.Add(rundownItem);
-                rundownItem.PropertyChanged += RundownItem_PropertyChanged;
-                rundownItem.RemoveRequested += RundownItem_RemoveRequested;
-            }
             else
                 throw new ArgumentException(nameof(index));
+            rundownItem.PropertyChanged += RundownItem_PropertyChanged;
+            rundownItem.RemoveRequested += RundownItem_RemoveRequested;
         }
 
         public void MoveItem(int srcIndex, int destIndex)
@@ -275,17 +269,18 @@ namespace StudioTVPlayer.Model
             RemoveItem(item);
         }
 
+        public override void Initialize()
+        {
+            base.Initialize();
+            PlayingRundownItem = null;
+        }
 
         public override void Dispose()
         {
             base.Dispose();
             PlayingRundownItem = null;
-            foreach (var item in _rundown)
-            {
-                item.PropertyChanged -= RundownItem_PropertyChanged;
-                item.RemoveRequested -= RundownItem_RemoveRequested;
-                item.Dispose();
-            }
+            foreach (var item in _rundown.ToList())
+                RemoveItem(item);
             _rundown.Clear();
         }
 

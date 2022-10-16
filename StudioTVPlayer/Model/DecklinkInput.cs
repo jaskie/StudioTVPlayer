@@ -39,7 +39,7 @@ namespace StudioTVPlayer.Model
                 _input.FormatChanged += Input_FormatChanged;
                 
                 _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);
-                _input.AddPreview(_preview);
+                _input.AddOutputSink(_preview);
                 return true;
             }
             catch
@@ -51,7 +51,7 @@ namespace StudioTVPlayer.Model
         public override void Uninitialize()
         {
             if (!(_preview is null))
-                _input?.RemovePreview(_preview);
+                _input?.RemoveOutputSink(_preview);
             if (!(_input is null))
             {
                 _input.FormatChanged -= Input_FormatChanged;

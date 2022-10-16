@@ -1,26 +1,14 @@
-﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Providers;
+﻿using StudioTVPlayer.Providers;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class AboutDialogViewModel: ViewModelBase
+    public class AboutDialogViewModel: DialogViewModelBase
     {
-        public AboutDialogViewModel(Action<AboutDialogViewModel> closeHandler)
+        public AboutDialogViewModel(Action<DialogViewModelBase> closeHandler) : base(closeHandler)
         {
-            CloseCommand = new UiCommand(_ => closeHandler(this));
-            OpenHyperlinkCommand = new UiCommand(o => Process.Start(o as string));
         }
 
         public VersionInfo VersionInfo => VersionInfo.Current;
-
-        public UiCommand CloseCommand { get; }
-
-        public UiCommand OpenHyperlinkCommand { get; }
     }
 }

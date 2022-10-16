@@ -8,11 +8,16 @@ namespace StudioTVPlayer.Model.Configuration
         private bool _isModified;
 
         [XmlIgnore]
-        internal bool IsModified { get => _isModified; set => SetIsModified(value); }
+        internal bool IsModified { get => GetIsModified(); set => SetIsModified(value); }
 
         protected virtual void SetIsModified(bool value)
         {
             _isModified = value;
+        }
+
+        protected virtual bool GetIsModified()
+        {
+            return _isModified;
         }
 
         protected bool Set<T>(ref T field, T value)

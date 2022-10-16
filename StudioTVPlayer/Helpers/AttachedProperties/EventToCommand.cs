@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.Helpers.AttachedProperties
@@ -27,7 +21,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
                 ((Control)d).MouseDoubleClick -= element_MouseDoubleClick;
         }
 
-        static void element_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private static void element_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left)
                 return;
@@ -58,7 +52,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
                 ((FrameworkElement)d).PreviewMouseLeftButtonDown -= element_MouseLeftButtonDown;
         }
 
-        static void element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private static void element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
@@ -85,7 +79,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
                 ((FrameworkElement)d).PreviewMouseLeftButtonUp -= element_MouseLeftButtonUp;
         }
 
-        static void element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
@@ -112,7 +106,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
                 ((FrameworkElement)d).PreviewMouseRightButtonDown -= element_MouseRightButtonDown;
         }
 
-        static void element_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private static void element_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
@@ -140,7 +134,7 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
                 ((FrameworkElement)d).Unloaded -= element_Unloaded;
         }
 
-        static void element_Unloaded(object sender, RoutedEventArgs e)
+        private static void element_Unloaded(object sender, RoutedEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 

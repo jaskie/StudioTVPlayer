@@ -19,6 +19,7 @@ namespace StudioTVPlayer.ViewModel
                 CurrentViewModel = new ConfigurationViewModel();
             });
             AboutCommand = new UiCommand(About);
+            HelpCommand = new UiCommand(Help);
         }
 
         public static readonly MainViewModel Instance = new MainViewModel();
@@ -54,10 +55,17 @@ namespace StudioTVPlayer.ViewModel
         public UiCommand ConfigurationCommand { get; }
 
         public UiCommand AboutCommand { get; }
+        
+        public UiCommand HelpCommand { get; }
 
         public void Dispose()
         {
             CurrentViewModel = null;
+        }
+
+        public bool CanClose()
+        {
+            return true;
         }
 
         private async void About(object _)
@@ -68,5 +76,12 @@ namespace StudioTVPlayer.ViewModel
             await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
         }
 
+        private async void Help(object _)
+        {
+            var dialog = new MahApps.Metro.Controls.Dialogs.CustomDialog { Title = "Help" };
+            var dialogVm = new HelpDialogViewModel(instance => _dialogCoordinator.HideMetroDialogAsync(this, dialog));
+            dialog.Content = new View.HelpDialog { DataContext = dialogVm };
+            await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
+        }
     }
 }

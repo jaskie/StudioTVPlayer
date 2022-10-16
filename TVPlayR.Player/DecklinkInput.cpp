@@ -28,14 +28,14 @@ namespace TVPlayR {
 		decklink->SetFormatChangedCallback(static_cast<Decklink::FORMAT_CALLBACK>(formatChangedIp.ToPointer()));
 	}
 
-	void DecklinkInput::AddPreview(PreviewSink^ preview)
+	void DecklinkInput::AddOutputSink(OutputSink^ preview)
 	{
-		GetDecklinkInput()->AddPreview(preview->GetNativeSink());
+		GetDecklinkInput()->AddOutputSink(preview->GetNativeSink());
 	}
 
-	void DecklinkInput::RemovePreview(PreviewSink^ preview)
+	void DecklinkInput::RemoveOutputSink(OutputSink^ output_sink)
 	{
-		GetDecklinkInput()->RemovePreview(preview->GetNativeSink());
+		GetDecklinkInput()->RemoveOutputSink(output_sink->GetNativeSink());
 	}
 
 	DecklinkInput::~DecklinkInput()

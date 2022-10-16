@@ -1,11 +1,11 @@
 #pragma once
 
 namespace TVPlayR {
+	enum class PixelFormat;
 
 	namespace Core {
-
+		enum class VideoFormatType;
 		class ClockTarget;
-		class Player;
 		class OverlayBase;
 		struct AVSync;
 
@@ -24,7 +24,7 @@ public:
 class OutputDevice : public FrameClockSource, public OutputSink, private Common::NonCopyable
 {
 public:
-	virtual bool InitializeFor(const Player& player) = 0;
+	virtual bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) = 0;
 	virtual void Uninitialize() = 0;
 	virtual void AddOverlay(std::shared_ptr<OverlayBase>& overlay) = 0;
 	virtual void RemoveOverlay(std::shared_ptr<OverlayBase>& overlay) = 0;

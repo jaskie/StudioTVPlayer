@@ -3,6 +3,9 @@
 
 #include "Core/VideoFormat.h"
 #include "Core/Player.h"
+#include "DecklinkKeyer.h"
+#include "DecklinkTimecodeSource.h"
+#include "TimecodeOutputSource.h"
 #include "Decklink/DecklinkIterator.h"
 #include "Decklink/DecklinkOutput.h"
 #include "Decklink/DecklinkInput.h"
@@ -45,28 +48,30 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		Core::Player player("1", Core::VideoFormatType::v2160p5000, PixelFormat::yuv422, 2, 48000);
+		Core::Player player("1", Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2, 48000);
 	/*	player.SetAudioVolumeCallback([](std::vector<float>& volume, float coherence) {
 			std::cout << coherence << "\n";
 			});
-	
+	*/
 		Decklink::DecklinkIterator iterator;
 		int device_index = 0;
+		
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto decklink_output = iterator.CreateOutput(*iterator[device_index], false);
-		player.SetFrameClock(decklink_output);
-		if (!decklink_output->InitializeFor(player))
-			throw std::exception();
+		auto decklink_output = iterator.CreateOutput(*iterator[device_index], DecklinkKeyer::Default, TimecodeOutputSource::TimeToEnd);
+		decklink_output->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2, 48000);
 		player.AddOutputSink(decklink_output);
-		*/
-		//using namespace std::chrono_literals;
+		player.SetFrameClockSource(*decklink_output);
+		//if (!decklink_output->InitializeFor(player))
+		//	throw std::exception();
+		//player.AddOutputSink(decklink_output);
+		
 
 		auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
-		if (!ndi->InitializeFor(player))
-			throw std::exception("Could not assign output to player");
+		if (!ndi->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2, 48000))
+			throw std::exception("Could not initialize output for player");
 		player.AddOutputSink(ndi);
-		player.SetFrameClockSource(*ndi);
+		//player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
 		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
 			"libx264",															// VideoCodec
@@ -97,10 +102,18 @@ int main()
 		//input->Seek(seek);
 		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
 		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		input->SetFramePlayedCallback([&](Core::FrameTimeInfo& time) {});
+		input->SetFramePlayedCallback([](Core::FrameTimeInfo& time) {});
 		input->Play();
 		input->SetIsLoop(true);
 		player.Load(input);
+
+
+		// prepare input and recording
+		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::v1080i5000, 2, DecklinkTimecodeSource::RP188Any, true);
+		FFmpeg::FFOutputParams record_params{ "d:\\temp\\cccc.mov", "libx264", "aac", 4000, 128 };
+		auto record_file = std::make_shared<FFmpeg::FFmpegOutput>(record_params);
+		record_file->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
+		decklink_input->AddOutputSink(record_file);
 
 		
 		while (true)
@@ -125,9 +138,12 @@ int main()
 				else	 
 					input->Play();
 		}
+		decklink_input->RemoveOutputSink(record_file);
+		record_file->Uninitialize();
 		ndi->Uninitialize();
 		player.RemoveOutputSink(ndi);
-		//player.RemoveOutputSink(decklink_output);
+		decklink_output->Uninitialize();
+		player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);
 #ifdef _DEBUG
 	}

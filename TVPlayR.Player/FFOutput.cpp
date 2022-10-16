@@ -5,6 +5,8 @@
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
 #include "Player.h"
+#include "Core/Player.h"
+#include "Core/VideoFormat.h"
 
 namespace TVPlayR
 {
@@ -58,7 +60,8 @@ namespace TVPlayR
 
     void FFOutput::InitializeFor(Player^ player)
     {
-        (*_native_output)->InitializeFor(player->GetNativePlayer());
+        Core::Player& native_player = player->GetNativePlayer();
+        (*_native_output)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
     }
 
     void FFOutput::UnInitialize()

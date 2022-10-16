@@ -12,8 +12,8 @@ AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_r
 	, time_base_(time_base)
 	, seek_time_(seek_time)
 	, sample_fmt_(sample_fmt)
-	, channels_count_(channels_count)
 {
+	av_channel_layout_default(&channel_layout_, channels_count);
 }
 
 bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
@@ -61,8 +61,7 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 	auto frame(AllocFrame());
 	frame->nb_samples = nb_samples;
 	frame->format = sample_fmt_;
-	frame->channels = channels_count_;
-	frame->channel_layout = av_get_default_channel_layout(channels_count_);
+	frame->ch_layout = channel_layout_;
 	frame->sample_rate = sample_rate_;
 	frame->pts = av_rescale(start_sample_, time_base_.den, static_cast<std::int64_t>(sample_rate_) * time_base_.num);
 	int samples_from_fifo = min(samples_in_fifo, nb_samples);
@@ -76,7 +75,7 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 	}
 	if (samples_from_fifo < nb_samples)
 	{
-		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channels_count_, sample_fmt_);
+		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channel_layout_.nb_channels, sample_fmt_);
 		DebugPrintLine(Common::DebugSeverity::debug, "Filled audio with silence at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms");
 	}
 	else

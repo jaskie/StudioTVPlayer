@@ -43,7 +43,7 @@ struct Decoder::implementation : Common::DebugTarget
 		, start_ts_(stream ? stream->start_time : 0LL)
 		, duration_(stream ? stream->duration: 0LL)
 		, stream_index_(stream ? stream->index : 0)
-		, channels_count_(stream && stream->codecpar ? stream->codecpar->channels : 0)
+		, channels_count_(stream && stream->codecpar ? stream->codecpar->ch_layout.nb_channels : 0)
 		, sample_rate_(stream && stream->codecpar ? stream->codecpar->sample_rate : 0)
 		, time_base_(stream ? stream->time_base : av_make_q(0, 1))
 		, seek_pts_(TimeToPts(seek_time, time_base_))
@@ -233,7 +233,7 @@ int Decoder::AudioSampleRate() const { return impl_->sample_rate_; }
 
 int Decoder::StreamIndex() const { return impl_->stream_index_; }
 
-std::uint64_t Decoder::AudioChannelLayout() const { return impl_->ctx_ ? impl_->ctx_->channel_layout : 0ULL; }
+AVChannelLayout Decoder::AudioChannelLayout() const { return impl_->ctx_ ? impl_->ctx_->ch_layout : AVChannelLayout(); }
 
 AVSampleFormat Decoder::AudioSampleFormat() const { return impl_->ctx_ ? impl_->ctx_->sample_fmt : AVSampleFormat::AV_SAMPLE_FMT_NONE; }
 

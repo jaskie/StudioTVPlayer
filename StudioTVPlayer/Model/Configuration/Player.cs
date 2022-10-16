@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Linq;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
@@ -42,6 +43,11 @@ namespace StudioTVPlayer.Model.Configuration
                 return;
             foreach (var output in Outputs)
                 output.IsModified = false;
+        }
+
+        protected override bool GetIsModified()
+        {
+            return base.GetIsModified() || Outputs.Any(output => output.IsModified);
         }
     }
 }

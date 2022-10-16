@@ -69,19 +69,19 @@ namespace TVPlayR {
 				});
 			}
 
-			bool InitializeFor(const Core::Player& player)
+			bool Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (format_.type() != Core::VideoFormatType::invalid)
 					return false;
-				format_ = player.Format();
-				src_pixel_format_ =  PixelFormatToFFmpegFormat(player.PixelFormat());
-				audio_channels_count_ = player.AudioChannelsCount();
-				audio_sample_rate_ = player.AudioSampleRate();
-				audio_resampler_ = std::make_unique<SwResample>(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]));
+				format_ = video_format;
+				src_pixel_format_ =  PixelFormatToFFmpegFormat(pixel_format);
+				audio_channels_count_ = audio_channel_count;
+				audio_sample_rate_ = audio_sample_rate;
+				audio_resampler_ = std::make_unique<SwResample>(audio_channel_count, audio_sample_rate, AVSampleFormat::AV_SAMPLE_FMT_FLT, audio_channel_count, audio_sample_rate, static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]));
 				if (params_.VideoFilter.empty())
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
-					video_filter_ = std::make_unique<OutputVideoFilter>(player.Format().FrameRate().av(), params_.VideoFilter, video_codec_->pix_fmts[0]);
+					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, video_codec_->pix_fmts[0]);
 				return true;
 			}
 
@@ -134,7 +134,7 @@ namespace TVPlayR {
 					}
 					if (!audio_encoder_)
 					{
-						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_->OutputSampleRate(), audio_resampler_->OutputChannelCount(), &options_, params_.AudioMetadata, params_.AudioStreamId);
+						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_->OutputSampleRate(), audio_resampler_->OutputChannelLayout(), &options_, params_.AudioMetadata, params_.AudioStreamId);
 						InitializeOuputIfPossible();
 					}
 					if (sync.Audio)
@@ -253,7 +253,7 @@ namespace TVPlayR {
 		{ }
 
 		FFmpegOutput::~FFmpegOutput() { }
-		bool FFmpegOutput::InitializeFor(const Core::Player& player) { return impl_->InitializeFor(player); }
+		bool FFmpegOutput::Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		
 		void FFmpegOutput::Uninitialize() { impl_->Uninitialize(); }
 		

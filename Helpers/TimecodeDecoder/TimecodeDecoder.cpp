@@ -54,16 +54,20 @@ int main()
 	{
 #endif
 	Common::ComInitializer com_initializer;
-	Core::Player player("Player 1", Core::VideoFormatType::pal_fha, PixelFormat::bgra, 2, 48000);
+	const Core::VideoFormatType video_format = Core::VideoFormatType::pal_fha;
+	const PixelFormat pixel_format = PixelFormat::bgra;
+	const int audio_channels = 2;
+	const int audio_sample_rate = 48000;
+	Core::Player player("Player 1", video_format, pixel_format, audio_channels, audio_sample_rate);
 	Decklink::DecklinkIterator iterator;
 	int device_index = 1;
 	//for (size_t i = 0; i < iterator.Size(); i++)
 	//	std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-	auto output = iterator.CreateOutput(*iterator[device_index], TVPlayR::DecklinkKeyer::Default);
+	auto output = iterator.CreateOutput(*iterator[device_index], TVPlayR::DecklinkKeyer::Default, TVPlayR::TimecodeOutputSource::Timecode);
 	auto ndi = std::make_shared<Ndi::NdiOutput>("NDI Output", "");
-	auto overlay = std::make_shared<Core::TimecodeOverlay>(TVPlayR::TimecodeOutputSource::TimeToEnd, player.Format().type(), player.PixelFormat());
-	output->InitializeFor(player);
-	ndi->InitializeFor(player);
+	auto overlay = std::make_shared<Core::TimecodeOverlay>(TVPlayR::TimecodeOutputSource::Timecode, player.Format().type(), player.PixelFormat());
+	output->Initialize(video_format, pixel_format, audio_channels, audio_sample_rate);
+	ndi->Initialize(video_format, pixel_format, audio_channels, audio_sample_rate);
 	player.AddOverlay(overlay);
 	player.SetFrameClockSource(*output);
 	player.AddOutputSink(output);
@@ -77,6 +81,7 @@ int main()
 	player.Load(input);
 	std::getchar();
 	player.RemoveOutputSink(ndi);
+	player.RemoveOutputSink(output);
 #ifdef _DEBUG
 	}
 	catch (std::exception e)

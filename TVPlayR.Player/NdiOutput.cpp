@@ -4,6 +4,8 @@
 #include "OverlayBase.h"
 #include "Ndi/NdiOutput.h"
 #include "Player.h"
+#include "Core/Player.h"
+#include "Core/VideoFormat.h"
 
 namespace TVPlayR {
 
@@ -43,7 +45,8 @@ namespace TVPlayR {
 
 	void NdiOutput::InitializeFor(Player^ player)
 	{
-		(*_ndi)->InitializeFor(player->GetNativePlayer());
+		Core::Player& native_player = player->GetNativePlayer();
+		(*_ndi)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
 	}
 
 	void NdiOutput::UnInitialize()

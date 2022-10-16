@@ -138,8 +138,7 @@ namespace TVPlayR {
 			BMDTimeValue packetTime;
 			if (SUCCEEDED(audio_packet->GetPacketTime(&packetTime, sample_rate)))
 				audio->pts = packetTime;
-			audio->channels = channels;
-			audio->channel_layout = av_get_default_channel_layout(channels);
+			av_channel_layout_default(&audio->ch_layout, channels);
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(audio.get(), 0));
 			std::memcpy(audio->data[0], audio_bytes, audio->linesize[0]);
 			return audio;

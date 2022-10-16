@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Windows.Media;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
     public class MediaViewModel : ViewModelBase, IDisposable
     {
 
-        public MediaFile Media { get; }
+        public Model.MediaFile Media { get; }
 
         public string Name => Media.Name;
         public TimeSpan Duration => Media.Duration;
@@ -17,7 +16,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public DateTime CreationTime => Media.CreationTime;
         public int Width => Media.Width;
         public int Height => Media.Height;
-        public ScanType ScanType => Media.ScanType;
+        public Model.ScanType ScanType => Media.ScanType;
         public string FrameRate => Media.FrameRate;
         public int AudioChannelCount => Media.AudioChannelCount;
         public bool HaveAlphaChannel => Media.HaveAlphaChannel;
@@ -28,9 +27,11 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public bool IsValid => Media.IsValid;
 
+        public IEnumerable<Model.Player> Players => Providers.GlobalApplicationData.Current.RundownPlayers;
+
         public UiCommand QueueToPlayerCommand { get; }
 
-        public MediaViewModel(MediaFile media)
+        public MediaViewModel(Model.MediaFile media)
         {
             Media = media;
             media.PropertyChanged += Media_PropertyChanged;

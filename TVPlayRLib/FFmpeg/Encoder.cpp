@@ -18,21 +18,21 @@ namespace TVPlayR {
 	}
 
 
-	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, int audio_channels_count, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, AVChannelLayout& audio_channel_layout, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(Common::DebugSeverity::info, "Audio encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
-		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channels_count))
+		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channel_layout))
 		, format_(enc_ctx_->sample_fmt)
 	{
 		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
 		if (enc_ctx_->frame_size > 0)
 		{
 			audio_frame_size_ = enc_ctx_->frame_size;
-			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(encoder_->sample_fmts[0], audio_channels_count, audio_frame_size_ * 3), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
+			fifo_ = std::unique_ptr<AVAudioFifo, std::function<void(AVAudioFifo*)>>(av_audio_fifo_alloc(encoder_->sample_fmts[0], audio_channel_layout.nb_channels, audio_frame_size_ * 3), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); });
 		}
 	}
 
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetAudioContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int sample_rate, int channels_count)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetAudioContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int sample_rate, AVChannelLayout& audio_channel_layout)
 	{
 		if (!encoder)
 		{
@@ -43,8 +43,7 @@ namespace TVPlayR {
 		if (!ctx)
 			return nullptr;
 		ctx->sample_rate = sample_rate;
-		ctx->channel_layout = av_get_default_channel_layout(channels_count);
-		ctx->channels = channels_count;
+		av_channel_layout_copy(&ctx->ch_layout, &audio_channel_layout);
 		ctx->sample_fmt = encoder->sample_fmts[0];
 		ctx->time_base = av_make_q(1, sample_rate);
 		ctx->bit_rate = bitrate * 1000;
@@ -167,8 +166,7 @@ namespace TVPlayR {
 		auto frame = FFmpeg::AllocFrame();
 		frame->nb_samples = nb_samples;
 		frame->format = enc_ctx_->sample_fmt;
-		frame->channels = enc_ctx_->channels;
-		frame->channel_layout = enc_ctx_->channel_layout;
+		frame->ch_layout = enc_ctx_->ch_layout;
 		frame->pts = output_timestamp_;
 		output_timestamp_ += nb_samples;
 		THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));

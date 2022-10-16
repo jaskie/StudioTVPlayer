@@ -1,7 +1,7 @@
 EXPORTS
-    sws_allocVec
     sws_alloc_context
     sws_alloc_set_opts
+    sws_allocVec
     sws_convertPalette8ToPacked24
     sws_convertPalette8ToPacked32
     sws_frame_end
@@ -9,13 +9,13 @@ EXPORTS
     sws_freeContext
     sws_freeFilter
     sws_freeVec
+    sws_get_class
     sws_getCachedContext
     sws_getCoefficients
     sws_getColorspaceDetails
     sws_getContext
     sws_getDefaultFilter
     sws_getGaussianVec
-    sws_get_class
     sws_init_context
     sws_isSupportedEndiannessConversion
     sws_isSupportedInput
@@ -24,8 +24,8 @@ EXPORTS
     sws_receive_slice
     sws_receive_slice_alignment
     sws_scale
-    sws_scaleVec
     sws_scale_frame
+    sws_scaleVec
     sws_send_slice
     sws_setColorspaceDetails
     swscale_configuration

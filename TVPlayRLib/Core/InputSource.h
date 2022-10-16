@@ -19,7 +19,7 @@ public:
 	virtual bool IsAddedToPlayer(const Player& player) = 0;
 	virtual void AddToPlayer(const Player& player) = 0;
 	virtual void RemoveFromPlayer(const Core::Player& player) = 0;
-	virtual void AddPreview(std::shared_ptr<Core::OutputSink> preview) = 0;
+	virtual void AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) = 0;
 	virtual void Play() = 0;
 	virtual void Pause() = 0;
 	virtual bool IsPlaying() const = 0;

@@ -73,5 +73,12 @@ namespace StudioTVPlayer.ViewModel
         {
             Application.Current?.Dispatcher.BeginInvoke(action);
         }
+
+        public bool IsDebugBuild =>
+#if DEBUG
+            true;
+#else
+            false;
+#endif
     }
 }

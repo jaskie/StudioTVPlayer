@@ -21,14 +21,11 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private MediaViewModel _selectedMedia;
         private DateTime _selectedDate;
 
-
-
         public ICommand QueueToPlayerByIndexCommand { get; }
 
         public ICommand ChangeDateCommand { get; }
 
         public ICommand ExploreFolderCommand { get; }
-
 
         public BrowserViewModel(WatchedFolder watchedFolder)
         {
@@ -43,7 +40,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             Path = watchedFolder.Path;
             IsFilteredByDate = watchedFolder.IsFilteredByDate;
             _selectedDate = watchedFolder.FilterDate;
-            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex, index => SelectedMedia != null && int.Parse(index as string) < Providers.GlobalApplicationData.Current.RundownPlayers.Count);
+            QueueToPlayerByIndexCommand = new UiCommand(QueueToPlayerByIndex);
             ChangeDateCommand = new UiCommand(ChangeDate, _ => IsFilteredByDate);
             ExploreFolderCommand = new UiCommand(ExploreFolder);
         }
@@ -117,18 +114,21 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                     break;
             }
         }
-
-     
+             
         private void QueueToPlayerByIndex(object obj)
         {
-            var index = int.Parse(obj as string);
-            Providers.GlobalApplicationData.Current.RundownPlayers[index].Submit(SelectedMedia.Media);
+            if (SelectedMedia is null)
+                return;
+            var player = Providers.GlobalApplicationData.Current.RundownPlayers.ElementAtOrDefault(int.Parse(obj as string));
+            if (player is null)
+                return;
+            player.Submit(SelectedMedia.Media);
         }
 
         private void ChangeDate(object days)
         {
             if (!(days is string str && int.TryParse(str, out var increment)))
-                throw new ArgumentException("Invalid parameter", nameof(days));
+                throw new ArgumentException(nameof(days));
             SelectedDate = SelectedDate.AddDays(increment);
         }
 

@@ -19,7 +19,7 @@ public:
 	bool IsEof() const;
 	int AudioChannelsCount() const;
 	int AudioSampleRate() const;
-	AVChannelLayout AudioChannelLayout() const;
+	AVChannelLayout* AudioChannelLayout() const;
 	AVSampleFormat AudioSampleFormat() const;
 	AVMediaType MediaType() const;
 	const AVRational& FrameRate() const;

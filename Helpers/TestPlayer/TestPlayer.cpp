@@ -95,7 +95,7 @@ int main()
 		*/
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Temp\\polmacedonia.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Playout\\PRV\\media\\WIPE.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
@@ -109,12 +109,13 @@ int main()
 
 
 		// prepare input and recording
+		/*
 		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::v1080i5000, 2, DecklinkTimecodeSource::RP188Any, true);
 		FFmpeg::FFOutputParams record_params{ "d:\\temp\\cccc.mov", "libx264", "aac", 4000, 128 };
 		auto record_file = std::make_shared<FFmpeg::FFmpegOutput>(record_params);
 		record_file->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
 		decklink_input->AddOutputSink(record_file);
-
+		*/
 		
 		while (true)
 		{
@@ -138,8 +139,8 @@ int main()
 				else	 
 					input->Play();
 		}
-		decklink_input->RemoveOutputSink(record_file);
-		record_file->Uninitialize();
+		//decklink_input->RemoveOutputSink(record_file);
+		//record_file->Uninitialize();
 		ndi->Uninitialize();
 		player.RemoveOutputSink(ndi);
 		decklink_output->Uninitialize();

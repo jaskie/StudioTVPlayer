@@ -73,7 +73,7 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 {
 	auto dest = std::find_if(std::begin(source_ctx_), std::end(source_ctx_), [&stream_index](const std::pair<int, AVFilterContext*>& ctx) {return ctx.first == stream_index; });
 	if (dest == std::end(source_ctx_))
-	THROW_EXCEPTION("AudioMuxer: stream not found");
+		THROW_EXCEPTION("AudioMuxer: stream not found");
 	DebugPrintLine(Common::DebugSeverity::trace, "Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000));
 	int ret = av_buffersrc_write_frame(dest->second, frame.get());
 	switch (ret)
@@ -159,11 +159,13 @@ void AudioMuxer::Initialize()
 		for (int i = 0; i < decoders_.size(); i++)
 		{
 			auto ch_layout = decoders_[i]->AudioChannelLayout();
-			int64_t channel_layout = av_channel_layout_subset(&ch_layout, UINT64_MAX);
-			snprintf(args, sizeof(args),
-				"time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%llx",
+			if (!ch_layout)
+				THROW_EXCEPTION("Decoder AudioChannelLayout empty");
+			int ret = snprintf(args, sizeof(args),
+				"time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=",
 				decoders_[i]->TimeBase().num, decoders_[i]->TimeBase().den, decoders_[i]->AudioSampleRate(),
-				av_get_sample_fmt_name(decoders_[i]->AudioSampleFormat()), channel_layout);
+				av_get_sample_fmt_name(decoders_[i]->AudioSampleFormat()));
+			av_channel_layout_describe(ch_layout, args + ret, sizeof(args) - ret);
 			auto new_source = std::pair<int, AVFilterContext*>(decoders_[i]->StreamIndex(), NULL);
 			THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&new_source.second, buffersrc, "ain", args, NULL, graph_.get()));
 

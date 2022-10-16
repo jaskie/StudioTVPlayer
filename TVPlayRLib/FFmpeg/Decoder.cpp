@@ -233,7 +233,7 @@ int Decoder::AudioSampleRate() const { return impl_->sample_rate_; }
 
 int Decoder::StreamIndex() const { return impl_->stream_index_; }
 
-AVChannelLayout Decoder::AudioChannelLayout() const { return impl_->ctx_ ? impl_->ctx_->ch_layout : AVChannelLayout(); }
+AVChannelLayout* Decoder::AudioChannelLayout() const { return impl_->ctx_ ? &impl_->ctx_->ch_layout : nullptr; }
 
 AVSampleFormat Decoder::AudioSampleFormat() const { return impl_->ctx_ ? impl_->ctx_->sample_fmt : AVSampleFormat::AV_SAMPLE_FMT_NONE; }
 

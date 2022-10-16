@@ -3,6 +3,9 @@
 #include "OverlayBase.h"
 #include "Decklink/DecklinkOutput.h"
 #include "Player.h"
+#include "Core/Player.h"
+#include "Core/VideoFormat.h"
+
 
 namespace TVPlayR {
 	std::shared_ptr<Core::OutputDevice> DecklinkOutput::GetNativeDevice()
@@ -35,7 +38,8 @@ namespace TVPlayR {
 
 	void DecklinkOutput::InitializeFor(Player^ player)
 	{
-		(*_decklink)->InitializeFor(player->GetNativePlayer());
+		Core::Player& native_player = player->GetNativePlayer();
+		(*_decklink)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
 	}
 
 	void DecklinkOutput::UnInitialize()

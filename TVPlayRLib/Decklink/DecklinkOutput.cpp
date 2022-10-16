@@ -2,9 +2,9 @@
 #include "DecklinkOutput.h"
 #include "../Core/VideoFormat.h"
 #include "../PixelFormat.h"
-#include "../Core/Player.h"
 #include "DecklinkUtils.h"
 #include "DecklinkVideoFrame.h"
+#include "../Core/Player.h" //ClockTarget here
 #include "../Core/OverlayBase.h"
 #include "../Core/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
@@ -23,6 +23,7 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkAttributes> attributes_;
 			int index_;
 			Core::VideoFormat format_;
+			PixelFormat pixel_format_ = PixelFormat::yuv422;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			std::vector<Core::ClockTarget*> clock_targets_;
 			std::mutex overlays_mutex_;
@@ -93,14 +94,14 @@ namespace TVPlayR {
 				return true;
 			}
 						
-			void Preroll(const Core::Player& player)
+			void Preroll()
 			{
 				if (!output_)
 					return;
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
 				output_->BeginAudioPreroll();
-				auto empty_video_frame = FFmpeg::CreateEmptyVideoFrame(player.Format(), player.PixelFormat());
+				auto empty_video_frame = FFmpeg::CreateEmptyVideoFrame(format_, pixel_format_);
 				for (size_t i = 0; i < buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
@@ -147,18 +148,18 @@ namespace TVPlayR {
 				return true;
 			}
 
-			bool InitializeFor(const Core::Player& player)
+			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
-				if (!OpenOutput(GetDecklinkDisplayMode(player.Format().type()), BMDPixelFormatFromPixelFormat(player.PixelFormat()), player.AudioChannelsCount()))
-					return false;
-				if (player.Format().type() == Core::VideoFormatType::invalid)
+				if (video_format == Core::VideoFormatType::invalid)
 					THROW_EXCEPTION("Invalid video format");
-				format_ = player.Format();
-				audio_channels_count_ = player.AudioChannelsCount();
-				if (player.AudioSampleFormat() != AVSampleFormat::AV_SAMPLE_FMT_S32)
-					audio_resampler_ = std::make_unique<FFmpeg::SwResample>(player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat(), audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
+				if (!OpenOutput(GetDecklinkDisplayMode(video_format), BMDPixelFormatFromPixelFormat(pixel_format), audio_channel_count))
+					return false;
+				format_ = video_format;
+				pixel_format_ = pixel_format;
+				audio_channels_count_ = audio_channel_count;
+				audio_resampler_ = std::make_unique<FFmpeg::SwResample>(audio_channel_count, audio_sample_rate, AVSampleFormat::AV_SAMPLE_FMT_FLT, audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
 				last_video_time_ = 0LL;
-				Preroll(player);
+				Preroll();
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
 				return true;
 			}
@@ -283,7 +284,7 @@ namespace TVPlayR {
 
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
-		bool DecklinkOutput::InitializeFor(const Core::Player& player) { return impl_->InitializeFor(player); }
+		bool DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		void DecklinkOutput::Uninitialize()	{ impl_->Uninitialize(); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }

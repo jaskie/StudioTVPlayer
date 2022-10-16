@@ -224,7 +224,7 @@ namespace TVPlayR {
 		bool DecklinkInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
 		void DecklinkInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
 		void DecklinkInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player); }
-		void DecklinkInput::AddOutputSink(std::shared_ptr<Core::OutputSink>& output_sink) { impl_->AddOutputSink(output_sink); }
+		void DecklinkInput::AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) { impl_->AddOutputSink(output_sink); }
 		void DecklinkInput::RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) { impl_->RemoveOutputSink(output_sink); }
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }

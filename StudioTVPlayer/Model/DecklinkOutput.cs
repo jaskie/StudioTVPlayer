@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 
 namespace StudioTVPlayer.Model
 {
@@ -35,6 +36,7 @@ namespace StudioTVPlayer.Model
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == _configuration.DeviceIndex);
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, _configuration.Keyer, _configuration.TimecodeSource);
             base.Initialize(player);
+            Debug.WriteLine("Decklink output initialized");
         }
     }
 }

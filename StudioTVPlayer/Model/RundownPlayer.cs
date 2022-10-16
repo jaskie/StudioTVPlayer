@@ -275,6 +275,11 @@ namespace StudioTVPlayer.Model
             RemoveItem(item);
         }
 
+        public override void Initialize()
+        {
+            base.Initialize();
+            PlayingRundownItem = null;
+        }
 
         public override void Dispose()
         {

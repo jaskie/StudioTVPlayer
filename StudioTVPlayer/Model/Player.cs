@@ -77,31 +77,9 @@ namespace StudioTVPlayer.Model
 
         public int AudioChannelCount { get; } = 2;
 
-        public void Initialize()
+        public virtual void Initialize()
         {
             var newVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
-            if (!(_player is null))
-            {
-                if (!(newVideoFormat == VideoFormat && PixelFormat == Configuration.PixelFormat))
-                {
-                }
-                foreach (var output in Outputs)
-                {
-                    if (!Configuration.Outputs.Contains(output.Configuration))
-                    {
-                        _player.RemoveOutputSink(output.Output);
-                        output.Dispose();
-                        continue;
-                    }
-                    if (output.Configuration.IsModified)
-                    {
-                        _player.RemoveOutputSink(output.Output);
-                        output.UnInitialize();
-                        _player.AddOutputSink(output.Output);
-                        output.Initialize(_player);
-                    }
-                }
-            }
             VideoFormat = newVideoFormat;
             PixelFormat = Configuration.PixelFormat;
             _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);

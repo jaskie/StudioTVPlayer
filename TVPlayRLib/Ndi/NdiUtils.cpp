@@ -115,7 +115,7 @@ namespace TVPlayR {
 			assert(avframe->format == AV_SAMPLE_FMT_FLT);
 			return NDIlib_audio_frame_interleaved_32f_t(
 				avframe->sample_rate,
-				avframe->channels,
+				avframe->ch_layout.nb_channels,
 				avframe->nb_samples,
 				timecode * 10,
 				reinterpret_cast<float*>(avframe->data[0])

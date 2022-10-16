@@ -1,9 +1,6 @@
 ﻿using StudioTVPlayer.Providers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
@@ -15,6 +12,8 @@ namespace StudioTVPlayer.ViewModel.Main
         {
             _input = input;
         }
+
+        public string Folder { get; set; }
 
         public string FileName { get; set; }
 

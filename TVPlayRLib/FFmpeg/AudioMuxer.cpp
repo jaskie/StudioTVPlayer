@@ -64,11 +64,6 @@ AVRational AudioMuxer::OutputTimeBase() const
 	return av_buffersink_get_time_base(sink_ctx_);
 }
 
-std::uint64_t AudioMuxer::OutputChannelLayout()
-{
-	return av_buffersink_get_channel_layout(sink_ctx_);
-}
-
 AVSampleFormat AudioMuxer::OutputSampleFormat()
 {
 	return audio_sample_format_;
@@ -163,9 +158,8 @@ void AudioMuxer::Initialize()
 		AVFilterInOut * current_output = outputs;
 		for (int i = 0; i < decoders_.size(); i++)
 		{
-			auto channel_layout = decoders_[i]->AudioChannelLayout();
-			if (!channel_layout)
-				channel_layout = av_get_default_channel_layout(decoders_[i]->AudioChannelsCount());
+			auto ch_layout = decoders_[i]->AudioChannelLayout();
+			int64_t channel_layout = av_channel_layout_subset(&ch_layout, UINT64_MAX);
 			snprintf(args, sizeof(args),
 				"time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%llx",
 				decoders_[i]->TimeBase().num, decoders_[i]->TimeBase().den, decoders_[i]->AudioSampleRate(),

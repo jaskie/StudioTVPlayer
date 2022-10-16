@@ -134,7 +134,7 @@ namespace TVPlayR {
 					}
 					if (!audio_encoder_)
 					{
-						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_->OutputSampleRate(), audio_resampler_->OutputChannelCount(), &options_, params_.AudioMetadata, params_.AudioStreamId);
+						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_->OutputSampleRate(), audio_resampler_->OutputChannelLayout(), &options_, params_.AudioMetadata, params_.AudioStreamId);
 						InitializeOuputIfPossible();
 					}
 					if (sync.Audio)

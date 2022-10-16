@@ -79,12 +79,11 @@ namespace TVPlayR {
 			if (!frame)
 				THROW_EXCEPTION("Frame not allocated");
 			frame->format = format;
-			frame->channels = num_channels;
-			frame->channel_layout = 0x7FFFFFFFFFFFFFFFULL >> (63 - num_channels);
+			av_channel_layout_default(&frame->ch_layout, num_channels);
 			frame->nb_samples = samples_count;
 			frame->sample_rate = 48000;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
-			THROW_ON_FFMPEG_ERROR(av_samples_set_silence(frame->data, 0, frame->nb_samples, frame->channels, static_cast<AVSampleFormat>(frame->format)));
+			THROW_ON_FFMPEG_ERROR(av_samples_set_silence(frame->data, 0, frame->nb_samples, frame->ch_layout.nb_channels, static_cast<AVSampleFormat>(frame->format)));
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 

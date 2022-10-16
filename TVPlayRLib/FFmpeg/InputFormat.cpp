@@ -61,7 +61,7 @@ bool InputFormat::LoadStreamData()
 			stream->index == best_video,
 			PtsToTime(stream->start_time, stream->time_base),
 			PtsToTime(stream->duration, stream->time_base),
-			stream->codecpar->channels,
+			stream->codecpar->ch_layout.nb_channels,
 			language ? language->value : "",
 			avcodec_find_decoder(stream->codecpar->codec_id),
 			stream
@@ -121,7 +121,7 @@ int InputFormat::GetTotalAudioChannelCount() const
 	int result = 0;
 	for (size_t i = 0; i < format_context_->nb_streams; i++)
 		if (format_context_->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
-			result += format_context_->streams[i]->codecpar->channels;
+			result += format_context_->streams[i]->codecpar->ch_layout.nb_channels;
 	return result;
 }
 

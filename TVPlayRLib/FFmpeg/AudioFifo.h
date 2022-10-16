@@ -25,7 +25,7 @@ private:
 	const AVRational time_base_;
 	const int sample_rate_;
 	const AVSampleFormat sample_fmt_;
-	const int channels_count_;
+	AVChannelLayout channel_layout_;
 	std::int64_t seek_time_;
 	std::int64_t start_sample_ = 0LL;
 	std::int64_t end_sample_ = 0LL;

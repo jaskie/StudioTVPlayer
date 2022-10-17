@@ -33,3 +33,4 @@
 /Helpers/TimecodeDecoder/x64
 /TimecodeDecoderService/bin
 /TimecodeDecoderService/obj
+/dependencies/FFmpeg/bin/*.exe

@@ -7,10 +7,9 @@ static std::string ClrStringToStdString(String ^str)
 {
 	if (str == nullptr)
 		return "";
-	IntPtr ansiStr = Runtime::InteropServices::Marshal::StringToHGlobalAnsi(str);
-	std::string outString((const char*)ansiStr.ToPointer());
-	Runtime::InteropServices::Marshal::FreeHGlobal(ansiStr);
-	return outString;
+	array<Byte>^ bytes = System::Text::Encoding::UTF8->GetBytes(str + "\0");
+	pin_ptr<Byte> pinnedBytes = &bytes[0];
+	return reinterpret_cast<char*>(pinnedBytes);
 }
 
 }

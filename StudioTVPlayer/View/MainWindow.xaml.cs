@@ -29,14 +29,9 @@ namespace StudioTVPlayer.View
             DataContext = ViewModel.MainViewModel.Instance;
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {
-
-        }
-
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.MainViewModel.Instance.ShowPlayoutView();
+            ViewModel.MainViewModel.Instance.InitializeAndShowPlayoutView();
         }
 
         private void MetroWindow_Closing(object sender, CancelEventArgs e)

@@ -38,8 +38,11 @@ namespace TVPlayR {
 			void Refresh()
 			{
 				auto iterator = create_iterator();
+				if (!iterator)
+					return;
 				IDeckLink* decklink;
 				int index = 0;
+				decklink_list_.clear();
 				while (iterator->Next(&decklink) == S_OK)
 					decklink_list_.push_back(std::make_shared<DecklinkInfo>(decklink, index++));
 			}
@@ -47,6 +50,8 @@ namespace TVPlayR {
 			std::shared_ptr<ApiVersion> GetVersion()
 			{
 				auto iterator = create_iterator();
+				if (!iterator)
+					return nullptr;
 				std::int64_t deckLinkVersion;
 				CComQIPtr<IDeckLinkAPIInformation> deckLinkAPIInformation(iterator);
 				if (deckLinkAPIInformation && SUCCEEDED(deckLinkAPIInformation->GetInt(BMDDeckLinkAPIVersion, &deckLinkVersion)))

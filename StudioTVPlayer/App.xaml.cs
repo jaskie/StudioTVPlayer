@@ -25,7 +25,6 @@ namespace StudioTVPlayer
                     System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Dispatcher.UnhandledException += App_DispatcherUnhandledException;
-            GlobalApplicationData.Current.Initialize();
         }
 
         protected override void OnExit(ExitEventArgs e)

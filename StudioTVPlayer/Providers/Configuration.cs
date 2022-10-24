@@ -8,7 +8,7 @@ namespace StudioTVPlayer.Providers
 {
     public class Configuration
     {
-        private const string ConfigurationFile = "configuration.xml";
+        private const string ConfigurationFile = "Configuration.xml";
 
         [XmlArray]
         public List<Model.WatchedFolder> WatchedFolders { get; set; } = new List<Model.WatchedFolder>();

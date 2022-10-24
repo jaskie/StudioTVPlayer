@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
 using System;
@@ -12,12 +13,7 @@ namespace StudioTVPlayer.ViewModel
 
         private MainViewModel()
         {
-            ConfigurationCommand = new UiCommand(_ =>
-            {
-                if (CurrentViewModel is ConfigurationViewModel)
-                    return;
-                CurrentViewModel = new ConfigurationViewModel();
-            });
+            ConfigurationCommand = new UiCommand(Configure);
             AboutCommand = new UiCommand(About);
             HelpCommand = new UiCommand(Help);
         }
@@ -36,26 +32,31 @@ namespace StudioTVPlayer.ViewModel
             }
         }
 
-
-        public async void ShowPlayoutView()
+        public async void InitializeAndShowPlayoutView()
         {
             try
             {
-                if (CurrentViewModel is PlayoutViewModel)
-                    return;
+                GlobalApplicationData.Current.Initialize();
                 CurrentViewModel = new PlayoutViewModel();
             }
-            catch 
+            catch
             {
-                await _dialogCoordinator.ShowMessageAsync(this, "Configuration error", "Configuration data missing or invalid.\nPlease, configure the application now to use it.");
+                await _dialogCoordinator.ShowMessageAsync(this, "Configuration error", "Configuration data missing or invalid.\nPlease, configure the application to use it.");
                 CurrentViewModel = new ConfigurationViewModel();
             }
+        }
+
+        public void ShowPlayoutView()
+        {
+            if (CurrentViewModel is PlayoutViewModel)
+                return;
+            CurrentViewModel = new PlayoutViewModel();
         }
 
         public UiCommand ConfigurationCommand { get; }
 
         public UiCommand AboutCommand { get; }
-        
+
         public UiCommand HelpCommand { get; }
 
         public void Dispose()
@@ -66,6 +67,13 @@ namespace StudioTVPlayer.ViewModel
         public bool CanClose()
         {
             return true;
+        }
+
+        private void Configure(object _)
+        {
+            if (CurrentViewModel is ConfigurationViewModel)
+                return;
+            CurrentViewModel = new ConfigurationViewModel();
         }
 
         private async void About(object _)

@@ -14,7 +14,7 @@ A simple TV studio player with SDI, NDI and MPEG TS outputs for Windows
 
 ## Prerequisits
 * [C++ for Visual Studio 2019 redistribuable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
-* [NDI Runtime](http://new.tk/NDIRedistV4Apple) - if you want to use NDI output
+* [NDI Runtime](http://new.tk/NDIRedistV4) - if you want to use NDI output
 * Decklink drivers, if such a card will be in use.
 
 ## Screenshot

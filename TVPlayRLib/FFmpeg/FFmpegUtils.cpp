@@ -22,6 +22,8 @@ namespace TVPlayR {
 
 		std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source)
 		{
+			if (!source)
+				return nullptr;
 			AVFrame* frame = av_frame_alloc();
 			THROW_ON_FFMPEG_ERROR(av_frame_ref(frame, source.get()));
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
@@ -29,6 +31,8 @@ namespace TVPlayR {
 
 		std::shared_ptr<AVFrame> CopyFrame(const std::shared_ptr<AVFrame>& source)
 		{
+			if (!source)
+				return nullptr;
 			AVFrame* frame = av_frame_alloc();
 			frame->width = source->width;
 			frame->height = source->height;

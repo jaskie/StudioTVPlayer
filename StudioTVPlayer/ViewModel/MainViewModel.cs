@@ -3,6 +3,7 @@ using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
 using System;
+using System.Threading.Tasks;
 
 namespace StudioTVPlayer.ViewModel
 {
@@ -41,7 +42,7 @@ namespace StudioTVPlayer.ViewModel
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(this, "Configuration error", "Configuration data missing or invalid.\nPlease, configure the application to use it.");
+                await ShowMessageAsync("Configuration error", "Configuration data missing or invalid.\nPlease, configure the application to use it.");
                 CurrentViewModel = new ConfigurationViewModel();
             }
         }
@@ -90,6 +91,11 @@ namespace StudioTVPlayer.ViewModel
             var dialogVm = new HelpDialogViewModel(instance => _dialogCoordinator.HideMetroDialogAsync(this, dialog));
             dialog.Content = new View.HelpDialog { DataContext = dialogVm };
             await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
+        }
+
+        public async Task ShowMessageAsync(string title, string message)
+        {
+            await _dialogCoordinator.ShowMessageAsync(this, title, message);
         }
     }
 }

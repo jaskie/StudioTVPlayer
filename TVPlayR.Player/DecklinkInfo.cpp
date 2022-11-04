@@ -20,25 +20,28 @@ namespace TVPlayR
 
 	int DecklinkInfo::Index::get()
 	{
-		return (*native_info_)->Index();
+		REWRAP_EXCEPTION(return (*native_info_)->Index();)
 	}
 
 	System::String^  DecklinkInfo::DisplayName::get()
 	{
-		return gcnew System::String((*native_info_)->GetDisplayName().c_str());
+		REWRAP_EXCEPTION(return gcnew System::String((*native_info_)->GetDisplayName().c_str());)
 	}
 
 	System::String^ DecklinkInfo::ModelName::get()
 	{
-		return gcnew System::String((*native_info_)->GetModelName().c_str());
+		REWRAP_EXCEPTION(return gcnew System::String((*native_info_)->GetModelName().c_str());)
 	}
 
 	bool DecklinkInfo::SupportsKeyer(DecklinkKeyer keyer)
 	{
-		return (*native_info_)->SupportsKeyer(keyer);
+		REWRAP_EXCEPTION(return (*native_info_)->SupportsKeyer(keyer);)
 	}
 
-	bool DecklinkInfo::HaveOutput::get() { return (*native_info_)->HaveOutput();}
+	bool DecklinkInfo::HaveOutput::get() 
+	{
+		REWRAP_EXCEPTION( return (*native_info_)->HaveOutput();)
+	}
 
 	bool DecklinkInfo::HaveInput::get() { return (*native_info_)->HaveInput(); }
 

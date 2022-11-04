@@ -23,9 +23,9 @@ namespace TVPlayR {
 			const FFOutputParams params_;
 			AVDictionary* options_ = nullptr;
 			Core::VideoFormat format_;
-			AVPixelFormat src_pixel_format_;
-			int audio_channels_count_;
-			int audio_sample_rate_;
+			AVPixelFormat src_pixel_format_ = AVPixelFormat::AV_PIX_FMT_NONE;
+			int audio_channels_count_ = 2;
+			int audio_sample_rate_ = 48000;
 			OutputFormat output_format_;
 			const AVCodec* video_codec_;
 			const AVCodec* audio_codec_;
@@ -63,8 +63,10 @@ namespace TVPlayR {
 			{
 				executor_.invoke([this]
 				{
-					PushToEncoder(video_encoder_, nullptr);
-					PushToEncoder(audio_encoder_, nullptr);
+					if (video_encoder_)
+						PushToEncoder(video_encoder_, nullptr);
+					if (audio_encoder_)
+						PushToEncoder(audio_encoder_, nullptr);
 					output_format_.Flush();
 				});
 			}
@@ -221,8 +223,11 @@ namespace TVPlayR {
 			{
 				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
 				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
-				audio->pts = audio_samples_pushed_;
-				audio_samples_pushed_ += audio->nb_samples;
+				if (audio)
+				{
+					audio->pts = audio_samples_pushed_;
+					audio_samples_pushed_ += audio->nb_samples;
+				}
 				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
 				if (buffer_.try_emplace(Core::AVSync(audio, video, sync.TimeInfo)) != Common::BlockingCollectionStatus::Ok)

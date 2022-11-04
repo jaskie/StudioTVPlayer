@@ -9,8 +9,14 @@
 
 namespace TVPlayR {
 
+	Ndi::NdiOutput* CreateNativeOutput(String^ sourceName, String^ groupNames)
+	{
+		REWRAP_EXCEPTION(return new Ndi::NdiOutput(ClrStringToStdString(sourceName), ClrStringToStdString(groupNames));)
+	}
+
+
 	NdiOutput::NdiOutput(String^ sourceName, String^ groupNames)
-		: _ndi(new std::shared_ptr<Ndi::NdiOutput>(new Ndi::NdiOutput(ClrStringToStdString(sourceName), ClrStringToStdString(groupNames))))
+		: _ndi(new std::shared_ptr<Ndi::NdiOutput>(CreateNativeOutput(sourceName, groupNames)))
 		, _sourceName(sourceName)
 		, _groupNames(groupNames)
 	{
@@ -25,7 +31,7 @@ namespace TVPlayR {
 	{
 		if (!_ndi)
 			return;
-		delete _ndi;
+		REWRAP_EXCEPTION(delete _ndi;)
 		_ndi = nullptr;
 	}
 
@@ -33,25 +39,25 @@ namespace TVPlayR {
 	{
 		if (!_ndi)
 			return;
-		(*_ndi)->AddOverlay(overlay->GetNativeObject());
+		REWRAP_EXCEPTION((*_ndi)->AddOverlay(overlay->GetNativeObject());)
 	}
 
 	void NdiOutput::RemoveOverlay(OverlayBase^ overlay)
 	{
 		if (!_ndi)
 			return;
-		(*_ndi)->RemoveOverlay(overlay->GetNativeObject());
+		REWRAP_EXCEPTION((*_ndi)->RemoveOverlay(overlay->GetNativeObject());)
 	}
 
 	void NdiOutput::InitializeFor(Player^ player)
 	{
 		Core::Player& native_player = player->GetNativePlayer();
-		(*_ndi)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
+		REWRAP_EXCEPTION((*_ndi)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
 	}
 
 	void NdiOutput::UnInitialize()
 	{
-		(*_ndi)->Uninitialize();
+		REWRAP_EXCEPTION((*_ndi)->Uninitialize();)
 	}
 
 	std::shared_ptr<Core::OutputDevice> NdiOutput::GetNativeDevice()

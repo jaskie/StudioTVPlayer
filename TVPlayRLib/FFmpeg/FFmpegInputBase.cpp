@@ -49,7 +49,7 @@ namespace TVPlayR {
 		{
 			auto& streams = input_.GetStreams();
 			assert(index >= 0 && index < streams.size());
-			return input_.GetStreams()[index];
+			return streams[index];
 		}
 
 		std::int64_t FFmpegInputBase::GetAudioDuration()

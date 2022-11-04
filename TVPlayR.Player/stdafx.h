@@ -7,6 +7,8 @@
 #include <crtdbg.h>
 #endif // DEBUG
 
+#define REWRAP_EXCEPTION(statement) try { statement } catch (std::exception e) { throw gcnew System::Exception(gcnew System::String(e.what())); }
+
 #include <memory>
 #include <functional>
 #include <string>

@@ -28,7 +28,7 @@ namespace TVPlayR {
 	protected:
 		virtual String^ GetName() override { return _modelName; }
 	internal:
-		DecklinkInput(std::shared_ptr<Decklink::DecklinkInput> decklink, String^ modelName);
+		DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink, String^ modelName);
 	public:
 		void AddOutputSink(OutputSink^ output_sink);
 		void RemoveOutputSink(OutputSink^ output_sink);

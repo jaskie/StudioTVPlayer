@@ -20,7 +20,7 @@ namespace TVPlayR
 	internal:
 		std::shared_ptr<Core::InputSource> GetNativeSource() { return _nativeSource == nullptr ? nullptr : *_nativeSource; }
 	protected:
-		InputBase(std::shared_ptr<Core::InputSource> input_source);
+		InputBase(std::shared_ptr<Core::InputSource>& input_source);
 		virtual String^ GetName() abstract;
 	private:
 		const std::shared_ptr<Core::InputSource>* _nativeSource;

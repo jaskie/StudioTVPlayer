@@ -6,9 +6,14 @@
 #include "TimecodeOutputSource.h"
 
 namespace TVPlayR {
-    
+
+    Core::TimecodeOverlay* GetNativeTimecodeOverlay(const TimecodeOutputSource source, VideoFormat^ videoFormat, const PixelFormat pixelFormat)
+    {
+        REWRAP_EXCEPTION(return new Core::TimecodeOverlay(source, videoFormat->GetNativeEnumType(), pixelFormat);)
+    }
+
     TimecodeOverlay::TimecodeOverlay(const TimecodeOutputSource source, VideoFormat^ videoFormat, const PixelFormat pixelFormat)
-        : _native_object(new std::shared_ptr<Core::TimecodeOverlay>(new Core::TimecodeOverlay(source, videoFormat->GetNativeEnumType(), pixelFormat)))
+        : _native_object(new std::shared_ptr<Core::TimecodeOverlay>(GetNativeTimecodeOverlay(source, videoFormat, pixelFormat)))
     { }
     
     TimecodeOverlay::~TimecodeOverlay()

@@ -25,13 +25,18 @@ namespace TVPlayR {
 		AudioVolume(this, gcnew AudioVolumeEventArgs(result, coherence));
 	}
 
+	Core::Player* CreateNativePlayer(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount, int sampleRate)
+	{
+		REWRAP_EXCEPTION(return new Core::Player(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), pixelFormat, audioChannelCount, sampleRate);)
+	}
+
 	Core::Player& Player::GetNativePlayer()
 	{
 		return *_player;
 	}
 
 	Player::Player(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount)
-		: _player(new Core::Player(ClrStringToStdString(name), videoFormat->GetNativeEnumType(), pixelFormat, audioChannelCount, 48000))
+		: _player(CreateNativePlayer(name, videoFormat, pixelFormat, audioChannelCount, 48000))
 		, _videoFormat(videoFormat)
 		, _pixelFormat(pixelFormat)
 	{ 
@@ -49,6 +54,7 @@ namespace TVPlayR {
 
 	Player::!Player()
 	{
+		REWRAP_EXCEPTION(
 		_player->SetAudioVolumeCallback(nullptr);
 		for each (OutputSink ^ output in _outputs)
 		{
@@ -58,43 +64,56 @@ namespace TVPlayR {
 		}
 		_audioVolumeHandle.Free();
 		delete _player;
+		)
 	}
 
 	void Player::SetFrameClockSource(OutputBase^ output)
 	{
-		_player->SetFrameClockSource(*output->GetNativeDevice());
+		REWRAP_EXCEPTION(_player->SetFrameClockSource(*output->GetNativeDevice());)
 	}
 
 	void Player::AddOutputSink(OutputSink^ sink)
 	{
+		REWRAP_EXCEPTION(
 		_player->AddOutputSink(sink->GetNativeSink());
 		_outputs->Add(sink);
+		)
 	}
 
 	void Player::RemoveOutputSink(OutputSink^ sink)
 	{
+		REWRAP_EXCEPTION(
 		if (_outputs->Remove(sink))
 			_player->RemoveOutputSink(sink->GetNativeSink());
+		)
 	}
 
 	void Player::AddOverlay(OverlayBase^ overlay)
 	{
+		REWRAP_EXCEPTION(
 		_player->AddOverlay(overlay->GetNativeObject());
+		)
 	}
 
 	void Player::Load(InputBase^ file)
 	{
+		REWRAP_EXCEPTION(
 		_player->Load(file->GetNativeSource());
+		)
 	}
 
 	void Player::Preload(InputBase^ file)
 	{
+		REWRAP_EXCEPTION(
 		_player->Preload(file->GetNativeSource());
+		)
 	}
 
 	void Player::Clear()
 	{
+		REWRAP_EXCEPTION(
 		_player->Clear();
+		)
 	}
 
 	float Player::Volume::get()
@@ -106,7 +125,7 @@ namespace TVPlayR {
 	{
 		if (volume == _volume)
 			return;
-		_player->SetVolume(volume);
+		REWRAP_EXCEPTION(_player->SetVolume(volume);)
 		_volume = volume;
 	}
 

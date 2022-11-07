@@ -8,16 +8,20 @@
 
 namespace TVPlayR {
 
+	FFmpeg::FFmpegInput* CreateNativeFFmpegInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice)
+	{
+		REWRAP_EXCEPTION(return new FFmpeg::FFmpegInput(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice));)
+	}
+
 	FileInput::FileInput(String^ fileName) : FileInput(fileName, HardwareAcceleration::None, String::Empty)
 	{ }
 
 	FileInput::FileInput(String^ fileName, HardwareAcceleration acceleration, String^ hwDevice)
-		: InputBase(std::shared_ptr<Core::InputSource>(new FFmpeg::FFmpegInput(ClrStringToStdString(fileName), static_cast<Core::HwAccel>(acceleration), ClrStringToStdString(hwDevice))))
+		: InputBase(std::shared_ptr<Core::InputSource>(CreateNativeFFmpegInput(fileName, acceleration, hwDevice)))
 		, _fileName(fileName)
 		, _acceleration(acceleration)
 		, _hwDevice(hwDevice)
 	{ 
-	
 		_stoppedDelegate = gcnew StoppedDelegate(this, &FileInput::StoppedCallback);
 		_stoppedHandle = GCHandle::Alloc(_stoppedDelegate);
 		IntPtr stoppedIp = Marshal::GetFunctionPointerForDelegate(_stoppedDelegate);
@@ -32,26 +36,28 @@ namespace TVPlayR {
 
 	FileInput::!FileInput()
 	{
+		REWRAP_EXCEPTION(
 		std::shared_ptr<FFmpeg::FFmpegInput> input = GetFFmpegInput();
 		if (!input)
 			return;
 		input->SetStoppedCallback(nullptr);
 		_stoppedHandle.Free();
+		)
 	}
 
 	bool FileInput::Seek(TimeSpan time)
 	{
-		return GetFFmpegInput()->Seek(time.Ticks / 10);
+		REWRAP_EXCEPTION(return GetFFmpegInput()->Seek(time.Ticks / 10);)
 	}
 
 	void FileInput::Play()
 	{
-		GetFFmpegInput()->Play();
+		REWRAP_EXCEPTION(GetFFmpegInput()->Play();)
 	}
 
 	void FileInput::Pause()
 	{
-		GetFFmpegInput()->Pause();
+		REWRAP_EXCEPTION(GetFFmpegInput()->Pause();)
 	}
 
 	TimeSpan FileInput::AudioDuration::get() { return TimeSpan(GetFFmpegInput()->GetAudioDuration() * 10); }
@@ -68,7 +74,7 @@ namespace TVPlayR {
 	
 	bool FileInput::IsEof::get() { return GetFFmpegInput()->IsEof(); }
 	
-	TVPlayR::FieldOrder FileInput::FieldOrder::get() { return static_cast<TVPlayR::FieldOrder>(GetFFmpegInput()->GetFieldOrder()); }
+	TVPlayR::FieldOrder FileInput::FieldOrder::get() { return GetFFmpegInput()->GetFieldOrder(); }
 	
 	TVPlayR::Rational FileInput::FrameRate::get() { return TVPlayR::Rational(GetFFmpegInput()->GetFrameRate()); }
 	

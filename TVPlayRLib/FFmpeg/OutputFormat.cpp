@@ -26,6 +26,8 @@ namespace TVPlayR {
 
 		void OutputFormat::Flush()
 		{
+			if (!is_initialized_)
+				return;
 			DebugPrintLine(Common::DebugSeverity::debug, "Flushing");
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), NULL));
 			is_flushed_ = true;

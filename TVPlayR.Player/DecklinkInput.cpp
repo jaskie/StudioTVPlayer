@@ -15,11 +15,11 @@ namespace TVPlayR {
 	void DecklinkInput::FormatChangedCallback(Core::VideoFormatType newFormat)
 	{
 		VideoFormat^ format = VideoFormat::FindFormat(newFormat);
-		FormatChanged(this, gcnew VideoFormatEventArgs(format));
+		REWRAP_EXCEPTION(FormatChanged(this, gcnew VideoFormatEventArgs(format));)
 	}
 
-	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput> decklink, String^ modelName)
-		: InputBase(decklink)
+	DecklinkInput::DecklinkInput(std::shared_ptr<Decklink::DecklinkInput>& decklink, String^ modelName)
+		: InputBase(std::dynamic_pointer_cast<Core::InputSource>(decklink))
 		, _modelName(modelName)
 	{
 		_formatChangedDelegate = gcnew DecklinkInput::FormatChangedDelegate(this, &DecklinkInput::FormatChangedCallback);
@@ -30,12 +30,12 @@ namespace TVPlayR {
 
 	void DecklinkInput::AddOutputSink(OutputSink^ preview)
 	{
-		GetDecklinkInput()->AddOutputSink(preview->GetNativeSink());
+		REWRAP_EXCEPTION(GetDecklinkInput()->AddOutputSink(preview->GetNativeSink());)
 	}
 
 	void DecklinkInput::RemoveOutputSink(OutputSink^ output_sink)
 	{
-		GetDecklinkInput()->RemoveOutputSink(output_sink->GetNativeSink());
+		REWRAP_EXCEPTION(GetDecklinkInput()->RemoveOutputSink(output_sink->GetNativeSink());)
 	}
 
 	DecklinkInput::~DecklinkInput()

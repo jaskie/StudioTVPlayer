@@ -18,7 +18,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     public class PlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
         private readonly RundownPlayer _mediaPlayer;
-        private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
         private const double AudioLevelMaxValue = -6.0;
         private const double AudioLevelMinValue = -60.0;
         private bool _isFocused;
@@ -367,7 +366,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error starting {_mediaPlayer.PlayingRundownItem?.Name }", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_mediaPlayer.PlayingRundownItem?.Name }");
                 return false;
             }
             return true;
@@ -384,7 +383,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Name}", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_mediaPlayer.PlayingRundownItem?.Name}");
                 return false;
             }
             return true;

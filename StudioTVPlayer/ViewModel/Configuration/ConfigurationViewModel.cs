@@ -18,10 +18,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
         }
 
   
-        private void SaveConfiguration(object obj)
+        private async void SaveConfiguration(object obj)
         {
-            Apply();
-            MainViewModel.Instance.ShowPlayoutView();
+            try
+            {
+                Apply();
+                MainViewModel.Instance.ShowPlayoutView();
+            }
+            catch (Exception e)
+            {
+                await MainViewModel.Instance.ShowMessageAsync("Configuration error", $"Could not initialize this configuration:\n\n{(e.InnerException ?? e).Message}");
+            }
         }
 
         public UiCommand SaveConfigurationCommand { get; }

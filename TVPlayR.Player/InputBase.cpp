@@ -7,7 +7,7 @@
 
 namespace TVPlayR
 {
-	InputBase::InputBase(std::shared_ptr<Core::InputSource> input_source)
+	InputBase::InputBase(std::shared_ptr<Core::InputSource>& input_source)
 		: _nativeSource(new std::shared_ptr<Core::InputSource>(input_source))
 	{
 		_framePlayedDelegate = gcnew FramePlayedDelegate(this, &InputBase::FramePlayedCallback);
@@ -28,7 +28,7 @@ namespace TVPlayR
 			return;
 		(*_nativeSource)->SetFramePlayedCallback(nullptr);
 		_framePlayedHandle.Free();
-		delete _nativeSource;
+		REWRAP_EXCEPTION(delete _nativeSource;)
 		_nativeSource = nullptr;
 	}
 

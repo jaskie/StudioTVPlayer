@@ -15,7 +15,7 @@ class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 {
 public:
 	SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync, std::int64_t start_timecode, std::int64_t media_duration, FieldOrder field_order);
-	~SynchronizingBuffer();
+	virtual ~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame>& frame);
 	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
 	Core::AVSync PullSync(int audio_samples_count);

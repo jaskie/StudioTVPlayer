@@ -118,6 +118,7 @@
     <ClCompile Include="VersionInfo.h">
       <FileType>CppHeader</FileType>
     </ClCompile>
+    <ClInclude Include="TVPlayRException.h" />
     <ClInclude Include="VideoFormat.h" />
     <ClInclude Include="VideoFormatEventArgs.h" />
   </ItemGroup>

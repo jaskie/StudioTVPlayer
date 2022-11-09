@@ -9,7 +9,7 @@ namespace TVPlayR {
 		{
 		public:
 			FFmpegOutput(const FFOutputParams params);
-			~FFmpegOutput();
+			virtual ~FFmpegOutput();
 			// OutputDevice
 			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
 			void Uninitialize() override;
@@ -18,8 +18,8 @@ namespace TVPlayR {
 			//OutputSink
 			void Push(Core::AVSync& sync) override;
 			//FrameClockSource
-			virtual void RegisterClockTarget(Core::ClockTarget& target) override;
-			virtual void UnregisterClockTarget(Core::ClockTarget& target) override;
+			void RegisterClockTarget(Core::ClockTarget& target) override;
+			void UnregisterClockTarget(Core::ClockTarget& target) override;
 			// FFmpegOutput
 			const FFOutputParams& GetStreamOutputParams();
 		private:

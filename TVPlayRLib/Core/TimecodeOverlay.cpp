@@ -12,7 +12,7 @@
 namespace TVPlayR {
 	namespace Core {
 
-		class GdiplusInitializer {
+		class GdiplusInitializer final {
 		private:
 			Gdiplus::GdiplusStartupInput	gdiplus_startup_input_;
 			ULONG_PTR						gdiplus_token_;

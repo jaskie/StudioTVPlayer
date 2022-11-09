@@ -32,6 +32,7 @@ public:
 	virtual int GetAudioChannelCount() = 0;
 	virtual bool HaveAlphaChannel() const = 0;
 	virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) = 0;
+	virtual ~InputSource() { }
 };
 
 }}

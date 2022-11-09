@@ -10,7 +10,7 @@ class DecklinkOutput final : public Core::OutputDevice
 {
 public:
 	explicit DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source);
-	~DecklinkOutput();
+	virtual ~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;
 	// Inherited via OutputDevice
@@ -19,8 +19,8 @@ public:
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void Push(Core::AVSync& sync) override;
-	virtual void RegisterClockTarget(Core::ClockTarget& target) override;
-	virtual void UnregisterClockTarget(Core::ClockTarget& target) override;
+	void RegisterClockTarget(Core::ClockTarget& target) override;
+	void UnregisterClockTarget(Core::ClockTarget& target) override;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

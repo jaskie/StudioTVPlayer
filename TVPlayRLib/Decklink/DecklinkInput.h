@@ -17,7 +17,7 @@ namespace TVPlayR {
 		{
 		public:
 			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
-			~DecklinkInput();
+			virtual ~DecklinkInput();
 			Core::AVSync PullSync(const Core::Player& player, int audio_samples_count) override;
 			bool IsAddedToPlayer(const Core::Player& player) override;
 			void AddToPlayer(const Core::Player& player) override;

@@ -81,6 +81,9 @@
     <ClInclude Include="DecklinkInfo.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="TVPlayRException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">

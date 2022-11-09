@@ -15,6 +15,7 @@ namespace TVPlayR {
 class ClockTarget {
 public:
 	virtual void RequestFrame(int audio_samples_count) = 0;
+	virtual ~ClockTarget() {}
 };
 
 class Player final : public ClockTarget, private Common::NonCopyable
@@ -22,11 +23,11 @@ class Player final : public ClockTarget, private Common::NonCopyable
 public:
 	typedef std::function<void(std::vector<float>&, float)> AUDIO_VOLUME_CALLBACK;
 	Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
-	~Player();
+	virtual ~Player();
 	void AddOutputSink(std::shared_ptr<OutputSink> device);
 	void RemoveOutputSink(std::shared_ptr<OutputSink> device);
 	void SetFrameClockSource(FrameClockSource& clock);
-	virtual void RequestFrame(int audio_samples_count) override;
+	void RequestFrame(int audio_samples_count) override;
 	void Load(std::shared_ptr<InputSource> source);
 	void Preload(std::shared_ptr<InputSource> source);
 	void AddOverlay(std::shared_ptr<OverlayBase> overlay);

@@ -14,7 +14,7 @@ class FFmpegInput: public Core::InputSource
 {
 public:
 	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
-	~FFmpegInput();
+	virtual ~FFmpegInput();
 	Core::AVSync PullSync(const Core::Player& player, int audio_samples_count);
 	bool Seek(const std::int64_t time);
 	bool IsEof() const;

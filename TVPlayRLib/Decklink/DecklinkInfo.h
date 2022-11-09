@@ -5,7 +5,7 @@ namespace TVPlayR {
 
 	namespace Decklink {
 
-		class DecklinkInfo final
+		class DecklinkInfo final : Common::NonCopyable
 		{
 		public:
 			explicit DecklinkInfo(IDeckLink* decklink, int index);

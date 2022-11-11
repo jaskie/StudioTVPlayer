@@ -46,9 +46,9 @@ namespace TVPlayR {
 					ndi_->send_destroy(send_instance_);
 			}
 
-			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
+			void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
-				return executor_.invoke([&] 
+				bool success = executor_.invoke([&] 
 				{
 					if (format_.type() != Core::VideoFormatType::invalid)
 					{
@@ -64,6 +64,8 @@ namespace TVPlayR {
 					Tick();
 					return true;
 				});
+				if (!success)
+					THROW_EXCEPTION("NdiOutput: unable to initalize")
 			}
 
 			void Uninitialize()
@@ -147,7 +149,7 @@ namespace TVPlayR {
 		NdiOutput::NdiOutput(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		NdiOutput::~NdiOutput() { }
 
-		bool NdiOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
+		void NdiOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 
 		void NdiOutput::Uninitialize() { impl_->Uninitialize(); }
 

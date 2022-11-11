@@ -26,7 +26,7 @@ public:
 class OutputDevice : public FrameClockSource, public OutputSink, private Common::NonCopyable
 {
 public:
-	virtual bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) = 0;
+	virtual void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) = 0;
 	virtual void Uninitialize() = 0;
 	virtual void AddOverlay(std::shared_ptr<OverlayBase>& overlay) = 0;
 	virtual void RemoveOverlay(std::shared_ptr<OverlayBase>& overlay) = 0;

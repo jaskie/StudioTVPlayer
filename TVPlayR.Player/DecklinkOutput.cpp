@@ -26,20 +26,20 @@ namespace TVPlayR {
 	{
 		if (!_decklink)
 			return;
-		(*_decklink)->AddOverlay(overlay->GetNativeObject());
+		REWRAP_EXCEPTION((*_decklink)->AddOverlay(overlay->GetNativeObject());)
 	}
 
 	void DecklinkOutput::RemoveOverlay(OverlayBase^ overlay)
 	{
 		if (!_decklink)
 			return;
-		(*_decklink)->RemoveOverlay(overlay->GetNativeObject());
+		REWRAP_EXCEPTION((*_decklink)->RemoveOverlay(overlay->GetNativeObject());)
 	}
 
 	void DecklinkOutput::InitializeFor(Player^ player)
 	{
 		Core::Player& native_player = player->GetNativePlayer();
-		(*_decklink)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
+		REWRAP_EXCEPTION((*_decklink)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
 	}
 
 	void DecklinkOutput::UnInitialize()
@@ -56,7 +56,7 @@ namespace TVPlayR {
 	{
 		if (!_decklink)
 			return;
-		delete _decklink;
+		REWRAP_EXCEPTION(delete _decklink;)
 		_decklink = nullptr;
 	}
 }

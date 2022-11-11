@@ -148,12 +148,12 @@ namespace TVPlayR {
 				return true;
 			}
 
-			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
+			void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (video_format == Core::VideoFormatType::invalid)
 					THROW_EXCEPTION("Decklink Output " + std::to_string(index_) + ": invalid video format");
 				if (!OpenOutput(GetDecklinkDisplayMode(video_format), BMDPixelFormatFromPixelFormat(pixel_format), audio_channel_count))
-					return false;
+					THROW_EXCEPTION("DecklinkOutout: OpenOutput() failed");
 				format_ = video_format;
 				pixel_format_ = pixel_format;
 				audio_channels_count_ = audio_channel_count;
@@ -161,7 +161,6 @@ namespace TVPlayR {
 				last_video_time_ = 0LL;
 				Preroll();
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
-				return true;
 			}
 
 			void Uninitialize()
@@ -284,7 +283,7 @@ namespace TVPlayR {
 
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
-		bool DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
+		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		void DecklinkOutput::Uninitialize()	{ impl_->Uninitialize(); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }

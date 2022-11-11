@@ -14,7 +14,7 @@ public:
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;
 	// Inherited via OutputDevice
-	bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
+	void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
 	void Uninitialize() override;
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;

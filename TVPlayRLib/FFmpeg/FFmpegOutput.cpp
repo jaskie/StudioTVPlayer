@@ -71,10 +71,10 @@ namespace TVPlayR {
 				});
 			}
 
-			bool Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
+			void Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (format_.type() != Core::VideoFormatType::invalid)
-					return false;
+					THROW_EXCEPTION("FFmpegOutput: already initialized")
 				format_ = video_format;
 				src_pixel_format_ =  PixelFormatToFFmpegFormat(pixel_format);
 				audio_channels_count_ = audio_channel_count;
@@ -84,7 +84,6 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, video_codec_->pix_fmts[0]);
-				return true;
 			}
 
 			void Uninitialize()
@@ -258,7 +257,7 @@ namespace TVPlayR {
 		{ }
 
 		FFmpegOutput::~FFmpegOutput() { }
-		bool FFmpegOutput::Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
+		void FFmpegOutput::Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		
 		void FFmpegOutput::Uninitialize() { impl_->Uninitialize(); }
 		

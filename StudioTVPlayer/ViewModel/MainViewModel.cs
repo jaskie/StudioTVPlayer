@@ -40,9 +40,9 @@ namespace StudioTVPlayer.ViewModel
                 GlobalApplicationData.Current.Initialize();
                 CurrentViewModel = new PlayoutViewModel();
             }
-            catch
+            catch (Exception e)
             {
-                await ShowMessageAsync("Configuration error", "Configuration data missing or invalid.\nPlease, configure the application to use it.");
+                await ShowMessageAsync("Configuration error", $"Configuration data missing or invalid.\nPlease, configure the application to use it.\n\n{(e.InnerException ?? e).Message}");
                 CurrentViewModel = new ConfigurationViewModel();
             }
         }

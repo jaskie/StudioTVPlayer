@@ -27,17 +27,12 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public virtual void UnInitialize()
-        {
-            (_overlay as IDisposable)?.Dispose();
-            _overlay = null;
-        }
-
         public abstract TVPlayR.OutputBase Output { get; }
 
         public virtual void Dispose()
         {
-            UnInitialize();
+            (_overlay as IDisposable)?.Dispose();
+            _overlay = null;
         }
     }
 }

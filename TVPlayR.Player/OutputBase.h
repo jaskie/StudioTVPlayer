@@ -23,6 +23,5 @@ namespace TVPlayR {
 		virtual void AddOverlay(OverlayBase^ overlay) abstract;
 		virtual void RemoveOverlay(OverlayBase^ overlay) abstract;
 		virtual void InitializeFor(Player^ player) abstract;
-		virtual void UnInitialize() abstract;
 	};
 }

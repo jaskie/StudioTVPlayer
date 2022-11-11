@@ -42,11 +42,6 @@ namespace TVPlayR {
 		REWRAP_EXCEPTION((*_decklink)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
 	}
 
-	void DecklinkOutput::UnInitialize()
-	{
-		(*_decklink)->Uninitialize();
-	}
-
 	DecklinkOutput::~DecklinkOutput()
 	{
 		this->!DecklinkOutput();
@@ -56,7 +51,9 @@ namespace TVPlayR {
 	{
 		if (!_decklink)
 			return;
-		REWRAP_EXCEPTION(delete _decklink;)
+		REWRAP_EXCEPTION(
+			(*_decklink)->Uninitialize();
+			delete _decklink;)
 		_decklink = nullptr;
 	}
 }

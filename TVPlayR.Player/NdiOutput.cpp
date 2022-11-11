@@ -31,7 +31,9 @@ namespace TVPlayR {
 	{
 		if (!_ndi)
 			return;
-		REWRAP_EXCEPTION(delete _ndi;)
+		REWRAP_EXCEPTION(
+			(*_ndi)->Uninitialize();
+			delete _ndi;)
 		_ndi = nullptr;
 	}
 
@@ -53,11 +55,6 @@ namespace TVPlayR {
 	{
 		Core::Player& native_player = player->GetNativePlayer();
 		REWRAP_EXCEPTION((*_ndi)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
-	}
-
-	void NdiOutput::UnInitialize()
-	{
-		REWRAP_EXCEPTION((*_ndi)->Uninitialize();)
 	}
 
 	std::shared_ptr<Core::OutputDevice> NdiOutput::GetNativeDevice()

@@ -52,7 +52,9 @@ namespace TVPlayR
     {
         if (!_native_output)
             return;
-        REWRAP_EXCEPTION(delete _native_output;)
+        REWRAP_EXCEPTION(
+            (*_native_output)->Uninitialize();
+            delete _native_output;)
         _native_output = nullptr;
     }
 
@@ -72,16 +74,9 @@ namespace TVPlayR
 
     void FFOutput::InitializeFor(Player^ player)
     {
-        REWRAP_EXCEPTION
-        (
-        Core::Player& native_player = player->GetNativePlayer();
-        (*_native_output)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
-        )
-    }
-
-    void FFOutput::UnInitialize()
-    {
-        REWRAP_EXCEPTION((*_native_output)->Uninitialize();)
+        REWRAP_EXCEPTION(
+            Core::Player& native_player = player->GetNativePlayer();
+            (*_native_output)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
     }
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }

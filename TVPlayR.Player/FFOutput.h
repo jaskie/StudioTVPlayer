@@ -33,7 +33,6 @@ namespace TVPlayR {
 		virtual void AddOverlay(OverlayBase^ overlay) override;
 		virtual void RemoveOverlay(OverlayBase^ overlay) override;
 		virtual void InitializeFor(Player^ player) override;
-		virtual void UnInitialize() override;
 
 	private:
 		std::shared_ptr<FFmpeg::FFmpegOutput>* _native_output;

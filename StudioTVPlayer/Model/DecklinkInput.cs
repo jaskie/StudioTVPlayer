@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Model.Args;
+using StudioTVPlayer.Providers;
 using System;
 using System.Linq;
 using System.Windows;
@@ -66,6 +67,8 @@ namespace StudioTVPlayer.Model
 
         private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
         {
+            VideoFormat = e.Format.Name;
+            InputList.Current.Save();
             InputFormatChanged?.Invoke(this, e);
         }
 

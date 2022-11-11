@@ -84,7 +84,7 @@ namespace TVPlayR {
 		else if (ctx->codec_id == AV_CODEC_ID_DNXHD)
 		{
 			if (ctx->width < 1280 || ctx->height < 720)
-				THROW_EXCEPTION("Unsupported video dimensions.");
+				THROW_EXCEPTION("Encoder: unsupported video dimensions.");
 			ctx->bit_rate = 220 * 1000000;
 			ctx->pix_fmt = AV_PIX_FMT_YUV422P;
 		}
@@ -130,7 +130,7 @@ namespace TVPlayR {
 			if (frame->nb_samples > av_audio_fifo_space(fifo_.get()))
 				THROW_ON_FFMPEG_ERROR(av_audio_fifo_realloc(fifo_.get(), frame->nb_samples * 2));
 			if (av_audio_fifo_write(fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
-				THROW_EXCEPTION("Can't write all samples to audio fifo");
+				THROW_EXCEPTION("Encoder: can't write all samples to audio fifo");
 			while (av_audio_fifo_size(fifo_.get()) >= audio_frame_size_)
 				frame_buffer_.emplace_back(GetFrameFromFifo(audio_frame_size_));
 		}
@@ -171,7 +171,7 @@ namespace TVPlayR {
 		output_timestamp_ += nb_samples;
 		THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 		if (int readed = av_audio_fifo_read(fifo_.get(), (void**)frame->data, audio_frame_size_) < nb_samples)
-			THROW_EXCEPTION("Readed too few samples");
+			THROW_EXCEPTION("Encoder: readed too few samples from av_audio_fifo_read()");
 		return frame;
 	}
 

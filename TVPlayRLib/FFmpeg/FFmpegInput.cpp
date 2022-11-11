@@ -271,7 +271,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			return;
 		}
 		if (player_)
-			THROW_EXCEPTION("Already added to another player");
+			THROW_EXCEPTION("FFmpegInput: already added to another player");
 		player_ = &player;
 		producer_cv_.notify_one();
 	}

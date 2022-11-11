@@ -77,7 +77,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                 case nameof(VideoFormat) when VideoFormat is null:
                     return "Video format can't be empty";
                 default:
-                    return string.Empty;                    
+                    return string.Empty;
             }
         }
 

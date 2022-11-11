@@ -130,7 +130,7 @@ namespace TVPlayR {
 				audio->format = AVSampleFormat::AV_SAMPLE_FMT_S32;
 				break;
 			default:
-				THROW_EXCEPTION("Invalid input sample type")
+				THROW_EXCEPTION("Utils::AVFrameFromDecklinkAudio: invalid input sample type")
 			}
 			audio->sample_rate = BMDAudioSampleRate::bmdAudioSampleRate48kHz;
 			audio->format = AV_SAMPLE_FMT_S32;

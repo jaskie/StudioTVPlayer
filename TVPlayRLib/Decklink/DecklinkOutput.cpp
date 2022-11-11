@@ -151,7 +151,7 @@ namespace TVPlayR {
 			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (video_format == Core::VideoFormatType::invalid)
-					THROW_EXCEPTION("Invalid video format");
+					THROW_EXCEPTION("Decklink Output " + std::to_string(index_) + ": invalid video format");
 				if (!OpenOutput(GetDecklinkDisplayMode(video_format), BMDPixelFormatFromPixelFormat(pixel_format), audio_channel_count))
 					return false;
 				format_ = video_format;

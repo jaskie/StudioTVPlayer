@@ -160,7 +160,7 @@ void AudioMuxer::Initialize()
 		{
 			auto ch_layout = decoders_[i]->AudioChannelLayout();
 			if (!ch_layout)
-				THROW_EXCEPTION("Decoder AudioChannelLayout empty");
+				THROW_EXCEPTION("AudioMuxer: decoder's AudioChannelLayout empty");
 			int ret = snprintf(args, sizeof(args),
 				"time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=",
 				decoders_[i]->TimeBase().num, decoders_[i]->TimeBase().den, decoders_[i]->AudioSampleRate(),
@@ -189,9 +189,9 @@ void AudioMuxer::Initialize()
 		inputs->pad_idx = 0;
 		inputs->next = NULL;
 		if (avfilter_graph_parse_ptr(graph_.get(), filter_str_.c_str(), &inputs, &outputs, NULL) < 0)
-			THROW_EXCEPTION("avfilter_graph_parse_ptr failed")
+			THROW_EXCEPTION("AudioMuxer: avfilter_graph_parse_ptr failed")
 		if (avfilter_graph_config(graph_.get(), NULL) < 0)
-			THROW_EXCEPTION("avfilter_graph_config failed")
+			THROW_EXCEPTION("AudioMuxer: avfilter_graph_config failed")
 		if (DebugSeverity() <= Common::DebugSeverity::debug)
 			DumpFilter(filter_str_, graph_.get());
 	}

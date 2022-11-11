@@ -63,12 +63,12 @@ namespace TVPlayR {
 			else
 				format = av_guess_format(NULL, url.c_str(), NULL);
 			if (!format)
-				THROW_EXCEPTION("Can't determine oformat");
+				THROW_EXCEPTION("OutputFormat: can't determine format for " + url);
 
 			AVFormatContext* ctx = nullptr;
 			THROW_ON_FFMPEG_ERROR(avformat_alloc_output_context2(&ctx, format, NULL, url.c_str()));
 			if (!ctx)
-				THROW_EXCEPTION("Format context not created");
+				THROW_EXCEPTION("OutputFormat: context for " + url + " not created");
 			if (!(ctx->oformat->flags & AVFMT_NOFILE))
 				THROW_ON_FFMPEG_ERROR(avio_open2(&ctx->pb, url.c_str(), AVIO_FLAG_WRITE, NULL, &options_));
 			return ctx;

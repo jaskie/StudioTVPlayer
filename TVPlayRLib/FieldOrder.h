@@ -28,7 +28,7 @@ static FieldOrder FieldOrderFromAVFieldOrder(const AVFieldOrder field_order)
 	case AV_FIELD_BT:          //< Bottom coded first, top displayed first
 		return FieldOrder::BottomFieldFirst;
 	default:
-		THROW_EXCEPTION("invalid pixel format")
+		THROW_EXCEPTION("Invalid field order: " + std::to_string(field_order))
 	}
 }
 #endif

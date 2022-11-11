@@ -284,7 +284,6 @@ namespace TVPlayR {
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
 		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
-		void DecklinkOutput::Uninitialize()	{ impl_->Uninitialize(); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 		void DecklinkOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }

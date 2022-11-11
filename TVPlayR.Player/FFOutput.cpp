@@ -52,9 +52,7 @@ namespace TVPlayR
     {
         if (!_native_output)
             return;
-        REWRAP_EXCEPTION(
-            (*_native_output)->Uninitialize();
-            delete _native_output;)
+        REWRAP_EXCEPTION(delete _native_output;)
         _native_output = nullptr;
     }
 

@@ -31,9 +31,7 @@ namespace TVPlayR {
 	{
 		if (!_ndi)
 			return;
-		REWRAP_EXCEPTION(
-			(*_ndi)->Uninitialize();
-			delete _ndi;)
+		REWRAP_EXCEPTION(delete _ndi;)
 		_ndi = nullptr;
 	}
 

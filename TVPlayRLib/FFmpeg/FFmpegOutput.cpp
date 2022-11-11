@@ -68,6 +68,7 @@ namespace TVPlayR {
 					if (audio_encoder_)
 						PushToEncoder(audio_encoder_, nullptr);
 					output_format_.Flush();
+					format_ = Core::VideoFormatType::invalid;
 				});
 			}
 
@@ -84,11 +85,6 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), video_codec_->pix_fmts[0]);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, video_codec_->pix_fmts[0]);
-			}
-
-			void Uninitialize()
-			{
-				format_ = Core::VideoFormatType::invalid;
 			}
 
 			void InitializeFrameRequester()
@@ -257,10 +253,9 @@ namespace TVPlayR {
 		{ }
 
 		FFmpegOutput::~FFmpegOutput() { }
+
 		void FFmpegOutput::Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
-		
-		void FFmpegOutput::Uninitialize() { impl_->Uninitialize(); }
-		
+
 		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 	{ impl_->AddOverlay(overlay); }
 
 		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }

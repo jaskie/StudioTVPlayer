@@ -40,7 +40,7 @@ namespace TVPlayR {
 			~implementation()
 			{
 				DebugPrintLine(Common::DebugSeverity::debug, "Destroying");
-				Uninitialize();
+				format_ = Core::VideoFormatType::invalid;
 				executor_.stop();
 				if (send_instance_)
 					ndi_->send_destroy(send_instance_);
@@ -66,14 +66,6 @@ namespace TVPlayR {
 				});
 				if (!success)
 					THROW_EXCEPTION("NdiOutput: unable to initalize")
-			}
-
-			void Uninitialize()
-			{
-				executor_.invoke([this] 
-				{ 
-					format_ = Core::VideoFormatType::invalid;
-				});
 			}
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
@@ -150,8 +142,6 @@ namespace TVPlayR {
 		NdiOutput::~NdiOutput() { }
 
 		void NdiOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
-
-		void NdiOutput::Uninitialize() { impl_->Uninitialize(); }
 
 		void NdiOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->AddOverlay(overlay); }
 

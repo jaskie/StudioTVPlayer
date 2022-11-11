@@ -51,9 +51,7 @@ namespace TVPlayR {
 	{
 		if (!_decklink)
 			return;
-		REWRAP_EXCEPTION(
-			(*_decklink)->Uninitialize();
-			delete _decklink;)
+		REWRAP_EXCEPTION(delete _decklink;)
 		_decklink = nullptr;
 	}
 }

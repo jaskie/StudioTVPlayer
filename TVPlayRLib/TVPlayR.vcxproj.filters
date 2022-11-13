@@ -185,7 +185,7 @@
     <ClInclude Include="FFmpeg\SwResample.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="DecklinkKeyer.h" />
+    <ClInclude Include="DecklinkKeyerType.h" />
     <ClInclude Include="FFmpeg\OutputVideoFilter.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>

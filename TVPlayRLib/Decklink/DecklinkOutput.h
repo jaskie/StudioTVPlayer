@@ -2,14 +2,14 @@
 #include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
-	enum class DecklinkKeyer;
+	enum class DecklinkKeyerType;
 	enum class TimecodeOutputSource;
 	namespace Decklink {
 
 class DecklinkOutput final : public Core::OutputDevice
 {
 public:
-	explicit DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source);
+	explicit DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source);
 	virtual ~DecklinkOutput();
 	bool SetBufferSize(int size);
 	int GetBufferSize() const;

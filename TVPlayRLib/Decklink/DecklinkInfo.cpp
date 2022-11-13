@@ -1,6 +1,6 @@
 #include "../pch.h"
 #include "DecklinkInfo.h"
-#include "../DecklinkKeyer.h"
+#include "../DecklinkKeyerType.h"
 
 
 namespace TVPlayR {
@@ -38,24 +38,28 @@ namespace TVPlayR {
 				return std::wstring(pModelName);
 			}
 
-			bool SupportsKeyer(DecklinkKeyer keyer)
+			bool SupportsKeyer(DecklinkKeyerType keyer)
 			{
 				BOOL support = FALSE;
 				switch (keyer)
 				{
-				case DecklinkKeyer::Default:
+				case DecklinkKeyerType::Default:
 					return true;
-				case DecklinkKeyer::Internal:
-					if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) && support)
-						return true;
-					break;
-				case DecklinkKeyer::External:
-					if (SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) && support)
-						return true;
-					break;
+				case DecklinkKeyerType::Internal:
+					return SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) && support;
+				case DecklinkKeyerType::External:
+					return SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) && support;
+				default:
+					return false;
 				}
-				return false;
 			}
+
+			bool SupportsInputModeDetection()
+			{
+				BOOL support = FALSE;
+				return SUCCEEDED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInputFormatDetection, &support)) && support;
+			}
+
 		};
 
 		DecklinkInfo::DecklinkInfo(IDeckLink* decklink, int index)
@@ -66,7 +70,8 @@ namespace TVPlayR {
 		DecklinkInfo::~DecklinkInfo() { }
 		std::wstring DecklinkInfo::GetDisplayName() const { return impl_->GetDisplayName(); }
 		std::wstring DecklinkInfo::GetModelName() const { return impl_->GetModelName(); }
-		bool DecklinkInfo::SupportsKeyer(DecklinkKeyer keyer) { return impl_->SupportsKeyer(keyer); }
+		bool DecklinkInfo::SupportsKeyer(DecklinkKeyerType keyer) { return impl_->SupportsKeyer(keyer); }
+		bool DecklinkInfo::SupportsInputModeDetection() { return impl_->SupportsInputModeDetection(); }
 		bool DecklinkInfo::HaveInput() const { return impl_->input_; }
 		bool DecklinkInfo::HaveOutput() const { return impl_->output_; }
 		int DecklinkInfo::Index() const { return impl_->index_; }

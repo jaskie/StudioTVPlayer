@@ -89,7 +89,7 @@
   <ItemGroup>
     <ClInclude Include="Core\CoreUtils.h" />
     <ClInclude Include="Core\OverlayBase.h" />
-    <ClInclude Include="DecklinkKeyer.h" />
+    <ClInclude Include="DecklinkKeyerType.h" />
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="DecklinkTimecodeSource.h" />
     <ClInclude Include="FFmpeg\Encoder.h" />

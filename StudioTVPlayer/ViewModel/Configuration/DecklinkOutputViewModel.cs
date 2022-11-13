@@ -8,7 +8,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
     {
         private DecklinkOutput _decklink;
         private TVPlayR.DecklinkInfo _selectedDevice;
-        private TVPlayR.DecklinkKeyer _selectedKeyer;
+        private TVPlayR.DecklinkKeyerType _selectedKeyer;
         private TVPlayR.TimecodeOutputSource _selectedTimecodeSource;
 
         public DecklinkOutputViewModel(DecklinkOutput decklink) : base(decklink)
@@ -23,9 +23,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public TVPlayR.DecklinkInfo SelectedDevice { get => _selectedDevice; set => Set(ref _selectedDevice, value); }
 
-        public Array Keyers { get; } = Enum.GetValues(typeof(TVPlayR.DecklinkKeyer));
+        public Array Keyers { get; } = Enum.GetValues(typeof(TVPlayR.DecklinkKeyerType));
 
-        public TVPlayR.DecklinkKeyer SelectedKeyer { get => _selectedKeyer; set => Set(ref _selectedKeyer, value); }
+        public TVPlayR.DecklinkKeyerType SelectedKeyer { get => _selectedKeyer; set => Set(ref _selectedKeyer, value); }
 
         public TVPlayR.TimecodeOutputSource SelectedTimecodeSource { get => _selectedTimecodeSource; set => Set(ref _selectedTimecodeSource, value); }
 

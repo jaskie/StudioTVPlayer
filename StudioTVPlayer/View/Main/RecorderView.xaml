@@ -17,11 +17,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <controls:FilePicker >
-            <controls:FilePicker.ExploreButtonContent>
-                <mah:FontIcon Glyph="&#xED25;"/>
-            </controls:FilePicker.ExploreButtonContent>
-        </controls:FilePicker>
         <TextBlock Grid.Row="1">Test</TextBlock>
     </Grid>
 </UserControl>

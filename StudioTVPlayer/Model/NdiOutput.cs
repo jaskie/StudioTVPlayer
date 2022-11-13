@@ -18,7 +18,6 @@
 
         public override void Initialize(TVPlayR.Player player)
         {
-            _outputDevice?.Dispose();
             _outputDevice = new TVPlayR.NdiOutput(SourceName, GroupNames);
             base.Initialize(player);
         }

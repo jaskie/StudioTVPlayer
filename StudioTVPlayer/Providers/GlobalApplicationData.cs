@@ -32,19 +32,19 @@ namespace StudioTVPlayer.Providers
                 input.Dispose();
         }
 
-        public void UpdatePlayers(List<Model.Configuration.Player> playersConfiguration)
+        public void UpdatePlayers(List<PlayerUpdateItem> newConfiguration)
         {
-            var rundownPlayers = RundownPlayers.Where(p => !playersConfiguration.Contains(p.Configuration)).ToList();
+            var rundownPlayers = RundownPlayers.Where(p => !newConfiguration.Select(x => x.Player).Contains(p.Configuration)).ToList();
             foreach (var rundownPlayer in rundownPlayers)
             {
                 rundownPlayer.Dispose();
                 _rundownPlayers.Remove(rundownPlayer);
             }
             rundownPlayers.Clear();
-            foreach (var player in playersConfiguration)
+            foreach (var player in newConfiguration)
             {
-                var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == player) ?? new RundownPlayer(player);
-                if (player.IsModified)
+                var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == player.Player) ?? new RundownPlayer(player.Player);
+                if (player.NeedsReinitialization)
                     rundownPlayer.Uninitialize();
                 if (!rundownPlayer.IsInitialized)
                     rundownPlayer.Initialize();
@@ -56,7 +56,7 @@ namespace StudioTVPlayer.Providers
 
         public void Initialize()
         {
-            UpdatePlayers(Configuration.Current.Players);
+            UpdatePlayers(Configuration.Current.Players.Select(p => new PlayerUpdateItem { Player = p, NeedsReinitialization = true }).ToList());
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
         }
@@ -72,5 +72,11 @@ namespace StudioTVPlayer.Providers
             return presets;
         }
 
+    }
+
+    internal class PlayerUpdateItem
+    {
+        public Model.Configuration.Player Player;
+        public bool NeedsReinitialization;
     }
 }

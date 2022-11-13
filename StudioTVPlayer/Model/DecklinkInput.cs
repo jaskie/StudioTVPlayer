@@ -16,6 +16,9 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public int DeviceIndex { get; set; }
 
+        [XmlAttribute]
+        public bool FormatAutodetection { get; set; }
+
         public override ImageSource Thumbnail => _preview?.PreviewSource;
 
         public override void Dispose()
@@ -36,7 +39,7 @@ namespace StudioTVPlayer.Model
                 return false;
             try
             {
-                _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true);
+                _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true, FormatAutodetection);
                 _input.FormatChanged += Input_FormatChanged;
                 
                 _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);

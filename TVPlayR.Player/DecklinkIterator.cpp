@@ -37,11 +37,11 @@ namespace TVPlayR {
 		)
 	}
 
-	DecklinkInput^ DecklinkIterator::CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo)
+	DecklinkInput^ DecklinkIterator::CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo, bool format_autodetection)
 	{
 		REWRAP_EXCEPTION
 		(
-			auto native_input = _iterator->CreateInput(*decklink->GetNativeInfo(), initialFormat->GetNativeEnumType(), audioChannelCount, timecodeSource, captureVideo);
+			auto native_input = _iterator->CreateInput(*decklink->GetNativeInfo(), initialFormat->GetNativeEnumType(), audioChannelCount, timecodeSource, captureVideo, format_autodetection);
 			return gcnew DecklinkInput(native_input, decklink->ModelName);
 		)
 	}

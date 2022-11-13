@@ -29,6 +29,6 @@ namespace TVPlayR {
 			array<DecklinkInfo^>^ get() { return _devices; }
 		}
 		static DecklinkOutput^ CreateOutput(DecklinkInfo^ decklink, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source);
-		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo);
+		static DecklinkInput^ CreateInput(DecklinkInfo^ decklink, VideoFormat^ initialFormat, int audioChannelCount, TVPlayR::DecklinkTimecodeSource timecodeSource, bool captureVideo, bool format_autodetection);
 	};
 }

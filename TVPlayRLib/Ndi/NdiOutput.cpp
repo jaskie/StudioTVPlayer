@@ -41,7 +41,6 @@ namespace TVPlayR {
 			{
 				DebugPrintLine(Common::DebugSeverity::debug, "Destroying");
 				format_ = Core::VideoFormatType::invalid;
-				executor_.stop();
 				if (send_instance_)
 					ndi_->send_destroy(send_instance_);
 			}

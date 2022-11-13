@@ -53,10 +53,11 @@
                   mah:ControlsHelper.ContentCharacterCasing="Normal"
                   >
             <StackPanel >
-                <Button FontSize="12" HorizontalAlignment="Right" Margin="5 0"
+                <Button HorizontalAlignment="Left" Margin="5 0" FontWeight="Normal"
                         Command="{Binding CommandAddRecorder}"
+                        Style="{StaticResource MahApps.Styles.Button}"
                         mah:ControlsHelper.ContentCharacterCasing="Normal">Add recorder</Button>
-                <ListBox ItemsSource="{Binding Recorders}"
+                <ListBox ItemsSource="{Binding Recorders}" Margin="5 5 0 0"
                          ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
                          >
                     <ListBox.Resources>

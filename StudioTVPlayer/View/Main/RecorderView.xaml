@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:StudioTVPlayer.View.Main"
-             xmlns:controls="clr-namespace:StudioTVPlayer.Controls"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance {x:Type vm:RecorderViewModel}}"
              d:DesignHeight="150" d:DesignWidth="800">
     <Grid >
         <Grid.ColumnDefinitions>
@@ -17,6 +17,14 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="1">Test</TextBlock>
+        <StackPanel>
+            <ComboBox ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding EncoderPreset}" DisplayMemberPath="PresetName"/>
+            <ComboBox IsEditable="True" Text="{Binding Folder}" >
+                <mah:TextBoxHelper.ButtonContent>
+                    <mah:FontIcon Glyph="&#xED25;"/>
+                </mah:TextBoxHelper.ButtonContent>
+            </ComboBox>
+            <TextBox Text="{Binding FileName}"/>
+        </StackPanel>
     </Grid>
 </UserControl>

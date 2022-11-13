@@ -46,7 +46,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public bool CanStartRecord => IsRecording || CanStartRecording();
 
-        public static IEnumerable<Model.EncoderPreset> EncoderPresets => GlobalApplicationData.Current.EncoderPresets;
+        public IEnumerable<Model.EncoderPreset> EncoderPresets => GlobalApplicationData.Current.EncoderPresets;
 
         public string Error => string.Empty;
 

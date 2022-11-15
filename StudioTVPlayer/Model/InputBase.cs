@@ -24,6 +24,14 @@ namespace StudioTVPlayer.Model
         
         public abstract void Uninitialize();
 
+        public void AddOutputSink(TVPlayR.OutputSink output)
+        {
+            Input.AddOutputSink(output);
+        }
 
+        public void RemoveOutputSink(TVPlayR.FFOutput output)
+        {
+            Input.RemoveOutputSink(output);
+        }
     }
 }

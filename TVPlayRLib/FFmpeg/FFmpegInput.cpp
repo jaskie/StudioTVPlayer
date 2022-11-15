@@ -359,6 +359,7 @@ bool FFmpegInput::IsAddedToPlayer(const Core::Player& player) { return impl_->Is
 void FFmpegInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
 void FFmpegInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player);}
 void FFmpegInput::AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) { } //TODO: implement
+void FFmpegInput::RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) { }; //TODO: implement
 void FFmpegInput::Play() { impl_->Play(); }
 void FFmpegInput::Pause() { impl_->Pause(); }
 bool FFmpegInput::IsPlaying() const { return impl_->is_playing_; }

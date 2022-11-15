@@ -27,9 +27,9 @@ namespace TVPlayR {
 		{
 			String^ get() { return _groupNames; }
 		}
-		virtual void AddOverlay(OverlayBase^ overlay) override;
-		virtual void RemoveOverlay(OverlayBase^ overlay) override;
-		virtual void InitializeFor(Player^ player) override;
+		void AddOverlay(OverlayBase^ overlay) override;
+		void RemoveOverlay(OverlayBase^ overlay) override;
+		void Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate) override;
 
 	internal:
 		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;

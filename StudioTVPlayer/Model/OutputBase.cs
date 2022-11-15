@@ -19,7 +19,7 @@ namespace StudioTVPlayer.Model
 
         public virtual void Initialize(TVPlayR.Player player) 
         {
-            Output.InitializeFor(player);
+            Output.Initialize(player.VideoFormat, player.PixelFormat, 2, 48000);
             if (TimecodeOverlay != TVPlayR.TimecodeOutputSource.None)
             {
                 _overlay = new TVPlayR.TimecodeOverlay(TimecodeOverlay, player.VideoFormat, player.PixelFormat);

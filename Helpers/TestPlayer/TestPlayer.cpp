@@ -3,7 +3,7 @@
 
 #include "Core/VideoFormat.h"
 #include "Core/Player.h"
-#include "DecklinkKeyer.h"
+#include "DecklinkKeyerType.h"
 #include "DecklinkTimecodeSource.h"
 #include "TimecodeOutputSource.h"
 #include "Decklink/DecklinkIterator.h"
@@ -48,7 +48,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080p5000;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
 		const PixelFormat pixel_format = PixelFormat::yuv422;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
@@ -63,7 +63,7 @@ int main()
 		
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
-		auto decklink_output = iterator.CreateOutput(*iterator[device_index], DecklinkKeyer::Default, TimecodeOutputSource::TimeToEnd);
+		auto decklink_output = iterator.CreateOutput(*iterator[device_index], DecklinkKeyerType::Default, TimecodeOutputSource::TimeToEnd);
 		decklink_output->Initialize(video_format, PixelFormat::yuv422, audio_channels, sample_rate);
 		player.AddOutputSink(decklink_output);
 		player.SetFrameClockSource(*decklink_output);
@@ -114,13 +114,11 @@ int main()
 
 
 		// prepare input and recording
-		/*
-		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::v1080i5000, 2, DecklinkTimecodeSource::RP188Any, true);
+		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::v1080i5000, 2, DecklinkTimecodeSource::RP188Any, true, true);
 		FFmpeg::FFOutputParams record_params{ "d:\\temp\\cccc.mov", "libx264", "aac", 4000, 128 };
 		auto record_file = std::make_shared<FFmpeg::FFmpegOutput>(record_params);
 		record_file->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
 		decklink_input->AddOutputSink(record_file);
-		*/
 		
 		while (true)
 		{
@@ -144,11 +142,9 @@ int main()
 				else	 
 					input->Play();
 		}
-		//decklink_input->RemoveOutputSink(record_file);
-		//record_file->Uninitialize();
+		decklink_input->RemoveOutputSink(record_file);
 		//ndi->Uninitialize();
 		//player.RemoveOutputSink(ndi);
-		decklink_output->Uninitialize();
 		player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);
 #ifdef _DEBUG

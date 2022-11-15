@@ -71,6 +71,7 @@ namespace StudioTVPlayer.ViewModel.Main
                 if (!Set(ref _encoderPreset, value))
                     return;
                 NotifyPropertyChanged(nameof(CanChangeRecordingState));
+                NotifyPropertyChanged(nameof(FileName));
             }
         }
 
@@ -90,7 +91,7 @@ namespace StudioTVPlayer.ViewModel.Main
         }
 
         public bool CanChangeRecordingState => IsRecording // to stop the ongiong recording
-            || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(_fullPath) && !File.Exists(_fullPath)); // to start new one
+            || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(_fullPath) && !File.Exists($"{_fullPath}.{EncoderPreset.FilenameExtension}")); // to start new one
 
         public ICommand CommandBrowseForFolder { get; }
 
@@ -108,7 +109,7 @@ namespace StudioTVPlayer.ViewModel.Main
             {
                 case nameof(Folder) when !IsRecording && !Directory.Exists(Folder):
                     return "Folder does not exists";
-                case nameof(FileName) when File.Exists(_fullPath):
+                case nameof(FileName) when File.Exists($"{_fullPath}.{EncoderPreset?.FilenameExtension}"):
                     return "File already exists";
                 case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
                     return "Filename can't be empty";
@@ -163,7 +164,7 @@ namespace StudioTVPlayer.ViewModel.Main
             Debug.Assert(_recording is null);
             Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
             _recording = new Model.Recording(_input);
-            _recording.StartRecording(_fullPath, EncoderPreset);
+            _recording.StartRecording($"{_fullPath}.{EncoderPreset.FilenameExtension}" , EncoderPreset);
             _recording.Finished += Recording_Finished;
         }
 

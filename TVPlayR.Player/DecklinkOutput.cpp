@@ -2,7 +2,7 @@
 #include "DecklinkOutput.h"
 #include "OverlayBase.h"
 #include "Decklink/DecklinkOutput.h"
-#include "Player.h"
+#include "VideoFormat.h"
 #include "Core/Player.h"
 #include "Core/VideoFormat.h"
 
@@ -36,10 +36,9 @@ namespace TVPlayR {
 		REWRAP_EXCEPTION((*_decklink)->RemoveOverlay(overlay->GetNativeObject());)
 	}
 
-	void DecklinkOutput::InitializeFor(Player^ player)
+	void DecklinkOutput::Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate)
 	{
-		Core::Player& native_player = player->GetNativePlayer();
-		REWRAP_EXCEPTION((*_decklink)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
+		(*_decklink)->Initialize(format->GetNativeEnumType(), pixelFormat, audioChannelsCount, audioSampleRate);
 	}
 
 	DecklinkOutput::~DecklinkOutput()

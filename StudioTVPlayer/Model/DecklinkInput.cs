@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Providers;
+﻿using StudioTVPlayer.Providers;
 using System;
 using System.Linq;
 using System.Windows;
@@ -33,13 +32,13 @@ namespace StudioTVPlayer.Model
         public override bool Initialize()
         {
             Uninitialize();
-            var videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
+            CurrentFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            if (info is null || videoFormat is null)
+            if (info is null || CurrentFormat is null)
                 return false;
             try
             {
-                _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true, FormatAutodetection);
+                _input = TVPlayR.DecklinkIterator.CreateInput(info, CurrentFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true, FormatAutodetection);
                 _input.FormatChanged += Input_FormatChanged;
                 
                 _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);
@@ -70,10 +69,15 @@ namespace StudioTVPlayer.Model
 
         private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
         {
+            CurrentFormat = e.Format;
             VideoFormat = e.Format.Name;
             InputList.Current.Save();
             InputFormatChanged?.Invoke(this, e);
         }
+
+        [XmlIgnore]
+        public TVPlayR.VideoFormat CurrentFormat { get; private set; }
+
 
         public event EventHandler<TVPlayR.VideoFormatEventArgs> InputFormatChanged;
 

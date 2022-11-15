@@ -54,7 +54,7 @@ namespace TVPlayR {
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
-				, executor_("Stream output: " + params.Url)
+				, executor_("FFmpegOutput: " + params.Url)
 			{
 				executor_.begin_invoke([this] {	Tick();	});
 			}

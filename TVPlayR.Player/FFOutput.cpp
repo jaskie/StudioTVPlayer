@@ -4,8 +4,7 @@
 #include "OverlayBase.h"
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
-#include "Player.h"
-#include "Core/Player.h"
+#include "VideoFormat.h"
 #include "Core/VideoFormat.h"
 
 namespace TVPlayR
@@ -70,11 +69,9 @@ namespace TVPlayR
         REWRAP_EXCEPTION((*_native_output)->RemoveOverlay(overlay->GetNativeObject());)
     }
 
-    void FFOutput::InitializeFor(Player^ player)
+    void FFOutput::Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate)
     {
-        REWRAP_EXCEPTION(
-            Core::Player& native_player = player->GetNativePlayer();
-            (*_native_output)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
+        REWRAP_EXCEPTION((*_native_output)->Initialize(format->GetNativeEnumType(), pixelFormat, audioChannelsCount, audioSampleRate);)
     }
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }

@@ -6,6 +6,7 @@ using namespace System::Runtime::InteropServices;
 namespace TVPlayR
 {
 	ref class TimeEventArgs;
+	ref class OutputSink;
 	namespace Core {
 		class InputSource;
 		struct FrameTimeInfo;
@@ -17,6 +18,8 @@ namespace TVPlayR
 		event EventHandler<TimeEventArgs^>^ FramePlayed;
 		~InputBase();
 		!InputBase();
+		void AddOutputSink(OutputSink^ output);
+		void RemoveOutputSink(OutputSink^ output);
 	internal:
 		std::shared_ptr<Core::InputSource> GetNativeSource() { return _nativeSource == nullptr ? nullptr : *_nativeSource; }
 	protected:

@@ -3,7 +3,7 @@
 #include "ClrStringHelper.h"
 #include "OverlayBase.h"
 #include "Ndi/NdiOutput.h"
-#include "Player.h"
+#include "VideoFormat.h"
 #include "Core/Player.h"
 #include "Core/VideoFormat.h"
 
@@ -49,10 +49,9 @@ namespace TVPlayR {
 		REWRAP_EXCEPTION((*_ndi)->RemoveOverlay(overlay->GetNativeObject());)
 	}
 
-	void NdiOutput::InitializeFor(Player^ player)
+	void NdiOutput::Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate)
 	{
-		Core::Player& native_player = player->GetNativePlayer();
-		REWRAP_EXCEPTION((*_ndi)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());)
+		REWRAP_EXCEPTION((*_ndi)->Initialize(format->GetNativeEnumType(), pixelFormat, audioChannelsCount, audioSampleRate);)
 	}
 
 	std::shared_ptr<Core::OutputDevice> NdiOutput::GetNativeDevice()

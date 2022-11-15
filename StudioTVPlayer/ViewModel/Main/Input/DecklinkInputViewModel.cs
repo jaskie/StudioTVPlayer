@@ -65,7 +65,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             }
         }
 
-        public bool CanFormatAutodetection => _selectedDevice.SupportsInputModeDetection;
+        public bool CanFormatAutodetection => _selectedDevice?.SupportsInputModeDetection ?? false;
 
         public bool CanSelectVideoFormat => !Input.IsRunning || !FormatAutodetection;
 

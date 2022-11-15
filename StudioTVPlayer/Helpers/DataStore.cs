@@ -18,8 +18,7 @@ namespace StudioTVPlayer.Helpers
         public static T Load<T>(string fileName)
         {
             if (!File.Exists(fileName))
-                return default(T);
-
+                return default;
             using (var reader = new StreamReader(fileName))
             {
                 var serializer = new XmlSerializer(typeof(T));

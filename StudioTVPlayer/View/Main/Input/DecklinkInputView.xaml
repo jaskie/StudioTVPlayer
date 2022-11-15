@@ -47,7 +47,7 @@
             </Grid>
         </StackPanel>
         <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
-        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recording" Margin="0 0 1 1" 
+        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recordings" Margin="0 0 1 1" 
                   Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}"
                   mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Accent3 }" 
                   mah:ControlsHelper.ContentCharacterCasing="Normal"
@@ -57,9 +57,7 @@
                         Command="{Binding CommandAddRecorder}"
                         Style="{StaticResource MahApps.Styles.Button}"
                         mah:ControlsHelper.ContentCharacterCasing="Normal">Add recorder</Button>
-                <ListBox ItemsSource="{Binding Recorders}" Margin="5 5 0 0"
-                         ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
-                         >
+                <ListBox ItemsSource="{Binding Recorders}" ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}" >
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type mainVm:RecorderViewModel}">
                             <main:RecorderView/>

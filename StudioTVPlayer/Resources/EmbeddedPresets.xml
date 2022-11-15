@@ -6,15 +6,19 @@
                  AudioCodec="aac"
                  AudioBitrate="128"
                  Options="preset=veryfast,g=30"
+                 FilenameExtension="mov"
                  >
-    <Description>Preview quality, 4 Mbps H.264 CPU-encoded video, 128 kbps audio</Description>
+    <Description>Preview quality, 4 Mbps H.264 CPU-encoded video, 128 kbps audio.
+Creates MOV file.</Description>
   </EncoderPreset>
   <EncoderPreset PresetName="XDCAM HD422 50Mbps"
                  VideoCodec="mpeg2video"
                  VideoBitrate="50000"
                  AudioCodec="pcm_s16le"
                  Options=""
+                 FilenameExtension="mxf"
                  >
-    <Description>Popular HD production format, 50 Mbps video, PCM audio</Description>
+    <Description>Popular HD production format, 50 Mbps video, PCM audio.
+Creates MXF file.</Description>
   </EncoderPreset>
 </PresetList>

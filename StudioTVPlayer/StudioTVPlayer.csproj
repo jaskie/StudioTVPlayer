@@ -117,6 +117,7 @@
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\InputBase.cs" />
     <Compile Include="Model\LiveInputRundownItem.cs" />
+    <Compile Include="Model\Recording.cs" />
     <Compile Include="Model\RundownItemBase.cs" />
     <Compile Include="Providers\Configuration.cs" />
     <Compile Include="Model\DecklinkInput.cs" />

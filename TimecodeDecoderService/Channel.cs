@@ -63,8 +63,8 @@ namespace TimecodeDecoderService
             var outputDecklink = TVPlayR.DecklinkIterator.Devices.ElementAtOrDefault(Output)
                 ?? throw new ApplicationException("Output Decklink not found");
             _player = new TVPlayR.Player($"Input {Input} Output {Output} Keyer {Keyer} Format {VideoFormat}", format, TVPlayR.PixelFormat.bgra, 2);
-            _decklinkInput = TVPlayR.DecklinkIterator.CreateInput(inputDecklink, format, 2, TcSource, Keyer != Keyer.Internal);
-            _decklinkOutput = TVPlayR.DecklinkIterator.CreateOutput(outputDecklink, (TVPlayR.DecklinkKeyer)Keyer.Internal, TVPlayR.TimecodeOutputSource.Timecode);
+            _decklinkInput = TVPlayR.DecklinkIterator.CreateInput(inputDecklink, format, 2, TcSource, Keyer != Keyer.Internal, true);
+            _decklinkOutput = TVPlayR.DecklinkIterator.CreateOutput(outputDecklink, (TVPlayR.DecklinkKeyerType)Keyer, TVPlayR.TimecodeOutputSource.Timecode);
             _timecodeOverlay = new TVPlayR.TimecodeOverlay(TVPlayR.TimecodeOutputSource.Timecode, format, _player.PixelFormat);
             _player.AddOverlay(_timecodeOverlay);
             _player.AddOutputSink(_decklinkOutput);

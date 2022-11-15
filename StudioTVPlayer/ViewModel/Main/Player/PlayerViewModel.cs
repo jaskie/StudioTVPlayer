@@ -560,6 +560,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             return true;
         }
 
+        public void DragEnter(IDropInfo dropInfo) { }
+
+        public void DragLeave(IDropInfo dropInfo) { }
+
         #endregion //drag&drop
 
         private RundownItemViewModelBase CreateRundownItemViewModel(RundownItemBase rundownItem)

@@ -164,7 +164,7 @@ namespace StudioTVPlayer.ViewModel.Main
             Debug.Assert(_recording is null);
             Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
             _recording = new Model.Recording(_input);
-            _recording.StartRecording($"{_fullPath}.{EncoderPreset.FilenameExtension}" , EncoderPreset);
+            _recording.StartRecording($"{_fullPath}.{EncoderPreset.FilenameExtension}", _input.CurrentFormat(), EncoderPreset);
             _recording.Finished += Recording_Finished;
         }
 
@@ -173,6 +173,7 @@ namespace StudioTVPlayer.ViewModel.Main
             var recording = sender as Model.Recording ?? throw new ArgumentException(nameof(sender));
             recording.Finished -= Recording_Finished;
             _recording = null;
+            NotifyPropertyChanged(nameof(FileName));
         }
     }
 }

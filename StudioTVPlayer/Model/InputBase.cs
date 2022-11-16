@@ -18,10 +18,12 @@ namespace StudioTVPlayer.Model
         [XmlIgnore]
         public abstract bool IsRunning { get; }
 
+        public abstract TVPlayR.VideoFormat CurrentFormat();
+
         public abstract void Dispose();
-        
+
         public abstract bool Initialize();
-        
+
         public abstract void Uninitialize();
 
         public void AddOutputSink(TVPlayR.OutputSink output)

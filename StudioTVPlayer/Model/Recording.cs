@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
@@ -25,9 +21,8 @@ namespace StudioTVPlayer.Model
         public string FullPath { get; private set; }
         public EncoderPreset EncoderPreset { get; private set; }
 
-        public void StartRecording(string fullPath, EncoderPreset preset)
+        public void StartRecording(string fullPath, TVPlayR.VideoFormat format, EncoderPreset preset)
         {
-            var decklinkInput = Input as DecklinkInput ?? throw new ArgumentException(nameof(Input));
             FullPath = fullPath;
             EncoderPreset = preset;
             Providers.GlobalApplicationData.Current.AddRecording(this);
@@ -43,13 +38,26 @@ namespace StudioTVPlayer.Model
                 audio_metadata: preset.AudioMetadata, 
                 video_stream_id: preset.VideoStreamId, 
                 audio_stream_id: preset.AudioStreamId);
-            _output.Initialize(decklinkInput.CurrentFormat, TVPlayR.PixelFormat.yuv422, 2, 48000);
+            if (Input is DecklinkInput decklinkInput)
+            {
+                decklinkInput.InputFormatChanged += DecklinkInput_InputFormatChanged;
+            }
+            _output.Initialize(format, TVPlayR.PixelFormat.yuv422, 2, 48000);
             Input.AddOutputSink(_output);
+        }
+
+        private void DecklinkInput_InputFormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
+        {
+            StopRecording();
         }
 
         public void StopRecording() 
         {
             Input.RemoveOutputSink(_output);
+            if (Input is DecklinkInput decklinkInput)
+            {
+                decklinkInput.InputFormatChanged -= DecklinkInput_InputFormatChanged;
+            }
             _output.Dispose();
             _output = null;
             Finished?.Invoke(this, EventArgs.Empty);

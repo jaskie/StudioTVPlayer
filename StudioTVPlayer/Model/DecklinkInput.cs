@@ -11,6 +11,7 @@ namespace StudioTVPlayer.Model
     {
         private TVPlayR.DecklinkInput _input;
         private TVPlayR.PreviewSink _preview;
+        private TVPlayR.VideoFormat _currentFormat;
 
         [XmlAttribute]
         public int DeviceIndex { get; set; }
@@ -32,13 +33,13 @@ namespace StudioTVPlayer.Model
         public override bool Initialize()
         {
             Uninitialize();
-            CurrentFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
+            _currentFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            if (info is null || CurrentFormat is null)
+            if (info is null || _currentFormat is null)
                 return false;
             try
             {
-                _input = TVPlayR.DecklinkIterator.CreateInput(info, CurrentFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true, FormatAutodetection);
+                _input = TVPlayR.DecklinkIterator.CreateInput(info, _currentFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true, FormatAutodetection);
                 _input.FormatChanged += Input_FormatChanged;
                 
                 _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);
@@ -69,14 +70,16 @@ namespace StudioTVPlayer.Model
 
         private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
         {
-            CurrentFormat = e.Format;
+            _currentFormat = e.Format;
             VideoFormat = e.Format.Name;
             InputList.Current.Save();
             InputFormatChanged?.Invoke(this, e);
         }
 
-        [XmlIgnore]
-        public TVPlayR.VideoFormat CurrentFormat { get; private set; }
+        public override TVPlayR.VideoFormat CurrentFormat()
+        {
+            return _currentFormat;
+        }
 
 
         public event EventHandler<TVPlayR.VideoFormatEventArgs> InputFormatChanged;

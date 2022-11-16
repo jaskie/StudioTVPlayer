@@ -8,10 +8,10 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, std::shared_ptr<AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, AVPixelFormat pixel_format, std::shared_ptr<AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(Common::DebugSeverity::info, "Video encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
-		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, video_frame->width, video_frame->height, time_base, frame_rate, video_frame->sample_aspect_ratio, video_frame->interlaced_frame))
+		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, pixel_format, video_frame->width, video_frame->height, time_base, frame_rate, video_frame->sample_aspect_ratio, video_frame->interlaced_frame))
 		, format_(enc_ctx_->pix_fmt)
 	{
 		OpenCodec(output_format.Ctx(), options, stream_metadata, stream_id);
@@ -55,7 +55,7 @@ namespace TVPlayR {
 		});
 	}
 	
-	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, int width, int height, AVRational time_base, AVRational frame_rate, AVRational sar, bool interlaced)
+	std::unique_ptr<AVCodecContext, std::function<void(AVCodecContext*)>> Encoder::GetVideoContext(AVFormatContext* const format_context, const AVCodec* encoder, int bitrate, AVPixelFormat pixel_format, int width, int height, AVRational time_base, AVRational frame_rate, AVRational sar, bool interlaced)
 	{
 		if (!encoder)
 		{
@@ -68,7 +68,7 @@ namespace TVPlayR {
 		ctx->height = height;
 		ctx->width = width;
 		ctx->sample_aspect_ratio = sar;
-		ctx->pix_fmt = encoder->pix_fmts[0];
+		ctx->pix_fmt = pixel_format;
 		ctx->framerate = frame_rate;
 		ctx->time_base = time_base;
 		ctx->bit_rate = bitrate * 1000;

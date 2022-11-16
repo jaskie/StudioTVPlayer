@@ -32,7 +32,7 @@
                 EncoderSettings.VideoCodec, EncoderSettings.AudioCodec,
                 EncoderSettings.VideoBitrate, EncoderSettings.AudioBitrate,
                 EncoderSettings.Options,
-                EncoderSettings.VideoFilter,
+                EncoderSettings.VideoFilter, EncoderSettings.PixelFormat,
                 EncoderSettings.OutputMetadata, EncoderSettings.VideoMetadata, EncoderSettings.AudioMetadata,
                 EncoderSettings.VideoStreamId, EncoderSettings.AudioStreamId
                 );

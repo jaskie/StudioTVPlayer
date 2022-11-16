@@ -24,6 +24,9 @@ namespace StudioTVPlayer.Model
 
         [XmlAttribute]
         public string VideoFilter { get; set; }
+        
+        [XmlAttribute]
+        public string PixelFormat { get; set; }
 
         [XmlAttribute]
         public string OutputMetadata { get; set; }

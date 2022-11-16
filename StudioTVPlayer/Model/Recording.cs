@@ -32,7 +32,7 @@ namespace StudioTVPlayer.Model
                 video_bitrate: preset.VideoBitrate, 
                 audio_bitrate: preset.AudioBitrate, 
                 options: preset.Options, 
-                video_filter: preset.VideoFilter, 
+                video_filter: preset.VideoFilter, pixel_format:preset.PixelFormat,
                 output_metadata: preset.OutputMetadata, 
                 video_metadata: preset.VideoMetadata, 
                 audio_metadata: preset.AudioMetadata, 

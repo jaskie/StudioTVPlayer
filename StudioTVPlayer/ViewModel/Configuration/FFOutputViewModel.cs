@@ -10,6 +10,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private int _videoBitrate;
         private int _audioBitrate;
         private string _videoFilter;
+        private string _pixelFormat;
         private string _outputMetadata;
         private string _audioMetadata;
         private string _videoMetadata;
@@ -27,6 +28,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _videoBitrate = streamOutput.EncoderSettings.VideoBitrate;
             _audioBitrate = streamOutput.EncoderSettings.AudioBitrate;
             _videoFilter = streamOutput.EncoderSettings.VideoFilter;
+            _pixelFormat = streamOutput.EncoderSettings.PixelFormat;
             _outputMetadata = streamOutput.EncoderSettings.OutputMetadata;
             _audioMetadata = streamOutput.EncoderSettings.AudioMetadata;
             _videoMetadata = streamOutput.EncoderSettings.VideoMetadata;
@@ -41,6 +43,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public int VideoBitrate { get => _videoBitrate; set => Set(ref _videoBitrate, value); }
         public int AudioBitrate { get => _audioBitrate; set => Set(ref _audioBitrate, value); }
         public string VideoFilter { get => _videoFilter; set => Set(ref _videoFilter, value); }
+        public string PixelFormat { get => _pixelFormat; set => Set(ref _pixelFormat, value); }
         public string OutputMetadata { get => _outputMetadata; set => Set(ref _outputMetadata, value); }
         public string AudioMetadata { get => _audioMetadata; set => Set(ref _audioMetadata, value); }
         public string VideoMetadata { get => _videoMetadata; set => Set(ref _videoMetadata, value); }
@@ -62,6 +65,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 VideoBitrate = _videoBitrate,
                 AudioBitrate = _audioBitrate,
                 VideoFilter = _videoFilter,
+                PixelFormat = _pixelFormat,
                 OutputMetadata = _outputMetadata,
                 AudioMetadata = _audioMetadata,
                 VideoMetadata = _videoMetadata,

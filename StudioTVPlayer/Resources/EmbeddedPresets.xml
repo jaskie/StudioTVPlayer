@@ -14,9 +14,10 @@ Creates MOV file.</Description>
   <EncoderPreset PresetName="XDCAM HD422 50Mbps"
                  VideoCodec="mpeg2video"
                  VideoBitrate="50000"
-                 AudioCodec="pcm_s16le"
-                 Options=""
+                 AudioCodec="pcm_s24le"
+                 Options="maxrate=50000k,bufsize=3835k,minrate=50000k,flags=+ildct+ilme"
                  FilenameExtension="mxf"
+                 PixelFormat="yuv422p"
                  >
     <Description>Popular HD production format, 50 Mbps video, PCM audio.
 Creates MXF file.</Description>

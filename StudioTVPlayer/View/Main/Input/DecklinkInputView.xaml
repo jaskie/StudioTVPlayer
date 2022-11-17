@@ -48,7 +48,6 @@
         </StackPanel>
         <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
         <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recordings" Margin="0 0 1 1" 
-                  Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}"
                   mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Accent3 }" 
                   mah:ControlsHelper.ContentCharacterCasing="Normal"
                   >

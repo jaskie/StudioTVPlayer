@@ -5,20 +5,14 @@ namespace TVPlayR {
 	namespace Common {
 class TVPlayRException : public std::exception
 {
-private:
-	char const* _stack_trace;
 public:
 	explicit TVPlayRException(char const* const message)
 		: std::exception(message)
-		, _stack_trace(nullptr)
 	{ }
-	explicit TVPlayRException(char const* const message, const char* const stack_trace)
-		: std::exception(message)
-		, _stack_trace(stack_trace)
+	explicit TVPlayRException(const std::string message)
+		: std::exception(message.c_str())
 	{ }
-	const char* StackTrace() const { return _stack_trace; }
 };
-
 }}
 
 #ifdef DEBUG

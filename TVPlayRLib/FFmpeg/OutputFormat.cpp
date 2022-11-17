@@ -8,7 +8,7 @@ namespace TVPlayR {
 			: Common::DebugTarget(Common::DebugSeverity::info, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
-			, format_ctx_(AllocFormatContext(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
+			, format_ctx_(AllocFormatContextAndOpenFile(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
 		{
 		}
 
@@ -53,7 +53,7 @@ namespace TVPlayR {
 			is_initialized_ = true;
 		}
 
-		AVFormatContext* OutputFormat::AllocFormatContext(const std::string& url)
+		AVFormatContext* OutputFormat::AllocFormatContextAndOpenFile(const std::string& url)
 		{
 			const AVOutputFormat* format = nullptr;
 			if (url.find("rtmp://") == 0)
@@ -76,7 +76,7 @@ namespace TVPlayR {
 
 		void OutputFormat::FreeFormatContext(AVFormatContext* ctx)
 		{
-			if (!FF(av_write_trailer(ctx)))
+			if (is_initialized_ && !FF(av_write_trailer(ctx)))
 				DebugPrintLine(Common::DebugSeverity::warning, "av_write_trailer failed");
 			if (!(ctx->oformat->flags & AVFMT_NOFILE))
 				if (!FF(avio_close(ctx->pb)))

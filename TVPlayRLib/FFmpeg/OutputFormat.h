@@ -19,7 +19,7 @@ namespace TVPlayR {
 			bool is_initialized_ = false;
 			bool is_flushed_ = false;
 			std::deque<std::shared_ptr<AVPacket>> initialization_queue_;
-			AVFormatContext* AllocFormatContext(const std::string& url);
+			AVFormatContext* AllocFormatContextAndOpenFile(const std::string& url);
 			void FreeFormatContext(AVFormatContext* ctx);
 		};
 

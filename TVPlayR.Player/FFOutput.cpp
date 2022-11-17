@@ -4,8 +4,7 @@
 #include "OverlayBase.h"
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
-#include "Player.h"
-#include "Core/Player.h"
+#include "VideoFormat.h"
 #include "Core/VideoFormat.h"
 
 namespace TVPlayR
@@ -15,7 +14,7 @@ namespace TVPlayR
         String^ video_codec, String^ audio_codec,
         int video_bitrate, int audio_bitrate,
         String^ options,
-        String^ video_filter,
+        String^ video_filter, String^ pixel_format,
         String^ output_metadata, String^ video_metadata, String^ audio_metadata,
         int video_stream_id, int audio_stream_id
     )
@@ -25,7 +24,7 @@ namespace TVPlayR
             ClrStringToStdString(video_codec), ClrStringToStdString(audio_codec),
             video_bitrate, audio_bitrate,
             ClrStringToStdString(options),
-            ClrStringToStdString(video_filter),
+            ClrStringToStdString(video_filter), ClrStringToStdString(pixel_format),
             ClrStringToStdString(output_metadata), ClrStringToStdString(video_metadata), ClrStringToStdString(audio_metadata),
             video_stream_id, audio_stream_id
             });)
@@ -36,11 +35,11 @@ namespace TVPlayR
         String^ video_codec, String^ audio_codec, 
         int video_bitrate, int audio_bitrate, 
         String^ options,
-        String^ video_filter,
+        String^ video_filter, String^ pixel_format,
         String^ output_metadata, String^ video_metadata, String^ audio_metadata, 
         int video_stream_id, int audio_stream_id
     )
-        : _native_output(new std::shared_ptr<FFmpeg::FFmpegOutput>(CreateNativeFFOutput(url, video_codec, audio_codec, video_bitrate, audio_bitrate, options, video_filter, output_metadata, video_metadata, audio_metadata, video_stream_id, audio_stream_id)))
+        : _native_output(new std::shared_ptr<FFmpeg::FFmpegOutput>(CreateNativeFFOutput(url, video_codec, audio_codec, video_bitrate, audio_bitrate, options, video_filter, pixel_format, output_metadata, video_metadata, audio_metadata, video_stream_id, audio_stream_id)))
     { }
 
     FFOutput::~FFOutput()
@@ -70,18 +69,9 @@ namespace TVPlayR
         REWRAP_EXCEPTION((*_native_output)->RemoveOverlay(overlay->GetNativeObject());)
     }
 
-    void FFOutput::InitializeFor(Player^ player)
+    void FFOutput::Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate)
     {
-        REWRAP_EXCEPTION
-        (
-        Core::Player& native_player = player->GetNativePlayer();
-        (*_native_output)->Initialize(native_player.Format().type(), native_player.PixelFormat(), native_player.AudioChannelsCount(), native_player.AudioSampleRate());
-        )
-    }
-
-    void FFOutput::UnInitialize()
-    {
-        REWRAP_EXCEPTION((*_native_output)->Uninitialize();)
+        REWRAP_EXCEPTION((*_native_output)->Initialize(format->GetNativeEnumType(), pixelFormat, audioChannelsCount, audioSampleRate);)
     }
 
     std::shared_ptr<Core::OutputDevice> FFOutput::GetNativeDevice() { return _native_output ? *_native_output : nullptr; }

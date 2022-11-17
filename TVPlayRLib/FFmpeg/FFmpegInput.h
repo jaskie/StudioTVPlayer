@@ -14,14 +14,15 @@ class FFmpegInput: public Core::InputSource
 {
 public:
 	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
-	~FFmpegInput();
+	virtual ~FFmpegInput();
 	Core::AVSync PullSync(const Core::Player& player, int audio_samples_count);
 	bool Seek(const std::int64_t time);
 	bool IsEof() const;
 	bool IsAddedToPlayer(const Core::Player& player) override;
 	void AddToPlayer(const Core::Player& player) override;
 	void RemoveFromPlayer(const Core::Player& player) override;
-	void AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink);
+	void AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) override;
+	void RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) override;
 	void Play() override;
 	void Pause() override;
 	bool IsPlaying() const override;

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DecklinkInfo.h"
 #include "Decklink/DecklinkInfo.h"
-#include "DecklinkKeyer.h"
+#include "DecklinkKeyerType.h"
 
 namespace TVPlayR
 {
@@ -33,17 +33,25 @@ namespace TVPlayR
 		REWRAP_EXCEPTION(return gcnew System::String((*native_info_)->GetModelName().c_str());)
 	}
 
-	bool DecklinkInfo::SupportsKeyer(DecklinkKeyer keyer)
+	bool DecklinkInfo::SupportsKeyer(DecklinkKeyerType keyer)
 	{
 		REWRAP_EXCEPTION(return (*native_info_)->SupportsKeyer(keyer);)
 	}
 
-	bool DecklinkInfo::HaveOutput::get() 
+	bool DecklinkInfo::SupportsInputModeDetection::get()
 	{
-		REWRAP_EXCEPTION( return (*native_info_)->HaveOutput();)
+		REWRAP_EXCEPTION(return (*native_info_)->SupportsInputModeDetection();)
 	}
 
-	bool DecklinkInfo::HaveInput::get() { return (*native_info_)->HaveInput(); }
+	bool DecklinkInfo::HaveOutput::get()
+	{
+		REWRAP_EXCEPTION(return (*native_info_)->HaveOutput();)
+	}
+
+	bool DecklinkInfo::HaveInput::get()
+	{
+		REWRAP_EXCEPTION(return (*native_info_)->HaveInput();)
+	}
 
 
 	const std::shared_ptr<Decklink::DecklinkInfo> DecklinkInfo::GetNativeInfo() { return *native_info_; }

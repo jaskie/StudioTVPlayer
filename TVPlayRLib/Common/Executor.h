@@ -54,9 +54,8 @@ namespace TVPlayR {
         template <typename Func>
         auto begin_invoke(Func&& func)
         {
-            if (!is_running_) {
-                THROW_EXCEPTION("executor not running.");
-            }
+            if (!is_running_)
+                THROW_EXCEPTION("Executor: not running.");
 
             using result_type = decltype(func());
 
@@ -70,9 +69,9 @@ namespace TVPlayR {
         {
             if (is_current())  // Avoids potential deadlock.
                 return func();
-            if (!is_running_) {
-                THROW_EXCEPTION("executor not running.");
-            }
+            if (!is_running_)
+                THROW_EXCEPTION("Executor: not running.");
+
             using result_type = decltype(func());
             auto task = std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func));
             queue_.add([=]() mutable { (*task)(); });

@@ -13,20 +13,11 @@ namespace StudioTVPlayer.Model
             _configuration = configuration;
         }
 
-        public override void UnInitialize()
-        {
-            if (_output is null)
-                return;
-            base.UnInitialize();
-            _output.UnInitialize();
-        }
-
         public override void Dispose()
         {
-            UnInitialize();
+            base.Dispose();
             _output?.Dispose();
             _output = null;
-            base.Dispose();
         }
 
         public override TVPlayR.OutputBase Output => _output;

@@ -3,7 +3,7 @@
 namespace TVPlayR {
 
 #if (_MANAGED == 1)
-		public
+public
 #endif
 enum class PixelFormat {
 	yuv422,
@@ -20,7 +20,7 @@ static AVPixelFormat PixelFormatToFFmpegFormat(const PixelFormat format)
 	case PixelFormat::yuv422:
 		return AV_PIX_FMT_UYVY422;
 	default:
-		THROW_EXCEPTION("invalid pixel format")
+		THROW_EXCEPTION("Invalid pixel format: " + std::to_string(static_cast<int>(format)))
 	}
 }
 #endif

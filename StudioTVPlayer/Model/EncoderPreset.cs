@@ -15,6 +15,9 @@ namespace StudioTVPlayer.Model
         [XmlElement]
         public string Description { get; set; }
 
+        [XmlAttribute]
+        public string FilenameExtension { get; set; }
+
         [XmlIgnore]
         public bool IsEmbedded { get; internal set; }
     }

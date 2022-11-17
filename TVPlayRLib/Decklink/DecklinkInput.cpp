@@ -12,7 +12,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		static bool IsAutodetectionSupprted(IDeckLink* decklink)
+		static bool IsFormatAutodetectionSupprted(IDeckLink* decklink)
 		{
 			CComQIPtr<IDeckLinkAttributes> attributes_(decklink);
 			BOOL format_auto_detection = false;
@@ -25,9 +25,10 @@ namespace TVPlayR {
 		{
 			const BMDAudioSampleType									AUDIO_SAMPLE_TYPE = BMDAudioSampleType::bmdAudioSampleType32bitInteger;
 			CComQIPtr<IDeckLinkInput>									input_;
-			const bool													is_autodetection_supported_;
+			const bool													is_format_autodetection_supported_;
 			const bool													is_wide_;
 			const bool													capture_video_;
+			const bool													format_autodetection_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
 			std::vector<std::shared_ptr<Core::OutputSink>>				output_sinks_;
 			BMDTimeScale												time_scale_ = 1LL;
@@ -40,15 +41,16 @@ namespace TVPlayR {
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video)
+			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink input")
 				, input_(decklink)
 				, is_wide_(!(initial_format == Core::VideoFormatType::ntsc || initial_format == Core::VideoFormatType::pal))
-				, is_autodetection_supported_(IsAutodetectionSupprted(decklink))
+				, is_format_autodetection_supported_(IsFormatAutodetectionSupprted(decklink))
 				, audio_channels_count_(audio_channels_count)
 				, timecode_source_(timecode_source)
 				, capture_video_(capture_video)
 				, current_format_(initial_format)
+				, format_autodetection_(format_autodetection)
 			{
 				BMDDisplayMode mode = GetDecklinkDisplayMode(initial_format);
 				BMDDisplayModeSupport support;
@@ -72,7 +74,7 @@ namespace TVPlayR {
 				BMDTimeValue frame_duration;
 				if (FAILED(displayMode->GetFrameRate(&frame_duration, &time_scale_)))
 					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
-				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_autodetection_supported_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
+				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_format_autodetection_supported_ && format_autodetection_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
 				if (audio_channels_count_ > 0)
 				{
@@ -213,8 +215,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video)
-			: impl_(std::make_unique<implementation>(decklink, initial_format, audio_channels_count, timecode_source, capture_video))
+		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
+			: impl_(std::make_unique<implementation>(decklink, initial_format, audio_channels_count, timecode_source, capture_video, format_autodetection))
 		{ }
 		
 		DecklinkInput::~DecklinkInput()	{ }

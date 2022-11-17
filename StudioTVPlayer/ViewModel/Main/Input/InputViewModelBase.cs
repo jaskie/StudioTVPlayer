@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
@@ -15,6 +16,12 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         {
             Input = input;
             CommandAddRecorder = new UiCommand(AddRecorder);
+            foreach(var recording in Providers.GlobalApplicationData.Current.Recordings.Where(r => r.Input == input))
+            {
+                var recorderVm = new RecorderViewModel(recording);
+                recorderVm.RemoveRequested += Recorder_RemoveRequested;
+                _recorders.Add(recorderVm);
+            }
         }
 
         public Model.InputBase Input { get; }
@@ -26,7 +33,6 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         public abstract void Dispose();
 
         protected abstract string ReadErrorInfo(string propertyName);
-
 
         public ICommand CommandAddRecorder { get; }
 

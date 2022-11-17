@@ -20,6 +20,7 @@ namespace TVPlayR {
 			int audio_bitrate,
 			String^ options,
 			String^ video_filter,
+			String^ pixel_format,
 			String^ output_metadata,
 			String^ video_metadata,
 			String^ audio_metadata,
@@ -30,18 +31,17 @@ namespace TVPlayR {
 		!FFOutput();
 		property static array<String^>^ VideoCodecs { array<String^>^ get() { return _videoCodecs; }};
 		property static array<String^>^ AudioCodecs { array<String^>^ get() { return _audioCodecs; }};
-		virtual void AddOverlay(OverlayBase^ overlay) override;
-		virtual void RemoveOverlay(OverlayBase^ overlay) override;
-		virtual void InitializeFor(Player^ player) override;
-		virtual void UnInitialize() override;
+		void AddOverlay(OverlayBase^ overlay) override;
+		void RemoveOverlay(OverlayBase^ overlay) override;
+		void Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate) override;
 
 	private:
 		std::shared_ptr<FFmpeg::FFmpegOutput>* _native_output;
 		static array<String^>^ _videoCodecs = gcnew array<String^> { "mpeg2video", "libx264", "h264_nvenc",	"hevc_nvenc"};
 		static array<String^>^ _audioCodecs = gcnew array<String^> { "aac", "ac3", "libmp3lame", "mp2" };
 	internal:
-		virtual std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
-		virtual std::shared_ptr<Core::OutputSink> GetNativeSink() override;
+		std::shared_ptr<Core::OutputDevice> GetNativeDevice() override;
+		std::shared_ptr<Core::OutputSink> GetNativeSink() override;
 	};
 
 }

@@ -19,7 +19,7 @@ namespace StudioTVPlayer.Model
 
         public virtual void Initialize(TVPlayR.Player player) 
         {
-            Output.InitializeFor(player);
+            Output.Initialize(player.VideoFormat, player.PixelFormat, 2, 48000);
             if (TimecodeOverlay != TVPlayR.TimecodeOutputSource.None)
             {
                 _overlay = new TVPlayR.TimecodeOverlay(TimecodeOverlay, player.VideoFormat, player.PixelFormat);
@@ -27,17 +27,12 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public virtual void UnInitialize()
-        {
-            (_overlay as IDisposable)?.Dispose();
-            _overlay = null;
-        }
-
         public abstract TVPlayR.OutputBase Output { get; }
 
         public virtual void Dispose()
         {
-            UnInitialize();
+            (_overlay as IDisposable)?.Dispose();
+            _overlay = null;
         }
     }
 }

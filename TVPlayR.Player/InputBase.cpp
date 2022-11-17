@@ -4,6 +4,7 @@
 #include "Core/FrameTimeInfo.h"
 #include "TimeEventArgs.h"
 #include "FieldOrder.h"
+#include "OutputBase.h"
 
 namespace TVPlayR
 {
@@ -35,6 +36,16 @@ namespace TVPlayR
 	void InputBase::FramePlayedCallback(Core::FrameTimeInfo& time_info)
 	{
 		FramePlayed(this, gcnew TimeEventArgs(time_info.TimeFromBegin, time_info.TimeToEnd, time_info.Timecode));
+	}
+
+	void InputBase::AddOutputSink(OutputSink^ output)
+	{
+		REWRAP_EXCEPTION((*_nativeSource)->AddOutputSink(output->GetNativeSink());)
+	}
+
+	void InputBase::RemoveOutputSink(OutputSink^ output)
+	{
+		REWRAP_EXCEPTION((*_nativeSource)->RemoveOutputSink(output->GetNativeSink());)
 	}
 
 

@@ -51,7 +51,7 @@ namespace TVPlayR {
 		{
 			AVFrame* frame = av_frame_alloc();
 			if (!frame)
-				THROW_EXCEPTION("Frame not allocated");
+				THROW_EXCEPTION("FFmpegUtils: video frame not allocated");
 			frame->width = format.width();
 			frame->height = format.height();
 			frame->display_picture_number = -1;
@@ -81,7 +81,7 @@ namespace TVPlayR {
 			assert(num_channels <= 63);
 			AVFrame* frame = av_frame_alloc();
 			if (!frame)
-				THROW_EXCEPTION("Frame not allocated");
+				THROW_EXCEPTION("FFmpegUtils: audio frame not allocated");
 			frame->format = format;
 			av_channel_layout_default(&frame->ch_layout, num_channels);
 			frame->nb_samples = samples_count;

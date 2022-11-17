@@ -9,7 +9,7 @@
 #include "../Core/AVSync.h"
 #include "../FFmpeg/FFmpegUtils.h"
 #include "../FFmpeg/SwResample.h"
-#include "../DecklinkKeyer.h"
+#include "../DecklinkKeyerType.h"
 #include "../TimecodeOutputSource.h"
 #include "../Core/CoreUtils.h"
 
@@ -34,11 +34,11 @@ namespace TVPlayR {
 			Common::BlockingCollection<Core::AVSync> buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
-			const DecklinkKeyer keyer_;
+			const DecklinkKeyerType keyer_;
 			const TimecodeOutputSource timecode_source_;
 			std::unique_ptr<FFmpeg::SwResample> audio_resampler_;
 
-			implementation(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source)
+			implementation(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
@@ -71,13 +71,13 @@ namespace TVPlayR {
 					BOOL support = FALSE;
 					switch (keyer_)
 					{
-					case DecklinkKeyer::Internal:
+					case DecklinkKeyerType::Internal:
 						if (FAILED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsInternalKeying, &support)) || !support)
 							break;
 						decklink_keyer_->Enable(FALSE);
 						decklink_keyer_->SetLevel(255);
 						break;
-					case DecklinkKeyer::External:
+					case DecklinkKeyerType::External:
 						if (FAILED(attributes_->GetFlag(BMDDeckLinkAttributeID::BMDDeckLinkSupportsExternalKeying, &support)) || !support)
 							break;
 						decklink_keyer_->Enable(TRUE);
@@ -89,7 +89,7 @@ namespace TVPlayR {
 				}
 				if (FAILED(output_->EnableVideoOutput(mode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
 					return false;
-				if (keyer_ != DecklinkKeyer::Internal)
+				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
 				return true;
 			}
@@ -126,10 +126,10 @@ namespace TVPlayR {
 				if (!buffer)
 					return;
 				unsigned int samples_written = 0;
-				if (keyer_ != DecklinkKeyer::Internal)
+				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
 				scheduled_samples_ += buffer->nb_samples;
-				DebugPrintLineIf(keyer_ != DecklinkKeyer::Internal && samples_written != buffer->nb_samples, Common::DebugSeverity::warning, "Not all samples written: " + std::to_string(samples_written) + " from buffer of " + std::to_string(buffer->nb_samples));
+				DebugPrintLineIf(keyer_ != DecklinkKeyerType::Internal && samples_written != buffer->nb_samples, Common::DebugSeverity::warning, "Not all samples written: " + std::to_string(samples_written) + " from buffer of " + std::to_string(buffer->nb_samples));
 			}
 
 			int AudioSamplesRequired() const
@@ -148,12 +148,12 @@ namespace TVPlayR {
 				return true;
 			}
 
-			bool Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
+			void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (video_format == Core::VideoFormatType::invalid)
-					THROW_EXCEPTION("Invalid video format");
+					THROW_EXCEPTION("Decklink Output " + std::to_string(index_) + ": invalid video format");
 				if (!OpenOutput(GetDecklinkDisplayMode(video_format), BMDPixelFormatFromPixelFormat(pixel_format), audio_channel_count))
-					return false;
+					THROW_EXCEPTION("DecklinkOutout: OpenOutput() failed");
 				format_ = video_format;
 				pixel_format_ = pixel_format;
 				audio_channels_count_ = audio_channel_count;
@@ -161,7 +161,6 @@ namespace TVPlayR {
 				last_video_time_ = 0LL;
 				Preroll();
 				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
-				return true;
 			}
 
 			void Uninitialize()
@@ -172,7 +171,7 @@ namespace TVPlayR {
 				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				BMDTimeValue actual_stop;
 				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
-				if (keyer_ != DecklinkKeyer::Internal)
+				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
 				audio_resampler_.reset();
@@ -276,7 +275,7 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkOutput::DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyer keyer, TimecodeOutputSource timecode_source)
+		DecklinkOutput::DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
 			: impl_(std::make_unique<implementation>(decklink, index, keyer, timecode_source))
 		{}
 
@@ -284,8 +283,7 @@ namespace TVPlayR {
 
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
-		bool DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
-		void DecklinkOutput::Uninitialize()	{ impl_->Uninitialize(); }
+		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 		void DecklinkOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }

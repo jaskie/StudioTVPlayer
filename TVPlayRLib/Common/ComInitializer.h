@@ -3,7 +3,7 @@
 namespace TVPlayR {
 	namespace Common {
 
-class ComInitializer
+class ComInitializer final : Common::NonCopyable
 {
 private:
 	const HRESULT m_hr;

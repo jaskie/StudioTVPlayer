@@ -9,7 +9,8 @@
     <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter"/>
     <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <converters:DescriptionConverter x:Key="DescriptionConverter"/>
-    
+    <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter"/>
+
     <DataTemplate x:Key="mediaDragTemplate">
         <Image Height="90" Source="{Binding Thumbnail}">
             <Image.OpacityMask>

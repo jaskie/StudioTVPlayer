@@ -11,7 +11,7 @@ namespace TVPlayR {
 
 	namespace FFmpeg {
 
-class FFmpegFileInfo
+class FFmpegFileInfo final
 {
 public:
 	FFmpegFileInfo(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);

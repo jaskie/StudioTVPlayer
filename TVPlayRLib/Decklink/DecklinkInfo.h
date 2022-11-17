@@ -1,18 +1,19 @@
 #pragma once
 
 namespace TVPlayR {
-	enum class DecklinkKeyer;
+	enum class DecklinkKeyerType;
 
 	namespace Decklink {
 
-		class DecklinkInfo final
+		class DecklinkInfo final : Common::NonCopyable
 		{
 		public:
 			explicit DecklinkInfo(IDeckLink* decklink, int index);
 			~DecklinkInfo();
 			std::wstring GetDisplayName() const;
 			std::wstring GetModelName() const;
-			bool SupportsKeyer(DecklinkKeyer keyer);
+			bool SupportsKeyer(DecklinkKeyerType keyer);
+			bool SupportsInputModeDetection();
 			bool HaveInput() const;
 			bool HaveOutput() const;
 			int Index() const;

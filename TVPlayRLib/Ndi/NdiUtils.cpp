@@ -71,9 +71,9 @@ namespace TVPlayR {
 		NDIlib_video_frame_v2_t CreateVideoFrame(const Core::VideoFormat& format, const std::shared_ptr<AVFrame>& avframe, std::int64_t timecode)
 		{
 			if (!avframe)
-				THROW_EXCEPTION("CreateVideoFrame: no frame provided");
+				THROW_EXCEPTION("NdiUtils::CreateVideoFrame: no frame provided");
 			if (format.type() == Core::VideoFormatType::invalid)
-				THROW_EXCEPTION("CreateVideoFrame: invalid video format");
+				THROW_EXCEPTION("NdiUtils::CreateVideoFrame: invalid video forma provided");
 			NDIlib_FourCC_video_type_e fourcc;
 			switch (avframe->format)
 			{
@@ -84,7 +84,7 @@ namespace TVPlayR {
 				fourcc = NDIlib_FourCC_type_UYVY;
 				break;
 			default:
-				THROW_EXCEPTION("CreateVideoFrame: Invalid format of video frame");
+				THROW_EXCEPTION("NdiUtils::CreateVideoFrame: invalid format of video frame");
 			}
 			NDIlib_frame_format_type_e frame_format_type;
 			switch (format.field_order())
@@ -103,7 +103,8 @@ namespace TVPlayR {
 				fourcc,
 				format.FrameRate().Numerator(),
 				format.FrameRate().Denominator(),
-				static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Denominator() * format.height()),				frame_format_type,
+				static_cast<float>(format.SampleAspectRatio().Numerator() * format.width()) / static_cast<float>(format.SampleAspectRatio().Denominator() * format.height()),
+				frame_format_type,
 				timecode * 10,
 				avframe->data[0],
 				avframe->linesize[0]

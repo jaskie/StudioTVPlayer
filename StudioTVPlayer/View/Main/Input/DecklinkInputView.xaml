@@ -9,7 +9,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:DecklinkInputViewModel}}"
-             d:DesignHeight="90" d:DesignWidth="400">
+             d:DesignHeight="190" d:DesignWidth="400">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -37,21 +37,26 @@
             <Label>Decklink input</Label>
             <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
             <Label>Video format</Label>
-            <ComboBox ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" DisplayMemberPath="Name"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0" Margin="5 0 0 0" IsChecked="{Binding FormatAutodetection}" IsEnabled="{Binding CanFormatAutodetection}" >Autodetection</CheckBox>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" IsEnabled="{Binding CanSelectVideoFormat}" DisplayMemberPath="Name"/>
+            </Grid>
         </StackPanel>
         <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
-        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recording" Margin="0 0 1 1" 
-                  Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}"
+        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recordings" Margin="0 0 1 1" 
                   mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Accent3 }" 
                   mah:ControlsHelper.ContentCharacterCasing="Normal"
                   >
             <StackPanel >
-                <Button FontSize="12" HorizontalAlignment="Right" Margin="5 0"
+                <Button HorizontalAlignment="Left" Margin="5 0" FontWeight="Normal"
                         Command="{Binding CommandAddRecorder}"
+                        Style="{StaticResource MahApps.Styles.Button}"
                         mah:ControlsHelper.ContentCharacterCasing="Normal">Add recorder</Button>
-                <ListBox ItemsSource="{Binding Recorders}"
-                         ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
-                         >
+                <ListBox ItemsSource="{Binding Recorders}" ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}" >
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type mainVm:RecorderViewModel}">
                             <main:RecorderView/>

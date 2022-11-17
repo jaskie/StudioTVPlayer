@@ -13,8 +13,6 @@
                 <!-- Application local settings -->
                 <ResourceDictionary Source="Resources/AppResources.xaml" />
                 <ResourceDictionary Source="Resources/AppStyles.xaml" />
-                <!--Custom controls styles-->
-                <ResourceDictionary Source="Controls/Generic.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>        
     </Application.Resources>

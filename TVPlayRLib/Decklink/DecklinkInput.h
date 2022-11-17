@@ -16,14 +16,14 @@ namespace TVPlayR {
 		class DecklinkInput final : public Core::InputSource
 		{
 		public:
-			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video);
-			~DecklinkInput();
+			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection);
+			virtual ~DecklinkInput();
 			Core::AVSync PullSync(const Core::Player& player, int audio_samples_count) override;
 			bool IsAddedToPlayer(const Core::Player& player) override;
 			void AddToPlayer(const Core::Player& player) override;
 			void RemoveFromPlayer(const Core::Player& player) override;
 			void AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) override;
-			void RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink);
+			void RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) override;
 			void Play() override;
 			void Pause() override;
 			bool IsPlaying() const override;

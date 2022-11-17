@@ -5,7 +5,7 @@ using namespace System::Runtime::InteropServices;
 
 namespace TVPlayR {
 	
-	enum class DecklinkKeyer;
+	enum class DecklinkKeyerType;
 
 	namespace Decklink {
 		class DecklinkInfo;
@@ -34,7 +34,9 @@ namespace TVPlayR {
 
 		property bool HaveInput { bool get(); }
 
-		bool SupportsKeyer(DecklinkKeyer keyer);
+		bool SupportsKeyer(DecklinkKeyerType keyer);
+
+		property bool SupportsInputModeDetection { bool get(); };
 		
 	internal:
 		DecklinkInfo(std::shared_ptr<Decklink::DecklinkInfo>& info);

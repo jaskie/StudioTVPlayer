@@ -11,6 +11,7 @@ A simple TV studio player with SDI, NDI and MPEG TS outputs for Windows
 * Audio level adjustment for playing file (+/- 15 dB)
 * Multiple outputs for single player
 * Time/Timecode input and output on RP-188 VANC stream or overlay on video (can be set for single output)
+* [NEW] Decklink input recording, with ability to play file while recording
 
 ## Prerequisits
 * [C++ for Visual Studio 2019 redistribuable](https://aka.ms/vs/17/release/vc_redist.x64.exe)

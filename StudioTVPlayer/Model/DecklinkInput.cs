@@ -1,4 +1,4 @@
-﻿using StudioTVPlayer.Model.Args;
+﻿using StudioTVPlayer.Providers;
 using System;
 using System.Linq;
 using System.Windows;
@@ -11,9 +11,13 @@ namespace StudioTVPlayer.Model
     {
         private TVPlayR.DecklinkInput _input;
         private TVPlayR.PreviewSink _preview;
+        private TVPlayR.VideoFormat _currentFormat;
 
         [XmlAttribute]
         public int DeviceIndex { get; set; }
+
+        [XmlAttribute]
+        public bool FormatAutodetection { get; set; }
 
         public override ImageSource Thumbnail => _preview?.PreviewSource;
 
@@ -29,13 +33,13 @@ namespace StudioTVPlayer.Model
         public override bool Initialize()
         {
             Uninitialize();
-            var videoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
+            _currentFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == VideoFormat);
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == DeviceIndex);
-            if (info is null || videoFormat is null)
+            if (info is null || _currentFormat is null)
                 return false;
             try
             {
-                _input = TVPlayR.DecklinkIterator.CreateInput(info, videoFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true);
+                _input = TVPlayR.DecklinkIterator.CreateInput(info, _currentFormat, 2, TVPlayR.DecklinkTimecodeSource.RP188Any, true, FormatAutodetection);
                 _input.FormatChanged += Input_FormatChanged;
                 
                 _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);
@@ -66,8 +70,17 @@ namespace StudioTVPlayer.Model
 
         private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
         {
+            _currentFormat = e.Format;
+            VideoFormat = e.Format.Name;
+            InputList.Current.Save();
             InputFormatChanged?.Invoke(this, e);
         }
+
+        public override TVPlayR.VideoFormat CurrentFormat()
+        {
+            return _currentFormat;
+        }
+
 
         public event EventHandler<TVPlayR.VideoFormatEventArgs> InputFormatChanged;
 

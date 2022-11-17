@@ -34,7 +34,7 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 		if (fifo_space < frame->nb_samples)
 			return false;
 		if (av_audio_fifo_write(aduio_fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
-			THROW_EXCEPTION("Not all audio samples were written to fifo");
+			THROW_EXCEPTION("AudioFifo: not all audio samples were written to fifo");
 		end_sample_ += frame->nb_samples;
 		if (frame_start_time <= seek_time_) // first frame
 		{

@@ -20,7 +20,7 @@ namespace TVPlayR {
 	}
 	namespace Decklink {
 
-class DecklinkInputSynchroProvider
+class DecklinkInputSynchroProvider final
 {
 public:
 	DecklinkInputSynchroProvider(const Core::Player& player, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video, int audio_channels);

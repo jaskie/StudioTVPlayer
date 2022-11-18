@@ -45,5 +45,9 @@ namespace StudioTVPlayer.Model
             return true;
         }
 
+        protected override void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
+        {
+            RaiseFramePlayed(e);
+        }
     }
 }

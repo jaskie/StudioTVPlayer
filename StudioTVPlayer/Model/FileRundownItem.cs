@@ -80,6 +80,12 @@ namespace StudioTVPlayer.Model
             return _input?.Seek(timeSpan) ?? false;
         }
 
+        protected override void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
+        {
+            var timeEventArgs = new TVPlayR.TimeEventArgs(e.TimeFromBegin, Media.Duration - e.TimeFromBegin, e.Timecode);
+            RaiseFramePlayed(timeEventArgs);
+        }
+
         private void InputFile_Stopped(object sender, EventArgs e)
         {
             Stopped?.Invoke(this, EventArgs.Empty);

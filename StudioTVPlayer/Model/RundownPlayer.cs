@@ -64,6 +64,7 @@ namespace StudioTVPlayer.Model
         public event EventHandler Stopped;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
         public event EventHandler<RundownItemEventArgs> Removed;
+        public event EventHandler MediaDurationChanged;
 
         public void Load(RundownItemBase item)
         {
@@ -116,6 +117,7 @@ namespace StudioTVPlayer.Model
             if (rundownItem is FileRundownItem fileRundownItem)
             {
                 fileRundownItem.Stopped -= PlaiyngRundownItem_Stopped;
+                fileRundownItem.Media.PropertyChanged -= Media_PropertyChanged;
                 if (DisableAfterUnload)
                     fileRundownItem.IsDisabled = true;
             }
@@ -133,6 +135,7 @@ namespace StudioTVPlayer.Model
                 {
                     case FileRundownItem fileRundownItem:
                         fileRundownItem.Stopped += PlaiyngRundownItem_Stopped;
+                        fileRundownItem.Media.PropertyChanged += Media_PropertyChanged;
                         break;
                     case LiveInputRundownItem liveInputRundownItem:
                         break;
@@ -146,6 +149,18 @@ namespace StudioTVPlayer.Model
                     rundownItem.Play();
             }
             Loaded?.Invoke(this, new RundownItemEventArgs(rundownItem));
+        }
+
+        private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var media = sender as MediaFile;
+            if (media is null) return;
+            switch (e.PropertyName)
+            {
+                case nameof(MediaFile.Duration):
+                    MediaDurationChanged?.Invoke(this, EventArgs.Empty);
+                    break;
+            }
         }
 
         internal void Submit(MediaFile media)

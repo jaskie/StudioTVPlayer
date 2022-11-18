@@ -1,16 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <PresetList>
-  <EncoderPreset PresetName="H.264 4Mbps"
-                 VideoCodec="libx264"
-                 VideoBitrate="4096"
-                 AudioCodec="aac"
-                 AudioBitrate="128"
-                 Options="preset=veryfast,g=30"
-                 FilenameExtension="mov"
-                 >
-    <Description>Preview quality, 4 Mbps H.264 CPU-encoded video, 128 kbps audio.
-Creates MOV file.</Description>
-  </EncoderPreset>
   <EncoderPreset PresetName="XDCAM HD422 50Mbps"
                  VideoCodec="mpeg2video"
                  VideoBitrate="50000"
@@ -21,5 +10,16 @@ Creates MOV file.</Description>
                  >
     <Description>Popular HD production format, 50 Mbps video, PCM audio.
 Creates MXF file.</Description>
+  </EncoderPreset>
+  <EncoderPreset PresetName="H.264 4Mbps"
+                 VideoCodec="libx264"
+                 VideoBitrate="4096"
+                 AudioCodec="aac"
+                 AudioBitrate="128"
+                 Options="preset=veryfast,g=30"
+                 FilenameExtension="mov"
+                 >
+    <Description>Preview quality, 4 Mbps H.264 CPU-encoded video, 128 kbps audio.
+Creates MOV file.</Description>
   </EncoderPreset>
 </PresetList>

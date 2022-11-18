@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Media;
-using TVPlayR;
 
 namespace StudioTVPlayer.Model
 {
@@ -16,7 +15,7 @@ namespace StudioTVPlayer.Model
 
         public abstract bool IsPlaying { get; }
 
-        public event EventHandler<TimeEventArgs> FramePlayed;
+        public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler RemoveRequested;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -82,7 +81,9 @@ namespace StudioTVPlayer.Model
             return true;
         }
 
-        private void Input_FramePlayed(object sender, TimeEventArgs e)
+        protected abstract void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e);
+
+        protected void RaiseFramePlayed(TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);
         }

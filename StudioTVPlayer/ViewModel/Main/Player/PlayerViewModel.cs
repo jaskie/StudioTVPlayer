@@ -54,6 +54,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
             player.Removed += MediaPlayer_Removed;
+            player.MediaDurationChanged += MediaPlayer_MediaDurationChanged;
             if (player.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
@@ -439,6 +440,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Rundown.Remove(vm);
         }
 
+        private void MediaPlayer_MediaDurationChanged(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged(nameof(CurrentItemDuration));
+        }
+
         private void Player_AudioVolume(object sender, Model.Args.AudioVolumeEventArgs e)
         {
             if (e.AudioVolume.Length == 0)
@@ -472,6 +478,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.Stopped -= MediaPlayer_Stopped;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
             _mediaPlayer.Removed -= MediaPlayer_Removed;
+            _mediaPlayer.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;
         }
 
         #region drag&drop

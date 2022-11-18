@@ -47,16 +47,30 @@
             </Grid>
         </StackPanel>
         <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
-        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recordings" Margin="0 0 1 1" 
-                  mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Accent3 }" 
+        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recordings"
+                  mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Gray.SemiTransparent }" 
                   mah:ControlsHelper.ContentCharacterCasing="Normal"
+                  BorderBrush="{StaticResource MahApps.Brushes.Gray9}"
+                  Padding="0"
                   >
             <StackPanel >
-                <Button HorizontalAlignment="Left" Margin="5 0" FontWeight="Normal"
+                <Button HorizontalAlignment="Left" Margin="5" FontWeight="Normal"
                         Command="{Binding CommandAddRecorder}"
                         Style="{StaticResource MahApps.Styles.Button}"
-                        mah:ControlsHelper.ContentCharacterCasing="Normal">Add recorder</Button>
-                <ListBox ItemsSource="{Binding Recorders}" ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}" >
+                        Padding="5 0"
+                        mah:ControlsHelper.ContentCharacterCasing="Normal">
+                    <StackPanel Orientation="Horizontal">
+                        <mah:FontIcon FontSize="12" Glyph="&#xE710;" />
+                        <TextBlock Margin="5 0 0 0" FontSize="12" FontWeight="Normal">Add recorder</TextBlock>
+                    </StackPanel>
+                </Button>
+                <ListBox ItemsSource="{Binding Recorders}" >
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource SimpleListBoxItemStyle}">
+                            <Setter Property="BorderThickness" Value="0 1 0 0"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.Gray9}"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type mainVm:RecorderViewModel}">
                             <main:RecorderView/>

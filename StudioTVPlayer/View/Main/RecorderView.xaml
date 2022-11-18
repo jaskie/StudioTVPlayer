@@ -9,10 +9,8 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance {x:Type vm:RecorderViewModel}}"
              d:DesignHeight="150" d:DesignWidth="800"
-             BorderThickness="0 0 0 1"
-             BorderBrush="{StaticResource MahApps.Brushes.Button.Border}"
              >
-    <Grid Margin="0 5">
+    <Grid Margin="0 0 0 3">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
@@ -30,7 +28,9 @@
             <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
         </Grid.Resources>
         <Label Grid.Row="0">Folder</Label>
-        <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0 5 0" BorderThickness="{StaticResource ComboBoxBorderThemeThickness}">
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0 5 0"
+                BorderThickness="{StaticResource ComboBoxBorderThemeThickness}"
+                IsEnabled="{Binding IsRecording, Converter={StaticResource InvertedBooleanConverter}}">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.TextBox.Border}"/>
@@ -59,9 +59,18 @@
             </Grid>
         </Border>
         <Label Grid.Row="2">File name</Label>
-        <TextBox Grid.Row="3" Margin="5 0" Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+        <TextBox Grid.Row="3" Margin="5 0" 
+                 Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                 IsEnabled="{Binding IsRecording, Converter={StaticResource InvertedBooleanConverter}}"
+                 />
         <Label Grid.Column="1" Grid.Row="2">Format preset</Label>
-        <ComboBox Grid.Column="1" Grid.Row="3" Margin="5 0" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding EncoderPreset, ValidatesOnDataErrors=True}" DisplayMemberPath="PresetName" ToolTip="{Binding EncoderPreset.Description}">
+        <ComboBox Grid.Column="1" Grid.Row="3" Margin="5 0"
+                  ItemsSource="{Binding EncoderPresets}"
+                  SelectedItem="{Binding EncoderPreset, ValidatesOnDataErrors=True}"
+                  DisplayMemberPath="PresetName"
+                  ToolTip="{Binding EncoderPreset.Description}"
+                  IsEnabled="{Binding IsRecording, Converter={StaticResource InvertedBooleanConverter}}"
+                  >
             <ComboBox.ItemContainerStyle>
                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource MahApps.Styles.ComboBoxItem}">
                     <Setter Property="ToolTip" Value="{Binding Description}"/>
@@ -69,7 +78,10 @@
             </ComboBox.ItemContainerStyle>
         </ComboBox>
         <Grid Grid.Column="2" Grid.RowSpan="10">
-            <Button Grid.Column="1" Style="{StaticResource RemoveButtonStyle}" VerticalAlignment="Bottom" Command="{Binding CommandRemove}" IsEnabled="{Binding IsRecording,Converter={StaticResource InvertedBooleanConverter}}"/>
+            <Button Grid.Column="1" VerticalAlignment="Bottom"
+                    Style="{StaticResource RemoveButtonStyle}"
+                    Command="{Binding CommandRemove}"
+                    IsEnabled="{Binding IsRecording,Converter={StaticResource InvertedBooleanConverter}}"/>
             <ToggleButton Grid.Column="1" 
                       IsChecked="{Binding IsRecording}" IsEnabled="{Binding CanChangeRecordingState}" 
                       VerticalAlignment="Top" Width="40" Height="40" Margin="5" >
@@ -79,6 +91,12 @@
                         <Style.Triggers>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Background" Value="DarkGray"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="ToolTip" Value="Stop recording"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="ToolTip" Value="Start recording"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>

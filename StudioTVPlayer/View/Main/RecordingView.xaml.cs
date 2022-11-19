@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace StudioTVPlayer.View.Main
 {
     /// <summary>
-    /// Interaction logic for RecorderView.xaml
+    /// Interaction logic for RecordingView.xaml
     /// </summary>
-    public partial class RecorderView : UserControl
+    public partial class RecordingView : UserControl
     {
-        public RecorderView()
+        public RecordingView()
         {
             InitializeComponent();
         }

@@ -1,4 +1,5 @@
-﻿using StudioTVPlayer.Helpers;
+﻿using ControlzEx.Standard;
+using StudioTVPlayer.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +11,7 @@ using System.Xml.Linq;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public class RecorderViewModel : RemovableViewModelBase, IDataErrorInfo
+    public class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {
         private Model.Recording _recording;
         private string _fileName;
@@ -18,16 +19,19 @@ namespace StudioTVPlayer.ViewModel.Main
         private string _fullPath;
         private bool _isRecording;
         private Model.EncoderPreset _encoderPreset;
+        private bool _disposed;
         private readonly Model.InputBase _input;
 
-        public RecorderViewModel(Model.InputBase input)
+        public RecordingViewModel(Model.InputBase input)
         {
             _input = input;
+            if (input is Model.DecklinkInput decklinkInput)
+                decklinkInput.InputInitialized += DecklinkInput_InputFormatChanged;
             CommandBrowseForFolder = new UiCommand(BrowseForFolder);
             _folder = Folders.LastOrDefault();
         }
 
-        public RecorderViewModel(Model.Recording recording)
+        public RecordingViewModel(Model.Recording recording)
         {
             _recording = recording;
             _input = recording.Input;
@@ -61,7 +65,14 @@ namespace StudioTVPlayer.ViewModel.Main
             }
         }
 
-        public IEnumerable<Model.EncoderPreset> EncoderPresets => Providers.GlobalApplicationData.Current.EncoderPresets;
+        public IEnumerable<Model.EncoderPreset> EncoderPresets
+        {
+            get
+            {
+                var currentFormatName = _input.CurrentFormat().Name;
+                return Providers.GlobalApplicationData.Current.EncoderPresets.Where(p => p.InputFormats == null || p.InputFormats.Contains(currentFormatName));
+            }
+        }
 
         public Model.EncoderPreset EncoderPreset
         {
@@ -136,6 +147,15 @@ namespace StudioTVPlayer.ViewModel.Main
             return !IsRecording;
         }
 
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+            _disposed = true;
+            if (_input is Model.DecklinkInput decklinkInput)
+                decklinkInput.InputInitialized -= DecklinkInput_InputFormatChanged;
+        }
+
         private void SetNewFullPath()
         {
             if (string.IsNullOrEmpty(Folder) || string.IsNullOrEmpty(FileName))
@@ -175,5 +195,12 @@ namespace StudioTVPlayer.ViewModel.Main
             _recording = null;
             NotifyPropertyChanged(nameof(FileName));
         }
+
+        private void DecklinkInput_InputFormatChanged(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged(nameof(EncoderPresets));
+        }
+
+
     }
 }

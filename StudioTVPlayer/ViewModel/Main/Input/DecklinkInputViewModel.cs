@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
@@ -8,6 +9,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.DecklinkInfo _selectedDevice;
         private bool _formatAutodetection;
+        private bool _disposed;
         private readonly Model.DecklinkInput _input;
 
         public DecklinkInputViewModel(Model.DecklinkInput input) : base(input)
@@ -16,7 +18,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             _formatAutodetection = _input.FormatAutodetection;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
-            input.InputFormatChanged += Input_InputFormatChanged;
+            input.InputInitialized += Input_InputFormatChanged;
         }
 
         public TVPlayR.DecklinkInfo SelectedDevice
@@ -103,17 +105,20 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             }
         }
 
-        private void Input_InputFormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
+        private void Input_InputFormatChanged(object sender, EventArgs e)
         {
-            _videoFormat = e.Format;
+            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException(nameof(sender));
+            _videoFormat = decklink.CurrentFormat();
             NotifyPropertyChanged(nameof(VideoFormat));
         }
 
         public override void Dispose()
         {
-            if (_input is null)
+            if (_disposed)
                 return;
-            _input.InputFormatChanged -= Input_InputFormatChanged;
+            _disposed = true;
+            _input.InputInitialized -= Input_InputFormatChanged;
+            base.Dispose();
         }
 
         private void ApplyChanges()

@@ -18,6 +18,10 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public string FilenameExtension { get; set; }
 
+        [XmlArray]
+        [XmlArrayItem("Format")]
+        public string[] InputFormats { get; set; }
+
         [XmlIgnore]
         public bool IsEmbedded { get; internal set; }
     }

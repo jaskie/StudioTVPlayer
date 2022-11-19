@@ -19,6 +19,7 @@ namespace StudioTVPlayer.Model
         public InputBase Input { get; }
 
         public string FullPath { get; private set; }
+
         public EncoderPreset EncoderPreset { get; private set; }
 
         public void StartRecording(string fullPath, TVPlayR.VideoFormat format, EncoderPreset preset)
@@ -40,13 +41,13 @@ namespace StudioTVPlayer.Model
                 audio_stream_id: preset.AudioStreamId);
             if (Input is DecklinkInput decklinkInput)
             {
-                decklinkInput.InputFormatChanged += DecklinkInput_InputFormatChanged;
+                decklinkInput.InputInitialized += DecklinkInput_InputInitialized;
             }
             _output.Initialize(format, TVPlayR.PixelFormat.yuv422, 2, 48000);
             Input.AddOutputSink(_output);
         }
 
-        private void DecklinkInput_InputFormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
+        private void DecklinkInput_InputInitialized(object sender, EventArgs e)
         {
             StopRecording();
         }
@@ -56,7 +57,7 @@ namespace StudioTVPlayer.Model
             Input.RemoveOutputSink(_output);
             if (Input is DecklinkInput decklinkInput)
             {
-                decklinkInput.InputFormatChanged -= DecklinkInput_InputFormatChanged;
+                decklinkInput.InputInitialized -= DecklinkInput_InputInitialized;
             }
             _output.Dispose();
             _output = null;

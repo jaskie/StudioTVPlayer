@@ -8,6 +8,11 @@
                  FilenameExtension="mxf"
                  PixelFormat="yuv422p"
                  >
+    <InputFormats>
+      <Format>1080i50</Format>
+      <Format>1080i59.94</Format>
+      <Format>1080i60</Format>
+    </InputFormats>
     <Description>Popular HD production format, 50 Mbps video, PCM audio.
 Creates MXF file.</Description>
   </EncoderPreset>

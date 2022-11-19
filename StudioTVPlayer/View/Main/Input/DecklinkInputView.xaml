@@ -64,7 +64,7 @@
                         <TextBlock Margin="5 0 0 0" FontSize="12" FontWeight="Normal">Add recorder</TextBlock>
                     </StackPanel>
                 </Button>
-                <ListBox ItemsSource="{Binding Recorders}" >
+                <ListBox ItemsSource="{Binding Recordings}" >
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource SimpleListBoxItemStyle}">
                             <Setter Property="BorderThickness" Value="0 1 0 0"/>
@@ -72,8 +72,8 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.Resources>
-                        <DataTemplate DataType="{x:Type mainVm:RecorderViewModel}">
-                            <main:RecorderView/>
+                        <DataTemplate DataType="{x:Type mainVm:RecordingViewModel}">
+                            <main:RecordingView/>
                         </DataTemplate>
                     </ListBox.Resources>
                 </ListBox>

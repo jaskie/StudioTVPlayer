@@ -38,7 +38,9 @@ namespace StudioTVPlayer.Model
                 video_metadata: preset.VideoMetadata, 
                 audio_metadata: preset.AudioMetadata, 
                 video_stream_id: preset.VideoStreamId, 
-                audio_stream_id: preset.AudioStreamId);
+                audio_stream_id: preset.AudioStreamId,
+                preset.OutputFormat
+                );
             if (Input is DecklinkInput decklinkInput)
             {
                 decklinkInput.InputInitialized += DecklinkInput_InputInitialized;

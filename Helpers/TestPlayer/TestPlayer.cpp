@@ -48,8 +48,8 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
-		const PixelFormat pixel_format = PixelFormat::yuv422;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::pal_fha;
+		const PixelFormat pixel_format = PixelFormat::bgra;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
 
@@ -64,7 +64,7 @@ int main()
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index], DecklinkKeyerType::Default, TimecodeOutputSource::TimeToEnd);
-		decklink_output->Initialize(video_format, PixelFormat::yuv422, audio_channels, sample_rate);
+		decklink_output->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		player.AddOutputSink(decklink_output);
 		player.SetFrameClockSource(*decklink_output);
 		//if (!decklink_output->InitializeFor(player))
@@ -114,10 +114,20 @@ int main()
 
 
 		// prepare input and recording
-		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::v1080i5000, 2, DecklinkTimecodeSource::RP188Any, true, true);
-		FFmpeg::FFOutputParams record_params{ "d:\\temp\\cccc.mov", "libx264", "aac", 4000, 128 };
+		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::RP188Any, true, true);
+		FFmpeg::FFOutputParams record_params
+		{ 
+			"d:\\temp\\cccc.mxf", 
+			"mpeg2video", "pcm_s24le", 
+			50000, 0,
+			"",//maxrate=50000000,bufsize=3835000,minrate=50000000,flags=+ildct+low_delay,dc=10,ps=1,qmin=1,qmax=3,bufsize=2000000,rc_init_occupancy=2000000,intra_vlc=1,non_linear_quant=1,color_primaries=5,color_trc=1,colorspace=5,rc_max_vbv_use=1,tag:v=mx5p,d10_channelcount=4",
+			"", "yuv422p",
+			"", "", "",
+			0, 0,
+			"mxf_d10"
+		};
 		auto record_file = std::make_shared<FFmpeg::FFmpegOutput>(record_params);
-		record_file->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
+		record_file->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		decklink_input->AddOutputSink(record_file);
 		
 		while (true)

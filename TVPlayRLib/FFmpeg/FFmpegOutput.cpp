@@ -47,12 +47,12 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const FFOutputParams& params)
-				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
+				: Common::DebugTarget(Common::DebugSeverity::trace, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, format_(Core::VideoFormatType::invalid)
 				, dest_pixel_format_(av_get_pix_fmt(params.PixelFormat.c_str()))
 				, options_(ReadOptions(params.Options))
-				, output_format_(params.Url, options_)
+				, output_format_(params.Url, params.OutputFormat, options_)
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
@@ -60,7 +60,6 @@ namespace TVPlayR {
 			{
 				if (dest_pixel_format_ == AVPixelFormat::AV_PIX_FMT_NONE)
 					dest_pixel_format_ = video_codec_->pix_fmts[0];
-				executor_.begin_invoke([this] {	Tick();	});
 			}
 
 			~implementation()
@@ -89,6 +88,7 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), dest_pixel_format_);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, dest_pixel_format_);
+				executor_.begin_invoke([this] {	Tick();	});
 			}
 
 			void InitializeFrameRequester()

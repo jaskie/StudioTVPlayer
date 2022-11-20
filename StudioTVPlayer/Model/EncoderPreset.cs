@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
@@ -17,6 +12,9 @@ namespace StudioTVPlayer.Model
 
         [XmlAttribute]
         public string FilenameExtension { get; set; }
+
+        [XmlAttribute]
+        public string OutputFormat { get; set; }
 
         [XmlArray]
         [XmlArrayItem("Format")]

@@ -12,6 +12,7 @@
 #include "../DecklinkKeyerType.h"
 #include "../TimecodeOutputSource.h"
 #include "../Core/CoreUtils.h"
+#include "../Common/Executor.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -26,8 +27,7 @@ namespace TVPlayR {
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			std::vector<Core::ClockTarget*> clock_targets_;
-			std::mutex overlays_mutex_;
-			int buffer_size_ = 4;
+			int buffer_size_ = 3;
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 2;
@@ -37,6 +37,8 @@ namespace TVPlayR {
 			const DecklinkKeyerType keyer_;
 			const TimecodeOutputSource timecode_source_;
 			std::unique_ptr<FFmpeg::SwResample> audio_resampler_;
+			Common::Executor overlay_executor_;
+			
 
 			implementation(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink " + std::to_string(index))
@@ -48,6 +50,7 @@ namespace TVPlayR {
 				, index_(index)
 				, keyer_(keyer)
 				, timecode_source_(timecode_source)
+				, overlay_executor_("Overlay queue for Decklink" + std::to_string(index))
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
 			}
@@ -189,20 +192,30 @@ namespace TVPlayR {
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				std::lock_guard<std::mutex> lock(overlays_mutex_);
-				overlays_.emplace_back(overlay);
+				overlay_executor_.invoke([&]
+					{
+						overlays_.emplace_back(overlay);
+					});
 			}
 
 			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				std::lock_guard<std::mutex> lock(overlays_mutex_);
-				overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
+				overlay_executor_.invoke([&]
+					{
+						overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
+					});
 			}
 
 			void Push(Core::AVSync& sync)
 			{
-				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped when pushed\n");
+				overlay_executor_.begin_invoke([sync, this]
+					{
+						Core::AVSync transformed(sync);
+						for (auto& overlay : overlays_)
+							transformed = overlay->Transform(transformed);
+						if (buffer_.try_add(transformed) != Common::BlockingCollectionStatus::Ok)
+							DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped when pushed\n");
+					});
 			}
 
 			//IDeckLinkVideoOutputCallback
@@ -218,11 +231,6 @@ namespace TVPlayR {
 				Core::AVSync sync;
 				if (buffer_.try_take(sync) == Common::BlockingCollectionStatus::Ok)
 				{
-					{
-						std::lock_guard<std::mutex> lock(overlays_mutex_);
-						for (auto& overlay : overlays_)
-							sync = overlay->Transform(sync);
-					}
 					ScheduleVideo(sync.Video, Core::TimecodeFromFameTimeInfo(sync.TimeInfo, timecode_source_));
 					if (sync.Audio)
 					{

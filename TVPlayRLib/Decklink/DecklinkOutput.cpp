@@ -50,7 +50,7 @@ namespace TVPlayR {
 				, index_(index)
 				, keyer_(keyer)
 				, timecode_source_(timecode_source)
-				, overlay_executor_("Overlay queue for Decklink" + std::to_string(index))
+				, overlay_executor_("Overlay queue for Decklink" + std::to_string(index), 3)
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
 			}

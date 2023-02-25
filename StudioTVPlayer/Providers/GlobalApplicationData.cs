@@ -72,7 +72,6 @@ namespace StudioTVPlayer.Providers
             var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
             var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<EncoderPreset>), new System.Xml.Serialization.XmlRootAttribute("PresetList"));
             var presets = (List<EncoderPreset>)serializer.Deserialize(resourceStream);
-            presets.ForEach(p => p.IsEmbedded = true);
             return presets;
         }
 

@@ -16,11 +16,12 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public string OutputFormat { get; set; }
 
+        /// <summary>
+        /// Formats for which the preset can be used.
+        /// If null, there is no input format restriction.
+        /// </summary>
         [XmlArray]
         [XmlArrayItem("Format")]
         public string[] InputFormats { get; set; }
-
-        [XmlIgnore]
-        public bool IsEmbedded { get; internal set; }
     }
 }

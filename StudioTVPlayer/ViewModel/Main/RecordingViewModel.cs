@@ -26,7 +26,7 @@ namespace StudioTVPlayer.ViewModel.Main
         {
             _input = input;
             if (input is Model.DecklinkInput decklinkInput)
-                decklinkInput.InputInitialized += DecklinkInput_InputFormatChanged;
+                decklinkInput.FormatChanged += DecklinkInput_InputFormatChanged;
             CommandBrowseForFolder = new UiCommand(BrowseForFolder);
             _folder = Folders.LastOrDefault();
         }
@@ -153,7 +153,7 @@ namespace StudioTVPlayer.ViewModel.Main
                 return;
             _disposed = true;
             if (_input is Model.DecklinkInput decklinkInput)
-                decklinkInput.InputInitialized -= DecklinkInput_InputFormatChanged;
+                decklinkInput.FormatChanged -= DecklinkInput_InputFormatChanged;
         }
 
         private void SetNewFullPath()
@@ -194,6 +194,8 @@ namespace StudioTVPlayer.ViewModel.Main
             recording.Finished -= Recording_Finished;
             _recording = null;
             NotifyPropertyChanged(nameof(FileName));
+            Set(ref _isRecording, false, nameof(IsRecording));
+            NotifyPropertyChanged(nameof(CanChangeRecordingState));
         }
 
         private void DecklinkInput_InputFormatChanged(object sender, EventArgs e)

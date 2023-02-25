@@ -1,17 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <PresetList>
-  <EncoderPreset PresetName="XDCAM HD422 50Mbps"
+  <EncoderPreset PresetName="XDCAM HD422 50Mbps 25fps"
                  VideoCodec="mpeg2video"
                  VideoBitrate="50000"
                  AudioCodec="pcm_s24le"
-                 Options="maxrate=50000k,bufsize=3835k,minrate=50000k,flags=+ildct+ilme"
+                 Options="maxrate=50000k,minrate=50000k,bufsize=3835k,rc_init_occupancy=3835k,flags=+ildct+ilme,non_linear_quant=1,g=12,color_primaries=bt709,color_trc=bt709,colorspace=bt709"
                  FilenameExtension="mxf"
                  PixelFormat="yuv422p"
                  >
     <InputFormats>
       <Format>1080i50</Format>
+      <Format>1080p25</Format>
+    </InputFormats>
+    <Description>Popular HD production format, 50 Mbps video, 24-bit PCM audio.
+Creates MXF file.</Description>
+  </EncoderPreset>
+  <EncoderPreset PresetName="XDCAM HD422 50Mbps 29.97fps"
+                 VideoCodec="mpeg2video"
+                 VideoBitrate="50000"
+                 AudioCodec="pcm_s24le"
+                 Options="maxrate=50000k,minrate=50000k,bufsize=17825792,rc_init_occupancy=17825792,flags=+ildct+ilme,non_linear_quant=1,g=15,color_primaries=bt709,color_trc=bt709,colorspace=bt709"
+                 FilenameExtension="mxf"
+                 PixelFormat="yuv422p"
+                 >
+    <InputFormats>
       <Format>1080i59.94</Format>
-      <Format>1080i60</Format>
+      <Format>1080p29.97</Format>
     </InputFormats>
     <Description>Popular HD production format, 50 Mbps video, 24-bit PCM audio.
 Creates MXF file.</Description>
@@ -30,10 +44,8 @@ Creates MXF file.</Description>
       <Format>PAL 4:3</Format>
       <Format>PAL 16:9</Format>
     </InputFormats>
-    <Description>
-      Popular SD production format, 50 Mbps video, 24-bit PCM audio.
-      Creates MXF file.
-    </Description>
+    <Description>Popular SD production format, 50 Mbps video, 24-bit PCM audio.
+Creates MXF file.</Description>
   </EncoderPreset>
   <EncoderPreset PresetName="H.264 4Mbps"
                  VideoCodec="libx264"

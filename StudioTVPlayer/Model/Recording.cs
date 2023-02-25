@@ -27,39 +27,41 @@ namespace StudioTVPlayer.Model
             FullPath = fullPath;
             EncoderPreset = preset;
             Providers.GlobalApplicationData.Current.AddRecording(this);
-            _output = new TVPlayR.FFOutput(address: fullPath, 
-                video_codec: preset.VideoCodec, 
-                audio_codec: preset.AudioCodec, 
-                video_bitrate: preset.VideoBitrate, 
-                audio_bitrate: preset.AudioBitrate, 
-                options: preset.Options, 
-                video_filter: preset.VideoFilter, pixel_format:preset.PixelFormat,
-                output_metadata: preset.OutputMetadata, 
-                video_metadata: preset.VideoMetadata, 
-                audio_metadata: preset.AudioMetadata, 
-                video_stream_id: preset.VideoStreamId, 
+            _output = new TVPlayR.FFOutput(
+                address: fullPath,
+                video_codec: preset.VideoCodec,
+                audio_codec: preset.AudioCodec,
+                video_bitrate: preset.VideoBitrate,
+                audio_bitrate: preset.AudioBitrate,
+                options: preset.Options,
+                video_filter: preset.VideoFilter,
+                pixel_format:preset.PixelFormat,
+                output_metadata: preset.OutputMetadata,
+                video_metadata: preset.VideoMetadata,
+                audio_metadata: preset.AudioMetadata,
+                video_stream_id: preset.VideoStreamId,
                 audio_stream_id: preset.AudioStreamId,
-                preset.OutputFormat
+                output_format: preset.OutputFormat
                 );
             if (Input is DecklinkInput decklinkInput)
             {
-                decklinkInput.InputInitialized += DecklinkInput_InputInitialized;
+                decklinkInput.FormatChanged += DecklinkInput_FormatChanged;
             }
             _output.Initialize(format, TVPlayR.PixelFormat.yuv422, 2, 48000);
             Input.AddOutputSink(_output);
         }
 
-        private void DecklinkInput_InputInitialized(object sender, EventArgs e)
+        private void DecklinkInput_FormatChanged(object sender, EventArgs e)
         {
             StopRecording();
         }
 
-        public void StopRecording() 
+        public void StopRecording()
         {
             Input.RemoveOutputSink(_output);
             if (Input is DecklinkInput decklinkInput)
             {
-                decklinkInput.InputInitialized -= DecklinkInput_InputInitialized;
+                decklinkInput.FormatChanged -= DecklinkInput_FormatChanged;
             }
             _output.Dispose();
             _output = null;

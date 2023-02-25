@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlzEx.Standard;
+using System;
 using System.Linq;
 using System.Windows.Media;
 
@@ -18,7 +19,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             _formatAutodetection = _input.FormatAutodetection;
             _selectedDevice = Devices.FirstOrDefault(d => d.Index == input.DeviceIndex);
             _videoFormat = VideoFormats.FirstOrDefault(f => f.Name == input.VideoFormat);
-            input.InputInitialized += Input_InputFormatChanged;
+            input.FormatChanged += Input_FormatChanged;
         }
 
         public TVPlayR.DecklinkInfo SelectedDevice
@@ -105,7 +106,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             }
         }
 
-        private void Input_InputFormatChanged(object sender, EventArgs e)
+        private void Input_FormatChanged(object sender, EventArgs e)
         {
             var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException(nameof(sender));
             _videoFormat = decklink.CurrentFormat();
@@ -117,7 +118,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             if (_disposed)
                 return;
             _disposed = true;
-            _input.InputInitialized -= Input_InputFormatChanged;
+            _input.FormatChanged -= Input_FormatChanged;
             base.Dispose();
         }
 

@@ -20,14 +20,14 @@ Creates MXF file.</Description>
                  VideoCodec="mpeg2video"
                  VideoBitrate="50000"
                  AudioCodec="pcm_s24le"
-                 Options="maxrate=50000k,bufsize=3835k,minrate=50000k,flags=+ildct+low_delay,dc=10,ps=1,qmin=1,qmax=3,bufsize=2000000,rc_init_occupancy=2000000,intra_vlc=1,non_linear_quant=1,color_primaries=5,color_trc=1,colorspace=5,rc_max_vbv_use=1,tag:v=mx5p,d10_channelcount=4"
+                 VideoFilter="pad=720:608:0:32"
+                 Options="maxrate=50000k,minrate=50000k,g=1,flags=+ildct+low_delay,dc=10,ps=1,qmin=1,qmax=3,bufsize=2000000,rc_init_occupancy=2000000,intra_vlc=1,non_linear_quant=1,color_primaries=5,color_trc=1,colorspace=5,rc_max_vbv_use=1,d10_channelcount=4"
                  OutputFormat="mxf_d10"
                  FilenameExtension="mxf"
                  PixelFormat="yuv422p"
                  >
     <InputFormats>
       <Format>PAL 4:3</Format>
-      <Format>1080i59.94</Format>
       <Format>PAL 16:9</Format>
     </InputFormats>
     <Description>

@@ -17,10 +17,10 @@ namespace TVPlayR {
 			if (!is_initialized_)
 			{
 				initialization_queue_.emplace_back(packet);
-				DebugPrintLine(Common::DebugSeverity::debug, "Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				DebugPrintLine(Common::DebugSeverity::debug, "Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts) + ", size=" + std::to_string(packet->size));
 				return;
 			}
-			DebugPrintLine(Common::DebugSeverity::trace, "Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+			DebugPrintLine(Common::DebugSeverity::trace, "Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts) + ", size=" + std::to_string(packet->size));
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 		}
 

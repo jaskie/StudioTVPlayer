@@ -36,6 +36,8 @@ namespace TVPlayR {
 			const int													audio_channels_count_;
 			const TVPlayR::DecklinkTimecodeSource						timecode_source_;
 			Core::VideoFormat											current_format_;
+			FieldOrder													current_field_order_;
+			AVRational													current_sar_;
 			std::mutex													channel_list_mutex_;
 			FORMAT_CALLBACK												format_changed_callback_ = nullptr;
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
@@ -50,6 +52,8 @@ namespace TVPlayR {
 				, timecode_source_(timecode_source)
 				, capture_video_(capture_video)
 				, current_format_(initial_format)
+				, current_field_order_(current_format_.field_order())
+				, current_sar_(current_format_.SampleAspectRatio().av())
 				, format_autodetection_(format_autodetection)
 			{
 				BMDDisplayMode mode = GetDecklinkDisplayMode(initial_format);
@@ -105,6 +109,8 @@ namespace TVPlayR {
 					current_format_ = BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_);
 					if (current_format_.type() == Core::VideoFormatType::invalid)
 						return S_OK;
+					current_field_order_ = current_format_.field_order();
+					current_sar_ = current_format_.SampleAspectRatio().av();
 					for (auto& provider : player_providers_)
 						provider->Reset(current_format_.FrameRate().av());
 					OpenInput(newDisplayMode);
@@ -126,7 +132,7 @@ namespace TVPlayR {
 					last_frame_time_ = bmd_time * AV_TIME_BASE / time_scale_;
 				Core::AVSync sync(
 					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
-					AVFrameFromDecklinkVideo(videoFrame, timecode_source_, current_format_, time_scale_),
+					AVFrameFromDecklinkVideo(videoFrame, current_field_order_, current_sar_, time_scale_),
 					Core::FrameTimeInfo {
 						TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()),
 						last_frame_time_,
@@ -210,7 +216,7 @@ namespace TVPlayR {
 
 			TVPlayR::FieldOrder GetFieldOrder() const
 			{
-				return current_format_.field_order();
+				return current_field_order_;
 			}
 
 		};

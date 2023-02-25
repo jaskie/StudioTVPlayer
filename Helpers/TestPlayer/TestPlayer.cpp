@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch.h"`
 #include <iostream>
 
 #include "Core/VideoFormat.h"
@@ -23,7 +23,7 @@
 
 using namespace TVPlayR;
 
-#define FFMPEG_LOG_LEVEL AV_LOG_INFO
+#define FFMPEG_LOG_LEVEL AV_LOG_TRACE
 
 static void avlog_cb(void * ptr, int level, const char * fmt, va_list vargs) {
 	if (level <= FFMPEG_LOG_LEVEL)
@@ -100,28 +100,28 @@ int main()
 		*/
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Playout\\PRV\\media\\WIPE.mov", Core::HwAccel::none, "");
+		//auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Playout\\PRV\\media\\WIPE.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
 		//input->Seek(seek);
-		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
-		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		input->SetFramePlayedCallback([](Core::FrameTimeInfo& time) {});
-		input->Play();
-		input->SetIsLoop(true);
-		player.Load(input);
+		//input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
+		//input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
+		//input->SetFramePlayedCallback([](Core::FrameTimeInfo& time) {});
+		//input->Play();
+		//input->SetIsLoop(true);
+		//player.Load(input);
 
 
 		// prepare input and recording
-		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::RP188Any, true, true);
+		auto decklink_input = iterator.CreateInput(*iterator[0], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::RP188Any, true, true);
 		FFmpeg::FFOutputParams record_params
 		{ 
 			"d:\\temp\\cccc.mxf", 
 			"mpeg2video", "pcm_s24le", 
 			50000, 0,
-			"",//maxrate=50000000,bufsize=3835000,minrate=50000000,flags=+ildct+low_delay,dc=10,ps=1,qmin=1,qmax=3,bufsize=2000000,rc_init_occupancy=2000000,intra_vlc=1,non_linear_quant=1,color_primaries=5,color_trc=1,colorspace=5,rc_max_vbv_use=1,tag:v=mx5p,d10_channelcount=4",
-			"", "yuv422p",
+			"maxrate=50000k,minrate=50000k,bufsize=2M,flags=+ildct+low_delay,g=1,dc=10,ps=1,qmin=1,qmax=3,rc_init_occupancy=2M,intra_vlc=1,non_linear_quant=1,colorspace=5,rc_max_vbv_use=1",
+			"pad=720:608:0:32", "yuv422p",
 			"", "", "",
 			0, 0,
 			"mxf_d10"
@@ -142,7 +142,7 @@ int main()
 			if (i == 's')
 				player.RemoveOutput(stream);*/
 
-			if (i == 's')
+			/*if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
 				player.Load(input);
@@ -150,7 +150,7 @@ int main()
 				if (input->IsPlaying())
 					input->Pause();
 				else	 
-					input->Play();
+					input->Play();*/
 		}
 		decklink_input->RemoveOutputSink(record_file);
 		//ndi->Uninitialize();

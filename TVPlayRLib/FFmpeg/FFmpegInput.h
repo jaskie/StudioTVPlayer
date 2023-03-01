@@ -17,7 +17,7 @@ public:
 	virtual ~FFmpegInput();
 	Core::AVSync PullSync(const Core::Player& player, int audio_samples_count);
 	bool Seek(const std::int64_t time);
-	bool IsEof() const;
+	bool IsEof() const override;
 	bool IsAddedToPlayer(const Core::Player& player) override;
 	void AddToPlayer(const Core::Player& player) override;
 	void RemoveFromPlayer(const Core::Player& player) override;

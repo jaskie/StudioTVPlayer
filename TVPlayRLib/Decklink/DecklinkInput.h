@@ -27,6 +27,7 @@ namespace TVPlayR {
 			void Play() override;
 			void Pause() override;
 			bool IsPlaying() const override;
+			bool IsEof() const override;
 			int GetWidth() const override;
 			int GetHeight() const override;
 			TVPlayR::FieldOrder GetFieldOrder() override;

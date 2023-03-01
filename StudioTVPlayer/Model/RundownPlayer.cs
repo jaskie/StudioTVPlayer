@@ -258,7 +258,7 @@ namespace StudioTVPlayer.Model
             if (current.Media.Duration - e.TimeFromBegin < PreloadTime)
                 return;
             if (nextItem.Prepare(AudioChannelCount))
-                Preload(nextItem.Input);
+                LoadNext(nextItem.Input);
         }
 
         private void SetNext(RundownItemBase item)

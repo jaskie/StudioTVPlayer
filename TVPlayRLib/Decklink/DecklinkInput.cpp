@@ -237,6 +237,7 @@ namespace TVPlayR {
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }
+		bool DecklinkInput::IsEof() const { return false; }
 		int DecklinkInput::GetWidth() const { return impl_->GetWidth(); }
 		int DecklinkInput::GetHeight() const { return impl_->GetHeight(); }
 		TVPlayR::FieldOrder DecklinkInput::GetFieldOrder() { return impl_->GetFieldOrder(); }

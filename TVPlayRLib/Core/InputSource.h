@@ -24,6 +24,7 @@ public:
 	virtual void Play() = 0;
 	virtual void Pause() = 0;
 	virtual bool IsPlaying() const = 0;
+	virtual bool IsEof() const = 0;
 	virtual std::int64_t GetVideoStart() const { return 0LL; }
 	virtual std::int64_t GetVideoDuration() const { return 0LL; }
 	virtual std::int64_t GetAudioDuration() const { return 0LL; }

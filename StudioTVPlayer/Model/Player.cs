@@ -152,10 +152,10 @@ namespace StudioTVPlayer.Model
             _player.Load(item);
         }
 
-        public void Preload(TVPlayR.InputBase item)
+        public void LoadNext(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
-            _player.Preload(item);
+            _player.LoadNext(item);
         }
 
         public virtual void Clear()

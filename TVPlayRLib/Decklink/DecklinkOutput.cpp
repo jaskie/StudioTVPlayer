@@ -27,7 +27,7 @@ namespace TVPlayR {
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			std::vector<Core::ClockTarget*> clock_targets_;
-			int buffer_size_ = 3;
+			int preroll_buffer_size_ = 3;
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 2;
@@ -105,7 +105,7 @@ namespace TVPlayR {
 				scheduled_samples_ = 0LL;
 				output_->BeginAudioPreroll();
 				auto empty_video_frame = FFmpeg::CreateEmptyVideoFrame(format_, pixel_format_);
-				for (size_t i = 0; i < buffer_size_; i++)
+				for (size_t i = 0; i < preroll_buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
 					ScheduleVideo(empty_video_frame, AV_NOPTS_VALUE);
@@ -147,7 +147,7 @@ namespace TVPlayR {
 			{
 				if (format_.type() != Core::VideoFormatType::invalid)
 					return false;
-				buffer_size_ = size;
+				preroll_buffer_size_ = size;
 				return true;
 			}
 
@@ -290,7 +290,7 @@ namespace TVPlayR {
 		DecklinkOutput::~DecklinkOutput() { }
 
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
-		int DecklinkOutput::GetBufferSize() const { return impl_->buffer_size_; }
+		int DecklinkOutput::GetBufferSize() const { return impl_->preroll_buffer_size_; }
 		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }

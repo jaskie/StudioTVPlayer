@@ -36,7 +36,6 @@ namespace TVPlayR {
 			AVFrame* frame = av_frame_alloc();
 			frame->width = source->width;
 			frame->height = source->height;
-			frame->display_picture_number = source->display_picture_number;
 			frame->format = source->format;
 			frame->pict_type = source->pict_type;
 			frame->sample_aspect_ratio = source->sample_aspect_ratio;
@@ -54,7 +53,6 @@ namespace TVPlayR {
 				THROW_EXCEPTION("FFmpegUtils: video frame not allocated");
 			frame->width = format.width();
 			frame->height = format.height();
-			frame->display_picture_number = -1;
 			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
 			frame->pict_type = AV_PICTURE_TYPE_NONE;
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();

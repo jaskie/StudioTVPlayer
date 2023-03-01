@@ -69,7 +69,6 @@ namespace TVPlayR {
 			std::shared_ptr<AVFrame> dest = AllocFrame();
 			dest->width = source->width;
 			dest->height = source->height;
-			dest->display_picture_number = source->display_picture_number;
 			dest->format = source->format;
 			dest->pict_type = source->pict_type;
 			dest->sample_aspect_ratio = source->sample_aspect_ratio;

@@ -157,7 +157,7 @@ struct Decoder::implementation : Common::DebugTarget
 		case 0:
 			if (frame->pts == AV_NOPTS_VALUE)
 				frame->pts = frame->best_effort_timestamp;
-			if (frame->pts >= seek_pts_ || frame->pts + frame->pkt_duration > seek_pts_)
+			if (frame->pts >= seek_pts_ || frame->pts + frame->duration > seek_pts_)
 			{
 				if (hw_device_ctx_)
 				{
@@ -168,9 +168,9 @@ struct Decoder::implementation : Common::DebugTarget
 				}
 #ifdef DEBUG
 				if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-					DebugPrintLine(Common::DebugSeverity::trace, "Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type));
+					DebugPrintLine(Common::DebugSeverity::trace, "Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type));
 				if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-					DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->pkt_duration, time_base_) / 1000));
+					DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000));
 #endif 
 				return frame;
 			}

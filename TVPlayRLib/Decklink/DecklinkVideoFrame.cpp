@@ -5,9 +5,31 @@
 
 namespace TVPlayR {
 	namespace Decklink {
-				
-		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, std::int64_t timecode)
-			: frame_(frame)
+		
+		std::shared_ptr<AVFrame> ConvertFrame(const std::shared_ptr<AVFrame>& source)
+		{
+			if (source->format == AV_PIX_FMT_X2RGB10LE)
+			{
+				std::shared_ptr<AVFrame> dest = FFmpeg::AllocFrame();
+				*dest = *source;
+				av_frame_get_buffer(dest.get(), 0);
+				uint64_t* end_of_data = reinterpret_cast<uint64_t*>(source->data[0]) + (source->linesize[0] * source->height / sizeof(uint64_t));
+				uint64_t* src_data = reinterpret_cast<uint64_t*>(source->data[0]);
+				uint64_t* dst_data = reinterpret_cast<uint64_t*>(dest->data[0]);
+				while (src_data < end_of_data)
+				{
+					*dst_data = *src_data << 2;
+					src_data++;
+					dst_data++;
+				}
+				return dest;
+			}
+			else
+				return source;
+		}
+
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
+			: frame_(ConvertFrame(frame))
 			, timecode_(format, timecode)
 			, ref_count_(0)
 			, format_(format)
@@ -42,12 +64,12 @@ namespace TVPlayR {
 		{
 			switch (frame_->format)
 			{
-			case AV_PIX_FMT_ARGB:
-				return BMDPixelFormat::bmdFormat8BitARGB;
 			case AV_PIX_FMT_BGRA:
 				return BMDPixelFormat::bmdFormat8BitBGRA;
 			case AV_PIX_FMT_UYVY422:
 				return BMDPixelFormat::bmdFormat8BitYUV;
+			case AV_PIX_FMT_X2RGB10LE:
+				return BMDPixelFormat::bmdFormat10BitRGBXLE;
 			default:
 				return BMDPixelFormat(0);
 			}

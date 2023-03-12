@@ -15,7 +15,7 @@ namespace TVPlayR {
 			Core::VideoFormat& format_;
 			DecklinkTimecode timecode_;
 		public:
-			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, std::int64_t timecode);
+			DecklinkVideoFrame(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode);
 			virtual ~DecklinkVideoFrame();
 			//IUnknown
 			STDMETHOD(QueryInterface(REFIID, LPVOID*));

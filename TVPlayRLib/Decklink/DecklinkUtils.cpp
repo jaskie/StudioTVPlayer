@@ -9,14 +9,16 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		BMDPixelFormat BMDPixelFormatFromPixelFormat(TVPlayR::PixelFormat format)
+		BMDPixelFormat BMDPixelFormatFromPixelFormat(PixelFormat format)
 		{
 			switch (format)
 			{
-			case TVPlayR::PixelFormat::bgra:
+			case PixelFormat::bgra:
 				return BMDPixelFormat::bmdFormat8BitBGRA;
-			case TVPlayR::PixelFormat::yuv422:
+			case PixelFormat::yuv422:
 				return BMDPixelFormat::bmdFormat8BitYUV;
+			case PixelFormat::rgb10:
+				return BMDPixelFormat::bmdFormat10BitRGB;
 			default:
 				break;
 			}

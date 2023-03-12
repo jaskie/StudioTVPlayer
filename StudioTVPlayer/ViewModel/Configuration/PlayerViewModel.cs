@@ -85,7 +85,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public TVPlayR.VideoFormat[] VideoFormats => TVPlayR.VideoFormat.Formats;
 
-        public TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422 };
+        public TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422, TVPlayR.PixelFormat.rgb10 };
 
         public TVPlayR.VideoFormat SelectedVideoFormat { get => _selectedVideoFormat; set => Set(ref _selectedVideoFormat, value); }
 

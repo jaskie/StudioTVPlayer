@@ -2,6 +2,8 @@
 #include "DecklinkVideoFrame.h"
 #include "../Core/VideoFormat.h"
 #include "../FFmpeg/FFmpegUtils.h"
+#include <execution>
+#include <emmintrin.h>
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -10,22 +12,20 @@ namespace TVPlayR {
 		{
 			if (source->format == AV_PIX_FMT_X2RGB10LE)
 			{
-				std::shared_ptr<AVFrame> dest = FFmpeg::AllocFrame();
-				*dest = *source;
-				av_frame_get_buffer(dest.get(), 0);
-				uint64_t* end_of_data = reinterpret_cast<uint64_t*>(source->data[0]) + (source->linesize[0] * source->height / sizeof(uint64_t));
-				uint64_t* src_data = reinterpret_cast<uint64_t*>(source->data[0]);
-				uint64_t* dst_data = reinterpret_cast<uint64_t*>(dest->data[0]);
-				while (src_data < end_of_data)
-				{
-					*dst_data = *src_data << 2;
-					src_data++;
-					dst_data++;
-				}
-				return dest;
+				int slices[] = { 0, 1, 2, 3 };
+				size_t slice_length = source->linesize[0] * source->height / (sizeof(__m128i) * (sizeof(slices) / sizeof(int)));
+				std::for_each(std::execution::par, std::begin(slices), std::end(slices), [&](int slice) -> void
+					{
+						__m128i* src_data = reinterpret_cast<__m128i*>(source->data[0]) + (slice_length * slice);
+						for (size_t i = 0; i < slice_length; i++)
+						{
+							__m128i data = _mm_load_si128(src_data + i);
+							data = _mm_slli_epi32(data, 2);
+							_mm_store_si128(src_data + i, data);
+						};
+					});
 			}
-			else
-				return source;
+			return source;
 		}
 
 		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
@@ -54,9 +54,9 @@ namespace TVPlayR {
 
 		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return timecode_.IsValid() ? BMDVideoOutputFlags::bmdVideoOutputRP188 | BMDVideoOutputFlags::bmdVideoOutputVITC : BMDVideoOutputFlags::bmdVideoOutputFlagDefault; }
 
-		long STDMETHODCALLTYPE DecklinkVideoFrame::GetWidth() { return frame_->width; }
+		long STDMETHODCALLTYPE DecklinkVideoFrame::GetWidth() { return format_.width(); }
 
-		long STDMETHODCALLTYPE DecklinkVideoFrame::GetHeight() { return frame_->height; }
+		long STDMETHODCALLTYPE DecklinkVideoFrame::GetHeight() { return format_.height(); }
 
 		long STDMETHODCALLTYPE DecklinkVideoFrame::GetRowBytes() { return frame_->linesize[0]; }
 

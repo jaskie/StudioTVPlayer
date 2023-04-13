@@ -1,4 +1,4 @@
-#include "pch.h"`
+#include "pch.h"
 #include <iostream>
 
 #include "Core/VideoFormat.h"
@@ -48,7 +48,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
 		const PixelFormat pixel_format = PixelFormat::rgb10;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
@@ -69,10 +69,9 @@ int main()
 		player.SetFrameClockSource(*decklink_output);
 		
 
-		/*auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
-		if (!ndi->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2, 48000))
-			throw std::exception("Could not initialize output for player");
-		player.AddOutputSink(ndi);*/
+		auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
+		ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
+		player.AddOutputSink(ndi);
 		//player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
 		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
@@ -151,9 +150,8 @@ int main()
 					input->Play();*/
 		}
 		//decklink_input->RemoveOutputSink(record_file);
-		//ndi->Uninitialize();
-		//player.RemoveOutputSink(ndi);
-		//player.RemoveOutputSink(decklink_output);
+		player.RemoveOutputSink(ndi);
+		player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);
 #ifdef _DEBUG
 	}

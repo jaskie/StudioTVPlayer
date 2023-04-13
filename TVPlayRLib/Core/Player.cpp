@@ -33,7 +33,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 		
 			implementation(const Player& player, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
-				: Common::DebugTarget(Common::DebugSeverity::info, "Player " + name)
+				: Common::DebugTarget(Common::DebugSeverity::warning, "Player " + name)
 				, player_(player)
 				, name_(name)
 				, format_(format)
@@ -70,8 +70,10 @@ namespace TVPlayR {
 						auto& audio = sync.Audio;
 						auto& video = sync.Video;
 						assert((audio_samples_count == 0 && !sync.Audio) || (sync.Audio->nb_samples == audio_samples_count));
-						if (!video)
+						if (!video) {
 							video = empty_video_;
+							DebugPrintLine(Common::DebugSeverity::warning, "Played empty video frame");
+						}
 						if (audio)
 							volume = audio_volume_.ProcessVolume(audio, &coherence);
 						AddOverlayAndPushToOutputs(video, audio, sync.TimeInfo);

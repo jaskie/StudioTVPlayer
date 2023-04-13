@@ -21,7 +21,7 @@ namespace TVPlayR {
 		{
 			const CComQIPtr<IDeckLinkOutput> output_;
 			const CComQIPtr<IDeckLinkKeyer> decklink_keyer_;
-			const CComQIPtr<IDeckLinkAttributes> attributes_;
+			const CComQIPtr<IDeckLinkProfileAttributes> attributes_;
 			int index_;
 			Core::VideoFormat format_;
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
@@ -65,9 +65,10 @@ namespace TVPlayR {
 			{
 				if (!output_)
 					return false;
-				BMDDisplayModeSupport modeSupport;
-				if (FAILED(output_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputFlags::bmdVideoOutputRP188, &modeSupport, NULL))
-					|| modeSupport == bmdDisplayModeNotSupported)
+				BOOL modeSupported;
+				BMDDisplayMode actualMode;
+				if (FAILED(output_->DoesSupportVideoMode(BMDVideoConnection::bmdVideoConnectionUnspecified, mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputConversionMode::bmdNoVideoOutputConversion, BMDSupportedVideoModeFlags::bmdSupportedVideoModeDefault, &actualMode, &modeSupported))
+					|| !modeSupported)
 					return false;
 				if (pixel_format == BMDPixelFormat::bmdFormat8BitBGRA)
 				{
@@ -90,7 +91,7 @@ namespace TVPlayR {
 						break;
 					}
 				}
-				if (FAILED(output_->EnableVideoOutput(mode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
+				if (FAILED(output_->EnableVideoOutput(actualMode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
 					return false;
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);

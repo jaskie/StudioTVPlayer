@@ -1,5 +1,5 @@
 /* -LICENSE-START-
-** Copyright (c) 2020 Blackmagic Design
+** Copyright (c) 2017 Blackmagic Design
 **
 ** Permission is hereby granted, free of charge, to any person or organization
 ** obtaining a copy of the software and accompanying documentation covered by
@@ -24,41 +24,38 @@
 ** DEALINGS IN THE SOFTWARE.
 ** -LICENSE-END-
 */
+/* DeckLinkAPI_v10_9.idl */
 
+/* Enum BMDDeckLinkConfigurationID - DeckLink Configuration ID */
 
-#ifndef BMD_CONST
-    #if defined(_MSC_VER)
-        #define BMD_CONST __declspec(selectany) static const
-    #else
-        #define BMD_CONST static const
-    #endif
-#endif
+typedef [v1_enum] enum	_BMDDeckLinkConfigurationID_v10_9 {
 
-// Type Declarations
+    /* Video output flags */
 
+    bmdDeckLinkConfig1080pNotPsF_v10_9                      = /* 'fpro' */ 0x6670726F,
 
-// Enumeration Mapping
-
-cpp_quote("#if 0")
-cpp_quote("#endif")
+} BMDDeckLinkConfigurationID_v10_9;
 
 // Forward Declarations
 
-interface IDeckLink;
+interface IDeckLinkConfiguration_v10_9;
 
-/* Interface IDeckLink - represents a DeckLink device */
+/* Interface IDeckLinkConfiguration_v10_9 - DeckLink Configuration interface */
 
 [
     object,
-    uuid(C418FBDD-0587-48ED-8FE5-640F0A14AF91),
-    helpstring("represents a DeckLink device")
-] interface IDeckLink : IUnknown
+    uuid(CB71734A-FE37-4E8D-8E13-802133A1C3F2),
+    local,
+    helpstring("DeckLink Configuration interface")
+] interface IDeckLinkConfiguration_v10_9 : IUnknown
 {
-    HRESULT GetModelName ([out] BSTR* modelName);
-    HRESULT GetDisplayName ([out] BSTR* displayName);
+    HRESULT SetFlag([in] BMDDeckLinkConfigurationID cfgID, [in] BOOL value);
+    HRESULT GetFlag([in] BMDDeckLinkConfigurationID cfgID, [out] BOOL *value);
+    HRESULT SetInt([in] BMDDeckLinkConfigurationID cfgID, [in] LONGLONG value);
+    HRESULT GetInt([in] BMDDeckLinkConfigurationID cfgID, [out] LONGLONG *value);
+    HRESULT SetFloat([in] BMDDeckLinkConfigurationID cfgID, [in] double value);
+    HRESULT GetFloat([in] BMDDeckLinkConfigurationID cfgID, [out] double *value);
+    HRESULT SetString([in] BMDDeckLinkConfigurationID cfgID, [in] BSTR value);
+    HRESULT GetString([in] BMDDeckLinkConfigurationID cfgID, [out] BSTR *value);
+    HRESULT WriteConfigurationToPreferences(void);
 };
-
-/* Coclasses */
-
-importlib("stdole2.tlb");
-

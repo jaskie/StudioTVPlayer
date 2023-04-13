@@ -14,11 +14,25 @@ namespace TVPlayR {
 
 		static bool IsFormatAutodetectionSupprted(IDeckLink* decklink)
 		{
-			CComQIPtr<IDeckLinkAttributes> attributes_(decklink);
+			CComQIPtr<IDeckLinkProfileAttributes> attributes_(decklink);
 			BOOL format_auto_detection = false;
 			if (FAILED(attributes_->GetFlag(BMDDeckLinkSupportsInputFormatDetection, &format_auto_detection)))
 				format_auto_detection = false;
 			return format_auto_detection;
+		}
+
+		static IDeckLinkDisplayMode* FindMode(BMDDisplayMode mode)
+		{
+			CComPtr<IDeckLinkDisplayModeIterator> displayModeIterator;
+			if (FAILED(displayModeIterator.CoCreateInstance(IID_IDeckLinkDisplayModeIterator)))
+				THROW_EXCEPTION("DecklinkInput: Display mode iterator creation failed");
+			IDeckLinkDisplayMode* displayMode = nullptr;
+			while (SUCCEEDED(displayModeIterator->Next(&displayMode)))
+			{
+				if (displayMode->GetDisplayMode() == mode)
+					return displayMode;
+			}
+			THROW_EXCEPTION("DecklinkInput: Display mode not found");
 		}
 
 		struct DecklinkInput::implementation: public IDeckLinkInputCallback, Common::DebugTarget
@@ -57,13 +71,13 @@ namespace TVPlayR {
 				, format_autodetection_(format_autodetection)
 			{
 				BMDDisplayMode mode = GetDecklinkDisplayMode(initial_format);
-				BMDDisplayModeSupport support;
-				IDeckLinkDisplayMode* initialDisplayMode = nullptr;
-				if (FAILED(input_->DoesSupportVideoMode(mode, BMDPixelFormat::bmdFormat8BitYUV, bmdVideoInputFlagDefault, &support, &initialDisplayMode)))
+				BOOL support;
+				BMDDisplayMode actual_mode;
+				if (FAILED(input_->DoesSupportVideoMode(BMDVideoConnection::bmdVideoConnectionUnspecified, mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoInputConversionMode::bmdNoVideoInputConversion, BMDSupportedVideoModeFlags::bmdSupportedVideoModeDefault, &actual_mode, &support)))
 					THROW_EXCEPTION("DecklinkInput: DoesSupportVideoMode failed");				
-				if (support == BMDDisplayModeSupport::bmdDisplayModeNotSupported)
+				if (!support)
 					THROW_EXCEPTION("DecklinkInput: Display mode not supported");
-				OpenInput(initialDisplayMode);
+				OpenInput(actual_mode);
 				input_->SetCallback(this);
 			}
 
@@ -73,12 +87,13 @@ namespace TVPlayR {
 				input_->SetCallback(NULL);
 			}
 
-			void OpenInput(IDeckLinkDisplayMode* displayMode)
+			void OpenInput(BMDDisplayMode mode)
 			{
 				BMDTimeValue frame_duration;
+				IDeckLinkDisplayMode* displayMode = FindMode(mode);
 				if (FAILED(displayMode->GetFrameRate(&frame_duration, &time_scale_)))
 					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
-				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_format_autodetection_supported_ && format_autodetection_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
+				if (FAILED(input_->EnableVideoInput(mode, BMDPixelFormat::bmdFormat8BitYUV, is_format_autodetection_supported_ && format_autodetection_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
 				if (audio_channels_count_ > 0)
 				{
@@ -113,7 +128,7 @@ namespace TVPlayR {
 					current_sar_ = current_format_.SampleAspectRatio().av();
 					for (auto& provider : player_providers_)
 						provider->Reset(current_format_.FrameRate().av());
-					OpenInput(newDisplayMode);
+					OpenInput(newDisplayMode->GetDisplayMode());
 					if (format_changed_callback_)
 						format_changed_callback_(BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_));
 				}

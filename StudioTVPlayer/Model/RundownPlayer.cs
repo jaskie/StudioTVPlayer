@@ -13,7 +13,6 @@ namespace StudioTVPlayer.Model
         private readonly List<RundownItemBase> _rundown = new List<RundownItemBase>();
         private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
         private RundownItemBase _playingRundownItem;
-        private RundownItemBase _nextRundownItem;
 
         public RundownPlayer(Configuration.Player configuration): base(configuration)
         { }
@@ -61,7 +60,7 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
-        public event EventHandler Stopped;
+        public event EventHandler Finished;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
         public event EventHandler<RundownItemEventArgs> Removed;
         public event EventHandler MediaDurationChanged;
@@ -99,6 +98,8 @@ namespace StudioTVPlayer.Model
                 throw new ArgumentException(nameof(index));
             rundownItem.PropertyChanged += RundownItem_PropertyChanged;
             rundownItem.RemoveRequested += RundownItem_RemoveRequested;
+            rundownItem.ActiveOnPlayer += RundownItem_ActiveOnPlayer;
+            //SetNext(FindNextAutoPlayItem());
         }
 
         public void MoveItem(int srcIndex, int destIndex)
@@ -106,6 +107,7 @@ namespace StudioTVPlayer.Model
             var item = _rundown[srcIndex];
             _rundown.RemoveAt(srcIndex);
             _rundown.Insert(destIndex, item);
+            //SetNext(FindNextAutoPlayItem());
         }
 
         private void InternalUnload(RundownItemBase rundownItem)
@@ -116,7 +118,7 @@ namespace StudioTVPlayer.Model
             rundownItem.FramePlayed -= PlaiyngRundownItem_FramePlayed;
             if (rundownItem is FileRundownItem fileRundownItem)
             {
-                fileRundownItem.Stopped -= PlaiyngRundownItem_Stopped;
+                fileRundownItem.Paused -= PlaiyngRundownItem_Paused;
                 fileRundownItem.Media.PropertyChanged -= Media_PropertyChanged;
                 if (DisableAfterUnload)
                     fileRundownItem.IsDisabled = true;
@@ -134,7 +136,7 @@ namespace StudioTVPlayer.Model
                 switch (rundownItem)
                 {
                     case FileRundownItem fileRundownItem:
-                        fileRundownItem.Stopped += PlaiyngRundownItem_Stopped;
+                        fileRundownItem.Paused += PlaiyngRundownItem_Paused;
                         fileRundownItem.Media.PropertyChanged += Media_PropertyChanged;
                         break;
                     case LiveInputRundownItem liveInputRundownItem:
@@ -180,7 +182,6 @@ namespace StudioTVPlayer.Model
         public override void Clear()
         {
             PlayingRundownItem = null;
-            SetNext(null);
             base.Clear();
         }
 
@@ -202,24 +203,19 @@ namespace StudioTVPlayer.Model
                 return false;
             rundownItem.PropertyChanged -= RundownItem_PropertyChanged;
             rundownItem.RemoveRequested -= RundownItem_RemoveRequested;
+            rundownItem.ActiveOnPlayer -= RundownItem_ActiveOnPlayer;
             if (rundownItem != PlayingRundownItem)
                 rundownItem.Dispose();
             Removed?.Invoke(this, new RundownItemEventArgs(rundownItem));
             return true;
         }
 
-        private void PlaiyngRundownItem_Stopped(object sender, EventArgs e)
+        private void PlaiyngRundownItem_Paused(object sender, EventArgs e)
         {
             Task.Run(() => // do not block incoming thread
             {
-                var nextItem = _nextRundownItem;
-                if (nextItem is null)
-                {
-                    Stopped?.Invoke(this, EventArgs.Empty);
-                    return;
-                }
-                PlayingRundownItem = nextItem;
-                nextItem.Play();
+                if (sender  == _playingRundownItem) // next didn't loaded
+                    Finished?.Invoke(this, EventArgs.Empty);
             });
         }
 
@@ -252,31 +248,24 @@ namespace StudioTVPlayer.Model
             var current = sender as FileRundownItem;
             if (current == null)
                 return;
-            var nextItem = _nextRundownItem;
-            if (nextItem is null)
-                return;
             if (current.Media.Duration - e.TimeFromBegin < PreloadTime)
                 return;
-            if (nextItem.Prepare(AudioChannelCount))
-                LoadNext(nextItem.Input);
-        }
-
-        private void SetNext(RundownItemBase item)
-        {
-            var oldNext = _nextRundownItem;
-            if (oldNext == item)
-                return;
-            _nextRundownItem = item;
-            oldNext?.Unload();
+            //if (nextItem.Prepare(AudioChannelCount))
+            //    PlayNext(nextItem.Input);
         }
 
         private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(FileRundownItem.IsAutoStart) ||
-                e.PropertyName == nameof(FileRundownItem.IsDisabled))
-                SetNext(FindNextAutoPlayItem());
+            //if (e.PropertyName == nameof(FileRundownItem.IsAutoStart) ||
+            //    e.PropertyName == nameof(FileRundownItem.IsDisabled))
+            //    SetNext(FindNextAutoPlayItem());
         }
 
+        private void RundownItem_ActiveOnPlayer(object sender, EventArgs e)
+        {
+            var item = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            PlayingRundownItem = item;
+        }
 
         private void RundownItem_RemoveRequested(object sender, EventArgs e)
         {

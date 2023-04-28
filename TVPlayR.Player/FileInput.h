@@ -42,7 +42,7 @@ namespace TVPlayR {
 			bool get() { return _isLoop; }
 			void set(bool isLoop);
 		}
-		event EventHandler^ Stopped;
+		event EventHandler^ Paused;
 
 	private:
 		const HardwareAcceleration _acceleration;
@@ -50,10 +50,10 @@ namespace TVPlayR {
 		String^ _fileName;
 		bool _isLoop;
 
-		delegate void StoppedDelegate(void);
-		StoppedDelegate^ _stoppedDelegate;
-		GCHandle _stoppedHandle;
-		void StoppedCallback();
+		delegate void PausedDelegate(void);
+		PausedDelegate^ _pausedDelegate;
+		GCHandle _pausedHandle;
+		void PausedCallback();
 		std::shared_ptr<FFmpeg::FFmpegInput> GetFFmpegInput();
 	protected:
 		virtual String^ GetName() override { return _fileName; }

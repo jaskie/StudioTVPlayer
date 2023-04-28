@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControlzEx.Standard;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -17,6 +18,7 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler RemoveRequested;
+        public event EventHandler ActiveOnPlayer;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public bool IsPrepared => _prepared != default;
@@ -83,23 +85,28 @@ namespace StudioTVPlayer.Model
 
         protected abstract void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e);
 
+        protected virtual void SubscribeToEvents()
+        {
+            Input.ActiveOnPlayer += Input_ActiveOnPlayer;
+            Input.FramePlayed += Input_FramePlayed;
+        }
+
+        protected virtual void UnsubscribeFromEvents()
+        {
+            Input.FramePlayed -= Input_FramePlayed;
+            Input.ActiveOnPlayer -= Input_ActiveOnPlayer;
+        }
+
+
         protected void RaiseFramePlayed(TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);
         }
 
-        protected void InputAdded(TVPlayR.InputBase input)
+        private void Input_ActiveOnPlayer(object sender, EventArgs e)
         {
-            Debug.WriteLine($"InputAdded: {input.Name}");
-            input.FramePlayed += Input_FramePlayed;
+            ActiveOnPlayer?.Invoke(this, e);
         }
-
-        protected void InputRemoved(TVPlayR.InputBase input)
-        {
-            input.FramePlayed -= Input_FramePlayed;
-            Debug.WriteLine($"InputRemoved: {input.Name}");
-        }
-
 
         protected void RaisePropertyChanged([CallerMemberName] string propertyname = null)
         {

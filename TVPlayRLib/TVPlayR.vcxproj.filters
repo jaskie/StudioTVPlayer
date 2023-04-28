@@ -316,6 +316,9 @@
     <ClCompile Include="Core\CoreUtils.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\InputSource.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

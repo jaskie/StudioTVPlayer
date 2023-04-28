@@ -16,6 +16,7 @@ namespace TVPlayR
 	public:
 		property String^ Name { String^ get() { return GetName(); } }
 		event EventHandler<TimeEventArgs^>^ FramePlayed;
+		event EventHandler^ ActiveOnPlayer;
 		~InputBase();
 		!InputBase();
 		void AddOutputSink(OutputSink^ output);
@@ -27,9 +28,15 @@ namespace TVPlayR
 		virtual String^ GetName() abstract;
 	private:
 		const std::shared_ptr<Core::InputSource>* _nativeSource;
+
 		delegate void FramePlayedDelegate(Core::FrameTimeInfo& time_info);
 		FramePlayedDelegate^ _framePlayedDelegate;
 		GCHandle _framePlayedHandle;
 		void FramePlayedCallback(Core::FrameTimeInfo& time_info);
+
+		delegate void ActiveOnPlayerDelegate();
+		ActiveOnPlayerDelegate^ _activeOnPlayerDelegate;
+		GCHandle _activeOnPlayerHandle;
+		void ActiveOnPlayerCallback();
 	};
 }

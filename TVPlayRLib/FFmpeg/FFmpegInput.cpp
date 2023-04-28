@@ -31,8 +31,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	std::condition_variable buffer_cv_;
 
 	TIME_CALLBACK frame_played_callback_ = nullptr;
-	STOPPED_CALLBACK stopped_callback_ = nullptr;
-	LOADED_CALLBACK loaded_callback_ = nullptr;
+	PAUSED_CALLBACK paused_callback_ = nullptr;
 	std::mutex producer_mutex_;
 	std::condition_variable producer_cv_;
 	std::thread producer_;
@@ -322,14 +321,16 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 
 	void Pause()
 	{
+		PAUSED_CALLBACK callback;
 		{
 			std::lock_guard<std::mutex> lock(buffer_content_mutex_);
+			callback = paused_callback_;
 			if (buffer_)
 				buffer_->SetIsPlaying(false);
 			is_playing_ = false;
 		}
-		if (stopped_callback_)
-			stopped_callback_();
+		if (callback)
+			callback();
 	}
 
 	void SetIsLoop(bool is_loop)
@@ -378,7 +379,5 @@ int FFmpegInput::StreamCount() const { return impl_->StreamCount(); }
 const Core::StreamInfo& FFmpegInput::GetStreamInfo(int index) const { return impl_->GetStreamInfo(index); }
 void FFmpegInput::SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map) { impl_->SetupAudio(audio_channel_map); }
 void FFmpegInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
-void FFmpegInput::SetStoppedCallback(STOPPED_CALLBACK stopped_callback) { impl_->stopped_callback_ = stopped_callback; }
-void FFmpegInput::SetLoadedCallback(LOADED_CALLBACK loaded_callback) { impl_->loaded_callback_ = loaded_callback; }
-
+void FFmpegInput::SetPausedCallback(PAUSED_CALLBACK paused_callback) { impl_->paused_callback_ = paused_callback; }
 }}

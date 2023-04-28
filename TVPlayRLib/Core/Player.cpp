@@ -19,7 +19,7 @@ namespace TVPlayR {
 			std::mutex devices_mutex_;
 			std::vector<std::shared_ptr<OutputSink>> outputs_;
 			std::shared_ptr<InputSource> playing_source_;
-			std::shared_ptr<InputSource> next_source_;
+			std::shared_ptr<InputSource> next_to_play_source_;
 			AudioVolume audio_volume_;
 			const VideoFormat format_;
 			const TVPlayR::PixelFormat pixel_format_;
@@ -41,7 +41,7 @@ namespace TVPlayR {
 				, audio_channels_count_(audio_channels_count)
 				, audio_sample_rate_(audio_sample_rate)
 				, playing_source_(nullptr)
-				, next_source_(nullptr)
+				, next_to_play_source_(nullptr)
 				, empty_video_(FFmpeg::CreateEmptyVideoFrame(format, pixel_format))
 				, executor_("Player: " + name)
 			{
@@ -77,11 +77,12 @@ namespace TVPlayR {
 						if (audio)
 							volume = audio_volume_.ProcessVolume(audio, &coherence);
 						AddOverlayAndPushToOutputs(video, audio, sync.TimeInfo);
-						if (playing_source_->IsEof() && next_source_)
+						if (playing_source_->IsEof() && next_to_play_source_)
 						{
-							playing_source_ = next_source_;
-							next_source_.reset();
-							playing_source_->Play();
+							playing_source_ = next_to_play_source_;
+							next_to_play_source_->RaiseIsActiveOnPlayer();
+							next_to_play_source_->Play();
+							next_to_play_source_.reset();
 						}
 					}
 					else
@@ -131,7 +132,7 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 				audio_volume_callback_ = callback;
 			}
-			
+
 			void Load(std::shared_ptr<InputSource>& source)
 			{
 				executor_.invoke([this, &source]
@@ -140,11 +141,11 @@ namespace TVPlayR {
 				});
 			}
 
-			void LoadNext(std::shared_ptr<InputSource>& source)
+			void PlayNext(std::shared_ptr<InputSource>& source)
 			{
 				executor_.invoke([this, &source]
 				{
-					next_source_ = source;
+					next_to_play_source_ = source;
 				});
 			}
 
@@ -156,7 +157,7 @@ namespace TVPlayR {
 						return;
 					playing_source_->RemoveFromPlayer(player_);
 					playing_source_.reset();
-					next_source_.reset();
+					next_to_play_source_.reset();
 				});
 			}
 
@@ -212,11 +213,11 @@ namespace TVPlayR {
 			impl_->Load(source);
 		}
 
-		void Player::LoadNext(std::shared_ptr<InputSource> source)
+		void Player::PlayNext(std::shared_ptr<InputSource> source)
 		{
 			if (!source->IsAddedToPlayer(*this))
 				source->AddToPlayer(*this);
-			impl_->LoadNext(source);
+			impl_->PlayNext(source);
 		}
 
 		void Player::AddOverlay(std::shared_ptr<OverlayBase> overlay) { impl_->AddOverlay(overlay); }

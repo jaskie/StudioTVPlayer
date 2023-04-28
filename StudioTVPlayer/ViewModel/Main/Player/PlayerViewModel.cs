@@ -50,7 +50,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             AudioLevelBars = Enumerable.Repeat(0, player.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
             player.Loaded += MediaPlayer_Loaded;
             player.FramePlayed += MediaPlayer_Progress;
-            player.Stopped += MediaPlayer_Stopped;
+            player.Finished += MediaPlayer_Finished;
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
             player.Removed += MediaPlayer_Removed;
@@ -412,9 +412,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             });
         }
 
-        private void MediaPlayer_Stopped(object sender, EventArgs e)
+        private void MediaPlayer_Finished(object sender, EventArgs e)
         {
-            Debug.WriteLine("Stopped");
+            Debug.WriteLine("Finished");
             NotifyPropertyChanged(nameof(IsPlaying));
             Refresh();
         }
@@ -475,7 +475,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _isDisposed = true;
             _mediaPlayer.Loaded -= MediaPlayer_Loaded;
             _mediaPlayer.FramePlayed -= MediaPlayer_Progress;
-            _mediaPlayer.Stopped -= MediaPlayer_Stopped;
+            _mediaPlayer.Finished -= MediaPlayer_Finished;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
             _mediaPlayer.Removed -= MediaPlayer_Removed;
             _mediaPlayer.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;

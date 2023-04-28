@@ -51,20 +51,6 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public OutputBase[] Outputs
-        {
-            get => _outputs.ToArray();
-            set
-            {
-                foreach (var output in _outputs)
-                    output.Dispose();
-                _outputs.Clear();
-                if (value is null)
-                    return;
-                _outputs.AddRange(value);
-            }
-        }
-
         public bool LivePreview => Configuration.LivePreview;
 
         public bool DisablePlayedItems { get => _disablePlayedItems; set => _disablePlayedItems = value; }
@@ -128,34 +114,36 @@ namespace StudioTVPlayer.Model
 
         public void Uninitialize()
         {
-            if (_player == null)
+            var player = _player;
+            _player = null;
+            if (player == null)
                 return;
-            foreach (var o in Outputs)
+            foreach (var o in _outputs)
             {
-                _player.RemoveOutputSink(o.Output);
+                player.RemoveOutputSink(o.Output);
                 o.Dispose();
             }
+            _outputs.Clear(); ;
             if (!(_outputPreview is null))
             {
                 _outputPreview.Dispose();
                 _outputPreview = null;
             }
-            _player.AudioVolume -= Player_AudioVolume;
-            _player.Clear();
-            _player.Dispose();
-            _player = null;
+            player.AudioVolume -= Player_AudioVolume;
+            player.Clear();
+            player.Dispose();
         }
 
-        public void Load(TVPlayR.InputBase item)
+        protected void Load(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
             _player.Load(item);
         }
 
-        public void LoadNext(TVPlayR.InputBase item)
+        protected void PlayNext(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
-            _player.LoadNext(item);
+            _player.PlayNext(item);
         }
 
         public virtual void Clear()
@@ -172,8 +160,6 @@ namespace StudioTVPlayer.Model
 
         public virtual void Dispose()
         {
-            if (!IsInitialized)
-                return;
             Uninitialize();
         }
 

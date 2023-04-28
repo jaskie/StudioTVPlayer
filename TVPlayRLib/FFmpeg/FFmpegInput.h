@@ -13,6 +13,7 @@ namespace TVPlayR {
 class FFmpegInput: public Core::InputSource
 {
 public:
+	typedef std::function<void()> PAUSED_CALLBACK;
 	FFmpegInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
 	virtual ~FFmpegInput();
 	Core::AVSync PullSync(const Core::Player& player, int audio_samples_count);
@@ -41,8 +42,7 @@ public:
 	const Core::StreamInfo& GetStreamInfo(int index) const;
 	virtual void SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audio_channel_map);
 	void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) override;
-	virtual void SetStoppedCallback(STOPPED_CALLBACK stopped_callback);
-	virtual void SetLoadedCallback(LOADED_CALLBACK loaded_callback);
+	virtual void SetPausedCallback(PAUSED_CALLBACK paused_callback);
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

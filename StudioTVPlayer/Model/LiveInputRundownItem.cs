@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Model
 {
-    public class LiveInputRundownItem : RundownItemBase
+    public sealed class LiveInputRundownItem : RundownItemBase
     {
         TVPlayR.InputBase _input;
 
@@ -33,7 +33,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Prepare(audioChannelCount))
                 return false;
-            InputAdded(_input);
+            SubscribeToEvents();
             return true;
         }
 
@@ -41,7 +41,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Unload())
                 return false;
-            InputRemoved(_input);
+            UnsubscribeFromEvents();
             return true;
         }
 

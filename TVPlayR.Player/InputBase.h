@@ -16,7 +16,7 @@ namespace TVPlayR
 	public:
 		property String^ Name { String^ get() { return GetName(); } }
 		event EventHandler<TimeEventArgs^>^ FramePlayed;
-		event EventHandler^ ActiveOnPlayer;
+		event EventHandler^ Loaded;
 		~InputBase();
 		!InputBase();
 		void AddOutputSink(OutputSink^ output);
@@ -34,9 +34,9 @@ namespace TVPlayR
 		GCHandle _framePlayedHandle;
 		void FramePlayedCallback(Core::FrameTimeInfo& time_info);
 
-		delegate void ActiveOnPlayerDelegate();
-		ActiveOnPlayerDelegate^ _activeOnPlayerDelegate;
-		GCHandle _activeOnPlayerHandle;
-		void ActiveOnPlayerCallback();
+		delegate void LoadedDelegate();
+		LoadedDelegate^ _loadedDelegate;
+		GCHandle _loadedHandle;
+		void LoadedCallback();
 	};
 }

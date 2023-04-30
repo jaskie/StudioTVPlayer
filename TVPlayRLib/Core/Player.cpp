@@ -80,8 +80,7 @@ namespace TVPlayR {
 						if (playing_source_->IsEof() && next_to_play_source_)
 						{
 							playing_source_ = next_to_play_source_;
-							next_to_play_source_->RaiseIsActiveOnPlayer();
-							next_to_play_source_->Play();
+							next_to_play_source_->RaiseLoaded();
 							next_to_play_source_.reset();
 						}
 					}
@@ -138,6 +137,7 @@ namespace TVPlayR {
 				executor_.invoke([this, &source]
 				{
 					playing_source_ = source;
+					playing_source_->RaiseLoaded();
 				});
 			}
 

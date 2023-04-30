@@ -3,16 +3,16 @@
 
 namespace TVPlayR {
 	namespace Core {
-		void InputSource::RaiseIsActiveOnPlayer()
+		void InputSource::RaiseLoaded()
 		{
-			ACTIVE_ON_PLAYER_CALLBACK callback = _activeOnPlayerCallback;
+			LOADED_CALLBACK callback = _loadedCallback;
 			if (callback)
 				callback();
 		}
 
-		void InputSource::SetIsActiveOnPlayerCallback(ACTIVE_ON_PLAYER_CALLBACK callback)
+		void InputSource::SetLoadedCallback(LOADED_CALLBACK callback)
 		{
-			_activeOnPlayerCallback = callback;
+			_loadedCallback = callback;
 		}
 	}
 }

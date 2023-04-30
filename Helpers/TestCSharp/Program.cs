@@ -27,13 +27,13 @@ namespace TestCSharp
                     player.Load(file1);
                     file1.Play();
                     player.PlayNext(file2);
-                    file2.ActiveOnPlayer += File2_ActiveOnPlayer;
+                    file2.Loaded += File2_Loaded;
                     Console.ReadKey();
                 }
             }
         }
 
-        private static void File2_ActiveOnPlayer(object sender, EventArgs e)
+        private static void File2_Loaded(object sender, EventArgs e)
         {
             var input = sender as FileInput;
             Debug.Write($"Started: {input.FileName}");

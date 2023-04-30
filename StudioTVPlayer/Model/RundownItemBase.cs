@@ -18,7 +18,7 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler RemoveRequested;
-        public event EventHandler ActiveOnPlayer;
+        public event EventHandler Loaded;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public bool IsPrepared => _prepared != default;
@@ -87,14 +87,14 @@ namespace StudioTVPlayer.Model
 
         protected virtual void SubscribeToEvents()
         {
-            Input.ActiveOnPlayer += Input_ActiveOnPlayer;
+            Input.Loaded += Input_Loaded;
             Input.FramePlayed += Input_FramePlayed;
         }
 
         protected virtual void UnsubscribeFromEvents()
         {
             Input.FramePlayed -= Input_FramePlayed;
-            Input.ActiveOnPlayer -= Input_ActiveOnPlayer;
+            Input.Loaded -= Input_Loaded;
         }
 
 
@@ -103,9 +103,9 @@ namespace StudioTVPlayer.Model
             FramePlayed?.Invoke(this, e);
         }
 
-        private void Input_ActiveOnPlayer(object sender, EventArgs e)
+        private void Input_Loaded(object sender, EventArgs e)
         {
-            ActiveOnPlayer?.Invoke(this, e);
+            Loaded?.Invoke(this, e);
         }
 
         protected void RaisePropertyChanged([CallerMemberName] string propertyname = null)

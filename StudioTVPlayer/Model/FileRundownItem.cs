@@ -62,6 +62,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Unload())
                 return false;
+            UnsubscribeFromEvents();
             _input.Dispose();
             _input = null;
             return true;
@@ -79,8 +80,7 @@ namespace StudioTVPlayer.Model
 
         protected override void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
-            var timeEventArgs = new TVPlayR.TimeEventArgs(e.TimeFromBegin, Media.Duration - e.TimeFromBegin, e.Timecode);
-            RaiseFramePlayed(timeEventArgs);
+            RaiseFramePlayed(e);
         }
 
         protected override void SubscribeToEvents()

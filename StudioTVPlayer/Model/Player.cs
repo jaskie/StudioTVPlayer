@@ -134,7 +134,7 @@ namespace StudioTVPlayer.Model
             player.Dispose();
         }
 
-        protected void Load(TVPlayR.InputBase item)
+        public void Load(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
             _player.Load(item);

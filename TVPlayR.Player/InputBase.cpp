@@ -17,11 +17,11 @@ namespace TVPlayR
 		typedef void(__stdcall* TIME_CALLBACK)(Core::FrameTimeInfo& time_info); // compatible with Core::InputSource::TIME_CALLBACK
 		(*_nativeSource)->SetFramePlayedCallback(static_cast<TIME_CALLBACK>(framePlayedIp.ToPointer()));
 		
-		_activeOnPlayerDelegate = gcnew ActiveOnPlayerDelegate(this, &InputBase::ActiveOnPlayerCallback);
-		_activeOnPlayerHandle = GCHandle::Alloc(_activeOnPlayerDelegate);
-		IntPtr activeOnPlayerIp = Marshal::GetFunctionPointerForDelegate(_activeOnPlayerDelegate);
-		typedef void(__stdcall* ACTIVE_ON_PLAYER_CALLBACK)(); // compatible with Core::InputSource::TIME_CALLBACK
-		(*_nativeSource)->SetIsActiveOnPlayerCallback(static_cast<ACTIVE_ON_PLAYER_CALLBACK>(activeOnPlayerIp.ToPointer()));
+		_loadedDelegate = gcnew LoadedDelegate(this, &InputBase::LoadedCallback);
+		_loadedHandle = GCHandle::Alloc(_loadedDelegate);
+		IntPtr loadedIp = Marshal::GetFunctionPointerForDelegate(_loadedDelegate);
+		typedef void(__stdcall* LOADED_CALLBACK)(); // compatible with Core::InputSource::TIME_CALLBACK
+		(*_nativeSource)->SetLoadedCallback(static_cast<LOADED_CALLBACK>(loadedIp.ToPointer()));
 	}
 
 	InputBase::~InputBase()
@@ -44,9 +44,9 @@ namespace TVPlayR
 		FramePlayed(this, gcnew TimeEventArgs(time_info.TimeFromBegin, time_info.TimeToEnd, time_info.Timecode));
 	}
 
-	void InputBase::ActiveOnPlayerCallback()
+	void InputBase::LoadedCallback()
 	{
-		ActiveOnPlayer(this, EventArgs::Empty);
+		Loaded(this, EventArgs::Empty);
 	}
 
 	void InputBase::AddOutputSink(OutputSink^ output)

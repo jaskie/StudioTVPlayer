@@ -34,6 +34,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _watchedFolder.Initialize();
             _mediaFiles = new ObservableCollection<MediaViewModel>(watchedFolder.Medias.Select(m => new MediaViewModel(m)));
             _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
+            _mediaFilesView.Filter = MediaFilter;
             _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
             _selectedSorting = Sorting.CreationTime;
             Name = watchedFolder.Name;
@@ -54,6 +55,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public bool IsFilteredByDate { get; }
 
         private bool _isFocused;
+        private string _filter;
+
         public bool IsFocused
         {
             get => _isFocused;
@@ -81,6 +84,17 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             }
         }
 
+        public string Filter
+        {
+            get => _filter; 
+            set
+            {
+                if (!Set(ref _filter, value))
+                    return;
+                _mediaFilesView.Refresh();
+            }
+        }
+
 
         public Array Sortings { get; } = Enum.GetValues(typeof(Sorting));
 
@@ -95,7 +109,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             }
         }
 
-        
         #endregion
 
         private void SortMediaCollection()
@@ -114,7 +127,17 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                     break;
             }
         }
-             
+
+        private bool MediaFilter(object mediaItem)
+        {
+            if (string.IsNullOrEmpty(_filter))
+                return true;
+            var media = mediaItem as MediaViewModel;
+            if (media == null || string.IsNullOrWhiteSpace(media.Name))
+                return false;
+            return media.Name.IndexOf(_filter, StringComparison.CurrentCultureIgnoreCase) >= 0;
+        }
+
         private void QueueToPlayerByIndex(object obj)
         {
             if (SelectedMedia is null)

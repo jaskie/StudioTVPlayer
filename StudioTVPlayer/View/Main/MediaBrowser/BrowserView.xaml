@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.MediaBrowser" 
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main.MediaBrowser"
              mc:Ignorable="d" 
@@ -32,21 +33,26 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-                <DatePicker Visibility="{Binding IsFilteredByDate, Converter={StaticResource BoolToVisibilityConverter}}" 
-                            SelectedDate="{Binding SelectedDate}" SelectedDateFormat="Short"
-                            Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" 
-                            IsTodayHighlighted="True" 
-                            ToolTip="Show only files created this day | Alt + Right/Left arrow key"
-                            >
-                </DatePicker>
-                <ComboBox Grid.Column="1" Margin="5" VerticalAlignment="Center"  ItemsSource="{Binding Sortings}" 
-                          SelectedItem="{Binding SelectedSorting, UpdateSourceTrigger=PropertyChanged}" 
-                          ToolTip="Sort media list"
-                          />                
-        <ListBox Grid.Row="1" Grid.ColumnSpan="2"
+        <DatePicker Visibility="{Binding IsFilteredByDate, Converter={StaticResource BoolToVisibilityConverter}}" 
+                    SelectedDate="{Binding SelectedDate}" SelectedDateFormat="Short"
+                    Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                    IsTodayHighlighted="True" 
+                    ToolTip="Show only files created selected day | Alt + Right/Left arrow key"
+                    />
+        <ComboBox Grid.Column="1" Margin="5" VerticalAlignment="Center"  ItemsSource="{Binding Sortings}" 
+                  SelectedItem="{Binding SelectedSorting, UpdateSourceTrigger=PropertyChanged}" 
+                  ToolTip="Sort media list"
+                  />
+        <TextBox Grid.Column="2" Margin="5 0"
+                 VerticalAlignment="Center"
+                 Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
+                 mah:TextBoxHelper.Watermark="Search for file..."
+                 />
+        <ListBox Grid.Row="1" Grid.ColumnSpan="3"
                  TabIndex="1"
                  ItemsSource="{Binding MediaFiles}" 
                  SelectedItem="{Binding SelectedMedia}"

@@ -9,14 +9,16 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		BMDPixelFormat BMDPixelFormatFromPixelFormat(TVPlayR::PixelFormat format)
+		BMDPixelFormat BMDPixelFormatFromPixelFormat(PixelFormat format)
 		{
 			switch (format)
 			{
-			case TVPlayR::PixelFormat::bgra:
+			case PixelFormat::bgra:
 				return BMDPixelFormat::bmdFormat8BitBGRA;
-			case TVPlayR::PixelFormat::yuv422:
+			case PixelFormat::yuv422:
 				return BMDPixelFormat::bmdFormat8BitYUV;
+			case PixelFormat::rgb10:
+				return BMDPixelFormat::bmdFormat10BitRGB;
 			default:
 				break;
 			}
@@ -93,7 +95,7 @@ namespace TVPlayR {
 			}
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, FieldOrder field_order, AVRational sar, BMDTimeScale time_scale)
 		{
 			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
@@ -103,9 +105,9 @@ namespace TVPlayR {
 			frame->width = decklink_frame->GetWidth();
 			frame->height = decklink_frame->GetHeight();
 			frame->pict_type = AV_PICTURE_TYPE_I;
-			frame->interlaced_frame = format.interlaced();
-			frame->top_field_first = format.field_order() == TVPlayR::FieldOrder::TopFieldFirst;
-			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
+			frame->interlaced_frame = field_order > FieldOrder::Progressive;
+			frame->top_field_first = field_order == TVPlayR::FieldOrder::TopFieldFirst;
+			frame->sample_aspect_ratio = sar;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 			assert(decklink_frame->GetRowBytes() == frame->linesize[0]);
 			std::memcpy(frame->data[0], video_bytes, frame->linesize[0] * frame->height);

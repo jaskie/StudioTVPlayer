@@ -16,7 +16,8 @@ namespace TVPlayR
         String^ options,
         String^ video_filter, String^ pixel_format,
         String^ output_metadata, String^ video_metadata, String^ audio_metadata,
-        int video_stream_id, int audio_stream_id
+        int video_stream_id, int audio_stream_id,
+        String^ output_format
     )
     {
         REWRAP_EXCEPTION(return new FFmpeg::FFmpegOutput(FFmpeg::FFOutputParams{
@@ -26,7 +27,8 @@ namespace TVPlayR
             ClrStringToStdString(options),
             ClrStringToStdString(video_filter), ClrStringToStdString(pixel_format),
             ClrStringToStdString(output_metadata), ClrStringToStdString(video_metadata), ClrStringToStdString(audio_metadata),
-            video_stream_id, audio_stream_id
+            video_stream_id, audio_stream_id,
+            ClrStringToStdString(output_format)
             });)
     }
 
@@ -37,9 +39,10 @@ namespace TVPlayR
         String^ options,
         String^ video_filter, String^ pixel_format,
         String^ output_metadata, String^ video_metadata, String^ audio_metadata, 
-        int video_stream_id, int audio_stream_id
+        int video_stream_id, int audio_stream_id,
+        String^ output_format
     )
-        : _native_output(new std::shared_ptr<FFmpeg::FFmpegOutput>(CreateNativeFFOutput(url, video_codec, audio_codec, video_bitrate, audio_bitrate, options, video_filter, pixel_format, output_metadata, video_metadata, audio_metadata, video_stream_id, audio_stream_id)))
+        : _native_output(new std::shared_ptr<FFmpeg::FFmpegOutput>(CreateNativeFFOutput(url, video_codec, audio_codec, video_bitrate, audio_bitrate, options, video_filter, pixel_format, output_metadata, video_metadata, audio_metadata, video_stream_id, audio_stream_id, output_format)))
     { }
 
     FFOutput::~FFOutput()

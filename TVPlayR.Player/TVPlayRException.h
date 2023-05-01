@@ -17,4 +17,13 @@ namespace TVPlayR {
 	};
 }
 
-#define REWRAP_EXCEPTION(statement) try { statement } catch (TVPlayR::Common::TVPlayRException te) { throw gcnew TVPlayRException(te); } catch (std::exception e) { throw gcnew TVPlayRException(e); }
+#define REWRAP_EXCEPTION(statement)\
+ try { statement }\
+  catch (TVPlayR::Common::TVPlayRException te)\
+  {\
+   throw gcnew TVPlayRException(te);\
+  }\
+  catch (std::exception e)\
+  {\
+   throw gcnew TVPlayRException(e);\
+  }

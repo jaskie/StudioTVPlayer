@@ -10,7 +10,7 @@ namespace TVPlayR {
 		{
 			const int index_;
 			CComPtr<IDeckLink> const decklink_;
-			const CComQIPtr<IDeckLinkAttributes> attributes_;
+			const CComQIPtr<IDeckLinkProfileAttributes> attributes_;
 			CComQIPtr<IDeckLinkInput> const input_;
 			CComQIPtr<IDeckLinkOutput> const output_;
 

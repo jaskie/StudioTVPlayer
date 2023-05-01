@@ -22,11 +22,11 @@ namespace TVPlayR {
 		, _acceleration(acceleration)
 		, _hwDevice(hwDevice)
 	{ 
-		_stoppedDelegate = gcnew StoppedDelegate(this, &FileInput::StoppedCallback);
-		_stoppedHandle = GCHandle::Alloc(_stoppedDelegate);
-		IntPtr stoppedIp = Marshal::GetFunctionPointerForDelegate(_stoppedDelegate);
-		typedef void(__stdcall* STOPPED_CALLBACK) (); // compatible with Core::InputSource::STOPPED_CALLBACK
-		GetFFmpegInput()->SetStoppedCallback(static_cast<STOPPED_CALLBACK>(stoppedIp.ToPointer()));
+		_pausedDelegate = gcnew PausedDelegate(this, &FileInput::PausedCallback);
+		_pausedHandle = GCHandle::Alloc(_pausedDelegate);
+		IntPtr stoppedIp = Marshal::GetFunctionPointerForDelegate(_pausedDelegate);
+		typedef void(__stdcall* PAUSED_CALLBACK) (); // compatible with Core::InputSource::STOPPED_CALLBACK
+		GetFFmpegInput()->SetPausedCallback(static_cast<PAUSED_CALLBACK>(stoppedIp.ToPointer()));
 	}
 
 	FileInput::~FileInput()
@@ -40,8 +40,8 @@ namespace TVPlayR {
 		std::shared_ptr<FFmpeg::FFmpegInput> input = GetFFmpegInput();
 		if (!input)
 			return;
-		input->SetStoppedCallback(nullptr);
-		_stoppedHandle.Free();
+		input->SetPausedCallback(nullptr);
+		_pausedHandle.Free();
 		)
 	}
 
@@ -90,9 +90,9 @@ namespace TVPlayR {
 		_isLoop = isLoop;
 	}
 	
-	void FileInput::StoppedCallback()
+	void FileInput::PausedCallback()
 	{
-		Stopped(this, EventArgs::Empty);
+		Paused(this, EventArgs::Empty);
 	}
 
 	std::shared_ptr<FFmpeg::FFmpegInput> FileInput::GetFFmpegInput()

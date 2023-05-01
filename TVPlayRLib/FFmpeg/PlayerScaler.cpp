@@ -2,12 +2,26 @@
 #include "PlayerScaler.h"
 #include "../Core/InputSource.h"
 #include "../PixelFormat.h"
+#include "../ColorSpace.h"
 #include "../FieldOrder.h"
 #include "../Core/Player.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
+static std::string ColorSpaceToString(enum ColorSpace color_space) {
+	switch (color_space)
+	{
+	case ColorSpace::bt601:
+		return "bt601";
+	case ColorSpace::bt709:
+		return "bt709";
+	case ColorSpace::bt2020:
+		return "bt2020";
+	default:
+		THROW_EXCEPTION("Invalid color space")
+	}
+}
 
 PlayerScaler::PlayerScaler(const Core::Player& player)
 	: VideoFilterBase(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
@@ -46,20 +60,20 @@ std::string PlayerScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Commo
 			if (input_height < output_format_.height() && output_format_.field_order() != TVPlayR::FieldOrder::Progressive) // bwdif used only when upscaling
 				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",interlace,";
 			else if ((input_height != output_format_.height() || input_width != output_format_.width()) && output_format_.field_order() != TVPlayR::FieldOrder::Progressive)
-				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":interl=1,";
+				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":out_color_matrix=" << ColorSpaceToString(output_format_.ColorSpace()) << ":interl=1,";
 			else if (output_format_.field_order() == TVPlayR::FieldOrder::Progressive)
 				filter << "yadif,";
 		}
 		else // progressive input
 			if ((input_height != output_format_.height() || input_width != output_format_.width()))
-				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
+				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":out_color_matrix=" << ColorSpaceToString(output_format_.ColorSpace()) << ",";
 	}
 	else if (input_frame_rate == output_format_.FrameRate() * 2)
 	{
 		if (input_interlaced)
 			filter << "yadif,";
 		if (input_height != output_format_.height() || input_width != output_format_.width())
-			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
+			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":out_color_matrix=" << ColorSpaceToString(output_format_.ColorSpace()) << ",";
 		if (output_format_.interlaced())
 			filter << "interlace,";
 		else
@@ -70,7 +84,7 @@ std::string PlayerScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Commo
 		if (input_interlaced)
 			filter << "bwdif,";
 		if (input_height != output_format_.height() || input_width != output_format_.width())
-			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
+			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":out_color_matrix=" << ColorSpaceToString(output_format_.ColorSpace()) << ",";
 		if (!input_interlaced)
 			filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 	}
@@ -79,12 +93,11 @@ std::string PlayerScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Commo
 		if (input_interlaced)
 			filter << "bwdif,"; // this will make the interlaced content as fluent as possible
 		if (input_height != output_format_.height() || input_width != output_format_.width())
-			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",";
+			filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":out_color_matrix=" << ColorSpaceToString(output_format_.ColorSpace()) << ",";
 		filter << "fps=" << output_format_.FrameRate().Numerator() << "/" << output_format_.FrameRate().Denominator() << ",";
 	}
 	filter << "format=" << static_cast<int>(output_pixel_format_);
 	return filter.str();
 }
-
 	
 }}

@@ -1,5 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <PresetList>
+  <EncoderPreset PresetName="XDCAM HD422 50Mbps 25fps"
+                 VideoCodec="mpeg2video"
+                 VideoBitrate="50000"
+                 AudioCodec="pcm_s24le"
+                 Options="maxrate=50000k,minrate=50000k,bufsize=3835k,rc_init_occupancy=3835k,flags=+ildct+ilme,non_linear_quant=1,g=12,color_primaries=bt709,color_trc=bt709,colorspace=bt709"
+                 FilenameExtension="mxf"
+                 PixelFormat="yuv422p"
+                 >
+    <InputFormats>
+      <Format>1080i50</Format>
+      <Format>1080p25</Format>
+    </InputFormats>
+    <Description>Popular HD production format, 50 Mbps video, 24-bit PCM audio.
+Creates MXF file.</Description>
+  </EncoderPreset>
+  <EncoderPreset PresetName="XDCAM HD422 50Mbps 29.97fps"
+                 VideoCodec="mpeg2video"
+                 VideoBitrate="50000"
+                 AudioCodec="pcm_s24le"
+                 Options="maxrate=50000k,minrate=50000k,bufsize=17825792,rc_init_occupancy=17825792,flags=+ildct+ilme,non_linear_quant=1,g=15,color_primaries=bt709,color_trc=bt709,colorspace=bt709"
+                 FilenameExtension="mxf"
+                 PixelFormat="yuv422p"
+                 >
+    <InputFormats>
+      <Format>1080i59.94</Format>
+      <Format>1080p29.97</Format>
+    </InputFormats>
+    <Description>Popular HD production format, 50 Mbps video, 24-bit PCM audio.
+Creates MXF file.</Description>
+  </EncoderPreset>
+  <EncoderPreset PresetName="IMX 50"
+                 VideoCodec="mpeg2video"
+                 VideoBitrate="50000"
+                 AudioCodec="pcm_s24le"
+                 VideoFilter="pad=720:608:0:32"
+                 Options="maxrate=50000k,minrate=50000k,g=1,flags=+ildct+low_delay,dc=10,ps=1,qmin=1,qmax=3,bufsize=2000000,rc_init_occupancy=2000000,intra_vlc=1,non_linear_quant=1,color_primaries=5,color_trc=1,colorspace=5,rc_max_vbv_use=1,d10_channelcount=4"
+                 OutputFormat="mxf_d10"
+                 FilenameExtension="mxf"
+                 PixelFormat="yuv422p"
+                 >
+    <InputFormats>
+      <Format>PAL 4:3</Format>
+      <Format>PAL 16:9</Format>
+    </InputFormats>
+    <Description>Popular SD production format, 50 Mbps video, 24-bit PCM audio.
+Creates MXF file.</Description>
+  </EncoderPreset>
   <EncoderPreset PresetName="H.264 4Mbps"
                  VideoCodec="libx264"
                  VideoBitrate="4096"
@@ -10,16 +57,5 @@
                  >
     <Description>Preview quality, 4 Mbps H.264 CPU-encoded video, 128 kbps audio.
 Creates MOV file.</Description>
-  </EncoderPreset>
-  <EncoderPreset PresetName="XDCAM HD422 50Mbps"
-                 VideoCodec="mpeg2video"
-                 VideoBitrate="50000"
-                 AudioCodec="pcm_s24le"
-                 Options="maxrate=50000k,bufsize=3835k,minrate=50000k,flags=+ildct+ilme"
-                 FilenameExtension="mxf"
-                 PixelFormat="yuv422p"
-                 >
-    <Description>Popular HD production format, 50 Mbps video, PCM audio.
-Creates MXF file.</Description>
   </EncoderPreset>
 </PresetList>

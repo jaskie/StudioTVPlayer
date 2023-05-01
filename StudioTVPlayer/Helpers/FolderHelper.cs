@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StudioTVPlayer.Helpers
+﻿namespace StudioTVPlayer.Helpers
 {
     internal static class FolderHelper
     {
-        public static bool Browse(ref string currentFolder, string description = "")
+        public static bool Browse(ref string currentFolder, string description)
         {            
             using (var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog(description) 
             { 

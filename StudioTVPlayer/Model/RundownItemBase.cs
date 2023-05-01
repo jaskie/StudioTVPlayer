@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ControlzEx.Standard;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Media;
-using TVPlayR;
 
 namespace StudioTVPlayer.Model
 {
@@ -16,8 +16,9 @@ namespace StudioTVPlayer.Model
 
         public abstract bool IsPlaying { get; }
 
-        public event EventHandler<TimeEventArgs> FramePlayed;
+        public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler RemoveRequested;
+        public event EventHandler Loaded;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public bool IsPrepared => _prepared != default;
@@ -82,23 +83,30 @@ namespace StudioTVPlayer.Model
             return true;
         }
 
-        private void Input_FramePlayed(object sender, TimeEventArgs e)
+        protected abstract void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e);
+
+        protected virtual void SubscribeToEvents()
+        {
+            Input.Loaded += Input_Loaded;
+            Input.FramePlayed += Input_FramePlayed;
+        }
+
+        protected virtual void UnsubscribeFromEvents()
+        {
+            Input.FramePlayed -= Input_FramePlayed;
+            Input.Loaded -= Input_Loaded;
+        }
+
+
+        protected void RaiseFramePlayed(TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);
         }
 
-        protected void InputAdded(TVPlayR.InputBase input)
+        private void Input_Loaded(object sender, EventArgs e)
         {
-            Debug.WriteLine($"InputAdded: {input.Name}");
-            input.FramePlayed += Input_FramePlayed;
+            Loaded?.Invoke(this, e);
         }
-
-        protected void InputRemoved(TVPlayR.InputBase input)
-        {
-            input.FramePlayed -= Input_FramePlayed;
-            Debug.WriteLine($"InputRemoved: {input.Name}");
-        }
-
 
         protected void RaisePropertyChanged([CallerMemberName] string propertyname = null)
         {

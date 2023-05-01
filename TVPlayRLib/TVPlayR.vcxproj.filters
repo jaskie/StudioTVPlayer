@@ -202,6 +202,7 @@
     <ClInclude Include="Core\CoreUtils.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="ColorSpace.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -314,6 +315,9 @@
       <Filter>FFmpeg</Filter>
     </ClCompile>
     <ClCompile Include="Core\CoreUtils.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\InputSource.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>

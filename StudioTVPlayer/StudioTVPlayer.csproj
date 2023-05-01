@@ -119,6 +119,7 @@
     <Compile Include="Model\LiveInputRundownItem.cs" />
     <Compile Include="Model\Recording.cs" />
     <Compile Include="Model\RundownItemBase.cs" />
+    <Compile Include="Model\Rundown.cs" />
     <Compile Include="Providers\Configuration.cs" />
     <Compile Include="Model\DecklinkInput.cs" />
     <Compile Include="Model\DecklinkOutput.cs" />
@@ -153,7 +154,7 @@
     <Compile Include="ViewModel\Main\Player\AudioLevelBarViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\LiveInputRundownItemViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\RundownItemViewModelBase.cs" />
-    <Compile Include="ViewModel\Main\RecorderViewModel.cs" />
+    <Compile Include="ViewModel\Main\RecordingViewModel.cs" />
     <Compile Include="ViewModel\ModifyableViewModelBase.cs" />
     <Compile Include="ViewModel\Main\MediaBrowser\MediaViewModel.cs" />
     <Compile Include="ViewModel\Configuration\PlayersViewModel.cs" />
@@ -216,8 +217,8 @@
     <Compile Include="View\Main\Player\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Main\RecorderView.xaml.cs">
-      <DependentUpon>RecorderView.xaml</DependentUpon>
+    <Compile Include="View\Main\RecordingView.xaml.cs">
+      <DependentUpon>RecordingView.xaml</DependentUpon>
     </Compile>
     <Page Include="Resources\AppResources.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -309,7 +310,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Main\RecorderView.xaml">
+    <Page Include="View\Main\RecordingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

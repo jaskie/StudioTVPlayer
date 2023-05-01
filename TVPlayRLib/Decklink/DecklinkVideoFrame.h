@@ -10,13 +10,20 @@ namespace TVPlayR {
 		class DecklinkVideoFrame final : public IDeckLinkVideoFrame
 		{
 		private:
-			const std::shared_ptr<AVFrame> frame_;
+			std::shared_ptr<AVFrame> frame_;
+			std::vector<uint32_t> buffer_;
 			ULONG ref_count_;
-			Core::VideoFormat& format_;
-			DecklinkTimecode timecode_;
+			int width_, height_;
+			int row_bytes_;
+			BMDPixelFormat pixel_format_;
+			std::shared_ptr<DecklinkTimecode> timecode_;
 		public:
-			DecklinkVideoFrame(Core::VideoFormat& format, std::shared_ptr<AVFrame> frame, std::int64_t timecode);
+			DecklinkVideoFrame();
 			virtual ~DecklinkVideoFrame();
+
+			void Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode);
+			void Recycle();
+		
 			//IUnknown
 			STDMETHOD(QueryInterface(REFIID, LPVOID*));
 			STDMETHOD_(ULONG, AddRef());
@@ -32,8 +39,6 @@ namespace TVPlayR {
 			STDMETHOD(GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode));
 			STDMETHOD(GetAncillaryData(IDeckLinkVideoFrameAncillary** ancillary)) { return E_FAIL; }
 
-			//other
-			STDMETHOD_(std::int64_t, GetPts()) { return frame_->pts; }
 		};
 
 	}

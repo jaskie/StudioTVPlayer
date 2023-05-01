@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 
@@ -17,6 +18,7 @@ namespace StudioTVPlayer.Model
         private bool _addItemsWithAutoPlay;
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.PixelFormat _pixelFormat;
+        private int _initialized;
 
         public Player(Configuration.Player configuration)
         {
@@ -35,7 +37,6 @@ namespace StudioTVPlayer.Model
                 if (_videoFormat == value)
                     return;
                 _videoFormat = value;
-                Uninitialize();
             }
         }
 
@@ -47,21 +48,6 @@ namespace StudioTVPlayer.Model
                 if (_pixelFormat == value)
                     return;
                 _pixelFormat = value;
-                Uninitialize();
-            }
-        }
-
-        public OutputBase[] Outputs
-        {
-            get => _outputs.ToArray();
-            set
-            {
-                foreach (var output in _outputs)
-                    output.Dispose();
-                _outputs.Clear();
-                if (value is null)
-                    return;
-                _outputs.AddRange(value);
             }
         }
 
@@ -77,9 +63,13 @@ namespace StudioTVPlayer.Model
 
         public virtual void Initialize()
         {
+            if (Interlocked.Exchange(ref _initialized, 1) != default)
+                return;
             var newVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
             VideoFormat = newVideoFormat;
             PixelFormat = Configuration.PixelFormat;
+            _disablePlayedItems = Configuration.DisablePlayedItems;
+            _addItemsWithAutoPlay = Configuration.AddItemsWithAutoPlay;
             _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);
             foreach (var outputConfiguration in Configuration.Outputs)
             {
@@ -109,15 +99,15 @@ namespace StudioTVPlayer.Model
 
         public void SetVolume(float value)
         {
-            if (_player == null)
-                throw new ApplicationException($"Player {Name} not initialized");
+            if (_initialized == default)
+                return;
             _player.Volume = (float)Math.Pow(10, value / 20);
         }
 
         public ImageSource GetPreview(int width, int height)
         {
-            if (_player == null)
-                throw new ApplicationException($"Player {Name} not initialized");
+            if (_initialized == default)
+                return null;
             if (_outputPreview is null)
             {
                 _outputPreview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, width, height);
@@ -128,13 +118,14 @@ namespace StudioTVPlayer.Model
 
         public void Uninitialize()
         {
-            if (_player == null)
+            if (Interlocked.Exchange(ref _initialized, default) == default)
                 return;
-            foreach (var o in Outputs)
+            foreach (var o in _outputs)
             {
                 _player.RemoveOutputSink(o.Output);
                 o.Dispose();
             }
+            _outputs.Clear(); ;
             if (!(_outputPreview is null))
             {
                 _outputPreview.Dispose();
@@ -143,23 +134,28 @@ namespace StudioTVPlayer.Model
             _player.AudioVolume -= Player_AudioVolume;
             _player.Clear();
             _player.Dispose();
-            _player = null;
         }
 
         public void Load(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
+            if (_initialized == default)
+                return;
             _player.Load(item);
         }
 
-        public void Preload(TVPlayR.InputBase item)
+        protected void PlayNext(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
-            _player.Preload(item);
+            if (_initialized == default)
+                return;
+            _player.PlayNext(item);
         }
 
         public virtual void Clear()
         {
+            if (_initialized == default)
+                return;
             _player.Clear();
         }
 
@@ -172,8 +168,6 @@ namespace StudioTVPlayer.Model
 
         public virtual void Dispose()
         {
-            if (!IsInitialized)
-                return;
             Uninitialize();
         }
 

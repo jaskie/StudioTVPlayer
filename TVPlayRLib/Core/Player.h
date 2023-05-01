@@ -29,7 +29,7 @@ public:
 	void SetFrameClockSource(FrameClockSource& clock);
 	void RequestFrame(int audio_samples_count) override;
 	void Load(std::shared_ptr<InputSource> source);
-	void Preload(std::shared_ptr<InputSource> source);
+	void PlayNext(std::shared_ptr<InputSource> source);
 	void AddOverlay(std::shared_ptr<OverlayBase> overlay);
 	void RemoveOverlay(std::shared_ptr<OverlayBase> overlay);
 	void Clear();

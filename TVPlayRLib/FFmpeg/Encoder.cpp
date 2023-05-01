@@ -74,33 +74,37 @@ namespace TVPlayR {
 		ctx->bit_rate = bitrate * 1000;
 
 		if (interlaced)
-			ctx->flags |= (AV_CODEC_FLAG_INTERLACED_ME | AV_CODEC_FLAG_INTERLACED_DCT);
+			ctx->flags = AV_CODEC_FLAG_INTERLACED_ME | AV_CODEC_FLAG_INTERLACED_DCT;
 
-		if (ctx->codec_id == AV_CODEC_ID_PRORES)
+		switch (encoder->id)
 		{
+		case AV_CODEC_ID_PRORES:
 			ctx->bit_rate = ctx->width < 1280 ? 63 * 1000000 : 220 * 1000000;
 			ctx->pix_fmt = AV_PIX_FMT_YUV422P10;
-		}
-		else if (ctx->codec_id == AV_CODEC_ID_DNXHD)
-		{
+			break;
+		case AV_CODEC_ID_DNXHD:
 			if (ctx->width < 1280 || ctx->height < 720)
 				THROW_EXCEPTION("Encoder: unsupported video dimensions.");
 			ctx->bit_rate = 220 * 1000000;
 			ctx->pix_fmt = AV_PIX_FMT_YUV422P;
-		}
-		else if (ctx->codec_id == AV_CODEC_ID_H264)
-		{
+			break;
+		case AV_CODEC_ID_H264:
 			ctx->gop_size = 30;
 			ctx->max_b_frames = 2;
-		}
-		else if (ctx->codec_id == AV_CODEC_ID_QTRLE)
-		{
-			ctx->pix_fmt = AV_PIX_FMT_ARGB;
-		}
-		else if (encoder_->id == AV_CODEC_ID_MJPEG)
-		{
+			break;
+		case AV_CODEC_ID_QTRLE:
+			ctx->pix_fmt = AV_PIX_FMT_ARGB; 
+			break;
+		case AV_CODEC_ID_MJPEG:
 			ctx->color_range = AVCOL_RANGE_JPEG;
 			ctx->qmax = 2;
+			break;
+		case AV_CODEC_ID_MPEG2VIDEO:
+			ctx->thread_count = 0;
+			ctx->thread_type = FF_THREAD_SLICE; // This is workaround for "Stuffing too large" FFmpeg error
+			break;
+		default:
+			break;
 		}
 
 		if (format_context->oformat->flags & AVFMT_GLOBALHEADER)
@@ -148,17 +152,15 @@ namespace TVPlayR {
 		if (frame)
 			DebugPrintLine(Common::DebugSeverity::trace, "InternalPush pts=" + std::to_string(frame->pts));
 		else
-			DebugPrintLine(Common::DebugSeverity::debug, "InternalPush flush frame");
+			DebugPrintLine(Common::DebugSeverity::debug, "InternalPush flush");
 		int ret = avcodec_send_frame(enc_ctx_.get(), frame);
 		switch (ret)
 		{
 		case AVERROR(EAGAIN):
 			return false;
-			break;
 		default:
-			break;
+			return true;
 		}
-		return true;
 	}
 
 	std::shared_ptr<AVFrame> Encoder::GetFrameFromFifo(int nb_samples)

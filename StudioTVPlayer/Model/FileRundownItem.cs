@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public class FileRundownItem : RundownItemBase
+    public sealed class FileRundownItem : RundownItemBase
     {
         private bool _isLoop;
         private TVPlayR.FileInput _input;
@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Model
             Media = media;
         }
 
-        public event EventHandler Stopped;
+        public event EventHandler Paused;
 
         public MediaFile Media { get; }
 
@@ -48,9 +48,8 @@ namespace StudioTVPlayer.Model
             if (!base.Prepare(audioChannelCount))
                 return false;
             _input = new TVPlayR.FileInput(Media.FullPath);
-            InputAdded(_input);
+            SubscribeToEvents();
             _input.IsLoop = IsLoop;
-            _input.Stopped += InputFile_Stopped;
             return true;
         }
 
@@ -63,8 +62,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Unload())
                 return false;
-            InputRemoved(_input);
-            _input.Stopped -= InputFile_Stopped;
+            UnsubscribeFromEvents();
             _input.Dispose();
             _input = null;
             return true;
@@ -80,9 +78,27 @@ namespace StudioTVPlayer.Model
             return _input?.Seek(timeSpan) ?? false;
         }
 
-        private void InputFile_Stopped(object sender, EventArgs e)
+        protected override void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
-            Stopped?.Invoke(this, EventArgs.Empty);
+            RaiseFramePlayed(e);
+        }
+
+        protected override void SubscribeToEvents()
+        {
+            base.SubscribeToEvents();
+            _input.Paused += InputFile_Paused;
+        }
+
+        protected override void UnsubscribeFromEvents()
+        {
+            _input.Paused -= InputFile_Paused;
+            base.UnsubscribeFromEvents();
+        }
+
+
+        private void InputFile_Paused(object sender, EventArgs e)
+        {
+            Paused?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
@@ -18,7 +13,15 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public string FilenameExtension { get; set; }
 
-        [XmlIgnore]
-        public bool IsEmbedded { get; internal set; }
+        [XmlAttribute]
+        public string OutputFormat { get; set; }
+
+        /// <summary>
+        /// Formats for which the preset can be used.
+        /// If null, there is no input format restriction.
+        /// </summary>
+        [XmlArray]
+        [XmlArrayItem("Format")]
+        public string[] InputFormats { get; set; }
     }
 }

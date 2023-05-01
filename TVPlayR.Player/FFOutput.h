@@ -25,7 +25,8 @@ namespace TVPlayR {
 			String^ video_metadata,
 			String^ audio_metadata,
 			int video_stream_id,
-			int audio_stream_id
+			int audio_stream_id,
+			String^ output_format
 			);
 		~FFOutput();
 		!FFOutput();

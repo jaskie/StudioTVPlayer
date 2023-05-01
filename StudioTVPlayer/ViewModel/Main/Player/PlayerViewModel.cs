@@ -50,14 +50,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             AudioLevelBars = Enumerable.Repeat(0, player.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
             player.Loaded += MediaPlayer_Loaded;
             player.FramePlayed += MediaPlayer_Progress;
-            player.Stopped += MediaPlayer_Stopped;
+            player.Finished += MediaPlayer_Finished;
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
-            player.Removed += MediaPlayer_Removed;
+            player.MediaDurationChanged += MediaPlayer_MediaDurationChanged;
+            player.Rundown.Removed += Rundown_Removed;
             if (player.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
-            Rundown = new ObservableCollection<RundownItemViewModelBase>(player.Rundown.Select(CreateRundownItemViewModel));
+            Rundown = new ObservableCollection<RundownItemViewModelBase>(player.Rundown.Items.Select(CreateRundownItemViewModel));
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
             _mediaPlayer = player;
         }
@@ -152,12 +153,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoop
         {
-            get => _mediaPlayer.IsLoop;
+            get => _mediaPlayer.Rundown.IsLoop;
             set
             {
-                if (_mediaPlayer.IsLoop == value)
+                if (_mediaPlayer.Rundown.IsLoop == value)
                     return;
-                _mediaPlayer.IsLoop = value;
+                _mediaPlayer.Rundown.IsLoop = value;
                 NotifyPropertyChanged();
             }
         }
@@ -411,9 +412,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             });
         }
 
-        private void MediaPlayer_Stopped(object sender, EventArgs e)
+        private void MediaPlayer_Finished(object sender, EventArgs e)
         {
-            Debug.WriteLine("Stopped");
+            Debug.WriteLine("Finished");
             NotifyPropertyChanged(nameof(IsPlaying));
             Refresh();
         }
@@ -432,11 +433,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Refresh();
         }
 
-        private void MediaPlayer_Removed(object sender, Model.Args.RundownItemEventArgs e)
+        private void Rundown_Removed(object sender, Model.Args.RundownItemEventArgs e)
         {
             var vm = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
             Debug.Assert(vm != null);
             Rundown.Remove(vm);
+        }
+
+        private void MediaPlayer_MediaDurationChanged(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged(nameof(CurrentItemDuration));
         }
 
         private void Player_AudioVolume(object sender, Model.Args.AudioVolumeEventArgs e)
@@ -469,9 +475,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _isDisposed = true;
             _mediaPlayer.Loaded -= MediaPlayer_Loaded;
             _mediaPlayer.FramePlayed -= MediaPlayer_Progress;
-            _mediaPlayer.Stopped -= MediaPlayer_Stopped;
+            _mediaPlayer.Finished -= MediaPlayer_Finished;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
-            _mediaPlayer.Removed -= MediaPlayer_Removed;
+            _mediaPlayer.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;
+            _mediaPlayer.Rundown.Removed -= Rundown_Removed;
         }
 
         #region drag&drop
@@ -528,7 +535,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     var destIndex = dropInfo.InsertIndex;
                     if (destIndex > srcIndex)
                         destIndex--;
-                    _mediaPlayer.MoveItem(srcIndex, destIndex);
+                    _mediaPlayer.Rundown.MoveItem(srcIndex, destIndex);
                     Rundown.Move(srcIndex, destIndex);
                     Refresh();
                     break;

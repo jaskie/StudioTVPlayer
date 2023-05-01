@@ -42,7 +42,7 @@ namespace StudioTVPlayer.ViewModel
             }
             catch (Exception e)
             {
-                await ShowMessageAsync("Configuration error", $"Configuration data missing or invalid.\nPlease, configure the application to use it.\n\n{(e.InnerException ?? e).Message}");
+                await ShowMessageAsync("Configuration error", $"Configuration data is missing or invalid.\nPlease configure the application to use it.\n\nFollowing error occured:\n{(e.InnerException ?? e).Message}");
                 CurrentViewModel = new ConfigurationViewModel();
             }
         }

@@ -28,9 +28,9 @@ using namespace TVPlayR;
 static void avlog_cb(void * ptr, int level, const char * fmt, va_list vargs) {
 	if (level <= FFMPEG_LOG_LEVEL)
 	{
-		char line[ERROR_STRING_LENGTH];
+		char line[ERROR_STRING_LENGTH*2];
 		static int prefix(1);
-		av_log_format_line(ptr, level, fmt, vargs, line, ERROR_STRING_LENGTH, &prefix);
+		av_log_format_line(ptr, level, fmt, vargs, line, ERROR_STRING_LENGTH*2, &prefix);
 		OutputDebugStringA(line);
 	}
 }
@@ -48,7 +48,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
 		const PixelFormat pixel_format = PixelFormat::yuv422;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
@@ -64,18 +64,14 @@ int main()
 		for (size_t i = 0; i < iterator.Size(); i++)
 			std::wcout << L"Device " << i << L": " << iterator[i]->GetDisplayName() << L" Model: " << iterator[i]->GetModelName() << std::endl;
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index], DecklinkKeyerType::Default, TimecodeOutputSource::TimeToEnd);
-		decklink_output->Initialize(video_format, PixelFormat::yuv422, audio_channels, sample_rate);
+		decklink_output->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		player.AddOutputSink(decklink_output);
 		player.SetFrameClockSource(*decklink_output);
-		//if (!decklink_output->InitializeFor(player))
-		//	throw std::exception();
-		//player.AddOutputSink(decklink_output);
 		
 
-		/*auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
-		if (!ndi->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::bgra, 2, 48000))
-			throw std::exception("Could not initialize output for player");
-		player.AddOutputSink(ndi);*/
+		//auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
+		//ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
+		//player.AddOutputSink(ndi);
 		//player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
 		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
@@ -100,26 +96,37 @@ int main()
 		*/
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("D:\\Playout\\PRV\\media\\WIPE.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("G:\\media\\test5.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
 		//input->Seek(seek);
-		input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
-		input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
-		input->SetFramePlayedCallback([](Core::FrameTimeInfo& time) {});
+		//input->SetStoppedCallback([] {std::wcout << L"Stopped\n"; });
+		//input->SetLoadedCallback([] {std::wcout << L"Loaded\n"; });
+		//input->SetFramePlayedCallback([](Core::FrameTimeInfo& time) {});
 		input->Play();
-		input->SetIsLoop(true);
+		//input->SetIsLoop(true);
 		player.Load(input);
 
 
 		// prepare input and recording
-		auto decklink_input = iterator.CreateInput(*iterator[1], Core::VideoFormatType::v1080i5000, 2, DecklinkTimecodeSource::RP188Any, true, true);
-		FFmpeg::FFOutputParams record_params{ "d:\\temp\\cccc.mov", "libx264", "aac", 4000, 128 };
+		/*
+		auto decklink_input = iterator.CreateInput(*iterator[0], Core::VideoFormatType::pal_fha, 2, DecklinkTimecodeSource::RP188Any, true, true);
+		FFmpeg::FFOutputParams record_params
+		{ 
+			"d:\\temp\\cccc.mxf", 
+			"mpeg2video", "pcm_s24le", 
+			50000, 0,
+			"maxrate=50000k,minrate=50000k,bufsize=2M,flags=+ildct+low_delay,g=1,dc=10,ps=1,qmin=1,qmax=3,rc_init_occupancy=2M,intra_vlc=1,non_linear_quant=1,colorspace=5,rc_max_vbv_use=1",
+			"pad=720:608:0:32", "yuv422p",
+			"", "", "",
+			0, 0,
+			"mxf_d10"
+		};
 		auto record_file = std::make_shared<FFmpeg::FFmpegOutput>(record_params);
-		record_file->Initialize(Core::VideoFormatType::v1080i5000, PixelFormat::yuv422, 2, 48000);
+		record_file->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		decklink_input->AddOutputSink(record_file);
-		
+		*/
 		while (true)
 		{
 			char i = std::cin.get();
@@ -132,7 +139,7 @@ int main()
 			if (i == 's')
 				player.RemoveOutput(stream);*/
 
-			if (i == 's')
+			/*if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
 				player.Load(input);
@@ -140,10 +147,9 @@ int main()
 				if (input->IsPlaying())
 					input->Pause();
 				else	 
-					input->Play();
+					input->Play();*/
 		}
-		decklink_input->RemoveOutputSink(record_file);
-		//ndi->Uninitialize();
+		//decklink_input->RemoveOutputSink(record_file);
 		//player.RemoveOutputSink(ndi);
 		player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);

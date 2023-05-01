@@ -10,6 +10,7 @@ namespace TVPlayR {
 			std::string VideoFilter, PixelFormat;
 			std::string OutputMetadata, VideoMetadata, AudioMetadata;
 			int VideoStreamId, AudioStreamId;
+			std::string OutputFormat;
 		};
 
 	}

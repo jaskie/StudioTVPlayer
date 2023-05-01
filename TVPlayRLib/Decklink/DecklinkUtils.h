@@ -1,6 +1,9 @@
 #pragma once
 
 namespace TVPlayR {
+	
+	enum class FieldOrder;
+
 	namespace Core
 	{
 		class VideoFormat;
@@ -22,7 +25,7 @@ namespace TVPlayR {
 
 		Core::VideoFormatType BMDDisplayModeToVideoFormatType(BMDDisplayMode displayMode, bool isWide);
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Core::VideoFormat& format, BMDTimeScale time_scale);
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, FieldOrder field_order, AVRational sar, BMDTimeScale time_scale);
 		
 		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate);
 

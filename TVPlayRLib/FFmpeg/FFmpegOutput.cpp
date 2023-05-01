@@ -52,7 +52,7 @@ namespace TVPlayR {
 				, format_(Core::VideoFormatType::invalid)
 				, dest_pixel_format_(av_get_pix_fmt(params.PixelFormat.c_str()))
 				, options_(ReadOptions(params.Options))
-				, output_format_(params.Url, options_)
+				, output_format_(params.Url, params.OutputFormat, options_)
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
@@ -60,7 +60,6 @@ namespace TVPlayR {
 			{
 				if (dest_pixel_format_ == AVPixelFormat::AV_PIX_FMT_NONE)
 					dest_pixel_format_ = video_codec_->pix_fmts[0];
-				executor_.begin_invoke([this] {	Tick();	});
 			}
 
 			~implementation()
@@ -89,6 +88,7 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), dest_pixel_format_);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, dest_pixel_format_);
+				executor_.begin_invoke([this] { Tick(); });
 			}
 
 			void InitializeFrameRequester()
@@ -110,38 +110,34 @@ namespace TVPlayR {
 				{
 					for (auto& overlay : overlays_)
 						sync = overlay->Transform(sync);
+					std::shared_ptr<AVFrame> processed_video;
 					if (video_filter_)
 					{
 						video_filter_->Push(sync.Video);
-						while (auto video = video_filter_->Pull())
+						processed_video = video_filter_->Pull();
+						if (!video_encoder_ && processed_video)
 						{
-							if (!video_encoder_)
-							{
-								video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, dest_pixel_format_, video, video_filter_->OutputTimeBase(), video_filter_->OutputFrameRate(), &options_, params_.VideoMetadata, params_.VideoStreamId);
-								InitializeOuputIfPossible();
-							}
-							PushToEncoder(video_encoder_, video);
+							AVRational frame_rate = video_filter_->OutputFrameRate();
+							if (frame_rate.num == 0)
+								frame_rate = format_.FrameRate().av();
+							InitializeVideoEncoderAndOutput(processed_video, video_filter_->OutputTimeBase(), frame_rate);
 						}
 					}
 					else if (video_scaler_)
 					{
-						auto video = video_scaler_->Scale(sync.Video);
-						if (!video_encoder_)
-						{
-							video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, dest_pixel_format_, video, format_.FrameRate().invert().av(), format_.FrameRate().av(), &options_, params_.VideoMetadata, params_.VideoStreamId);
-							InitializeOuputIfPossible();
-						}
-						PushToEncoder(video_encoder_, video);
+						processed_video = video_scaler_->Scale(sync.Video);
+						if (!video_encoder_ && processed_video)
+							InitializeVideoEncoderAndOutput(processed_video, format_.FrameRate().invert().av(), format_.FrameRate().av());
 					}
 					if (!audio_encoder_)
 					{
 						audio_encoder_ = std::make_unique<Encoder>(output_format_, audio_codec_, params_.AudioBitrate, audio_resampler_->OutputSampleRate(), audio_resampler_->OutputChannelLayout(), &options_, params_.AudioMetadata, params_.AudioStreamId);
 						InitializeOuputIfPossible();
 					}
+					if (video_encoder_ && processed_video)
+						PushToEncoder(video_encoder_, processed_video);
 					if (sync.Audio)
-					{
 						PushToEncoder(audio_encoder_, audio_resampler_->Resample(sync.Audio));
-					}
 				}
 				else
 					DebugPrintLine(Common::DebugSeverity::info, "Buffer didn't return frame");
@@ -182,6 +178,12 @@ namespace TVPlayR {
 				}
 				else
 					DebugPrintLine(Common::DebugSeverity::warning, "Negative wait time");
+			}
+
+			void InitializeVideoEncoderAndOutput(const std::shared_ptr<AVFrame>& frame, AVRational time_base, AVRational frame_rate)
+			{
+				video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, dest_pixel_format_, frame, time_base, frame_rate, &options_, params_.VideoMetadata, params_.VideoStreamId);
+				InitializeOuputIfPossible();
 			}
 
 			void InitializeOuputIfPossible()

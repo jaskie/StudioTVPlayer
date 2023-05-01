@@ -34,7 +34,8 @@
                 EncoderSettings.Options,
                 EncoderSettings.VideoFilter, EncoderSettings.PixelFormat,
                 EncoderSettings.OutputMetadata, EncoderSettings.VideoMetadata, EncoderSettings.AudioMetadata,
-                EncoderSettings.VideoStreamId, EncoderSettings.AudioStreamId
+                EncoderSettings.VideoStreamId, EncoderSettings.AudioStreamId,
+                string.Empty
                 );
             base.Initialize(player);
         }

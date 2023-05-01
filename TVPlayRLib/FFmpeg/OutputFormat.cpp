@@ -4,11 +4,11 @@
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		OutputFormat::OutputFormat(const std::string& url, AVDictionary*& options)
+		OutputFormat::OutputFormat(const std::string& url, const std::string& format_name, AVDictionary*& options)
 			: Common::DebugTarget(Common::DebugSeverity::info, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
-			, format_ctx_(AllocFormatContextAndOpenFile(url), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
+			, format_ctx_(AllocFormatContextAndOpenFile(url, format_name), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
 		{
 		}
 
@@ -17,10 +17,10 @@ namespace TVPlayR {
 			if (!is_initialized_)
 			{
 				initialization_queue_.emplace_back(packet);
-				DebugPrintLine(Common::DebugSeverity::debug, "Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+				DebugPrintLine(Common::DebugSeverity::debug, "Queuing packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts) + ", size=" + std::to_string(packet->size));
 				return;
 			}
-			DebugPrintLine(Common::DebugSeverity::trace, "Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts));
+			DebugPrintLine(Common::DebugSeverity::trace, "Sending packet to stream=" + std::to_string(packet->stream_index) + ", pts=" + std::to_string(packet->pts) + ", dts=" + std::to_string(packet->dts) + ", size=" + std::to_string(packet->size));
 			THROW_ON_FFMPEG_ERROR(av_interleaved_write_frame(format_ctx_.get(), packet.get()));
 		}
 
@@ -53,7 +53,7 @@ namespace TVPlayR {
 			is_initialized_ = true;
 		}
 
-		AVFormatContext* OutputFormat::AllocFormatContextAndOpenFile(const std::string& url)
+		AVFormatContext* OutputFormat::AllocFormatContextAndOpenFile(const std::string& url, const std::string& format_name)
 		{
 			const AVOutputFormat* format = nullptr;
 			if (url.find("rtmp://") == 0)
@@ -61,7 +61,7 @@ namespace TVPlayR {
 			else if (url.find("udp://") == 0)
 				format = av_guess_format("mpegts", NULL, NULL);
 			else
-				format = av_guess_format(NULL, url.c_str(), NULL);
+				format = av_guess_format(format_name.c_str(), url.c_str(), NULL);
 			if (!format)
 				THROW_EXCEPTION("OutputFormat: can't determine format for " + url);
 

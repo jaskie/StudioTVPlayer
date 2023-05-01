@@ -1,7 +1,8 @@
 #pragma once
 
 namespace TVPlayR {
-		enum class FieldOrder;	
+		enum class FieldOrder;
+		enum class ColorSpace;
 		
 		namespace Core {
 		enum class VideoFormatType {
@@ -42,6 +43,7 @@ public:
 	VideoFormat(enum VideoFormatType type);
 	VideoFormat& operator=(const VideoFormat&) = default;
 	const enum VideoFormatType type() const;
+	const enum ColorSpace ColorSpace() const;
 	int width() const;
 	int height() const;
 	Common::Rational<int> SampleAspectRatio() const;
@@ -57,6 +59,7 @@ public:
 
 private:
 	enum VideoFormatType type_;
+	enum ColorSpace color_space_;
 	int width_;
 	int height_;
 	std::string name_;

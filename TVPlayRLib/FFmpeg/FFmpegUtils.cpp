@@ -36,7 +36,6 @@ namespace TVPlayR {
 			AVFrame* frame = av_frame_alloc();
 			frame->width = source->width;
 			frame->height = source->height;
-			frame->display_picture_number = source->display_picture_number;
 			frame->format = source->format;
 			frame->pict_type = source->pict_type;
 			frame->sample_aspect_ratio = source->sample_aspect_ratio;
@@ -54,22 +53,27 @@ namespace TVPlayR {
 				THROW_EXCEPTION("FFmpegUtils: video frame not allocated");
 			frame->width = format.width();
 			frame->height = format.height();
-			frame->display_picture_number = -1;
 			frame->format = TVPlayR::PixelFormatToFFmpegFormat(pix_fmt);
 			frame->pict_type = AV_PICTURE_TYPE_NONE;
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
 			frame->interlaced_frame = format.interlaced();
 			frame->top_field_first = format.field_order() == TVPlayR::FieldOrder::TopFieldFirst;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
-			if (pix_fmt == TVPlayR::PixelFormat::bgra)
+			uint32_t* data_begin = reinterpret_cast<uint32_t*>(frame->data[0]);
+			ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };
+			switch (pix_fmt)
 			{
-				// to make transparent alpha
-				memset(frame->data[0], 0x10101000, frame->linesize[0] * frame->height);
-			}
-			else
-			{
-				ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };
+			case TVPlayR::PixelFormat::rgb10:
+			case TVPlayR::PixelFormat::yuv422:
 				THROW_ON_FFMPEG_ERROR(av_image_fill_black(frame->data, linesize, static_cast<AVPixelFormat>(frame->format), AVColorRange::AVCOL_RANGE_MPEG, frame->width, frame->height));
+				break;
+			case TVPlayR::PixelFormat::bgra:
+				// we want fully transparent, black frame here
+				std::fill(data_begin, data_begin + (frame->linesize[0] * frame->height / sizeof(uint32_t)), 0x00000000);
+				break;
+			default:
+				THROW_EXCEPTION("Invalid frame pixel format")
+				break;
 			}
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}

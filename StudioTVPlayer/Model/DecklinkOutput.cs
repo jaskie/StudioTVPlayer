@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace StudioTVPlayer.Model
@@ -25,6 +26,8 @@ namespace StudioTVPlayer.Model
         public override void Initialize(TVPlayR.Player player)
         {
             var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == _configuration.DeviceIndex);
+            if (info == null)
+                throw new ApplicationException($"Decklink {_configuration.DeviceIndex} not found.");
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, _configuration.Keyer, _configuration.TimecodeSource);
             base.Initialize(player);
             Debug.WriteLine("Decklink output initialized");

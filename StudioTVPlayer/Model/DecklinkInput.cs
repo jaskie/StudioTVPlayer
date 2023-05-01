@@ -19,6 +19,8 @@ namespace StudioTVPlayer.Model
         [XmlAttribute]
         public bool FormatAutodetection { get; set; }
 
+        public event EventHandler FormatChanged;
+
         public override ImageSource Thumbnail => _preview?.PreviewSource;
 
         public override void Dispose()
@@ -44,6 +46,7 @@ namespace StudioTVPlayer.Model
                 
                 _preview = new TVPlayR.PreviewSink(Application.Current.Dispatcher, 160, 90);
                 _input.AddOutputSink(_preview);
+                FormatChanged?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             catch
@@ -73,7 +76,7 @@ namespace StudioTVPlayer.Model
             _currentFormat = e.Format;
             VideoFormat = e.Format.Name;
             InputList.Current.Save();
-            InputFormatChanged?.Invoke(this, e);
+            FormatChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public override TVPlayR.VideoFormat CurrentFormat()
@@ -82,7 +85,6 @@ namespace StudioTVPlayer.Model
         }
 
 
-        public event EventHandler<TVPlayR.VideoFormatEventArgs> InputFormatChanged;
 
     }
 }

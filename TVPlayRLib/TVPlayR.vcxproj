@@ -87,6 +87,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ColorSpace.h" />
     <ClInclude Include="Core\CoreUtils.h" />
     <ClInclude Include="Core\OverlayBase.h" />
     <ClInclude Include="DecklinkKeyerType.h" />

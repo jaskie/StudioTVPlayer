@@ -49,7 +49,7 @@ int main()
 #endif
 		Common::ComInitializer com_initializer;
 		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
-		const PixelFormat pixel_format = PixelFormat::rgb10;
+		const PixelFormat pixel_format = PixelFormat::yuv422;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
 

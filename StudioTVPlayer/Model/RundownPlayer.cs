@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Model
 {
     public class RundownPlayer : Player
     {
-        private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(1);
+        private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
         private RundownItemBase _playingRundownItem;
         private Rundown _rundown = new Rundown();
 
@@ -140,7 +140,7 @@ namespace StudioTVPlayer.Model
 
         internal void Submit(MediaFile media)
         {
-            var item = new FileRundownItem(media);
+            var item = new FileRundownItem(media) { IsAutoStart = AddItemsWithAutoPlay };
             _rundown.Add(item);
             MediaSubmitted?.Invoke(this, new RundownItemEventArgs(item));
         }

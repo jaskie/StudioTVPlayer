@@ -20,7 +20,7 @@ namespace TVPlayR
 		_loadedDelegate = gcnew LoadedDelegate(this, &InputBase::LoadedCallback);
 		_loadedHandle = GCHandle::Alloc(_loadedDelegate);
 		IntPtr loadedIp = Marshal::GetFunctionPointerForDelegate(_loadedDelegate);
-		typedef void(__stdcall* LOADED_CALLBACK)(); // compatible with Core::InputSource::TIME_CALLBACK
+		typedef void(__stdcall* LOADED_CALLBACK)(); // compatible with Core::InputSource::LOADED_CALLBACK
 		(*_nativeSource)->SetLoadedCallback(static_cast<LOADED_CALLBACK>(loadedIp.ToPointer()));
 	}
 
@@ -35,6 +35,8 @@ namespace TVPlayR
 			return;
 		(*_nativeSource)->SetFramePlayedCallback(nullptr);
 		_framePlayedHandle.Free();
+		(*_nativeSource)->SetLoadedCallback(nullptr);
+		_loadedHandle.Free();
 		REWRAP_EXCEPTION(delete _nativeSource;)
 		_nativeSource = nullptr;
 	}

@@ -1,4 +1,5 @@
-﻿using StudioTVPlayer.Providers;
+﻿#undef DEBUG
+using StudioTVPlayer.Providers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,13 +19,13 @@ namespace StudioTVPlayer
     {
         public App()
         {
-            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            DispatcherUnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
             FrameworkElement.LanguageProperty.OverrideMetadata(
                     typeof(FrameworkElement),
                     new FrameworkPropertyMetadata(
                     System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            Dispatcher.UnhandledException += App_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) => HandleException(e.ExceptionObject as Exception, e.IsTerminating);
+            Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -39,25 +40,18 @@ namespace StudioTVPlayer
             { }
         }
 
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-#if DEBUG
-            CrashLogger.SaveDump(e.ExceptionObject.ToString());
-#else
-            if (e.IsTerminating)
-                MessageBox.Show(e.ExceptionObject.ToString(), "Error - terminating application", MessageBoxButton.OK, MessageBoxImage.Error);
-            else
-                MessageBox.Show(e.ExceptionObject.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-#endif
-        }
 
-        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        private void HandleException(Exception e, bool isTerminating)
         {
+            var exception = (e?.InnerException ?? e);
+            var message = $"{e?.GetType().Name ?? "Error without exception"} occured with message {e?.Message ?? "empty"}.";
 #if DEBUG
-            CrashLogger.SaveDump(e.Exception.ToString());
+            CrashLogger.SaveDump(e.ToString());
 #else
-            MessageBox.Show(e.Exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            e.Handled = true;
+            if (isTerminating)
+                MessageBox.Show(message, "Error - terminating application", MessageBoxButton.OK, MessageBoxImage.Error);
+            else
+                MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 #endif
         }
 

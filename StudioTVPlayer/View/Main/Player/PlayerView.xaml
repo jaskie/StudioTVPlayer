@@ -28,7 +28,7 @@
         <KeyBinding Modifiers="Alt" Key="Delete" Command="{Binding DeleteDisabledCommand}" />
     </UserControl.InputBindings>
 
-    <Grid Margin="5">
+    <Grid Margin="5" Height="370">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="3*"/>
@@ -237,7 +237,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition/>
+                <ColumnDefinition />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Label Grid.Column="0" VerticalAlignment="Bottom" >Rundown</Label>

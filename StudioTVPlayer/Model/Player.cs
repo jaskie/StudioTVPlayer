@@ -13,8 +13,7 @@ namespace StudioTVPlayer.Model
     {
         private TVPlayR.Player _player;
         private TVPlayR.PreviewSink _outputPreview;
-        private List<OutputBase> _outputs = new List<OutputBase>();
-        private bool _disablePlayedItems;
+        private readonly List<OutputBase> _outputs = new List<OutputBase>();
         private bool _addItemsWithAutoPlay;
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.PixelFormat _pixelFormat;
@@ -53,11 +52,9 @@ namespace StudioTVPlayer.Model
 
         public bool LivePreview => Configuration.LivePreview;
 
-        public bool DisablePlayedItems { get => _disablePlayedItems; set => _disablePlayedItems = value; }
-
         public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => _addItemsWithAutoPlay = value; }
 
-        public bool IsInitialized => _player != null;
+        public bool IsInitialized => _initialized != default;
 
         public int AudioChannelCount { get; } = 2;
 
@@ -68,7 +65,6 @@ namespace StudioTVPlayer.Model
             var newVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
             VideoFormat = newVideoFormat;
             PixelFormat = Configuration.PixelFormat;
-            _disablePlayedItems = Configuration.DisablePlayedItems;
             _addItemsWithAutoPlay = Configuration.AddItemsWithAutoPlay;
             _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);
             foreach (var outputConfiguration in Configuration.Outputs)
@@ -144,12 +140,12 @@ namespace StudioTVPlayer.Model
             _player.Load(item);
         }
 
-        protected void PlayNext(TVPlayR.InputBase item)
+        protected void LoadNext(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
             if (_initialized == default)
                 return;
-            _player.PlayNext(item);
+            _player.LoadNext(item);
         }
 
         public virtual void Clear()

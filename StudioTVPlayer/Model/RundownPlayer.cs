@@ -99,11 +99,11 @@ namespace StudioTVPlayer.Model
             {
                 fileRundownItem.Paused -= PlaiyngRundownItem_Paused;
                 fileRundownItem.Media.PropertyChanged -= Media_PropertyChanged;
-                if (DisableAfterUnload)
-                    fileRundownItem.IsDisabled = true;
             }
             rundownItem.Pause();
             rundownItem.Unload();
+            if (DisableAfterUnload)
+                rundownItem.IsDisabled = true;
         }
 
         private void BeforePlay(RundownItemBase rundownItem)
@@ -181,14 +181,14 @@ namespace StudioTVPlayer.Model
             var current = sender as FileRundownItem;
             if (current == null || current != _playingRundownItem)
                 return;
-            if (current.Media.Duration - e.TimeFromBegin < PreloadTime)
+            if (current.Media.Duration - e.TimeFromBegin > PreloadTime)
                 return;
             var next = _rundown.NextAutoPlayItem;
             if (next == null)
                 return;
             if (next.Prepare(AudioChannelCount))
             {
-                PlayNext(next.Input);
+                LoadNext(next.Input);
                 next.Play();
             }
         }

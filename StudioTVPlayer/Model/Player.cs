@@ -140,12 +140,17 @@ namespace StudioTVPlayer.Model
             _player.Load(item);
         }
 
-        protected void LoadNext(TVPlayR.InputBase item)
+        protected bool LoadNext(RundownItemBase rundownItem)
         {
-            Debug.Assert(item != null);
             if (_initialized == default)
-                return;
-            _player.LoadNext(item);
+                return false;
+            if (rundownItem.Prepare(AudioChannelCount))
+            {
+                _player.LoadNext(rundownItem.Input);
+                rundownItem.Play();
+                return true;
+            }
+            return false;
         }
 
         public virtual void Clear()

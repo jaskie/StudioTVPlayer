@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
@@ -13,6 +14,7 @@ namespace StudioTVPlayer.Model
         private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
         private RundownItemBase _playingRundownItem;
         private Rundown _rundown = new Rundown();
+        private RundownItemBase _loadedNextRundownItem;
 
         public RundownPlayer(Configuration.Player configuration): base(configuration)
         {
@@ -60,7 +62,7 @@ namespace StudioTVPlayer.Model
 
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
-        public event EventHandler Finished;
+        public event EventHandler Paused;
         public event EventHandler<RundownItemEventArgs> MediaSubmitted;
         public event EventHandler MediaDurationChanged;
 
@@ -165,7 +167,7 @@ namespace StudioTVPlayer.Model
             Task.Run(() => // do not block incoming thread
             {
                 if (sender  == _playingRundownItem) // next didn't loaded
-                    Finished?.Invoke(this, EventArgs.Empty);
+                    Paused?.Invoke(this, EventArgs.Empty);
             });
         }
 
@@ -186,10 +188,11 @@ namespace StudioTVPlayer.Model
             var next = _rundown.NextAutoPlayItem;
             if (next == null)
                 return;
-            if (next.Prepare(AudioChannelCount))
+            if (LoadNext(next))
             {
-                LoadNext(next.Input);
-                next.Play();
+                var previouslyLoadedNext = Interlocked.Exchange(ref _loadedNextRundownItem, next);
+                if (previouslyLoadedNext != null && previouslyLoadedNext != _playingRundownItem)
+                    previouslyLoadedNext.Unload();
             }
         }
 

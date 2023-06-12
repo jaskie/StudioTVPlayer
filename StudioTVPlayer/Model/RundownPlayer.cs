@@ -18,7 +18,7 @@ namespace StudioTVPlayer.Model
 
         public RundownPlayer(Configuration.Player configuration): base(configuration)
         {
-            _rundown.Loaded += Rundown_Loaded;
+            _rundown.ItemLoaded += Rundown_ItemLoaded;
         }
 
         public RundownItemBase PlayingRundownItem
@@ -171,7 +171,7 @@ namespace StudioTVPlayer.Model
             });
         }
 
-        private void Rundown_Loaded(object sender, RundownItemEventArgs e)
+        private void Rundown_ItemLoaded(object sender, RundownItemEventArgs e)
         {
             PlayingRundownItem = e.RundownItem;
             Loaded?.Invoke(this, e);
@@ -206,7 +206,7 @@ namespace StudioTVPlayer.Model
         {
             base.Dispose();
             _rundown.Dispose();
-            _rundown.Loaded -= Rundown_Loaded;
+            _rundown.ItemLoaded -= Rundown_ItemLoaded;
             PlayingRundownItem = null;
         }
 

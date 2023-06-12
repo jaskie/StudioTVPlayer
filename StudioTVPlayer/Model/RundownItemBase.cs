@@ -97,7 +97,6 @@ namespace StudioTVPlayer.Model
             Input.Loaded -= Input_Loaded;
         }
 
-
         protected void RaiseFramePlayed(TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);

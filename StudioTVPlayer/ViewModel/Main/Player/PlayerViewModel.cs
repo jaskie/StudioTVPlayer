@@ -54,7 +54,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
             player.MediaDurationChanged += MediaPlayer_MediaDurationChanged;
-            player.Rundown.Removed += Rundown_Removed;
+            player.Rundown.ItemRemoved += Rundown_ItemRemoved;
             if (player.LivePreview)
                 _preview = player.GetPreview(224, 126);
             IsAlpha = player.IsAplha;
@@ -429,7 +429,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Refresh();
         }
 
-        private void Rundown_Removed(object sender, Model.Args.RundownItemEventArgs e)
+        private void Rundown_ItemRemoved(object sender, Model.Args.RundownItemEventArgs e)
         {
             var vm = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
             Debug.Assert(vm != null);
@@ -474,7 +474,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _mediaPlayer.Paused -= MediaPlayer_Paused;
             _mediaPlayer.MediaSubmitted -= MediaPlayer_MediaSubmitted;
             _mediaPlayer.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;
-            _mediaPlayer.Rundown.Removed -= Rundown_Removed;
+            _mediaPlayer.Rundown.ItemRemoved -= Rundown_ItemRemoved;
         }
 
         #region drag&drop

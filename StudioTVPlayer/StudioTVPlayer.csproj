@@ -112,8 +112,11 @@
     <Compile Include="Model\Configuration\NdiOutput.cs" />
     <Compile Include="Model\Configuration\OutputBase.cs" />
     <Compile Include="Model\Configuration\Player.cs" />
+    <Compile Include="Model\Persistence\FileRundownItem.cs" />
+    <Compile Include="Model\Persistence\Rundown.cs" />
     <Compile Include="Model\EncoderPreset.cs" />
     <Compile Include="Model\EncoderSettings.cs" />
+    <Compile Include="Model\Persistence\RundownItemBase.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\InputBase.cs" />
     <Compile Include="Model\LiveInputRundownItem.cs" />

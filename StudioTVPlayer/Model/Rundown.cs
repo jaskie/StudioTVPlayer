@@ -17,10 +17,20 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _nextAutoPlayItem;
         private bool _isLoop;
         private int _isDisposed;
-        private readonly List<RundownItemBase> _rundown = new List<RundownItemBase>();
+        private readonly List<RundownItemBase> _items = new List<RundownItemBase>();
         private readonly object _rundownLock = new object();
 
-        public List<RundownItemBase> Items => _rundown;
+        public List<RundownItemBase> Items
+        {
+            get
+            {
+                lock (_rundownLock)
+                {
+                    return _items.ToList();
+                }
+            }
+        }
+
         public RundownItemBase NextAutoPlayItem => _nextAutoPlayItem;
         public bool IsLoop
         {
@@ -35,17 +45,18 @@ namespace StudioTVPlayer.Model
         }
 
         public event EventHandler<RundownItemEventArgs> ItemLoaded;
-        public event EventHandler<RundownItemEventArgs> ItemRemoved;
+        public event EventHandler<RundownItemIndexedEventArgs> ItemAdded;
+        public event EventHandler<RundownItemIndexedEventArgs> ItemRemoved;
 
-        public bool Contains(RundownItemBase item) => _rundown.Contains(item);
+        public bool Contains(RundownItemBase item) => _items.Contains(item);
 
         public void MoveItem(int srcIndex, int destIndex)
         {
             lock (_rundownLock)
             {
-                var item = _rundown[srcIndex];
-                _rundown.RemoveAt(srcIndex);
-                _rundown.Insert(destIndex, item);
+                var item = _items[srcIndex];
+                _items.RemoveAt(srcIndex);
+                _items.Insert(destIndex, item);
             }
             RundownChanged();
         }
@@ -61,9 +72,7 @@ namespace StudioTVPlayer.Model
         private void RundownItem_RemoveRequested(object sender, EventArgs _)
         {
             var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
-            if (!Remove(rundownItem))
-                return;
-            ItemRemoved?.Invoke(this, new RundownItemEventArgs(rundownItem));
+            Remove(rundownItem);
         }
 
         private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -82,10 +91,10 @@ namespace StudioTVPlayer.Model
         {
             lock (_rundownLock)
             {
-                if (index == -1 || index == _rundown.Count)
-                    _rundown.Add(rundownItem);
-                else if (index < _rundown.Count)
-                    _rundown.Insert(index, rundownItem);
+                if (index == -1 || index == _items.Count)
+                    _items.Add(rundownItem);
+                else if (index < _items.Count)
+                    _items.Insert(index, rundownItem);
                 else
                     throw new ArgumentException(nameof(index));
             }
@@ -93,20 +102,25 @@ namespace StudioTVPlayer.Model
             rundownItem.RemoveRequested += RundownItem_RemoveRequested;
             rundownItem.Loaded += RundownItem_Loaded;
             RundownChanged();
+            ItemAdded?.Invoke(this, new RundownItemIndexedEventArgs(rundownItem, index));
         }
 
-        public bool Remove(RundownItemBase rundownItem)
+        public void Remove(RundownItemBase rundownItem)
         {
+            int index;
             lock (_rundownLock)
             {
-                if (!_rundown.Remove(rundownItem))
-                    return false;
+                index = _items.IndexOf(rundownItem);
+                if (index >= 0)
+                    _items.RemoveAt(index);
             }
+            if (index == -1)
+                return;
             rundownItem.PropertyChanged -= RundownItem_PropertyChanged;
             rundownItem.RemoveRequested -= RundownItem_RemoveRequested;
             rundownItem.Loaded -= RundownItem_Loaded;
             RundownChanged();
-            return true;
+            ItemRemoved?.Invoke(this, new RundownItemIndexedEventArgs(rundownItem, index));
         }
 
 
@@ -116,7 +130,7 @@ namespace StudioTVPlayer.Model
             while (true)
             {
                 lock (_rundownLock)
-                    item = _rundown.FirstOrDefault(i => i.IsDisabled);
+                    item = _items.FirstOrDefault(i => i.IsDisabled);
                 if (item is null)
                     break;
                 Remove(item);
@@ -126,7 +140,7 @@ namespace StudioTVPlayer.Model
         private RundownItemBase FindNextAutoPlayItem(RundownItemBase currentItem)
         {
             lock (_rundownLock)
-                using (var iterator = _rundown.GetEnumerator())
+                using (var iterator = _items.GetEnumerator())
                 {
                     bool foundCurrentItem = false;
                     while (iterator.MoveNext())
@@ -141,7 +155,7 @@ namespace StudioTVPlayer.Model
                     }
                 }
             if (IsLoop)
-                return _rundown.FirstOrDefault(i => i != currentItem && i.IsAutoStart && !i.IsDisabled);
+                return _items.FirstOrDefault(i => i != currentItem && i.IsAutoStart && !i.IsDisabled);
             else
                 return null;
         }
@@ -159,20 +173,19 @@ namespace StudioTVPlayer.Model
             });
         }
 
+        public void ClearItems()
+        {
+            foreach (var item in Items)
+                Remove(item);
+        }
+
         public void Dispose()
         {
             if (Interlocked.Exchange(ref _isDisposed, 1) == default)
                 return;
-            foreach (var item in _rundown.ToList())
+            foreach (var item in _items.ToList())
                 Remove(item);
-            _rundown.Clear();
-        }
-
-        public void SaveToFile()
-        {
-            List<RundownItemBase> rundownCopy;
-            lock (_rundownLock)
-                rundownCopy = _rundown.ToList();
+            _items.Clear();
         }
     }
 }

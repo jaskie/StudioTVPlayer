@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public class Player : IDisposable
+    public abstract class Player : IDisposable
     {
         private TVPlayR.Player _player;
         private TVPlayR.PreviewSink _outputPreview;
@@ -39,17 +39,6 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public TVPlayR.PixelFormat PixelFormat
-        {
-            get => _pixelFormat; 
-            private set
-            {
-                if (_pixelFormat == value)
-                    return;
-                _pixelFormat = value;
-            }
-        }
-
         public bool LivePreview => Configuration.LivePreview;
 
         public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => _addItemsWithAutoPlay = value; }
@@ -64,9 +53,9 @@ namespace StudioTVPlayer.Model
                 return;
             var newVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
             VideoFormat = newVideoFormat;
-            PixelFormat = Configuration.PixelFormat;
+            _pixelFormat = Configuration.PixelFormat;
             _addItemsWithAutoPlay = Configuration.AddItemsWithAutoPlay;
-            _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);
+            _player = new TVPlayR.Player(Name, VideoFormat, _pixelFormat, AudioChannelCount);
             foreach (var outputConfiguration in Configuration.Outputs)
             {
                 OutputBase output;
@@ -132,7 +121,7 @@ namespace StudioTVPlayer.Model
             _player.Dispose();
         }
 
-        public void Load(TVPlayR.InputBase item)
+        protected void Load(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
             if (_initialized == default)
@@ -146,13 +135,15 @@ namespace StudioTVPlayer.Model
                 return false;
             if (rundownItem.Prepare(AudioChannelCount))
             {
-                _player.LoadNext(rundownItem.Input);
+                _player.LoadNext(rundownItem.TVPlayRInput);
                 rundownItem.Play();
                 return true;
             }
             return false;
         }
 
+        public bool IsAplha => _pixelFormat == TVPlayR.PixelFormat.bgra;
+                
         public virtual void Clear()
         {
             if (_initialized == default)

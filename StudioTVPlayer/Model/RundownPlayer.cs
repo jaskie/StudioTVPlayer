@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Model
         private Rundown _rundown = new Rundown();
         private RundownItemBase _loadedNextRundownItem;
 
-        public RundownPlayer(Configuration.Player configuration): base(configuration)
+        public RundownPlayer(Configuration.Player configuration) : base(configuration)
         {
             _rundown.ItemLoaded += Rundown_ItemLoaded;
         }
@@ -37,11 +37,9 @@ namespace StudioTVPlayer.Model
 
         public bool DisableAfterUnload { get; set; }
 
-        public bool IsEof => (PlayingRundownItem?.Input as TVPlayR.FileInput)?.IsEof ?? true;
+        public bool IsEof => (PlayingRundownItem?.TVPlayRInput as TVPlayR.FileInput)?.IsEof ?? true;
 
         public TimeSpan OneFrame => VideoFormat.FrameNumberToTime(1);
-
-        public bool IsAplha => PixelFormat == TVPlayR.PixelFormat.bgra;
 
         public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
 
@@ -74,21 +72,19 @@ namespace StudioTVPlayer.Model
             if (item.IsAutoStart)
                 item.Play();
             PlayingRundownItem = item;
-            base.Load(item.Input);
+            Load(item.TVPlayRInput);
         }
 
-        public FileRundownItem AddMediaToQueue(MediaFile media, int index)
+        public void AddMediaToQueue(MediaFile media, int index)
         {
             var item = new FileRundownItem(media) { IsAutoStart = AddItemsWithAutoPlay };
             _rundown.Add(item, index);
-            return item;
         }
 
-        public LiveInputRundownItem AddLiveToQueue(InputBase input, int index)
+        public void AddLiveToQueue(InputBase input, int index)
         {
             var item = new LiveInputRundownItem(input) { IsAutoStart = AddItemsWithAutoPlay };
             _rundown.Add(item, index);
-            return item;
         }
 
         private void AfterPlayed(RundownItemBase rundownItem)

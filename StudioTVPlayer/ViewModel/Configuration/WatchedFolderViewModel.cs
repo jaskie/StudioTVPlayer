@@ -21,7 +21,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             BrowseCommand = new UiCommand((_) =>
             {
                 var path = Path;
-                if (FolderHelper.Browse(ref path, $"Select path for folder {Name}"))
+                if (FolderHelper.BrowseForFolder(ref path, $"Select path for folder {Name}"))
                     Path = path;
             });
 

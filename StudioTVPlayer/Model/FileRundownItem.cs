@@ -17,10 +17,9 @@ namespace StudioTVPlayer.Model
 
         public MediaFile Media { get; }
 
-        public override TVPlayR.InputBase Input => _input; 
-
         public override bool IsPlaying => _input?.IsPlaying == true;
 
+        internal override TVPlayR.InputBase TVPlayRInput => _input;
 
         public bool IsLoop
         {
@@ -36,7 +35,6 @@ namespace StudioTVPlayer.Model
             }
         }
 
-
         public override ImageSource Thumbnail => Media.Thumbnail;
 
         public override string Name => Media.Name;
@@ -48,7 +46,7 @@ namespace StudioTVPlayer.Model
             if (!base.Prepare(audioChannelCount))
                 return false;
             _input = new TVPlayR.FileInput(Media.FullPath);
-            SubscribeToEvents();
+            SubscribeToEvents(_input);
             _input.IsLoop = IsLoop;
             return true;
         }
@@ -62,7 +60,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Unload())
                 return false;
-            UnsubscribeFromEvents();
+            UnsubscribeFromEvents(_input);
             _input.Dispose();
             _input = null;
             return true;
@@ -83,18 +81,17 @@ namespace StudioTVPlayer.Model
             RaiseFramePlayed(e);
         }
 
-        protected override void SubscribeToEvents()
+        protected override void SubscribeToEvents(TVPlayR.InputBase input)
         {
-            base.SubscribeToEvents();
+            base.SubscribeToEvents(input);
             _input.Paused += InputFile_Paused;
         }
 
-        protected override void UnsubscribeFromEvents()
+        protected override void UnsubscribeFromEvents(TVPlayR.InputBase input)
         {
             _input.Paused -= InputFile_Paused;
-            base.UnsubscribeFromEvents();
+            base.UnsubscribeFromEvents(input);
         }
-
 
         private void InputFile_Paused(object sender, EventArgs e)
         {

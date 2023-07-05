@@ -3,9 +3,12 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Helpers
 {
+
+    public interface IPersistable { }
+    
     public static class DataStore
     {                
-        public static void Save<T>(this T data, string fileName)
+        public static void Save<T>(this T data, string fileName) where T : IPersistable
         {
             var dirName = Path.GetDirectoryName(fileName);
             if (!Directory.Exists(dirName))
@@ -15,7 +18,7 @@ namespace StudioTVPlayer.Helpers
                 serializer.Serialize(writer, data);
         }
 
-        public static T Load<T>(string fileName)
+        public static T Load<T>(string fileName) where T : IPersistable
         {
             if (!File.Exists(fileName))
                 return default;

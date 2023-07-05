@@ -52,9 +52,9 @@ namespace StudioTVPlayer.Model
             Unload();
         }
 
-        public abstract TVPlayR.InputBase Input { get; }
-
         public abstract ImageSource Thumbnail { get; }
+
+        internal abstract TVPlayR.InputBase TVPlayRInput { get; }
 
         public abstract string Name { get; }
 
@@ -85,16 +85,16 @@ namespace StudioTVPlayer.Model
 
         protected abstract void Input_FramePlayed(object sender, TVPlayR.TimeEventArgs e);
 
-        protected virtual void SubscribeToEvents()
+        protected virtual void SubscribeToEvents(TVPlayR.InputBase input)
         {
-            Input.Loaded += Input_Loaded;
-            Input.FramePlayed += Input_FramePlayed;
+            input.Loaded += Input_Loaded;
+            input.FramePlayed += Input_FramePlayed;
         }
 
-        protected virtual void UnsubscribeFromEvents()
+        protected virtual void UnsubscribeFromEvents(TVPlayR.InputBase input)
         {
-            Input.FramePlayed -= Input_FramePlayed;
-            Input.Loaded -= Input_Loaded;
+            input.FramePlayed -= Input_FramePlayed;
+            input.Loaded -= Input_Loaded;
         }
 
         protected void RaiseFramePlayed(TVPlayR.TimeEventArgs e)

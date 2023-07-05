@@ -7,11 +7,9 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Persistence
 {
-    public class Rundown : Helpers.IPersistable
+    public class DecklinkInputRundownItem : RundownItemBase
     {
-
-        [XmlElement(typeof(FileRundownItem))]
-        [XmlElement(typeof(DecklinkInputRundownItem))]
-        public RundownItemBase[] RundownItems { get; set; }
+        [XmlAttribute]
+        public int DeviceIndex { get; set; }
     }
 }

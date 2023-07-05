@@ -6,6 +6,7 @@
 #include "DecklinkIterator.h"
 #include "DecklinkInput.h"
 #include "../Core/VideoFormat.h"
+#include "../PixelFormat.h"
 
 namespace TVPlayR {
 	namespace Decklink {
@@ -66,7 +67,7 @@ namespace TVPlayR {
 
 			std::shared_ptr<DecklinkInput> CreateInput(const DecklinkInfo& info, Core::VideoFormatType format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
 			{
-				return std::make_shared<DecklinkInput>(info.GetDecklink(), format, audio_channels_count, timecode_source, capture_video, format_autodetection);
+				return std::make_shared<DecklinkInput>(info.GetDecklink(), format, PixelFormat::yuv422, audio_channels_count, timecode_source, capture_video, format_autodetection);
 			}
 
 		};

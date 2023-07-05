@@ -7,6 +7,7 @@
 #include "../Core/VideoFormat.h"
 #include "../Core/AVSync.h"
 #include "../FieldOrder.h"
+#include "../PixelFormat.h"
 #include "../Core/OutputDevice.h"
 
 namespace TVPlayR {
@@ -29,6 +30,7 @@ namespace TVPlayR {
 			const bool													is_wide_;
 			const bool													capture_video_;
 			const bool													format_autodetection_;
+			const BMDPixelFormat										pixel_format_;
 			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
 			std::vector<std::shared_ptr<Core::OutputSink>>				output_sinks_;
 			BMDTimeScale												time_scale_ = 1LL;
@@ -43,7 +45,7 @@ namespace TVPlayR {
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
+			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink input")
 				, input_(decklink)
 				, is_wide_(!(initial_format == Core::VideoFormatType::ntsc || initial_format == Core::VideoFormatType::pal))
@@ -55,9 +57,10 @@ namespace TVPlayR {
 				, current_field_order_(current_format_.field_order())
 				, current_sar_(current_format_.SampleAspectRatio().av())
 				, format_autodetection_(format_autodetection)
+				, pixel_format_(Decklink::BMDPixelFormatFromPixelFormat(pixel_format))
 			{
 				IDeckLinkDisplayMode* mode = FindMode(GetDecklinkDisplayMode(initial_format));
-				OpenInput(mode);
+				OpenInput(mode, pixel_format_);
 				input_->SetCallback(this);
 			}
 
@@ -67,12 +70,12 @@ namespace TVPlayR {
 				input_->SetCallback(NULL);
 			}
 
-			void OpenInput(IDeckLinkDisplayMode* displayMode)
+			void OpenInput(IDeckLinkDisplayMode* displayMode, BMDPixelFormat pixel_format)
 			{
 				BMDTimeValue frame_duration;
 				if (FAILED(displayMode->GetFrameRate(&frame_duration, &time_scale_)))
 					THROW_EXCEPTION("DecklinkInput: GetFrameRate failed");
-				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), BMDPixelFormat::bmdFormat8BitYUV, is_format_autodetection_supported_ && format_autodetection_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
+				if (FAILED(input_->EnableVideoInput(displayMode->GetDisplayMode(), pixel_format, is_format_autodetection_supported_ && format_autodetection_ ? bmdVideoInputEnableFormatDetection : bmdVideoInputFlagDefault)))
 					THROW_EXCEPTION("DecklinkInput: EnableVideoInput failed");
 				if (audio_channels_count_ > 0)
 				{
@@ -121,7 +124,7 @@ namespace TVPlayR {
 					current_sar_ = current_format_.SampleAspectRatio().av();
 					for (auto& provider : player_providers_)
 						provider->Reset(current_format_.FrameRate().av());
-					OpenInput(newDisplayMode);
+					OpenInput(newDisplayMode, pixel_format_);
 					if (format_changed_callback_)
 						format_changed_callback_(BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_));
 				}
@@ -229,8 +232,8 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
-			: impl_(std::make_unique<implementation>(decklink, initial_format, audio_channels_count, timecode_source, capture_video, format_autodetection))
+		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
+			: impl_(std::make_unique<implementation>(decklink, initial_format, pixel_format, audio_channels_count, timecode_source, capture_video, format_autodetection))
 		{ }
 		
 		DecklinkInput::~DecklinkInput()	{ }

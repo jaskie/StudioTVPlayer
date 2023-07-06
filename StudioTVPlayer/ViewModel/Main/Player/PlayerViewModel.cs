@@ -48,6 +48,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
 
             player.Loaded += MediaPlayer_Loaded;
+            player.Cleared += MediaPlayer_Cleared;
             player.FramePlayed += MediaPlayer_Progress;
             player.Paused += MediaPlayer_Paused;
             player.MediaSubmitted += MediaPlayer_MediaSubmitted;
@@ -67,36 +68,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             SaveRundownCommand = new UiCommand(SaveRundown, _ => Rundown.Any());
             LoadRundownCommand = new UiCommand(LoadRundown, _ => _player.PlayingRundownItem is null); 
-        }
-
-        private void SaveRundown(object _)
-        {
-            var fileName = FolderHelper.SaveFileDialog("Save rundown as", "Rundowns", "rundown");
-            if (string.IsNullOrEmpty(fileName))
-                return;
-            try
-            {
-                Model.Persistence.RundownPersister.SaveRundown(_player.Rundown, fileName);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Unable to save rundown. Error was:\n{ex.InnerException ?? ex}", "Error saving rundown", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void LoadRundown(object _)
-        {
-            var fileName = FolderHelper.OpenFileDialog("Load rundown", "Rundowns", "rundown");
-            if (string.IsNullOrEmpty(fileName)) 
-                return;
-            try
-            {
-                Model.Persistence.RundownPersister.LoadRundown(_player.Rundown, fileName);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Unable to load rundown. Error was:\n{ex.InnerException ?? ex}", "Error loading rundown", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         public string Name { get; }
@@ -462,6 +433,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 Preview = CurrentRundownItem?.Thumbnail;
         }
 
+        private void MediaPlayer_Cleared(object sender, EventArgs e)
+        {
+            CurrentRundownItem = null;
+            Preview = null;
+        }
+
         private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)
         {
             Rundown.Add(CreateRundownItemViewModel(e.RundownItem));
@@ -528,6 +505,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             _isDisposed = true;
             _player.Loaded -= MediaPlayer_Loaded;
+            _player.Cleared -= MediaPlayer_Cleared;
             _player.FramePlayed -= MediaPlayer_Progress;
             _player.Paused -= MediaPlayer_Paused;
             _player.MediaSubmitted -= MediaPlayer_MediaSubmitted;
@@ -631,6 +609,38 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     throw new ArgumentException(nameof(rundownItem));
             }
         }
+
+        private void SaveRundown(object _)
+        {
+            var fileName = FolderHelper.SaveFileDialog("Save rundown as", "Rundowns", "rundown");
+            if (string.IsNullOrEmpty(fileName))
+                return;
+            try
+            {
+                Model.Persistence.RundownPersister.SaveRundown(_player.Rundown, fileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to save rundown. Error was:\n{ex.InnerException ?? ex}", "Error saving rundown", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void LoadRundown(object _)
+        {
+            var fileName = FolderHelper.OpenFileDialog("Load rundown", "Rundowns", "rundown");
+            if (string.IsNullOrEmpty(fileName))
+                return;
+            try
+            {
+                UISBusyState.SetBusyState();
+                Model.Persistence.RundownPersister.LoadRundown(_player.Rundown, fileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to load rundown. Error was:\n{ex.InnerException ?? ex}", "Error loading rundown", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
 
     }
 }

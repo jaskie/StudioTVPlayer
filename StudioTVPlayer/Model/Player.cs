@@ -19,6 +19,9 @@ namespace StudioTVPlayer.Model
         private TVPlayR.PixelFormat _pixelFormat;
         private int _initialized;
 
+        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
+        public event EventHandler Cleared;
+
         public Player(Configuration.Player configuration)
         {
             Configuration = configuration;
@@ -149,9 +152,8 @@ namespace StudioTVPlayer.Model
             if (_initialized == default)
                 return;
             _player.Clear();
+            Cleared?.Invoke(this, EventArgs.Empty);
         }
-
-        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
 
         private void Player_AudioVolume(object sender, TVPlayR.AudioVolumeEventArgs e)
         {

@@ -9,16 +9,18 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public class Player : IDisposable
+    public abstract class Player : IDisposable
     {
         private TVPlayR.Player _player;
         private TVPlayR.PreviewSink _outputPreview;
-        private List<OutputBase> _outputs = new List<OutputBase>();
-        private bool _disablePlayedItems;
+        private readonly List<OutputBase> _outputs = new List<OutputBase>();
         private bool _addItemsWithAutoPlay;
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.PixelFormat _pixelFormat;
         private int _initialized;
+
+        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
+        public event EventHandler Cleared;
 
         public Player(Configuration.Player configuration)
         {
@@ -40,24 +42,11 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public TVPlayR.PixelFormat PixelFormat
-        {
-            get => _pixelFormat; 
-            private set
-            {
-                if (_pixelFormat == value)
-                    return;
-                _pixelFormat = value;
-            }
-        }
-
         public bool LivePreview => Configuration.LivePreview;
-
-        public bool DisablePlayedItems { get => _disablePlayedItems; set => _disablePlayedItems = value; }
 
         public bool AddItemsWithAutoPlay { get => _addItemsWithAutoPlay; set => _addItemsWithAutoPlay = value; }
 
-        public bool IsInitialized => _player != null;
+        public bool IsInitialized => _initialized != default;
 
         public int AudioChannelCount { get; } = 2;
 
@@ -67,10 +56,9 @@ namespace StudioTVPlayer.Model
                 return;
             var newVideoFormat = TVPlayR.VideoFormat.Formats.FirstOrDefault(f => f.Name == Configuration.VideoFormat);
             VideoFormat = newVideoFormat;
-            PixelFormat = Configuration.PixelFormat;
-            _disablePlayedItems = Configuration.DisablePlayedItems;
+            _pixelFormat = Configuration.PixelFormat;
             _addItemsWithAutoPlay = Configuration.AddItemsWithAutoPlay;
-            _player = new TVPlayR.Player(Name, VideoFormat, PixelFormat, AudioChannelCount);
+            _player = new TVPlayR.Player(Name, VideoFormat, _pixelFormat, AudioChannelCount);
             foreach (var outputConfiguration in Configuration.Outputs)
             {
                 OutputBase output;
@@ -136,7 +124,7 @@ namespace StudioTVPlayer.Model
             _player.Dispose();
         }
 
-        public void Load(TVPlayR.InputBase item)
+        protected void Load(TVPlayR.InputBase item)
         {
             Debug.Assert(item != null);
             if (_initialized == default)
@@ -144,22 +132,28 @@ namespace StudioTVPlayer.Model
             _player.Load(item);
         }
 
-        protected void PlayNext(TVPlayR.InputBase item)
+        protected bool LoadNext(RundownItemBase rundownItem)
         {
-            Debug.Assert(item != null);
             if (_initialized == default)
-                return;
-            _player.PlayNext(item);
+                return false;
+            if (rundownItem.Prepare(AudioChannelCount))
+            {
+                _player.LoadNext(rundownItem.TVPlayRInput);
+                rundownItem.Play();
+                return true;
+            }
+            return false;
         }
 
+        public bool IsAplha => _pixelFormat == TVPlayR.PixelFormat.bgra;
+                
         public virtual void Clear()
         {
             if (_initialized == default)
                 return;
             _player.Clear();
+            Cleared?.Invoke(this, EventArgs.Empty);
         }
-
-        public event EventHandler<AudioVolumeEventArgs> AudioVolume;
 
         private void Player_AudioVolume(object sender, TVPlayR.AudioVolumeEventArgs e)
         {

@@ -102,10 +102,10 @@ namespace TVPlayR {
 		)
 	}
 
-	void Player::PlayNext(InputBase^ file)
+	void Player::LoadNext(InputBase^ file)
 	{
 		REWRAP_EXCEPTION(
-		_player->PlayNext(file->GetNativeSource());
+		_player->LoadNext(file->GetNativeSource());
 		)
 	}
 

@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Providers
 {
-    public class Configuration
+    public class Configuration : Helpers.IPersistable
     {
         private const string ConfigurationFile = "Configuration.xml";
 

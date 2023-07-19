@@ -4,20 +4,22 @@ namespace StudioTVPlayer.Model
 {
     public sealed class LiveInputRundownItem : RundownItemBase
     {
-        TVPlayR.InputBase _input;
+        InputBase _input;
 
         public LiveInputRundownItem(InputBase input)
         {
-            _input = input.Input;
+            _input = input;
         }
 
         public override bool IsPlaying => true;
 
-        public override TVPlayR.InputBase Input => _input;
-
         public override ImageSource Thumbnail => null;
 
-        public override string Name => _input.Name;
+        public override string Name => _input.TVPlayRInput.Name;
+
+        public InputBase Input => _input;
+
+        internal override TVPlayR.InputBase TVPlayRInput => _input.TVPlayRInput;
 
         public override bool CanSeek => false;
 
@@ -33,7 +35,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Prepare(audioChannelCount))
                 return false;
-            SubscribeToEvents();
+            SubscribeToEvents(_input.TVPlayRInput);
             return true;
         }
 
@@ -41,7 +43,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Unload())
                 return false;
-            UnsubscribeFromEvents();
+            UnsubscribeFromEvents(_input.TVPlayRInput);
             return true;
         }
 

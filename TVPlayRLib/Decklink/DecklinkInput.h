@@ -4,6 +4,7 @@
 namespace TVPlayR {
 
 	enum class DecklinkTimecodeSource;
+	enum class PixelFormat;
 
 	namespace Core {
 		enum class VideoFormatType;
@@ -16,7 +17,7 @@ namespace TVPlayR {
 		class DecklinkInput final : public Core::InputSource
 		{
 		public:
-			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection);
+			explicit DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection);
 			virtual ~DecklinkInput();
 			Core::AVSync PullSync(const Core::Player& player, int audio_samples_count) override;
 			bool IsAddedToPlayer(const Core::Player& player) override;

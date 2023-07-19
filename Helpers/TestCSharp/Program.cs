@@ -26,7 +26,7 @@ namespace TestCSharp
                     var file2 = new FileInput(@"d:\temp\test (1).mov");
                     player.Load(file1);
                     file1.Play();
-                    player.PlayNext(file2);
+                    player.LoadNext(file2);
                     file2.Loaded += File2_Loaded;
                     Console.ReadKey();
                 }

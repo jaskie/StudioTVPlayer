@@ -11,4 +11,15 @@ namespace StudioTVPlayer.Model.Args
 
         public RundownItemBase RundownItem { get; }
     }
+
+    public class RundownItemIndexedEventArgs: RundownItemEventArgs
+    {
+        public RundownItemIndexedEventArgs(RundownItemBase item, int index) : base(item)
+        {
+            Index = index;
+        }
+
+        public int Index { get; }
+    }
+
 }

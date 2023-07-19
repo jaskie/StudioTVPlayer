@@ -169,7 +169,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         private void BrowseForFolder(object _)
         {
-            if (FolderHelper.Browse(ref _folder, $"Select folder to capture video"))
+            if (FolderHelper.BrowseForFolder(ref _folder, $"Select folder to capture video"))
             {
                 NotifyPropertyChanged(nameof(Folder));
                 SetNewFullPath();

@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Providers
 {
-    public class InputList
+    public class InputList : Helpers.IPersistable
     {
         private const string InputsFile = "inputs.xml";
         

@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Model
         public string VideoFormat { get; set; }
 
         [XmlIgnore]
-        public abstract TVPlayR.InputBase Input { get; }
+        internal abstract TVPlayR.InputBase TVPlayRInput { get; }
 
         [XmlIgnore]
         public abstract ImageSource Thumbnail { get; }
@@ -18,7 +18,7 @@ namespace StudioTVPlayer.Model
         [XmlIgnore]
         public abstract bool IsRunning { get; }
 
-        public abstract TVPlayR.VideoFormat CurrentFormat();
+        internal abstract TVPlayR.VideoFormat CurrentFormat();
 
         public abstract void Dispose();
 
@@ -26,14 +26,14 @@ namespace StudioTVPlayer.Model
 
         public abstract void Uninitialize();
 
-        public void AddOutputSink(TVPlayR.OutputSink output)
+        internal void AddOutputSink(TVPlayR.OutputSink output)
         {
-            Input.AddOutputSink(output);
+            TVPlayRInput.AddOutputSink(output);
         }
 
-        public void RemoveOutputSink(TVPlayR.FFOutput output)
+        internal void RemoveOutputSink(TVPlayR.OutputSink output)
         {
-            Input.RemoveOutputSink(output);
+            TVPlayRInput.RemoveOutputSink(output);
         }
     }
 }

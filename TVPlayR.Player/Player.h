@@ -40,7 +40,7 @@ namespace TVPlayR {
 		void RemoveOutputSink(OutputSink^ sink);
 		void AddOverlay(OverlayBase^ overlay);
 		void Load(InputBase^ file);
-		void PlayNext(InputBase^ file);
+		void LoadNext(InputBase^ file);
 		void Clear();
 		property float Volume { float get(); void set(float volume); }
 		property TVPlayR::VideoFormat^ VideoFormat { TVPlayR::VideoFormat^ get() { return _videoFormat; }}

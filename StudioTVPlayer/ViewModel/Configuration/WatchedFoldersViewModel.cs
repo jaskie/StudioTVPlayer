@@ -30,7 +30,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void AddWatchedFolder(object obj)
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
-            if (FolderHelper.Browse(ref path, "Select path for new watched folder"))
+            if (FolderHelper.BrowseForFolder(ref path, "Select path for new watched folder"))
             {
                 var name = path.Split(new[] { System.IO.Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? "New watched folder";
                 var vm = new WatchedFolderViewModel(new WatchedFolder() { Path = path, Name = name, Filter = "*.mov;*.mp4;*.mxf" });

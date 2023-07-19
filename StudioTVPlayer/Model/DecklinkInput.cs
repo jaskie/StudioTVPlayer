@@ -30,7 +30,7 @@ namespace StudioTVPlayer.Model
             Uninitialize();
         }
 
-        public override TVPlayR.InputBase Input => _input;
+        internal override TVPlayR.InputBase TVPlayRInput => _input;
 
         public override bool Initialize()
         {
@@ -79,12 +79,10 @@ namespace StudioTVPlayer.Model
             FormatChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public override TVPlayR.VideoFormat CurrentFormat()
+        internal override TVPlayR.VideoFormat CurrentFormat()
         {
             return _currentFormat;
         }
-
-
 
     }
 }

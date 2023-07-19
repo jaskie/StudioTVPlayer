@@ -4,20 +4,20 @@ using System.Linq;
 
 namespace StudioTVPlayer.Providers
 {
-
-
     public class MostRecentUsed
     {
+        private readonly MostRecentlyUsedList _folders = new MostRecentlyUsedList(Path.Combine(GlobalApplicationData.ApplicationDataDir, "MRU_Folders.txt"), 5);
+
         private class MostRecentlyUsedList
         {
             private List<string> _items;
             private readonly string _fileName;
-            private readonly int _count;
+            private readonly int _max_count;
 
-            public MostRecentlyUsedList(string fileName, int count)
+            public MostRecentlyUsedList(string fileName, int max_count)
             {
                 _fileName = fileName;
-                _count = count;
+                _max_count = max_count;
                 if (File.Exists(fileName))
                 {
                     try
@@ -39,7 +39,7 @@ namespace StudioTVPlayer.Providers
                     _items.RemoveAt(index);
                 else
                 {
-                    if (_items.Count > _count - 1)
+                    if (_items.Count > _max_count - 1)
                         _items.RemoveAt(0);
                 }
                 _items.Add(folder);
@@ -58,8 +58,6 @@ namespace StudioTVPlayer.Providers
             public List<string> Items { get { return _items; } }
 
         }
-
-        private readonly MostRecentlyUsedList _folders = new MostRecentlyUsedList(Path.Combine(GlobalApplicationData.ApplicationDataDir, "MRU_Folders.txt"), 5);
 
         public IReadOnlyList<string> Folders => _folders.Items;
 

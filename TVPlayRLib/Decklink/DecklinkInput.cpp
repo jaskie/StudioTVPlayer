@@ -61,7 +61,8 @@ namespace TVPlayR {
 			{
 				IDeckLinkDisplayMode* mode = FindMode(GetDecklinkDisplayMode(initial_format));
 				OpenInput(mode, pixel_format_);
-				input_->SetCallback(this);
+				if (FAILED(input_->SetCallback(this)))
+					THROW_EXCEPTION("DecklinkInput: SetCallback failed");;
 			}
 
 			implementation::~implementation()
@@ -100,7 +101,7 @@ namespace TVPlayR {
 
 			IDeckLinkDisplayMode* FindMode(BMDDisplayMode mode)
 			{
-				IDeckLinkDisplayModeIterator* displayModeIterator = nullptr;				
+				IDeckLinkDisplayModeIterator* displayModeIterator = nullptr;
 				if (FAILED(input_->GetDisplayModeIterator(&displayModeIterator)))
 					THROW_EXCEPTION("DecklinkInput: Display mode iterator creation failed");
 				IDeckLinkDisplayMode* displayMode = nullptr;
@@ -151,8 +152,8 @@ namespace TVPlayR {
 					);
 				for (auto& provider : player_providers_)
 					provider->Push(sync);
-				for (auto& preview : output_sinks_)
-					preview->Push(sync);
+				for (auto& sink : output_sinks_)
+					sink->Push(sync);
 				if (frame_played_callback_)
 					frame_played_callback_(sync.TimeInfo);
 				return S_OK;

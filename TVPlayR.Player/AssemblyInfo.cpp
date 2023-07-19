@@ -6,16 +6,16 @@ using namespace System::Runtime::CompilerServices;
 using namespace System::Runtime::InteropServices;
 using namespace System::Security::Permissions;
 
-[assembly:AssemblyTitleAttribute(L"TVPlayRPlayer")];
-[assembly:AssemblyDescriptionAttribute(L"")];
+[assembly:AssemblyTitleAttribute(L"TVPlayR.Player")];
+[assembly:AssemblyDescriptionAttribute(L"Player native library")];
 [assembly:AssemblyConfigurationAttribute(L"")];
 [assembly:AssemblyCompanyAttribute(L"")];
-[assembly:AssemblyProductAttribute(L"TVPlayRPlayer")];
-[assembly:AssemblyCopyrightAttribute(L"Copyright (c)  2022")];
+[assembly:AssemblyProductAttribute(L"TVPlayR.Player")];
+[assembly:AssemblyCopyrightAttribute(L"Copyright (c)  2023")];
 [assembly:AssemblyTrademarkAttribute(L"")];
 [assembly:AssemblyCultureAttribute(L"")];
 
-[assembly:AssemblyVersionAttribute("0.6.*")];
+[assembly:AssemblyVersionAttribute("0.7.*")];
 
 [assembly:ComVisible(false)];
 

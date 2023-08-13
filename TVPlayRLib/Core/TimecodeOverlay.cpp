@@ -96,7 +96,7 @@ namespace TVPlayR {
 				frame_graphics.Flush(Gdiplus::FlushIntentionSync);
 			}
 
-			std::string GetTimeString(int64_t time)
+			std::string GetTimeString(std::int64_t time)
 			{
 				return video_format_.FrameNumberToString(static_cast<int>(av_rescale(time, video_format_.FrameRate().Numerator(), video_format_.FrameRate().Denominator() * AV_TIME_BASE)));
 			}

@@ -38,5 +38,5 @@ private:
 	AVRational input_sar_ = av_make_q(1, 1);
 	void CreateFilter(int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar);
 };
-	
+
 }}

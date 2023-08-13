@@ -130,7 +130,7 @@ namespace TVPlayR {
 				assert(executor_.is_current());
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
 				for (Core::ClockTarget * target : clock_targets_)
-					target->RequestFrame(audio_samples_required);
+					target->RequestNextFrame(audio_samples_required);
 				video_frames_requested_++;
 				audio_samples_requested_ += audio_samples_required;
 			}

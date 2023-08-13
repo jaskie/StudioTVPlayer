@@ -11,7 +11,7 @@ public:
 	std::shared_ptr<AVFrame> GetFrame();
 	void SetIsPlaying(bool is_playing);
 	bool IsEmpty() const;
-	int64_t Pts() const;
+	std::int64_t Pts() const;
 	void Clear();
 private:
 	const FieldOrder field_order_;

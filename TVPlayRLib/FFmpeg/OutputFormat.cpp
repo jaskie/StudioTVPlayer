@@ -76,10 +76,10 @@ namespace TVPlayR {
 
 		void OutputFormat::FreeFormatContext(AVFormatContext* ctx)
 		{
-			if (is_initialized_ && !FF(av_write_trailer(ctx)))
+			if (is_initialized_ && !FF_SUCCESS(av_write_trailer(ctx)))
 				DebugPrintLine(Common::DebugSeverity::warning, "av_write_trailer failed");
 			if (!(ctx->oformat->flags & AVFMT_NOFILE))
-				if (!FF(avio_close(ctx->pb)))
+				if (!FF_SUCCESS(avio_close(ctx->pb)))
 					DebugPrintLine(Common::DebugSeverity::warning, "avio_close failed");
 			avformat_free_context(ctx);
 			DebugPrintLine(Common::DebugSeverity::info, "avformat_free_context");

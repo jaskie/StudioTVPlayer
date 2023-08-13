@@ -203,6 +203,15 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="ColorSpace.h" />
+    <ClInclude Include="FFmpeg\VideoOverlayFilter.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="FFmpeg\FFmpegBufferedInput.h">
+      <Filter>FFmpeg</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AudioParameters.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -319,6 +328,12 @@
     </ClCompile>
     <ClCompile Include="Core\InputSource.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\VideoOverlayFilter.cpp">
+      <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\FFmpegBufferedInput.cpp">
+      <Filter>FFmpeg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

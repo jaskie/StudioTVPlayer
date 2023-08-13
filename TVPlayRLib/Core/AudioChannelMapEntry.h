@@ -1,9 +1,8 @@
 #pragma once
 namespace TVPlayR {
 	namespace Core {
-class AudioChannelMapEntry
+struct AudioChannelMapEntry
 {
-public:
 	int StreamIndex;
 	int ChannelNumber;
 };

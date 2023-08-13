@@ -3,9 +3,8 @@
 
 namespace TVPlayR {
 	namespace Core {
-class StreamInfo
+struct StreamInfo
 {
-public:
 	int Index;
 	MediaType Type;
 	bool IsPreffered;

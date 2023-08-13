@@ -4,8 +4,8 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class AudioChannelMapEntry;
-		class StreamInfo;
+		struct AudioChannelMapEntry;
+		struct StreamInfo;
 		enum class FieldOrder;
 	}
 		namespace FFmpeg {

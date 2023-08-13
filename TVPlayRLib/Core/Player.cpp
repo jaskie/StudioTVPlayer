@@ -55,7 +55,7 @@ namespace TVPlayR {
 					audio_volume_callback_ = nullptr;
 			}
 
-			void RequestFrame(int audio_samples_count)
+			void RequestNextFrame(int audio_samples_count)
 			{
 				if (audio_samples_count < 0)
 					audio_samples_count = 0;
@@ -204,7 +204,7 @@ namespace TVPlayR {
 
 		void Player::SetFrameClockSource(FrameClockSource& clock) { impl_->SetFrameClockSource(*this, clock); }
 
-		void Player::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
+		void Player::RequestNextFrame(int audio_samples_count) { impl_->RequestNextFrame(audio_samples_count); }
 
 		void Player::Load(std::shared_ptr<InputSource> source) 
 		{

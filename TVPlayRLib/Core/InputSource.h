@@ -35,7 +35,6 @@ public:
 	virtual void SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) = 0;
 	void RaiseLoaded();
 	void SetLoadedCallback(LOADED_CALLBACK callback);
-	virtual ~InputSource() { }
 private:
 	LOADED_CALLBACK _loadedCallback = nullptr;
 };

@@ -27,7 +27,7 @@ struct Decoder::implementation : Common::DebugTarget
 	bool is_flushed_ = false;
 	const int stream_index_;
 	const int channels_count_;
-	const int sample_rate_;
+	const int audio_sample_rate_;
 	const std::unique_ptr<AVCodecContext, void(*)(AVCodecContext*)>  ctx_;
 	std::deque<std::shared_ptr<AVPacket>> packet_queue_;
 	const AVRational time_base_;
@@ -38,13 +38,13 @@ struct Decoder::implementation : Common::DebugTarget
 	std::mutex mutex_;
 
 	implementation(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
-		: Common::DebugTarget(Common::DebugSeverity::info, "Decoder")
+		: Common::DebugTarget(Common::DebugSeverity::debug, "Decoder")
 		, ctx_(codec ? avcodec_alloc_context3(codec) : NULL, [](AVCodecContext* c) { if (c)	avcodec_free_context(&c); })
 		, start_ts_(stream ? stream->start_time : 0LL)
 		, duration_(stream ? stream->duration: 0LL)
 		, stream_index_(stream ? stream->index : 0)
 		, channels_count_(stream && stream->codecpar ? stream->codecpar->ch_layout.nb_channels : 0)
-		, sample_rate_(stream && stream->codecpar ? stream->codecpar->sample_rate : 0)
+		, audio_sample_rate_(stream && stream->codecpar ? stream->codecpar->sample_rate : 0)
 		, time_base_(stream ? stream->time_base : av_make_q(0, 1))
 		, seek_pts_(TimeToPts(seek_time, time_base_))
 		, stream_(stream)
@@ -82,7 +82,7 @@ struct Decoder::implementation : Common::DebugTarget
 			if (hw_pix_format == AV_PIX_FMT_CUDA)
 				ctx_->get_format = GetHwPixelFormat;
 			AVBufferRef* weak_hw_device_ctx = NULL;
-			if (FF(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
+			if (FF_SUCCESS(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
 			{
 				hw_device_ctx_.reset(weak_hw_device_ctx);
 				ctx_->hw_device_ctx = av_buffer_ref(weak_hw_device_ctx);
@@ -121,7 +121,7 @@ struct Decoder::implementation : Common::DebugTarget
 	{
 		if (packet_queue_.empty())
 			return;
-		auto packet = packet_queue_.front();
+		auto& packet = packet_queue_.front();
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			if (packet)
@@ -229,7 +229,7 @@ bool Decoder::IsEof() const { return impl_->is_eof_; }
 
 int Decoder::AudioChannelsCount() const { return impl_->channels_count_; }
 
-int Decoder::AudioSampleRate() const { return impl_->sample_rate_; }
+int Decoder::AudioSampleRate() const { return impl_->audio_sample_rate_; }
 
 int Decoder::StreamIndex() const { return impl_->stream_index_; }
 

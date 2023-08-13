@@ -2,7 +2,7 @@
 
 namespace TVPlayR {
 	namespace Core {
-		class StreamInfo;
+		struct StreamInfo;
 		enum class HwAccel;
 	}
 

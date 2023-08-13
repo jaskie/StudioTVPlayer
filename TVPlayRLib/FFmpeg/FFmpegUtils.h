@@ -1,6 +1,6 @@
 #pragma once
 
-#define FF(value) (value >= 0)
+#define FF_SUCCESS(value) (value >= 0)
 
 namespace TVPlayR {
 		enum class PixelFormat;

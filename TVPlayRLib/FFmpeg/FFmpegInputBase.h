@@ -7,15 +7,16 @@ namespace TVPlayR {
 
 	namespace Core {
 		enum class HwAccel;
-		class StreamInfo;
+		struct StreamInfo;
 	}
 	namespace FFmpeg {
 		class Decoder;
 		
-struct FFmpegInputBase : Common::NonCopyable
+struct FFmpegInputBase : private Common::NonCopyable
 {
 protected:
 	FFmpegInputBase(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
+	virtual ~FFmpegInputBase();
 	const std::string file_name_;
 	const Core::HwAccel acceleration_;
 	const std::string hw_device_;

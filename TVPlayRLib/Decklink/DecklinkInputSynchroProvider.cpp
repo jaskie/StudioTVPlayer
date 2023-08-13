@@ -4,6 +4,7 @@
 #include "DecklinkUtils.h"
 #include "../Core/Player.h"
 #include "../Core/AVSync.h"
+#include "../Core/AudioParameters.h"
 #include "../FFmpeg/FFmpegUtils.h"
 #include "../FFmpeg/PlayerScaler.h"
 
@@ -11,7 +12,7 @@ namespace TVPlayR {
 	namespace Decklink {
 		DecklinkInputSynchroProvider::DecklinkInputSynchroProvider(const Core::Player& player, TVPlayR::DecklinkTimecodeSource timecode_source, bool process_video, int audio_channels)
 			: player_(player)
-			, audio_fifo_(player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), av_make_q(1, player.AudioSampleRate()), 0LL, AV_TIME_BASE/10)
+			, audio_fifo_(Core::AudioParameters{ player.AudioSampleRate(), player.AudioChannelsCount(), player.AudioSampleFormat() }, av_make_q(1, player.AudioSampleRate()), 0LL, AV_TIME_BASE / 10)
 			, process_video_(process_video)
 			, input_frame_rate_(player.Format().FrameRate().av())
 			, frame_queue_(2)

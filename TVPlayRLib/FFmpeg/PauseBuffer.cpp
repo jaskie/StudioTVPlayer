@@ -32,7 +32,7 @@ namespace TVPlayR {
 			return !last_frame_;
 		}
 
-		int64_t PauseBuffer::Pts() const
+		std::int64_t PauseBuffer::Pts() const
 		{
 			return last_frame_ ? last_frame_->pts : AV_NOPTS_VALUE;
 		}

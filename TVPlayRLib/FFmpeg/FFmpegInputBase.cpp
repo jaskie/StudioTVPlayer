@@ -24,6 +24,10 @@ namespace TVPlayR {
 		{
 		}
 
+		FFmpegInputBase::~FFmpegInputBase()
+		{
+		}
+
 		void FFmpegInputBase::InitializeVideoDecoder()
 		{
 			if (video_decoder_)

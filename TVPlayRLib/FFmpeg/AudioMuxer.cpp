@@ -1,4 +1,5 @@
 #include "../pch.h"
+#include "../Core/AudioParameters.h"
 #include "AudioMuxer.h"
 #include "Decoder.h"
 #include "AudioFifo.h"
@@ -8,21 +9,19 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, std::int64_t output_channel_layout, const AVSampleFormat sample_format, const int sample_rate, const int nb_channels)
+AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, std::int64_t output_channel_layout, const Core::AudioParameters output_audio_parameters)
 	: Common::DebugTarget(Common::DebugSeverity::info, "Audio muxer")
 	, FilterBase::FilterBase()
 	, decoders_(decoders)
-	, input_time_base_(decoders.empty() ? av_make_q(1, sample_rate) : decoders[0]->TimeBase())
-	, output_sample_rate_(sample_rate)
-	, nb_channels_(nb_channels)
+	, input_time_base_(decoders.empty() ? av_make_q(1, output_audio_parameters.SampleRate) : decoders[0]->TimeBase())
+	, output_audio_parameters_(output_audio_parameters)
 	, output_channel_layout_(output_channel_layout)
-	, audio_sample_format_(sample_format)
-{ 
-	filter_str_ = GetAudioMuxerString(sample_rate);
+	, filter_str_(GetAudioMuxerString())
+{
 	Reset();
 }
 
-std::string AudioMuxer::GetAudioMuxerString(const int sample_rate)
+std::string AudioMuxer::GetAudioMuxerString()
 {
 	std::ostringstream filter;
 	int total_nb_channels = std::accumulate(decoders_.begin(), decoders_.end(), 0, [](int sum, const std::unique_ptr<Decoder>& curr) { return sum + curr->AudioChannelsCount(); });
@@ -45,7 +44,7 @@ std::string AudioMuxer::GetAudioMuxerString(const int sample_rate)
 		if (total_nb_channels == 2)
 			filter << "[a0]";
 	}
-	filter << "aresample=out_sample_fmt=" << av_get_sample_fmt_name(audio_sample_format_) << ":out_sample_rate=" << sample_rate;
+	filter << "aresample=out_sample_fmt=" << av_get_sample_fmt_name(output_audio_parameters_.SampleFormat) << ":out_sample_rate=" << output_audio_parameters_.SampleRate;
 	return filter.str();
 }
 
@@ -64,9 +63,9 @@ AVRational AudioMuxer::OutputTimeBase() const
 	return av_buffersink_get_time_base(sink_ctx_);
 }
 
-AVSampleFormat AudioMuxer::OutputSampleFormat()
+AVSampleFormat AudioMuxer::OutputSampleFormat() const
 {
-	return audio_sample_format_;
+	return output_audio_parameters_.SampleFormat;
 }
 
 void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
@@ -137,9 +136,9 @@ void AudioMuxer::Initialize()
 	is_flushed_ = false;
 	graph_.reset(avfilter_graph_alloc());
 
-	AVSampleFormat out_sample_fmts[] = { audio_sample_format_, AV_SAMPLE_FMT_NONE };
+	AVSampleFormat out_sample_fmts[] = { output_audio_parameters_.SampleFormat, AV_SAMPLE_FMT_NONE };
 	std::int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
-	int out_sample_rates[] = { output_sample_rate_, -1 };
+	int out_sample_rates[] = { output_audio_parameters_.SampleRate, -1 };
 
 	AVFilterInOut * inputs = avfilter_inout_alloc();
 	AVFilterInOut * outputs = avfilter_inout_alloc();

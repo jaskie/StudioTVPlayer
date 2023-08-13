@@ -1,4 +1,6 @@
 #pragma once
+#include "../Core/AudioParameters.h"
+
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -6,7 +8,7 @@ namespace TVPlayR {
 class AudioFifo final : private Common::NonCopyable, private Common::DebugTarget
 {
 public:
-	AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, std::int64_t seek_time, std::int64_t fifo_duration);
+	AudioFifo(Core::AudioParameters audio_parameters, AVRational time_base, std::int64_t seek_time, std::int64_t fifo_duration);
 	bool TryPush(std::shared_ptr<AVFrame> frame);
 	/// <summary>
 	/// returns frame with requested nb_samples. If FIFO is smaller, rest will be filled with silence.
@@ -23,8 +25,7 @@ public:
 private:
 	const std::unique_ptr<AVAudioFifo, void(*)(AVAudioFifo*)> aduio_fifo_;
 	const AVRational time_base_;
-	const int sample_rate_;
-	const AVSampleFormat sample_fmt_;
+	const Core::AudioParameters audio_parameters_;
 	AVChannelLayout channel_layout_;
 	std::int64_t seek_time_;
 	std::int64_t start_sample_ = 0LL;

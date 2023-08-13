@@ -36,7 +36,7 @@ std::int64_t InputFormat::ReadStartTimecode() const
 		if (tcr)
 		{
 			AVTimecode tc;
-			if (FF(av_timecode_init_from_string(&tc, stream.Stream->r_frame_rate, tcr->value, NULL)))
+			if (FF_SUCCESS(av_timecode_init_from_string(&tc, stream.Stream->r_frame_rate, tcr->value, NULL)))
 				return av_rescale((std::int64_t)tc.start * AV_TIME_BASE, tc.rate.den, tc.rate.num);
 		}
 	}
@@ -45,7 +45,7 @@ std::int64_t InputFormat::ReadStartTimecode() const
 
 bool InputFormat::LoadStreamData()
 {
-	if (!FF(avformat_find_stream_info(format_context_.get(), NULL)))
+	if (!FF_SUCCESS(avformat_find_stream_info(format_context_.get(), NULL)))
 		return false;
 	streams_.clear();
 	int best_video = av_find_best_stream(format_context_.get(), AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
@@ -108,7 +108,7 @@ bool InputFormat::Seek(std::int64_t time)
 	std::lock_guard<std::mutex> lock(seek_mutex_);
 	if (!CanSeek())
 		return false;
-	if (FF(av_seek_frame(format_context_.get(), -1, time, AVSEEK_FLAG_BACKWARD)))
+	if (FF_SUCCESS(av_seek_frame(format_context_.get(), -1, time, AVSEEK_FLAG_BACKWARD)))
 	{
 		is_eof_ = false;
 		return true;

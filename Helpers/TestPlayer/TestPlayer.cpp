@@ -16,6 +16,7 @@
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
 #include "FFmpeg/FFmpegUtils.h"
+#include "FFmpeg/VideoOverlayFilter.h"
 #include "PixelFormat.h"
 #include "Common/ComInitializer.h"
 
@@ -48,7 +49,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
 		const PixelFormat pixel_format = PixelFormat::yuv422;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
@@ -58,6 +59,7 @@ int main()
 			std::cout << coherence << "\n";
 			});
 	*/
+		/*
 		Decklink::DecklinkIterator iterator;
 		int device_index = 0;
 		
@@ -67,12 +69,14 @@ int main()
 		decklink_output->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		player.AddOutputSink(decklink_output);
 		player.SetFrameClockSource(*decklink_output);
-		
+		*/
+		//auto overlay = std::make_shared<FFmpeg::VideoOverlayFilter>(player.Format(), PixelFormatToFFmpegFormat(player.PixelFormat()));
+		//player.AddOverlay(overlay);		
 
-		//auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
-		//ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
-		//player.AddOutputSink(ndi);
-		//player.SetFrameClockSource(*ndi);
+		auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
+		ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
+		player.AddOutputSink(ndi);
+		player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
 		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
 			"libx264",															// VideoCodec
@@ -150,8 +154,8 @@ int main()
 					input->Play();*/
 		}
 		//decklink_input->RemoveOutputSink(record_file);
-		//player.RemoveOutputSink(ndi);
-		player.RemoveOutputSink(decklink_output);
+		player.RemoveOutputSink(ndi);
+		//player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);
 #ifdef _DEBUG
 	}

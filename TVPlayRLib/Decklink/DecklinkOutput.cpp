@@ -258,7 +258,7 @@ namespace TVPlayR {
 
 				int audio_samples_required = AudioSamplesRequired();
 				for (Core::ClockTarget* target : clock_targets_)
-					target->RequestFrame(audio_samples_required);
+					target->RequestNextFrame(audio_samples_required);
 
 				Core::AVSync sync;
 				if (input_buffer_.try_take(sync) == Common::BlockingCollectionStatus::Ok)

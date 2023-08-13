@@ -37,7 +37,7 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
 	case AVERROR(EINVAL):
 		return nullptr;
 	}
-	if (FF(ret))
+	if (FF_SUCCESS(ret))
 	{
 		//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
 		//	frame->best_effort_timestamp = frame->pts;
@@ -102,47 +102,46 @@ void VideoFilterBase::SetFilter(const std::string& filter_str, const AVRational 
 
 void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar) 
 {
-	graph_ = std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)>(avfilter_graph_alloc(), [](AVFilterGraph* graph) { avfilter_graph_free(&graph); });
-	AVFilterInOut* inputs = avfilter_inout_alloc();
+	graph_.reset(avfilter_graph_alloc());
 	AVFilterInOut* outputs = avfilter_inout_alloc();
+	AVFilterInOut* inputs = avfilter_inout_alloc();
 	try
 	{
 		const AVFilter* buffersrc = avfilter_get_by_name("buffer");
 		const AVFilter* buffersink = avfilter_get_by_name("buffersink");
-		char args[512];
-		snprintf(args, sizeof(args),
-			"video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
-			input_width, input_height, input_pixel_format,
-			input_time_base_.num, input_time_base_.den,
-			input_sar.num, input_sar.den);
-		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args, NULL, graph_.get()));
+		std::stringstream args;
+		args << "video_size=" << input_width << "x" << input_height
+			<< ":pix_fmt=" << input_pixel_format
+			<< ":time_base=" << input_time_base_.num << "/" << input_time_base_.den
+			<< ":pixel_aspect=" << input_sar.num << "/" << input_sar.den;
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args.str().c_str(), NULL, graph_.get()));
 		enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&sink_ctx_, buffersink, "vout", NULL, NULL, graph_.get()));
 		THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(sink_ctx_, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN));
 
-		outputs->name = av_strdup("in");
-		outputs->filter_ctx = source_ctx_;
-		outputs->pad_idx = 0;
-		outputs->next = NULL;
-
-		inputs->name = av_strdup("out");
-		inputs->filter_ctx = sink_ctx_;
+		inputs->name = av_strdup("in");
+		inputs->filter_ctx = source_ctx_;
 		inputs->pad_idx = 0;
 		inputs->next = NULL;
-		THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_.c_str(), inputs, outputs, NULL));
+
+		outputs->name = av_strdup("out");
+		outputs->filter_ctx = sink_ctx_;
+		outputs->pad_idx = 0;
+		outputs->next = NULL;
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_.c_str(), outputs, inputs, NULL));
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
 		input_width_ = input_width;
 		input_height_ = input_height;
 		input_pixel_format_ = static_cast<AVPixelFormat>(input_pixel_format);
 		input_sar_ = input_sar;
-		DebugPrintLine(Common::DebugSeverity::debug, args);
+		DebugPrintLine(Common::DebugSeverity::debug, args.str());
 		if (DebugSeverity() <= Common::DebugSeverity::info)
 			DumpFilter(filter_, graph_.get());
 	}
 	catch (const std::exception& e)
 	{
-		avfilter_inout_free(&inputs);
 		avfilter_inout_free(&outputs);
+		avfilter_inout_free(&inputs);
 		throw e;
 	}
 }

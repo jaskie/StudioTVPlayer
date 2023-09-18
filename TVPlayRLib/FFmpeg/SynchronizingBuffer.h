@@ -7,9 +7,7 @@ namespace TVPlayR {
 	
 	namespace Core 
 	{
-		class Player;
 		struct AVSync;
-		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
 		class AudioFifo;

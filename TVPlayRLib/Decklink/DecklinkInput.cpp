@@ -93,7 +93,7 @@ namespace TVPlayR {
 					return;
 				if (FAILED(input_->StopStreams()))
 					THROW_EXCEPTION("DecklinkInput: StopStreams failed");
-				if (FAILED(input_->DisableAudioInput()))
+				if (audio_channels_count_ > 0 && FAILED(input_->DisableAudioInput()))
 					THROW_EXCEPTION("DecklinkInput: DisableAudioInput failed");
 				if (FAILED(input_->DisableVideoInput()))
 					THROW_EXCEPTION("DecklinkInput: DisableVideoInput failed");
@@ -143,7 +143,7 @@ namespace TVPlayR {
 				if (SUCCEEDED(videoFrame->GetStreamTime(&bmd_time, &bmd_duration, time_scale_)))
 					last_frame_time_ = bmd_time * AV_TIME_BASE / time_scale_;
 				Core::AVSync sync(
-					AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz),
+					audioPacket ? AVFrameFromDecklinkAudio(audioPacket, audio_channels_count_, AUDIO_SAMPLE_TYPE, BMDAudioSampleRate::bmdAudioSampleRate48kHz) : nullptr,
 					AVFrameFromDecklinkVideo(videoFrame, current_field_order_, current_sar_, time_scale_),
 					Core::FrameTimeInfo {
 						TimeFromDeclinkTimecode(videoFrame, timecode_source_, current_format_.FrameRate()),
@@ -173,7 +173,7 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToPlayer(player))
 				{
-					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, timecode_source_, capture_video_, audio_channels_count_);
+					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, capture_video_, audio_channels_count_);
 					provider->Reset(current_format_.FrameRate().av());
 					player_providers_.emplace_back(std::move(provider));
 				}

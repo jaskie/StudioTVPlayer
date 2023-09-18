@@ -212,6 +212,9 @@
     <ClInclude Include="Core\AudioParameters.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\PlayerSynchroSource.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -334,6 +337,9 @@
     </ClCompile>
     <ClCompile Include="FFmpeg\FFmpegBufferedInput.cpp">
       <Filter>FFmpeg</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\PlayerSynchroSource.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

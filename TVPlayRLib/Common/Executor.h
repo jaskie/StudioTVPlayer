@@ -20,11 +20,13 @@ namespace TVPlayR {
                 info.dwThreadID = dwThreadID;
                 info.dwFlags = 0;
             }
+#pragma warning(disable: 6312 6322)
             __try
             {
                 RaiseException(0x406D1388, 0, sizeof(info) / sizeof(DWORD), (ULONG_PTR*)&info);
             }
             __except (EXCEPTION_CONTINUE_EXECUTION) {}
+#pragma warning(default: 6312 6322)
         }
 
     class Executor final

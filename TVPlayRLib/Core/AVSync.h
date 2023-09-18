@@ -39,6 +39,4 @@ namespace TVPlayR {
 				return Audio || Video;
 			}
 		};
-
-
 }}

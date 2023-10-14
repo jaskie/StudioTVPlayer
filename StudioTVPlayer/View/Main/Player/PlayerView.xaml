@@ -249,10 +249,10 @@
             <StackPanel Orientation="Horizontal">
                 <Label VerticalAlignment="Bottom" >Rundown</Label>
                 <ToggleButton IsChecked="{Binding IsLoop}" ToolTip="Loop whole rundown">
-                    <mah:FontIcon Glyph="&#xF71A;"/>
+                    <mah:FontIcon Glyph="&#xE97A;"/>
                 </ToggleButton>
                 <ToggleButton IsChecked="{Binding DisableAfterUnload}" ToolTip="Disable after unload">
-                    <mah:FontIcon Glyph="&#xE8D8;"/>
+                    <mah:FontIcon Glyph="&#xE72E;"/>
                 </ToggleButton>
                 <Button Command="{Binding LoadRundownCommand}" ToolTip="Load rundown from file">
                     <mah:FontIcon Glyph="&#xED25;"/>

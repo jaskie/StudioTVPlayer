@@ -83,7 +83,7 @@ namespace TVPlayR {
 		video_queue_.pop_front();
 #ifdef DEBUG
 		if (audio && audio->pts != AV_NOPTS_VALUE)
-			DebugPrintLine(Common::DebugSeverity::trace, "Output video " + std::to_string(static_cast<float>(PtsToTime(video->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(video->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
+			DebugPrintLine(Common::DebugSeverity::trace, "PulSync: video " + std::to_string(static_cast<float>(PtsToTime(video->pts, input_video_time_base_))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(video->pts, input_video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
 		std::int64_t time = PtsToTime(video->pts, input_video_time_base_);
 		return Core::AVSync(audio, video, Core::FrameTimeInfo{ time + start_timecode_, time, media_duration_ == AV_NOPTS_VALUE ? AV_NOPTS_VALUE : media_duration_ - time});

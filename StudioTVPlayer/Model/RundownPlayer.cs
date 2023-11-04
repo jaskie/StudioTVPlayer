@@ -61,7 +61,6 @@ namespace StudioTVPlayer.Model
         public event EventHandler<RundownItemEventArgs> Loaded;
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler Paused;
-        public event EventHandler<RundownItemEventArgs> MediaSubmitted;
         public event EventHandler MediaDurationChanged;
 
         public void Load(RundownItemBase item)
@@ -140,7 +139,6 @@ namespace StudioTVPlayer.Model
         {
             var item = new FileRundownItem(media) { IsAutoStart = AddItemsWithAutoPlay };
             _rundown.Add(item);
-            MediaSubmitted?.Invoke(this, new RundownItemEventArgs(item));
         }
 
         public bool Seek(TimeSpan timeSpan)

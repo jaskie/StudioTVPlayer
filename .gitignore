@@ -34,3 +34,4 @@
 /TimecodeDecoderService/bin
 /TimecodeDecoderService/obj
 /dependencies/FFmpeg/bin/*.exe
+/TVPlayRLib.Test/x64/

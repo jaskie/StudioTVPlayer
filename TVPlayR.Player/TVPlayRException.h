@@ -6,23 +6,18 @@ namespace TVPlayR {
 	public ref class TVPlayRException : public System::Exception
 	{
 	public:
-		TVPlayRException(Common::TVPlayRException e)
-			: System::Exception(gcnew System::String(e.what()))
-		{
-		}
 		TVPlayRException(std::exception e)
 			: System::Exception(gcnew System::String(e.what())) 
 		{ }
-
+		TVPlayRException(const char* what)
+			: System::Exception(gcnew System::String(what))
+		{
+		}
 	};
 }
 
 #define REWRAP_EXCEPTION(statement)\
  try { statement }\
-  catch (TVPlayR::Common::TVPlayRException te)\
-  {\
-   throw gcnew TVPlayRException(te);\
-  }\
   catch (std::exception e)\
   {\
    throw gcnew TVPlayRException(e);\

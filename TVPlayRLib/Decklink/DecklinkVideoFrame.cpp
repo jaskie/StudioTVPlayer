@@ -7,7 +7,7 @@
 
 namespace TVPlayR {
 	namespace Decklink {
-		
+
 		static void ConvertFrame(const std::shared_ptr<AVFrame>& source, std::vector<uint32_t>& dest)
 		{
 			if (source->format == AV_PIX_FMT_X2RGB10LE)
@@ -43,12 +43,13 @@ namespace TVPlayR {
 			}
 		}
 
-		DecklinkVideoFrame::DecklinkVideoFrame()
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format)
 			: ref_count_(0)
 			, width_(0)
 			, height_(0)
 			, row_bytes_(0)
 			, pixel_format_(BMDPixelFormat(0))
+			, timecode_(format)
 		{ }
 
 		DecklinkVideoFrame::~DecklinkVideoFrame()
@@ -58,7 +59,7 @@ namespace TVPlayR {
 
 		void DecklinkVideoFrame::Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
 		{
-			timecode_ = std::make_shared<DecklinkTimecode>(format, timecode);
+			timecode_.Update(format, timecode);
 			width_ = format.width();
 			height_ = format.height();
 			row_bytes_ = frame->linesize[0];
@@ -94,7 +95,7 @@ namespace TVPlayR {
 			return count;
 		}
 
-		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return timecode_->IsValid() ? BMDVideoOutputFlags::bmdVideoOutputRP188 | BMDVideoOutputFlags::bmdVideoOutputVITC : BMDVideoOutputFlags::bmdVideoOutputFlagDefault; }
+		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return timecode_.IsValid() ? BMDVideoOutputFlags::bmdVideoOutputRP188 | BMDVideoOutputFlags::bmdVideoOutputVITC : BMDVideoOutputFlags::bmdVideoOutputFlagDefault; }
 
 		long STDMETHODCALLTYPE DecklinkVideoFrame::GetWidth() { return width_; }
 
@@ -123,9 +124,9 @@ namespace TVPlayR {
 		{
 			if (timecode == nullptr)
 				return E_FAIL;
-			if (!timecode_->IsValid())
+			if (!timecode_.IsValid())
 				return E_FAIL;
-			*timecode = timecode_.get();
+			*timecode = &timecode_;
 			return S_OK;
 		}
 

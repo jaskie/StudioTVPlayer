@@ -12,14 +12,17 @@ namespace TVPlayR {
 		class Player;
 		struct AVSync;
 		struct FrameTimeInfo;
-
+		/**
+		* Provides video/audio/timecode frames for player.
+		* Adjust video to player framerate and resolution.
+		* Resamples audio to player.
+		*/
 		class PlayerSynchroSource
 		{
 		public:
 			const Core::Player& Player() const { return player_; }
-			virtual void Push(Core::AVSync& sync);
+			virtual void Push(const Core::AVSync& sync, AVRational frame_rate);
 			Core::AVSync PullSync(int audio_samples_count);
-			void Reset(AVRational input_frame_rate);
 			virtual ~PlayerSynchroSource();
 		protected:
 			PlayerSynchroSource(const Core::Player& player, bool process_video, int audio_channels);

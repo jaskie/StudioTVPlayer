@@ -17,11 +17,12 @@ namespace TVPlayR {
 		{
 		}
 
-		void DecklinkInputSynchroProvider::Push(Core::AVSync& sync)
+		void DecklinkInputSynchroProvider::Push(const Core::AVSync& sync, AVRational frame_rate)
 		{
-			executor_.begin_invoke([=] {
-				Core::AVSync copy(sync);
-				PlayerSynchroSource::Push(copy);
+			Core::AVSync copy(sync);
+			executor_.begin_invoke([=]
+				{
+					PlayerSynchroSource::Push(copy, frame_rate);
 				});
 		}
 

@@ -123,8 +123,6 @@ namespace TVPlayR {
 						return S_OK;
 					current_field_order_ = current_format_.field_order();
 					current_sar_ = current_format_.SampleAspectRatio().av();
-					for (auto& provider : player_providers_)
-						provider->Reset(current_format_.FrameRate().av());
 					OpenInput(newDisplayMode, pixel_format_);
 					if (format_changed_callback_)
 						format_changed_callback_(BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_));
@@ -151,7 +149,7 @@ namespace TVPlayR {
 						AV_NOPTS_VALUE }
 					);
 				for (auto& provider : player_providers_)
-					provider->Push(sync);
+					provider->Push(sync, current_format_.FrameRate().av());
 				for (auto& sink : output_sinks_)
 					sink->Push(sync);
 				if (frame_played_callback_)
@@ -174,7 +172,6 @@ namespace TVPlayR {
 				if (!IsAddedToPlayer(player))
 				{
 					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, capture_video_, audio_channels_count_);
-					provider->Reset(current_format_.FrameRate().av());
 					player_providers_.emplace_back(std::move(provider));
 				}
 			}

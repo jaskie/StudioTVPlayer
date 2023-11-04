@@ -18,5 +18,5 @@ protected:
 	bool is_flushed_ = false;
 	bool is_eof_ = false;
 };
-	
+
 }}

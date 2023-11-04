@@ -11,7 +11,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	SynchronizingBuffer::SynchronizingBuffer(AVRational video_frame_rate, Core::AudioParameters audio_parameters, std::int64_t capacity, std::int64_t duration, std::int64_t start_timecode, std::int64_t media_duration, TVPlayR::FieldOrder field_order)
+	SynchronizingBuffer::SynchronizingBuffer(AVRational video_frame_rate, const Core::AudioParameters& audio_parameters, std::int64_t capacity, std::int64_t duration, std::int64_t start_timecode, std::int64_t media_duration, TVPlayR::FieldOrder field_order)
 		: Common::DebugTarget(Common::DebugSeverity::trace, "SynchronizingBuffer")
 		, video_frame_rate_(video_frame_rate)
 		, audio_parameters_(audio_parameters)
@@ -49,7 +49,7 @@ namespace TVPlayR {
 		}
 	}
 
-	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base) 
+	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame, AVRational time_base) 
 	{ 
 		if (!(frame && have_video_))
 			return;

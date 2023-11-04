@@ -13,14 +13,14 @@ class VideoFilterBase :	public FilterBase, protected Common::DebugTarget
 {
 public:
 	VideoFilterBase(AVPixelFormat output_pix_fmt);
-	virtual std::shared_ptr<AVFrame> Pull() override;
+	std::shared_ptr<AVFrame> Pull() override;
 	int OutputWidth();
 	int OutputHeight();
 	AVRational OutputSampleAspectRatio();
 	AVPixelFormat OutputPixelFormat();
-	virtual AVRational OutputTimeBase() const override;
+	AVRational OutputTimeBase() const override;
 	AVRational OutputFrameRate() const;
-	virtual void Flush() override;
+	void Flush() override;
 	void Reset();
 	bool IsInitialized() const;
 protected:

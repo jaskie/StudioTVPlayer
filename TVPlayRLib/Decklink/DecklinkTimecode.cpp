@@ -4,9 +4,8 @@
 
 namespace TVPlayR {
     namespace Decklink {
-        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat& format, std::int64_t time)
-            : ref_count_(0)
-            , time_(time)
+        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat& format)
+            : time_(AV_NOPTS_VALUE)
             , format_(format)
         { }
 
@@ -15,17 +14,17 @@ namespace TVPlayR {
             return time_ != AV_NOPTS_VALUE;
         }
 
+        void DecklinkTimecode::Update(Core::VideoFormat& format, std::int64_t time)
+        {
+            format_ = format;
+            time_ = time;
+        }
+
         STDMETHODIMP DecklinkTimecode::QueryInterface(REFIID, LPVOID*) { return E_NOINTERFACE; }
 
-        STDMETHODIMP_(ULONG) DecklinkTimecode::AddRef() { return InterlockedIncrement(&ref_count_); }
+        STDMETHODIMP_(ULONG) DecklinkTimecode::AddRef() { return 1; }
 
-        STDMETHODIMP_(ULONG) DecklinkTimecode::Release()
-        {
-            ULONG count = InterlockedDecrement(&ref_count_);
-            if (count == 0)
-                delete this;
-            return count;
-        }
+        STDMETHODIMP_(ULONG) DecklinkTimecode::Release() { return 1; }
 
         STDMETHODIMP_(BMDTimecodeBCD) DecklinkTimecode::GetBCD()
         {

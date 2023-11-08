@@ -45,7 +45,7 @@ namespace TVPlayR {
 			TIME_CALLBACK												frame_played_callback_ = nullptr;
 
 
-			implementation::implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
+			implementation(IDeckLink* decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink input")
 				, input_(decklink)
 				, is_wide_(!(initial_format == Core::VideoFormatType::ntsc || initial_format == Core::VideoFormatType::pal))
@@ -65,7 +65,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("DecklinkInput: SetCallback failed");;
 			}
 
-			implementation::~implementation()
+			~implementation()
 			{
 				CloseInput();
 				input_->SetCallback(NULL);

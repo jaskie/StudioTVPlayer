@@ -4,6 +4,9 @@
 if (condition) \
 	DebugPrintLine(severity, message)
 
+#define DebugWindowsError(msg, hr) \
+DebugPrintLineFmt(Common::DebugSeverity::error, std::string(msg).append(" error: {}"), std::system_category().message(hr))
+
 namespace TVPlayR {
 	namespace Common {
 
@@ -40,6 +43,14 @@ protected:
 		{
 			DebugPrint((name_ + ": " + s + "\n").c_str());
 		}
+#endif // DEBUG
+	}
+
+	template <typename... Args>
+	inline void DebugPrintLineFmt(enum DebugSeverity severity, std::string_view format, Args&& ...args)
+	{
+#ifdef DEBUG
+		DebugPrintLine(severity, std::vformat(format, std::make_format_args(args...)));
 #endif // DEBUG
 	}
 

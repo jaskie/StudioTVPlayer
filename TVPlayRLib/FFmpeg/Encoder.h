@@ -26,7 +26,7 @@ namespace TVPlayR {
 		std::shared_ptr<AVFrame> GetFrameFromFifo(int nb_samples);
 	public:
 		Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, AVPixelFormat pixel_format, std::shared_ptr<AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id);
-		Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, AVChannelLayout& audio_channel_layout, AVDictionary** options, const std::string& stream_metadata, int stream_id);
+		Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, AVChannelLayout audio_channel_layout, AVDictionary** options, const std::string& stream_metadata, int stream_id);
 		void Push(const std::shared_ptr<AVFrame>& frame);
 		void Flush();
 		bool IsEof() const { return is_eof_; }

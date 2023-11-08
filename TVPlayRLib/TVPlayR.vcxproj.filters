@@ -26,6 +26,9 @@
     <Filter Include="FFmpeg">
       <UniqueIdentifier>{6383a109-8738-4ebc-a479-21bd5e6cb721}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DirectX">
+      <UniqueIdentifier>{fbdc15d9-4d9b-46e3-9b56-7103b0037541}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\ComInitializer.h">
@@ -203,6 +206,12 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="ColorSpace.h" />
+    <ClInclude Include="DirectX\VideoProcessor.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX\Utils.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -319,6 +328,12 @@
     </ClCompile>
     <ClCompile Include="Core\InputSource.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX\VideoProcessor.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX\Utils.cpp">
+      <Filter>DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

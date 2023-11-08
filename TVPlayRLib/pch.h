@@ -10,6 +10,7 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <format>
 #include <vector>
 #include <algorithm>
 #include <deque>
@@ -31,6 +32,7 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
+#include <system_error>
 
 extern "C"
 {

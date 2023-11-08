@@ -18,6 +18,7 @@
 #include "FFmpeg/FFmpegUtils.h"
 #include "PixelFormat.h"
 #include "Common/ComInitializer.h"
+#include "DirectX/VideoProcessor.h"
 
 #undef DEBUG
 
@@ -48,7 +49,9 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
+		DirectX::VideoProcessor video_processor;
+
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
 		const PixelFormat pixel_format = PixelFormat::yuv422;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;

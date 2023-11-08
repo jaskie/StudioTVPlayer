@@ -142,7 +142,7 @@ namespace TVPlayR {
 					decklink_frame->Release(); // if the frame is added to recycler, then decklink output will release it.
 			}
 
-			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
+			void ScheduleAudio(const std::shared_ptr<AVFrame>& buffer)
 			{
 				if (!buffer)
 					return;
@@ -265,7 +265,7 @@ namespace TVPlayR {
 					ScheduleVideo(sync.Video, Core::TimecodeFromFameTimeInfo(sync.TimeInfo, timecode_source_));
 					if (sync.Audio)
 					{
-						ScheduleAudio(audio_resampler_? audio_resampler_->Resample(sync.Audio) : sync.Audio);
+						ScheduleAudio(audio_resampler_ ? audio_resampler_->Resample(sync.Audio) : sync.Audio);
 					}
 					else if (audio_samples_required > 0)
 					{

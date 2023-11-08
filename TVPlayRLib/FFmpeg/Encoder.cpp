@@ -18,7 +18,7 @@ namespace TVPlayR {
 	}
 
 
-	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, AVChannelLayout& audio_channel_layout, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, int audio_sample_rate, AVChannelLayout audio_channel_layout, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(Common::DebugSeverity::info, "Audio encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
 		, enc_ctx_(GetAudioContext(output_format.Ctx(), encoder_, bitrate, audio_sample_rate, audio_channel_layout))

@@ -40,7 +40,7 @@ namespace TVPlayR {
 			Gdiplus::PointF						timecode_position_;
 
 
-			implementation::implementation(const TimecodeOutputSource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
+			implementation(const TimecodeOutputSource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format)
 				: timecode_source_(source)
 				, video_format_(video_format)
 				, output_pixel_format_(output_pixel_format)

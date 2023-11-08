@@ -167,7 +167,7 @@ namespace TVPlayR {
 			void WaitForNextFrameTime()
 			{
 				assert(executor_.is_current());
-				auto& frame_rate = format_.FrameRate();
+				const auto& frame_rate = format_.FrameRate();
 				clock::time_point current_time = clock::now();
 				clock::time_point next_frame_time = stream_start_time_ + clock::duration(clock::period::den * frame_rate.Denominator() * video_frames_requested_ / (clock::period::num * frame_rate.Numerator()));
 				auto wait_time = next_frame_time - current_time;

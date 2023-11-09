@@ -212,6 +212,9 @@
     <ClInclude Include="DirectX\Utils.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="DirectX\VideoTextureBuffer.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">

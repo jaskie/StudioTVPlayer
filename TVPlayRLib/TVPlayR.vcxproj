@@ -94,6 +94,7 @@
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="DecklinkTimecodeSource.h" />
     <ClInclude Include="DirectX\Utils.h" />
+    <ClInclude Include="DirectX\VideoTextureBuffer.h" />
     <ClInclude Include="FFmpeg\Encoder.h" />
     <ClInclude Include="FFmpeg\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />

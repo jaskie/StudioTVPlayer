@@ -121,7 +121,7 @@ struct Decoder::implementation : Common::DebugTarget
 	{
 		if (packet_queue_.empty())
 			return;
-		auto packet = packet_queue_.front();
+		auto& packet = packet_queue_.front();
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			if (packet)

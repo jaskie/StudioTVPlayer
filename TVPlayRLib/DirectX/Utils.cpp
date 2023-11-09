@@ -43,7 +43,8 @@ namespace TVPlayR
 
 		const std::string DXGIFormatToString(const DXGI_FORMAT format)
 		{
-			switch (format) {
+			switch (format)
+			{
 			case DXGI_FORMAT_R16G16B16A16_FLOAT:			return "R16G16B16A16_FLOAT";
 			case DXGI_FORMAT_R16G16B16A16_UNORM:			return "R16G16B16A16_UNORM";
 			case DXGI_FORMAT_R10G10B10A2_UNORM:				return "R10G10B10A2_UNORM";
@@ -75,6 +76,105 @@ namespace TVPlayR
 			case DXGI_FORMAT_A8P8:							return "A8P8";
 			default: return "UNKNOWN";
 			};
+		}
+
+		int GetBitDepth(const DXGI_FORMAT format)
+		{
+			switch (format)
+			{
+			case DXGI_FORMAT_R8_TYPELESS:
+			case DXGI_FORMAT_B8G8R8X8_UNORM:
+			case DXGI_FORMAT_B8G8R8A8_UNORM:
+			case DXGI_FORMAT_AYUV:
+			case DXGI_FORMAT_NV12:
+			case DXGI_FORMAT_420_OPAQUE:
+			case DXGI_FORMAT_YUY2:
+			default:
+				return 8;
+			case DXGI_FORMAT_R10G10B10A2_UNORM:
+			case DXGI_FORMAT_P010:
+			case DXGI_FORMAT_Y210:
+			case DXGI_FORMAT_Y410:
+				return 10;
+			case DXGI_FORMAT_R16G16B16A16_UNORM:
+			case DXGI_FORMAT_R16_TYPELESS:
+			case DXGI_FORMAT_P016:
+			case DXGI_FORMAT_Y216:
+			case DXGI_FORMAT_Y416:
+				return 16;
+			}
+		}
+
+		const std::string D3DFilterToString(const D3D11_VIDEO_PROCESSOR_FILTER filter)
+		{
+			switch (filter)
+			{
+			case D3D11_VIDEO_PROCESSOR_FILTER_BRIGHTNESS:			return "BRIGHTNESS";
+			case D3D11_VIDEO_PROCESSOR_FILTER_CONTRAST:				return "CONTRAST";
+			case D3D11_VIDEO_PROCESSOR_FILTER_HUE:					return "HUE";
+			case D3D11_VIDEO_PROCESSOR_FILTER_SATURATION:			return "SATURATION";
+			case D3D11_VIDEO_PROCESSOR_FILTER_NOISE_REDUCTION:		return "NOISE_REDUCTION";
+			case D3D11_VIDEO_PROCESSOR_FILTER_EDGE_ENHANCEMENT:		return "EDGE_ENHANCEMENT";
+			case D3D11_VIDEO_PROCESSOR_FILTER_ANAMORPHIC_SCALING:	return "ANAMORPHIC_SCALING";
+			case D3D11_VIDEO_PROCESSOR_FILTER_STEREO_ADJUSTMENT:	return "STEREO_ADJUSTMENT";
+			default:
+				return "UNKNOWN";
+			}
+		}
+
+		D3D11_TEXTURE2D_DESC CreateTex2DDesc(const DXGI_FORMAT format, const UINT width, const UINT height, const Tex2DType type)
+		{
+			D3D11_TEXTURE2D_DESC desc;
+			desc.Width = width;
+			desc.Height = height;
+			desc.MipLevels = 1;
+			desc.ArraySize = 1;
+			desc.Format = format;
+			desc.SampleDesc = { 1, 0 };
+
+			switch (type)
+			{
+			default:
+			case Tex2D_Default:
+				desc.Usage = D3D11_USAGE_DEFAULT;
+				desc.BindFlags = 0;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+				break;
+			case Tex2D_DefaultRTarget:
+				desc.Usage = D3D11_USAGE_DEFAULT;
+				desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+				break;
+			case Tex2D_DefaultShader:
+				desc.Usage = D3D11_USAGE_DEFAULT;
+				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+				break;
+			case Tex2D_DefaultShaderRTarget:
+				desc.Usage = D3D11_USAGE_DEFAULT;
+				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+				break;
+			case Tex2D_DynamicShaderWrite:
+			case Tex2D_DynamicShaderWriteNoSRV:
+				desc.Usage = D3D11_USAGE_DYNAMIC;
+				desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+				desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+				desc.MiscFlags = 0;
+				break;
+			case Tex2D_StagingRead:
+				desc.Usage = D3D11_USAGE_STAGING;
+				desc.BindFlags = 0;
+				desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+				desc.MiscFlags = 0;
+				break;
+			}
+
+			return desc;
 		}
 	}
 }

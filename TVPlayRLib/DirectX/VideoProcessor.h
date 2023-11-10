@@ -8,6 +8,7 @@ namespace TVPlayR
 		public:
 			VideoProcessor();
 			virtual ~VideoProcessor();
+
 		private:
 			struct implementation;
 			std::unique_ptr<implementation> impl_;

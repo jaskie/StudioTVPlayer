@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-bool VideoFilterBase::Push(std::shared_ptr<AVFrame> frame) 
+bool VideoFilterBase::Push(const std::shared_ptr<AVFrame>& frame) 
 { 
 	if (frame->width != input_width_ ||
 		frame->height != input_height_ ||

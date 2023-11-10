@@ -23,7 +23,7 @@ namespace TVPlayR {
 			av_channel_layout_default(&dest_channel_layout_, dest_channel_count);
 		}
 
-		std::shared_ptr<AVFrame> SwResample::Resample(const std::shared_ptr<AVFrame> frame)
+		std::shared_ptr<AVFrame> SwResample::Resample(const std::shared_ptr<AVFrame>& frame)
 		{
 			std::shared_ptr<AVFrame> resampled = AllocFrame();
 			resampled->nb_samples = swr_get_out_samples(swr_.get(), frame->nb_samples);

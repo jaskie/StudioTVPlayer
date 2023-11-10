@@ -37,7 +37,7 @@ namespace TVPlayR
 			case FCC('Y216'):			return "Y216";			// Intel
 			case FCC('AIP8'):			return "AIP8";			// DXVA-HD
 			case FCC('AI44'):			return "AI44";			// DXVA-HD
-			default: return "UNKNOWN";
+			default:					return "UNKNOWN";
 			};
 		}
 
@@ -74,7 +74,7 @@ namespace TVPlayR
 			case DXGI_FORMAT_IA44:							return "IA44";
 			case DXGI_FORMAT_P8:							return "P8";
 			case DXGI_FORMAT_A8P8:							return "A8P8";
-			default: return "UNKNOWN";
+			default:										return "UNKNOWN";
 			};
 		}
 
@@ -117,8 +117,47 @@ namespace TVPlayR
 			case D3D11_VIDEO_PROCESSOR_FILTER_EDGE_ENHANCEMENT:		return "EDGE_ENHANCEMENT";
 			case D3D11_VIDEO_PROCESSOR_FILTER_ANAMORPHIC_SCALING:	return "ANAMORPHIC_SCALING";
 			case D3D11_VIDEO_PROCESSOR_FILTER_STEREO_ADJUSTMENT:	return "STEREO_ADJUSTMENT";
-			default:
-				return "UNKNOWN";
+			default:												return "UNKNOWN";
+			}
+		}
+
+		const AVPixelFormat DXGIFormatToAVPixelFormat(DXGI_FORMAT dx_format)
+		{
+			switch (dx_format)
+			{
+			case DXGI_FORMAT_NV12:				return AV_PIX_FMT_NV12;
+			case DXGI_FORMAT_P010:				return AV_PIX_FMT_P010;
+			case DXGI_FORMAT_B8G8R8A8_UNORM:	return AV_PIX_FMT_BGRA;
+			case DXGI_FORMAT_R10G10B10A2_UNORM: return AV_PIX_FMT_X2BGR10;
+			case DXGI_FORMAT_R16G16B16A16_FLOAT:return AV_PIX_FMT_RGBAF16;
+			case DXGI_FORMAT_AYUV:				return AV_PIX_FMT_VUYX;
+			case DXGI_FORMAT_YUY2:				return AV_PIX_FMT_YUYV422;
+			case DXGI_FORMAT_Y210:				return AV_PIX_FMT_Y210;
+			case DXGI_FORMAT_Y410:				return AV_PIX_FMT_XV30;
+			case DXGI_FORMAT_P016:				return AV_PIX_FMT_P012;
+			case DXGI_FORMAT_Y216:				return AV_PIX_FMT_Y212;
+			case DXGI_FORMAT_Y416:				return AV_PIX_FMT_XV36;
+			default:							return AV_PIX_FMT_NONE;
+			}
+		}
+
+		const DXGI_FORMAT DXGIFormatToAVPixelFormat(AVPixelFormat format)
+		{
+			switch (format)
+			{
+			case AV_PIX_FMT_NV12:	return DXGI_FORMAT_NV12;
+			case AV_PIX_FMT_P010:	return DXGI_FORMAT_P010;
+			case AV_PIX_FMT_BGRA:	return DXGI_FORMAT_B8G8R8A8_UNORM;
+			case AV_PIX_FMT_X2BGR10:return DXGI_FORMAT_R10G10B10A2_UNORM;
+			case AV_PIX_FMT_RGBAF16:return DXGI_FORMAT_R16G16B16A16_FLOAT;
+			case AV_PIX_FMT_VUYX:	return DXGI_FORMAT_AYUV;
+			case AV_PIX_FMT_YUYV422:return DXGI_FORMAT_YUY2;
+			case AV_PIX_FMT_Y210:	return DXGI_FORMAT_Y210;
+			case AV_PIX_FMT_XV30:	return DXGI_FORMAT_Y410;
+			case AV_PIX_FMT_P012:	return DXGI_FORMAT_P016;
+			case AV_PIX_FMT_Y212:	return DXGI_FORMAT_Y216;
+			case AV_PIX_FMT_XV36:	return DXGI_FORMAT_Y416;
+			default:				return DXGI_FORMAT_UNKNOWN;
 			}
 		}
 
@@ -173,7 +212,6 @@ namespace TVPlayR
 				desc.MiscFlags = 0;
 				break;
 			}
-
 			return desc;
 		}
 	}

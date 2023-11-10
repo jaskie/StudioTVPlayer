@@ -220,7 +220,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(Core::AVSync& sync)
+			void Push(const Core::AVSync& sync)
 			{
 				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
 				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
@@ -266,7 +266,7 @@ namespace TVPlayR {
 
 		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
-		void FFmpegOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
+		void FFmpegOutput::Push(const Core::AVSync& sync) { impl_->Push(sync); }
 
 		void FFmpegOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
 

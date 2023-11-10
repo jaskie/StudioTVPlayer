@@ -88,7 +88,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(Core::AVSync& sync)
+			void Push(const Core::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped");
@@ -157,7 +157,7 @@ namespace TVPlayR {
 
 		void NdiOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
-		void NdiOutput::Push(Core::AVSync & sync) { impl_->Push(sync); }
+		void NdiOutput::Push(const Core::AVSync& sync) { impl_->Push(sync); }
 
 		void NdiOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
 

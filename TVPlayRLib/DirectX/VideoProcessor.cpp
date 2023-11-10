@@ -64,7 +64,7 @@ namespace TVPlayR
 				DumpVideoDevice();
 #endif
 				DXGI_FORMAT outFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-				InitVideoProcessor(DXGI_FORMAT::DXGI_FORMAT_YUY2, 1920, 1080, false, outFormat);
+				InitVideoProcessor(DXGI_FORMAT::DXGI_FORMAT_YUY2, 1920, 1080, true, outFormat);
 			}
 
 			~implementation()
@@ -328,6 +328,19 @@ namespace TVPlayR
 							if (m_RateConvCaps.ProcessorCaps & D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_FRAME_RATE_CONVERSION) { dbgstr.append(" Frame Rate Conversion"); }
 							dbgstr += std::format("\n  PastFrames   : {}", m_RateConvCaps.PastFrames);
 							dbgstr += std::format("\n  FutureFrames : {}", m_RateConvCaps.FutureFrames);
+							dbgstr += std::format("\n  CustomRateCount: {}", m_RateConvCaps.CustomRateCount);
+							if (m_RateConvCaps.CustomRateCount)
+							{
+								for (UINT i = 0; i < m_RateConvCaps.CustomRateCount; i++)
+								{
+									D3D11_VIDEO_PROCESSOR_CUSTOM_RATE rate;
+									if (S_OK == m_pVideoProcessorEnum->GetVideoProcessorCustomRate(m_RateConvIndex, i, &rate))
+									{
+										dbgstr += std::format("\n    {:2d}: {}/{}, input {} OutputFrames {} InputFramesOrFields {}", 
+											i, rate.CustomRate.Numerator, rate.CustomRate.Denominator, rate.InputInterlaced ? "interlaced " : "progressive", rate.OutputFrames, rate.InputFramesOrFields);
+									}
+								}
+							}
 							DebugPrintLine(Common::DebugSeverity::debug, dbgstr);
 #endif
 						}

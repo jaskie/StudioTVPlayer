@@ -15,7 +15,7 @@ namespace TVPlayR {
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
 			//OutputSink
-			void Push(Core::AVSync& sync) override;
+			void Push(const Core::AVSync& sync) override;
 			//FrameClockSource
 			void RegisterClockTarget(Core::ClockTarget& target) override;
 			void UnregisterClockTarget(Core::ClockTarget& target) override;

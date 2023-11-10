@@ -234,9 +234,9 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(Core::AVSync& sync)
+			void Push(const Core::AVSync& sync)
 			{
-				overlay_executor_.begin_invoke([sync, this]
+				overlay_executor_.begin_invoke([=]
 					{
 						Core::AVSync transformed(sync);
 						for (auto& overlay : overlays_)
@@ -325,7 +325,7 @@ namespace TVPlayR {
 		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
-		void DecklinkOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
+		void DecklinkOutput::Push(const Core::AVSync& sync) { impl_->Push(sync); }
 		void DecklinkOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(target); }
 		void DecklinkOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(target); }
 	}

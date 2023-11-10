@@ -12,7 +12,7 @@ namespace TVPlayR {
 class OutputSink
 {
 public:
-	virtual void Push(Core::AVSync& sync) = 0;
+	virtual void Push(const Core::AVSync& sync) = 0;
 	virtual ~OutputSink() { }
 };
 

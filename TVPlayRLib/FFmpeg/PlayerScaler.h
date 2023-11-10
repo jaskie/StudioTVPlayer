@@ -16,11 +16,11 @@ class PlayerScaler final :	public VideoFilterBase
 public:
 	PlayerScaler(const Core::Player& player);
 	const Core::VideoFormat& Format() const { return output_format_; }
-	bool Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base);
+	bool Push(const std::shared_ptr<AVFrame>& frame, AVRational input_frame_rate, AVRational input_time_base);
 private:
 	const Core::VideoFormat output_format_;
 	const AVPixelFormat output_pixel_format_;
-	std::string GetFilterString(std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate);
+	std::string GetFilterString(const std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate);
 };
 
 }}

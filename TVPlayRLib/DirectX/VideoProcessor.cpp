@@ -63,8 +63,6 @@ namespace TVPlayR
 #ifdef DEBUG
 				DumpVideoDevice();
 #endif
-				DXGI_FORMAT outFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-				InitVideoProcessor(DXGI_FORMAT::DXGI_FORMAT_YUY2, 1920, 1080, true, outFormat);
 			}
 
 			~implementation()
@@ -420,7 +418,7 @@ namespace TVPlayR
 				m_srcHeight = 0;
 			}
 
-			HRESULT InitInputTextures(ID3D11Device* pDevice)
+			HRESULT InitInputTextures()
 			{
 #if ENABLE_FUTUREFRAMES
 				m_VideoTextures.Resize(1 + m_RateConvCaps.PastFrames + m_RateConvCaps.FutureFrames);
@@ -430,12 +428,12 @@ namespace TVPlayR
 
 				HRESULT hr = E_NOT_VALID_STATE;
 
-				for (UINT i = 0; i < m_VideoTextures.Size(); i++)
+				for (size_t i = 0; i < m_VideoTextures.Size(); i++)
 				{
 					ID3D11Texture2D** ppTexture = m_VideoTextures.GetTexture(i);
 					D3D11_TEXTURE2D_DESC texdesc = CreateTex2DDesc(m_srcFormat, m_srcWidth, m_srcHeight, Tex2D_Default);
 
-					hr = pDevice->CreateTexture2D(&texdesc, nullptr, ppTexture);
+					hr = m_pDevice->CreateTexture2D(&texdesc, nullptr, ppTexture);
 					if (S_OK == hr)
 					{
 						D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC inputViewDesc = {};
@@ -547,15 +545,20 @@ namespace TVPlayR
 				}
 				return hr;
 			}
+
+			bool Push(const std::shared_ptr<AVFrame>& frame)
+			{
+				if (!(m_pVideoProcessor && frame->width == m_srcWidth && frame->height == m_srcHeight && frame->format == (int)DXGIFormatToAVPixelFormat(m_srcFormat)))
+				{
+					DXGI_FORMAT outputFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+					InitVideoProcessor(AVPixelFormatToDXGIFormat(static_cast<AVPixelFormat>(frame->format)), frame->width, frame->height, frame->interlaced_frame, outputFormat);
+					InitInputTextures();
+				}
+			}
 		};
 
-		VideoProcessor::VideoProcessor()
-			: impl_(std::make_unique<implementation>())
-		{
-
-		}
-		VideoProcessor::~VideoProcessor()
-		{
-		}
+		VideoProcessor::VideoProcessor() : impl_(std::make_unique<implementation>()) { }
+		VideoProcessor::~VideoProcessor() { }
+		bool VideoProcessor::Push(const std::shared_ptr<AVFrame>& frame) { return impl_->Push(frame); }
 	}
 }

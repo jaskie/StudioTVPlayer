@@ -141,7 +141,7 @@ namespace TVPlayR
 			}
 		}
 
-		const DXGI_FORMAT DXGIFormatToAVPixelFormat(AVPixelFormat format)
+		const DXGI_FORMAT AVPixelFormatToDXGIFormat(AVPixelFormat format)
 		{
 			switch (format)
 			{

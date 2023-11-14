@@ -34,7 +34,7 @@ namespace TVPlayR
 		const std::string DXGIFormatToString(const DXGI_FORMAT format);
 		const std::string D3DFilterToString(const D3D11_VIDEO_PROCESSOR_FILTER filter);
 		const AVPixelFormat DXGIFormatToAVPixelFormat(DXGI_FORMAT dx_format);
-		const DXGI_FORMAT DXGIFormatToAVPixelFormat(AVPixelFormat format);
+		const DXGI_FORMAT AVPixelFormatToDXGIFormat(AVPixelFormat format);
 		int GetBitDepth(const DXGI_FORMAT format);
 		D3D11_TEXTURE2D_DESC CreateTex2DDesc(const DXGI_FORMAT format, const UINT width, const UINT height, const Tex2DType type);
 	}

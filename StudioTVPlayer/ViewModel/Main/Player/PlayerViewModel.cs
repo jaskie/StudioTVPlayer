@@ -436,7 +436,8 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void MediaPlayer_Cleared(object sender, EventArgs e)
         {
             CurrentRundownItem = null;
-            Preview = null;
+            if (!_player.LivePreview)
+                Preview = null;
         }
 
         private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)

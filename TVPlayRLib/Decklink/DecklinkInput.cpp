@@ -160,8 +160,8 @@ namespace TVPlayR {
 			}
 
 			STDMETHODIMP						QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
-			virtual ULONG STDMETHODCALLTYPE		AddRef() override { return 1; }
-			virtual ULONG STDMETHODCALLTYPE		Release() override { return 1; }
+			STDMETHODIMP_(ULONG)				AddRef() override { return 1; }
+			STDMETHODIMP_(ULONG)				Release() override { return 1; }
 
 			bool IsAddedToPlayer(const Core::Player& player)
 			{

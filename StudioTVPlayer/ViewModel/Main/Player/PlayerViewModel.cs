@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -51,7 +50,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             player.Cleared += MediaPlayer_Cleared;
             player.FramePlayed += MediaPlayer_Progress;
             player.Paused += MediaPlayer_Paused;
-            player.MediaSubmitted += MediaPlayer_MediaSubmitted;
             player.AudioVolume += Player_AudioVolume;
             player.MediaDurationChanged += MediaPlayer_MediaDurationChanged;
             player.Rundown.ItemRemoved += Rundown_ItemRemoved;
@@ -440,12 +438,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 Preview = null;
         }
 
-        private void MediaPlayer_MediaSubmitted(object sender, Model.Args.RundownItemEventArgs e)
-        {
-            Rundown.Add(CreateRundownItemViewModel(e.RundownItem));
-            Refresh();
-        }
-
         private void Rundown_ItemRemoved(object sender, Model.Args.RundownItemIndexedEventArgs e)
         {
             Rundown.RemoveAt(e.Index);
@@ -509,7 +501,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             _player.Cleared -= MediaPlayer_Cleared;
             _player.FramePlayed -= MediaPlayer_Progress;
             _player.Paused -= MediaPlayer_Paused;
-            _player.MediaSubmitted -= MediaPlayer_MediaSubmitted;
             _player.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;
             _player.Rundown.ItemRemoved -= Rundown_ItemRemoved;
             _player.Rundown.ItemAdded -= Rundown_ItemAdded;

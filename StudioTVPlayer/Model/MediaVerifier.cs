@@ -84,7 +84,7 @@ namespace StudioTVPlayer.Model
                         media.Thumbnail = thumb;
                     }
                 }
-                media.IsValid = true;
+                media.IsValid = media.Duration > TimeSpan.Zero;
             }
             catch 
             {

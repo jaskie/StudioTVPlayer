@@ -10,12 +10,12 @@ namespace TVPlayR {
         class DecklinkTimecode final : public IDeckLinkTimecode
         {
         private:
-            ULONG ref_count_;
             std::int64_t time_;
             Core::VideoFormat& format_;
         public:
-            DecklinkTimecode(Core::VideoFormat& format, std::int64_t time);
+            DecklinkTimecode(Core::VideoFormat& format);
             bool IsValid() const;
+            void Update(Core::VideoFormat& format, std::int64_t time);
             //IUnknown
             STDMETHOD(QueryInterface(REFIID, LPVOID*));
             STDMETHOD_(ULONG, AddRef());

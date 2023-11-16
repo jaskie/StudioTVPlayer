@@ -38,7 +38,7 @@ namespace TVPlayR {
 
 	void DecklinkOutput::Initialize(VideoFormat^ format, PixelFormat pixelFormat, int audioChannelsCount, int audioSampleRate)
 	{
-		(*_decklink)->Initialize(format->GetNativeEnumType(), pixelFormat, audioChannelsCount, audioSampleRate);
+		REWRAP_EXCEPTION((*_decklink)->Initialize(format->GetNativeEnumType(), pixelFormat, audioChannelsCount, audioSampleRate);)
 	}
 
 	DecklinkOutput::~DecklinkOutput()

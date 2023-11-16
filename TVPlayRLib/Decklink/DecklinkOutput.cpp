@@ -27,10 +27,10 @@ namespace TVPlayR {
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			std::vector<Core::ClockTarget*> clock_targets_;
-			int preroll_buffer_size_ = 3;
+			int preroll_buffer_size_ = 4;
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
-			int audio_channels_count_ = 2;
+			int audio_channels_count_ = 0;
 			Common::BlockingCollection<Core::AVSync> input_buffer_;
 			Common::BlockingCollection<DecklinkVideoFrame*> decklink_frames_recycler_;
 			std::shared_ptr<AVFrame> last_video_;
@@ -62,15 +62,15 @@ namespace TVPlayR {
 				output_->SetScheduledFrameCompletionCallback(nullptr);
 			}
 
-			bool OpenOutput(BMDDisplayMode mode, BMDPixelFormat pixel_format, int audio_channels_count)
+			void OpenOutput(BMDDisplayMode mode, BMDPixelFormat pixel_format, int audio_channels_count)
 			{
 				if (!output_)
-					return false;
+					THROW_EXCEPTION("Decklink Output: unable to find video output at index " + std::to_string(index_));
 				BOOL modeSupported;
 				BMDDisplayMode actualMode;
 				if (FAILED(output_->DoesSupportVideoMode(BMDVideoConnection::bmdVideoConnectionUnspecified, mode, BMDPixelFormat::bmdFormat8BitYUV, BMDVideoOutputConversionMode::bmdNoVideoOutputConversion, BMDSupportedVideoModeFlags::bmdSupportedVideoModeDefault, &actualMode, &modeSupported))
 					|| !modeSupported)
-					return false;
+					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unsupported video mode");
 				if (pixel_format == BMDPixelFormat::bmdFormat8BitBGRA)
 				{
 					BOOL support = FALSE;
@@ -93,10 +93,9 @@ namespace TVPlayR {
 					}
 				}
 				if (FAILED(output_->EnableVideoOutput(actualMode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
-					return false;
+					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to enable video output");
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
-				return true;
 			}
 						
 			void Preroll()
@@ -121,9 +120,10 @@ namespace TVPlayR {
 				DecklinkVideoFrame* decklink_frame;
 				if (decklink_frames_recycler_.take(decklink_frame) != Common::BlockingCollectionStatus::Ok)
 				{
-					DebugPrintLine(Common::DebugSeverity::trace, "ScheduleVideo: Can't take frame from recycler");
+					DebugPrintLine(Common::DebugSeverity::warning, "ScheduleVideo: Can't take frame from recycler");
+					return;
 				}
-				(*decklink_frame).Update(format_, frame, timecode);
+				decklink_frame->Update(format_, frame, timecode);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_time_ = timecode;
 				last_video_ = frame;
@@ -137,8 +137,9 @@ namespace TVPlayR {
 
 			void RecycleDecklinkFrame(DecklinkVideoFrame* decklink_frame)
 			{
+				decklink_frame->Recycle();
 				if (decklink_frames_recycler_.add(decklink_frame) != Common::BlockingCollectionStatus::Ok)
-					decklink_frame->Release(); //assume the output is unitializing
+					decklink_frame->Release(); // if the frame is added to recycler, then decklink output will release it.
 			}
 
 			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
@@ -171,9 +172,8 @@ namespace TVPlayR {
 			void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (video_format == Core::VideoFormatType::invalid)
-					THROW_EXCEPTION("Decklink Output " + std::to_string(index_) + ": invalid video format");
-				if (!OpenOutput(GetDecklinkDisplayMode(video_format), BMDPixelFormatFromPixelFormat(pixel_format), audio_channel_count))
-					THROW_EXCEPTION("DecklinkOutout: OpenOutput() failed");
+					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": invalid video format");
+				OpenOutput(GetDecklinkDisplayMode(video_format), BMDPixelFormatFromPixelFormat(pixel_format), audio_channel_count);
 				format_ = video_format;
 				pixel_format_ = pixel_format;
 				audio_channels_count_ = audio_channel_count;
@@ -182,7 +182,7 @@ namespace TVPlayR {
 				decklink_frames_recycler_.activate();
 				for (size_t i = 0; i < preroll_buffer_size_ + 1; i++)
 				{
-					DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame();
+					DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(format_);
 					decklink_frame->AddRef();
 					RecycleDecklinkFrame(decklink_frame);
 				}
@@ -246,11 +246,10 @@ namespace TVPlayR {
 					});
 			}
 
-			//IDeckLinkVideoOutputCallback
+#pragma region IDeckLinkVideoOutputCallback
 			HRESULT STDMETHODCALLTYPE ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
 			{
 				auto frame = dynamic_cast<DecklinkVideoFrame*>(completedFrame);
-				frame->Recycle();
 				RecycleDecklinkFrame(frame);
 
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
@@ -305,11 +304,13 @@ namespace TVPlayR {
 			{
 				return S_OK;
 			}
+#pragma endregion
 
-			//IUnknown
+#pragma region IUnknown
 			HRESULT STDMETHODCALLTYPE QueryInterface(REFIID, LPVOID*) override { return E_NOINTERFACE; }
 			ULONG STDMETHODCALLTYPE AddRef() override { return S_OK; }
 			ULONG STDMETHODCALLTYPE Release() override { return S_OK; }
+#pragma endregion
 
 		};
 

@@ -3,28 +3,19 @@
 namespace TVPlayR {
     namespace Common {
 
-        typedef struct tagTHREADNAME_INFO
-        {
-            DWORD dwType; // must be 0x1000
-            LPCSTR szName; // pointer to name (in user addr space)
-            DWORD dwThreadID; // thread ID (-1=caller thread)
-            DWORD dwFlags; // reserved for future use, must be zero
-        } THREADNAME_INFO;
-
         static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
         {
-            THREADNAME_INFO info;
+            HANDLE hThread = ::GetCurrentThread();
+            const size_t size = strlen(szThreadName) + 1;
+            wchar_t* wThreadName = new wchar_t[size];
+            size_t outSize;
+            try
             {
-                info.dwType = 0x1000;
-                info.szName = szThreadName;
-                info.dwThreadID = dwThreadID;
-                info.dwFlags = 0;
+                if (mbstowcs_s(&outSize, wThreadName, size, szThreadName, size - 1) == 0)
+                    ::SetThreadDescription(hThread, wThreadName);
             }
-            __try
-            {
-                RaiseException(0x406D1388, 0, sizeof(info) / sizeof(DWORD), (ULONG_PTR*)&info);
-            }
-            __except (EXCEPTION_CONTINUE_EXECUTION) {}
+            catch (...) {}
+            delete wThreadName;
         }
 
     class Executor final

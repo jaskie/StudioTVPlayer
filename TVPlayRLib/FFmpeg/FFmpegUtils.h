@@ -21,6 +21,8 @@ if (error_code < 0) \
 	throw TVPlayR::Common::TVPlayRException(exception_message.c_str());\
 	}
 
+template<class T> using FF_unique_ptr = std::unique_ptr<T, void(*)(T*)>; // template unique pointer type
+
 std::shared_ptr<AVPacket> AllocPacket();
 
 std::shared_ptr<AVFrame> AllocFrame();

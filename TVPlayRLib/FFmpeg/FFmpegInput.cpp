@@ -19,7 +19,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	std::atomic_bool is_eof_ = false;
 	std::atomic_bool is_playing_ = false;
 	std::atomic_bool is_loop_ = false;
-	std::atomic_bool is_producer_running_ = true;
+	bool is_producer_running_ = false;
 	std::vector<std::unique_ptr<Decoder>> audio_decoders_;
 	const Core::Player* player_ = nullptr;
 	std::unique_ptr<AudioMuxer> audio_muxer_;
@@ -38,7 +38,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 
 	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
 		: FFmpegInputBase(file_name, acceleration, hw_device)
-		, Common::DebugTarget(Common::DebugSeverity::info, "FFmpegInput " + file_name)
+		, Common::DebugTarget(Common::DebugSeverity::debug, "FFmpegInput " + file_name)
 		, producer_(&implementation::ProducerTheradStart, this)
 	{ 
 		input_.LoadStreamData();
@@ -46,10 +46,13 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 
 	~implementation()
 	{
-		is_producer_running_ = false;
 		if (player_)
 			RemoveFromPlayer(*player_);
-		producer_cv_.notify_one();
+		{
+			std::lock_guard<std::mutex> lock(producer_mutex_);
+			is_producer_running_ = false;
+			producer_cv_.notify_one();
+		}
 		producer_.join();
 	}
 
@@ -58,24 +61,27 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	void ProducerTheradStart()
 	{
 		Common::SetThreadName(::GetCurrentThreadId(), ("FFmpegInput " + file_name_).c_str());
-		while (is_producer_running_)
-		{
-			std::unique_lock<std::mutex> wait_lock(producer_mutex_);
-			producer_cv_.wait(wait_lock);
+		is_producer_running_ = true;
+		std::unique_lock<std::mutex> wait_lock(producer_mutex_);
+		producer_cv_.wait(wait_lock, [&]()
 			{
 				std::lock_guard<std::mutex> lock(buffer_mutex_);
-				if (!player_)
-					continue;
-				if (!buffer_ && player_)
-					InitializeBuffer();
-				while (!buffer_->IsFull())
+				if (player_)
 				{
-					ProcessNextInputPacket();
-					if (buffer_->IsReady())
-						buffer_cv_.notify_one();
+					if (!buffer_)
+						InitializeBuffer();
+					while (!buffer_->IsFull())
+					{
+						ProcessNextInputPacket();
+						if (buffer_->IsReady())
+						{
+							std::lock_guard<std::mutex> buffer_content_lock(buffer_content_mutex_);
+							buffer_cv_.notify_one();
+						}
+					}
 				}
-			}			
-		}
+				return !is_producer_running_;
+			});
 	}
 
 	void InitializeBuffer()
@@ -250,8 +256,13 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		{
 			is_eof_ = true;
 			Pause();
-		} else
+			DebugPrintLine(Common::DebugSeverity::debug, "Stopped");
+		}
+		else
+		{
+			std::lock_guard<std::mutex> lock(producer_mutex_);
 			producer_cv_.notify_one();
+		}
 		return sync;
 	}
 
@@ -263,25 +274,36 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 
 	void AddToPlayer(const Core::Player& player)
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (&player == player_)
 		{
-			DebugPrintLine(Common::DebugSeverity::error, "Already added to this player");
-			return;
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
+			if (&player == player_)
+			{
+				DebugPrintLine(Common::DebugSeverity::error, "Already added to this player");
+				return;
+			}
+			if (player_)
+				THROW_EXCEPTION("FFmpegInput: already added to another player");
+			player_ = &player;
 		}
-		if (player_)
-			THROW_EXCEPTION("FFmpegInput: already added to another player");
-		player_ = &player;
+		std::lock_guard<std::mutex> lock(producer_mutex_);
 		producer_cv_.notify_one();
+		DebugPrintLine(Common::DebugSeverity::debug, "Added to player");
 	}
 
 	void RemoveFromPlayer(const Core::Player& player)
 	{
-		std::lock_guard<std::mutex> lock(buffer_mutex_);
-		if (player_ != &player)
-			return;
-		player_ = nullptr;
+		{
+			std::lock_guard<std::mutex> lock(buffer_mutex_);
+			if (player_ != &player)
+				return;
+			player_ = nullptr;
+			buffer_.reset();
+			player_scaler_.reset();
+			audio_muxer_.reset();
+		}
+		std::lock_guard<std::mutex> lock(producer_mutex_);
 		producer_cv_.notify_one();
+		DebugPrintLine(Common::DebugSeverity::debug, "Removed from player");
 	}
 
 
@@ -305,6 +327,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			if (buffer_)
 				buffer_->Seek(time);
 			is_eof_ = false;
+			std::lock_guard<std::mutex> lock(producer_mutex_);
 			producer_cv_.notify_one();
 			return true;
 		}

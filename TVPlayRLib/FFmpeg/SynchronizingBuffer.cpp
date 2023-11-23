@@ -11,7 +11,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 	SynchronizingBuffer::SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t capacity, std::int64_t initial_sync, std::int64_t start_timecode, std::int64_t media_duration, FieldOrder field_order)
-		: Common::DebugTarget(Common::DebugSeverity::info, "SynchronizingBuffer " + player->Name())
+		: Common::DebugTarget(Common::DebugSeverity::error, "SynchronizingBuffer " + player->Name())
 		, video_format_(player->Format().type())
 		, video_frame_rate_(player->Format().FrameRate().av())
 		, sample_rate_(player->AudioSampleRate())
@@ -30,9 +30,13 @@ namespace TVPlayR {
 		, media_duration_(media_duration)
 		, pause_buffer_(field_order, is_playing)
 	{
+		DebugPrintLine(Common::DebugSeverity::info, "Created");
 	}
 
-	SynchronizingBuffer::~SynchronizingBuffer() { }
+	SynchronizingBuffer::~SynchronizingBuffer() 
+	{
+		DebugPrintLine(Common::DebugSeverity::info, "Finalized");
+	}
 	
 	void SynchronizingBuffer::PushAudio(const std::shared_ptr<AVFrame>& frame) 
 	{

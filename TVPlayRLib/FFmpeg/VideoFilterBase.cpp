@@ -136,7 +136,7 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 		input_pixel_format_ = static_cast<AVPixelFormat>(input_pixel_format);
 		input_sar_ = input_sar;
 		DebugPrintLine(Common::DebugSeverity::debug, args);
-		if (DebugSeverity() <= Common::DebugSeverity::info)
+		if (DebugSeverity() == Common::DebugSeverity::trace)
 			DumpFilter(filter_, graph_.get());
 	}
 	catch (const std::exception& e)

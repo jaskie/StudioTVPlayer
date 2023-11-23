@@ -41,7 +41,7 @@ struct Decoder::implementation : Common::DebugTarget
 	std::mutex mutex_;
 
 	implementation(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
-		: Common::DebugTarget(Common::DebugSeverity::info, "Decoder")
+		: Common::DebugTarget(Common::DebugSeverity::info, "Decoder " + std::string(codec->name))
 		, codec_(codec)
 		, ctx_(CreateCodecContext())
 		, start_ts_(stream ? stream->start_time : 0LL)
@@ -105,7 +105,7 @@ struct Decoder::implementation : Common::DebugTarget
 		av_opt_set_int(ctx.get(), "refcounted_frames", 1, 0);
 		av_opt_set_int(ctx.get(), "threads", 4, 0);
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(ctx.get(), codec_, NULL));
-		DebugPrintLine(Common::DebugSeverity::debug, "Decoder created");
+		DebugPrintLine(Common::DebugSeverity::debug, "created");
 		return ctx;
 	}
 
@@ -143,7 +143,7 @@ struct Decoder::implementation : Common::DebugTarget
 		{
 			avcodec_flush_buffers(ctx_.get());
 			flush_packet_pushed_ = false;
-			DebugPrintLine(Common::DebugSeverity::debug, "Decoder reset");
+			DebugPrintLine(Common::DebugSeverity::debug, "reset");
 		}
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
@@ -213,7 +213,7 @@ struct Decoder::implementation : Common::DebugTarget
 	{
 		Push(nullptr);
 		flush_packet_received_ = true;
-		DebugPrintLine(Common::DebugSeverity::info, "Decoder flushed");
+		DebugPrintLine(Common::DebugSeverity::debug, "flushed");
 	}
 
 	void Seek(const std::int64_t seek_time)

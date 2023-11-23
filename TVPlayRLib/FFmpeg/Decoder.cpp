@@ -25,7 +25,7 @@ struct Decoder::implementation : Common::DebugTarget
 	AVCodecHWConfig* hw_config_ = NULL;
 	const std::string hw_device_index_;
 	bool is_eof_ = false;
-	bool flush_packet_sent_ = false;
+	bool flush_packet_pushed_ = false;
 	bool flush_packet_received_ = false;
 	const int stream_index_;
 	const int channels_count_;
@@ -34,8 +34,8 @@ struct Decoder::implementation : Common::DebugTarget
 	const AVRational time_base_;
 	AVStream* const stream_;
 	const AVMediaType media_type_;
-	FF_unique_ptr<AVBufferRef> hw_device_ctx_;
-	FF_unique_ptr<AVCodecContext> ctx_;
+	unique_ptr<AVBufferRef> hw_device_ctx_;
+	const unique_ptr<AVCodecContext> ctx_;
 	std::int64_t seek_pts_;
 	const std::int64_t duration_;
 	std::mutex mutex_;
@@ -61,10 +61,11 @@ struct Decoder::implementation : Common::DebugTarget
 
 	}
 
-	FF_unique_ptr<AVCodecContext> CreateCodecContext()
+	unique_ptr<AVCodecContext> CreateCodecContext()
 	{
-		auto ctx = FF_unique_ptr<AVCodecContext>(codec_ ? avcodec_alloc_context3(codec_) : NULL,
-			[](AVCodecContext* c) { if (c)	avcodec_free_context(&c); });
+		auto ctx = unique_ptr<AVCodecContext>(
+			codec_ ? avcodec_alloc_context3(codec_) : NULL,
+			[](AVCodecContext* c) { if (c) avcodec_free_context(&c); });
 		if (!ctx || !stream_ || !codec_)
 			THROW_EXCEPTION("Decoder: codec context not created");
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_to_context(ctx.get(), stream_->codecpar));
@@ -97,16 +98,13 @@ struct Decoder::implementation : Common::DebugTarget
 			if (FF(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
 			{
 				ctx->hw_device_ctx = av_buffer_ref(weak_hw_device_ctx);
-				hw_device_ctx_ = FF_unique_ptr<AVBufferRef>(weak_hw_device_ctx, [](AVBufferRef* p) { av_buffer_unref(&p); });
+				hw_device_ctx_ = unique_ptr<AVBufferRef>(weak_hw_device_ctx, [](AVBufferRef* p) { av_buffer_unref(&p); });
 			}
 		}
 
 		av_opt_set_int(ctx.get(), "refcounted_frames", 1, 0);
 		av_opt_set_int(ctx.get(), "threads", 4, 0);
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(ctx.get(), codec_, NULL));
-		flush_packet_received_ = false;
-		flush_packet_sent_ = false;
-		is_eof_ = false;
 		DebugPrintLine(Common::DebugSeverity::debug, "Decoder created");
 		return ctx;
 	}
@@ -140,9 +138,13 @@ struct Decoder::implementation : Common::DebugTarget
 			return;
 		auto packet = packet_queue_.front();
 		if (!packet)
-			flush_packet_sent_ = true;
-		if (flush_packet_sent_ && packet)
-			ctx_ = CreateCodecContext();
+			flush_packet_pushed_ = true;
+		else if (flush_packet_pushed_)
+		{
+			avcodec_flush_buffers(ctx_.get());
+			flush_packet_pushed_ = false;
+			DebugPrintLine(Common::DebugSeverity::debug, "Decoder reset");
+		}
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			if (packet)
@@ -219,6 +221,8 @@ struct Decoder::implementation : Common::DebugTarget
 		std::lock_guard<std::mutex> lock(mutex_);
 		avcodec_flush_buffers(ctx_.get());
 		packet_queue_.clear();
+		is_eof_ = false;
+		flush_packet_received_ = false;
 		seek_pts_ = TimeToPts(seek_time, time_base_);
 	}
 

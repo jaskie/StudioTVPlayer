@@ -554,6 +554,9 @@ namespace TVPlayR
 					InitVideoProcessor(AVPixelFormatToDXGIFormat(static_cast<AVPixelFormat>(frame->format)), frame->width, frame->height, frame->interlaced_frame, outputFormat);
 					InitInputTextures();
 				}
+				ID3D11Texture2D* texture = GetNextInputTexture(AVFrameD3D11_VIDEO_FRAME_FORMAT(frame));
+				//texture->
+				return false;
 			}
 		};
 

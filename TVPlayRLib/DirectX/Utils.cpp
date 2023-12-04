@@ -214,5 +214,20 @@ namespace TVPlayR
 			}
 			return desc;
 		}
+
+		const D3D11_VIDEO_FRAME_FORMAT AVFrameD3D11_VIDEO_FRAME_FORMAT(const std::shared_ptr<AVFrame>& frame)
+		{
+			if (frame->interlaced_frame)
+			{
+				if (frame->top_field_first)
+					return D3D11_VIDEO_FRAME_FORMAT::D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST;
+				else
+					return D3D11_VIDEO_FRAME_FORMAT::D3D11_VIDEO_FRAME_FORMAT_INTERLACED_BOTTOM_FIELD_FIRST;
+			}
+			else
+			{
+				return D3D11_VIDEO_FRAME_FORMAT::D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE;
+			}
+		}
 	}
 }

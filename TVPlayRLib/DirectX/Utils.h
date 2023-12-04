@@ -37,5 +37,6 @@ namespace TVPlayR
 		const DXGI_FORMAT AVPixelFormatToDXGIFormat(AVPixelFormat format);
 		int GetBitDepth(const DXGI_FORMAT format);
 		D3D11_TEXTURE2D_DESC CreateTex2DDesc(const DXGI_FORMAT format, const UINT width, const UINT height, const Tex2DType type);
+		const D3D11_VIDEO_FRAME_FORMAT AVFrameD3D11_VIDEO_FRAME_FORMAT(const std::shared_ptr<AVFrame>& frame);
 	}
 }

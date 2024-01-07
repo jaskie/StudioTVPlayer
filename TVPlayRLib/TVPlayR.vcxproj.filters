@@ -206,7 +206,7 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="ColorSpace.h" />
-    <ClInclude Include="DirectX\VideoProcessor.h">
+    <ClInclude Include="DirectX\D3D11VP.h">
       <Filter>DirectX</Filter>
     </ClInclude>
     <ClInclude Include="DirectX\Utils.h">
@@ -215,6 +215,7 @@
     <ClInclude Include="DirectX\VideoTextureBuffer.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="DirectX\DX11Helper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decklink\DecklinkIterator.cpp">
@@ -332,12 +333,13 @@
     <ClCompile Include="Core\InputSource.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="DirectX\VideoProcessor.cpp">
+    <ClCompile Include="DirectX\D3D11VP.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
     <ClCompile Include="DirectX\Utils.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
+    <ClCompile Include="DirectX\DX11Helper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="..\DecklinkSDK\include\DeckLinkAPI.idl">

@@ -17,19 +17,23 @@
 #define D3DFMT_Y410 (D3DFORMAT)FCC('Y410')
 #define D3DFMT_Y416 (D3DFORMAT)FCC('Y416')
 
-enum Tex2DType {
-	Tex2D_Default,
-	Tex2D_DefaultRTarget,
-	Tex2D_DefaultShader,
-	Tex2D_DefaultShaderRTarget,
-	Tex2D_DynamicShaderWrite,
-	Tex2D_DynamicShaderWriteNoSRV,
-	Tex2D_StagingRead,
-};
+#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p) = nullptr; } }
+#define SAFE_CLOSE_HANDLE(p) { if (p) { if ((p) != INVALID_HANDLE_VALUE) ASSERT(CloseHandle(p)); (p) = nullptr; } }
+#define SAFE_DELETE(p)       { if (p) { delete (p); (p) = nullptr; } }
 
 namespace TVPlayR
 {
 	namespace DirectX {
+
+		enum Tex2DType {
+			Tex2D_Default,
+			Tex2D_DefaultRTarget,
+			Tex2D_DefaultShader,
+			Tex2D_DefaultShaderRTarget,
+			Tex2D_DynamicShaderWrite,
+			Tex2D_DynamicShaderWriteNoSRV,
+			Tex2D_StagingRead,
+		};
 		const std::string D3DFormatToString(const D3DFORMAT format);
 		const std::string DXGIFormatToString(const DXGI_FORMAT format);
 		const std::string D3DFilterToString(const D3D11_VIDEO_PROCESSOR_FILTER filter);

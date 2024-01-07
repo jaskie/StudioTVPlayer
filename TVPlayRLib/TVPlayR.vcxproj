@@ -93,6 +93,7 @@
     <ClInclude Include="DecklinkKeyerType.h" />
     <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="DecklinkTimecodeSource.h" />
+    <ClInclude Include="DirectX\DX11Helper.h" />
     <ClInclude Include="DirectX\Utils.h" />
     <ClInclude Include="DirectX\VideoTextureBuffer.h" />
     <ClInclude Include="FFmpeg\Encoder.h" />
@@ -152,7 +153,7 @@
     <ClInclude Include="FFmpeg\SwScale.h" />
     <ClInclude Include="FFmpeg\SwResample.h" />
     <ClInclude Include="TimecodeOutputSource.h" />
-    <ClInclude Include="DirectX\VideoProcessor.h" />
+    <ClInclude Include="DirectX\D3D11VP.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\CoreUtils.cpp">
@@ -180,6 +181,10 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkUtils.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="DirectX\DX11Helper.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -315,7 +320,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="DirectX\VideoProcessor.cpp">
+    <ClCompile Include="DirectX\D3D11VP.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

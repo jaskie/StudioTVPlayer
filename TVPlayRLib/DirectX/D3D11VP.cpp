@@ -1,13 +1,10 @@
 #include "../pch.h"
-#include "VideoProcessor.h"
+#include "D3D11VP.h"
 #include "../Common/Debug.h"
 #include <DirectXMath.h>
 #include "Utils.h"
-#include <d3d11.h>
-#include <d3d11_1.h>
-#include <DXGI1_2.h>
-#include <dxva2api.h>
 #include "VideoTextureBuffer.h"
+#include "DX11Helper.h"
 
 #pragma comment (lib, "d3d9.lib")
 #pragma comment (lib, "d3d11.lib")
@@ -15,48 +12,8 @@
 namespace TVPlayR
 {
 	namespace DirectX {
-		struct VideoProcessor::implementation : private Common::DebugTarget
-		{
-			UINT vendor_id = 0;
-			CComPtr<ID3D11Device1>					m_pDevice;
-			CComPtr<ID3D11DeviceContext1>			m_pDeviceContext;
 
-			
-			CComPtr<ID3D11VideoDevice>				m_pVideoDevice;
-			CComPtr<ID3D11VideoProcessor>			m_pVideoProcessor;
-			CComPtr<ID3D11VideoProcessorEnumerator>	m_pVideoProcessorEnum;
-
-			CComPtr<ID3D11VideoContext>				m_pVideoContext; 
-			CComPtr<ID3D11VideoProcessorEnumerator1> m_pVideoProcessorEnum1;
-
-			D3D11_VIDEO_PROCESSOR_CAPS				m_VPCaps = {};
-
-			VideoTextureBuffer m_VideoTextures;
-
-			UINT m_nInputFrameOrField = 0;
-			bool m_bPresentFrame = false;
-			UINT m_nPastFrames = 0;
-			UINT m_nFutureFrames = 0;
-			UINT m_RateConvIndex = 0;
-			D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS m_RateConvCaps = {};
-
-			DXGI_FORMAT m_srcFormat = DXGI_FORMAT_UNKNOWN;
-			UINT m_srcWidth = 0;
-			UINT m_srcHeight = 0;
-			//bool m_bInterlaced = false;
-			DXGI_FORMAT m_dstFormat = DXGI_FORMAT_UNKNOWN;
-
-			// Filters
-			struct {
-				int support;
-				int value;
-				D3D11_VIDEO_PROCESSOR_FILTER_RANGE range;
-			} m_VPFilters[8] = {};
-			bool m_bUpdateFilters = false;
-			D3D11_VIDEO_PROCESSOR_ROTATION m_Rotation = D3D11_VIDEO_PROCESSOR_ROTATION_IDENTITY;
-
-
-			implementation()
+		D3D11VP::D3D11VP()
 				: Common::DebugTarget(Common::DebugSeverity::trace, "DirectX Video Processor")
 			{
 				CreateDevice();
@@ -65,13 +22,13 @@ namespace TVPlayR
 #endif
 			}
 
-			~implementation()
+		D3D11VP::~D3D11VP()
 			{
 				ReleaseVideoProcessor();
 				ReleaseVideoDevice();
 			}
 
-			void CreateDevice()
+			void D3D11VP::CreateDevice()
 			{
 				ID3D11Device* pDevice = nullptr;
 				D3D_FEATURE_LEVEL featurelevel;
@@ -115,7 +72,7 @@ namespace TVPlayR
 				pDevice->Release();
 			}
 
-			HRESULT SetDevice(ID3D11Device* pDevice)
+			HRESULT D3D11VP::SetDevice(ID3D11Device* pDevice)
 			{
 				if (!pDevice)
 					return E_POINTER;
@@ -127,7 +84,7 @@ namespace TVPlayR
 				return InitVideoDevice(pDevice);
 			}
 
-			HRESULT InitVideoDevice(ID3D11Device* pDevice)
+			HRESULT D3D11VP::InitVideoDevice(ID3D11Device* pDevice)
 			{
 				HRESULT hr = pDevice->QueryInterface(IID_PPV_ARGS(&m_pVideoDevice));
 				if (FAILED(hr))
@@ -146,7 +103,7 @@ namespace TVPlayR
 				return S_OK;
 			}
 
-			void ReleaseVideoDevice()
+			void D3D11VP::ReleaseVideoDevice()
 			{
 				m_pVideoContext.Release();
 				m_pVideoDevice.Release();
@@ -155,7 +112,7 @@ namespace TVPlayR
 			}
 
 #ifdef DEBUG
-			void DumpVideoDevice()
+			void D3D11VP::DumpVideoDevice()
 			{
 				D3D11_VIDEO_PROCESSOR_CONTENT_DESC ContentDesc = { D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE, {}, 1920, 1080, {}, 1920, 1080, D3D11_VIDEO_USAGE_OPTIMAL_QUALITY };
 				CComPtr<ID3D11VideoProcessorEnumerator> pVideoProcEnum;
@@ -186,7 +143,7 @@ namespace TVPlayR
 			}
 #endif
 
-			HRESULT InitVideoProcessor(const DXGI_FORMAT inputFmt, const UINT width, const UINT height, const bool interlaced, DXGI_FORMAT& outputFmt)
+			HRESULT D3D11VP::InitVideoProcessor(const DXGI_FORMAT inputFmt, const UINT width, const UINT height, const bool interlaced, DXGI_FORMAT& outputFmt)
 			{
 				ReleaseVideoProcessor();
 
@@ -404,7 +361,7 @@ namespace TVPlayR
 
 			}
 
-			void ReleaseVideoProcessor()
+			void D3D11VP::ReleaseVideoProcessor()
 			{
 				m_VideoTextures.Clear();
 				m_pVideoProcessor.Release();
@@ -418,7 +375,7 @@ namespace TVPlayR
 				m_srcHeight = 0;
 			}
 
-			HRESULT InitInputTextures()
+			HRESULT D3D11VP::InitInputTextures()
 			{
 #if ENABLE_FUTUREFRAMES
 				m_VideoTextures.Resize(1 + m_RateConvCaps.PastFrames + m_RateConvCaps.FutureFrames);
@@ -444,7 +401,7 @@ namespace TVPlayR
 				return hr;
 			}
 
-			ID3D11Texture2D* GetNextInputTexture(const D3D11_VIDEO_FRAME_FORMAT vframeFormat)
+			ID3D11Texture2D* D3D11VP::GetNextInputTexture(const D3D11_VIDEO_FRAME_FORMAT vframeFormat)
 			{
 				if (m_VideoTextures.Size())
 				{
@@ -452,7 +409,8 @@ namespace TVPlayR
 					{
 						m_nInputFrameOrField++;
 					}
-					else {
+					else
+					{
 						m_nInputFrameOrField += 2;
 					}
 					if (!m_bPresentFrame)
@@ -476,7 +434,7 @@ namespace TVPlayR
 				return *m_VideoTextures.GetTexture();
 			}
 
-			HRESULT Process(ID3D11Texture2D* pRenderTarget, const D3D11_VIDEO_FRAME_FORMAT sampleFormat, const bool second)
+			HRESULT D3D11VP::Process(ID3D11Texture2D* pRenderTarget, const D3D11_VIDEO_FRAME_FORMAT sampleFormat, const bool second)
 			{
 				assert(m_pVideoDevice);
 				assert(m_pVideoContext);
@@ -509,16 +467,16 @@ namespace TVPlayR
 					return hr;
 				}
 
-				D3D11_VIDEO_PROCESSOR_STREAM StreamData = {};
-				StreamData.Enable = TRUE;
-				StreamData.InputFrameOrField = m_nInputFrameOrField;
+				D3D11_VIDEO_PROCESSOR_STREAM streamData = {};
+				streamData.Enable = TRUE;
+				streamData.InputFrameOrField = m_nInputFrameOrField;
 				if (second)
 				{
-					StreamData.OutputIndex = 1;
+					streamData.OutputIndex = 1;
 				}
 				else
 				{
-					StreamData.InputFrameOrField--;
+					streamData.InputFrameOrField--;
 				}
 				if (m_VideoTextures.Size())
 				{
@@ -526,19 +484,19 @@ namespace TVPlayR
 					if (m_nFutureFrames)
 					{
 						idx -= m_nFutureFrames;
-						StreamData.FutureFrames = m_nFutureFrames;
-						StreamData.ppFutureSurfaces = m_VideoTextures.GetInputView(idx);
+						streamData.FutureFrames = m_nFutureFrames;
+						streamData.ppFutureSurfaces = m_VideoTextures.GetInputView(idx);
 					}
 					idx--;
-					StreamData.pInputSurface = *m_VideoTextures.GetInputView(idx);
+					streamData.pInputSurface = *m_VideoTextures.GetInputView(idx);
 					if (m_nPastFrames)
 					{
 						idx -= m_nPastFrames;
-						StreamData.PastFrames = m_nPastFrames;
-						StreamData.ppPastSurfaces = m_VideoTextures.GetInputView(idx);
+						streamData.PastFrames = m_nPastFrames;
+						streamData.ppPastSurfaces = m_VideoTextures.GetInputView(idx);
 					}
 				}
-				hr = m_pVideoContext->VideoProcessorBlt(m_pVideoProcessor, pOutputView, StreamData.InputFrameOrField, 1, &StreamData);
+				hr = m_pVideoContext->VideoProcessorBlt(m_pVideoProcessor, pOutputView, streamData.InputFrameOrField, 1, &streamData);
 				if (FAILED(hr))
 				{
 					DebugWindowsError("Process() : VideoProcessorBlt() failed", hr);
@@ -546,22 +504,15 @@ namespace TVPlayR
 				return hr;
 			}
 
-			bool Push(const std::shared_ptr<AVFrame>& frame)
+			HRESULT D3D11VP::SetRectangles(const RECT* pSrcRect, const RECT* pDstRect)
 			{
-				if (!(m_pVideoProcessor && frame->width == m_srcWidth && frame->height == m_srcHeight && frame->format == (int)DXGIFormatToAVPixelFormat(m_srcFormat)))
-				{
-					DXGI_FORMAT outputFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-					InitVideoProcessor(AVPixelFormatToDXGIFormat(static_cast<AVPixelFormat>(frame->format)), frame->width, frame->height, frame->interlaced_frame, outputFormat);
-					InitInputTextures();
-				}
-				ID3D11Texture2D* texture = GetNextInputTexture(AVFrameD3D11_VIDEO_FRAME_FORMAT(frame));
-				//texture->
-				return false;
-			}
-		};
+				if (!m_pVideoContext)
+					return E_ABORT;
 
-		VideoProcessor::VideoProcessor() : impl_(std::make_unique<implementation>()) { }
-		VideoProcessor::~VideoProcessor() { }
-		bool VideoProcessor::Push(const std::shared_ptr<AVFrame>& frame) { return impl_->Push(frame); }
+				m_pVideoContext->VideoProcessorSetStreamSourceRect(m_pVideoProcessor, 0, pSrcRect ? TRUE : FALSE, pSrcRect);
+				m_pVideoContext->VideoProcessorSetStreamDestRect(m_pVideoProcessor, 0, pDstRect ? TRUE : FALSE, pDstRect);
+
+				return S_OK;
+			}
 	}
 }

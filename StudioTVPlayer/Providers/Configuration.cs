@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model.Configuration;
+﻿using StudioTVPlayer.Model.Configuration;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -16,6 +15,10 @@ namespace StudioTVPlayer.Providers
         [XmlArray]
         public List<Player> Players { get; set; } = new List<Player>();
 
+        [XmlArray]
+        [XmlArrayItem(typeof(BlackmagicDesignAtem))]
+        public List<PlayerController> PlayerControllers { get; set; } = new List<PlayerController>();
+
         public static Configuration Current { get; } = Load();
 
         private static Configuration Load()
@@ -23,7 +26,7 @@ namespace StudioTVPlayer.Providers
             var configurationFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, ConfigurationFile);
             try
             {
-                var configuration = DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
+                var configuration = Helpers.DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
                 foreach (var player in configuration.Players)
                     player.IsModified = false;
                 return configuration;
@@ -37,7 +40,7 @@ namespace StudioTVPlayer.Providers
         public void Save()
         {
             var configurationFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, ConfigurationFile);
-            DataStore.Save(this, configurationFile);
+            Helpers.DataStore.Save(this, configurationFile);
         }
 
     }

@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class OutputBase : ConfigurationItemBase
+    public abstract class OutputBase : ConfigurationItemBase
     {
         private TVPlayR.TimecodeOutputSource _timecodeOverlay;
         private bool _isFrameClock;

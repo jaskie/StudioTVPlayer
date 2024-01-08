@@ -108,12 +108,15 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
+    <Compile Include="Model\Configuration\BlackmagicDesignAtem.cs" />
     <Compile Include="Model\Configuration\ConfigurationItemBase.cs" />
     <Compile Include="Model\Configuration\DecklinkOutput.cs" />
     <Compile Include="Model\Configuration\FFOutput.cs" />
     <Compile Include="Model\Configuration\NdiOutput.cs" />
     <Compile Include="Model\Configuration\OutputBase.cs" />
     <Compile Include="Model\Configuration\Player.cs" />
+    <Compile Include="Model\Configuration\PlayerBinding.cs" />
+    <Compile Include="Model\Configuration\PlayerController.cs" />
     <Compile Include="Model\Persistence\DecklinkInputRundownItem.cs" />
     <Compile Include="Model\Persistence\FileRundownItem.cs" />
     <Compile Include="Model\Persistence\Rundown.cs" />

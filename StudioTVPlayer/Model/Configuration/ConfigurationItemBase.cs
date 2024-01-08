@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class ConfigurationItemBase
+    public abstract class ConfigurationItemBase
     {
         private bool _isModified;
 

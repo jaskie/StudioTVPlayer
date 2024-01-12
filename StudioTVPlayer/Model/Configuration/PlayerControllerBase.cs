@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public abstract class PlayerController: ConfigurationItemBase
+    public abstract class PlayerControllerBase: ConfigurationItemBase
     {
         private PlayerBinding[] _playerBindings = new PlayerBinding[0];
 

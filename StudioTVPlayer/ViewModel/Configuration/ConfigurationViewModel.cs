@@ -3,7 +3,7 @@ using System;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ConfigurationViewModel : ModifyableViewModelBase
+    public sealed class ConfigurationViewModel : ModifyableViewModelBase, IDisposable
     {
       
         public ConfigurationViewModel()
@@ -12,6 +12,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             WatchedFolders.Modified += Item_Modified;
             Players = new PlayersViewModel();
             Players.Modified += Item_Modified;
+            PlayerControllers = new PlayerControllersViewModel();
+            PlayerControllers.Modified += Item_Modified;
 
             SaveConfigurationCommand = new UiCommand(SaveConfiguration, _ => IsModified && IsValid());
             CancelCommand = new UiCommand(Cancel);
@@ -39,7 +41,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public PlayersViewModel Players { get; }
 
-        
+        public PlayerControllersViewModel PlayerControllers { get; }
+
         private void Cancel(object obj)
         {
             MainViewModel.Instance.ShowPlayoutView();
@@ -49,6 +52,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolders.Apply();
             Players.Apply();
+            PlayerControllers.Apply();
             Providers.Configuration.Current.Save();
             IsModified = false;
         }
@@ -58,6 +62,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public override bool IsValid()
         {
             return WatchedFolders.IsValid() && Players.IsValid();
+        }
+
+        public void Dispose()
+        {
+            PlayerControllers.Dispose();
         }
     }
 }

@@ -16,8 +16,8 @@ namespace StudioTVPlayer.Providers
         public List<Player> Players { get; set; } = new List<Player>();
 
         [XmlArray]
-        [XmlArrayItem(typeof(BlackmagicDesignAtem))]
-        public List<PlayerController> PlayerControllers { get; set; } = new List<PlayerController>();
+        [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerController))]
+        public List<PlayerControllerBase> PlayerControllers { get; set; } = new List<PlayerControllerBase>();
 
         public static Configuration Current { get; } = Load();
 

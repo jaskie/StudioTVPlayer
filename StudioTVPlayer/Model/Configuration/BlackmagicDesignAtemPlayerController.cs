@@ -7,12 +7,12 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public sealed class BlackmagicDesignAtem : PlayerController
+    public sealed class BlackmagicDesignAtemPlayerController : PlayerControllerBase
     {
         private string _deviceAddress;
 
         [XmlAttribute]
-        public string DeviceAddress { get => _deviceAddress; set => Set(ref _deviceAddress, value); }
+        public string DeviceId { get => _deviceAddress; set => Set(ref _deviceAddress, value); }
 
     }
 }

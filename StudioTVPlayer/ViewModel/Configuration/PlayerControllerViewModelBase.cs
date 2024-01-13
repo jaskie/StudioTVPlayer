@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public abstract string Id { get ; }
 
-        public abstract string Name { get ; }
+        public abstract string DisplayName { get ; }
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 

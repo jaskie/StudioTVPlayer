@@ -12,6 +12,8 @@ namespace StudioTVPlayer.Model.Configuration
 
         protected virtual void SetIsModified(bool value)
         {
+            if (value == _isModified)
+                return; 
             _isModified = value;
             NotifyPropertyChanged(nameof(IsModified));
         }

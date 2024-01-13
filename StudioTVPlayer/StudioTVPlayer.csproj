@@ -112,6 +112,7 @@
     <Compile Include="Controls\TimecodeEdit.cs" />
     <Compile Include="Converters\EnumDescriptionTypeConverter.cs" />
     <Compile Include="Converters\InvertedBooleanConverter.cs" />
+    <Compile Include="Converters\BooleanToBrushConverter.cs" />
     <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\DescriptionConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />

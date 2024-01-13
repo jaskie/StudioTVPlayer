@@ -7,7 +7,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Configuration"
              mc:Ignorable="d" 
-             FontSize="16"
+             FontSize="14"
              d:DataContext="{d:DesignInstance {x:Type vm:BlackmagicDesignAtemPlayerControllerViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -37,10 +37,27 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Label Grid.Column="0" Grid.Row="0">Blackmagic ATEM switcher</Label>
-                    <ComboBox Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DeviceName" />
-                    
+                    <ComboBox Grid.Column="0" Grid.Row="1" 
+                              ItemsSource="{Binding Devices}" 
+                              SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" 
+                              IsReadOnly="{Binding Connect, Converter={StaticResource InvertedBooleanConverter}}"
+                              DisplayMemberPath="DeviceName" />
                     <Label Grid.Column="1" Grid.Row="0">Device address</Label>
-                    <TextBox Grid.Column="1" Grid.Row="1" IsReadOnly="True" Text="{Binding SelectedDevice.Address, Mode=OneWay}"/>
+                    <TextBox Grid.Column="1" Grid.Row="1" IsReadOnly="True" VerticalContentAlignment="Center" Text="{Binding Address, Mode=OneWay}"/>
+                    <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Margin="5 5" >
+                        <ToggleButton MinWidth="100" IsChecked="{Binding Connect}" Background="{Binding IsConnected, Converter={StaticResource BooleanToBrushConverter}}">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                    <Setter Property="Content" Value="Connect" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Content" Value="Disconnect" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+                    </StackPanel>
                 </Grid>
             </GroupBox>
         </StackPanel>

@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using StudioTVPlayer.Model;
+using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
     public sealed class BlackmagicDesignAtemPlayerControllerViewModel : PlayerControllerViewModelBase
     {
         private Model.BlackmagicDesignAtemDeviceInfo _selectedDevice;
+        private bool _connect;
         private readonly Model.BlackmagicDesignAtemDiscovery _blackmagicDesignAtemDiscovery;
+        private BlackmagicDesignAtem _device;
+        private bool _isConnected;
 
         public BlackmagicDesignAtemPlayerControllerViewModel(Model.BlackmagicDesignAtemDiscovery blackmagicDesignAtemDiscovery, Model.Configuration.BlackmagicDesignAtemPlayerController controllerConfiguration = null)
             : base(controllerConfiguration ?? new Model.Configuration.BlackmagicDesignAtemPlayerController())
@@ -29,6 +34,49 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public override bool IsValid()
         {
             return SelectedDevice != null;
+        }
+
+        public bool Connect
+        {
+            get => _connect;
+            set
+            {
+                if (_connect == value)
+                    return;
+                _connect = value;
+                if (value)
+                {
+                    _device = BlackmagicDesignAtem.GetDevice(Address);
+                    _device.Connected += OnConnected;
+                }
+                else
+                {
+                    if (BlackmagicDesignAtem.CloseDevice(Address))
+                    {
+                        _device.Connected -= OnConnected;
+                        _device = null;
+                        IsConnected = false;
+                    }
+                }
+                NotifyPropertyChanged();
+            }
+        }
+
+        private void OnConnected(object sender, System.EventArgs e)
+        {
+            IsConnected = true;
+        }
+
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set
+            {
+                if (_isConnected == value)
+                    return;
+                _isConnected = value;
+                NotifyPropertyChanged();
+            }
         }
 
         internal void NotifyDeviceSeen(Model.BlackmagicDesignAtemDeviceInfo device)
@@ -74,6 +122,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public override string Id => SelectedDevice?.DeviceId;
 
         public override string DisplayName => SelectedDevice is null ? null : $"{SelectedDevice.DeviceName} at {SelectedDevice.Address}";
+        public string Address => SelectedDevice is null ? null : $"{SelectedDevice.Address}:{SelectedDevice.Port}";
 
     }
 }

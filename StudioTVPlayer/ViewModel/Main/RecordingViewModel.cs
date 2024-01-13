@@ -7,11 +7,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
+    public sealed class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {
         private Model.Recording _recording;
         private string _fileName;
@@ -131,11 +130,6 @@ namespace StudioTVPlayer.ViewModel.Main
         }
 
         #endregion IDataErrorInfo
-
-        public override void Apply()
-        {
-            throw new NotImplementedException();
-        }
 
         public override bool IsValid()
         {

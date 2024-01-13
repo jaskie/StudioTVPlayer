@@ -73,7 +73,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void DeletePlayer(object obj)
         {
             var player = obj as PlayerViewModel ?? throw new ArgumentException(nameof(obj));
-            Players.Remove(player);
+            if (Players.Remove(player))
+            {
+                player.RemoveRequested -= Player_RemoveRequested;
+                player.CheckErrorInfo -= Player_CheckErrorInfo;
+            }
         }
 
         private void AddPlayer(object obj)
@@ -95,6 +99,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var playersConfiguration = Players.Select(vm => vm.Player).ToList();
             Providers.GlobalApplicationData.Current.UpdatePlayers(newPlayers);
             Providers.Configuration.Current.Players = playersConfiguration;
+            base.Apply();
         }
 
         public override bool IsValid()

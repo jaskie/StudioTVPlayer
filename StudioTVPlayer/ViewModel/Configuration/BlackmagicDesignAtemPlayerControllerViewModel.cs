@@ -23,7 +23,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             config.Name = SelectedDevice?.DeviceName;
             config.Address = SelectedDevice?.Address.ToString();
             config.Port = SelectedDevice?.Port ?? 0;
-            IsModified = false;
+            base.Apply();
         }
 
         public override bool IsValid()
@@ -35,7 +35,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             NotifyPropertyChanged(nameof(Devices));
             if (device.DeviceId == PlayerController.Id)
-                SelectedDevice = device;
+            {
+                _selectedDevice = device;
+                NotifyPropertyChanged(nameof(SelectedDevice));
+            }
         }
 
         internal void NotifyDeviceLost(Model.BlackmagicDesignAtemDeviceInfo device)
@@ -52,7 +55,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 case nameof(SelectedDevice) when SelectedDevice is null:
                     return "Please select switcher";
             }
-            return string.Empty;
+            return base.ReadErrorInfo(columnName);
         }
 
         public IEnumerable<Model.BlackmagicDesignAtemDeviceInfo> Devices => _blackmagicDesignAtemDiscovery.Devices;

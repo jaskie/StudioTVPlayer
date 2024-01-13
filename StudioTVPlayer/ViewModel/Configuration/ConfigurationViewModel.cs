@@ -54,14 +54,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Players.Apply();
             PlayerControllers.Apply();
             Providers.Configuration.Current.Save();
-            IsModified = false;
+            base.Apply();
         }
 
         private void Item_Modified(object sender, EventArgs e) => IsModified = true;
 
         public override bool IsValid()
         {
-            return WatchedFolders.IsValid() && Players.IsValid();
+            return WatchedFolders.IsValid() && Players.IsValid() && PlayerControllers.IsValid();
         }
 
         public void Dispose()

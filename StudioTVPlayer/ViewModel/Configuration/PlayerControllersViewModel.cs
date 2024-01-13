@@ -6,10 +6,12 @@ using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class PlayerControllersViewModel : ModifyableViewModelBase, IDisposable
+    public class PlayerControllersViewModel : ModifyableViewModelBase, IDisposable, ICheckErrorInfo
     {
         private readonly Model.BlackmagicDesignAtemDiscovery _blackmagicDesignAtemDiscovery;
         private PlayerControllerViewModelBase _selectedPlayerController;
+
+        public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
         public PlayerControllersViewModel()
         {
@@ -21,7 +23,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 switch (playerControllerConfiguration)
                 {
                     case Model.Configuration.BlackmagicDesignAtemPlayerController blackmagicDecklinkPlayerController:
-                        return new BlackmagicDesignAtemPlayerControllerViewModel(_blackmagicDesignAtemDiscovery, blackmagicDecklinkPlayerController);
+                        var vm = new BlackmagicDesignAtemPlayerControllerViewModel(_blackmagicDesignAtemDiscovery, blackmagicDecklinkPlayerController);
+                        vm.Modified += PlayerController_Modified;
+                        vm.RemoveRequested += PlayerController_RemoveRequested;
+                        vm.CheckErrorInfo += PlayerController_CheckErrorInfo;
+                        return vm;
                     default:
                         throw new NotImplementedException();
                 }
@@ -38,7 +44,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                             return vm.PlayerController;
                         })
                 .ToList();
-            IsModified = false;
+            base.Apply();
         }
 
         public override bool IsValid()
@@ -55,7 +61,16 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public ObservableCollection<PlayerControllerViewModelBase> PlayerControllers { get; }
 
-        public PlayerControllerViewModelBase SelectedPlayerController { get => _selectedPlayerController; set => Set(ref _selectedPlayerController, value); }
+        public PlayerControllerViewModelBase SelectedPlayerController
+        {
+            get => _selectedPlayerController; set
+            {
+                if (_selectedPlayerController == value)
+                    return;
+                _selectedPlayerController = value;
+                NotifyPropertyChanged();
+            }
+        }
 
         public ICommand AddBlackmagicDesignAtemPlayerControllerCommand { get; }
 
@@ -76,8 +91,23 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var vm = new BlackmagicDesignAtemPlayerControllerViewModel(_blackmagicDesignAtemDiscovery);
             vm.Modified += PlayerController_Modified;
             vm.RemoveRequested += PlayerController_RemoveRequested;
+            vm.CheckErrorInfo += PlayerController_CheckErrorInfo;
             PlayerControllers.Add(vm);
             SelectedPlayerController = vm;
+        }
+
+        private void PlayerController_CheckErrorInfo(object sender, CheckErrorEventArgs e)
+        {
+            switch (e.Source)
+            {
+                case BlackmagicDesignAtemPlayerControllerViewModel blackmagicDesignAtemPlayerControllerViewModel
+                    when e.PropertyName == nameof(BlackmagicDesignAtemPlayerControllerViewModel.SelectedDevice) && 
+                        PlayerControllers
+                            .OfType<BlackmagicDesignAtemPlayerControllerViewModel>()
+                            .Any(controller => controller != blackmagicDesignAtemPlayerControllerViewModel && controller.Id == blackmagicDesignAtemPlayerControllerViewModel.Id):
+                    e.Message = "This switcher is already in use for other player controller";
+                    break;
+            }
         }
 
         private void PlayerController_RemoveRequested(object sender, EventArgs e)
@@ -87,6 +117,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 throw new ApplicationException("PlayerController was not in list");
             vm.RemoveRequested -= PlayerController_RemoveRequested;
             vm.Modified -= PlayerController_Modified;
+            vm.CheckErrorInfo -= PlayerController_CheckErrorInfo;
             IsModified = true;
         }
 

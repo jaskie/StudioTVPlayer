@@ -31,7 +31,7 @@
                     <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.ToolBar}"/>
                 </DataGrid.Resources>
                 <DataGrid.Columns >
-                    <DataGridTextColumn Header="Name" MinWidth="80" Width="2*" Binding="{Binding DisplayName, TargetNullValue='Device not selected yet'}" />
+                    <DataGridTextColumn Header="Name" MinWidth="80" Width="2*" Binding="{Binding DisplayName, TargetNullValue='Device not available or not selected yet'}" />
                     <DataGridTemplateColumn Width="45" CanUserSort="False" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

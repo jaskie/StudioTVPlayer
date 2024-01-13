@@ -36,6 +36,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 return;
             Output.IsFrameClock = _isFrameClock;
             Output.TimecodeOverlay = _timecodeOverlay;
+            base.Apply();
         }
 
         protected virtual string ReadErrorInfo(string propertyName)
@@ -43,7 +44,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (CheckErrorInfo is null)
                 return string.Empty;
             var checkErrorInfo = new CheckErrorEventArgs(this, propertyName);
-            CheckErrorInfo.Invoke(this, checkErrorInfo);
+            CheckErrorInfo(this, checkErrorInfo);
             return checkErrorInfo.Message;
         }
     }

@@ -22,7 +22,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
-        protected abstract string ReadErrorInfo(string columnName);
+        protected virtual string ReadErrorInfo(string propertyName)
+        {
+            if (CheckErrorInfo is null)
+                return string.Empty;
+            var checkErrorInfo = new CheckErrorEventArgs(this, propertyName);
+            CheckErrorInfo(this, checkErrorInfo);
+            return checkErrorInfo.Message;
+        }
 
     }
 }

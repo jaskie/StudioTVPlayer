@@ -31,7 +31,11 @@ namespace StudioTVPlayer.ViewModel
 
         public abstract bool IsValid();
 
-        public abstract void Apply();
+        public virtual void Apply()
+        {
+            _isModified = false;
+            NotifyPropertyChanged(nameof(IsModified));
+        }
 
         public event EventHandler Modified;
     }

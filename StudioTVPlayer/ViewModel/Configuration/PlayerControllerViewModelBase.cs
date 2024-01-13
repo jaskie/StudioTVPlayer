@@ -12,10 +12,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
             PlayerController = playerController;
         }
 
-        public string this[string columnName] => throw new System.NotImplementedException();
+        public abstract string Id { get ; }
+
+        public abstract string Name { get ; }
+
+        public string this[string columnName] => ReadErrorInfo(columnName);
 
         public string Error => throw new System.NotImplementedException();
 
         public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
+
+        protected abstract string ReadErrorInfo(string columnName);
+
     }
 }

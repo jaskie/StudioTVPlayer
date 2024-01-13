@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Model
 
         private readonly ConcurrentBag<BlackmagicDesignAtemDeviceInfo> _knownDevices;
         private readonly MulticastService _mdns;
-        private readonly int _updatePeriod;
+        private readonly int _considerMissingTime;
         private readonly Timer _updateTimer;
         private bool _disposed;
 
@@ -34,7 +34,7 @@ namespace StudioTVPlayer.Model
             _mdns.AnswerReceived += AnswerReceived;
             _mdns.Start();
             _updateTimer = new Timer(TimerCallback, null, updatePeriod, updatePeriod);
-            _updatePeriod = updatePeriod;
+            _considerMissingTime = updatePeriod * 3;
         }
 
         public IReadOnlyCollection<BlackmagicDesignAtemDeviceInfo> Devices => _knownDevices.ToArray();
@@ -62,32 +62,50 @@ namespace StudioTVPlayer.Model
             }
 
             var txtRec = records.OfType<TXTRecord>().FirstOrDefault(r => r.Type == DnsType.TXT && r.Name == answer.DomainName);
-            List<string> strings = txtRec?.Strings ?? new List<string>();
-
-            string name = string.Join(".", answer.DomainName.Labels);
-            if (name.EndsWith(ServiceName))
-                name = name.Substring(0, name.Length - ServiceName.Length - 1);
-
-            var deviceId = srvRec.Target.ToString();
-            var dev = _knownDevices.FirstOrDefault(d => d.DeviceId == deviceId);
-            if (dev == null)
+            if (txtRec?.Strings is List<string> strings)
             {
-                dev = new BlackmagicDesignAtemDeviceInfo(deviceId, name, DateTime.Now, aRec.Address, srvRec.Port, strings);
-                _knownDevices.Add(dev);
-                DeviceSeen?.Invoke(this, new BlackmagicAtemDeviceEventArgs(dev));
+                string id = null;
+                string modelName = null;
+                foreach(var s in strings)
+                {
+                    var splitted = s.Split(new[] { '=' }, 2);
+                    if (splitted.Length != 2)
+                        continue;
+                    switch (splitted[0])
+                    {
+                        case "name":
+                            modelName = splitted[1];
+                            break;
+                        case "unique id":
+                            id = splitted[1];
+                            break;
+                    }
+                }
+                if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(modelName))
+                    return;
+                string deviceName = string.Join(".", answer.DomainName.Labels);
+                if (deviceName.EndsWith(ServiceName))
+                    deviceName = deviceName.Substring(0, deviceName.Length - ServiceName.Length - 1);
+
+                var dev = _knownDevices.FirstOrDefault(d => d.DeviceId == id);
+                if (dev == null)
+                {
+                    dev = new BlackmagicDesignAtemDeviceInfo(id, modelName, deviceName, DateTime.Now, aRec.Address, srvRec.Port);
+                    _knownDevices.Add(dev);
+                    DeviceSeen?.Invoke(this, new BlackmagicAtemDeviceEventArgs(dev));
+                }
+                else
+                    dev.Update(deviceName, DateTime.Now, aRec.Address, srvRec.Port);
             }
-            else
-                dev.Update(name, DateTime.Now, aRec.Address, srvRec.Port, strings);
         }
 
         private void TimerCallback(object _)
         {
             DateTime now = DateTime.Now;
-
             foreach (var dev in _knownDevices)
             {
                 // Remove if not seen in too long
-                if (dev != null && now.Subtract(dev.LastSeen).TotalMilliseconds > _updatePeriod * 3)
+                if (dev != null && now.Subtract(dev.LastSeen).TotalMilliseconds > _considerMissingTime)
                 {
                     if (_knownDevices.TryTake(out var device))
                         DeviceLost?.Invoke(this, new BlackmagicAtemDeviceEventArgs(device));
@@ -109,38 +127,34 @@ namespace StudioTVPlayer.Model
 
     public class BlackmagicDesignAtemDeviceInfo: Helpers.PropertyChangedBase
     {
-        private string _name;
+        private string _deviceName;
         private DateTime _lastSeen;
         private IPAddress _address;
         private int _port;
-        private IReadOnlyList<string> _strings;
 
         public string DeviceId { get; }
-        public string Name { get => _name; private set => Set(ref _name, value); }
+        public string ModelName { get; }
+        public string DeviceName { get => _deviceName; private set => Set(ref _deviceName, value); }
         public DateTime LastSeen { get => _lastSeen; private set => Set(ref _lastSeen, value); }
-
         public IPAddress Address { get => _address; private set => Set(ref _address, value); }
         public int Port { get => _port; private set => Set(ref _port, value); }
 
-        public IReadOnlyList<string> Strings { get => _strings; private set => Set(ref _strings, value); }
-
-        public BlackmagicDesignAtemDeviceInfo(string deviceId, string name, DateTime lastSeen, IPAddress address, int port, IReadOnlyList<string> strings)
+        public BlackmagicDesignAtemDeviceInfo(string deviceId, string modelName, string deviceName, DateTime lastSeen, IPAddress address, int port)
         {
             DeviceId = deviceId;
-            _name = name;
+            ModelName = modelName;
+            _deviceName = deviceName;
             _lastSeen = lastSeen;
             _address = address;
             _port = port;
-            _strings = strings;
         }
 
-        internal void Update(string name, DateTime lastSeen, IPAddress address, int port, IReadOnlyList<string> strings)
+        internal void Update(string deviceName, DateTime lastSeen, IPAddress address, int port)
         {
-            Name = name;
+            DeviceName = deviceName;
             LastSeen = lastSeen;
             Address = address;
             Port = port;
-            Strings = strings;
         }
     }
 

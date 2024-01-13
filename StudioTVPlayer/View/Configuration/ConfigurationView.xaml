@@ -57,6 +57,9 @@
             <TabItem Header="Watched folders">
                 <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
             </TabItem>
+            <TabItem Header="Controllers">
+                <views:PlayerControllersView Margin="5" DataContext="{Binding PlayerControllers}" />
+            </TabItem>
         </TabControl>
     </Grid>
 </UserControl>

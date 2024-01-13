@@ -200,6 +200,12 @@
     <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\FileRundownItemViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
+    <Compile Include="View\Configuration\BlackmagicDesignAtemPlayerControllerView.xaml.cs">
+      <DependentUpon>BlackmagicDesignAtemPlayerControllerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Configuration\PlayerControllersView.xaml.cs">
+      <DependentUpon>PlayerControllersView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\HelpDialog.xaml.cs">
       <DependentUpon>HelpDialog.xaml</DependentUpon>
     </Compile>
@@ -259,6 +265,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Resources\AppStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\BlackmagicDesignAtemPlayerControllerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\PlayerControllersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

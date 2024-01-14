@@ -1,19 +1,18 @@
-﻿using StudioTVPlayer.Model.Configuration;
-using System.Linq;
+﻿using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class NdiOutputViewModel : OutputViewModelBase
     {
-        private NdiOutput _ndi;
+        private Model.Configuration.NdiOutput _ndi;
         private string _groupNames;
         private string _sourceName;
 
-        public NdiOutputViewModel(NdiOutput ndi) : base(ndi)
+        public NdiOutputViewModel(Model.Configuration.NdiOutput ndiConfiguration) : base(ndiConfiguration)
         {
-            _ndi = ndi;
-            _groupNames = ndi.GroupNames;
-            _sourceName = ndi.SourceName;
+            _ndi = ndiConfiguration;
+            _groupNames = ndiConfiguration.GroupNames;
+            _sourceName = ndiConfiguration.SourceName;
         }
 
         public string GroupNames { get => _groupNames; set => Set(ref _groupNames, value); }

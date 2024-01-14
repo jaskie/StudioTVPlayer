@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer.Model.Configuration;
-using System;
+﻿using System;
 using System.ComponentModel;
 
 namespace StudioTVPlayer.ViewModel.Configuration
@@ -8,12 +7,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
     {
         private bool _isFrameClock;
         private TVPlayR.TimecodeOutputSource _timecodeOverlay;
+        internal Model.Configuration.OutputBase OutputConfiguration;
 
-        public OutputViewModelBase(OutputBase output)
+        public OutputViewModelBase(Model.Configuration.OutputBase outputConfiguration)
         {
-            Output = output;
-            _isFrameClock = output.IsFrameClock;
-            _timecodeOverlay = output.TimecodeOverlay;
+            OutputConfiguration = outputConfiguration;
+            _isFrameClock = outputConfiguration.IsFrameClock;
+            _timecodeOverlay = outputConfiguration.TimecodeOverlay;
         }
 
         public string this[string columnName] => ReadErrorInfo(columnName);
@@ -26,16 +26,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public string Error => string.Empty;
 
-        internal OutputBase Output { get; }
-
         public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
         public override void Apply()
         {
             if (!IsModified)
                 return;
-            Output.IsFrameClock = _isFrameClock;
-            Output.TimecodeOverlay = _timecodeOverlay;
+            OutputConfiguration.IsFrameClock = _isFrameClock;
+            OutputConfiguration.TimecodeOverlay = _timecodeOverlay;
             base.Apply();
         }
 

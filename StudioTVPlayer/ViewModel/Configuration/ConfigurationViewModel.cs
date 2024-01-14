@@ -5,21 +5,21 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public sealed class ConfigurationViewModel : ModifyableViewModelBase, IDisposable
     {
-      
+        internal static ConfigurationViewModel Instance { get; private set; }
+
         public ConfigurationViewModel()
         {
+            Instance = this;
             WatchedFolders = new WatchedFoldersViewModel();
             WatchedFolders.Modified += Item_Modified;
             Players = new PlayersViewModel();
             Players.Modified += Item_Modified;
             PlayerControllers = new PlayerControllersViewModel();
             PlayerControllers.Modified += Item_Modified;
-
             SaveConfigurationCommand = new UiCommand(SaveConfiguration, _ => IsModified && IsValid());
             CancelCommand = new UiCommand(Cancel);
         }
 
-  
         private async void SaveConfiguration(object obj)
         {
             try

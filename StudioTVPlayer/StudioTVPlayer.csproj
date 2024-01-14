@@ -133,6 +133,7 @@
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
     <Compile Include="Model\BlackmagicDesignAtemDevices.cs" />
     <Compile Include="Model\BlackmagicDesignAtemDiscovery.cs" />
+    <Compile Include="Model\Configuration\BlackmagicDesignAtemPlayerBinding.cs" />
     <Compile Include="Model\Configuration\BlackmagicDesignAtemPlayerController.cs" />
     <Compile Include="Model\Configuration\ConfigurationItemBase.cs" />
     <Compile Include="Model\Configuration\DecklinkOutput.cs" />
@@ -140,7 +141,7 @@
     <Compile Include="Model\Configuration\NdiOutput.cs" />
     <Compile Include="Model\Configuration\OutputBase.cs" />
     <Compile Include="Model\Configuration\Player.cs" />
-    <Compile Include="Model\Configuration\PlayerBinding.cs" />
+    <Compile Include="Model\Configuration\PlayerBindingBase.cs" />
     <Compile Include="Model\Configuration\PlayerControllerBase.cs" />
     <Compile Include="Model\Persistence\DecklinkInputRundownItem.cs" />
     <Compile Include="Model\Persistence\FileRundownItem.cs" />
@@ -173,6 +174,7 @@
     <Compile Include="Providers\MostRecentUsed.cs" />
     <Compile Include="Providers\InputList.cs" />
     <Compile Include="Providers\VersionInfo.cs" />
+    <Compile Include="ViewModel\Configuration\BlackmagicDesignAtemPlayerBindingViewModel.cs" />
     <Compile Include="ViewModel\Configuration\BlackmagicDesignAtemPlayerControllerViewModel.cs" />
     <Compile Include="ViewModel\Configuration\PlayerControllersViewModel.cs" />
     <Compile Include="ViewModel\Configuration\PlayerControllerViewModelBase.cs" />
@@ -204,6 +206,9 @@
     <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\FileRundownItemViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
+    <Compile Include="View\Configuration\BlackmagicDesignAtemPlayerBindingView.xaml.cs">
+      <DependentUpon>BlackmagicDesignAtemPlayerBindingView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Configuration\BlackmagicDesignAtemPlayerControllerView.xaml.cs">
       <DependentUpon>BlackmagicDesignAtemPlayerControllerView.xaml</DependentUpon>
     </Compile>
@@ -269,6 +274,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Resources\AppStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\BlackmagicDesignAtemPlayerBindingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

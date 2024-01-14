@@ -48,7 +48,7 @@ namespace StudioTVPlayer.Model.Configuration
         [XmlArrayItem(typeof(DecklinkOutput))]
         [XmlArrayItem(typeof(NdiOutput))]
         [XmlArrayItem(typeof(FFOutput))]
-        public OutputBase[] Outputs { get; set; } = new OutputBase[0];
+        public OutputBase[] Outputs { get; set; } = Array.Empty<OutputBase>();
 
         protected override void SetIsModified(bool value)
         {

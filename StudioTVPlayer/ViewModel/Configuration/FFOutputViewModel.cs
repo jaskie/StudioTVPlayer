@@ -1,6 +1,4 @@
-﻿using StudioTVPlayer.Model.Configuration;
-
-namespace StudioTVPlayer.ViewModel.Configuration
+﻿namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class FFOutputViewModel : OutputViewModelBase
     {
@@ -17,24 +15,24 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private string _options;
         private int _videoStreamId;
         private int _audioStreamId;
-        private readonly FFOutput _streamOutput;
+        private readonly Model.Configuration.FFOutput _streamOutput;
 
-        public FFOutputViewModel(FFOutput streamOutput) : base(streamOutput)
+        public FFOutputViewModel(Model.Configuration.FFOutput streamOutputConfiguration) : base(streamOutputConfiguration)
         {
-            _streamOutput = streamOutput;
-            _url = streamOutput.Url;
-            _videoCodec = streamOutput.EncoderSettings.VideoCodec;
-            _audioCodec = streamOutput.EncoderSettings.AudioCodec;
-            _videoBitrate = streamOutput.EncoderSettings.VideoBitrate;
-            _audioBitrate = streamOutput.EncoderSettings.AudioBitrate;
-            _videoFilter = streamOutput.EncoderSettings.VideoFilter;
-            _pixelFormat = streamOutput.EncoderSettings.PixelFormat;
-            _outputMetadata = streamOutput.EncoderSettings.OutputMetadata;
-            _audioMetadata = streamOutput.EncoderSettings.AudioMetadata;
-            _videoMetadata = streamOutput.EncoderSettings.VideoMetadata;
-            _options = streamOutput.EncoderSettings.Options;
-            _videoStreamId = streamOutput.EncoderSettings.VideoStreamId;
-            _audioStreamId = streamOutput.EncoderSettings.AudioStreamId;
+            _streamOutput = streamOutputConfiguration;
+            _url = streamOutputConfiguration.Url;
+            _videoCodec = streamOutputConfiguration.EncoderSettings.VideoCodec;
+            _audioCodec = streamOutputConfiguration.EncoderSettings.AudioCodec;
+            _videoBitrate = streamOutputConfiguration.EncoderSettings.VideoBitrate;
+            _audioBitrate = streamOutputConfiguration.EncoderSettings.AudioBitrate;
+            _videoFilter = streamOutputConfiguration.EncoderSettings.VideoFilter;
+            _pixelFormat = streamOutputConfiguration.EncoderSettings.PixelFormat;
+            _outputMetadata = streamOutputConfiguration.EncoderSettings.OutputMetadata;
+            _audioMetadata = streamOutputConfiguration.EncoderSettings.AudioMetadata;
+            _videoMetadata = streamOutputConfiguration.EncoderSettings.VideoMetadata;
+            _options = streamOutputConfiguration.EncoderSettings.Options;
+            _videoStreamId = streamOutputConfiguration.EncoderSettings.VideoStreamId;
+            _audioStreamId = streamOutputConfiguration.EncoderSettings.AudioStreamId;
         }
 
         public string Url { get => _url; set => Set(ref _url, value); }

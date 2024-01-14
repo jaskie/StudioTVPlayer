@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Model
         [Description("Duration")]
         Duration,
         [Description("Creation time")]
-        CreationTime
+        CreationTime,
     }
 
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
@@ -28,13 +28,34 @@ namespace StudioTVPlayer.Model
     public enum TimeDisplaySource
     {
         TimeFromBegin,
-        Timecode
+        Timecode,
     }
 
     public enum MediaEventKind
     {
         Create,
         Delete,
-        Change
+        Change,
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum PlayerMethodKind
+    {
+        Cue,
+        [Description("Cue next clip")]
+        CueNext,
+        Play,
+        Pause,
+        Stop,
+        Clear,
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum BlackmagicDesignAtemCommand
+    {
+        [Description("Program - input change")]
+        PrgI,
+        [Description("Preview - input change")]
+        PrvI,
     }
 }

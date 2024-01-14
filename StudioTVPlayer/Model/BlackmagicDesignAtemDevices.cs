@@ -1,36 +1,47 @@
 ﻿using LibAtem.Net;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
     public static class BlackmagicDesignAtemDevices
     {
-        private static ConcurrentDictionary<string, AtemClient> _devices = new ConcurrentDictionary<string, AtemClient>();
+        private class AtemClientReference
+        {
+            public int UseCount;
+            public AtemClient AtemClient;
+        }
+
+        private static object _lock = new object();
+        private static Dictionary<string, AtemClientReference> _devices = new Dictionary<string, AtemClientReference>();
 
         public static AtemClient GetDevice(string address)
         {
-            return _devices.GetOrAdd(address, c => new AtemClient(c));
+            lock (_lock)
+            {
+                if (!_devices.TryGetValue(address, out var reference))
+                {
+                    reference = new AtemClientReference { AtemClient = new AtemClient(address) };
+                    _devices[address] = reference;
+                }
+                reference.UseCount++;
+                return reference.AtemClient;
+            }
         }
 
-        public static bool CloseDevice(string address)
+        public static bool ReleaseDevice(string address)
         {
-            if (_devices.TryRemove(address, out var device))
+            lock (_lock)
             {
-                device.Dispose();
+                if (_devices.TryGetValue(address, out var reference))
+                    return false;
+                reference.UseCount--;
+                if (reference.UseCount == 0)
+                {
+                    _devices.Remove(address);
+                    reference.AtemClient.Dispose();
+                }
                 return true;
             }
-            return false;
         }
     }
 }

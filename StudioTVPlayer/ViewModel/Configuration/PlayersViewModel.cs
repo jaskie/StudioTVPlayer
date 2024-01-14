@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model.Configuration;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -82,8 +81,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddPlayer(object obj)
         {
-            var player = new Player { Name = $"Player {Players.Count + 1}" };
-            var vm = new PlayerViewModel(player);
+            var playerConfiguration = new Model.Configuration.Player { Name = $"Player {Players.Count + 1}" };
+            var vm = new PlayerViewModel(playerConfiguration);
             vm.RemoveRequested += Player_RemoveRequested;
             vm.CheckErrorInfo += Player_CheckErrorInfo;
             Players.Add(vm);
@@ -96,9 +95,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
             var newPlayers = Players.Select(p => new Providers.PlayerUpdateItem { Player = p.Player, NeedsReinitialization = p.IsModified }).ToList();
             foreach (var player in Players)
                 player.Apply(); // resets IsModified
-            var playersConfiguration = Players.Select(vm => vm.Player).ToList();
+            var playerConfigurations = Players.Select(vm => vm.Player).ToList();
             Providers.GlobalApplicationData.Current.UpdatePlayers(newPlayers);
-            Providers.Configuration.Current.Players = playersConfiguration;
+            Providers.Configuration.Current.Players = playerConfigurations;
             base.Apply();
         }
 

@@ -1,21 +1,18 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public abstract class PlayerControllerBase: ConfigurationItemBase
+    public abstract class PlayerControllerBase
     {
-        private string _id;
-        private string _name;
-        private PlayerBinding[] _playerBindings = new PlayerBinding[0];
+        [XmlAttribute]
+        public string Id { get; set; }
 
         [XmlAttribute]
-        public string Id { get => _id; set => Set(ref _id, value); }
-
-        [XmlAttribute]
-        public string Name { get => _name; set => Set(ref _name, value); }
+        public string Name { get; set; }
 
         [XmlArray]
-        public PlayerBinding[] PlayerBindings { get => _playerBindings; set => Set(ref _playerBindings, value); }
-
+        [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerBinding))]
+        public PlayerBindingBase[] Bindings { get; set; } = Array.Empty<PlayerBindingBase>();
     }
 }

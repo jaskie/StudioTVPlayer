@@ -79,7 +79,6 @@
         <Grid Grid.Column="2" Grid.RowSpan="10">
             <Button Grid.Column="1" VerticalAlignment="Bottom"
                     Style="{StaticResource RemoveButtonStyle}"
-                    Command="{Binding CommandRemove}"
                     IsEnabled="{Binding IsRecording,Converter={StaticResource InvertedBooleanConverter}}"/>
             <ToggleButton Grid.Column="1" 
                       IsChecked="{Binding IsRecording}" IsEnabled="{Binding CanChangeRecordingState}" 

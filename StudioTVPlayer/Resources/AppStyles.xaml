@@ -41,7 +41,7 @@
     </Style>
 
     <Style x:Key="RemoveButtonStyle" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square.Accent}">
-        <Setter Property="Command" Value="{Binding CommandRemove}"/>
+        <Setter Property="Command" Value="{Binding RemoveCommand}"/>
         <Setter Property="Width" Value="25"/>
         <Setter Property="Height" Value="25"/>
         <Setter Property="ToolTip" Value="Remove"/>

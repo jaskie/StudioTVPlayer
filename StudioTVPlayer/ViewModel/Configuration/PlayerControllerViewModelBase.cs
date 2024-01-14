@@ -5,11 +5,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public abstract class PlayerControllerViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
-        public readonly Model.Configuration.PlayerControllerBase PlayerController;
+        public readonly Model.Configuration.PlayerControllerBase PlayerControllerConfiguration;
 
-        public PlayerControllerViewModelBase(Model.Configuration.PlayerControllerBase playerController)
+        public PlayerControllerViewModelBase(Model.Configuration.PlayerControllerBase playerControllerConfiguration)
         {
-            PlayerController = playerController;
+            PlayerControllerConfiguration = playerControllerConfiguration;
         }
 
         public abstract string Id { get ; }
@@ -18,7 +18,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 
-        public string Error => throw new System.NotImplementedException();
+        public string Error => null;
 
         public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 

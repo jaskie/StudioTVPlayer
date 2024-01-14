@@ -142,7 +142,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Player.LivePreview = LivePreview;
             Player.DisablePlayedItems = DisablePlayedItems;
             Player.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
-            Player.Outputs = Outputs.Select(o => o.Output).ToArray();
+            Player.Outputs = Outputs.Select(o => o.OutputConfiguration).ToArray();
             base.Apply();
         }
 

@@ -30,7 +30,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         throw new NotImplementedException();
                 }
             }));
-            AddBlackmagicDesignAtemPlayerControllerCommand = new UiCommand(AddPlayerController);
+            AddBlackmagicDesignAtemPlayerControllerCommand = new UiCommand(AddBlackmagicDesignAtemPlayerController);
         }
 
         public override void Apply()
@@ -39,7 +39,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 .Select(vm =>
                         {
                             vm.Apply();
-                            return vm.PlayerController;
+                            return vm.PlayerControllerConfiguration;
                         })
                 .ToList();
             base.Apply();
@@ -84,7 +84,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceLost(e.Device);
         }
 
-        private void AddPlayerController(object obj)
+        private void AddBlackmagicDesignAtemPlayerController(object obj)
         {
             var vm = new BlackmagicDesignAtemPlayerControllerViewModel(_blackmagicDesignAtemDiscovery);
             vm.Modified += PlayerController_Modified;
@@ -112,7 +112,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             var vm = sender as PlayerControllerViewModelBase ?? throw new ArgumentException(nameof(sender));
             if (!PlayerControllers.Remove(vm))
-                throw new ApplicationException("PlayerController was not in list");
+                throw new ApplicationException("PlayerController was not in the list");
             vm.RemoveRequested -= PlayerController_RemoveRequested;
             vm.Modified -= PlayerController_Modified;
             vm.CheckErrorInfo -= PlayerController_CheckErrorInfo;

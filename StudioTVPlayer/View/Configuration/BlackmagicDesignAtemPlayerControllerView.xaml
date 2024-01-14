@@ -10,10 +10,10 @@
              FontSize="14"
              d:DataContext="{d:DesignInstance {x:Type vm:BlackmagicDesignAtemPlayerControllerViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" >
         <StackPanel>
             <GroupBox Header="Controller properties">
-                <Grid Margin="0 0 0 5" >
+                <Grid >
                     <Grid.Resources>
                         <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}"/>
@@ -34,8 +34,8 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
-                        <RowDefinition/>
                     </Grid.RowDefinitions>
+                    <!-- properties -->
                     <Label Grid.Column="0" Grid.Row="0">Blackmagic ATEM switcher</Label>
                     <ComboBox Grid.Column="0" Grid.Row="1" 
                               ItemsSource="{Binding Devices}" 
@@ -43,22 +43,47 @@
                               IsReadOnly="{Binding Connect, Converter={StaticResource InvertedBooleanConverter}}"
                               DisplayMemberPath="DeviceName" />
                     <Label Grid.Column="1" Grid.Row="0">Device address</Label>
-                    <TextBox Grid.Column="1" Grid.Row="1" IsReadOnly="True" VerticalContentAlignment="Center" Text="{Binding Address, Mode=OneWay}"/>
-                    <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" Margin="5 5" >
-                        <ToggleButton MinWidth="100" IsChecked="{Binding Connect}" Background="{Binding IsConnected, Converter={StaticResource BooleanToBrushConverter}}">
-                            <ToggleButton.Style>
-                                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                                    <Setter Property="Content" Value="Connect" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsChecked" Value="True">
-                                            <Setter Property="Content" Value="Disconnect" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ToggleButton.Style>
-                        </ToggleButton>
-                    </StackPanel>
+                    <TextBox Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" Text="{Binding Address}"/>
+                    <Label Grid.Column="0" Grid.Row="2">Model name</Label>
+                    <TextBox Grid.Column="0" Grid.Row="3" IsReadOnly="True" VerticalContentAlignment="Center" Text="{Binding SelectedDevice.ModelName, Mode=OneWay}"/>
+                    <ToggleButton MinWidth="100" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" Margin="5 5" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Connect}"
+                                  IsEnabled="{Binding CanPressConnect}"
+                                  Background="{Binding IsConnected, Converter={StaticResource BooleanToBrushConverter}}">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                <Setter Property="Content" Value="Connect" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content" Value="Disconnect" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <!-- add binging -->
+                    <Button Grid.Column="0" Grid.Row="4" Margin="10" HorizontalAlignment="Left" Command="{Binding AddBindingCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <mah:FontIcon Glyph="&#xE710;" />
+                            <Label FontSize="16" FontWeight="Normal">Add player binding</Label>
+                        </StackPanel>
+                    </Button>
                 </Grid>
+            </GroupBox>
+            <GroupBox Header="Bindings" >
+                <ListBox ItemsSource="{Binding Bindings}" 
+                         Margin="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource SimpleListBoxItemStyle}" >
+                            <Setter Property="Margin" Value="0 0 0 10"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ListBox.Resources>
+                        <DataTemplate DataType="{x:Type vm:BlackmagicDesignAtemPlayerBindingViewModel}">
+                            <local:BlackmagicDesignAtemPlayerBindingView/>
+                        </DataTemplate>
+                    </ListBox.Resources>
+                </ListBox>
             </GroupBox>
         </StackPanel>
     </ScrollViewer>

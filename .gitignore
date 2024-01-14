@@ -34,3 +34,6 @@
 /TimecodeDecoderService/bin
 /TimecodeDecoderService/obj
 /dependencies/FFmpeg/bin/*.exe
+/dependencies/LibAtem
+/dependencies/LibAtem.netstandard2.0/bin
+/dependencies/LibAtem.netstandard2.0/obj

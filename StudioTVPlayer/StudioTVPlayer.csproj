@@ -56,6 +56,9 @@
     <Reference Include="GongSolutions.WPF.DragDrop, Version=3.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
       <HintPath>..\packages\gong-wpf-dragdrop.3.2.1\lib\net48\GongSolutions.WPF.DragDrop.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=2.0.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.15\lib\net45\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.10\lib\net47\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -128,7 +131,7 @@
     <Compile Include="Model\Args\BrowserItemEventArgs.cs" />
     <Compile Include="Model\Args\MediaEventArgs.cs" />
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
-    <Compile Include="Model\BlackmagicDesignAtem.cs" />
+    <Compile Include="Model\BlackmagicDesignAtemDevices.cs" />
     <Compile Include="Model\BlackmagicDesignAtemDiscovery.cs" />
     <Compile Include="Model\Configuration\BlackmagicDesignAtemPlayerController.cs" />
     <Compile Include="Model\Configuration\ConfigurationItemBase.cs" />
@@ -393,6 +396,10 @@
     <SplashScreen Include="StudioTVPlayer.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dependencies\LibAtem.netstandard2.0\LibAtem.netstandard2.0.csproj">
+      <Project>{1c40783d-4f97-45f8-b83b-8dab63ec0253}</Project>
+      <Name>LibAtem.netstandard2.0</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TVPlayR.Player\TVPlayR.Player.vcxproj">
       <Project>{8d4ba75e-812d-41e1-8b0f-de6540d2f84b}</Project>
       <Name>TVPlayR.Player</Name>

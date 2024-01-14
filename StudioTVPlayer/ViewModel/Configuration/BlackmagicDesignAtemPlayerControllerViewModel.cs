@@ -1,4 +1,5 @@
-﻿using StudioTVPlayer.Model;
+﻿using LibAtem.Net;
+using StudioTVPlayer.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
@@ -10,7 +11,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private Model.BlackmagicDesignAtemDeviceInfo _selectedDevice;
         private bool _connect;
         private readonly Model.BlackmagicDesignAtemDiscovery _blackmagicDesignAtemDiscovery;
-        private BlackmagicDesignAtem _device;
+        private AtemClient _atemClient;
         private bool _isConnected;
 
         public BlackmagicDesignAtemPlayerControllerViewModel(Model.BlackmagicDesignAtemDiscovery blackmagicDesignAtemDiscovery, Model.Configuration.BlackmagicDesignAtemPlayerController controllerConfiguration = null)
@@ -46,15 +47,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 _connect = value;
                 if (value)
                 {
-                    _device = BlackmagicDesignAtem.GetDevice(Address);
-                    _device.Connected += OnConnected;
+                    _atemClient = BlackmagicDesignAtemDevices.GetDevice(Address);
+                    _atemClient.OnConnection += OnConnection;
+                    _atemClient.OnDisconnect += OnDisconnect;
                 }
                 else
                 {
-                    if (BlackmagicDesignAtem.CloseDevice(Address))
+                    if (BlackmagicDesignAtemDevices.CloseDevice(Address))
                     {
-                        _device.Connected -= OnConnected;
-                        _device = null;
+                        _atemClient.OnConnection -= OnConnection;
+                        _atemClient.OnDisconnect -= OnDisconnect;
+                        _atemClient = null;
                         IsConnected = false;
                     }
                 }
@@ -62,9 +65,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
 
-        private void OnConnected(object sender, System.EventArgs e)
+        private void OnConnection(object _)
         {
             IsConnected = true;
+        }
+
+        private void OnDisconnect(object _)
+        {
+            IsConnected = false;
         }
 
         public bool IsConnected
@@ -122,7 +130,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public override string Id => SelectedDevice?.DeviceId;
 
         public override string DisplayName => SelectedDevice is null ? null : $"{SelectedDevice.DeviceName} at {SelectedDevice.Address}";
-        public string Address => SelectedDevice is null ? null : $"{SelectedDevice.Address}:{SelectedDevice.Port}";
+        public string Address => SelectedDevice?.Address.ToString();
 
     }
 }

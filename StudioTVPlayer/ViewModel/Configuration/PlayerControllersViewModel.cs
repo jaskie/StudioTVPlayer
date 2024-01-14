@@ -6,12 +6,10 @@ using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class PlayerControllersViewModel : ModifyableViewModelBase, IDisposable, ICheckErrorInfo
+    public class PlayerControllersViewModel : ModifyableViewModelBase, IDisposable
     {
         private readonly Model.BlackmagicDesignAtemDiscovery _blackmagicDesignAtemDiscovery;
         private PlayerControllerViewModelBase _selectedPlayerController;
-
-        public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
         public PlayerControllersViewModel()
         {

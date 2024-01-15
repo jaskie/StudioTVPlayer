@@ -14,8 +14,9 @@
             <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
         </StackPanel.Resources>
         <GroupBox Header="When the switcher select input" mah:ControlsHelper.ContentCharacterCasing="Normal">
-            <Grid Margin="0 5">
+            <Grid >
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -24,34 +25,29 @@
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid Grid.ColumnSpan="3" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <ToggleButton IsChecked="{Binding IsAtemListening}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5">
-                        <mah:FontIcon Glyph="&#xF270;" FontSize="12" />
-                    </ToggleButton>
-                    <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12"
-                           >Switcher properties below can be easily selected by pressing relevant button on switcher if it is connected, while ear button on the left is pressed.</TextBlock>
                 </Grid>
                 <!-- remove button -->
-                <Button Grid.Row="0" Grid.Column="3" Grid.RowSpan="3" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove the action"/>
+                <Button Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove the action"/>
 
-                <Label Grid.Row="1" Grid.Column="0" >Input</Label>
-                <ComboBox Grid.Row="2" Grid.Column="0" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ItemsSource="{Binding VideoSources}" SelectedItem="{Binding VideoSource}" ToolTip="Source the switcher selects" />
-                <Label Grid.Row="1" Grid.Column="2" >On</Label>
-                <ComboBox Grid.Row="2" Grid.Column="2" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ItemsSource="{Binding AtemCommands}" SelectedItem="{Binding AtemCommand}" ToolTip="Switcher selects input for line" />
-                <Label Grid.Row="1" Grid.Column="1" >ME</Label>
-                <ComboBox Grid.Row="2" Grid.Column="1" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ItemsSource="{Binding Mes}" SelectedItem="{Binding Me}" ToolTip="ME on the switcher" />
+                <ToggleButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsAtemListening}" Margin="5" Padding="2" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
+                    <mah:FontIcon Glyph="&#xF270;" FontSize="16" />
+                </ToggleButton>
+                <Label Grid.Row="0" Grid.Column="1" >Input</Label>
+                <ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ItemsSource="{Binding VideoSources}" SelectedItem="{Binding VideoSource}" ToolTip="Source the switcher selects" />
+                <Label Grid.Row="0" Grid.Column="3" >On</Label>
+                <ComboBox Grid.Row="1" Grid.Column="3" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ItemsSource="{Binding AtemCommands}" SelectedItem="{Binding AtemCommand}" ToolTip="Switcher selects input for line" />
+                <Label Grid.Row="0" Grid.Column="2" >ME</Label>
+                <ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ItemsSource="{Binding Mes}" SelectedItem="{Binding Me}" ToolTip="ME on the switcher" />
             </Grid>
         </GroupBox>
         <GroupBox Header="Then player will do" mah:ControlsHelper.ContentCharacterCasing="Normal">
-            <Grid Margin="0 5">
+            <Grid Margin="0 0 0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>

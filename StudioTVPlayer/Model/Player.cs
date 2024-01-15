@@ -29,6 +29,8 @@ namespace StudioTVPlayer.Model
         
         public Configuration.Player Configuration { get; }
 
+        public string Id => Configuration.Id;
+
         public string Name => Configuration.Name;
 
         public TVPlayR.VideoFormat VideoFormat

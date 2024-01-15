@@ -26,7 +26,7 @@ namespace StudioTVPlayer.ViewModel.Main
             _input = input;
             if (input is Model.DecklinkInput decklinkInput)
                 decklinkInput.FormatChanged += DecklinkInput_InputFormatChanged;
-            CommandBrowseForFolder = new UiCommand(BrowseForFolder);
+            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
             _folder = Folders.LastOrDefault();
         }
 
@@ -103,7 +103,7 @@ namespace StudioTVPlayer.ViewModel.Main
         public bool CanChangeRecordingState => IsRecording // to stop the ongiong recording
             || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(_fullPath) && !File.Exists($"{_fullPath}.{EncoderPreset.FilenameExtension}")); // to start new one
 
-        public ICommand CommandBrowseForFolder { get; }
+        public ICommand BrowseForFolderCommand { get; }
 
         #region IDataErrorInfo
 

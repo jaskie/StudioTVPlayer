@@ -42,11 +42,10 @@ namespace StudioTVPlayer.Model
     public enum PlayerMethodKind
     {
         Cue,
-        [Description("Cue next clip")]
-        CueNext,
+        [Description("Load next clip")]
+        LoadNext,
         Play,
         Pause,
-        Stop,
         Clear,
     }
 

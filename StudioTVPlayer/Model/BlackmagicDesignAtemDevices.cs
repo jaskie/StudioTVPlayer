@@ -32,7 +32,7 @@ namespace StudioTVPlayer.Model
         {
             lock (_lock)
             {
-                if (_devices.TryGetValue(address, out var reference))
+                if (!_devices.TryGetValue(address, out var reference))
                     return false;
                 reference.UseCount--;
                 if (reference.UseCount == 0)

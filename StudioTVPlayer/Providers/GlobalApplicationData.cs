@@ -11,6 +11,7 @@ namespace StudioTVPlayer.Providers
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
         private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
+        private List<PlayerControllerBase> _playerControllers = new List<PlayerControllerBase>();
         private List<Recording> _recordings = new List<Recording>();
 
         private GlobalApplicationData()
@@ -22,9 +23,11 @@ namespace StudioTVPlayer.Providers
 
         public IReadOnlyList<RundownPlayer> RundownPlayers => _rundownPlayers;
 
+        public IReadOnlyList<PlayerControllerBase> PlayerControllers => _playerControllers;
+
         public IReadOnlyList<Recording> Recordings { get => _recordings; }
 
-        public IEnumerable<EncoderPreset> EncoderPresets { get; private set; }
+        public IReadOnlyList<EncoderPreset> EncoderPresets { get; private set; }
 
         public void Shutdown()
         {
@@ -35,6 +38,8 @@ namespace StudioTVPlayer.Providers
                 player.Dispose();
             foreach (var input in InputList.Current.Inputs)
                 input.Dispose();
+            foreach (var playerController in PlayerControllers)
+                playerController.Dispose();
         }
 
         public void UpdatePlayers(List<PlayerUpdateItem> newConfiguration)
@@ -64,9 +69,27 @@ namespace StudioTVPlayer.Providers
             UpdatePlayers(Configuration.Current.Players.Select(p => new PlayerUpdateItem { Player = p, NeedsReinitialization = true }).ToList());
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
+            UpdatePlayerControllers();
         }
 
-        public IEnumerable<EncoderPreset> LoadEncoderPresets()
+        public void UpdatePlayerControllers()
+        {
+            foreach (var playerController in _playerControllers)
+                playerController.Dispose();
+            _playerControllers = Configuration.Current.PlayerControllers.Select(CreatePlayerController).ToList();
+        }
+
+        private PlayerControllerBase CreatePlayerController(Model.Configuration.PlayerControllerBase playerControllerConfiguration)
+        {
+            switch (playerControllerConfiguration)
+            {
+                case Model.Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration:
+                    return new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration);
+                default: throw new ApplicationException($"Unknown player controller ({playerControllerConfiguration})");
+            }
+        }
+
+        public IReadOnlyList<EncoderPreset> LoadEncoderPresets()
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");

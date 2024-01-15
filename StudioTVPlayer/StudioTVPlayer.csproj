@@ -133,6 +133,9 @@
     <Compile Include="Model\Args\AudioVolumeEventArgs.cs" />
     <Compile Include="Model\BlackmagicDesignAtemDevices.cs" />
     <Compile Include="Model\BlackmagicDesignAtemDiscovery.cs" />
+    <Compile Include="Model\BlackmagicDesignAtemPlayerBinding.cs" />
+    <Compile Include="Model\BlackmagicDesignAtemPlayerController.cs" />
+    <Compile Include="Model\PlayerControllerBase.cs" />
     <Compile Include="Model\Configuration\BlackmagicDesignAtemPlayerBinding.cs" />
     <Compile Include="Model\Configuration\BlackmagicDesignAtemPlayerController.cs" />
     <Compile Include="Model\Configuration\ConfigurationItemBase.cs" />

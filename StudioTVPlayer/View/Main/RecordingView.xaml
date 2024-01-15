@@ -49,7 +49,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <ComboBox IsEditable="True" Text="{Binding Folder, ValidatesOnDataErrors=True}" ItemsSource="{Binding Folders}" BorderThickness="0"/>
-                <Button Grid.Column="1" Command="{Binding CommandBrowseForFolder}"
+                <Button Grid.Column="1" Command="{Binding BrowseForFolderCommand}"
                     Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
                     ToolTip="Browse for the folder"
                     >

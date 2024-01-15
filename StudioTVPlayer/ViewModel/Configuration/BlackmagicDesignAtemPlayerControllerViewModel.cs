@@ -30,6 +30,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             _blackmagicDesignAtemDiscovery = blackmagicDesignAtemDiscovery;
             if (controllerConfiguration != null)
+            {
                 _address = controllerConfiguration.Address;
                 _id = controllerConfiguration.Id;
                 _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.Id) ?? blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
@@ -40,6 +41,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     vm.RemoveRequested += Binding_RemoveRequested;
                     _bindings.Add(vm);
                 }
+            }
             AddBindingCommand = new UiCommand(AddBinging);
         }
 
@@ -77,6 +79,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         _atemClient.OnConnection += OnConnection;
                         _atemClient.OnDisconnect += OnDisconnect;
                         _atemClient.OnReceive += OnReceive;
+                        IsConnected = _atemClient.ConnectionVersion != null;
                     }
                     else
                     {
@@ -98,31 +101,24 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void OnReceive(object sender, IReadOnlyList<LibAtem.Commands.ICommand> commands)
         {
-            Debug.WriteLine($"{nameof(OnReceive)}: {commands.Count} commands");
-            string commandId = null;
-            MixEffectBlockId me = default;
-            VideoSource source = default;
             foreach (var cmd in commands)
             {
                 switch (cmd)
                 {
                     case ProgramInputGetCommand prgI:
-                        commandId = LibAtem.Commands.CommandManager.FindNameAndVersionForType(prgI).Item1;
-                        me = prgI.Index;
-                        source = prgI.Source;
-                        Debug.WriteLine($"prgI: {prgI.Index}.{prgI.Source}");
+                        NotifyBindings(BlackmagicDesignAtemCommand.PrgI, prgI.Index, prgI.Source);
                         break;
                     case PreviewInputGetCommand prvI:
-                        commandId = LibAtem.Commands.CommandManager.FindNameAndVersionForType(prvI).Item1;
-                        me = prvI.Index;
-                        source = prvI.Source;
-                        Debug.WriteLine($"prvI: {prvI.Index}:{prvI.Source}");
+                        NotifyBindings(BlackmagicDesignAtemCommand.PrvI, prvI.Index, prvI.Source);
                         break;
                 }
             }
-            if (Enum.TryParse<BlackmagicDesignAtemCommand>(commandId, out var command))
-                foreach (var binding in Bindings)
-                    binding.AtemCommandReceived(command, me, source);
+        }
+
+        private void NotifyBindings(BlackmagicDesignAtemCommand command, MixEffectBlockId me, VideoSource videoSource)
+        {
+            foreach (var binding in _bindings)
+                binding.AtemCommandReceived(command, me, videoSource);
         }
 
         public bool IsConnected

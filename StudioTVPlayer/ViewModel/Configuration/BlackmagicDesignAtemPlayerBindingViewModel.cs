@@ -20,11 +20,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public BlackmagicDesignAtemPlayerBindingViewModel(Model.Configuration.BlackmagicDesignAtemPlayerBinding bingingConfiguration = null)
         {
             BingingConfiguration = bingingConfiguration ?? new Model.Configuration.BlackmagicDesignAtemPlayerBinding();
-            _playerMethod = bingingConfiguration.PlayerMethod;
-            _player = Players.FirstOrDefault(player => player.Player.Id == bingingConfiguration.PlayerId);
-            _me = bingingConfiguration.Me;
-            _atemCommand = bingingConfiguration.Command;
-            _videoSource = bingingConfiguration.VideoSource;
+            _playerMethod = BingingConfiguration.PlayerMethod;
+            _player = Players.FirstOrDefault(player => player.Player.Id == BingingConfiguration.PlayerId);
+            _me = BingingConfiguration.Me;
+            _atemCommand = BingingConfiguration.Command;
+            _videoSource = BingingConfiguration.VideoSource;
         }
 
         public string this[string columnName] => ReadErrorInfo(columnName);
@@ -48,20 +48,20 @@ namespace StudioTVPlayer.ViewModel.Configuration
             base.Apply();
         }
 
-        public PlayerMethodKind PlayerMethod { get => _playerMethod; set => Set(ref _playerMethod, value); }
-        public Array PlayerMethods { get; } = Enum.GetValues(typeof(PlayerMethodKind));
-
         public PlayerViewModel Player { get => _player; set => Set(ref _player, value); }
         public IEnumerable<PlayerViewModel> Players => ConfigurationViewModel.Instance.Players.Players;
+
+        public PlayerMethodKind PlayerMethod { get => _playerMethod; set => Set(ref _playerMethod, value); }
+        public static Array PlayerMethods { get; } = Enum.GetValues(typeof(PlayerMethodKind));
 
         public MixEffectBlockId Me { get => _me; set => Set(ref _me, value); }
         public Array Mes { get; } = Enum.GetValues(typeof(MixEffectBlockId));
 
         public VideoSource VideoSource { get => _videoSource; set => Set(ref _videoSource, value); }
-        public Array VideoSources { get; } = Enum.GetValues(typeof(VideoSource));
+        public static Array VideoSources { get; } = Enum.GetValues(typeof(VideoSource));
 
         public BlackmagicDesignAtemCommand AtemCommand { get => _atemCommand; set => Set(ref _atemCommand, value); }
-        public Array AtemCommands { get; } = Enum.GetValues(typeof(BlackmagicDesignAtemCommand));
+        public static Array AtemCommands { get; } = Enum.GetValues(typeof(BlackmagicDesignAtemCommand));
 
         public bool IsAtemListening { get => _isAtemListening; set => Set(ref _isAtemListening, value); }
 

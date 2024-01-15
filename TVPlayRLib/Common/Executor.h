@@ -3,6 +3,7 @@
 namespace TVPlayR {
     namespace Common {
 
+#ifdef DEBUG
         static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
         {
             HANDLE hThread = ::GetCurrentThread();
@@ -15,8 +16,9 @@ namespace TVPlayR {
                     ::SetThreadDescription(hThread, wThreadName);
             }
             catch (...) {}
-            delete wThreadName;
+            delete[] wThreadName;
         }
+#endif
 
     class Executor final
     {
@@ -100,7 +102,9 @@ namespace TVPlayR {
     private:
         void run(std::string name)
         {
+#ifdef DEBUG
             SetThreadName(::GetCurrentThreadId(), name.c_str());
+#endif
             std::function<void()> task;
             while (is_running_) {
                 try {

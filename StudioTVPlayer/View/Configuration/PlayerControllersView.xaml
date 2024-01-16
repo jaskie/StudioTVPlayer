@@ -41,18 +41,29 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button Grid.Row="1" Margin="0 10" Command="{Binding AddBlackmagicDesignAtemPlayerControllerCommand}" HorizontalAlignment="Left">
-                <StackPanel Orientation="Horizontal">
-                    <mah:FontIcon Glyph="&#xE710;" />
-                    <Label FontSize="16" FontWeight="Normal">Add ATEM controller</Label>
-                </StackPanel>
-            </Button>
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <Button Margin="10" Command="{Binding AddBlackmagicDesignAtemPlayerControllerCommand}" >
+                    <StackPanel Orientation="Horizontal">
+                        <mah:FontIcon Glyph="&#xE710;" />
+                        <Label>Add ATEM switcher</Label>
+                    </StackPanel>
+                </Button>
+                <Button Margin="10" Command="{Binding AddElgatoStreamDeckPlayerControllerCommand}" >
+                    <StackPanel Orientation="Horizontal">
+                        <mah:FontIcon Glyph="&#xE710;" />
+                        <Label>Add Elgato StreamDeck panel</Label>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
         <GridSplitter HorizontalAlignment="Right" Width="3" Margin="2 0" Background="{DynamicResource MahApps.Brushes.Separator}"/>
         <ContentControl Grid.Column="1" Content="{Binding SelectedPlayerController}" Margin="4 0 0 0">
             <ContentControl.Resources>
                 <DataTemplate DataType="{x:Type vm:BlackmagicDesignAtemPlayerControllerViewModel}">
                     <local:BlackmagicDesignAtemPlayerControllerView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:ElgatoStreamDeckPlayerControllerViewModel}">
+                    <local:ElgatoStreamDeckPlayerControllerView/>
                 </DataTemplate>
             </ContentControl.Resources>
         </ContentControl>

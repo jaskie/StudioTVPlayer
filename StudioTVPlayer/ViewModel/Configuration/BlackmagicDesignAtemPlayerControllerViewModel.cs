@@ -1,15 +1,10 @@
-﻿using LibAtem;
-using LibAtem.Commands.MixEffects;
+﻿using LibAtem.Commands.MixEffects;
 using LibAtem.Common;
 using LibAtem.Net;
-using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -18,11 +13,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private Model.BlackmagicDesignAtemDeviceInfo _selectedDevice;
         private bool _connect;
         private readonly Model.BlackmagicDesignAtemDiscovery _blackmagicDesignAtemDiscovery;
-        private readonly ObservableCollection<BlackmagicDesignAtemPlayerBindingViewModel> _bindings = new ObservableCollection<BlackmagicDesignAtemPlayerBindingViewModel>();
         private AtemClient _atemClient;
         private bool _isConnected;
         private string _address;
-        private string _id;
+        private string _deviceId;
         private bool _disposed;
 
         public BlackmagicDesignAtemPlayerControllerViewModel(Model.BlackmagicDesignAtemDiscovery blackmagicDesignAtemDiscovery, Model.Configuration.BlackmagicDesignAtemPlayerController controllerConfiguration = null)
@@ -32,34 +26,28 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (controllerConfiguration != null)
             {
                 _address = controllerConfiguration.Address;
-                _id = controllerConfiguration.Id;
-                _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.Id) ?? blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
+                _deviceId = controllerConfiguration.DeviceId;
+                _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.DeviceId) ?? blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
                 foreach (var binging in controllerConfiguration.Bindings.OfType<Model.Configuration.BlackmagicDesignAtemPlayerBinding>())
-                {
-                    var vm = new BlackmagicDesignAtemPlayerBindingViewModel(binging);
-                    vm.Modified += Binding_Modified;
-                    vm.RemoveRequested += Binding_RemoveRequested;
-                    _bindings.Add(vm);
-                }
+                    AddBindingViewModel(new BlackmagicDesignAtemPlayerBindingViewModel(binging));
             }
-            AddBindingCommand = new UiCommand(AddBinging);
         }
 
         public override void Apply()
         {
             var config = PlayerControllerConfiguration as Model.Configuration.BlackmagicDesignAtemPlayerController;
-            config.Id = SelectedDevice?.DeviceId;
+            config.DeviceId = SelectedDevice?.DeviceId;
             config.Name = SelectedDevice?.DeviceName;
             config.Address = Address;
-            foreach (var binding in _bindings)
+            foreach (var binding in Bindings)
                 binding.Apply();
-            config.Bindings = _bindings.Select(binding => binding.BingingConfiguration).ToArray();
+            config.Bindings = Bindings.Select(binding => binding.BindingConfiguration).ToArray();
             base.Apply();
         }
 
         public override bool IsValid()
         {
-            return SelectedDevice != null;
+            return !IsModified || (SelectedDevice != null && base.IsValid());
         }
 
         public bool Connect
@@ -99,6 +87,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
 
+        protected override PlayerControllerBindingViewModelBase CreatePlayerControlerBindingViewModel(Model.Configuration.PlayerBindingBase bindingConfiguration = null)
+        {
+            var blackmagicDesignAtemBindingConfiguration = bindingConfiguration as Model.Configuration.BlackmagicDesignAtemPlayerBinding ?? throw new ArgumentException(nameof(bindingConfiguration));
+            return new BlackmagicDesignAtemPlayerBindingViewModel(blackmagicDesignAtemBindingConfiguration);
+        }
+
         private void OnReceive(object sender, IReadOnlyList<LibAtem.Commands.ICommand> commands)
         {
             foreach (var cmd in commands)
@@ -117,7 +111,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void NotifyBindings(BlackmagicDesignAtemCommand command, MixEffectBlockId me, VideoSource videoSource)
         {
-            foreach (var binding in _bindings)
+            foreach (var binding in Bindings.OfType<BlackmagicDesignAtemPlayerBindingViewModel>())
                 binding.AtemCommandReceived(command, me, videoSource);
         }
 
@@ -135,13 +129,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public bool CanPressConnect => Connect || SelectedDevice != null;
 
-        internal void NotifyDeviceSeen(Model.BlackmagicDesignAtemDeviceInfo device)
+        internal void NotifyDeviceSeen(BlackmagicDesignAtemDeviceInfo device)
         {
             NotifyPropertyChanged(nameof(Devices));
-            if (device.DeviceId == PlayerControllerConfiguration.Id || device.Address.ToString() == _address)
+            if (device.DeviceId == _deviceId || device.Address.ToString() == _address)
             {
                 _selectedDevice = device;
-                _id = device.DeviceId;
                 NotifyPropertyChanged(nameof(SelectedDevice));
                 NotifyPropertyChanged(nameof(DisplayName));
                 NotifyPropertyChanged(nameof(CanPressConnect));
@@ -150,7 +143,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
 
-        internal void NotifyDeviceLost(Model.BlackmagicDesignAtemDeviceInfo device)
+        internal void NotifyDeviceLost(BlackmagicDesignAtemDeviceInfo device)
         {
             NotifyPropertyChanged(nameof(Devices));
             if (device == _selectedDevice)
@@ -180,13 +173,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 if (value != null)
                 {
                     _address = value.Address.ToString();
-                    _id = value.DeviceId;
+                    _deviceId = value.DeviceId;
                 }
                 NotifyPropertyChanged(nameof(Address));
             }
         }
 
-        public override string Id => _id;
+        public string DeviceId => _deviceId;
         public override string DisplayName => SelectedDevice is null ? null : $"{SelectedDevice.DeviceName} at {SelectedDevice.Address}";
         public string Address
         {
@@ -210,32 +203,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     IsConnected = false;
                 }
             }
-        }
-
-        public ICommand AddBindingCommand { get; }
-
-        public IEnumerable<BlackmagicDesignAtemPlayerBindingViewModel> Bindings => _bindings;
-        
-        private void AddBinging(object obj)
-        {
-            var vm = new BlackmagicDesignAtemPlayerBindingViewModel();
-            vm.Modified += Binding_Modified;
-            vm.RemoveRequested += Binding_RemoveRequested;
-            _bindings.Add(vm);
-            IsModified = true;
-        }
-
-        private void Binding_RemoveRequested(object sender, EventArgs e)
-        {
-            var vm = sender as BlackmagicDesignAtemPlayerBindingViewModel ?? throw new ArgumentException(nameof(sender));
-            vm.Modified -= Binding_Modified;
-            vm.RemoveRequested -= Binding_RemoveRequested;
-            _bindings.Remove(vm);
-        }
-
-        private void Binding_Modified(object sender, EventArgs e)
-        {
-            IsModified = true;
         }
 
         private void OnConnection(object _)

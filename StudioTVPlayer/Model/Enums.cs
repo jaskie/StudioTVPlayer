@@ -41,11 +41,15 @@ namespace StudioTVPlayer.Model
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
     public enum PlayerMethodKind
     {
+        [Description("Cue loaded clip")]
         Cue,
         [Description("Load next clip")]
         LoadNext,
+        [Description("Play loaded clip")]
         Play,
+        [Description("Pause playing clip")]
         Pause,
+        [Description("Clear player")]
         Clear,
     }
 

@@ -35,7 +35,7 @@
                 <!-- remove button -->
                 <Button Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove the action"/>
 
-                <ToggleButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsAtemListening}" Margin="5" Padding="2" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
+                <ToggleButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsListening}" Margin="5" Padding="2" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
                     <mah:FontIcon Glyph="&#xF270;" FontSize="16" />
                 </ToggleButton>
                 <Label Grid.Row="0" Grid.Column="1" >Input</Label>

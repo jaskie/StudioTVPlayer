@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer.Helpers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -24,7 +23,7 @@ namespace StudioTVPlayer.Providers
             var inputsFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, InputsFile);
             try
             {
-                return DataStore.Load<InputList>(inputsFile) ?? new InputList();
+                return Helpers.DataStore.Load<InputList>(inputsFile) ?? new InputList();
             }
             catch
             {
@@ -35,7 +34,7 @@ namespace StudioTVPlayer.Providers
         public void Save()
         {
             var inputsFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, InputsFile);
-            DataStore.Save(this, inputsFile);
+            Helpers.DataStore.Save(this, inputsFile);
         }
 
         public bool RemoveInput(Model.InputBase input)

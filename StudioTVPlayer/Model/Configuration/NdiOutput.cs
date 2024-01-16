@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class NdiOutput : OutputBase
+    public sealed class NdiOutput : OutputBase
     {
         private string _sourceName;
         private string _groupNames;

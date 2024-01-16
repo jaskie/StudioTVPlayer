@@ -1,9 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class Player : ConfigurationItemBase
+    public sealed class Player : ConfigurationItemBase
     {
         private string _name;
         private string _videoFormat;
@@ -11,6 +12,19 @@ namespace StudioTVPlayer.Model.Configuration
         private bool _livePreview;
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
+        private string _id;
+
+        [XmlElement]
+        public string Id
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_id))
+                    _id = Guid.NewGuid().ToString();
+                return _id;
+            }
+            set => _id = value;
+        }
 
         [XmlAttribute]
         public string Name { get => _name; set => Set(ref _name, value); }
@@ -34,7 +48,7 @@ namespace StudioTVPlayer.Model.Configuration
         [XmlArrayItem(typeof(DecklinkOutput))]
         [XmlArrayItem(typeof(NdiOutput))]
         [XmlArrayItem(typeof(FFOutput))]
-        public OutputBase[] Outputs { get; set; } = new OutputBase[0];
+        public OutputBase[] Outputs { get; set; } = Array.Empty<OutputBase>();
 
         protected override void SetIsModified(bool value)
         {

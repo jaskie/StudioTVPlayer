@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29201.188
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudioTVPlayer", "StudioTVPlayer\StudioTVPlayer.csproj", "{117594D4-570F-425A-87A4-81B1A9458E29}"
 EndProject
@@ -18,6 +18,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TimecodeDecoder", "Helpers\TimecodeDecoder\TimecodeDecoder.vcxproj", "{68C34775-2817-4DF2-910E-E78BFB859F8F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimecodeDecoderService", "TimecodeDecoderService\TimecodeDecoderService.csproj", "{A19808FA-6256-445B-BD86-41DF590B97F9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{B9D4D9A8-AD38-416D-8445-02C338080F00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibAtem.netstandard2.0", "dependencies\LibAtem.netstandard2.0\LibAtem.netstandard2.0.csproj", "{1C40783D-4F97-45F8-B83B-8DAB63EC0253}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +87,14 @@ Global
 		{A19808FA-6256-445B-BD86-41DF590B97F9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A19808FA-6256-445B-BD86-41DF590B97F9}.Release|x64.ActiveCfg = Release|Any CPU
 		{A19808FA-6256-445B-BD86-41DF590B97F9}.Release|x64.Build.0 = Release|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Debug|x64.Build.0 = Debug|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Release|x64.ActiveCfg = Release|Any CPU
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +103,7 @@ Global
 		{F69ABB69-6AA2-41D7-BD25-1656CA0F4945} = {A1D0DDE3-AF4B-4A7E-BC19-F6AE343160FA}
 		{2AED69F2-5658-47AF-974D-825E8DCC0EE3} = {A1D0DDE3-AF4B-4A7E-BC19-F6AE343160FA}
 		{68C34775-2817-4DF2-910E-E78BFB859F8F} = {A1D0DDE3-AF4B-4A7E-BC19-F6AE343160FA}
+		{1C40783D-4F97-45F8-B83B-8DAB63EC0253} = {B9D4D9A8-AD38-416D-8445-02C338080F00}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4A3B44D3-AF55-47CE-8FC0-B40E9D7CBD35}

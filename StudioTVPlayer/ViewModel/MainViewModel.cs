@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel
 
         private MainViewModel()
         {
-            ConfigurationCommand = new UiCommand(Configure);
+            ConfigurationCommand = new UiCommand(Configure, _ => !(CurrentViewModel is ConfigurationViewModel));
             AboutCommand = new UiCommand(About);
             HelpCommand = new UiCommand(Help);
         }

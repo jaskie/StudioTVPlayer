@@ -1,4 +1,4 @@
-﻿using StudioTVPlayer.Model.Configuration;
+﻿using StudioTVPlayer;
 using System;
 using System.Linq;
 
@@ -6,17 +6,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class DecklinkOutputViewModel : OutputViewModelBase
     {
-        private DecklinkOutput _decklink;
+        private Model.Configuration.DecklinkOutput _decklinkConfiguration;
         private TVPlayR.DecklinkInfo _selectedDevice;
         private TVPlayR.DecklinkKeyerType _selectedKeyer;
         private TVPlayR.TimecodeOutputSource _selectedTimecodeSource;
 
-        public DecklinkOutputViewModel(DecklinkOutput decklink) : base(decklink)
+        public DecklinkOutputViewModel(Model.Configuration.DecklinkOutput decklinkConfiguration) : base(decklinkConfiguration)
         {
-            _decklink = decklink;
-            _selectedDevice = Devices.FirstOrDefault(d => d.Index == decklink.DeviceIndex);
-            _selectedKeyer = decklink.Keyer;
-            _selectedTimecodeSource = decklink.TimecodeSource;
+            _decklinkConfiguration = decklinkConfiguration;
+            _selectedDevice = Devices.FirstOrDefault(d => d.Index == decklinkConfiguration.DeviceIndex);
+            _selectedKeyer = decklinkConfiguration.Keyer;
+            _selectedTimecodeSource = decklinkConfiguration.TimecodeSource;
         }
 
         public TVPlayR.DecklinkInfo[] Devices => TVPlayR.DecklinkIterator.Devices;
@@ -34,9 +34,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (!IsModified)
                 return;
             base.Apply();
-            _decklink.DeviceIndex = SelectedDevice.Index;
-            _decklink.Keyer = SelectedKeyer;
-            _decklink.TimecodeSource = SelectedTimecodeSource;
+            _decklinkConfiguration.DeviceIndex = SelectedDevice.Index;
+            _decklinkConfiguration.Keyer = SelectedKeyer;
+            _decklinkConfiguration.TimecodeSource = SelectedTimecodeSource;
         }
 
         public override bool IsValid()

@@ -17,7 +17,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 {
     public class PlayerViewModel : ViewModelBase, IDisposable, IDropTarget
     {
-        private readonly RundownPlayer _player;
+        private readonly RundownPlayer _rundownPlayer;
         private const double AudioLevelMaxValue = -6.0;
         private const double AudioLevelMinValue = -60.0;
         private bool _isFocused;
@@ -34,26 +34,27 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private TimeSpan _timeFromBegin;
         private TimeDisplaySource _timeDisplaySource;
 
-        public PlayerViewModel(RundownPlayer player)
+        public PlayerViewModel(RundownPlayer rundownPlayer)
         {
-            _player = player;
-            Name = player.Name;
-            VideoFormat = player.VideoFormat;
-            AudioLevelBars = Enumerable.Repeat(0, player.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
-            IsAlpha = player.IsAplha;
-            if (player.LivePreview)
-                _preview = player.GetPreview(224, 126);
-            Rundown = new ObservableCollection<RundownItemViewModelBase>(player.Rundown.Items.Select(CreateRundownItemViewModel));
-            _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == player.PlayingRundownItem);
+            _rundownPlayer = rundownPlayer;
+            Name = rundownPlayer.Name;
+            Id = rundownPlayer.Id;
+            VideoFormat = rundownPlayer.VideoFormat;
+            AudioLevelBars = Enumerable.Repeat(0, rundownPlayer.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
+            IsAlpha = rundownPlayer.IsAplha;
+            if (rundownPlayer.LivePreview)
+                _preview = rundownPlayer.GetPreview(224, 126);
+            Rundown = new ObservableCollection<RundownItemViewModelBase>(rundownPlayer.Rundown.Items.Select(CreateRundownItemViewModel));
+            _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == rundownPlayer.PlayingRundownItem);
 
-            player.Loaded += MediaPlayer_Loaded;
-            player.Cleared += MediaPlayer_Cleared;
-            player.FramePlayed += MediaPlayer_Progress;
-            player.Paused += MediaPlayer_Paused;
-            player.AudioVolume += Player_AudioVolume;
-            player.MediaDurationChanged += MediaPlayer_MediaDurationChanged;
-            player.Rundown.ItemRemoved += Rundown_ItemRemoved;
-            player.Rundown.ItemAdded += Rundown_ItemAdded;
+            rundownPlayer.Loaded += MediaPlayer_Loaded;
+            rundownPlayer.Cleared += MediaPlayer_Cleared;
+            rundownPlayer.FramePlayed += MediaPlayer_Progress;
+            rundownPlayer.Paused += MediaPlayer_Paused;
+            rundownPlayer.AudioVolume += Player_AudioVolume;
+            rundownPlayer.MediaDurationChanged += MediaPlayer_MediaDurationChanged;
+            rundownPlayer.Rundown.ItemRemoved += Rundown_ItemRemoved;
+            rundownPlayer.Rundown.ItemAdded += Rundown_ItemAdded;
 
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
@@ -65,14 +66,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             DisplayTimecodeEditCommand = new UiCommand(_ => { if (DisplayTime.HasValue) Seek(DisplayTime.Value); });
             SeekFramesCommand = new UiCommand(param => SeekFrames(param));
             SaveRundownCommand = new UiCommand(SaveRundown, _ => Rundown.Any());
-            LoadRundownCommand = new UiCommand(LoadRundown, _ => _player.PlayingRundownItem is null); 
+            LoadRundownCommand = new UiCommand(LoadRundown, _ => _rundownPlayer.PlayingRundownItem is null); 
         }
 
         public string Name { get; }
 
+        public string Id { get; }
+
         public TVPlayR.VideoFormat VideoFormat { get; }
 
-        public bool IsPlaying => _player.IsPlaying;
+        public bool IsPlaying => _rundownPlayer.IsPlaying;
 
         public bool IsFocused
         {
@@ -150,7 +153,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 if (!Set(ref _volume, value))
                     return;
-                _player.SetVolume(value);
+                _rundownPlayer.SetVolume(value);
             }
         }
 
@@ -158,24 +161,24 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public bool IsLoop
         {
-            get => _player.Rundown.IsLoop;
+            get => _rundownPlayer.Rundown.IsLoop;
             set
             {
-                if (_player.Rundown.IsLoop == value)
+                if (_rundownPlayer.Rundown.IsLoop == value)
                     return;
-                _player.Rundown.IsLoop = value;
+                _rundownPlayer.Rundown.IsLoop = value;
                 NotifyPropertyChanged();
             }
         }
 
         public bool DisableAfterUnload
         {
-            get => _player.DisableAfterUnload;
+            get => _rundownPlayer.DisableAfterUnload;
             set
             {
-                if (_player.DisableAfterUnload == value)
+                if (_rundownPlayer.DisableAfterUnload == value)
                     return;
-                _player.DisableAfterUnload = value;
+                _rundownPlayer.DisableAfterUnload = value;
                 NotifyPropertyChanged();
             }
         }
@@ -272,7 +275,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void Seek(TimeSpan time)
         {
-            if (!_player.Seek(time))
+            if (!_rundownPlayer.Seek(time))
                 return;
             _sliderPosition = time.TotalSeconds;
             NotifyPropertyChanged(nameof(SliderPosition));
@@ -295,7 +298,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void DeleteDisabled(object obj)
         {
-            _player.DeleteDisabled();
+            _rundownPlayer.DeleteDisabled();
         }
 
         internal void EndSliderThumbDrag()
@@ -318,7 +321,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             if (playerItem.RundownItem.IsDisabled)
                 return;
-            _player.Load(playerItem.RundownItem);
+            _rundownPlayer.Load(playerItem.RundownItem);
         }
 
         private void LoadNextItem(object _)
@@ -349,7 +352,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void Unload(object _)
         {
-            _player.Clear();
+            _rundownPlayer.Clear();
         }
 
         private async void TogglePlay(object _)
@@ -361,17 +364,16 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         }
 
 
-        private async Task<bool> Play()
+        public async Task<bool> Play()
         {
             try
             {
-                _player.Play();
+                _rundownPlayer.Play();
                 NotifyPropertyChanged(nameof(IsPlaying));
-
             }
             catch
             {
-                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_player.PlayingRundownItem?.Name }");
+                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_rundownPlayer.PlayingRundownItem?.Name }");
                 return false;
             }
             return true;
@@ -381,14 +383,14 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             try
             {
-                _player.Pause();
+                _rundownPlayer.Pause();
                 NotifyPropertyChanged(nameof(IsPlaying));
                 OutTimeBlink = false;
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_player.PlayingRundownItem?.Name}");
+                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_rundownPlayer.PlayingRundownItem?.Name}");
                 return false;
             }
             return true;
@@ -411,7 +413,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                         break;
                 }
                 OutTime = e.TimeToEnd;
-                OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _player.OneFrame;
+                OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _rundownPlayer.OneFrame;
                 Set(ref _sliderPosition, e.TimeFromBegin.TotalSeconds, nameof(SliderPosition));
             });
         }
@@ -427,14 +429,14 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         private void MediaPlayer_Loaded(object sender, Model.Args.RundownItemEventArgs e)
         {
             CurrentRundownItem = Rundown.FirstOrDefault(i => i.RundownItem == e.RundownItem);
-            if (!_player.LivePreview)
+            if (!_rundownPlayer.LivePreview)
                 Preview = CurrentRundownItem?.Thumbnail;
         }
 
         private void MediaPlayer_Cleared(object sender, EventArgs e)
         {
             CurrentRundownItem = null;
-            if (!_player.LivePreview)
+            if (!_rundownPlayer.LivePreview)
                 Preview = null;
         }
 
@@ -484,10 +486,10 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private bool CanTogglePlay(object obj)
         {
-            var item = _player.PlayingRundownItem as FileRundownItem;
+            var item = _rundownPlayer.PlayingRundownItem as FileRundownItem;
             if (item == null)
                 return false;
-            if (!IsPlaying && _player.IsEof)
+            if (!IsPlaying && _rundownPlayer.IsEof)
                 return false;
             return true;
         }
@@ -497,13 +499,13 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             if (_isDisposed)
                 return;
             _isDisposed = true;
-            _player.Loaded -= MediaPlayer_Loaded;
-            _player.Cleared -= MediaPlayer_Cleared;
-            _player.FramePlayed -= MediaPlayer_Progress;
-            _player.Paused -= MediaPlayer_Paused;
-            _player.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;
-            _player.Rundown.ItemRemoved -= Rundown_ItemRemoved;
-            _player.Rundown.ItemAdded -= Rundown_ItemAdded;
+            _rundownPlayer.Loaded -= MediaPlayer_Loaded;
+            _rundownPlayer.Cleared -= MediaPlayer_Cleared;
+            _rundownPlayer.FramePlayed -= MediaPlayer_Progress;
+            _rundownPlayer.Paused -= MediaPlayer_Paused;
+            _rundownPlayer.MediaDurationChanged -= MediaPlayer_MediaDurationChanged;
+            _rundownPlayer.Rundown.ItemRemoved -= Rundown_ItemRemoved;
+            _rundownPlayer.Rundown.ItemAdded -= Rundown_ItemAdded;
         }
 
         #region drag&drop
@@ -541,12 +543,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             {
                 case MediaViewModel mediaViewModel:
                     var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                    _player.AddMediaToQueue(mediaViewModel.Media, index);
+                    _rundownPlayer.AddMediaToQueue(mediaViewModel.Media, index);
                     break;
 
                 case DecklinkInputViewModel decklink:
                     index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                    _player.AddLiveToQueue(decklink.Input, index);
+                    _rundownPlayer.AddLiveToQueue(decklink.Input, index);
                     break;
                 case LiveInputRundownItemViewModel _:
                 case FileRundownItemViewModel _:
@@ -554,7 +556,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     var destIndex = dropInfo.InsertIndex;
                     if (destIndex > srcIndex)
                         destIndex--;
-                    _player.Rundown.MoveItem(srcIndex, destIndex);
+                    _rundownPlayer.Rundown.MoveItem(srcIndex, destIndex);
                     Rundown.Move(srcIndex, destIndex);
                     break;
 
@@ -567,7 +569,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     if (!media.IsValid)
                         return;
                     index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
-                    _player.AddMediaToQueue(media, index);
+                    _rundownPlayer.AddMediaToQueue(media, index);
                     break;
             }
         }
@@ -609,7 +611,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                Model.Persistence.RundownPersister.SaveRundown(_player.Rundown, fileName);
+                Model.Persistence.RundownPersister.SaveRundown(_rundownPlayer.Rundown, fileName);
             }
             catch (Exception ex)
             {
@@ -625,7 +627,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             try
             {
                 UISBusyState.SetBusyState();
-                Model.Persistence.RundownPersister.LoadRundown(_player.Rundown, fileName);
+                Model.Persistence.RundownPersister.LoadRundown(_rundownPlayer.Rundown, fileName);
             }
             catch (Exception ex)
             {

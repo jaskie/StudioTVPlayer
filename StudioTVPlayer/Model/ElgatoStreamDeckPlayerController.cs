@@ -63,6 +63,7 @@ namespace StudioTVPlayer.Model
         {
             if (_disposed)
                 return;
+            _disposed = true;
             if (_streamDeck != null)
             {
                 _streamDeck.KeyStateChanged -= OnKeyStateChanged;

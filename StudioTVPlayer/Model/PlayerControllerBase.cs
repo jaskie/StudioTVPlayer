@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace StudioTVPlayer.Model
 {
@@ -15,7 +14,6 @@ namespace StudioTVPlayer.Model
 
         protected void NotifyConnectionStateChanged(bool isConnected)
         {
-            Debug.WriteLine(isConnected);
             _isConnected = isConnected;
             ConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }

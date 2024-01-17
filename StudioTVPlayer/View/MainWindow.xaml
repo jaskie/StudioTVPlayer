@@ -9,7 +9,7 @@
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
                  xmlns:configurationViews="clr-namespace:StudioTVPlayer.View.Configuration"
                  xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
-                 mc:Ignorable="d"    
+                 mc:Ignorable="d"
                  Title="Studio TVPlayer" 
                  Height="1024" Width="1280"
                  TitleCharacterCasing="Normal"
@@ -41,6 +41,27 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+    <mah:MetroWindow.LeftWindowCommands>
+        <mah:WindowCommands>
+            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ArrowVisibility="Collapsed">
+                <mah:DropDownButton.Style>
+                    <Style TargetType="mah:DropDownButton" BasedOn="{StaticResource MahApps.Styles.DropDownButton.WindowCommands}">
+                        <Setter Property="Foreground" Value="DarkRed"/>
+                        <Setter Property="ToolTip" Value="Not all playout controllers are connected.&#x0a;Check their status against configuration."/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlayerControllersConnected}" Value="True">
+                                <Setter Property="Foreground" Value="DarkGreen" />
+                                <Setter Property="ToolTip" Value="All playout controllers are connected"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </mah:DropDownButton.Style>
+                <mah:DropDownButton.Icon>
+                    <mah:FontIcon Glyph="&#xEA3B;" />
+                </mah:DropDownButton.Icon>
+            </mah:DropDownButton>
+        </mah:WindowCommands>
+    </mah:MetroWindow.LeftWindowCommands>
     <Window.InputBindings>
         <KeyBinding Gesture="Shift+Ctrl+E" Command="{Binding ConfigurationCommand}"/>
     </Window.InputBindings>

@@ -28,17 +28,17 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <!-- remove button -->
-                <Button Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove the action"/>
+                <Button Grid.Row="0" Grid.Column="4" Grid.RowSpan="3" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove the action" />
 
-                <ToggleButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsListening}" Margin="5" Padding="2" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
-                    <mah:FontIcon Glyph="&#xF270;" FontSize="16" />
-                </ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsListening}" Style="{StaticResource ListenToggleButtonStyle}" />
                 <Label Grid.Row="0" Grid.Column="1" >Button triggering the action below</Label>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Key}" ToolTip="Button number.\nPress" VerticalAlignment="Center" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Key}" ToolTip="Button number.\nPress" VerticalAlignment="Center" HorizontalContentAlignment="Right" />
+<!--
                 <Label Grid.Row="0" Grid.Column="3" >On</Label>
                 <ComboBox Grid.Row="1" Grid.Column="3" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ToolTip="" />
                 <Label Grid.Row="0" Grid.Column="2" >ME</Label>
                 <ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" ToolTip="" />
+-->
             </Grid>
         </GroupBox>
         <local:PlayerControllerBindingSectionView />

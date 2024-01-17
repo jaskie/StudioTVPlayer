@@ -1,12 +1,8 @@
 ﻿using LibAtem.Commands.MixEffects;
-using LibAtem.Commands.MixEffects.Transition;
 using LibAtem.Common;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
@@ -21,6 +17,8 @@ namespace StudioTVPlayer.Model
         {
             _address = bmdPlayerControllerConfiguration.Address;
             _atemClient = BlackmagicDesignAtemDevices.GetDevice(_address);
+            _atemClient.OnConnection += OnConnection;
+            _atemClient.OnDisconnect += OnDisconnect;
             _atemClient.OnReceive += OnReceive;
             _bindings = bmdPlayerControllerConfiguration.Bindings.Select(CreateBinding).ToArray();
         }
@@ -55,11 +53,25 @@ namespace StudioTVPlayer.Model
                 binding.AtemCommandReceived(command, me, videoSource);
         }
 
+        private void OnConnection(object _)
+        {
+            NotifyConnectionStateChanged(true);
+        }
+
+        private void OnDisconnect(object _)
+        {
+            NotifyConnectionStateChanged(false);
+        }
+
+
         public override void Dispose()
         {
             if (_disposed)
                 return;
             _disposed = true;
+            _atemClient.OnReceive -= OnReceive;
+            _atemClient.OnConnection -= OnConnection;
+            _atemClient.OnDisconnect -= OnDisconnect;
             BlackmagicDesignAtemDevices.ReleaseDevice(_address);
         }
     }

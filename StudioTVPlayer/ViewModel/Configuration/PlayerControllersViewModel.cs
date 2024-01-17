@@ -48,6 +48,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                             return vm.PlayerControllerConfiguration;
                         })
                 .ToList();
+            Providers.GlobalApplicationData.Current.UpdatePlayerControllers();
             base.Apply();
         }
 

@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Providers
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
         private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
-        private List<PlayerControllerBase> _playerControllers = new List<PlayerControllerBase>();
+        private PlayerControllerBase[] _playerControllers = Array.Empty<PlayerControllerBase>();
         private List<Recording> _recordings = new List<Recording>();
 
         private GlobalApplicationData()
@@ -75,20 +75,37 @@ namespace StudioTVPlayer.Providers
         public void UpdatePlayerControllers()
         {
             foreach (var playerController in _playerControllers)
+            {
+                playerController.ConnectionStateChanged -= PlayerController_ConnectionStateChanged;
                 playerController.Dispose();
-            _playerControllers = Configuration.Current.PlayerControllers.Select(CreatePlayerController).ToList();
+            }
+            _playerControllers = Configuration.Current.PlayerControllers.Select(CreatePlayerController).ToArray();
         }
+
+        public event EventHandler PlayerControllerConnectionStatusChanged;
+
+        public bool PlayerControllersConnected => _playerControllers.All(p => p.IsConnected);
 
         private PlayerControllerBase CreatePlayerController(Model.Configuration.PlayerControllerBase playerControllerConfiguration)
         {
+            PlayerControllerBase playerController = null;
             switch (playerControllerConfiguration)
             {
                 case Model.Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration:
-                    return new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration);
+                    playerController = new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration);
+                    break;
                 case Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerControllerConfiguration:
-                    return new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration);
+                    playerController = new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration);
+                    break;
                 default: throw new ApplicationException($"Unknown player controller ({playerControllerConfiguration})");
             }
+            playerController.ConnectionStateChanged += PlayerController_ConnectionStateChanged;
+            return playerController;
+        }
+
+        private void PlayerController_ConnectionStateChanged(object sender, EventArgs e)
+        {
+            PlayerControllerConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public IReadOnlyList<EncoderPreset> LoadEncoderPresets()

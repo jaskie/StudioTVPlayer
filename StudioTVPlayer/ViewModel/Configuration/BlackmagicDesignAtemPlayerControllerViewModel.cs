@@ -31,17 +31,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 foreach (var binging in controllerConfiguration.Bindings.OfType<Model.Configuration.BlackmagicDesignAtemPlayerBinding>())
                     AddBindingViewModel(new BlackmagicDesignAtemPlayerBindingViewModel(binging));
             }
+            else
+                _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault();
         }
 
         public override void Apply()
         {
             var config = PlayerControllerConfiguration as Model.Configuration.BlackmagicDesignAtemPlayerController;
-            config.DeviceId = SelectedDevice?.DeviceId;
-            config.Name = SelectedDevice?.DeviceName;
-            config.Address = Address;
-            foreach (var binding in Bindings)
-                binding.Apply();
-            config.Bindings = Bindings.Select(binding => binding.BindingConfiguration).ToArray();
+            if (SelectedDevice != null)
+            {
+                config.DeviceId = SelectedDevice?.DeviceId;
+                config.Name = SelectedDevice?.DeviceName;
+                config.Address = Address;
+            }
             base.Apply();
         }
 
@@ -89,7 +91,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         protected override PlayerControllerBindingViewModelBase CreatePlayerControlerBindingViewModel(Model.Configuration.PlayerBindingBase bindingConfiguration = null)
         {
-            var blackmagicDesignAtemBindingConfiguration = bindingConfiguration as Model.Configuration.BlackmagicDesignAtemPlayerBinding ?? throw new ArgumentException(nameof(bindingConfiguration));
+            var blackmagicDesignAtemBindingConfiguration = bindingConfiguration as Model.Configuration.BlackmagicDesignAtemPlayerBinding;
             return new BlackmagicDesignAtemPlayerBindingViewModel(blackmagicDesignAtemBindingConfiguration);
         }
 
@@ -180,7 +182,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
         }
 
         public string DeviceId => _deviceId;
-        public override string DisplayName => SelectedDevice is null ? null : $"{SelectedDevice.DeviceName} at {SelectedDevice.Address}";
+        public override string DisplayName => SelectedDevice is null 
+            ? (string.IsNullOrEmpty(PlayerControllerConfiguration.Name) ? null : $"{PlayerControllerConfiguration.Name} (not available)")
+            : $"{SelectedDevice.DeviceName} at {SelectedDevice.Address}";
+
         public string Address
         {
             get => _address;

@@ -54,9 +54,18 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Bindings.Add(vm);
         }
 
+        public override void Apply()
+        {
+            foreach (var binding in Bindings)
+                binding.Apply();
+            PlayerControllerConfiguration.Bindings = Bindings.Select(binding => binding.BindingConfiguration).ToArray();
+            base.Apply();
+        }
+
         private void AddBinging(object obj)
         {
             var vm = CreatePlayerControlerBindingViewModel();
+            AddBindingViewModel(vm);
             IsModified = true;
         }
 
@@ -72,6 +81,5 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             IsModified = true;
         }
-
     }
 }

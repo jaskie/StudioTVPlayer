@@ -45,13 +45,13 @@
                 <Button Margin="10" Command="{Binding AddBlackmagicDesignAtemPlayerControllerCommand}" >
                     <StackPanel Orientation="Horizontal">
                         <mah:FontIcon Glyph="&#xE710;" />
-                        <Label>Add ATEM switcher</Label>
+                        <TextBlock Style="{StaticResource ButtonTextBlockStyle}">Add ATEM switcher</TextBlock>
                     </StackPanel>
                 </Button>
                 <Button Margin="10" Command="{Binding AddElgatoStreamDeckPlayerControllerCommand}" >
                     <StackPanel Orientation="Horizontal">
                         <mah:FontIcon Glyph="&#xE710;" />
-                        <Label>Add Elgato StreamDeck panel</Label>
+                        <TextBlock Style="{StaticResource ButtonTextBlockStyle}">Add Elgato StreamDeck panel</TextBlock>
                     </StackPanel>
                 </Button>
             </StackPanel>

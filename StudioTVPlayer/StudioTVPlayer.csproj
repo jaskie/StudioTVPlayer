@@ -249,8 +249,14 @@
     <Compile Include="View\Configuration\BlackmagicDesignAtemPlayerControllerView.xaml.cs">
       <DependentUpon>BlackmagicDesignAtemPlayerControllerView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Configuration\ElgatoStreamDeckPlayerBindingView.xaml.cs">
+      <DependentUpon>ElgatoStreamDeckPlayerBindingView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Configuration\ElgatoStreamDeckPlayerControllerView.xaml.cs">
       <DependentUpon>ElgatoStreamDeckPlayerControllerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Configuration\PlayerControllerBindingSectionView.xaml.cs">
+      <DependentUpon>PlayerControllerBindingSectionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Configuration\PlayerControllersView.xaml.cs">
       <DependentUpon>PlayerControllersView.xaml</DependentUpon>
@@ -325,7 +331,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Configuration\ElgatoStreamDeckPlayerBindingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Configuration\ElgatoStreamDeckPlayerControllerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Configuration\PlayerControllerBindingSectionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

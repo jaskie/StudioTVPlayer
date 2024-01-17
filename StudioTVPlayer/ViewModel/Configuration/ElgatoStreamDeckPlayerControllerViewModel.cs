@@ -2,10 +2,7 @@
 using StreamDeckSharp;
 using StreamDeckSharp.Exceptions;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model.Configuration;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
@@ -14,7 +11,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public sealed class ElgatoStreamDeckPlayerControllerViewModel : PlayerControllerViewModelBase
     {
-        private readonly ObservableCollection<ElgatoStreamDeckPlayerBindingViewModel> _bindings = new ObservableCollection<ElgatoStreamDeckPlayerBindingViewModel>();
         private StreamDeckDevice[] _devices;
         private StreamDeckDevice _selectedDevice;
         private bool _connect;
@@ -24,19 +20,24 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public ElgatoStreamDeckPlayerControllerViewModel(Model.Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration = null) : base(playerControllerConfiguration ?? new Model.Configuration.ElgatoStreamDeckPlayerController())
         {
             RefreshDevices();
-            _selectedDevice = playerControllerConfiguration is null
-                ? _devices.FirstOrDefault()
-                : _devices.FirstOrDefault(d => d.Device.DevicePath == playerControllerConfiguration.Path);
+            if (playerControllerConfiguration != null)
+            {
+                _selectedDevice = _devices.FirstOrDefault(d => d.Device.DevicePath == playerControllerConfiguration.Path);
+                foreach (var binging in playerControllerConfiguration.Bindings.OfType<Model.Configuration.ElgatoStreamDeckPlayerBinding>())
+                    AddBindingViewModel(new ElgatoStreamDeckPlayerBindingViewModel(binging));
+            }
+            else
+                _selectedDevice = _devices.FirstOrDefault();
             RefreshDevicesCommand = new UiCommand(RefreshDevices);
         }
 
         public ICommand RefreshDevicesCommand { get; }
 
-        public override string DisplayName => _selectedDevice?.Device.DeviceName ?? string.Empty;
+        public override string DisplayName => _selectedDevice is null
+            ? (string.IsNullOrEmpty(PlayerControllerConfiguration.Name) ? null : $"{PlayerControllerConfiguration.Name} (not available)")
+            : SelectedDevice.Device.DeviceName;
 
         public IEnumerable<StreamDeckDevice> Devices => _devices;
-
-        public IEnumerable<ElgatoStreamDeckPlayerBindingViewModel> Bindings => _bindings;
 
         public StreamDeckDevice SelectedDevice
         {
@@ -46,6 +47,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 if (!Set(ref _selectedDevice, value))
                     return;
                 NotifyPropertyChanged(nameof(DisplayName));
+                NotifyPropertyChanged(nameof(CanPressConnect));
             }
         }
 
@@ -100,7 +102,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             if (e.IsDown)
             {
-                foreach (var binding in _bindings)
+                foreach (var binding in Bindings.OfType<ElgatoStreamDeckPlayerBindingViewModel>())
                     binding.KeyReceived(e.Key);
             }
         }
@@ -124,10 +126,21 @@ namespace StudioTVPlayer.ViewModel.Configuration
             return !IsModified || (_selectedDevice != null && base.IsValid());
         }
 
-        protected override PlayerControllerBindingViewModelBase CreatePlayerControlerBindingViewModel(PlayerBindingBase bindingConfiguration = null)
+        protected override PlayerControllerBindingViewModelBase CreatePlayerControlerBindingViewModel(Model.Configuration.PlayerBindingBase bindingConfiguration = null)
         {
-            var elgatoStreamDeckPlayerBindingConfiguration = bindingConfiguration as Model.Configuration.ElgatoStreamDeckPlayerBinding ?? throw new ArgumentException(nameof(bindingConfiguration));
+            var elgatoStreamDeckPlayerBindingConfiguration = bindingConfiguration as Model.Configuration.ElgatoStreamDeckPlayerBinding;
             return new ElgatoStreamDeckPlayerBindingViewModel(elgatoStreamDeckPlayerBindingConfiguration);
+        }
+
+        public override void Apply()
+        {
+            var config = PlayerControllerConfiguration as Model.Configuration.ElgatoStreamDeckPlayerController;
+            if (SelectedDevice != null)
+            {
+                config.Name = SelectedDevice.Device.DeviceName;
+                config.Path = SelectedDevice.Device.DevicePath;
+            }
+            base.Apply();
         }
 
         protected override string ReadErrorInfo(string columnName)

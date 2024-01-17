@@ -54,7 +54,7 @@
                                   IsEnabled="{Binding CanPressConnect}"
                                   Background="{Binding IsConnected, Converter={StaticResource BooleanToBrushConverter}}">
                     <ToggleButton.Style>
-                        <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonStyle}">
                             <Setter Property="Content" Value="Connect" />
                             <Style.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
@@ -73,7 +73,7 @@
                     <Button Grid.Column="0" Margin="10" Command="{Binding AddBindingCommand}">
                         <StackPanel Orientation="Horizontal">
                             <mah:FontIcon Glyph="&#xE710;" />
-                            <Label FontSize="16" FontWeight="Normal">Add player binding</Label>
+                            <TextBlock Style="{StaticResource ButtonTextBlockStyle}">Add player binding</TextBlock>
                         </StackPanel>
                     </Button>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12">

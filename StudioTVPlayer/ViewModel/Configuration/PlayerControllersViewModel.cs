@@ -2,6 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Configuration
@@ -98,14 +99,20 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void BlackmagicDesignAtemDiscovery_DeviceSeen(object sender, Model.BlackmagicAtemDeviceEventArgs e)
         {
-            foreach (var blackmagicDecklinkPlayerControllerViewModel in PlayerControllers.OfType<BlackmagicDesignAtemPlayerControllerViewModel>())
-                blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceSeen(e.Device);
+            OnUiThread(() =>
+            {
+                foreach (var blackmagicDecklinkPlayerControllerViewModel in PlayerControllers.OfType<BlackmagicDesignAtemPlayerControllerViewModel>())
+                    blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceSeen(e.Device);
+            });
         }
 
         private void BlackmagicDesignAtemDiscovery_DeviceLost(object sender, Model.BlackmagicAtemDeviceEventArgs e)
         {
-            foreach (var blackmagicDecklinkPlayerControllerViewModel in PlayerControllers.OfType<BlackmagicDesignAtemPlayerControllerViewModel>())
-                blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceLost(e.Device);
+            OnUiThread(() =>
+            {
+                foreach (var blackmagicDecklinkPlayerControllerViewModel in PlayerControllers.OfType<BlackmagicDesignAtemPlayerControllerViewModel>())
+                    blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceLost(e.Device);
+            });
         }
 
         private void AddAndAndSelectPlayerController(PlayerControllerViewModelBase vm)
@@ -113,6 +120,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             SubscribePlayerControllerEvents(vm);
             PlayerControllers.Add(vm);
             SelectedPlayerController = vm;
+            IsModified = true;
         }
 
         private void SubscribePlayerControllerEvents(PlayerControllerViewModelBase vm)

@@ -85,6 +85,8 @@ namespace StudioTVPlayer.Providers
             {
                 case Model.Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration:
                     return new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration);
+                case Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerControllerConfiguration:
+                    return new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration);
                 default: throw new ApplicationException($"Unknown player controller ({playerControllerConfiguration})");
             }
         }

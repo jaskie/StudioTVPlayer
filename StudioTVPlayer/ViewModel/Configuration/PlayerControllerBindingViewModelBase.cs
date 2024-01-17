@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public abstract class PlayerControllerBindingViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
+    public abstract class PlayerControllerBindingViewModelBase : RemovableViewModelBase, IDataErrorInfo
     {
         private PlayerMethodKind _playerMethod;
         private PlayerViewModel _player;
@@ -14,9 +15,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public PlayerControllerBindingViewModelBase(Model.Configuration.PlayerBindingBase playerBindingConfiguration)
         {
             BindingConfiguration = playerBindingConfiguration;
+            _player = Players.FirstOrDefault();
         }
-
-        public event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 

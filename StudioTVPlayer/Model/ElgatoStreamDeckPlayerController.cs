@@ -10,11 +10,13 @@ namespace StudioTVPlayer.Model
 {
     public class ElgatoStreamDeckPlayerController : PlayerControllerBase
     {
+        private readonly Configuration.ElgatoStreamDeckPlayerController _playerControllerConfiguration;
         private IMacroBoard _streamDeck;
 
-        public ElgatoStreamDeckPlayerController(string devicePath)
+        public ElgatoStreamDeckPlayerController(Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration)
         {
-            _streamDeck = StreamDeck.OpenDevice(devicePath, false);
+            //_streamDeck = StreamDeck.OpenDevice(devicePath, false);
+            _playerControllerConfiguration = playerControllerConfiguration;
         }
         public override void Dispose()
         {

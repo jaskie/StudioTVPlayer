@@ -477,6 +477,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\EmbeddedPresets.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Player.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy $(SolutionDir)\dependencies\FFMpeg\bin\*.dll "$(TargetDir)" /D /Y</PostBuildEvent>

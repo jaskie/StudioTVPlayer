@@ -2,7 +2,10 @@
 using StreamDeckSharp;
 using StreamDeckSharp.Exceptions;
 using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
@@ -13,6 +16,7 @@ namespace StudioTVPlayer.Model
         private readonly ElgatoStreamDeckPlayerBinding[] _bindings;
         private IMacroBoard _streamDeck;
         private bool _disposed;
+        private CancellationTokenSource _initalizeCancelationTokenSource;
 
         public ElgatoStreamDeckPlayerController(Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration)
         {
@@ -37,12 +41,34 @@ namespace StudioTVPlayer.Model
                     _streamDeck.ConnectionStateChanged += OnConnectionStateChanged;
                     _streamDeck.KeyStateChanged += OnKeyStateChanged;
                     NotifyConnectionStateChanged(true);
+                    await InitializeScreen();
                 }
                 catch (Exception e) when (e is InvalidOperationException || e is StreamDeckNotFoundException)
                 {
                     await Task.Delay(5000);
                 }
             }
+        }
+
+        private async Task InitializeScreen()
+        {
+            _initalizeCancelationTokenSource = new CancellationTokenSource();
+            try
+            {
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StudioTVPlayer.Resources.Player.png"))
+                {
+                    var fullScreenImage = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+                    _streamDeck.DrawFullScreenBitmap(fullScreenImage, SixLabors.ImageSharp.Processing.ResizeMode.Crop);
+                    await Task.Delay(2000, _initalizeCancelationTokenSource.Token);
+                    for (int i = 0; i < _streamDeck.Keys.Count; i++)
+                    {
+                        var bitmap = _bindings.FirstOrDefault(b => b.Key == i)?.GetKeyBitmap() ?? KeyBitmap.Black;
+                        _streamDeck.SetKeyBitmap(bitmap);
+                    }
+                }
+            } catch (TaskCanceledException) { }
+            _initalizeCancelationTokenSource.Dispose();
+            _initalizeCancelationTokenSource = null;
         }
 
         private void OnKeyStateChanged(object sender, KeyEventArgs e)
@@ -68,7 +94,9 @@ namespace StudioTVPlayer.Model
             {
                 _streamDeck.KeyStateChanged -= OnKeyStateChanged;
                 _streamDeck.ConnectionStateChanged -= OnConnectionStateChanged;
+                _streamDeck.ShowLogo();
                 _streamDeck.Dispose();
+                _initalizeCancelationTokenSource?.Cancel();
                 _streamDeck = null;
             }
         }

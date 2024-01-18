@@ -1,4 +1,7 @@
 ﻿using LibAtem.Common;
+using OpenMacroBoard.SDK;
+using System;
+using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
@@ -16,6 +19,13 @@ namespace StudioTVPlayer.Model
             if (!(_key == key))
                 return;
             ExecuteOnPlayer();
+        }
+
+        public int Key => _key;
+
+        public KeyBitmap GetKeyBitmap()
+        {
+            return KeyBitmap.Create.FromColor(OmbColor.White);
         }
     }
 }

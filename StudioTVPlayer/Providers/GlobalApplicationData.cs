@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
@@ -80,6 +81,7 @@ namespace StudioTVPlayer.Providers
                 playerController.Dispose();
             }
             _playerControllers = Configuration.Current.PlayerControllers.Select(CreatePlayerController).ToArray();
+            PlayerControllerConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler PlayerControllerConnectionStatusChanged;

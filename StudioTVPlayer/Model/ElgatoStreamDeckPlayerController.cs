@@ -2,6 +2,7 @@
 using StreamDeckSharp;
 using StreamDeckSharp.Exceptions;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,7 +17,9 @@ namespace StudioTVPlayer.Model
         private readonly ElgatoStreamDeckPlayerBinding[] _bindings;
         private IMacroBoard _streamDeck;
         private bool _disposed;
-        private CancellationTokenSource _initalizeCancelationTokenSource;
+        private CancellationTokenSource _connectCancelationTokenSource;
+        private Font _font;
+
 
         public ElgatoStreamDeckPlayerController(Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration)
         {
@@ -40,35 +43,43 @@ namespace StudioTVPlayer.Model
                     _streamDeck = StreamDeck.OpenDevice(_playerControllerConfiguration.Path, false).WithDisconnectReplay().WithButtonPressEffect();
                     _streamDeck.ConnectionStateChanged += OnConnectionStateChanged;
                     _streamDeck.KeyStateChanged += OnKeyStateChanged;
+                    _font = new Font("Segoe MDL2 Assets", _streamDeck.Keys.KeySize / 2);
                     NotifyConnectionStateChanged(true);
-                    await InitializeScreen();
+                    await ShowInitialScreen();
                 }
                 catch (Exception e) when (e is InvalidOperationException || e is StreamDeckNotFoundException)
                 {
-                    await Task.Delay(5000);
+                    Thread.Sleep(5000);
                 }
             }
         }
 
-        private async Task InitializeScreen()
+        private async Task ShowInitialScreen()
         {
-            _initalizeCancelationTokenSource = new CancellationTokenSource();
+            _connectCancelationTokenSource = new CancellationTokenSource();
             try
             {
                 using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StudioTVPlayer.Resources.Player.png"))
                 {
-                    var fullScreenImage = await SixLabors.ImageSharp.Image.LoadAsync(stream);
-                    _streamDeck.DrawFullScreenBitmap(fullScreenImage, SixLabors.ImageSharp.Processing.ResizeMode.Crop);
-                    await Task.Delay(2000, _initalizeCancelationTokenSource.Token);
-                    for (int i = 0; i < _streamDeck.Keys.Count; i++)
-                    {
-                        var bitmap = _bindings.FirstOrDefault(b => b.Key == i)?.GetKeyBitmap() ?? KeyBitmap.Black;
-                        _streamDeck.SetKeyBitmap(bitmap);
-                    }
+                    var splashKeyImage = KeyBitmap.Create.FromImageSharpImage(await SixLabors.ImageSharp.Image.LoadAsync(stream, _connectCancelationTokenSource.Token));
+                    _streamDeck.SetKeyBitmap(splashKeyImage);
                 }
-            } catch (TaskCanceledException) { }
-            _initalizeCancelationTokenSource.Dispose();
-            _initalizeCancelationTokenSource = null;
+                var random = new Random();
+                var showKeyTasks = new Task[_streamDeck.Keys.Count];
+                for (int i = 0; i < _streamDeck.Keys.Count; i++)
+                    showKeyTasks[i] = UpdateKey(i, random.Next(500), _connectCancelationTokenSource.Token);
+                await Task.WhenAll(showKeyTasks);
+            }
+            catch (TaskCanceledException) { }
+            _connectCancelationTokenSource.Dispose();
+            _connectCancelationTokenSource = null;
+        }
+
+        private async Task UpdateKey(int key, int delay, CancellationToken cancellationToken)
+        {
+            await Task.Delay(delay, cancellationToken);
+            var bitmap = _bindings.FirstOrDefault(b => b.Key == key)?.GetKeyBitmap(_font, _streamDeck.Keys.KeySize, false) ?? KeyBitmap.Black;
+            _streamDeck.SetKeyBitmap(key, bitmap);
         }
 
         private void OnKeyStateChanged(object sender, KeyEventArgs e)
@@ -96,8 +107,13 @@ namespace StudioTVPlayer.Model
                 _streamDeck.ConnectionStateChanged -= OnConnectionStateChanged;
                 _streamDeck.ShowLogo();
                 _streamDeck.Dispose();
-                _initalizeCancelationTokenSource?.Cancel();
+                _connectCancelationTokenSource?.Cancel();
                 _streamDeck = null;
+            }
+            if (_font != null)
+            {
+                _font.Dispose();
+                _font = null;
             }
         }
     }

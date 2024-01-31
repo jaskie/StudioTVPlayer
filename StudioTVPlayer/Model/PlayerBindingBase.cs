@@ -7,12 +7,12 @@ namespace StudioTVPlayer.Model
     public abstract class PlayerBindingBase
     {
         private readonly string _playerId;
-        private readonly PlayerMethodKind _playerMethod;
+        protected readonly PlayerMethodKind PlayerMethod;
 
         protected PlayerBindingBase(Configuration.PlayerBindingBase playerBindingConfiguration) 
         {
             _playerId = playerBindingConfiguration.PlayerId;
-            _playerMethod = playerBindingConfiguration.PlayerMethod;
+            PlayerMethod = playerBindingConfiguration.PlayerMethod;
         }
 
         protected void ExecuteOnPlayer()
@@ -22,7 +22,7 @@ namespace StudioTVPlayer.Model
             var playerVm = playoutViewModel.Players.FirstOrDefault(p => p.Id == _playerId);
             if (playerVm == null)
                 return;
-            switch (_playerMethod)
+            switch (PlayerMethod)
             {
                 case PlayerMethodKind.Cue:
                     playerVm.OnUiThread(() => playerVm.CueCommand.Execute(null));

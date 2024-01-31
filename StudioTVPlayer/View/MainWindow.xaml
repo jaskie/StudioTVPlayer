@@ -33,19 +33,9 @@
             <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
                 <mah:FontIcon Glyph="&#xE713;" />
             </Button>
-            <Button ToolTip="Help" Command="{Binding HelpCommand}">
-                <mah:FontIcon Glyph="&#xE9CE;" />
-            </Button>
-            <Button ToolTip="About" Command="{Binding AboutCommand}">
-                <mah:FontIcon Glyph="&#xE946;" />
-            </Button>
-        </mah:WindowCommands>
-    </mah:MetroWindow.RightWindowCommands>
-    <mah:MetroWindow.LeftWindowCommands>
-        <mah:WindowCommands>
-            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ArrowVisibility="Collapsed">
-                <mah:DropDownButton.Style>
-                    <Style TargetType="mah:DropDownButton" BasedOn="{StaticResource MahApps.Styles.DropDownButton.WindowCommands}">
+            <Button Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Setter Property="Foreground" Value="DarkRed"/>
                         <Setter Property="ToolTip" Value="Not all playout controllers are connected.&#x0a;Check their status against configuration."/>
                         <Style.Triggers>
@@ -55,13 +45,17 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </mah:DropDownButton.Style>
-                <mah:DropDownButton.Icon>
-                    <mah:FontIcon Glyph="&#xEA3B;" />
-                </mah:DropDownButton.Icon>
-            </mah:DropDownButton>
+                </Button.Style>
+                <mah:FontIcon Glyph="&#xEA3B;" />
+            </Button>
+            <Button ToolTip="Help" Command="{Binding HelpCommand}">
+                <mah:FontIcon Glyph="&#xE9CE;" />
+            </Button>
+            <Button ToolTip="About" Command="{Binding AboutCommand}">
+                <mah:FontIcon Glyph="&#xE946;" />
+            </Button>
         </mah:WindowCommands>
-    </mah:MetroWindow.LeftWindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
     <Window.InputBindings>
         <KeyBinding Gesture="Shift+Ctrl+E" Command="{Binding ConfigurationCommand}"/>
     </Window.InputBindings>

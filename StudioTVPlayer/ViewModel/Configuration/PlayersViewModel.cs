@@ -92,7 +92,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override void Apply()
         {
-            var newPlayers = Players.Select(p => new Providers.PlayerUpdateItem { Player = p.Player, NeedsReinitialization = p.IsModified }).ToList();
+            var newPlayers = Players.Select(p => new Providers.PlayerUpdateItem(p.Player, p.IsModified)).ToList();
             foreach (var player in Players)
                 player.Apply(); // resets IsModified
             var playerConfigurations = Players.Select(vm => vm.Player).ToList();

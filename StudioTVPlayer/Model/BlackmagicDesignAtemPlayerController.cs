@@ -23,6 +23,8 @@ namespace StudioTVPlayer.Model
             _bindings = bmdPlayerControllerConfiguration.Bindings.Select(CreateBinding).ToArray();
         }
 
+        public override void NotifyPlayerChanged(RundownPlayer player) { }
+
         private BlackmagicDesignAtemPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration)
         {
             var blackmagicDesignAtemPlayerBindingConfiguration = playerBindingConfiguration as Configuration.BlackmagicDesignAtemPlayerBinding ?? throw new ArgumentException(nameof(playerBindingConfiguration));
@@ -62,7 +64,6 @@ namespace StudioTVPlayer.Model
         {
             NotifyConnectionStateChanged(false);
         }
-
 
         public override void Dispose()
         {

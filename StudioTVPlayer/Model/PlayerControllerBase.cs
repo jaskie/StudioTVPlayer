@@ -17,5 +17,8 @@ namespace StudioTVPlayer.Model
             _isConnected = isConnected;
             ConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        public abstract void NotifyPlayerChanged(RundownPlayer player);
+
     }
 }

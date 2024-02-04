@@ -15,6 +15,7 @@ namespace StudioTVPlayer.Model
     {
         private readonly Configuration.ElgatoStreamDeckPlayerController _playerControllerConfiguration;
         private readonly ElgatoStreamDeckPlayerBinding[] _bindings;
+        private readonly object _lock = new object();
         private IMacroBoard _streamDeck;
         private bool _disposed;
         private CancellationTokenSource _connectCancelationTokenSource;
@@ -59,7 +60,7 @@ namespace StudioTVPlayer.Model
             _connectCancelationTokenSource = new CancellationTokenSource();
             try
             {
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("StudioTVPlayer.Resources.Player.png"))
+                using (Stream stream = GetType().Assembly.GetManifestResourceStream("StudioTVPlayer.Resources.Player.png"))
                 {
                     var splashKeyImage = KeyBitmap.Create.FromImageSharpImage(await SixLabors.ImageSharp.Image.LoadAsync(stream, _connectCancelationTokenSource.Token));
                     _streamDeck.SetKeyBitmap(splashKeyImage);
@@ -78,8 +79,11 @@ namespace StudioTVPlayer.Model
         private async Task UpdateKey(int key, int delay, CancellationToken cancellationToken)
         {
             await Task.Delay(delay, cancellationToken);
-            var bitmap = _bindings.FirstOrDefault(b => b.Key == key)?.GetKeyBitmap(_font, _streamDeck.Keys.KeySize, false) ?? KeyBitmap.Black;
-            _streamDeck.SetKeyBitmap(key, bitmap);
+            var bitmap = _bindings.FirstOrDefault(b => b.Key == key)?.GetKeyBitmap(_font, _streamDeck.Keys.KeySize) ?? KeyBitmap.Black;
+            lock (_lock)
+            {
+                _streamDeck.SetKeyBitmap(key, bitmap);
+            }
         }
 
         private void OnKeyStateChanged(object sender, KeyEventArgs e)
@@ -115,6 +119,26 @@ namespace StudioTVPlayer.Model
                 _font.Dispose();
                 _font = null;
             }
+        }
+
+        public override void NotifyPlayerChanged(RundownPlayer player) => UpdateButtons(player);
+
+        private void UpdateButtons(RundownPlayer player)
+        {
+            if (_streamDeck is null)
+                return;
+            Task.Run(() =>
+            {
+                foreach (var binding in _bindings.Where(b => b.PlayerId == player.Id))
+                {
+                    var keyBitmap = binding.GetKeyBitmap(_font, _streamDeck.Keys.KeySize, player);
+                    if (keyBitmap != null)
+                        lock (_lock)
+                        {
+                            _streamDeck.SetKeyBitmap(binding.Key, keyBitmap);
+                        }
+                }
+            });
         }
     }
 }

@@ -3,7 +3,6 @@ using OpenMacroBoard.SDK;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace StudioTVPlayer.Model
@@ -11,6 +10,9 @@ namespace StudioTVPlayer.Model
     public sealed class ElgatoStreamDeckPlayerBinding : PlayerBindingBase
     {
         private readonly int _key;
+        private bool _isEnabled;
+        private string _icon;
+
         public ElgatoStreamDeckPlayerBinding(Configuration.ElgatoStreamDeckPlayerBinding elgatoStreamDeckPlayerBinding)
             : base(elgatoStreamDeckPlayerBinding)
         {
@@ -26,10 +28,19 @@ namespace StudioTVPlayer.Model
 
         public int Key => _key;
 
-        public KeyBitmap GetKeyBitmap(Font font, int keySize, bool isEnabled)
+
+        /// <summary>
+        /// Returns KeyBitmap for a key. Returns null if no change is required
+        /// </summary>
+        public KeyBitmap GetKeyBitmap(Font font, int keySize, RundownPlayer player = null)
         {
             var bitmapImage = new Bitmap(keySize, keySize, PixelFormat.Format24bppRgb);
-            var icon = MethodToIcon(PlayerMethod);
+            var icon = MethodToIcon(PlayerMethod, player?.PlayerState ?? PlayerState.Disabled);
+            bool isEnabled = CanEnable(player);
+            if (isEnabled == _isEnabled && icon == _icon)
+                return null;
+            _isEnabled = isEnabled;
+            _icon = icon;
             using (var g = Graphics.FromImage(bitmapImage))
             {
                 g.FillRectangle(isEnabled ? Brushes.Red : Brushes.DarkGray, 0, 0, keySize, keySize);
@@ -39,7 +50,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        private static string MethodToIcon(PlayerMethodKind playerMethodKind)
+        private static string MethodToIcon(PlayerMethodKind playerMethodKind, PlayerState playerState)
         {
             switch (playerMethodKind)
             {
@@ -47,10 +58,12 @@ namespace StudioTVPlayer.Model
                     return "\xE892";
                 case PlayerMethodKind.LoadNext:
                     return "\xF8AD";
-                case PlayerMethodKind.Play:
-                    return "\xE768";
                 case PlayerMethodKind.Pause:
+                case PlayerMethodKind.Toggle when playerState is PlayerState.Playing:
                     return "\xE769";
+                case PlayerMethodKind.Play:
+                case PlayerMethodKind.Toggle:
+                    return "\xE768";
                 case PlayerMethodKind.Clear:
                     return "\xE71A";
                 default:
@@ -73,6 +86,30 @@ namespace StudioTVPlayer.Model
             {
                 if (bmpdata != null)
                     bitmap.UnlockBits(bmpdata);
+            }
+        }
+
+        private bool CanEnable(RundownPlayer player)
+        {
+            if (player is null)
+                return false;
+            var playerState = player.PlayerState;
+            switch (PlayerMethod)
+            {
+                case PlayerMethodKind.Cue:
+                    return player.CanCue();
+                case PlayerMethodKind.LoadNext:
+                    return player.CanLoadNextItem();
+                case PlayerMethodKind.Play:
+                    return playerState == PlayerState.Cue || playerState == PlayerState.Paused;
+                case PlayerMethodKind.Pause:
+                    return playerState == PlayerState.Playing;
+                case PlayerMethodKind.Toggle:
+                    return playerState != PlayerState.Finished && (playerState == PlayerState.Cue || playerState == PlayerState.Paused || playerState == PlayerState.Playing);
+                case PlayerMethodKind.Clear:
+                    return player.IsLoaded();
+                default:
+                    return false;
             }
         }
     }

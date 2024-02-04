@@ -38,6 +38,16 @@ namespace StudioTVPlayer.Model
         Change,
     }
 
+    public enum PlayerState
+    {
+        Disabled,
+        Unloaded,
+        Cue,
+        Playing,
+        Paused,
+        Finished
+    }
+
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
     public enum PlayerMethodKind
     {
@@ -49,6 +59,8 @@ namespace StudioTVPlayer.Model
         Play,
         [Description("Pause playing clip")]
         Pause,
+        [Description("Toggle playing clip")]
+        Toggle,
         [Description("Clear player")]
         Clear,
     }

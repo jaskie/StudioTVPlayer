@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Providers
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
         private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
         private PlayerControllerBase[] _playerControllers = Array.Empty<PlayerControllerBase>();
-        private List<Recording> _recordings = new List<Recording>();
+        private readonly List<Recording> _recordings = new List<Recording>();
 
         private GlobalApplicationData()
         {
@@ -26,7 +26,7 @@ namespace StudioTVPlayer.Providers
 
         public IReadOnlyList<PlayerControllerBase> PlayerControllers => _playerControllers;
 
-        public IReadOnlyList<Recording> Recordings { get => _recordings; }
+        public IReadOnlyList<Recording> Recordings => _recordings;
 
         public IReadOnlyList<EncoderPreset> EncoderPresets { get; private set; }
 
@@ -48,14 +48,19 @@ namespace StudioTVPlayer.Providers
             var rundownPlayers = RundownPlayers.Where(p => !newConfiguration.Select(x => x.Player).Contains(p.Configuration)).ToList();
             foreach (var rundownPlayer in rundownPlayers)
             {
+                rundownPlayer.PlayerStateChanged -= Player_PlayerChanged;
+                rundownPlayer.ItemAdded -= Player_PlayerChanged;
+                rundownPlayer.ItemRemoved -= Player_PlayerChanged;
+                rundownPlayer.ItemLoaded -= Player_PlayerChanged;
+                rundownPlayer.Seeked -= Player_PlayerChanged;
                 rundownPlayer.Dispose();
                 _rundownPlayers.Remove(rundownPlayer);
             }
             rundownPlayers.Clear();
-            foreach (var player in newConfiguration)
+            foreach (var playerUpdateItem in newConfiguration)
             {
-                var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == player.Player) ?? new RundownPlayer(player.Player);
-                if (player.NeedsReinitialization)
+                var rundownPlayer = RundownPlayers.FirstOrDefault(p => p.Configuration == playerUpdateItem.Player) ?? CreateRundownPlayer(playerUpdateItem.Player);
+                if (playerUpdateItem.NeedsReinitialization)
                     rundownPlayer.Uninitialize();
                 if (!rundownPlayer.IsInitialized)
                     rundownPlayer.Initialize();
@@ -67,7 +72,7 @@ namespace StudioTVPlayer.Providers
 
         public void Initialize()
         {
-            UpdatePlayers(Configuration.Current.Players.Select(p => new PlayerUpdateItem { Player = p, NeedsReinitialization = true }).ToList());
+            UpdatePlayers(Configuration.Current.Players.Select(p => new PlayerUpdateItem(p, true)).ToList());
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
             UpdatePlayerControllers();
@@ -88,6 +93,24 @@ namespace StudioTVPlayer.Providers
 
         public bool PlayerControllersConnected => _playerControllers.All(p => p.IsConnected);
 
+        private RundownPlayer CreateRundownPlayer(Model.Configuration.Player playerConfiguration)
+        {
+            var player = new RundownPlayer(playerConfiguration);
+            player.PlayerStateChanged += Player_PlayerChanged;
+            player.ItemAdded += Player_PlayerChanged;
+            player.ItemRemoved += Player_PlayerChanged;
+            player.ItemLoaded += Player_PlayerChanged;
+            player.Seeked += Player_PlayerChanged;
+            return player;
+        }
+
+        private void Player_PlayerChanged(object sender, EventArgs e)
+        {
+            var player = sender as RundownPlayer ?? throw new ArgumentException(nameof(sender));
+            foreach (var playerController in PlayerControllers)
+                playerController.NotifyPlayerChanged(player);
+        }
+
         private PlayerControllerBase CreatePlayerController(Model.Configuration.PlayerControllerBase playerControllerConfiguration)
         {
             PlayerControllerBase playerController = null;
@@ -105,10 +128,7 @@ namespace StudioTVPlayer.Providers
             return playerController;
         }
 
-        private void PlayerController_ConnectionStateChanged(object sender, EventArgs e)
-        {
-            PlayerControllerConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
-        }
+        private void PlayerController_ConnectionStateChanged(object sender, EventArgs e) => PlayerControllerConnectionStatusChanged?.Invoke(sender, EventArgs.Empty);
 
         public IReadOnlyList<EncoderPreset> LoadEncoderPresets()
         {
@@ -133,9 +153,14 @@ namespace StudioTVPlayer.Providers
         }
     }
 
-    internal class PlayerUpdateItem
+    public class PlayerUpdateItem
     {
-        public Model.Configuration.Player Player;
-        public bool NeedsReinitialization;
+        public PlayerUpdateItem(Model.Configuration.Player player, bool needsReinitialization)
+        {
+            Player = player;
+            NeedsReinitialization = needsReinitialization;
+        }
+        public Model.Configuration.Player Player { get; }
+        public bool NeedsReinitialization { get; }
     }
 }

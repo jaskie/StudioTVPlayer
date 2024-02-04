@@ -1,43 +1,54 @@
 ﻿using StudioTVPlayer.ViewModel.Main;
 using StudioTVPlayer.ViewModel;
 using System.Linq;
+using System;
 
 namespace StudioTVPlayer.Model
 {
     public abstract class PlayerBindingBase
     {
-        private readonly string _playerId;
         protected readonly PlayerMethodKind PlayerMethod;
+        private readonly Lazy<RundownPlayer> _rundownPlayer;
 
         protected PlayerBindingBase(Configuration.PlayerBindingBase playerBindingConfiguration) 
         {
-            _playerId = playerBindingConfiguration.PlayerId;
+            PlayerId = playerBindingConfiguration.PlayerId;
             PlayerMethod = playerBindingConfiguration.PlayerMethod;
+            _rundownPlayer = new Lazy<RundownPlayer>(() => Providers.GlobalApplicationData.Current.RundownPlayers.FirstOrDefault(p => p.Id == PlayerId));
         }
+
+        public readonly string PlayerId;
+
+        protected RundownPlayer RundownPlayer => _rundownPlayer.Value;
+
+        protected bool CanExecute => MainViewModel.Instance.CurrentViewModel is PlayoutViewModel;
 
         protected void ExecuteOnPlayer()
         {
-            if (!(MainViewModel.Instance.CurrentViewModel is PlayoutViewModel playoutViewModel))
+            if (!CanExecute)
                 return;
-            var playerVm = playoutViewModel.Players.FirstOrDefault(p => p.Id == _playerId);
-            if (playerVm == null)
+            var rundownPlayer = RundownPlayer;
+            if (rundownPlayer is null)
                 return;
             switch (PlayerMethod)
             {
                 case PlayerMethodKind.Cue:
-                    playerVm.OnUiThread(() => playerVm.CueCommand.Execute(null));
+                    rundownPlayer.Cue();
                     break;
                 case PlayerMethodKind.LoadNext:
-                    playerVm.OnUiThread(() => playerVm.LoadNextItemCommand.Execute(null));
+                    rundownPlayer.LoadNextItem();
                     break;
                 case PlayerMethodKind.Play:
-                    playerVm.OnUiThread(async () => await playerVm.Play());
+                    rundownPlayer.Play();
                     break;
                 case PlayerMethodKind.Pause:
-                    playerVm.OnUiThread(async () => await playerVm.Pause());
+                    rundownPlayer.Pause();
                     break;
                 case PlayerMethodKind.Clear:
-                    playerVm.OnUiThread(() => playerVm.UnloadCommand.Execute(null));
+                    rundownPlayer.Clear();
+                    break;
+                case PlayerMethodKind.Toggle:
+                    rundownPlayer.Toggle();
                     break;
             }
         }

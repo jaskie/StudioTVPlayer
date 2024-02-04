@@ -1,7 +1,5 @@
-﻿using ControlzEx.Standard;
-using System;
+﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Media;
@@ -13,8 +11,6 @@ namespace StudioTVPlayer.Model
         private bool _isAutoStart;
         private bool _isDisabled;
         private int _prepared;
-
-        public abstract bool IsPlaying { get; }
 
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler RemoveRequested;
@@ -58,11 +54,17 @@ namespace StudioTVPlayer.Model
 
         public abstract string Name { get; }
 
+        public abstract bool Seek(TimeSpan timeSpan);
+
         public abstract bool CanSeek { get; }
 
         public abstract void Play();
 
         public abstract void Pause();
+
+        public abstract bool IsPlaying();
+
+        public abstract bool IsEof { get; }
 
         public virtual bool Prepare(int audioChannelCount)
         {

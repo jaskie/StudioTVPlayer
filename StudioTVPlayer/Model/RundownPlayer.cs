@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,7 +37,7 @@ namespace StudioTVPlayer.Model
                 if (value is null)
                     PlayerState = PlayerState.Unloaded;
                 else
-                    PlayerState = value.IsPlaying() ? PlayerState.Playing : PlayerState.Paused;
+                    PlayerState = value.IsPlaying() ? PlayerState.Playing : PlayerState.Cue;
             }
         }
 
@@ -82,7 +81,7 @@ namespace StudioTVPlayer.Model
         public void Pause()
         {
             var rundownItem = _loadedItem;
-            if (!(rundownItem?.CanSeek ?? false))
+            if (!(rundownItem?.CanSeek() ?? false))
                 return;
             rundownItem.Pause();
             PlayerState = PlayerState.Paused;
@@ -91,7 +90,7 @@ namespace StudioTVPlayer.Model
         public void Toggle()
         {
             var rundownItem = _loadedItem;
-            if (!(rundownItem?.CanSeek ?? false))
+            if (!(rundownItem?.CanSeek() ?? false))
                 return;
             if (rundownItem.IsPlaying())
                 rundownItem.Pause();
@@ -114,7 +113,7 @@ namespace StudioTVPlayer.Model
         public bool CanCue()
         {
             var loadedItem = _loadedItem;
-            if (loadedItem is null || !loadedItem.CanSeek)
+            if (loadedItem is null || !loadedItem.CanSeek())
                 return false;
             return true;
         }

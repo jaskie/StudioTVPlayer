@@ -22,7 +22,7 @@ namespace StudioTVPlayer.Model
 
         internal override TVPlayR.InputBase TVPlayRInput => _input.TVPlayRInput;
 
-        public override bool CanSeek => false;
+        public override bool CanSeek() => false;
 
         public override bool IsEof => false;
 

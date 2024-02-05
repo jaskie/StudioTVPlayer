@@ -56,7 +56,7 @@ namespace StudioTVPlayer.Model
 
         public abstract bool Seek(TimeSpan timeSpan);
 
-        public abstract bool CanSeek { get; }
+        public abstract bool CanSeek();
 
         public abstract void Play();
 

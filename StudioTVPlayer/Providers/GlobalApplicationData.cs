@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
@@ -51,7 +50,6 @@ namespace StudioTVPlayer.Providers
                 rundownPlayer.PlayerStateChanged -= Player_PlayerChanged;
                 rundownPlayer.ItemAdded -= Player_PlayerChanged;
                 rundownPlayer.ItemRemoved -= Player_PlayerChanged;
-                rundownPlayer.ItemLoaded -= Player_PlayerChanged;
                 rundownPlayer.Seeked -= Player_PlayerChanged;
                 rundownPlayer.Dispose();
                 _rundownPlayers.Remove(rundownPlayer);
@@ -99,7 +97,6 @@ namespace StudioTVPlayer.Providers
             player.PlayerStateChanged += Player_PlayerChanged;
             player.ItemAdded += Player_PlayerChanged;
             player.ItemRemoved += Player_PlayerChanged;
-            player.ItemLoaded += Player_PlayerChanged;
             player.Seeked += Player_PlayerChanged;
             return player;
         }
@@ -117,10 +114,10 @@ namespace StudioTVPlayer.Providers
             switch (playerControllerConfiguration)
             {
                 case Model.Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration:
-                    playerController = new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration);
+                    playerController = new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration, RundownPlayers);
                     break;
                 case Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerControllerConfiguration:
-                    playerController = new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration);
+                    playerController = new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration, RundownPlayers);
                     break;
                 default: throw new ApplicationException($"Unknown player controller ({playerControllerConfiguration})");
             }

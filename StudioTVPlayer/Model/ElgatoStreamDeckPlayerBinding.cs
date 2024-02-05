@@ -1,8 +1,8 @@
-﻿using LibAtem.Common;
-using OpenMacroBoard.SDK;
+﻿using OpenMacroBoard.SDK;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace StudioTVPlayer.Model
@@ -12,11 +12,17 @@ namespace StudioTVPlayer.Model
         private readonly int _key;
         private bool _isEnabled;
         private string _icon;
+        private Brush _backgroundBrush = Brushes.Red;
 
-        public ElgatoStreamDeckPlayerBinding(Configuration.ElgatoStreamDeckPlayerBinding elgatoStreamDeckPlayerBinding)
-            : base(elgatoStreamDeckPlayerBinding)
+        public ElgatoStreamDeckPlayerBinding(Configuration.ElgatoStreamDeckPlayerBinding elgatoStreamDeckPlayerBinding, RundownPlayer rundownPlayer)
+            : base(elgatoStreamDeckPlayerBinding, rundownPlayer)
         {
             _key = elgatoStreamDeckPlayerBinding.Key;
+            if (int.TryParse(elgatoStreamDeckPlayerBinding.ButtonBackgroundColor, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var intColor))
+            {
+                var colorsArray = BitConverter.GetBytes(intColor);
+                _backgroundBrush = new SolidBrush(Color.FromArgb(colorsArray[2], colorsArray[1], colorsArray[0]));
+            }
         }
 
         public void KeyPressed(int key)
@@ -28,25 +34,26 @@ namespace StudioTVPlayer.Model
 
         public int Key => _key;
 
-
         /// <summary>
-        /// Returns KeyBitmap for a key. Returns null if no change is required
+        /// Returns new KeyBitmap for a key. Returns null if no change is required
         /// </summary>
         public KeyBitmap GetKeyBitmap(Font font, int keySize, RundownPlayer player = null)
         {
-            var bitmapImage = new Bitmap(keySize, keySize, PixelFormat.Format24bppRgb);
-            var icon = MethodToIcon(PlayerMethod, player?.PlayerState ?? PlayerState.Disabled);
-            bool isEnabled = CanEnable(player);
-            if (isEnabled == _isEnabled && icon == _icon)
-                return null;
-            _isEnabled = isEnabled;
-            _icon = icon;
-            using (var g = Graphics.FromImage(bitmapImage))
+            using (var bitmapImage = new Bitmap(keySize, keySize, PixelFormat.Format24bppRgb))
             {
-                g.FillRectangle(isEnabled ? Brushes.Red : Brushes.DarkGray, 0, 0, keySize, keySize);
-                var size = g.MeasureString(icon, font);
-                g.DrawString(icon, font, isEnabled ? Brushes.White : Brushes.LightGray, (keySize - size.Width) / 2, (keySize - size.Height) / 2);
-                return KeyBitmap.Create.FromBgr24Array(keySize, keySize, BitmapToByteArray(bitmapImage));
+                var icon = MethodToIcon(PlayerMethod, player?.PlayerState ?? PlayerState.Disabled);
+                bool isEnabled = CanEnable(player);
+                if (isEnabled == _isEnabled && icon == _icon)
+                    return null;
+                _isEnabled = isEnabled;
+                _icon = icon;
+                using (var g = Graphics.FromImage(bitmapImage))
+                {
+                    g.FillRectangle(isEnabled ? _backgroundBrush : Brushes.DarkGray, 0, 0, keySize, keySize);
+                    var size = g.MeasureString(icon, font);
+                    g.DrawString(icon, font, isEnabled ? Brushes.White : Brushes.LightGray, (keySize - size.Width) / 2, (keySize - size.Height) / 2);
+                    return KeyBitmap.Create.FromBgr24Array(keySize, keySize, BitmapToByteArray(bitmapImage));
+                }
             }
         }
 
@@ -57,7 +64,7 @@ namespace StudioTVPlayer.Model
                 case PlayerMethodKind.Cue:
                     return "\xE892";
                 case PlayerMethodKind.LoadNext:
-                    return "\xF8AD";
+                    return "\xE893";
                 case PlayerMethodKind.Pause:
                 case PlayerMethodKind.Toggle when playerState is PlayerState.Playing:
                     return "\xE769";
@@ -77,10 +84,9 @@ namespace StudioTVPlayer.Model
             try
             {
                 bmpdata = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-                var bytedata = new byte[bmpdata.Stride * bitmap.Height];
-                var ptr = bmpdata.Scan0;
-                Marshal.Copy(ptr, bytedata, 0, bytedata.Length);
-                return bytedata;
+                var bytes = new byte[bmpdata.Stride * bitmap.Height];
+                Marshal.Copy(bmpdata.Scan0, bytes, 0, bytes.Length);
+                return bytes;
             }
             finally
             {

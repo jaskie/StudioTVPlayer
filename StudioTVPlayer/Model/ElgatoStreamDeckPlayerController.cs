@@ -2,10 +2,11 @@
 using StreamDeckSharp;
 using StreamDeckSharp.Exceptions;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,21 +22,21 @@ namespace StudioTVPlayer.Model
         private CancellationTokenSource _connectCancelationTokenSource;
         private Font _font;
 
-
-        public ElgatoStreamDeckPlayerController(Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration)
+        public ElgatoStreamDeckPlayerController(Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration, IReadOnlyList<RundownPlayer> rundownPlayers)
         {
             _playerControllerConfiguration = playerControllerConfiguration;
-            _bindings = playerControllerConfiguration.Bindings.Select(CreateBinding).ToArray();
-            TryToReconnect();
+            _bindings = playerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId))).ToArray();
+            Task.Run(TryToReconnect);
         }
 
-        private ElgatoStreamDeckPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration)
+        private ElgatoStreamDeckPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer)
         {
+            Debug.Assert(rundownPlayer != null);
             var elgatoStreamDeckPlayerBindingConfiguration = playerBindingConfiguration as Configuration.ElgatoStreamDeckPlayerBinding ?? throw new ArgumentException(nameof(playerBindingConfiguration));
-            return new ElgatoStreamDeckPlayerBinding(elgatoStreamDeckPlayerBindingConfiguration);
+            return new ElgatoStreamDeckPlayerBinding(elgatoStreamDeckPlayerBindingConfiguration, rundownPlayer);
         }
 
-        private async void TryToReconnect()
+        private async Task TryToReconnect()
         {
             while (!_disposed && _streamDeck is null)
             {
@@ -105,12 +106,14 @@ namespace StudioTVPlayer.Model
             if (_disposed)
                 return;
             _disposed = true;
-            if (_streamDeck != null)
+            var streamDeck = _streamDeck;
+            if (streamDeck != null)
             {
-                _streamDeck.KeyStateChanged -= OnKeyStateChanged;
-                _streamDeck.ConnectionStateChanged -= OnConnectionStateChanged;
-                _streamDeck.ShowLogo();
-                _streamDeck.Dispose();
+                streamDeck.KeyStateChanged -= OnKeyStateChanged;
+                streamDeck.ConnectionStateChanged -= OnConnectionStateChanged;
+                if (streamDeck.IsConnected)
+                    streamDeck.ShowLogo();
+                streamDeck.Dispose();
                 _connectCancelationTokenSource?.Cancel();
                 _streamDeck = null;
             }
@@ -121,24 +124,21 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public override void NotifyPlayerChanged(RundownPlayer player) => UpdateButtons(player);
-
-        private void UpdateButtons(RundownPlayer player)
+        public override void NotifyPlayerChanged(RundownPlayer rundownPlayer)
         {
-            if (_streamDeck is null)
+            var streamDeck = _streamDeck;
+            if (streamDeck is null)
                 return;
-            Task.Run(() =>
+            foreach (var binding in _bindings.Where(b => b.RundownPlayer == rundownPlayer))
             {
-                foreach (var binding in _bindings.Where(b => b.PlayerId == player.Id))
+                var keyBitmap = binding.GetKeyBitmap(_font, streamDeck.Keys.KeySize, rundownPlayer);
+                if (keyBitmap is null)
+                    continue;
+                lock (_lock)
                 {
-                    var keyBitmap = binding.GetKeyBitmap(_font, _streamDeck.Keys.KeySize, player);
-                    if (keyBitmap != null)
-                        lock (_lock)
-                        {
-                            _streamDeck.SetKeyBitmap(binding.Key, keyBitmap);
-                        }
+                    streamDeck.SetKeyBitmap(binding.Key, keyBitmap);
                 }
-            });
+            }
         }
     }
 }

@@ -58,7 +58,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
             LoadMediaCommand = new UiCommand(LoadMedia);
             LoadSelectedMediaCommand = new UiCommand(LoadSelectedMedia, _ => SelectedRundownItem != null);
-            CueCommand = new UiCommand(Cue, _ => CurrentRundownItem is FileRundownItemViewModel);
+            CueCommand = new UiCommand(Cue, _ => _rundownPlayer.CanCue());
             TogglePlayCommand = new UiCommand(TogglePlay, CanTogglePlay);
             ClearCommand = new UiCommand(Clear, _ => _rundownPlayer.IsLoaded());
             LoadNextItemCommand = new UiCommand(LoadNextItem, CanLoadNextItem);
@@ -183,9 +183,9 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public bool IsSeekable => _currentRundownItem?.RundownItem.CanSeek == true;
+        public bool IsSeekable => _currentRundownItem?.RundownItem.CanSeek() == true;
 
-        public bool IsLive => _currentRundownItem?.RundownItem.CanSeek != true;
+        public bool IsLive => _currentRundownItem is LiveInputRundownItemViewModel;
 
         public ImageSource Preview { get => _preview; private set => Set(ref _preview, value); }
 
@@ -288,7 +288,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             LoadMedia(SelectedRundownItem);
         }
 
-
         private async void Cue(object obj)
         {
             if (!await Pause())
@@ -387,7 +386,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void MediaPlayer_PlayerStateChanged(object sender, EventArgs e)
         {
-            Debug.WriteLine("PlayerStateChanged");
             NotifyPropertyChanged(nameof(IsPlaying));
             Refresh();
         }

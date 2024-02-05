@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
@@ -40,7 +39,7 @@ namespace StudioTVPlayer.Model
 
         public override string Name => Media.Name;
 
-        public override bool CanSeek => true;
+        public override bool CanSeek() => true;
 
         public override bool IsEof => _input.IsEof;
 

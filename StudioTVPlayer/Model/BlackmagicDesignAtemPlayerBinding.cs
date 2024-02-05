@@ -8,8 +8,8 @@ namespace StudioTVPlayer.Model
         private readonly VideoSource _videoSource;
         private readonly BlackmagicDesignAtemCommand _command;
 
-        public BlackmagicDesignAtemPlayerBinding(Configuration.BlackmagicDesignAtemPlayerBinding blackmagicDesignAtemPlayerBindingConfiguration)
-            : base(blackmagicDesignAtemPlayerBindingConfiguration)
+        public BlackmagicDesignAtemPlayerBinding(Configuration.BlackmagicDesignAtemPlayerBinding blackmagicDesignAtemPlayerBindingConfiguration, RundownPlayer rundownPlayer)
+            : base(blackmagicDesignAtemPlayerBindingConfiguration, rundownPlayer)
         {
             _me = blackmagicDesignAtemPlayerBindingConfiguration.Me;
             _videoSource = blackmagicDesignAtemPlayerBindingConfiguration.VideoSource;

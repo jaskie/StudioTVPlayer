@@ -2,6 +2,7 @@
 using LibAtem.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace StudioTVPlayer.Model
@@ -13,22 +14,23 @@ namespace StudioTVPlayer.Model
         private readonly LibAtem.Net.AtemClient _atemClient;
         private readonly BlackmagicDesignAtemPlayerBinding[] _bindings;
 
-        public BlackmagicDesignAtemPlayerController(Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration)
+        public BlackmagicDesignAtemPlayerController(Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration, IReadOnlyList<RundownPlayer> rundownPlayers)
         {
             _address = bmdPlayerControllerConfiguration.Address;
             _atemClient = BlackmagicDesignAtemDevices.GetDevice(_address);
             _atemClient.OnConnection += OnConnection;
             _atemClient.OnDisconnect += OnDisconnect;
             _atemClient.OnReceive += OnReceive;
-            _bindings = bmdPlayerControllerConfiguration.Bindings.Select(CreateBinding).ToArray();
+            _bindings = bmdPlayerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId))).ToArray();
         }
 
         public override void NotifyPlayerChanged(RundownPlayer player) { }
 
-        private BlackmagicDesignAtemPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration)
+        private BlackmagicDesignAtemPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer)
         {
+            Debug.Assert(rundownPlayer != null);
             var blackmagicDesignAtemPlayerBindingConfiguration = playerBindingConfiguration as Configuration.BlackmagicDesignAtemPlayerBinding ?? throw new ArgumentException(nameof(playerBindingConfiguration));
-            return new BlackmagicDesignAtemPlayerBinding(blackmagicDesignAtemPlayerBindingConfiguration);
+            return new BlackmagicDesignAtemPlayerBinding(blackmagicDesignAtemPlayerBindingConfiguration, rundownPlayer);
         }
 
         private void OnReceive(object sender, IReadOnlyList<LibAtem.Commands.ICommand> commands)

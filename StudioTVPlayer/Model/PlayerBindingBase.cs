@@ -1,25 +1,19 @@
 ﻿using StudioTVPlayer.ViewModel.Main;
 using StudioTVPlayer.ViewModel;
-using System.Linq;
-using System;
 
 namespace StudioTVPlayer.Model
 {
     public abstract class PlayerBindingBase
     {
         protected readonly PlayerMethodKind PlayerMethod;
-        private readonly Lazy<RundownPlayer> _rundownPlayer;
 
-        protected PlayerBindingBase(Configuration.PlayerBindingBase playerBindingConfiguration) 
+        protected PlayerBindingBase(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer) 
         {
-            PlayerId = playerBindingConfiguration.PlayerId;
             PlayerMethod = playerBindingConfiguration.PlayerMethod;
-            _rundownPlayer = new Lazy<RundownPlayer>(() => Providers.GlobalApplicationData.Current.RundownPlayers.FirstOrDefault(p => p.Id == PlayerId));
+            RundownPlayer = rundownPlayer;
         }
 
-        public readonly string PlayerId;
-
-        protected RundownPlayer RundownPlayer => _rundownPlayer.Value;
+        public readonly RundownPlayer RundownPlayer;
 
         protected bool CanExecute => MainViewModel.Instance.CurrentViewModel is PlayoutViewModel;
 
@@ -27,28 +21,27 @@ namespace StudioTVPlayer.Model
         {
             if (!CanExecute)
                 return;
-            var rundownPlayer = RundownPlayer;
-            if (rundownPlayer is null)
+            if (RundownPlayer is null)
                 return;
             switch (PlayerMethod)
             {
                 case PlayerMethodKind.Cue:
-                    rundownPlayer.Cue();
+                    RundownPlayer.Cue();
                     break;
                 case PlayerMethodKind.LoadNext:
-                    rundownPlayer.LoadNextItem();
+                    RundownPlayer.LoadNextItem();
                     break;
                 case PlayerMethodKind.Play:
-                    rundownPlayer.Play();
+                    RundownPlayer.Play();
                     break;
                 case PlayerMethodKind.Pause:
-                    rundownPlayer.Pause();
+                    RundownPlayer.Pause();
                     break;
                 case PlayerMethodKind.Clear:
-                    rundownPlayer.Clear();
+                    RundownPlayer.Clear();
                     break;
                 case PlayerMethodKind.Toggle:
-                    rundownPlayer.Toggle();
+                    RundownPlayer.Toggle();
                     break;
             }
         }

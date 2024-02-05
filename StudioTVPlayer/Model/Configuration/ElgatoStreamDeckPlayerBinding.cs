@@ -6,5 +6,8 @@ namespace StudioTVPlayer.Model.Configuration
     {
         [XmlAttribute]
         public int Key { get; set; } = 1;
+
+        [XmlAttribute]
+        public string ButtonBackgroundColor { get; set; }
     }
 }

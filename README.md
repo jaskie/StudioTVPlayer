@@ -14,7 +14,7 @@ A simple TV studio player with SDI, NDI and MPEG TS outputs for Windows
 * Multiple outputs for single player, i.e. one with and one w/o timecode overlay
 * Decklink input recording, with ability to play file while recording
 * 10-bit processing and output on Decklink (not recommended with overlays)
-* [NEW] Player control (e.g. play, cue) using Blackmagic Atem switcher network connection
+* [NEW] Player control (e.g. play, cue) integration with Blackmagic Atem switcher and Elgato StreamDeck
 
 ## Prerequisits
 * Windows 7 or newer

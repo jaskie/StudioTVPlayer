@@ -17,6 +17,7 @@ namespace StudioTVPlayer.Providers
 
         [XmlArray]
         [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerController))]
+        [XmlArrayItem(typeof(ElgatoStreamDeckPlayerController))]
         public List<PlayerControllerBase> PlayerControllers { get; set; } = new List<PlayerControllerBase>();
 
         public static Configuration Current { get; } = Load();

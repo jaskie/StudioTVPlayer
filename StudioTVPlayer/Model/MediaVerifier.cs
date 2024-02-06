@@ -21,11 +21,13 @@ namespace StudioTVPlayer.Model
             public DateTime FirstVerification;
         }
 
+        private bool _disposed;
         private readonly Task _verificationTask;
         private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private const int DefaultThumbnailHeight = 126;
         private const int DefaultThumbnailWidth = 224;
+
         private MediaVerifier()
         {
             _verificationTask = Task.Factory.StartNew(MediaVerifierTask, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -33,6 +35,9 @@ namespace StudioTVPlayer.Model
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+            _disposed = true;
             _cancellationTokenSource.Cancel();
             try
             {

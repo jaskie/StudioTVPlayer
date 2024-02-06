@@ -1,4 +1,5 @@
 ﻿using StudioTVPlayer.Model.Args;
+using StudioTVPlayer.Model.Persistence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +49,21 @@ namespace StudioTVPlayer.Model
         public event EventHandler<RundownItemIndexedEventArgs> ItemAdded;
         public event EventHandler<RundownItemIndexedEventArgs> ItemRemoved;
 
-        public bool Contains(RundownItemBase item) => _items.Contains(item);
+        public bool Contains(RundownItemBase item)
+        {
+            lock (_rundownLock)
+            {
+                return _items.Contains(item);
+            }
+        }
+
+        public int IndexOf(RundownItemBase item)
+        {
+            lock (_rundownLock)
+            {
+                return _items.IndexOf(item);
+            }
+        }
 
         public void MoveItem(int srcIndex, int destIndex)
         {
@@ -177,6 +192,38 @@ namespace StudioTVPlayer.Model
         {
             foreach (var item in Items)
                 Remove(item);
+        }
+
+        public bool CanLoadNextItem(RundownItemBase fromRundownItem)
+        {
+            lock (_rundownLock)
+            {
+                var currentIndex = _items.IndexOf(fromRundownItem);
+                while (++currentIndex < _items.Count)
+                {
+                    if (_items[currentIndex].IsDisabled)
+                        continue;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public RundownItemBase FindNextItemToLoad(RundownItemBase fromRundownItem)
+        {
+            lock (_rundownLock)
+            {
+                var currentIndex = _items.IndexOf(fromRundownItem);
+                if (currentIndex >= _items.Count - 1)
+                    return null;
+                while (++currentIndex < _items.Count)
+                {
+                    if (_items[currentIndex].IsDisabled)
+                        continue;
+                    return _items[currentIndex];
+                }
+            }
+            return null;
         }
 
         public void Dispose()

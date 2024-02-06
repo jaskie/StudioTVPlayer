@@ -1,17 +1,18 @@
-﻿using System.Windows.Media;
+﻿using System;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
     public sealed class LiveInputRundownItem : RundownItemBase
     {
-        InputBase _input;
+        private readonly InputBase _input;
 
         public LiveInputRundownItem(InputBase input)
         {
             _input = input;
         }
 
-        public override bool IsPlaying => true;
+        public override bool IsPlaying() => true;
 
         public override ImageSource Thumbnail => null;
 
@@ -21,7 +22,14 @@ namespace StudioTVPlayer.Model
 
         internal override TVPlayR.InputBase TVPlayRInput => _input.TVPlayRInput;
 
-        public override bool CanSeek => false;
+        public override bool CanSeek() => false;
+
+        public override bool IsEof => false;
+
+        public override bool Seek(TimeSpan timeSpan)
+        {
+            return false;
+        }
 
         public override void Play()
         {
@@ -51,5 +59,6 @@ namespace StudioTVPlayer.Model
         {
             RaiseFramePlayed(e);
         }
+
     }
 }

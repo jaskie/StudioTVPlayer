@@ -46,7 +46,7 @@
             <Button Grid.Row="1" Margin="0 10" Command="{Binding AddPlayerCommand}" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
                     <mah:FontIcon Glyph="&#xE710;" />
-                    <Label FontSize="16" FontWeight="Normal">Add new player</Label>
+                    <TextBlock Style="{StaticResource ButtonTextBlockStyle}">Add new player</TextBlock>
                 </StackPanel>
             </Button>
         </Grid>

@@ -1,14 +1,14 @@
 ﻿using StudioTVPlayer.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model.Persistence
 {
     public static class RundownPersister
     {
+        /// <summary>
+        /// Saves <see cref="Model.Rundown"/> to file
+        /// </summary>
         public static void SaveRundown(Model.Rundown rundown, string fileName)
         {
             var items = rundown.Items
@@ -28,11 +28,12 @@ namespace StudioTVPlayer.Model.Persistence
             new Rundown { RundownItems = items }.Save(fileName);
         }
 
+        /// <summary>
+        /// Loads rundown from file into existing <see cref="Model.Rundown"/> instance
+        /// </summary>
         public static void LoadRundown(Model.Rundown rundown, string fileName)
         {
-            var savedRundown = DataStore.Load<Rundown>(fileName);
-            if (savedRundown is null)
-                throw new ApplicationException($"file {fileName} not contain valid rundown information");
+            var savedRundown = DataStore.Load<Rundown>(fileName) ?? throw new ApplicationException($"File {fileName} can't be loaded");
             rundown.ClearItems();
             foreach (var savedItem in savedRundown.RundownItems)
             {

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,68 +10,148 @@ namespace StudioTVPlayer.Model
 {
     public class RundownPlayer : Player
     {
-        private readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
-        private RundownItemBase _playingRundownItem;
-        private Rundown _rundown = new Rundown();
+        private static readonly TimeSpan PreloadTime = TimeSpan.FromSeconds(2);
+        private RundownItemBase _loadedItem;
         private RundownItemBase _loadedNextRundownItem;
+        private PlayerState _playerState = PlayerState.Unloaded;
+        private readonly Rundown _rundown = new Rundown();
+        private bool _disposed;
 
         public RundownPlayer(Configuration.Player configuration) : base(configuration)
         {
             _rundown.ItemLoaded += Rundown_ItemLoaded;
+            _rundown.ItemAdded += Rundown_ItemAdded;
+            _rundown.ItemRemoved += Rundown_ItemRemoved;
         }
-
-        public RundownItemBase PlayingRundownItem
+        public RundownItemBase LoadedItem
         {
-            get => _playingRundownItem;
+            get => _loadedItem;
             private set
             {
-                var oldItem = _playingRundownItem;
-                if (_playingRundownItem == value)
+                var oldItem = _loadedItem;
+                if (_loadedItem == value)
                     return;
-                _playingRundownItem = value;
+                _loadedItem = value;
                 AfterPlayed(oldItem);
                 BeforePlay(value);
+                if (value is null)
+                    PlayerState = PlayerState.Unloaded;
+                else
+                    PlayerState = value.IsPlaying() ? PlayerState.Playing : PlayerState.Cue;
             }
         }
 
         public bool DisableAfterUnload { get; set; }
 
-        public bool IsEof => (PlayingRundownItem?.TVPlayRInput as TVPlayR.FileInput)?.IsEof ?? true;
+        public bool IsEof() => _loadedItem?.IsEof ?? true;
 
         public TimeSpan OneFrame => VideoFormat.FrameNumberToTime(1);
 
-        public bool IsPlaying => _playingRundownItem?.IsPlaying == true;
+        public bool IsPlaying() => _loadedItem?.IsPlaying() == true;
 
-        public Rundown Rundown { get => _rundown; }
+        public bool IsLoaded() => _loadedItem != null;
 
-        public bool Play()
+        #region Rundown class wrapper stuff
+        public bool IsLoop { get => _rundown.IsLoop; set => _rundown.IsLoop = value; }
+        
+        public List<RundownItemBase> Items => _rundown.Items;
+
+        public void MoveItem(int srcIndex, int destIndex) => _rundown.MoveItem(srcIndex, destIndex);
+
+        private void Rundown_ItemAdded(object sender, RundownItemIndexedEventArgs e)
         {
-            if (PlayingRundownItem is null)
-                return false;
-            PlayingRundownItem.Play();
-            return true;
+            ItemAdded?.Invoke(this, e);
+        }
+
+        private void Rundown_ItemRemoved(object sender, RundownItemIndexedEventArgs e)
+        {
+            ItemRemoved?.Invoke(this, e);
+        }
+
+        #endregion Rundown class wrapper stuff
+        public void Play()
+        {
+            var rundownItem = _loadedItem;
+            if (rundownItem is null)
+                return;
+            rundownItem.Play();
+            PlayerState = PlayerState.Playing;
         }
 
         public void Pause()
         {
-            PlayingRundownItem?.Pause();
+            var rundownItem = _loadedItem;
+            if (!(rundownItem?.CanSeek() ?? false))
+                return;
+            rundownItem.Pause();
+            PlayerState = PlayerState.Paused;
         }
 
-        public event EventHandler<RundownItemEventArgs> Loaded;
+        public void Toggle()
+        {
+            var rundownItem = _loadedItem;
+            if (!(rundownItem?.CanSeek() ?? false))
+                return;
+            if (rundownItem.IsPlaying())
+                rundownItem.Pause();
+            else
+                rundownItem.Play();
+            PlayerState = rundownItem.IsPlaying() ? PlayerState.Playing : PlayerState.Paused;
+        }
+
+        public void Cue()
+        {
+            if (!(_loadedItem is RundownItemBase rundownItem))
+                return;
+            rundownItem.Pause();
+            if (rundownItem.Seek((rundownItem as FileRundownItem)?.Media.StartTime ?? TimeSpan.Zero))
+                PlayerState = PlayerState.Cue;
+            else 
+                PlayerState = PlayerState.Paused;
+        }
+
+        public bool CanCue()
+        {
+            var loadedItem = _loadedItem;
+            if (loadedItem is null || !loadedItem.CanSeek())
+                return false;
+            return true;
+        }
+
+        public void LoadNextItem() => Load(_rundown.FindNextItemToLoad(_loadedItem));
+
+        public PlayerState PlayerState
+        {
+            get =>  _playerState;
+            set
+            {
+                if (value == _playerState)
+                    return;
+                _playerState = value;
+                PlayerStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public event EventHandler<RundownItemEventArgs> ItemLoaded;
+        public event EventHandler<RundownItemIndexedEventArgs> ItemAdded;
+        public event EventHandler<RundownItemIndexedEventArgs> ItemRemoved;
+        public event EventHandler Seeked;
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
-        public event EventHandler Paused;
+        public event EventHandler PlayerStateChanged;
         public event EventHandler MediaDurationChanged;
 
         public void Load(RundownItemBase item)
         {
-            if (!_rundown.Contains(item))
+            if (!_rundown.Contains(item) || item.IsDisabled)
                 return;
             item.Prepare(AudioChannelCount);
             if (item.IsAutoStart)
                 item.Play();
-            PlayingRundownItem = item;
+            LoadedItem = item;
             Load(item.TVPlayRInput);
         }
+
+        public bool CanLoadNextItem() => _rundown.CanLoadNextItem(_loadedItem);
 
         public void AddMediaToQueue(MediaFile media, int index)
         {
@@ -85,6 +164,10 @@ namespace StudioTVPlayer.Model
             var item = new LiveInputRundownItem(input) { IsAutoStart = AddItemsWithAutoPlay };
             _rundown.Add(item, index);
         }
+
+        public void LoadRundown(string fileName) => Persistence.RundownPersister.LoadRundown(_rundown, fileName);
+
+        public void SaveRundown(string fileName) => Persistence.RundownPersister.SaveRundown(_rundown, fileName);
 
         private void AfterPlayed(RundownItemBase rundownItem)
         {
@@ -125,8 +208,8 @@ namespace StudioTVPlayer.Model
 
         private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var media = sender as MediaFile;
-            if (media is null) return;
+            if (!(sender is MediaFile media))
+                return;
             switch (e.PropertyName)
             {
                 case nameof(MediaFile.Duration):
@@ -143,15 +226,18 @@ namespace StudioTVPlayer.Model
 
         public bool Seek(TimeSpan timeSpan)
         {
-            if (!(PlayingRundownItem is FileRundownItem file))
+            if (!(LoadedItem is FileRundownItem file) ||
+                !file.Seek(timeSpan))
                 return false;
-            return file.Seek(timeSpan);
+            Seeked?.Invoke(this, EventArgs.Empty);
+            return true;
         }
 
         public override void Clear()
         {
-            PlayingRundownItem = null;
+            LoadedItem = null;
             base.Clear();
+            PlayerState = PlayerState.Unloaded;
         }
 
         public void DeleteDisabled() => _rundown.DeleteDisabled();
@@ -160,22 +246,28 @@ namespace StudioTVPlayer.Model
         {
             Task.Run(() => // do not block incoming thread
             {
-                if (sender  == _playingRundownItem) // next didn't loaded
-                    Paused?.Invoke(this, EventArgs.Empty);
+                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+                if (rundownItem == _loadedItem) // next didn't loaded
+                {
+                    if (rundownItem.IsEof)
+                        PlayerState = PlayerState.Finished;
+                    else 
+                        PlayerState = PlayerState.Paused;
+                }
             });
         }
 
         private void Rundown_ItemLoaded(object sender, RundownItemEventArgs e)
         {
-            PlayingRundownItem = e.RundownItem;
-            Loaded?.Invoke(this, e);
+            LoadedItem = e.RundownItem;
+            ItemLoaded?.Invoke(this, e);
         }
 
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);
             var current = sender as FileRundownItem;
-            if (current == null || current != _playingRundownItem)
+            if (current == null || current != _loadedItem)
                 return;
             if (current.Media.Duration - e.TimeFromBegin > PreloadTime)
                 return;
@@ -185,7 +277,7 @@ namespace StudioTVPlayer.Model
             if (LoadNext(next))
             {
                 var previouslyLoadedNext = Interlocked.Exchange(ref _loadedNextRundownItem, next);
-                if (previouslyLoadedNext != null && previouslyLoadedNext != _playingRundownItem)
+                if (previouslyLoadedNext != null && previouslyLoadedNext != _loadedItem)
                     previouslyLoadedNext.Unload();
             }
         }
@@ -193,15 +285,20 @@ namespace StudioTVPlayer.Model
         public override void Initialize()
         {
             base.Initialize();
-            PlayingRundownItem = null;
+            LoadedItem = null;
         }
 
         public override void Dispose()
         {
+            if (_disposed)
+                return;
+            _disposed = true;
             base.Dispose();
             _rundown.Dispose();
             _rundown.ItemLoaded -= Rundown_ItemLoaded;
-            PlayingRundownItem = null;
+            _rundown.ItemAdded -= Rundown_ItemAdded;
+            _rundown.ItemRemoved -= Rundown_ItemRemoved;
+            LoadedItem = null;
         }
 
     }

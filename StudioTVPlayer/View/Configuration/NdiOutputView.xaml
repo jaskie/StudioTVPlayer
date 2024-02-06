@@ -3,13 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance vm:NdiOutputViewModel}"
-             d:DesignHeight="125" d:DesignWidth="400">
+             d:DataContext="{d:DesignInstance vm:NdiOutputViewModel, IsDesignTimeCreatable=False}"
+             d:DesignWidth="450">
     <UserControl.Resources>
-        <Style TargetType="TextBox" BasedOn="{StaticResource MahApps.Styles.TextBox}">
+        <Style TargetType="TextBox" >
             <Setter Property="Margin" Value="5 0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>

@@ -97,19 +97,19 @@
                         <Button Margin="10" Command="{Binding AddDecklinkOutputCommand}" Visibility="{Binding CanAddDecklinkOutput, Converter={StaticResource BoolToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <mah:FontIcon Glyph="&#xE710;" />
-                                <Label FontSize="16" FontWeight="Normal">Add decklink output</Label>
+                                <TextBlock Style="{StaticResource ButtonTextBlockStyle}">Add decklink output</TextBlock>
                             </StackPanel>
                         </Button>
                         <Button Margin="10" Command="{Binding AddNdiOutputCommand}" >
                             <StackPanel Orientation="Horizontal">
                                 <mah:FontIcon Glyph="&#xE710;" />
-                                <Label FontSize="16" FontWeight="Normal">Add NDI output</Label>
+                                <TextBlock Style="{StaticResource ButtonTextBlockStyle}" >Add NDI output</TextBlock>
                             </StackPanel>
                         </Button>
                         <Button Margin="10" Command="{Binding AddStreamOutputCommand}" >
                             <StackPanel Orientation="Horizontal">
                                 <mah:FontIcon Glyph="&#xE710;" />
-                                <Label FontSize="16" FontWeight="Normal">Add FFmpeg stream output</Label>
+                                <TextBlock Style="{StaticResource ButtonTextBlockStyle}" >Add FFmpeg stream output</TextBlock>
                             </StackPanel>
                         </Button>
                     </StackPanel>

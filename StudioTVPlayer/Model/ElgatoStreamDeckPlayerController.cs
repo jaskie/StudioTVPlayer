@@ -122,6 +122,10 @@ namespace StudioTVPlayer.Model
                 _font.Dispose();
                 _font = null;
             }
+            foreach (var binding in _bindings)
+            {
+                binding.Dispose();
+            }
         }
 
         public override void NotifyPlayerChanged(RundownPlayer rundownPlayer)

@@ -7,12 +7,13 @@ using System.Runtime.InteropServices;
 
 namespace StudioTVPlayer.Model
 {
-    public sealed class ElgatoStreamDeckPlayerBinding : PlayerBindingBase
+    public sealed class ElgatoStreamDeckPlayerBinding : PlayerBindingBase, IDisposable
     {
         private readonly int _key;
         private bool _isEnabled;
         private string _icon;
-        private Brush _backgroundBrush = Brushes.Red;
+        private Brush _backgroundBrush;
+        private bool _disposed;
 
         public ElgatoStreamDeckPlayerBinding(Configuration.ElgatoStreamDeckPlayerBinding elgatoStreamDeckPlayerBinding, RundownPlayer rundownPlayer)
             : base(elgatoStreamDeckPlayerBinding, rundownPlayer)
@@ -49,7 +50,7 @@ namespace StudioTVPlayer.Model
                 _icon = icon;
                 using (var g = Graphics.FromImage(bitmapImage))
                 {
-                    g.FillRectangle(isEnabled ? _backgroundBrush : Brushes.DarkGray, 0, 0, keySize, keySize);
+                    g.FillRectangle(isEnabled ? _backgroundBrush ?? Brushes.Red : Brushes.DarkGray, 0, 0, keySize, keySize);
                     var size = g.MeasureString(icon, font);
                     g.DrawString(icon, font, isEnabled ? Brushes.White : Brushes.LightGray, (keySize - size.Width) / 2, (keySize - size.Height) / 2);
                     return KeyBitmap.Create.FromBgr24Array(keySize, keySize, BitmapToByteArray(bitmapImage));
@@ -117,6 +118,14 @@ namespace StudioTVPlayer.Model
                 default:
                     return false;
             }
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+            _disposed = true;
+            _backgroundBrush?.Dispose();
         }
     }
 }

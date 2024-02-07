@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class DecklinkOutput : OutputBase
+    public sealed class DecklinkOutput : OutputBase
     {
         private int _deviceIndex;
         private TVPlayR.DecklinkKeyerType _keyer;

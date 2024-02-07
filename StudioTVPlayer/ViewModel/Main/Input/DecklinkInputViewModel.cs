@@ -1,5 +1,4 @@
-﻿using ControlzEx.Standard;
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows.Media;
 
@@ -86,6 +85,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         {
             _input.DeviceIndex = SelectedDevice.Index;
             _input.VideoFormat = VideoFormat.Name;
+            base.Apply();
         }
 
         protected override bool CanRequestRemove(object obj)

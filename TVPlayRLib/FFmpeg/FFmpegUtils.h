@@ -21,6 +21,8 @@ if (error_code < 0) \
 	throw TVPlayR::Common::TVPlayRException(exception_message.c_str());\
 	}
 
+template<class T> using unique_ptr = std::unique_ptr<T, void(*)(T*)>; // unique pointer type for FFmpeg wrappers
+
 std::shared_ptr<AVPacket> AllocPacket();
 
 std::shared_ptr<AVFrame> AllocFrame();

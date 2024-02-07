@@ -7,6 +7,7 @@
 #include <crtdbg.h>
 #endif // DEBUG
 
+#include <string>
 #include <memory>
 #include <functional>
 #include <string>

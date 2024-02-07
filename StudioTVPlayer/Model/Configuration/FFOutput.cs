@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class FFOutput : OutputBase
+    public sealed class FFOutput : OutputBase
     {
         private string _url;
         private EncoderSettings _encoderSettings;

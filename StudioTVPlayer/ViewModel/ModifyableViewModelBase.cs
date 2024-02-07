@@ -23,17 +23,19 @@ namespace StudioTVPlayer.ViewModel
 
         protected override bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
         {
-            if (base.Set(ref field, value, propertyName))
-            {
-                IsModified = true;
-                return true;
-            }
-            return false;
+            if (!base.Set(ref field, value, propertyName))
+                return false;
+            IsModified = true;
+            return true;
         }
 
         public abstract bool IsValid();
 
-        public abstract void Apply();
+        public virtual void Apply()
+        {
+            _isModified = false;
+            NotifyPropertyChanged(nameof(IsModified));
+        }
 
         public event EventHandler Modified;
     }

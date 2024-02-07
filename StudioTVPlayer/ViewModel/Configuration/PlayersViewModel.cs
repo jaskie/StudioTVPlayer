@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model.Configuration;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -73,13 +72,17 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private void DeletePlayer(object obj)
         {
             var player = obj as PlayerViewModel ?? throw new ArgumentException(nameof(obj));
-            Players.Remove(player);
+            if (Players.Remove(player))
+            {
+                player.RemoveRequested -= Player_RemoveRequested;
+                player.CheckErrorInfo -= Player_CheckErrorInfo;
+            }
         }
 
         private void AddPlayer(object obj)
         {
-            var player = new Player { Name = $"Player {Players.Count + 1}" };
-            var vm = new PlayerViewModel(player);
+            var playerConfiguration = new Model.Configuration.Player { Name = $"Player {Players.Count + 1}" };
+            var vm = new PlayerViewModel(playerConfiguration);
             vm.RemoveRequested += Player_RemoveRequested;
             vm.CheckErrorInfo += Player_CheckErrorInfo;
             Players.Add(vm);
@@ -89,12 +92,13 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override void Apply()
         {
-            var newPlayers = Players.Select(p => new Providers.PlayerUpdateItem { Player = p.Player, NeedsReinitialization = p.IsModified }).ToList();
+            var newPlayers = Players.Select(p => new Providers.PlayerUpdateItem(p.Player, p.IsModified)).ToList();
             foreach (var player in Players)
                 player.Apply(); // resets IsModified
-            var playersConfiguration = Players.Select(vm => vm.Player).ToList();
+            var playerConfigurations = Players.Select(vm => vm.Player).ToList();
             Providers.GlobalApplicationData.Current.UpdatePlayers(newPlayers);
-            Providers.Configuration.Current.Players = playersConfiguration;
+            Providers.Configuration.Current.Players = playerConfigurations;
+            base.Apply();
         }
 
         public override bool IsValid()

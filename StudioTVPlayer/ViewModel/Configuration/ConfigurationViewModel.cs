@@ -3,21 +3,23 @@ using System;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class ConfigurationViewModel : ModifyableViewModelBase
+    public sealed class ConfigurationViewModel : ModifyableViewModelBase, IDisposable
     {
-      
+        internal static ConfigurationViewModel Instance { get; private set; }
+
         public ConfigurationViewModel()
         {
+            Instance = this;
             WatchedFolders = new WatchedFoldersViewModel();
             WatchedFolders.Modified += Item_Modified;
             Players = new PlayersViewModel();
             Players.Modified += Item_Modified;
-
+            PlayerControllers = new PlayerControllersViewModel();
+            PlayerControllers.Modified += Item_Modified;
             SaveConfigurationCommand = new UiCommand(SaveConfiguration, _ => IsModified && IsValid());
             CancelCommand = new UiCommand(Cancel);
         }
 
-  
         private async void SaveConfiguration(object obj)
         {
             try
@@ -39,7 +41,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public PlayersViewModel Players { get; }
 
-        
+        public PlayerControllersViewModel PlayerControllers { get; }
+
         private void Cancel(object obj)
         {
             MainViewModel.Instance.ShowPlayoutView();
@@ -49,15 +52,21 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             WatchedFolders.Apply();
             Players.Apply();
+            PlayerControllers.Apply();
             Providers.Configuration.Current.Save();
-            IsModified = false;
+            base.Apply();
         }
 
         private void Item_Modified(object sender, EventArgs e) => IsModified = true;
 
         public override bool IsValid()
         {
-            return WatchedFolders.IsValid() && Players.IsValid();
+            return WatchedFolders.IsValid() && Players.IsValid() && PlayerControllers.IsValid();
+        }
+
+        public void Dispose()
+        {
+            PlayerControllers.Dispose();
         }
     }
 }

@@ -2,8 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
-using StudioTVPlayer.Providers;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -33,7 +31,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (FolderHelper.BrowseForFolder(ref path, "Select path for new watched folder"))
             {
                 var name = path.Split(new[] { System.IO.Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? "New watched folder";
-                var vm = new WatchedFolderViewModel(new WatchedFolder() { Path = path, Name = name, Filter = "*.mov;*.mp4;*.mxf" });
+                var vm = new WatchedFolderViewModel(new Model.WatchedFolder() { Path = path, Name = name, Filter = "*.mov;*.mp4;*.mxf" });
                 vm.RemoveRequested += WatchedFolder_RemoveRequested;
                 WatchedFolders.Add(vm);
                 IsModified = true;
@@ -55,7 +53,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 f.Apply();
                 return f.WatchedFolder;
             }).ToList();
-            IsModified = false;
+            base.Apply();
         }
 
         public override bool IsValid()

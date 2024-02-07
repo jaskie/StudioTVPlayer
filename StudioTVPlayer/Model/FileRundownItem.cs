@@ -17,7 +17,7 @@ namespace StudioTVPlayer.Model
 
         public MediaFile Media { get; }
 
-        public override bool IsPlaying => _input?.IsPlaying == true;
+        public override bool IsPlaying() => _input?.IsPlaying == true;
 
         internal override TVPlayR.InputBase TVPlayRInput => _input;
 
@@ -39,7 +39,9 @@ namespace StudioTVPlayer.Model
 
         public override string Name => Media.Name;
 
-        public override bool CanSeek => true;
+        public override bool CanSeek() => true;
+
+        public override bool IsEof => _input.IsEof;
 
         public override bool Prepare(int audioChannelCount)
         {
@@ -71,7 +73,7 @@ namespace StudioTVPlayer.Model
             _input?.Pause();
         }
 
-        public bool Seek(TimeSpan timeSpan)
+        public override bool Seek(TimeSpan timeSpan)
         {
             return _input?.Seek(timeSpan) ?? false;
         }
@@ -95,7 +97,7 @@ namespace StudioTVPlayer.Model
 
         private void InputFile_Paused(object sender, EventArgs e)
         {
-            Paused?.Invoke(this, EventArgs.Empty);
+                Paused?.Invoke(this, EventArgs.Empty);
         }
     }
 }

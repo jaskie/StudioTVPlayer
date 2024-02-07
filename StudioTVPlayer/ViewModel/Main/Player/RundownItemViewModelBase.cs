@@ -9,7 +9,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     {
         protected RundownItemViewModelBase()
         {
-            CommandRemove = new UiCommand(Remove, _ => !IsLoaded);
+            RemoveCommand = new UiCommand(Remove, _ => !IsLoaded);
         }
 
         private bool _isLoaded;
@@ -25,7 +25,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public ICommand CommandRemove { get; }
+        public ICommand RemoveCommand { get; }
 
         public abstract RundownItemBase RundownItem { get; }
 

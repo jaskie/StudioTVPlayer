@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Providers;
@@ -10,6 +11,7 @@ namespace StudioTVPlayer.ViewModel.Main
 {
     public class PlayoutViewModel : ViewModelBase, IDisposable
     {
+        private bool _disposed;
         public PlayoutViewModel()
         {
             Players = GlobalApplicationData.Current.RundownPlayers.Select(p => new PlayerViewModel(p)).ToArray();
@@ -22,9 +24,9 @@ namespace StudioTVPlayer.ViewModel.Main
         public UiCommand FocusPlayerCommand { get; }
         public UiCommand FocusBrowserCommand { get; }
 
-        public PlayerViewModel[] Players { get; }
+        public IReadOnlyCollection<PlayerViewModel> Players { get; }
 
-        public BrowserViewModel[] Browsers { get; }
+        public IReadOnlyCollection<BrowserViewModel> Browsers { get; }
 
         public InputsViewModel Inputs { get; }
 
@@ -38,6 +40,9 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public void Dispose()
         {
+            if (_disposed) 
+                return;
+            _disposed = true;
             foreach (var player in Players)
                 player.Dispose();
             foreach (var browser in Browsers)

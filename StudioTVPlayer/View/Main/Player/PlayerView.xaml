@@ -24,7 +24,7 @@
         <KeyBinding Modifiers="Ctrl" Key="PageUp" Command="{Binding CueCommand}" />
         <KeyBinding Key="Space" Command="{Binding TogglePlayCommand}" />
         <KeyBinding Modifiers="Alt" Key="PageDown" Command="{Binding LoadNextItemCommand}" />
-        <KeyBinding Modifiers="Ctrl" Key="Pause" Command="{Binding UnloadCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="Pause" Command="{Binding ClearCommand}" />
         <KeyBinding Modifiers="Alt" Key="Delete" Command="{Binding DeleteDisabledCommand}" />
     </UserControl.InputBindings>
 
@@ -137,7 +137,7 @@
                     <mah:FontIcon Glyph="&#xE892;"/>
                 </Button>
 
-                <Button Command="{Binding UnloadCommand}" >
+                <Button Command="{Binding ClearCommand}" >
                     <Control.ToolTip>
                         <ToolTip Content="Clear | Ctrl+Pause/Break" />
                     </Control.ToolTip>

@@ -45,7 +45,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             WatchedFolder.Name = Name;
             WatchedFolder.IsFilteredByDate = IsFilteredByDate;
             WatchedFolder.Filter = Filter;
-            IsModified = false;
+            base.Apply();
         }
 
         public override bool IsValid()

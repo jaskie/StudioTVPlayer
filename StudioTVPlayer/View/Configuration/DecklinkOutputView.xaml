@@ -20,16 +20,19 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
+        </Grid.Resources>
         <TextBlock HorizontalAlignment="Center" FontSize="14">Decklink output</TextBlock>
-        <Label Grid.Row="1" Style="{StaticResource ConfigurationLabelStyle}">Selected decklink device</Label>
+        <Label Grid.Row="1" >Selected decklink device</Label>
         <ComboBox Grid.Row="2" Style="{StaticResource ConfigurationComboBoxStyle}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" ItemsSource="{Binding Devices}" DisplayMemberPath="DisplayName" />
-        <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource ConfigurationLabelStyle}">Keyer</Label>
+        <Label Grid.Row="1" Grid.Column="1" >Keyer</Label>
         <ComboBox Grid.Row="2" Grid.Column="1" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" SelectedItem="{Binding SelectedKeyer, ValidatesOnDataErrors=True}" ItemsSource="{Binding Keyers}" 
                   ToolTip="Decklink keyer, allows internal keying or key signal output while playing clips containg alpha channel" />
-        <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource ConfigurationLabelStyle}">Timecode overlay</Label>
+        <Label Grid.Row="3" Grid.Column="0">Timecode overlay</Label>
         <ComboBox Grid.Row="4" Grid.Column="0" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}"  SelectedItem="{Binding TimecodeOverlay}" ItemsSource="{Binding TimecodeOutputSources}"
                   ToolTip="Timecode that will be placed over displayed video" />
-        <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource ConfigurationLabelStyle}">Timecode output</Label>
+        <Label Grid.Row="3" Grid.Column="1" >Timecode output</Label>
         <ComboBox Grid.Row="4" Grid.Column="1" Style="{StaticResource ConfigurationDescriptionComboBoxStyle}" SelectedItem="{Binding SelectedTimecodeSource}" ItemsSource="{Binding TimecodeOutputSources}" 
                   ToolTip="Timecode kind that is inserted into SDI signal (RP188/VITC)" />
         <Button Grid.RowSpan="5" VerticalAlignment="Center" Grid.Column="2" Style="{StaticResource RemoveButtonStyle}" ToolTip="Remove this output"/>

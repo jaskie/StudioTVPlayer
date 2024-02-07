@@ -16,12 +16,12 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void MouseDoubleClickCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null && e.OldValue == null)
-                ((Control)d).MouseDoubleClick += element_MouseDoubleClick;
+                ((Control)d).MouseDoubleClick += Element_MouseDoubleClick;
             if (e.NewValue == null && e.OldValue != null)
-                ((Control)d).MouseDoubleClick -= element_MouseDoubleClick;
+                ((Control)d).MouseDoubleClick -= Element_MouseDoubleClick;
         }
 
-        private static void element_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private static void Element_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left)
                 return;
@@ -47,12 +47,12 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void MouseLeftButtonDownCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null && e.OldValue == null)
-                ((FrameworkElement)d).PreviewMouseLeftButtonDown += element_MouseLeftButtonDown;
+                ((FrameworkElement)d).PreviewMouseLeftButtonDown += Element_MouseLeftButtonDown;
             if (e.NewValue == null && e.OldValue != null)
-                ((FrameworkElement)d).PreviewMouseLeftButtonDown -= element_MouseLeftButtonDown;
+                ((FrameworkElement)d).PreviewMouseLeftButtonDown -= Element_MouseLeftButtonDown;
         }
 
-        private static void element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private static void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
@@ -74,12 +74,12 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void MouseLeftButtonUpCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null && e.OldValue == null)
-                ((FrameworkElement)d).PreviewMouseLeftButtonUp += element_MouseLeftButtonUp;
+                ((FrameworkElement)d).PreviewMouseLeftButtonUp += Element_MouseLeftButtonUp;
             if (e.NewValue == null && e.OldValue != null)
-                ((FrameworkElement)d).PreviewMouseLeftButtonUp -= element_MouseLeftButtonUp;
+                ((FrameworkElement)d).PreviewMouseLeftButtonUp -= Element_MouseLeftButtonUp;
         }
 
-        private static void element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void Element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
@@ -101,12 +101,12 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void MouseRightButtonDownCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null && e.OldValue == null)
-                ((FrameworkElement)d).PreviewMouseRightButtonDown += element_MouseRightButtonDown;
+                ((FrameworkElement)d).PreviewMouseRightButtonDown += Element_MouseRightButtonDown;
             if (e.NewValue == null && e.OldValue != null)
-                ((FrameworkElement)d).PreviewMouseRightButtonDown -= element_MouseRightButtonDown;
+                ((FrameworkElement)d).PreviewMouseRightButtonDown -= Element_MouseRightButtonDown;
         }
 
-        private static void element_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private static void Element_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 
@@ -129,12 +129,12 @@ namespace StudioTVPlayer.Helpers.AttachedProperties
         private static void UnloadedCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null && e.OldValue == null)
-                ((FrameworkElement)d).Unloaded += element_Unloaded;
+                ((FrameworkElement)d).Unloaded += Element_Unloaded;
             if (e.NewValue == null && e.OldValue != null)
-                ((FrameworkElement)d).Unloaded -= element_Unloaded;
+                ((FrameworkElement)d).Unloaded -= Element_Unloaded;
         }
 
-        private static void element_Unloaded(object sender, RoutedEventArgs e)
+        private static void Element_Unloaded(object sender, RoutedEventArgs e)
         {
             FrameworkElement element = (FrameworkElement)sender;
 

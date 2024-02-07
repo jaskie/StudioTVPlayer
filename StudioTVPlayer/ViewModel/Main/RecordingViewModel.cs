@@ -7,11 +7,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
+    public sealed class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {
         private Model.Recording _recording;
         private string _fileName;
@@ -27,7 +26,7 @@ namespace StudioTVPlayer.ViewModel.Main
             _input = input;
             if (input is Model.DecklinkInput decklinkInput)
                 decklinkInput.FormatChanged += DecklinkInput_InputFormatChanged;
-            CommandBrowseForFolder = new UiCommand(BrowseForFolder);
+            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
             _folder = Folders.LastOrDefault();
         }
 
@@ -104,7 +103,7 @@ namespace StudioTVPlayer.ViewModel.Main
         public bool CanChangeRecordingState => IsRecording // to stop the ongiong recording
             || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(_fullPath) && !File.Exists($"{_fullPath}.{EncoderPreset.FilenameExtension}")); // to start new one
 
-        public ICommand CommandBrowseForFolder { get; }
+        public ICommand BrowseForFolderCommand { get; }
 
         #region IDataErrorInfo
 
@@ -131,11 +130,6 @@ namespace StudioTVPlayer.ViewModel.Main
         }
 
         #endregion IDataErrorInfo
-
-        public override void Apply()
-        {
-            throw new NotImplementedException();
-        }
 
         public override bool IsValid()
         {

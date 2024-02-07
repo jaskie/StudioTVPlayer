@@ -49,7 +49,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <ComboBox IsEditable="True" Text="{Binding Folder, ValidatesOnDataErrors=True}" ItemsSource="{Binding Folders}" BorderThickness="0"/>
-                <Button Grid.Column="1" Command="{Binding CommandBrowseForFolder}"
+                <Button Grid.Column="1" Command="{Binding BrowseForFolderCommand}"
                     Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
                     ToolTip="Browse for the folder"
                     >
@@ -79,7 +79,6 @@
         <Grid Grid.Column="2" Grid.RowSpan="10">
             <Button Grid.Column="1" VerticalAlignment="Bottom"
                     Style="{StaticResource RemoveButtonStyle}"
-                    Command="{Binding CommandRemove}"
                     IsEnabled="{Binding IsRecording,Converter={StaticResource InvertedBooleanConverter}}"/>
             <ToggleButton Grid.Column="1" 
                       IsChecked="{Binding IsRecording}" IsEnabled="{Binding CanChangeRecordingState}" 

@@ -10,6 +10,7 @@
     <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <converters:DescriptionConverter x:Key="DescriptionConverter"/>
     <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter"/>
+    <converters:BooleanToBrushConverter x:Key="BooleanToBrushConverter"/>
 
     <DataTemplate x:Key="mediaDragTemplate">
         <Image Height="90" Source="{Binding Thumbnail}">

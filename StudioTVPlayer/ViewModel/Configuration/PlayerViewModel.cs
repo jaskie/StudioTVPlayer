@@ -1,5 +1,4 @@
 ﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,19 +19,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private bool _disablePlayedItems;
         private bool _addItemsWithAutoPlay;
 
-        public PlayerViewModel(Player player)
+        public PlayerViewModel(Model.Configuration.Player player)
         {
             Player = player;
             _name = player.Name;
-            OutputViewModelBase viewModelSelector(OutputBase o)
+            OutputViewModelBase viewModelSelector(Model.Configuration.OutputBase o)
             {
                 switch (o)
                 {
-                    case DecklinkOutput decklink:
+                    case Model.Configuration.DecklinkOutput decklink:
                         return new DecklinkOutputViewModel(decklink);
-                    case NdiOutput ndi:
+                    case Model.Configuration.NdiOutput ndi:
                         return new NdiOutputViewModel(ndi);
-                    case FFOutput stream:
+                    case Model.Configuration.FFOutput stream:
                         return new FFOutputViewModel(stream);
                     default:
                         throw new ApplicationException("Invalid type provided");
@@ -58,7 +57,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             AddNdiOutputCommand = new UiCommand(AddNdiOutput);
         }
 
-        internal Player Player { get; }
+        internal Model.Configuration.Player Player { get; }
 
         public string Name
         {
@@ -143,8 +142,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Player.LivePreview = LivePreview;
             Player.DisablePlayedItems = DisablePlayedItems;
             Player.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
-            Player.Outputs = Outputs.Select(o => o.Output).ToArray();
-            IsModified = false;
+            Player.Outputs = Outputs.Select(o => o.OutputConfiguration).ToArray();
+            base.Apply();
         }
 
         public override bool IsValid()
@@ -166,7 +165,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void AddStreamOutput(object _)
         {
-            var vm = new FFOutputViewModel(new FFOutput
+            var vm = new FFOutputViewModel(new Model.Configuration.FFOutput
             {
                 IsFrameClock = !Outputs.Any(a => a.IsFrameClock),
                 EncoderSettings = new Model.EncoderSettings

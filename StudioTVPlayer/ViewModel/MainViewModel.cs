@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel
 
         private MainViewModel()
         {
-            ConfigurationCommand = new UiCommand(Configure);
+            ConfigurationCommand = new UiCommand(Configuration, _ => !(CurrentViewModel is ConfigurationViewModel));
             AboutCommand = new UiCommand(About);
             HelpCommand = new UiCommand(Help);
         }
@@ -30,11 +30,13 @@ namespace StudioTVPlayer.ViewModel
                 if (!Set(ref _currentViewModel, value))
                     return;
                 (oldVm as IDisposable)?.Dispose();
+                NotifyPropertyChanged(nameof(IsControllerStatusVisible));
             }
         }
 
         public async void InitializeAndShowPlayoutView()
         {
+            GlobalApplicationData.Current.PlayerControllerConnectionStatusChanged += PlayerControllerConnectionStatusChanged;
             try
             {
                 GlobalApplicationData.Current.Initialize();
@@ -47,6 +49,15 @@ namespace StudioTVPlayer.ViewModel
                 CurrentViewModel = new ConfigurationViewModel();
             }
         }
+
+        private void PlayerControllerConnectionStatusChanged(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged(nameof(PlayerControllersConnected));
+        }
+
+        public bool IsControllerStatusVisible => CurrentViewModel is PlayoutViewModel && GlobalApplicationData.Current.PlayerControllers.Count > 0;
+
+        public bool PlayerControllersConnected => GlobalApplicationData.Current.PlayerControllersConnected;
 
         public void ShowPlayoutView()
         {
@@ -71,7 +82,7 @@ namespace StudioTVPlayer.ViewModel
             return true;
         }
 
-        private void Configure(object _)
+        private void Configuration(object _)
         {
             if (CurrentViewModel is ConfigurationViewModel)
                 return;

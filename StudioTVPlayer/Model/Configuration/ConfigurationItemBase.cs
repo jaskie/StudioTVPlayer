@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model.Configuration
 {
-    public class ConfigurationItemBase
+    public abstract class ConfigurationItemBase: Helpers.PropertyChangedBase
     {
         private bool _isModified;
 
@@ -12,7 +12,10 @@ namespace StudioTVPlayer.Model.Configuration
 
         protected virtual void SetIsModified(bool value)
         {
+            if (value == _isModified)
+                return; 
             _isModified = value;
+            NotifyPropertyChanged(nameof(IsModified));
         }
 
         protected virtual bool GetIsModified()
@@ -20,12 +23,13 @@ namespace StudioTVPlayer.Model.Configuration
             return _isModified;
         }
 
-        protected bool Set<T>(ref T field, T value)
+        protected override bool Set<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
         {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            IsModified = true;
+            if (!base.Set(ref field, value, propertyName))
+                return false;
+            SetIsModified(true);
             return true;
         }
+
     }
 }

@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Providers
 
         private class MostRecentlyUsedList
         {
-            private List<string> _items;
+            private readonly List<string> _items;
             private readonly string _fileName;
             private readonly int _max_count;
 

@@ -6,7 +6,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class DecklinkOutputViewModel : OutputViewModelBase
     {
-        private Model.Configuration.DecklinkOutput _decklinkConfiguration;
+        private readonly Model.Configuration.DecklinkOutput _decklinkConfiguration;
         private TVPlayR.DecklinkInfo _selectedDevice;
         private TVPlayR.DecklinkKeyerType _selectedKeyer;
         private TVPlayR.TimecodeOutputSource _selectedTimecodeSource;

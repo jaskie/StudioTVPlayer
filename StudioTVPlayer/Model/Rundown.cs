@@ -57,14 +57,6 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public int IndexOf(RundownItemBase item)
-        {
-            lock (_rundownLock)
-            {
-                return _items.IndexOf(item);
-            }
-        }
-
         public void MoveItem(int srcIndex, int destIndex)
         {
             lock (_rundownLock)

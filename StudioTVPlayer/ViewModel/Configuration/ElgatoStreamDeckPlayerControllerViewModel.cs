@@ -83,10 +83,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     }
                     else
                     {
-                        if (_macroBoard != null)
-                        {
-                            _macroBoard.Dispose();
-                        }
+                        _macroBoard?.Dispose();
                     }
                 }
                 else
@@ -162,7 +159,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public class StreamDeckDevice
         {
-            private int _index;
+            private readonly int _index;
             public StreamDeckDevice(StreamDeckDeviceReference Device, int index)
             {
                 this.Device = Device;

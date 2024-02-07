@@ -4,7 +4,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 {
     public class NdiOutputViewModel : OutputViewModelBase
     {
-        private Model.Configuration.NdiOutput _ndi;
+        private readonly Model.Configuration.NdiOutput _ndi;
         private string _groupNames;
         private string _sourceName;
 

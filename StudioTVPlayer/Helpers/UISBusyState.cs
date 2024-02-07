@@ -28,16 +28,16 @@ namespace StudioTVPlayer.Helpers
             _isBusy = busy;
             Application.Current.Dispatcher.BeginInvoke((Action)(() => Mouse.OverrideCursor = busy ? Cursors.Wait : null));
             if (_isBusy)
-                new DispatcherTimer(TimeSpan.Zero, DispatcherPriority.ContextIdle, dispatcherTimer_Tick, Application.Current.Dispatcher);
+                new DispatcherTimer(TimeSpan.Zero, DispatcherPriority.ContextIdle, DispatcherTimer_Tick, Application.Current.Dispatcher);
         }
 
-        private static void dispatcherTimer_Tick(object sender, EventArgs _)
+        private static void DispatcherTimer_Tick(object sender, EventArgs _)
         {
             if (!(sender is DispatcherTimer dispatcherTimer))
                 return;
             SetBusyState(false);
             dispatcherTimer.Stop();
-            dispatcherTimer.Tick -= dispatcherTimer_Tick;
+            dispatcherTimer.Tick -= DispatcherTimer_Tick;
         }
     }
 }

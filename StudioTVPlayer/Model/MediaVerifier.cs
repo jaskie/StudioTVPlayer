@@ -116,7 +116,7 @@ namespace StudioTVPlayer.Model
                         continue;
                     if (!File.Exists(vd.Media.FullPath))
                         continue;
-                    if (vd.FirstVerification == default(DateTime))
+                    if (vd.FirstVerification == default)
                         vd.FirstVerification = DateTime.Now;
                     try
                     {

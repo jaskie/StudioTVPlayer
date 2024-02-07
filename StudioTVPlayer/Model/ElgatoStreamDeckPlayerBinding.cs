@@ -12,7 +12,7 @@ namespace StudioTVPlayer.Model
         private readonly int _key;
         private bool _isEnabled;
         private string _icon;
-        private Brush _backgroundBrush;
+        private readonly Brush _backgroundBrush;
         private bool _disposed;
 
         public ElgatoStreamDeckPlayerBinding(Configuration.ElgatoStreamDeckPlayerBinding elgatoStreamDeckPlayerBinding, RundownPlayer rundownPlayer)

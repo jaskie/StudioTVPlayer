@@ -11,8 +11,8 @@ namespace StudioTVPlayer.Model
             public AtemClient AtemClient;
         }
 
-        private static object _lock = new object();
-        private static Dictionary<string, AtemClientReference> _devices = new Dictionary<string, AtemClientReference>();
+        private static readonly object _lock = new object();
+        private static readonly Dictionary<string, AtemClientReference> _devices = new Dictionary<string, AtemClientReference>();
 
         public static AtemClient GetDevice(string address)
         {

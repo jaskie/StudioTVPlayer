@@ -29,7 +29,9 @@ namespace TVPlayR {
 
 		void FFmpegBufferedInput::ProducerTheradStart()
 		{
+#ifdef DEBUG
 			Common::SetThreadName(::GetCurrentThreadId(), ("FFmpegBufferedInput " + file_name_).c_str());
+#endif
 			std::unique_lock<std::mutex> init_lock(initialization_mutex_);
 			initialization_cv_.wait(init_lock);
 			while (is_producer_running_)

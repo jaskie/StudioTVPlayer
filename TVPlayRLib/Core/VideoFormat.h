@@ -53,9 +53,9 @@ public:
 	bool interlaced() const;
 	bool IsDropFrame() const;
 	std::string FrameNumberToString(int frame_number) const;
-	int StringToFrameNumber(const std::string& tc);
-	uint32_t FrameNumberToSmpteTimecode(int frame_number);
-	int TimeToFrameNumber(std::int64_t time);
+	int StringToFrameNumber(const std::string& tc) const;
+	uint32_t FrameNumberToSmpteTimecode(int frame_number) const;
+	int TimeToFrameNumber(std::int64_t time) const;
 
 private:
 	enum VideoFormatType type_;

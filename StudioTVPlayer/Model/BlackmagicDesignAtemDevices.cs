@@ -43,5 +43,15 @@ namespace StudioTVPlayer.Model
                 return true;
             }
         }
+
+        public static bool IsConnected(string address)
+        {
+            lock (_lock)
+            {
+                if (!_devices.TryGetValue(address, out var reference))
+                    return false;
+                return reference.AtemClient.ConnectionVersion != null;
+            }
+        } 
     }
 }

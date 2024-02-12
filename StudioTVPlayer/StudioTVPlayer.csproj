@@ -244,6 +244,7 @@
     <Compile Include="ViewModel\Main\PlayoutViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\PlayerViewModel.cs" />
     <Compile Include="ViewModel\Main\Player\FileRundownItemViewModel.cs" />
+    <Compile Include="ViewModel\PlayerControllerViewModel.cs" />
     <Compile Include="ViewModel\RemovableViewModelBase.cs" />
     <Compile Include="View\Configuration\BlackmagicDesignAtemPlayerBindingView.xaml.cs">
       <DependentUpon>BlackmagicDesignAtemPlayerBindingView.xaml</DependentUpon>

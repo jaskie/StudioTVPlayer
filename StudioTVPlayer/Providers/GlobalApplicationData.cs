@@ -85,11 +85,14 @@ namespace StudioTVPlayer.Providers
             }
             _playerControllers = Configuration.Current.PlayerControllers.Select(CreatePlayerController).ToArray();
             PlayerControllerConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
+            PlayerControllersModified?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler PlayerControllerConnectionStatusChanged;
 
-        public bool PlayerControllersConnected => _playerControllers.All(p => p.IsConnected);
+        public event EventHandler PlayerControllersModified;
+
+        public bool AllPlayerControllersConnected => _playerControllers.All(p => p.IsConnected);
 
         private RundownPlayer CreateRundownPlayer(Model.Configuration.Player playerConfiguration)
         {

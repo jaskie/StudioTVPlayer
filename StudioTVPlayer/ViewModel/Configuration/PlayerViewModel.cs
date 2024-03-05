@@ -11,6 +11,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
     public class PlayerViewModel : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
         private readonly ObservableCollection<OutputViewModelBase> _outputs;
+        private readonly bool _canAddDecklinkOutput;
+        private readonly bool _canAddNdiOutput;
         private string _name;
         private TVPlayR.VideoFormat _selectedVideoFormat;
         private TVPlayR.PixelFormat _selectedPixelFormat;
@@ -52,9 +54,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _livePreview = player.LivePreview;
             _disablePlayedItems = player.DisablePlayedItems;
             _addItemsWithAutoPlay = player.AddItemsWithAutoPlay;
+            _canAddDecklinkOutput =  TVPlayR.DecklinkIterator.Devices.Any(o => o.HaveOutput);
+            _canAddNdiOutput = TVPlayR.VersionInfo.Ndi != null;
             AddStreamOutputCommand = new UiCommand(AddStreamOutput);
-            AddDecklinkOutputCommand = new UiCommand(AddDecklinkOutput);
-            AddNdiOutputCommand = new UiCommand(AddNdiOutput);
+            AddDecklinkOutputCommand = new UiCommand(AddDecklinkOutput, _ => _canAddDecklinkOutput);
+            AddNdiOutputCommand = new UiCommand(AddNdiOutput, _ => _canAddNdiOutput);
         }
 
         internal Model.Configuration.Player Player { get; }
@@ -99,8 +103,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public ICommand AddStreamOutputCommand { get; }
         public ICommand AddDecklinkOutputCommand { get; }
         public ICommand AddNdiOutputCommand { get; }
-
-        public bool CanAddDecklinkOutput => TVPlayR.DecklinkIterator.Devices.Any(o => o.HaveOutput);
 
         public string Error => string.Empty;
 

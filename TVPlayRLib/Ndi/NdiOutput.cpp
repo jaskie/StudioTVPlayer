@@ -36,7 +36,9 @@ namespace TVPlayR {
 				, source_name_(source_name)
 				, ndi_(LoadNdi())
 				, send_instance_(ndi_ ? CreateSend(ndi_, source_name, group_names) : nullptr)
-			{		
+			{
+				if (!ndi_)
+					THROW_EXCEPTION("Unable to create NDI output: NDI library not found");
 			}
 
 			~implementation()

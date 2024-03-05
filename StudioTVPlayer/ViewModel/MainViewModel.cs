@@ -49,7 +49,7 @@ namespace StudioTVPlayer.ViewModel
             catch (Exception e)
             {
                 await ShowMessageAsync("Initialization failed", 
-                    $"Application failed to initialize. It may be configuration problem.\n\nPlease, review the configuration considering following error:\n{(e.InnerException ?? e).Message}");
+                    $"Application failed to initialize. It may be a configuration problem.\n\nPlease, review the configuration considering following error:\n{(e.InnerException ?? e).Message}");
                 CurrentViewModel = new ConfigurationViewModel();
             }
         }

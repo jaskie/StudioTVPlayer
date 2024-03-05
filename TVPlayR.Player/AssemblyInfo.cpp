@@ -11,11 +11,11 @@ using namespace System::Security::Permissions;
 [assembly:AssemblyConfigurationAttribute(L"")];
 [assembly:AssemblyCompanyAttribute(L"")];
 [assembly:AssemblyProductAttribute(L"TVPlayR.Player")];
-[assembly:AssemblyCopyrightAttribute(L"Copyright (c)  2023")];
+[assembly:AssemblyCopyrightAttribute(L"Copyright (c)  2024")];
 [assembly:AssemblyTrademarkAttribute(L"")];
 [assembly:AssemblyCultureAttribute(L"")];
 
-[assembly:AssemblyVersionAttribute("0.7.*")];
+[assembly:AssemblyVersionAttribute("0.8.*")];
 
 [assembly:ComVisible(false)];
 

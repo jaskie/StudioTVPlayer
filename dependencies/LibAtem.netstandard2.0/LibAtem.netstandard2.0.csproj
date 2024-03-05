@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>LibAtem.netstandard2._0</RootNamespace>
+    <RootNamespace>LibAtem</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -557,7 +557,6 @@
 
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.15" />
-    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
   
 </Project>

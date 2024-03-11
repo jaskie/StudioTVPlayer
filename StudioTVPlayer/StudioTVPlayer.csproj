@@ -31,6 +31,7 @@
     <PackageReference Include="Microsoft-WindowsAPICodePack-Core" Version="1.1.5" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.7" />
     <PackageReference Include="StreamDeckSharp" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>

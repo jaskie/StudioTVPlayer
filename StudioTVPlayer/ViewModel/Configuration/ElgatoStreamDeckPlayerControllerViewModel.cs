@@ -27,7 +27,10 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     AddBindingViewModel(new ElgatoStreamDeckPlayerBindingViewModel(binging));
             }
             else
+            {
                 _selectedDevice = _devices.FirstOrDefault();
+                IsModified = true;
+            }
             RefreshDevicesCommand = new UiCommand(RefreshDevices);
         }
 

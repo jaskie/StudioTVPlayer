@@ -29,11 +29,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.DeviceId) ?? blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
                 foreach (var binging in controllerConfiguration.Bindings.OfType<Model.Configuration.BlackmagicDesignAtemPlayerBinding>())
                     AddBindingViewModel(new BlackmagicDesignAtemPlayerBindingViewModel(binging));
+                if (Model.BlackmagicDesignAtemDevices.IsConnected(_address))
+                    Connect = true;
             }
             else
+            {
                 _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault();
-            if (Model.BlackmagicDesignAtemDevices.IsConnected(_address))
-                Connect = true;
+                IsModified = true;
+            }
         }
 
         public override void Apply()

@@ -3,6 +3,7 @@
 namespace TVPlayR {
     namespace Common {
 
+// This function requires at least Windows 10, so for Windows 7 support, is not used in production (release) code
 #ifdef DEBUG
         static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
         {

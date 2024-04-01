@@ -1,5 +1,6 @@
 #pragma once
 #include "FilterBase.h"
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -21,17 +22,17 @@ public:
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
 	std::shared_ptr<AVFrame> Pull() override;
 	void Flush() override;
-	void Reset();
+	void InitializeGraph(const std::vector<std::unique_ptr<Decoder>>& decoders);
 private:
-	std::string GetAudioMuxerString();
-	void Initialize();
-	const std::vector<std::unique_ptr<Decoder>>& decoders_;
-	std::vector<std::pair<int, AVFilterContext*>> source_ctx_;
+	std::string GetAudioMuxerString(const std::vector<std::unique_ptr<Decoder>>& decoders);
+	std::vector<std::pair<int, unique_ptr<AVFilterContext>>> source_ctx_;
 	const AVRational input_time_base_;
 	const std::int64_t output_channel_layout_;
 	const Core::AudioParameters output_audio_parameters_;
-	AVFilterContext* sink_ctx_ = NULL;
-	const std::string filter_str_;
+	unique_ptr<AVFilterContext> sink_ctx_;
+	unique_ptr<AVFilterInOut> inputs_;
+	unique_ptr<AVFilterInOut> outputs_;
+	std::string filter_str_;
 };
 
 }}

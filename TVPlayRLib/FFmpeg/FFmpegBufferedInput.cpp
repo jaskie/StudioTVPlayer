@@ -11,18 +11,16 @@ namespace TVPlayR {
 		FFmpegBufferedInput::FFmpegBufferedInput(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device, const Core::AudioParameters & output_audio_parameters)
 			: FFmpegInputBase(file_name, acceleration, hw_device)
 			, Common::DebugTarget(Common::DebugSeverity::info, "FFmpegBufferedInput " + file_name)
-			, producer_(&FFmpegBufferedInput::ProducerTheradStart, this)
 			, output_audio_parameters_(output_audio_parameters)
 		{
 			input_.LoadStreamData();
-			InitializeBuffer();
-			initialization_cv_.notify_one();
+			Initialize();
+			producerThread_ = std::thread(&FFmpegBufferedInput::ProducerTheradStart, this);
 		}
 
 		FFmpegBufferedInput::~FFmpegBufferedInput()
 		{
-			producer_cv_.notify_one();
-			producer_.join();
+			producerThread_.join();
 		}
 
 #pragma region Input thread methods
@@ -32,20 +30,13 @@ namespace TVPlayR {
 #ifdef DEBUG
 			Common::SetThreadName(::GetCurrentThreadId(), ("FFmpegBufferedInput " + file_name_).c_str());
 #endif
-			std::unique_lock<std::mutex> init_lock(initialization_mutex_);
-			initialization_cv_.wait(init_lock);
-			while (is_producer_running_)
+			while (true)
 			{
-				while (!buffer_->IsFull())
-					ProcessNextInputPacket();
-				{
-					std::unique_lock<std::mutex> wait_lock(producer_mutex_);
-					producer_cv_.wait(wait_lock);
-				}
+				ProcessNextInputPacket();
 			}
 		}
 
-		void FFmpegBufferedInput::InitializeBuffer()
+		void FFmpegBufferedInput::Initialize()
 		{
 			InitializeVideoDecoder();
 			InitializeAudioDecoders();
@@ -125,6 +116,8 @@ namespace TVPlayR {
 
 		void FFmpegBufferedInput::ProcessAudio(const std::unique_ptr<Decoder>& decoder)
 		{
+			if (decoder->IsEof() || audio_muxer_->IsEof())
+				return;
 			auto decoded = decoder->Pull();
 			if (decoded)
 				audio_muxer_->Push(decoder->StreamIndex(), decoded);
@@ -154,7 +147,7 @@ namespace TVPlayR {
 					for (const auto& decoder : audio_decoders_)
 						decoder->Seek(seek_time);
 					if (audio_muxer_)
-						audio_muxer_->Reset();
+						audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, output_audio_parameters_);
 					if (buffer_)
 						buffer_->Loop();
 					DebugPrintLine(Common::DebugSeverity::info, "Loop");
@@ -180,8 +173,6 @@ namespace TVPlayR {
 			{
 				is_eof_ = true;
 			}
-			else
-				producer_cv_.notify_one();
 			return sync;
 		}
 
@@ -195,11 +186,10 @@ namespace TVPlayR {
 				for (auto& decoder : audio_decoders_)
 					decoder->Seek(time);
 				if (audio_muxer_)
-					audio_muxer_->Reset();
+					audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, output_audio_parameters_);
 				if (buffer_)
 					buffer_->Seek(time);
 				is_eof_ = false;
-				producer_cv_.notify_one();
 				return true;
 			}
 			return false;

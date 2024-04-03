@@ -23,7 +23,7 @@ static AVPixelFormat PixelFormatToFFmpegFormat(const PixelFormat format)
 	case PixelFormat::rgb10:
 		return AV_PIX_FMT_X2RGB10LE;
 	default:
-		THROW_EXCEPTION("Invalid pixel format: " + std::to_string(static_cast<int>(format)))
+		THROW_EXCEPTION("Invalid pixel format: " + std::to_string(static_cast<int>(format)));
 	}
 }
 #endif

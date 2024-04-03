@@ -53,7 +53,7 @@ public:
 	bool interlaced() const;
 	bool IsDropFrame() const;
 	std::string FrameNumberToString(int frame_number) const;
-	int StringToFrameNumber(const std::string& tc) const;
+	int StringToFrameNumber(const std::string &tc) const;
 	uint32_t FrameNumberToSmpteTimecode(int frame_number) const;
 	int TimeToFrameNumber(std::int64_t time) const;
 

@@ -14,13 +14,13 @@ namespace TVPlayR {
 			const Core::VideoFormat& format_;
 			const AVPixelFormat output_pixel_format_;
 			const AVRational output_time_base_;
-			AVFilterContext* source_ctx_ = NULL;
-			AVFilterContext* overlay_ctx_ = NULL;
-			AVFilterContext* sink_ctx_ = NULL;
+			AVFilterContext *source_ctx_ = NULL;
+			AVFilterContext *overlay_ctx_ = NULL;
+			AVFilterContext *sink_ctx_ = NULL;
 			std::shared_ptr<FFmpegInput> overlay_;
 			std::int64_t current_frame_;
 
-			implementation(const Core::VideoFormat& format, AVPixelFormat output_pixel_format)
+			implementation(const Core::VideoFormat &format, AVPixelFormat output_pixel_format)
 				: Common::DebugTarget(Common::DebugSeverity::debug, "VideoOverlayFilter")
 				, format_(format)
 				, output_pixel_format_(output_pixel_format)
@@ -29,10 +29,9 @@ namespace TVPlayR {
 			{
 			}
 
-			Core::AVSync Transform(Core::AVSync& sync)
+			Core::AVSync Transform(const Core::AVSync &sync)
 			{
-				auto& video = sync.Video;
-				video = FFmpeg::CloneFrame(video);
+				auto video = FFmpeg::CloneFrame(sync.Video);
 				video->pts = current_frame_++;
 
 				return Core::AVSync(sync.Audio, video, sync.TimeInfo);
@@ -120,7 +119,7 @@ namespace TVPlayR {
 
 		VideoOverlayFilter::~VideoOverlayFilter() { }
 
-		Core::AVSync VideoOverlayFilter::Transform(Core::AVSync& sync) { return impl_->Transform(sync); }
+		Core::AVSync VideoOverlayFilter::Transform(const Core::AVSync& sync) { return impl_->Transform(sync); }
 
 	}
 }

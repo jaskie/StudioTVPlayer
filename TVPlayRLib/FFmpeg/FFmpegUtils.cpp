@@ -72,7 +72,7 @@ namespace TVPlayR {
 				std::fill(data_begin, data_begin + (frame->linesize[0] * frame->height / sizeof(uint32_t)), 0x00000000);
 				break;
 			default:
-				THROW_EXCEPTION("Invalid frame pixel format")
+				THROW_EXCEPTION("Invalid frame pixel format");
 				break;
 			}
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);

@@ -63,11 +63,11 @@ namespace TVPlayR {
 				return Gdiplus::Rect((video_format_.width() - width) / 2 , video_format_.height() - (height * 4 / 3) , width, height);
 			}
 
-			Core::AVSync Transform(Core::AVSync& sync)
+			Core::AVSync Transform(const Core::AVSync& sync)
 			{
 				if (!sync.Video)
 					return sync;
-				std::shared_ptr<AVFrame>& input_frame = sync.Video;
+				const std::shared_ptr<AVFrame>& input_frame = sync.Video;
 				assert(input_frame->width == video_format_.width() && input_frame->height == video_format_.height());
 				if (!out_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
 					out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format));
@@ -109,6 +109,6 @@ namespace TVPlayR {
 
 		TimecodeOverlay::~TimecodeOverlay() { }
 
-		Core::AVSync TimecodeOverlay::Transform(Core::AVSync& sync) { return impl_->Transform(sync); }
+		Core::AVSync TimecodeOverlay::Transform(const Core::AVSync &sync) { return impl_->Transform(sync); }
 	}
 }

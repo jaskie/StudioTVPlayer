@@ -8,7 +8,7 @@ namespace TVPlayR {
 		class DecklinkInfo final : Common::NonCopyable
 		{
 		public:
-			explicit DecklinkInfo(IDeckLink* decklink, int index);
+			explicit DecklinkInfo(IDeckLink *decklink, int index);
 			~DecklinkInfo();
 			std::wstring GetDisplayName() const;
 			std::wstring GetModelName() const;
@@ -18,7 +18,7 @@ namespace TVPlayR {
 			bool HaveOutput() const;
 			int Index() const;
 		private:
-			IDeckLink* GetDecklink() const;
+			IDeckLink *GetDecklink() const;
 			struct implementation;
 			std::unique_ptr<implementation> impl_;
 			friend class DecklinkIterator;

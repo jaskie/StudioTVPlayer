@@ -18,10 +18,10 @@ namespace TVPlayR {
 			BMDPixelFormat pixel_format_;
 			DecklinkTimecode timecode_;
 		public:
-			DecklinkVideoFrame(Core::VideoFormat& format);
+			DecklinkVideoFrame(Core::VideoFormat &format);
 			virtual ~DecklinkVideoFrame();
 
-			void Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode);
+			void Update(Core::VideoFormat &format, const std::shared_ptr<AVFrame> &frame, std::int64_t timecode);
 			void Recycle();
 		
 			//IUnknown
@@ -35,9 +35,9 @@ namespace TVPlayR {
 			STDMETHOD_(long, GetRowBytes());
 			STDMETHOD_(BMDPixelFormat, GetPixelFormat());
 			STDMETHOD_(BMDFrameFlags, GetFlags());
-			STDMETHOD(GetBytes(void** buffer));
-			STDMETHOD(GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode));
-			STDMETHOD(GetAncillaryData(IDeckLinkVideoFrameAncillary** ancillary)) { return E_FAIL; }
+			STDMETHOD(GetBytes(void **buffer));
+			STDMETHOD(GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode **timecode));
+			STDMETHOD(GetAncillaryData(IDeckLinkVideoFrameAncillary **ancillary)) { return E_FAIL; }
 
 		};
 

@@ -12,8 +12,8 @@ struct StreamInfo
 	std::int64_t Duration;
 	int AudioChannelsCount;
 	std::string Language;
-	const AVCodec* Codec;
-	AVStream* Stream;
+	const AVCodec *Codec;
+	AVStream *Stream;
 };
 
 }}

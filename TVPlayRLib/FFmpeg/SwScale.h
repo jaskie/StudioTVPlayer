@@ -1,4 +1,5 @@
 #pragma once
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -20,6 +21,6 @@ namespace TVPlayR {
 			const AVPixelFormat dest_pixel_format_;
 			const int dest_width_;
 			const int dest_height_;
-			std::unique_ptr<SwsContext, std::function<void(SwsContext*)>> sws_;
+			unique_ptr<SwsContext> sws_;
 		};
 }}

@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
     namespace Decklink {
-        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat& format)
+        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat &format)
             : time_(AV_NOPTS_VALUE)
             , format_(format)
         { }
@@ -14,7 +14,7 @@ namespace TVPlayR {
             return time_ != AV_NOPTS_VALUE;
         }
 
-        void DecklinkTimecode::Update(Core::VideoFormat& format, std::int64_t time)
+        void DecklinkTimecode::Update(Core::VideoFormat &format, std::int64_t time)
         {
             format_ = format;
             time_ = time;
@@ -41,7 +41,7 @@ namespace TVPlayR {
             return bcd;
         }
 
-        STDMETHODIMP DecklinkTimecode::GetComponents(unsigned char* hours, unsigned char* minutes, unsigned char* seconds, unsigned char* frames)
+        STDMETHODIMP DecklinkTimecode::GetComponents(unsigned char *hours, unsigned char *minutes, unsigned char *seconds, unsigned char *frames)
         {
             return E_NOTIMPL;
         }
@@ -56,7 +56,7 @@ namespace TVPlayR {
             return BMDTimecodeFlags();
         }
 
-        STDMETHODIMP DecklinkTimecode::GetTimecodeUserBits(BMDTimecodeUserBits* userBits)
+        STDMETHODIMP DecklinkTimecode::GetTimecodeUserBits(BMDTimecodeUserBits *userBits)
         {
             if (userBits == nullptr)
                 return E_FAIL;

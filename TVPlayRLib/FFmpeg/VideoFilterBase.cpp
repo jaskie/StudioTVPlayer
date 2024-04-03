@@ -1,11 +1,10 @@
 #include "../pch.h"
-#include "FFmpegUtils.h"
 #include "VideoFilterBase.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-bool VideoFilterBase::Push(std::shared_ptr<AVFrame> frame) 
+bool VideoFilterBase::Push(const std::shared_ptr<AVFrame> &frame)
 { 
 	if (frame->width != input_width_ ||
 		frame->height != input_height_ ||
@@ -22,7 +21,8 @@ VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
 	, output_pix_fmt_(output_pix_fmt)
 { }
 
-std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
+std::shared_ptr<AVFrame> VideoFilterBase::Pull()
+{
 	if (!sink_ctx_)
 		return nullptr;
 	auto frame = AllocFrame();
@@ -48,23 +48,25 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
 	return nullptr;
 }
 
-int VideoFilterBase::OutputWidth() { 
+int VideoFilterBase::OutputWidth()
+{
 	assert(sink_ctx_);
 	return av_buffersink_get_w(sink_ctx_);
 }
 
-int VideoFilterBase::OutputHeight() { 
+int VideoFilterBase::OutputHeight()
+{ 
 	assert(sink_ctx_);
 	return av_buffersink_get_h(sink_ctx_);
 }
 
-AVRational VideoFilterBase::OutputSampleAspectRatio() 
+AVRational VideoFilterBase::OutputSampleAspectRatio()
 { 
 	assert(sink_ctx_);
 	return av_buffersink_get_sample_aspect_ratio(sink_ctx_);
 }
 
-AVPixelFormat VideoFilterBase::OutputPixelFormat() 
+AVPixelFormat VideoFilterBase::OutputPixelFormat()
 { 
 	assert(sink_ctx_);
 	return static_cast<AVPixelFormat>(av_buffersink_get_format(sink_ctx_));
@@ -83,13 +85,14 @@ AVRational VideoFilterBase::OutputFrameRate() const
 }
 
 
-void VideoFilterBase::Flush() { 
+void VideoFilterBase::Flush()
+{
 	if (source_ctx_)
 		av_buffersrc_write_frame(source_ctx_, NULL);
 	is_flushed_ = true;
 }
 
-void VideoFilterBase::SetFilter(const std::string& filter_str, const AVRational input_time_base)
+void VideoFilterBase::SetFilter(const std::string &filter_str, const AVRational input_time_base)
 {
 	Reset();
 	input_time_base_ = input_time_base;
@@ -147,7 +150,7 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 }
 
 
-bool VideoFilterBase::IsInitialized() const 
+bool VideoFilterBase::IsInitialized() const
 {
 	return !!graph_;
 }

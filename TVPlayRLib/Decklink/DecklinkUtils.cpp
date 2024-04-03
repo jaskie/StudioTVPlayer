@@ -95,7 +95,7 @@ namespace TVPlayR {
 			}
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, FieldOrder field_order, AVRational sar, BMDTimeScale time_scale)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame *decklink_frame, FieldOrder field_order, AVRational sar, BMDTimeScale time_scale)
 		{
 			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
@@ -117,7 +117,7 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket *audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate)
 		{
 			void* audio_bytes = nullptr;
 			if (!audio_packet || FAILED(audio_packet->GetBytes(&audio_bytes)) || !audio_bytes)
@@ -146,7 +146,7 @@ namespace TVPlayR {
 			return audio;
 		}
 
-		std::int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
+		std::int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame *video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int> &frame_rate)
 		{
 			CComPtr<IDeckLinkTimecode> timecode;
 			if (video_frame && SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
@@ -158,7 +158,7 @@ namespace TVPlayR {
 			return AV_NOPTS_VALUE;
 		}
 
-		std::int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
+		std::int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame *decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int> &frame_rate)
 		{
 			switch (timecode_source)
 			{

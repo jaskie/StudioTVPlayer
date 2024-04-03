@@ -21,13 +21,13 @@ namespace TVPlayR {
 		{
 		public:
 			const Core::Player& Player() const { return player_; }
-			virtual void Push(const Core::AVSync& sync, AVRational frame_rate);
+			virtual void Push(const Core::AVSync &sync, AVRational frame_rate);
 			Core::AVSync PullSync(int audio_samples_count);
 			virtual ~PlayerSynchroSource();
 		protected:
-			PlayerSynchroSource(const Core::Player& player, bool process_video, int audio_channels);
+			PlayerSynchroSource(const Core::Player &player, bool process_video, int audio_channels);
 		private:
-			const Core::Player& player_;
+			const Core::Player &player_;
 			typedef std::pair<Core::FrameTimeInfo, std::shared_ptr<AVFrame>> queue_item_t;
 			std::unique_ptr<FFmpeg::PlayerScaler>		scaler_;
 			const bool									process_video_;

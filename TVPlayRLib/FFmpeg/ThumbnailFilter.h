@@ -7,7 +7,7 @@ namespace TVPlayR {
 class ThumbnailFilter final : public VideoFilterBase
 {
 public:
-	ThumbnailFilter(int width, int height, std::shared_ptr<AVFrame> frame);
+	ThumbnailFilter(int width, int height, const std::shared_ptr<AVFrame> &frame);
 	std::shared_ptr<AVFrame> Pull() override;
 private:
 	const std::shared_ptr<AVFrame> input_frame_;

@@ -7,17 +7,17 @@ namespace TVPlayR {
 class NdiOutput final : public Core::OutputDevice
 {
 public:
-	NdiOutput(const std::string& source_name, const std::string& group_names);
+	NdiOutput(const std::string &source_name, const std::string &group_names);
 	virtual ~NdiOutput();
 	//OutputDevice
 	void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
-	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
-	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
+	void AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) override;
+	void RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) override;
 	//OutputSink
-	void Push(Core::AVSync& sync) override;
+	void Push(const Core::AVSync &sync) override;
 	//FrameClockSource
-	void RegisterClockTarget(Core::ClockTarget& target) override;
-	void UnregisterClockTarget(Core::ClockTarget& target) override;
+	void RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) override;
+	void UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) override;
 
 private:
 	struct implementation;

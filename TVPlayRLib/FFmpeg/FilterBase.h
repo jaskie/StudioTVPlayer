@@ -1,4 +1,5 @@
 #pragma once
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -14,7 +15,7 @@ public:
 	bool IsEof() const { return is_eof_; };
 	std::int64_t TimeFromTs(std::int64_t ts) const;
 protected:
-	std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)> graph_;
+	unique_ptr<AVFilterGraph> graph_;
 	bool is_flushed_ = false;
 	bool is_eof_ = false;
 };

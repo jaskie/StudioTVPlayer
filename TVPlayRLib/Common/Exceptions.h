@@ -6,10 +6,10 @@ namespace TVPlayR {
 class TVPlayRException : public std::exception
 {
 public:
-	explicit TVPlayRException(char const* const message)
+	explicit TVPlayRException(char const *const message)
 		: std::exception(message)
 	{ }
-	explicit TVPlayRException(const std::string& message)
+	explicit TVPlayRException(const std::string &message)
 		: std::exception(message.c_str())
 	{ }
 };

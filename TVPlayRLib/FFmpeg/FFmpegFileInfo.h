@@ -14,7 +14,7 @@ namespace TVPlayR {
 class FFmpegFileInfo final
 {
 public:
-	FFmpegFileInfo(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
+	FFmpegFileInfo(const std::string &file_name, Core::HwAccel acceleration, const std::string &hw_device);
 	~FFmpegFileInfo();
 	std::shared_ptr<AVFrame> GetFrameAt(std::int64_t time);
 	AVRational GetTimeBase() const;
@@ -28,7 +28,7 @@ public:
 	int GetAudioChannelCount() const;
 	bool HaveAlphaChannel()const;
 	int StreamCount() const;
-	const Core::StreamInfo& GetStreamInfo(int index) const;
+	const Core::StreamInfo & GetStreamInfo(int index) const;
 	bool IsStream() const;
 private:
 	struct implementation;

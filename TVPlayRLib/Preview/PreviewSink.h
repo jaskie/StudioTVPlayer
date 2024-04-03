@@ -14,7 +14,7 @@ namespace TVPlayR {
 			virtual ~PreviewSink();
 			typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
 			void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback);
-			void Push(Core::AVSync& sync);
+			void Push(const Core::AVSync &sync);
 		private:
 			struct implementation;
 			std::unique_ptr<implementation> impl_;

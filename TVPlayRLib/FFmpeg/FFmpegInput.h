@@ -22,8 +22,8 @@ public:
 	bool IsAddedToPlayer(const Core::Player &player) override;
 	void AddToPlayer(const Core::Player &player) override;
 	void RemoveFromPlayer(const Core::Player &player) override;
-	void AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) override;
-	void RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) override;
+	void AddOutputSink(std::shared_ptr<Core::OutputSink> &output_sink) override;
+	void RemoveOutputSink(std::shared_ptr<Core::OutputSink> &output_sink) override;
 	void Play() override;
 	void Pause() override;
 	bool IsPlaying() const override;

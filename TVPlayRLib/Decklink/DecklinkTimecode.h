@@ -11,21 +11,21 @@ namespace TVPlayR {
         {
         private:
             std::int64_t time_;
-            Core::VideoFormat& format_;
+            Core::VideoFormat &format_;
         public:
-            DecklinkTimecode(Core::VideoFormat& format);
+            DecklinkTimecode(Core::VideoFormat &format);
             bool IsValid() const;
-            void Update(Core::VideoFormat& format, std::int64_t time);
+            void Update(Core::VideoFormat &format, std::int64_t time);
             //IUnknown
             STDMETHOD(QueryInterface(REFIID, LPVOID*));
             STDMETHOD_(ULONG, AddRef());
             STDMETHOD_(ULONG, Release());
             //IDecklinkTimeCode
             STDMETHOD_(BMDTimecodeBCD, GetBCD());
-            STDMETHOD(GetComponents(unsigned char* hours, unsigned char* minutes, unsigned char* seconds, unsigned char* frames));
-            STDMETHOD(GetString(/* [out] */ BSTR* timecode));
+            STDMETHOD(GetComponents(unsigned char *hours, unsigned char *minutes, unsigned char *seconds, unsigned char *frames));
+            STDMETHOD(GetString(/* [out] */ BSTR *timecode));
             STDMETHOD_(BMDTimecodeFlags, GetFlags());
-            STDMETHOD(GetTimecodeUserBits(/* [out] */ BMDTimecodeUserBits* userBits));
+            STDMETHOD(GetTimecodeUserBits(/* [out] */ BMDTimecodeUserBits *userBits));
         };
 
 }}

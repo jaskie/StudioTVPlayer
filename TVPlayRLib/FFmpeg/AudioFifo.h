@@ -23,7 +23,7 @@ public:
 	std::int64_t TimeMin() const;
 	inline AVRational TimeBase() const { return time_base_; }
 private:
-	const std::unique_ptr<AVAudioFifo, void(*)(AVAudioFifo*)> aduio_fifo_;
+	const std::unique_ptr<AVAudioFifo, void(*)(AVAudioFifo*)> audio_fifo_;
 	const AVRational time_base_;
 	const Core::AudioParameters audio_parameters_;
 	AVChannelLayout channel_layout_;

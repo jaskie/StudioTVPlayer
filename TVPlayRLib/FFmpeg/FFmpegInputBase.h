@@ -15,14 +15,14 @@ namespace TVPlayR {
 struct FFmpegInputBase : private Common::NonCopyable
 {
 protected:
-	FFmpegInputBase(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device);
+	FFmpegInputBase(const std::string &file_name, Core::HwAccel acceleration, const std::string &hw_device);
 	virtual ~FFmpegInputBase();
 	const std::string file_name_;
 	const Core::HwAccel acceleration_;
 	const std::string hw_device_;
-	FFmpeg::InputFormat input_;
+	InputFormat input_;
 	const bool is_stream_;
-	std::unique_ptr<FFmpeg::Decoder> video_decoder_;
+	std::unique_ptr<Decoder> video_decoder_;
 public:
 	void InitializeVideoDecoder();
 	bool IsStream() const;

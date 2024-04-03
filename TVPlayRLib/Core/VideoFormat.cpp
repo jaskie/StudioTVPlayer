@@ -300,7 +300,7 @@ std::string VideoFormat::FrameNumberToString(int frame_number) const
 	return "";
 }
 
-int VideoFormat::StringToFrameNumber(const std::string& tc) const
+int VideoFormat::StringToFrameNumber(const std::string &tc) const
 {
 	if (!timecode_is_supported_)
 		return 0;

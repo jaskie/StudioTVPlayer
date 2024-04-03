@@ -5,18 +5,18 @@ namespace TVPlayR {
 	namespace Core {
 		struct AVSync
 		{
-			AVSync(std::shared_ptr<AVFrame>& audio, std::shared_ptr<AVFrame>& video, FrameTimeInfo time_info)
+			AVSync(const std::shared_ptr<AVFrame> &audio, const std::shared_ptr<AVFrame> &video, const FrameTimeInfo &time_info)
 				: Audio(audio)
 				, Video(video)
 				, TimeInfo(time_info)
 			{ }
-			AVSync() : AVSync(std::shared_ptr<AVFrame>(), std::shared_ptr<AVFrame>(), FrameTimeInfo()) {}
-			AVSync(AVSync&& other) = default;
-			AVSync(const AVSync& other) = default;
+			AVSync() : AVSync(std::shared_ptr<AVFrame>(), std::shared_ptr<AVFrame>(), FrameTimeInfo()) { }
+			AVSync(AVSync &&other) = default;
+			AVSync(const AVSync &other) = default;
 			std::shared_ptr<AVFrame> Audio;
 			std::shared_ptr<AVFrame> Video;
 			FrameTimeInfo TimeInfo;
-			AVSync operator=(AVSync&& other) noexcept
+			AVSync operator=(AVSync &&other) noexcept
 			{
 				if (&other == this)
 					return *this;

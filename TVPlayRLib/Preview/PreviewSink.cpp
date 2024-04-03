@@ -22,7 +22,7 @@ namespace TVPlayR {
 
 			}
 
-			void Push(std::shared_ptr<AVFrame>& video)
+			void Push(const std::shared_ptr<AVFrame> &video)
 			{
 				if (!video)
 					return;
@@ -57,6 +57,6 @@ namespace TVPlayR {
 			impl_->SetFramePlayedCallback(frame_played_callback);
 		}
 		
-		void PreviewSink::Push(Core::AVSync& sync) { impl_->Push(sync.Video); }
+		void PreviewSink::Push(const Core::AVSync &sync) { impl_->Push(sync.Video); }
 	}
 }

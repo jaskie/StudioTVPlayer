@@ -14,7 +14,7 @@ class TimecodeOverlay final :  public OverlayBase
 public:
 	TimecodeOverlay(const TimecodeOutputSource source, const VideoFormatType video_format, TVPlayR::PixelFormat output_pixel_format);
 	virtual ~TimecodeOverlay();
-	Core::AVSync Transform(Core::AVSync& sync) override;
+	Core::AVSync Transform(const Core::AVSync &sync) override;
 private:
 	struct implementation;
 	std::unique_ptr<implementation> impl_;

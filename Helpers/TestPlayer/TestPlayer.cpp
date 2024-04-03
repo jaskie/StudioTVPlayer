@@ -54,7 +54,7 @@ int main()
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
 
-		Core::Player player("1", video_format, pixel_format, audio_channels, sample_rate);
+		auto player = std::make_shared<Core::Player>("1", video_format, pixel_format, audio_channels, sample_rate);
 	/*	player.SetAudioVolumeCallback([](std::vector<float>& volume, float coherence) {
 			std::cout << coherence << "\n";
 			});
@@ -75,8 +75,8 @@ int main()
 
 		auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
 		ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
-		player.AddOutputSink(ndi);
-		player.SetFrameClockSource(*ndi);
+		player->AddOutputSink(ndi);
+		ndi->RegisterClockTarget(player);
 		//std::this_thread::sleep_for(200ms);
 		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
 			"libx264",															// VideoCodec
@@ -110,7 +110,7 @@ int main()
 		//input->SetFramePlayedCallback([](Core::FrameTimeInfo& time) {});
 		input->Play();
 		//input->SetIsLoop(true);
-		player.Load(input);
+		player->Load(input);
 
 
 		// prepare input and recording
@@ -137,7 +137,7 @@ int main()
  			if (i == 'q')
 				break;
 			if (i == 'c')
-				player.Clear();
+				player->Clear();
 			/*if (i == 'r')
 				player.AddOutput(stream);
 			if (i == 's')
@@ -154,7 +154,7 @@ int main()
 					input->Play();*/
 		}
 		//decklink_input->RemoveOutputSink(record_file);
-		player.RemoveOutputSink(ndi);
+		player->RemoveOutputSink(ndi);
 		//player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);
 #ifdef _DEBUG

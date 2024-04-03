@@ -1,4 +1,5 @@
 #pragma once
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace Core {
@@ -11,14 +12,14 @@ namespace TVPlayR {
 class InputFormat final : public Common::DebugTarget, Common::NonCopyable
 {
 private:
-	std::unique_ptr<AVFormatContext, void(*)(AVFormatContext*)> format_context_;
+	unique_ptr<AVFormatContext> format_context_;
 	std::vector<Core::StreamInfo> streams_;
 	const std::string file_name_;
 	bool is_eof_ = false;
 	bool is_stream_data_loaded_ = false;
 	std::mutex seek_mutex_;
 public:
-	InputFormat(const std::string& fileName);
+	InputFormat(const std::string &fileName);
 	bool LoadStreamData();
 	std::shared_ptr<AVPacket> PullPacket();
 	bool CanSeek() const;
@@ -29,7 +30,7 @@ public:
 	int GetTotalAudioChannelCount() const;
 	std::int64_t ReadStartTimecode() const;
 	const std::vector<Core::StreamInfo>& GetStreams() const { return streams_; };
-	const Core::StreamInfo* GetVideoStream() const;
+	const Core::StreamInfo * GetVideoStream() const;
 	bool IsValid() const;
 };
 

@@ -3,27 +3,26 @@
 #include "AudioMuxer.h"
 #include "Decoder.h"
 #include "AudioFifo.h"
-#include "FFmpegUtils.h"
 
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>>& decoders, std::int64_t output_channel_layout, const Core::AudioParameters output_audio_parameters)
+AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>> &decoders, std::int64_t output_channel_layout, const Core::AudioParameters output_audio_parameters)
 	: Common::DebugTarget(Common::DebugSeverity::info, "Audio muxer")
 	, FilterBase::FilterBase()
 	, input_time_base_(decoders.empty() ? av_make_q(1, output_audio_parameters.SampleRate) : decoders[0]->TimeBase())
 	, output_audio_parameters_(output_audio_parameters)
 	, output_channel_layout_(output_channel_layout)
 	, filter_str_(GetAudioMuxerString(decoders))
-	, sink_ctx_(NULL, [](AVFilterContext* filter) { avfilter_free(filter); })
-	, inputs_(NULL, [](AVFilterInOut* io) { avfilter_inout_free(&io); })
-	, outputs_(NULL, [](AVFilterInOut* io) { avfilter_inout_free(&io); })
+	, sink_ctx_(NULL, [](AVFilterContext *filter) { avfilter_free(filter); })
+	, inputs_(NULL, [](AVFilterInOut *io) { avfilter_inout_free(&io); })
+	, outputs_(NULL, [](AVFilterInOut *io) { avfilter_inout_free(&io); })
 {
 	InitializeGraph(decoders);
 }
 
-std::string AudioMuxer::GetAudioMuxerString(const std::vector<std::unique_ptr<Decoder>>& decoders)
+std::string AudioMuxer::GetAudioMuxerString(const std::vector<std::unique_ptr<Decoder>> &decoders)
 {
 	std::ostringstream filter;
 	int total_nb_channels = std::accumulate(decoders.begin(), decoders.end(), 0, [](int sum, const std::unique_ptr<Decoder>& curr) { return sum + curr->AudioChannelsCount(); });
@@ -121,9 +120,9 @@ void AudioMuxer::Flush()
 		av_buffersrc_write_frame(ctx.second.get(), NULL);
 }
 
-void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>>& decoders)
+void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &decoders)
 {
-	if (std::find_if(decoders.begin(), decoders.end(), [](const std::unique_ptr<Decoder>& decoder) -> bool { return decoder->MediaType() != AVMEDIA_TYPE_AUDIO; }) != decoders.end())
+	if (std::find_if(decoders.begin(), decoders.end(), [](const std::unique_ptr<Decoder> &decoder) { return decoder->MediaType() != AVMEDIA_TYPE_AUDIO; }) != decoders.end())
 		THROW_EXCEPTION("AudioMuxer::InitializeGraph() got non-audio stream")
 
 		source_ctx_.clear();
@@ -134,13 +133,13 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>>& de
 	AVSampleFormat out_sample_fmts[] = { output_audio_parameters_.SampleFormat, AV_SAMPLE_FMT_NONE };
 	std::int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
 	int out_sample_rates[] = { output_audio_parameters_.SampleRate, -1 };
-	AVFilterInOut* inputs = avfilter_inout_alloc();
+	AVFilterInOut *inputs = avfilter_inout_alloc();
 	inputs_.reset(inputs);
-	AVFilterInOut* outputs = avfilter_inout_alloc();
+	AVFilterInOut *outputs = avfilter_inout_alloc();
 	outputs_.reset(outputs);
-	const AVFilter* buffersrc = avfilter_get_by_name("abuffer");
-	const AVFilter* buffersink = avfilter_get_by_name("abuffersink");
-	AVFilterContext* weak_sink_ctx = NULL;
+	const AVFilter *buffersrc = avfilter_get_by_name("abuffer");
+	const AVFilter *buffersink = avfilter_get_by_name("abuffersink");
+	AVFilterContext *weak_sink_ctx = NULL;
 	THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&weak_sink_ctx, buffersink, "aout", NULL, NULL, graph_.get()));
 	sink_ctx_.reset(weak_sink_ctx);
 	THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(weak_sink_ctx, "sample_fmts", out_sample_fmts, AV_SAMPLE_FMT_NONE, AV_OPT_SEARCH_CHILDREN));
@@ -148,11 +147,11 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>>& de
 	THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(weak_sink_ctx, "sample_rates", out_sample_rates, -1, AV_OPT_SEARCH_CHILDREN));
 
 	char args[512];
-	AVFilterInOut* current_output = outputs;
+	AVFilterInOut *current_output = outputs;
 	for (int i = 0; i < decoders.size(); i++)
 	{
-		const std::unique_ptr<Decoder>& decoder = decoders[i];
-		AVChannelLayout* ch_layout = decoder->AudioChannelLayout();
+		const std::unique_ptr<Decoder> &decoder = decoders[i];
+		AVChannelLayout *ch_layout = decoder->AudioChannelLayout();
 		if (!ch_layout)
 			THROW_EXCEPTION("AudioMuxer: decoder's AudioChannelLayout empty");
 		int ret = snprintf(args, sizeof(args),
@@ -183,11 +182,11 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>>& de
 	inputs->pad_idx = 0;
 	inputs->next = NULL;
 	if (avfilter_graph_parse_ptr(graph_.get(), filter_str_.c_str(), &inputs, &outputs, NULL) < 0)
-		THROW_EXCEPTION("AudioMuxer: avfilter_graph_parse_ptr failed")
-		if (avfilter_graph_config(graph_.get(), NULL) < 0)
-			THROW_EXCEPTION("AudioMuxer: avfilter_graph_config failed")
-			if (DebugSeverity() <= Common::DebugSeverity::debug)
-				DumpFilter(filter_str_, graph_.get());
+		THROW_EXCEPTION("AudioMuxer: avfilter_graph_parse_ptr failed");
+	if (avfilter_graph_config(graph_.get(), NULL) < 0)
+		THROW_EXCEPTION("AudioMuxer: avfilter_graph_config failed");
+	if (DebugSeverity() <= Common::DebugSeverity::debug)
+		DumpFilter(filter_str_, graph_.get());
 }
 
 }}

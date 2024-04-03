@@ -8,7 +8,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		static void ConvertFrame(const std::shared_ptr<AVFrame>& source, std::vector<uint32_t>& dest)
+		static void ConvertFrame(const std::shared_ptr<AVFrame> &source, std::vector<uint32_t> &dest)
 		{
 			if (source->format == AV_PIX_FMT_X2RGB10LE)
 			{
@@ -28,7 +28,7 @@ namespace TVPlayR {
 			}
 		}
 
-		static BMDPixelFormat GetBMDPixelFormat(const std::shared_ptr<AVFrame>& frame)
+		static BMDPixelFormat GetBMDPixelFormat(const std::shared_ptr<AVFrame> &frame)
 		{
 			switch (frame->format)
 			{
@@ -43,7 +43,7 @@ namespace TVPlayR {
 			}
 		}
 
-		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format)
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat &format)
 			: ref_count_(0)
 			, width_(0)
 			, height_(0)
@@ -57,7 +57,7 @@ namespace TVPlayR {
 			assert(!ref_count_);
 		}
 
-		void DecklinkVideoFrame::Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
+		void DecklinkVideoFrame::Update(Core::VideoFormat &format, const std::shared_ptr<AVFrame> &frame, std::int64_t timecode)
 		{
 			timecode_.Update(format, timecode);
 			width_ = format.width();
@@ -105,7 +105,7 @@ namespace TVPlayR {
 
 		BMDPixelFormat STDMETHODCALLTYPE DecklinkVideoFrame::GetPixelFormat() { return pixel_format_; }
 
-		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::GetBytes(void** buffer)
+		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::GetBytes(void **buffer)
 		{
 			if (!buffer_.empty())
 			{
@@ -120,7 +120,7 @@ namespace TVPlayR {
 			return E_FAIL;
 		}
 
-		STDMETHODIMP DecklinkVideoFrame::GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode)
+		STDMETHODIMP DecklinkVideoFrame::GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode **timecode)
 		{
 			if (timecode == nullptr)
 				return E_FAIL;

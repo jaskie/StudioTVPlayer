@@ -1,18 +1,17 @@
 #include "../pch.h"
 #include "SwResample.h"
-#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		std::unique_ptr<SwrContext, std::function<void(SwrContext*)>> AllocSwr(int out_ch_count, enum AVSampleFormat out_sample_fmt, int out_sample_rate,int in_ch_count, enum AVSampleFormat in_sample_fmt, int in_sample_rate)
+		unique_ptr<SwrContext> AllocSwr(int out_ch_count, enum AVSampleFormat out_sample_fmt, int out_sample_rate,int in_ch_count, enum AVSampleFormat in_sample_fmt, int in_sample_rate)
 		{
 			SwrContext* native_ctx = nullptr;
 			AVChannelLayout in_ch_layout, out_ch_layout;
 			av_channel_layout_default(&in_ch_layout, in_ch_count);
 			av_channel_layout_default(&out_ch_layout, out_ch_count);
 			swr_alloc_set_opts2(&native_ctx, &out_ch_layout, out_sample_fmt, out_sample_rate, &in_ch_layout, in_sample_fmt, in_sample_rate, 0, NULL);
-			return std::unique_ptr<SwrContext, std::function<void(SwrContext*)>>(native_ctx, [](SwrContext* ctx) { swr_free(&ctx); });
+			return unique_ptr<SwrContext>(native_ctx, [](SwrContext* ctx) { swr_free(&ctx); });
 		}
 
 		SwResample::SwResample(int src_channel_count, int src_sample_rate, AVSampleFormat src_sample_format, int dest_channel_count, int dest_sample_rate, AVSampleFormat dest_sample_format)
@@ -23,7 +22,7 @@ namespace TVPlayR {
 			av_channel_layout_default(&dest_channel_layout_, dest_channel_count);
 		}
 
-		std::shared_ptr<AVFrame> SwResample::Resample(const std::shared_ptr<AVFrame> frame)
+		std::shared_ptr<AVFrame> SwResample::Resample(const std::shared_ptr<AVFrame> &frame)
 		{
 			std::shared_ptr<AVFrame> resampled = AllocFrame();
 			resampled->nb_samples = swr_get_out_samples(swr_.get(), frame->nb_samples);

@@ -1,6 +1,5 @@
 #include "../pch.h"
 #include "SwScale.h"
-#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {

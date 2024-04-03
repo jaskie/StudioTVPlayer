@@ -71,7 +71,7 @@ namespace TVPlayR {
 				input_->SetCallback(NULL);
 			}
 
-			void OpenInput(IDeckLinkDisplayMode* displayMode, BMDPixelFormat pixel_format)
+			void OpenInput(IDeckLinkDisplayMode *displayMode, BMDPixelFormat pixel_format)
 			{
 				BMDTimeValue frame_duration;
 				if (FAILED(displayMode->GetFrameRate(&frame_duration, &time_scale_)))
@@ -130,7 +130,7 @@ namespace TVPlayR {
 				return S_OK;
 			}
 
-			STDMETHODIMP VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override
+			STDMETHODIMP VideoInputFrameArrived(IDeckLinkVideoInputFrame *videoFrame, IDeckLinkAudioInputPacket *audioPacket) override
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (current_format_.type() == Core::VideoFormatType::invalid)
@@ -161,12 +161,12 @@ namespace TVPlayR {
 			STDMETHODIMP_(ULONG)				AddRef() override { return 1; }
 			STDMETHODIMP_(ULONG)				Release() override { return 1; }
 
-			bool IsAddedToPlayer(const Core::Player& player)
+			bool IsAddedToPlayer(const Core::Player &player)
 			{
 				return std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& provider) { return &provider->Player() == &player; }) != player_providers_.end();
 			}
 
-			void AddToPlayer(const Core::Player& player)
+			void AddToPlayer(const Core::Player &player)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToPlayer(player))
@@ -176,7 +176,7 @@ namespace TVPlayR {
 				}
 			}
 
-			void RemoveFromPlayer(const Core::Player& player)
+			void RemoveFromPlayer(const Core::Player &player)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
@@ -185,16 +185,16 @@ namespace TVPlayR {
 				player_providers_.erase(provider);
 			}
 
-			void AddOutputSink(std::shared_ptr<Core::OutputSink>& output_sink)
+			void AddOutputSink(std::shared_ptr<Core::OutputSink> &output_sink)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				output_sinks_.push_back(output_sink);
 			}
 
-			void RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink)
+			void RemoveOutputSink(std::shared_ptr<Core::OutputSink> &output_sink)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				auto item = std::find_if(output_sinks_.begin(), output_sinks_.end(), [&](const std::shared_ptr<Core::OutputSink>& p) { return p == output_sink; });
+				auto item = std::find_if(output_sinks_.begin(), output_sinks_.end(), [&](const std::shared_ptr<Core::OutputSink> &p) { return p == output_sink; });
 				if (item == output_sinks_.end())
 					return;
 				output_sinks_.erase(item);
@@ -215,7 +215,7 @@ namespace TVPlayR {
 				return audio_channels_count_;
 			}
 
-			Core::AVSync PullSync(const Core::Player& player, int audio_samples_count)
+			Core::AVSync PullSync(const Core::Player &player, int audio_samples_count)
 			{
 				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
 				if (provider == player_providers_.end())
@@ -230,19 +230,19 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkInput::DecklinkInput(IDeckLink* decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
+		DecklinkInput::DecklinkInput(IDeckLink *decklink, Core::VideoFormatType initial_format, PixelFormat pixel_format, int audio_channels_count, TVPlayR::DecklinkTimecodeSource timecode_source, bool capture_video, bool format_autodetection)
 			: impl_(std::make_unique<implementation>(decklink, initial_format, pixel_format, audio_channels_count, timecode_source, capture_video, format_autodetection))
 		{ }
 		
 		DecklinkInput::~DecklinkInput()	{ }
 		
-		Core::AVSync DecklinkInput::PullSync(const Core::Player& player, int audio_samples_count) { return impl_->PullSync(player, audio_samples_count); }
+		Core::AVSync DecklinkInput::PullSync(const Core::Player &player, int audio_samples_count) { return impl_->PullSync(player, audio_samples_count); }
 
-		bool DecklinkInput::IsAddedToPlayer(const Core::Player& player) { return impl_->IsAddedToPlayer(player); }
-		void DecklinkInput::AddToPlayer(const Core::Player& player) { impl_->AddToPlayer(player); }
-		void DecklinkInput::RemoveFromPlayer(const Core::Player& player) { impl_->RemoveFromPlayer(player); }
-		void DecklinkInput::AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) { impl_->AddOutputSink(output_sink); }
-		void DecklinkInput::RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) { impl_->RemoveOutputSink(output_sink); }
+		bool DecklinkInput::IsAddedToPlayer(const Core::Player &player) { return impl_->IsAddedToPlayer(player); }
+		void DecklinkInput::AddToPlayer(const Core::Player &player) { impl_->AddToPlayer(player); }
+		void DecklinkInput::RemoveFromPlayer(const Core::Player &player) { impl_->RemoveFromPlayer(player); }
+		void DecklinkInput::AddOutputSink(std::shared_ptr<Core::OutputSink> &output_sink) { impl_->AddOutputSink(output_sink); }
+		void DecklinkInput::RemoveOutputSink(std::shared_ptr<Core::OutputSink> &output_sink) { impl_->RemoveOutputSink(output_sink); }
 		void DecklinkInput::Play() { }
 		void DecklinkInput::Pause()	{ }
 		bool DecklinkInput::IsPlaying() const { return true; }

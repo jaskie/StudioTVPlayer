@@ -5,7 +5,7 @@
 
 namespace TVPlayR {
 	namespace Core {
-		std::int64_t TimecodeFromFameTimeInfo(FrameTimeInfo& frame_time_info, TimecodeOutputSource timecode_source)
+		std::int64_t TimecodeFromFameTimeInfo(const FrameTimeInfo &frame_time_info, TimecodeOutputSource timecode_source)
 		{
 			switch (timecode_source)
 			{

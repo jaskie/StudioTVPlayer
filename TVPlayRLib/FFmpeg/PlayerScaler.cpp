@@ -19,7 +19,7 @@ static std::string ColorSpaceToString(enum ColorSpace color_space) {
 	case ColorSpace::bt2020:
 		return "bt2020";
 	default:
-		THROW_EXCEPTION("Invalid color space")
+		THROW_EXCEPTION("Invalid color space");
 	}
 }
 

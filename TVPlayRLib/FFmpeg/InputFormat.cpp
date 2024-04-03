@@ -1,15 +1,14 @@
 #include "../pch.h"
 #include "InputFormat.h"
-#include "FFmpegUtils.h"
 #include "../Core/HwAccel.h"
 #include "../Core/StreamInfo.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		AVFormatContext* CreateContext(const std::string& file_name, bool dump)
+		AVFormatContext * CreateContext(const std::string &file_name, bool dump)
 		{
-			AVFormatContext* ctx = NULL;
+			AVFormatContext *ctx = NULL;
 			THROW_ON_FFMPEG_ERROR(avformat_open_input(&ctx, file_name.c_str(), NULL, NULL) == 0 && ctx);
 			if (!ctx)
 				THROW_EXCEPTION("InputFormat: context not created for " + file_name);
@@ -19,9 +18,9 @@ namespace TVPlayR {
 		}
 
 
-InputFormat::InputFormat(const std::string& file_name)
+InputFormat::InputFormat(const std::string &file_name)
 	: DebugTarget(Common::DebugSeverity::info, "Input format: " + file_name)
-	, format_context_(CreateContext(file_name, DebugSeverity() <= Common::DebugSeverity::info), [](AVFormatContext* ctx){ avformat_close_input(&ctx); })
+	, format_context_(CreateContext(file_name, DebugSeverity() <= Common::DebugSeverity::info), [] (AVFormatContext *ctx) { avformat_close_input(&ctx); })
 	, file_name_(file_name)
 {
 }
@@ -127,9 +126,9 @@ int InputFormat::GetTotalAudioChannelCount() const
 
 const Core::StreamInfo* InputFormat::GetVideoStream() const
 {
-	auto info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo& info) { return info.Type == Core::MediaType::video && info.IsPreffered; });
+	auto info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo &info) { return info.Type == Core::MediaType::video && info.IsPreffered; });
 	if (info_iter == streams_.end())
-		info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo& info) { return info.Type == Core::MediaType::video; });
+		info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo &info) { return info.Type == Core::MediaType::video; });
 	if (info_iter == streams_.end())
 		return nullptr;
 	return &*info_iter;
@@ -140,7 +139,4 @@ bool InputFormat::IsValid() const
 	return !!format_context_;
 }
 
-
-
-	
 }}

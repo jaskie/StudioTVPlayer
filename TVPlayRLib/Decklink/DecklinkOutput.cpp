@@ -26,7 +26,7 @@ namespace TVPlayR {
 			Core::VideoFormat format_;
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
-			std::vector<Core::ClockTarget*> clock_targets_;
+			std::vector<std::shared_ptr<Core::ClockTarget>> clock_targets_;
 			int preroll_buffer_size_ = 4;
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
@@ -41,7 +41,7 @@ namespace TVPlayR {
 			Common::Executor overlay_executor_;
 			
 
-			implementation(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
+			implementation(IDeckLink *decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
@@ -114,7 +114,7 @@ namespace TVPlayR {
 				output_->EndAudioPreroll();
 			}
 
-			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
+			void ScheduleVideo(const std::shared_ptr<AVFrame> &frame, std::int64_t timecode)
 			{
 				std::int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				DecklinkVideoFrame* decklink_frame;
@@ -135,14 +135,14 @@ namespace TVPlayR {
 				}
 			}
 
-			void RecycleDecklinkFrame(DecklinkVideoFrame* decklink_frame)
+			void RecycleDecklinkFrame(DecklinkVideoFrame *decklink_frame)
 			{
 				decklink_frame->Recycle();
 				if (decklink_frames_recycler_.add(decklink_frame) != Common::BlockingCollectionStatus::Ok)
 					decklink_frame->Release(); // if the frame is added to recycler, then decklink output will release it.
 			}
 
-			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
+			void ScheduleAudio(std::shared_ptr<AVFrame> &buffer)
 			{
 				if (!buffer)
 					return;
@@ -208,17 +208,17 @@ namespace TVPlayR {
 				audio_resampler_.reset();
 			}
 
-			void RegisterClockTarget(Core::ClockTarget& target)
+			void RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target)
 			{
-				clock_targets_.push_back(&target);
+				clock_targets_.push_back(target);
 			}
 
-			void UnregisterClockTarget(Core::ClockTarget& target)
+			void UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target)
 			{
-				clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), &target), clock_targets_.end());
+				clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), target), clock_targets_.end());
 			}
 
-			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			void AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
 			{
 				overlay_executor_.invoke([&]
 					{
@@ -226,7 +226,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
 			{
 				overlay_executor_.invoke([&]
 					{
@@ -234,12 +234,12 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(Core::AVSync& sync)
+			void Push(const Core::AVSync &sync)
 			{
 				overlay_executor_.begin_invoke([sync, this]
 					{
 						Core::AVSync transformed(sync);
-						for (auto& overlay : overlays_)
+						for (auto &overlay : overlays_)
 							transformed = overlay->Transform(transformed);
 						if (input_buffer_.try_add(transformed) != Common::BlockingCollectionStatus::Ok)
 							DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped when pushed\n");
@@ -247,7 +247,7 @@ namespace TVPlayR {
 			}
 
 #pragma region IDeckLinkVideoOutputCallback
-			HRESULT STDMETHODCALLTYPE ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
+			HRESULT STDMETHODCALLTYPE ScheduledFrameCompleted(IDeckLinkVideoFrame *completedFrame, BMDOutputFrameCompletionResult result) override
 			{
 				auto frame = dynamic_cast<DecklinkVideoFrame*>(completedFrame);
 				RecycleDecklinkFrame(frame);
@@ -256,7 +256,7 @@ namespace TVPlayR {
 					return S_OK;
 
 				int audio_samples_required = AudioSamplesRequired();
-				for (Core::ClockTarget* target : clock_targets_)
+				for (auto &target : clock_targets_)
 					target->RequestNextFrame(audio_samples_required);
 
 				Core::AVSync sync;
@@ -323,11 +323,11 @@ namespace TVPlayR {
 		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
 		int DecklinkOutput::GetBufferSize() const { return impl_->preroll_buffer_size_; }
 		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
-		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
-		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
-		void DecklinkOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
-		void DecklinkOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(target); }
-		void DecklinkOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(target); }
+		void DecklinkOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)	{ impl_->AddOverlay(overlay); }
+		void DecklinkOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) { impl_->RemoveOverlay(overlay); }
+		void DecklinkOutput::Push(const Core::AVSync &sync) { impl_->Push(sync); }
+		void DecklinkOutput::RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->RegisterClockTarget(target); }
+		void DecklinkOutput::UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->UnregisterClockTarget(target); }
 	}
 }
 

@@ -14,12 +14,12 @@ class InputSource : Common::NonCopyable
 public:
 	typedef std::function<void(FrameTimeInfo&)> TIME_CALLBACK;
 	typedef std::function<void()> LOADED_CALLBACK;
-	virtual Core::AVSync PullSync(const Core::Player& player, int audio_samples_count) = 0;
-	virtual bool IsAddedToPlayer(const Player& player) = 0;
-	virtual void AddToPlayer(const Player& player) = 0;
-	virtual void RemoveFromPlayer(const Core::Player& player) = 0;
-	virtual void AddOutputSink(std::shared_ptr<Core::OutputSink> output_sink) = 0;
-	virtual void RemoveOutputSink(std::shared_ptr<Core::OutputSink> output_sink) = 0;
+	virtual Core::AVSync PullSync(const Core::Player &player, int audio_samples_count) = 0;
+	virtual bool IsAddedToPlayer(const Player &player) = 0;
+	virtual void AddToPlayer(const Player &player) = 0;
+	virtual void RemoveFromPlayer(const Core::Player &player) = 0;
+	virtual void AddOutputSink(std::shared_ptr<Core::OutputSink> &output_sink) = 0;
+	virtual void RemoveOutputSink(std::shared_ptr<Core::OutputSink> &output_sink) = 0;
 	virtual void Play() = 0;
 	virtual void Pause() = 0;
 	virtual bool IsPlaying() const = 0;

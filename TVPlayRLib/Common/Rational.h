@@ -21,13 +21,13 @@ public:
 		: numerator_(av_rational.num)
 		, denominator_(av_rational.den)	{ }
 
-	Rational() : Rational(0, 1) {}
+	Rational() : Rational(0, 1) { }
 			
 	T Numerator() const { return numerator_; }
 
 	T Denominator() const { return denominator_; }
 
-	bool operator==(const Rational<T>& other) const {
+	bool operator==(const Rational<T> &other) const {
 		return other.numerator_ * denominator_ == other.denominator_ * numerator_;
 	}
 

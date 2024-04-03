@@ -13,7 +13,7 @@ namespace TVPlayR {
 struct FFmpegFileInfo::implementation : FFmpegInputBase
 {
 
-	implementation(const std::string& file_name, Core::HwAccel acceleration, const std::string& hw_device)
+	implementation(const std::string &file_name, Core::HwAccel acceleration, const std::string &hw_device)
 		: FFmpegInputBase(file_name, acceleration, hw_device)
 	{ 
 		input_.LoadStreamData();
@@ -45,11 +45,10 @@ struct FFmpegFileInfo::implementation : FFmpegInputBase
 		}
 		return nullptr;
 	}
-
 };
 
 
-FFmpegFileInfo::FFmpegFileInfo(const std::string & file_name, Core::HwAccel acceleration, const std::string& hw_device)
+FFmpegFileInfo::FFmpegFileInfo(const std::string &file_name, Core::HwAccel acceleration, const std::string &hw_device)
 	: impl_(std::make_unique<implementation>(file_name, acceleration, hw_device))
 { }
 
@@ -66,7 +65,7 @@ TVPlayR::FieldOrder FFmpegFileInfo::GetFieldOrder() const				{ return impl_->Get
 int FFmpegFileInfo::GetAudioChannelCount() const						{ return impl_->GetAudioChannelCount(); }
 bool FFmpegFileInfo::HaveAlphaChannel() const							{ return impl_->HaveAlphaChannel(); }
 int FFmpegFileInfo::StreamCount() const									{ return impl_->StreamCount(); }
-const Core::StreamInfo& FFmpegFileInfo::GetStreamInfo(int index) const	{ return impl_->GetStreamInfo(index); }
+const Core::StreamInfo & FFmpegFileInfo::GetStreamInfo(int index) const	{ return impl_->GetStreamInfo(index); }
 bool FFmpegFileInfo::IsStream() const									{ return impl_->IsStream(); }
 
 }}

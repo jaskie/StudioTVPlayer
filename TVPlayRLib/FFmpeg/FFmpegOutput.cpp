@@ -37,7 +37,7 @@ namespace TVPlayR {
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<Core::AVSync> buffer_;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
-			std::vector<Core::ClockTarget*> clock_targets_;
+			std::vector<std::shared_ptr<Core::ClockTarget>> clock_targets_;
 			std::int64_t video_frames_requested_ = 0LL;
 			std::int64_t audio_samples_requested_ = 0LL;
 			std::int64_t video_frames_pushed_ = 0LL;
@@ -46,7 +46,7 @@ namespace TVPlayR {
 			clock::time_point stream_start_time_;
 			Common::Executor executor_;
 
-			implementation(const FFOutputParams& params)
+			implementation(const FFOutputParams &params)
 				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, format_(Core::VideoFormatType::invalid)
@@ -78,7 +78,7 @@ namespace TVPlayR {
 			void Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
 				if (format_.type() != Core::VideoFormatType::invalid)
-					THROW_EXCEPTION("FFmpegOutput: already initialized")
+					THROW_EXCEPTION("FFmpegOutput: already initialized");
 				format_ = video_format;
 				src_pixel_format_ =  PixelFormatToFFmpegFormat(pixel_format);
 				audio_channels_count_ = audio_channel_count;
@@ -147,7 +147,7 @@ namespace TVPlayR {
 			{
 				assert(executor_.is_current());
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
-				for (Core::ClockTarget* target : clock_targets_)
+				for (auto& target : clock_targets_)
 					target->RequestNextFrame(audio_samples_required);
 				video_frames_requested_++;
 				audio_samples_requested_ += audio_samples_required;
@@ -204,7 +204,7 @@ namespace TVPlayR {
 				}
 			}
 
-			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			void AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
 			{
 				executor_.invoke([=]
 					{
@@ -212,7 +212,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
 			{
 				executor_.invoke([=]
 					{
@@ -220,7 +220,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(Core::AVSync& sync)
+			void Push(const Core::AVSync &sync)
 			{
 				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
 				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
@@ -241,12 +241,12 @@ namespace TVPlayR {
 					});
 			}
 
-			void RegisterClockTarget(Core::ClockTarget* target)
+			void RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target)
 			{
-				executor_.invoke([=] { clock_targets_.push_back(target); });
+				executor_.invoke([=] { clock_targets_.emplace_back(target); });
 			}
 
-			void UnregisterClockTarget(Core::ClockTarget* target)
+			void UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target)
 			{
 				executor_.invoke([=] { clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), target), clock_targets_.end()); });
 			}
@@ -254,7 +254,7 @@ namespace TVPlayR {
 
 		};
 
-		FFmpegOutput::FFmpegOutput(const FFOutputParams params)
+		FFmpegOutput::FFmpegOutput(const FFOutputParams &params)
 			: impl_(std::make_unique<implementation>(params))
 		{ }
 
@@ -262,17 +262,17 @@ namespace TVPlayR {
 
 		void FFmpegOutput::Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 
-		void FFmpegOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) 	{ impl_->AddOverlay(overlay); }
+		void FFmpegOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) 	{ impl_->AddOverlay(overlay); }
 
-		void FFmpegOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
+		void FFmpegOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) { impl_->RemoveOverlay(overlay); }
 
-		void FFmpegOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
+		void FFmpegOutput::Push(const Core::AVSync &sync) { impl_->Push(sync); }
 
-		void FFmpegOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
+		void FFmpegOutput::RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->RegisterClockTarget(target); }
 
-		void FFmpegOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(&target); }
+		void FFmpegOutput::UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->UnregisterClockTarget(target); }
 
-		const FFOutputParams& FFmpegOutput::GetStreamOutputParams() { return params_; }
+		const FFOutputParams & FFmpegOutput::GetStreamOutputParams() { return params_; }
 	}
 }
 

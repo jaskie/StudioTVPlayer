@@ -22,7 +22,7 @@ class DebugTarget
 private:
 	const std::string name_;
 	const enum DebugSeverity severity_;
-	inline void DebugPrint(const char* s)
+	inline void DebugPrint(const char *s)
 	{
 		OutputDebugStringA(s);
 	}
@@ -33,7 +33,7 @@ protected:
 		, severity_(severity)
 	{}
 
-	inline void DebugPrintLine(enum DebugSeverity severity, const std::string& s)
+	inline void DebugPrintLine(enum DebugSeverity severity, const std::string &s)
 	{
 #ifdef DEBUG
 		if (severity >= severity_)
@@ -46,5 +46,5 @@ protected:
 	inline enum DebugSeverity DebugSeverity() const { return severity_; }
 };
 
-}	
+}
 }

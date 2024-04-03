@@ -8,17 +8,17 @@ namespace TVPlayR {
 		class FFmpegOutput final : public Core::OutputDevice
 		{
 		public:
-			FFmpegOutput(const FFOutputParams params);
+			FFmpegOutput(const FFOutputParams &params);
 			virtual ~FFmpegOutput();
 			// OutputDevice
 			void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
-			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
-			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
+			void AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) override;
+			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) override;
 			//OutputSink
-			void Push(Core::AVSync& sync) override;
+			void Push(const Core::AVSync &sync) override;
 			//FrameClockSource
-			void RegisterClockTarget(Core::ClockTarget& target) override;
-			void UnregisterClockTarget(Core::ClockTarget& target) override;
+			void RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) override;
+			void UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) override;
 			// FFmpegOutput
 			const FFOutputParams& GetStreamOutputParams();
 		private:

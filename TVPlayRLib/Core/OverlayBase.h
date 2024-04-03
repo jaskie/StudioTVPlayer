@@ -9,7 +9,7 @@ namespace TVPlayR {
 class OverlayBase : public Common::NonCopyable
 {
 public:
-	virtual Core::AVSync Transform(Core::AVSync& sync) = 0;
+	virtual Core::AVSync Transform(const Core::AVSync &sync) = 0;
 };
 
 }}

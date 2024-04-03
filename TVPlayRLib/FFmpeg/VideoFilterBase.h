@@ -24,8 +24,8 @@ public:
 	void Reset();
 	bool IsInitialized() const;
 protected:
-	bool Push(std::shared_ptr<AVFrame> frame);
-	void SetFilter(const std::string& filter_str, const AVRational input_time_base );
+	bool Push(const std::shared_ptr<AVFrame> &frame);
+	void SetFilter(const std::string &filter_str, const AVRational input_time_base );
 private:
 	std::string filter_;
 	AVFilterContext* source_ctx_ = NULL;

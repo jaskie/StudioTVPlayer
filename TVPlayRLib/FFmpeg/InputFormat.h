@@ -28,9 +28,9 @@ public:
 	inline bool IsEof() const { return is_eof_; }
 	inline bool IsStreamDataLoaded() const { return is_stream_data_loaded_; }
 	int GetTotalAudioChannelCount() const;
+	std::int64_t GetVideoStartTime() const;
 	std::int64_t ReadStartTimecode() const;
 	const std::vector<Core::StreamInfo>& GetStreams() const { return streams_; };
-	const Core::StreamInfo * GetVideoStream() const;
 	bool IsValid() const;
 };
 

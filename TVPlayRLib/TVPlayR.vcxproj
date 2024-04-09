@@ -88,6 +88,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ColorSpace.h" />
+    <ClInclude Include="Common\ManualResetEvent.h" />
     <ClInclude Include="Core\AudioParameters.h" />
     <ClInclude Include="Core\CoreUtils.h" />
     <ClInclude Include="Core\OverlayBase.h" />
@@ -108,7 +109,6 @@
     <ClInclude Include="Common\BlockingCollection.h" />
     <ClInclude Include="Common\Debug.h" />
     <ClInclude Include="Common\Executor.h" />
-    <ClInclude Include="Common\Semaphore.h" />
     <ClInclude Include="Common\ComInitializer.h" />
     <ClInclude Include="Common\NonCopyable.h" />
     <ClInclude Include="Common\Exceptions.h" />

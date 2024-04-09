@@ -113,9 +113,6 @@
     <ClInclude Include="Core\MediaType.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Semaphore.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="Decklink\DecklinkUtils.h">
       <Filter>Decklink</Filter>
     </ClInclude>
@@ -214,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="Core\PlayerSynchroSource.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ManualResetEvent.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

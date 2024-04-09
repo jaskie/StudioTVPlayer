@@ -27,11 +27,11 @@ InputFormat::InputFormat(const std::string &file_name)
 
 std::int64_t InputFormat::ReadStartTimecode() const
 {
-	for (const Core::StreamInfo& stream : streams_)
+	for (const Core::StreamInfo &stream : streams_)
 	{
-		if (stream.Stream->codecpar->codec_type != AVMEDIA_TYPE_VIDEO)
+		if (stream.Type != Core::MediaType::video)
 			continue;
-		AVDictionaryEntry* tcr = av_dict_get(stream.Stream->metadata, "timecode", NULL, 0);
+		AVDictionaryEntry *tcr = av_dict_get(stream.Stream->metadata, "timecode", NULL, 0);
 		if (tcr)
 		{
 			AVTimecode tc;
@@ -50,11 +50,12 @@ bool InputFormat::LoadStreamData()
 	int best_video = av_find_best_stream(format_context_.get(), AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
 	for (size_t i = 0; i < format_context_->nb_streams; i++)
 	{
-		AVStream* stream = format_context_->streams[i];
+		AVStream *stream = format_context_->streams[i];
 		if (!stream)
 			continue;
-		AVDictionaryEntry* language = av_dict_get(stream->metadata, "language", NULL, 0);
-		streams_.push_back(Core::StreamInfo{
+		AVDictionaryEntry *language = av_dict_get(stream->metadata, "language", NULL, 0);
+		streams_.push_back(Core::StreamInfo
+			{
 			stream->index,
 			stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ? Core::MediaType::audio : stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO ? Core::MediaType::video : Core::MediaType::other,
 			stream->index == best_video,
@@ -95,11 +96,11 @@ bool InputFormat::CanSeek() const
 {
 	if (format_context_->ctx_flags & AVFMTCTX_UNSEEKABLE)
 		return false;
-	// hack to correctly determine seekability in case of .jpg files
-	auto stream = GetVideoStream();
-	if (!stream)
-		return true;
-	return stream->Duration > AV_TIME_BASE/10 || stream->Stream->nb_frames > 1 ;
+	// hack to correctly determine seekability for .jpg files
+	for (auto& stream : streams_)
+		if (stream.Type == Core::MediaType::video)
+			return stream.Duration > AV_TIME_BASE / 10 || stream.Stream->nb_frames > 1;
+	return true;
 }
 
 bool InputFormat::Seek(std::int64_t time)
@@ -124,14 +125,12 @@ int InputFormat::GetTotalAudioChannelCount() const
 	return result;
 }
 
-const Core::StreamInfo* InputFormat::GetVideoStream() const
+std::int64_t InputFormat::GetVideoStartTime() const
 {
-	auto info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo &info) { return info.Type == Core::MediaType::video && info.IsPreffered; });
-	if (info_iter == streams_.end())
-		info_iter = std::find_if(streams_.begin(), streams_.end(), [](const Core::StreamInfo &info) { return info.Type == Core::MediaType::video; });
-	if (info_iter == streams_.end())
-		return nullptr;
-	return &*info_iter;
+	for (auto &stream : streams_)
+		if (stream.Type == Core::MediaType::video)
+			return stream.StartTime;
+	return 0LL;
 }
 
 bool InputFormat::IsValid() const

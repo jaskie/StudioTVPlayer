@@ -24,7 +24,7 @@ namespace TVPlayR {
 			void ProcessAudio(const std::unique_ptr<Decoder>& decoder);
 			void FlushAudioMuxerIfNeeded();
 			void FlushBufferOrLoopIfNeeded();
-			virtual Core::AVSync PullSync(int audio_samples_count);
+			virtual Core::AVSync PullSync();
 			bool Seek(const std::int64_t time);
 		private:
 			std::atomic_bool is_eof_ = false;

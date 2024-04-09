@@ -5,6 +5,7 @@
 #include "../Core/AVSync.h"
 #include "../Core/Player.h"
 #include "PlayerScaler.h"
+#include "../Core/PlayerSynchroSource.h"
 
 
 namespace TVPlayR {
@@ -17,11 +18,12 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 	std::atomic_bool is_loop_ = false;
 	std::atomic_bool is_producer_running_ = true;
 	const Core::Player *player_ = nullptr;
-	std::unique_ptr<PlayerScaler> player_scaler_;
+	std::unique_ptr<Core::PlayerSynchroSource> player_synchro_source_;
 	std::mutex player_scaler_reset_mutex_;
 
 	TIME_CALLBACK frame_played_callback_ = nullptr;
 	PAUSED_CALLBACK paused_callback_ = nullptr;
+	std::thread frame_reader_thread_;
 
 	implementation(const std::string &file_name, Core::HwAccel acceleration, const std::string &hw_device)
 		: FFmpegBufferedInput(file_name, acceleration, hw_device, Core::AudioParameters { 48000, 2, AVSampleFormat::AV_SAMPLE_FMT_FLT})
@@ -37,10 +39,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 
 	Core::AVSync PullSync(const Core::Player &player, int audio_samples_count)
 	{
-		Core::AVSync sync = FFmpegBufferedInput::PullSync(audio_samples_count);
-		auto audio = sync.Audio;
-		auto video = sync.Video;
-
+		Core::AVSync sync = player_synchro_source_->PullSync(audio_samples_count);
 		if (frame_played_callback_)
 			frame_played_callback_(sync.TimeInfo);
 		if (is_eof_)
@@ -66,7 +65,8 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 		if (player_)
 			THROW_EXCEPTION("FFmpegInput: already added to another player");
 		player_ = &player;
-		player_scaler_ = std::make_unique<PlayerScaler>(player);
+		player_synchro_source_ = std::make_unique<Core::PlayerSynchroSource>(player, true, player.AudioChannelsCount());
+		frame_reader_thread_ = std::thread(&implementation::ProducerTheradStart, this);
 	}
 
 	void RemoveFromPlayer(const Core::Player &player)
@@ -74,7 +74,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 		if (player_ != &player)
 			return;
 		player_ = nullptr;
-		player_scaler_.reset();
+		player_synchro_source_.reset();
 	}
 
 	void Play()
@@ -102,6 +102,15 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 	void SetupAudio(const std::vector<Core::AudioChannelMapEntry> &audio_channel_map)
 	{
 
+	}
+
+	void ProducerTheradStart()
+	{
+		while (player_synchro_source_)
+		{
+			auto sync = FFmpegBufferedInput::PullSync();
+			player_synchro_source_->Push(sync, FFmpegInputBase::GetFrameRate());
+		}
 	}
 
 };

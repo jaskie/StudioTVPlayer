@@ -77,6 +77,7 @@ int main()
 		ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		player->AddOutputSink(ndi);
 		ndi->RegisterClockTarget(player);
+		
 		//std::this_thread::sleep_for(200ms);
 		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
 			"libx264",															// VideoCodec
@@ -136,22 +137,22 @@ int main()
 			char i = std::cin.get();
  			if (i == 'q')
 				break;
-			if (i == 'c')
+			/*if (i == 'c')
 				player->Clear();
-			/*if (i == 'r')
+			if (i == 'r')
 				player.AddOutput(stream);
 			if (i == 's')
 				player.RemoveOutput(stream);*/
 
-			/*if (i == 's')
+			if (i == 's')
 				input->Seek(AV_TIME_BASE * 10);
 			if (i == 'l')
-				player.Load(input);
+				player->Load(input);
 			if (i == ' ')
 				if (input->IsPlaying())
 					input->Pause();
 				else	 
-					input->Play();*/
+					input->Play();
 		}
 		//decklink_input->RemoveOutputSink(record_file);
 		player->RemoveOutputSink(ndi);

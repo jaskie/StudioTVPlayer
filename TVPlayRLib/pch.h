@@ -57,10 +57,10 @@ extern "C"
 #include "Decklink/DeckLinkAPI_h.h"
 #include "Common/Exceptions.h"
 #include "Common/NonCopyable.h"
-#include "Common/Semaphore.h"
 #include "Common/BlockingCollection.h"
 #include "Common/Executor.h"
 #include "Common/Rational.h"
 #include "Common/Debug.h"
+#include "Common/ManualResetEvent.h"
 
 #endif //PCH_H

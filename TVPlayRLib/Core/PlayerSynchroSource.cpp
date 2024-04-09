@@ -11,7 +11,7 @@ namespace TVPlayR {
 	namespace Core {
 		PlayerSynchroSource::PlayerSynchroSource(const Core::Player &player, bool process_video, int audio_channels)
 			: player_(player)
-			, audio_fifo_(Core::AudioParameters{ player.AudioSampleRate(), player.AudioChannelsCount(), player.AudioSampleFormat() }, av_make_q(1, player.AudioSampleRate()), 0LL, AV_TIME_BASE / 10)
+			, audio_fifo_(player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), 0LL, AV_TIME_BASE / 10)
 			, process_video_(process_video)
 			, input_frame_rate_({0, 1})
 			, frame_queue_(2)
@@ -40,7 +40,7 @@ namespace TVPlayR {
 			}
 			if (sync.Audio)
 			{
-				audio_fifo_.TryPush(audio_resampler_.Resample(sync.Audio));
+				audio_fifo_.Push(audio_resampler_.Resample(sync.Audio));
 			}
 		}
 

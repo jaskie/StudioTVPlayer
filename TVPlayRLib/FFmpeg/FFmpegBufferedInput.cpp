@@ -42,22 +42,29 @@ namespace TVPlayR {
 			InitializeAudioDecoders();
 			if (!audio_decoders_.empty())
 				audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, output_audio_parameters_);
+			std::int64_t media_duration = GetVideoDuration();
+			if (!media_duration)
+				media_duration = GetAudioDuration();
 			buffer_ = std::make_unique<SynchronizingBuffer>(
 				video_decoder_->FrameRate(),
+				video_decoder_->TimeBase(),
 				output_audio_parameters_,
 				AV_TIME_BASE, // 1s
-				0,
 				input_.ReadStartTimecode(),
-				GetVideoDuration(),
-				GetFieldOrder()
+				media_duration
 			);
 		}
 
 		void FFmpegBufferedInput::InitializeAudioDecoders()
 		{
+			std::int64_t seek = 0;
 			auto& streams = input_.GetStreams();
-			const Core::StreamInfo *video_stream = input_.GetVideoStream();
-			std::int64_t seek = video_stream ? video_stream->StartTime : 0;
+			for (auto &video_stream : input_.GetStreams())
+				if (video_stream.Type == Core::MediaType::video)
+				{
+					seek = video_stream.StartTime;
+					break;
+				}
 			for (const auto& stream : streams)
 			{
 				if (stream.Type == Core::MediaType::audio)
@@ -111,7 +118,7 @@ namespace TVPlayR {
 		void FFmpegBufferedInput::ProcessVideo()
 		{
 			while (auto decoded = video_decoder_->Pull())
-				buffer_->PushVideo(decoded, video_decoder_->TimeBase());
+				buffer_->PushVideo(decoded);
 		}
 
 		void FFmpegBufferedInput::ProcessAudio(const std::unique_ptr<Decoder>& decoder)
@@ -141,7 +148,7 @@ namespace TVPlayR {
 				(!audio_muxer_ || audio_muxer_->IsEof())) // muxer exists and is Eof
 				if (is_loop_)
 				{
-					std::int64_t seek_time = input_.GetVideoStream()->StartTime;
+					std::int64_t seek_time = input_.GetVideoStartTime();
 					input_.Seek(seek_time);
 					video_decoder_->Seek(seek_time);
 					for (const auto& decoder : audio_decoders_)
@@ -159,14 +166,14 @@ namespace TVPlayR {
 		}
 #pragma endregion
 
-		Core::AVSync FFmpegBufferedInput::PullSync(int audio_samples_count)
+		Core::AVSync FFmpegBufferedInput::PullSync()
 		{
 			bool finished = false;
 			Core::AVSync sync;
 			{
 				if (is_eof_)
-					return buffer_->PullSync(audio_samples_count);
-				sync = buffer_->PullSync(audio_samples_count);
+					return buffer_->PullSync();
+				sync = buffer_->PullSync();
 				finished = buffer_->IsEof();
 			}
 			if (finished)

@@ -5,20 +5,25 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-AudioFifo::AudioFifo(Core::AudioParameters audio_parameters, AVRational time_base, std::int64_t seek_time, std::int64_t fifo_duration)
+AudioFifo::AudioFifo(AVSampleFormat sample_format, int channel_count, int sample_rate, std::int64_t seek_time, std::int64_t capacity)
 	: Common::DebugTarget(Common::DebugSeverity::debug, "AduioFifo")
-	, audio_parameters_(audio_parameters)
-	, audio_fifo_(av_audio_fifo_alloc(audio_parameters.SampleFormat, audio_parameters.ChannelCount, static_cast<int>(fifo_duration * audio_parameters.SampleRate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
-	, time_base_(time_base)
+	, sample_format_(sample_format)
+	, channel_count_(channel_count)
+	, sample_rate_(sample_rate)
+	, audio_fifo_(av_audio_fifo_alloc(sample_format, channel_count, static_cast<int>(capacity * sample_rate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
+	, time_base_(av_make_q(1, sample_rate_))
 	, seek_time_(seek_time)
 {
-	av_channel_layout_default(&channel_layout_, audio_parameters.ChannelCount);
+	const uint64_t ALL_CHANNELS = 0x7FFFFFFFFFFFFFFFULL;
+	av_channel_layout_from_mask(&channel_layout_, ALL_CHANNELS >> (63 - channel_count));
 }
 
-bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
+bool AudioFifo::Push(std::shared_ptr<AVFrame> frame)
 {
-	assert(frame->format == audio_parameters_.SampleFormat);
-    DebugPrintLine(Common::DebugSeverity::trace, "Pushed audio frame to fifo: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000) + " ms");
+	assert(frame->format == sample_format_);
+	assert(frame->sample_rate == sample_rate_);
+	assert(frame->ch_layout.nb_channels == channel_count_);
+    DebugPrintLine(Common::DebugSeverity::trace, "Pushed audio frame to fifo: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, frame->time_base)) / AV_TIME_BASE) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000) + " ms");
 	int fifo_space = av_audio_fifo_space(audio_fifo_.get());
 	int fifo_size = av_audio_fifo_size(audio_fifo_.get());
 	if (frame->nb_samples * 2 > fifo_space + fifo_size)
@@ -26,8 +31,8 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 		av_audio_fifo_realloc(audio_fifo_.get(), frame->nb_samples * 2);
 		fifo_space = av_audio_fifo_space(audio_fifo_.get());
 	}
-	std::int64_t frame_start_time = PtsToTime(frame->pts, time_base_);
-	std::int64_t frame_end_time = frame_start_time + av_rescale(frame->nb_samples, AV_TIME_BASE, audio_parameters_.SampleRate);
+	std::int64_t frame_start_time = PtsToTime(frame->pts, frame->time_base);
+	std::int64_t frame_end_time = frame_start_time + av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate);
 	if (frame_end_time > seek_time_)
 	{
 		if (fifo_space < frame->nb_samples)
@@ -37,9 +42,9 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 		end_sample_ += frame->nb_samples;
 		if (frame_start_time <= seek_time_) // first frame
 		{
-			start_sample_ = av_rescale(frame_start_time, audio_parameters_.SampleRate, AV_TIME_BASE);
+			start_sample_ = av_rescale(frame_start_time, frame->sample_rate, AV_TIME_BASE);
 			end_sample_ += start_sample_;
-			int samples_to_discard = static_cast<int>((seek_time_ - frame_start_time) * audio_parameters_.SampleRate / AV_TIME_BASE);
+			int samples_to_discard = static_cast<int>((seek_time_ - frame_start_time) * frame->sample_rate / AV_TIME_BASE);
 			if (samples_to_discard > 0)
 			{
 				THROW_ON_FFMPEG_ERROR(av_audio_fifo_drain(audio_fifo_.get(), samples_to_discard));
@@ -59,10 +64,11 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 		return nullptr;
 	auto frame(AllocFrame());
 	frame->nb_samples = nb_samples;
-	frame->format = audio_parameters_.SampleFormat;
+	frame->format = sample_format_;
 	frame->ch_layout = channel_layout_;
-	frame->sample_rate = audio_parameters_.SampleRate;
-	frame->pts = av_rescale(start_sample_, time_base_.den, static_cast<std::int64_t>(audio_parameters_.SampleRate) * time_base_.num);
+	frame->sample_rate = sample_rate_;
+	frame->time_base = time_base_;
+	frame->pts = av_rescale(start_sample_, time_base_.den, static_cast<std::int64_t>(sample_rate_) * time_base_.num);
 	int samples_from_fifo = min(samples_in_fifo, nb_samples);
 	if (nb_samples > 0)
 	{
@@ -74,12 +80,19 @@ std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
 	}
 	if (samples_from_fifo < nb_samples)
 	{
-		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channel_layout_.nb_channels, audio_parameters_.SampleFormat);
+		av_samples_set_silence(frame->data, samples_from_fifo, nb_samples - samples_from_fifo, channel_layout_.nb_channels, sample_format_);
 		DebugPrintLine(Common::DebugSeverity::debug, "Filled audio with silence at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(nb_samples - samples_from_fifo, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms");
 	}
 	else
 		DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from fifo at time: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(av_rescale(frame->nb_samples, AV_TIME_BASE, frame->sample_rate) / 1000) + " ms");
 	return frame;
+}
+
+std::shared_ptr<AVFrame> AudioFifo::PullToTime(std::int64_t time)
+{
+	std::int64_t to_sample = av_rescale(time, sample_rate_, AV_TIME_BASE);
+	assert(to_sample >= start_sample_);
+	return Pull(static_cast<int>(to_sample - start_sample_));
 }
 
 void AudioFifo::DiscardSamples(int nb_samples)
@@ -109,13 +122,13 @@ int AudioFifo::SamplesCount() const
 
 std::int64_t AudioFifo::TimeMin() const
 {
-	return av_rescale(start_sample_, AV_TIME_BASE , audio_parameters_.SampleRate);
+	return av_rescale(start_sample_, AV_TIME_BASE , sample_rate_);
 }
 
 
 std::int64_t AudioFifo::TimeMax() const
 {
-	return av_rescale(end_sample_, AV_TIME_BASE, audio_parameters_.SampleRate);
+	return av_rescale(end_sample_, AV_TIME_BASE, sample_rate_);
 }
 
 

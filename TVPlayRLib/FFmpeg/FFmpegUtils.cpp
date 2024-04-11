@@ -87,7 +87,7 @@ namespace TVPlayR {
 			if (!frame)
 				THROW_EXCEPTION("FFmpegUtils: audio frame not allocated");
 			frame->format = format;
-			av_channel_layout_default(&frame->ch_layout, num_channels);
+			av_channel_layout_from_mask(&frame->ch_layout, ALL_CHANNELS >> (63 - num_channels));
 			frame->nb_samples = samples_count;
 			frame->sample_rate = 48000;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));

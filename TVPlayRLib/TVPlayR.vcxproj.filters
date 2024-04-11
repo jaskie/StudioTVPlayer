@@ -152,7 +152,7 @@
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h">
+    <ClInclude Include="Decklink\DecklinkInputPlayerSource.h">
       <Filter>Decklink</Filter>
     </ClInclude>
     <ClInclude Include="Core\OverlayBase.h">
@@ -214,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="Common\ManualResetEvent.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="FFmpeg\FFmpegInputPlayerSource.h">
+      <Filter>FFmpeg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -293,7 +296,7 @@
     <ClCompile Include="FFmpeg\FFmpegFileInfo.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
-    <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
+    <ClCompile Include="Decklink\DecklinkInputPlayerSource.cpp">
       <Filter>Decklink</Filter>
     </ClCompile>
     <ClCompile Include="FFmpeg\FFmpegInputBase.cpp">
@@ -340,6 +343,9 @@
     </ClCompile>
     <ClCompile Include="Core\PlayerSynchroSource.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="FFmpeg\FFmpegInputPlayerSource.cpp">
+      <Filter>FFmpeg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -21,7 +21,7 @@ public:
 	AVRational OutputTimeBase() const override;
 	AVRational OutputFrameRate() const;
 	void Flush() override;
-	void Reset();
+	void Clear();
 	bool IsInitialized() const;
 protected:
 	bool Push(const std::shared_ptr<AVFrame> &frame);
@@ -34,8 +34,8 @@ private:
 	int input_width_ = 0;
 	int input_height_ = 0;
 	AVPixelFormat input_pixel_format_ = AV_PIX_FMT_NONE;
-	AVRational input_time_base_ = av_make_q(1, 1);
-	AVRational input_sar_ = av_make_q(1, 1);
+	AVRational input_time_base_ = { 0, 1 };
+	AVRational input_sar_ = { 1, 1 };
 	void CreateFilter(int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar);
 };
 

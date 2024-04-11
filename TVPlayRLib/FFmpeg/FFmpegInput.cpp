@@ -5,7 +5,7 @@
 #include "../Core/AVSync.h"
 #include "../Core/Player.h"
 #include "PlayerScaler.h"
-#include "../Core/PlayerSynchroSource.h"
+#include "FFmpegInputPlayerSource.h"
 
 
 namespace TVPlayR {
@@ -18,7 +18,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 	std::atomic_bool is_loop_ = false;
 	std::atomic_bool is_producer_running_ = true;
 	const Core::Player *player_ = nullptr;
-	std::unique_ptr<Core::PlayerSynchroSource> player_synchro_source_;
+	std::unique_ptr<FFmpegInputPlayerSource> player_source_;
 	std::mutex player_scaler_reset_mutex_;
 
 	TIME_CALLBACK frame_played_callback_ = nullptr;
@@ -39,7 +39,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 
 	Core::AVSync PullSync(const Core::Player &player, int audio_samples_count)
 	{
-		Core::AVSync sync = player_synchro_source_->PullSync(audio_samples_count);
+		Core::AVSync sync = player_source_->PullSync(audio_samples_count);
 		if (frame_played_callback_)
 			frame_played_callback_(sync.TimeInfo);
 		if (is_eof_)
@@ -65,7 +65,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 		if (player_)
 			THROW_EXCEPTION("FFmpegInput: already added to another player");
 		player_ = &player;
-		player_synchro_source_ = std::make_unique<Core::PlayerSynchroSource>(player, true, player.AudioChannelsCount());
+		player_source_ = std::make_unique<FFmpegInputPlayerSource>(player, true, player.AudioChannelsCount());
 		frame_reader_thread_ = std::thread(&implementation::ProducerTheradStart, this);
 	}
 
@@ -74,7 +74,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 		if (player_ != &player)
 			return;
 		player_ = nullptr;
-		player_synchro_source_.reset();
+		player_source_.reset();
 	}
 
 	void Play()
@@ -106,10 +106,10 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 
 	void ProducerTheradStart()
 	{
-		while (player_synchro_source_)
+		while (player_source_)
 		{
 			auto sync = FFmpegBufferedInput::PullSync();
-			player_synchro_source_->Push(sync, FFmpegInputBase::GetFrameRate());
+			player_source_->Push(sync, FFmpegInputBase::GetFrameRate());
 		}
 	}
 

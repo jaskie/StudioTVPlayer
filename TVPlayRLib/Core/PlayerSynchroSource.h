@@ -22,8 +22,9 @@ namespace TVPlayR {
 		public:
 			const Core::Player& Player() const { return player_; }
 			virtual void Push(const Core::AVSync &sync, AVRational frame_rate);
-			Core::AVSync PullSync(int audio_samples_count);
+			virtual Core::AVSync PullSync(int audio_samples_count);
 			virtual ~PlayerSynchroSource();
+		protected:
 			PlayerSynchroSource(const Core::Player &player, bool process_video, int audio_channels);
 		private:
 			const Core::Player &player_;

@@ -18,6 +18,7 @@ AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>> &decoders, st
 	, sink_ctx_(NULL, [](AVFilterContext *filter) { avfilter_free(filter); })
 	, inputs_(NULL, [](AVFilterInOut *io) { avfilter_inout_free(&io); })
 	, outputs_(NULL, [](AVFilterInOut *io) { avfilter_inout_free(&io); })
+	, output_time_base_(av_make_q(0, 1))
 {
 	InitializeGraph(decoders);
 }
@@ -49,19 +50,19 @@ std::string AudioMuxer::GetAudioMuxerString(const std::vector<std::unique_ptr<De
 	return filter.str();
 }
 
-int AudioMuxer::OutputSampleRate()
+int AudioMuxer::OutputSampleRate() const
 {
 	return av_buffersink_get_sample_rate(sink_ctx_.get());
 }
 
-int AudioMuxer::OutputChannelsCount()
+int AudioMuxer::OutputChannelsCount() const
 {
 	return av_buffersink_get_channels(sink_ctx_.get());
 }
 
 AVRational AudioMuxer::OutputTimeBase() const
 {
-	return av_buffersink_get_time_base(sink_ctx_.get());
+	return output_time_base_;
 }
 
 AVSampleFormat AudioMuxer::OutputSampleFormat() const
@@ -74,7 +75,7 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	auto dest = std::find_if(std::begin(source_ctx_), std::end(source_ctx_), [&stream_index](const std::pair<int, unique_ptr<AVFilterContext>>& ctx) {return ctx.first == stream_index; });
 	if (dest == std::end(source_ctx_))
 		THROW_EXCEPTION("AudioMuxer: stream not found");
-	DebugPrintLine(Common::DebugSeverity::trace, "Pushed to muxer:   " + std::to_string(PtsToTime(frame->pts, input_time_base_) / 1000));
+	DebugPrintLine(Common::DebugSeverity::trace, "Pushed to muxer:   " + std::to_string(FrameTime(frame) / 1000));
 	int ret = av_buffersrc_write_frame(dest->second.get(), frame.get());
 	switch (ret)
 	{
@@ -95,7 +96,8 @@ std::shared_ptr<AVFrame> AudioMuxer::Pull()
 	switch (ret)
 	{
 		case 0: 
-			DebugPrintLine(Common::DebugSeverity::trace, "Pulled from muxer: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_.get())) / 1000));
+			frame->time_base = output_time_base_;
+			DebugPrintLine(Common::DebugSeverity::trace, "Pulled from muxer: " + std::to_string(FrameTime(frame) / 1000));
 			return frame;
 		case AVERROR(EAGAIN):
 			break;
@@ -185,6 +187,7 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &de
 		THROW_EXCEPTION("AudioMuxer: avfilter_graph_parse_ptr failed");
 	if (avfilter_graph_config(graph_.get(), NULL) < 0)
 		THROW_EXCEPTION("AudioMuxer: avfilter_graph_config failed");
+	output_time_base_ = av_buffersink_get_time_base(weak_sink_ctx);
 	if (DebugSeverity() <= Common::DebugSeverity::debug)
 		DumpFilter(filter_str_, graph_.get());
 }

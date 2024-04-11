@@ -11,9 +11,10 @@ namespace TVPlayR {
 			int OutputSampleRate() const { return dest_sample_rate_; }
 			AVChannelLayout OutputChannelLayout() const { return dest_channel_layout_; }
 		private:
-			const int dest_sample_rate_; 
+			const int dest_sample_rate_;
+			const AVRational dest_time_base_;
 			const AVSampleFormat dest_sample_format_;
-			AVChannelLayout dest_channel_layout_;
+			const AVChannelLayout dest_channel_layout_;
 			unique_ptr<SwrContext> swr_;
 		};
 

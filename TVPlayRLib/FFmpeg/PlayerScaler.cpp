@@ -31,10 +31,10 @@ PlayerScaler::PlayerScaler(const Core::Player& player)
 }
 
 
-bool PlayerScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate, AVRational input_time_base)
+bool PlayerScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate)
 {
 	if (!IsInitialized())
-		VideoFilterBase::SetFilter(GetFilterString(frame, input_frame_rate), input_time_base);
+		VideoFilterBase::SetFilter(GetFilterString(frame, input_frame_rate), frame->time_base);
 	return VideoFilterBase::Push(frame);
 }
 

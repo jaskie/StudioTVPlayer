@@ -15,7 +15,7 @@ namespace TVPlayR {
 class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 {
 public:
-	SynchronizingBuffer(AVRational video_frame_rate, AVRational video_time_base, const Core::AudioParameters &audio_parameters, std::int64_t capacity, std::int64_t start_timecode, std::int64_t media_duration);
+	SynchronizingBuffer(AVRational video_frame_rate, AVRational video_time_base, AVRational audio_time_base, const Core::AudioParameters &audio_parameters, std::int64_t capacity, std::int64_t start_timecode, std::int64_t media_duration);
 	virtual ~SynchronizingBuffer();
 	void PushAudio(const std::shared_ptr<AVFrame> &frame);
 	void PushVideo(const std::shared_ptr<AVFrame> &frame);

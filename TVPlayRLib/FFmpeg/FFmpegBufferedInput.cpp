@@ -40,14 +40,19 @@ namespace TVPlayR {
 		{
 			InitializeVideoDecoder();
 			InitializeAudioDecoders();
+			AVRational audio_time_base{ 0, 1 };
 			if (!audio_decoders_.empty())
+			{
 				audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, output_audio_parameters_);
+				audio_time_base = audio_muxer_->OutputTimeBase();
+			}
 			std::int64_t media_duration = GetVideoDuration();
 			if (!media_duration)
 				media_duration = GetAudioDuration();
 			buffer_ = std::make_unique<SynchronizingBuffer>(
 				video_decoder_->FrameRate(),
 				video_decoder_->TimeBase(),
+				audio_time_base,
 				output_audio_parameters_,
 				AV_TIME_BASE, // 1s
 				input_.ReadStartTimecode(),

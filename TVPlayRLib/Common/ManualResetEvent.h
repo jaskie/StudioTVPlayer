@@ -16,6 +16,8 @@ namespace TVPlayR {
 			void Set()
 			{
 				std::lock_guard<std::mutex> lock(mutex_);
+				if (state_)
+					return;
 				state_ = true;
 				cv_.notify_all();
 			}
@@ -23,6 +25,8 @@ namespace TVPlayR {
 			void Reset()
 			{
 				std::lock_guard<std::mutex> lock(mutex_);
+				if (!state_)
+					return;
 				state_ = false;
 			}
 

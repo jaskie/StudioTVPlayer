@@ -16,7 +16,7 @@ class PlayerScaler final :	public VideoFilterBase
 public:
 	PlayerScaler(const Core::Player& player);
 	const Core::VideoFormat& Format() const { return output_format_; }
-	bool Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate);
+	void Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate);
 private:
 	const Core::VideoFormat output_format_;
 	const AVPixelFormat output_pixel_format_;

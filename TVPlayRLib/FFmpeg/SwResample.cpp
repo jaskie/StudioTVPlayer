@@ -30,6 +30,7 @@ namespace TVPlayR {
 			resampled->ch_layout = dest_channel_layout_;
 			THROW_ON_FFMPEG_ERROR(swr_convert_frame(swr_.get(), resampled.get(), frame.get()));
 			resampled->time_base = dest_time_base_;
+			// TODO: verify this calculation
 			resampled->pts = av_rescale_q(frame->pts, dest_time_base_, frame->time_base);
 			return resampled;
 		}

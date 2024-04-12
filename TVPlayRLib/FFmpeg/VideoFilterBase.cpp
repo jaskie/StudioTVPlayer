@@ -4,7 +4,13 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-bool VideoFilterBase::Push(const std::shared_ptr<AVFrame> &frame)
+VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
+	: Common::DebugTarget(Common::DebugSeverity::trace, "VideoFilterBase")
+	, output_pix_fmt_(output_pix_fmt)
+{ }
+
+
+void VideoFilterBase::Push(const std::shared_ptr<AVFrame> &frame)
 { 
 	if (frame->width != input_width_ ||
 		frame->height != input_height_ ||
@@ -13,38 +19,40 @@ bool VideoFilterBase::Push(const std::shared_ptr<AVFrame> &frame)
 		frame->sample_aspect_ratio.den != input_sar_.den
 		)
 		CreateFilter(frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio);
-	return av_buffersrc_write_frame(source_ctx_, frame.get()) >= 0;
+	std::lock_guard<std::mutex> lock(frame_queue_mutex_);
+	frame_buffer_.emplace_back(frame);
+	assert(frame_buffer_.size() < 100);
 }
-
-VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
-	: Common::DebugTarget(Common::DebugSeverity::info, "VideoFilterBase")
-	, output_pix_fmt_(output_pix_fmt)
-{ }
 
 std::shared_ptr<AVFrame> VideoFilterBase::Pull()
 {
 	if (!sink_ctx_)
 		return nullptr;
 	auto frame = AllocFrame();
-	auto ret = av_buffersink_get_frame(sink_ctx_, frame.get());
-	switch (ret)
+	while (true)
 	{
-	case AVERROR_EOF:
-		is_eof_ = true;
-		return nullptr;
-	case AVERROR(EAGAIN):
-		break;
-	case AVERROR(EINVAL):
-		return nullptr;
-	}
-	if (FF_SUCCESS(ret))
-	{
-		//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
-		//	frame->best_effort_timestamp = frame->pts;
-		frame->time_base = OutputTimeBase();
-		frame->pts = av_rescale_q(frame->best_effort_timestamp, input_time_base_, frame->time_base);
-		DebugPrintLine(Common::DebugSeverity::trace, "Pulled from VideoFilterBase: " + std::to_string(FrameTime(frame) / 1000) + "\n");
-		return frame;
+		int ret = av_buffersink_get_frame(sink_ctx_, frame.get());
+		switch (ret)
+		{
+		case AVERROR_EOF:
+			is_eof_ = true;
+			return nullptr;
+		case AVERROR(EAGAIN):
+			if (!PushFrameFromBuffer())
+				return nullptr;
+			continue;
+		case AVERROR(EINVAL):
+			return nullptr;
+		}
+		if (FF_SUCCESS(ret))
+		{
+			//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
+			//	frame->best_effort_timestamp = frame->pts;
+			frame->time_base = output_time_base_;
+			frame->pts = av_rescale_q(frame->pts, input_time_base_, output_time_base_);
+			DebugPrintLine(Common::DebugSeverity::trace, "Pull: " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
+			return frame;
+		}
 	}
 	return nullptr;
 }
@@ -73,18 +81,16 @@ AVPixelFormat VideoFilterBase::OutputPixelFormat()
 	return static_cast<AVPixelFormat>(av_buffersink_get_format(sink_ctx_));
 }
 
-AVRational VideoFilterBase::OutputTimeBase() const 
+AVRational VideoFilterBase::OutputTimeBase() const
 { 
-	assert(sink_ctx_);
-	return av_buffersink_get_time_base(sink_ctx_);
+	return output_time_base_;
 }
 
-AVRational VideoFilterBase::OutputFrameRate() const 
+AVRational VideoFilterBase::OutputFrameRate() const
 { 
 	assert(sink_ctx_);
 	return av_buffersink_get_frame_rate(sink_ctx_);
 }
-
 
 void VideoFilterBase::Flush()
 {
@@ -138,6 +144,7 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 		input_height_ = input_height;
 		input_pixel_format_ = static_cast<AVPixelFormat>(input_pixel_format);
 		input_sar_ = input_sar;
+		output_time_base_ = av_buffersink_get_time_base(sink_ctx_);
 		DebugPrintLine(Common::DebugSeverity::debug, args.str());
 		if (DebugSeverity() <= Common::DebugSeverity::info)
 			DumpFilter(filter_, graph_.get());
@@ -148,6 +155,22 @@ void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFor
 		avfilter_inout_free(&inputs);
 		throw e;
 	}
+}
+
+bool VideoFilterBase::PushFrameFromBuffer()
+{
+	std::lock_guard<std::mutex> lock(frame_queue_mutex_);
+	if (frame_buffer_.empty())
+		return false; // buffer empty - normal case
+	std::shared_ptr<AVFrame> &frame = frame_buffer_.front();
+	if (FF_SUCCESS(av_buffersrc_write_frame(source_ctx_, frame.get())))
+	{
+		DebugPrintLine(Common::DebugSeverity::trace, "PushFrameFromBuffer: " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
+		frame_buffer_.pop_front();
+		return true;
+	}
+	DebugPrintLine(Common::DebugSeverity::warning, "av_buffersrc_write_frame failded for" + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
+	return false;
 }
 
 

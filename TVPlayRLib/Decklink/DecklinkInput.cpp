@@ -1,8 +1,8 @@
 #include "../pch.h"
 #include "DecklinkInput.h"
 #include "DecklinkUtils.h"
+#include "DecklinkInputPlayerSource.h"
 #include "../DecklinkTimecodeSource.h"
-#include "DecklinkInputSynchroProvider.h"
 #include "../Core/Player.h"
 #include "../Core/VideoFormat.h"
 #include "../Core/AVSync.h"
@@ -31,7 +31,7 @@ namespace TVPlayR {
 			const bool													capture_video_;
 			const bool													format_autodetection_;
 			const BMDPixelFormat										pixel_format_;
-			std::vector<std::unique_ptr<DecklinkInputSynchroProvider>>	player_providers_;
+			std::vector<std::unique_ptr<DecklinkInputPlayerSource>>	    player_sources_;
 			std::vector<std::shared_ptr<Core::OutputSink>>				output_sinks_;
 			BMDTimeScale												time_scale_ = 1LL;
 			std::int64_t												last_frame_time_ = 0;
@@ -148,8 +148,8 @@ namespace TVPlayR {
 						last_frame_time_,
 						AV_NOPTS_VALUE }
 					);
-				for (auto& provider : player_providers_)
-					provider->Push(sync, current_format_.FrameRate().av());
+				for (auto &source : player_sources_)
+					source->Push(sync, current_format_.FrameRate().av());
 				for (auto& sink : output_sinks_)
 					sink->Push(sync);
 				if (frame_played_callback_)
@@ -163,7 +163,7 @@ namespace TVPlayR {
 
 			bool IsAddedToPlayer(const Core::Player &player)
 			{
-				return std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& provider) { return &provider->Player() == &player; }) != player_providers_.end();
+				return std::find_if(player_sources_.begin(), player_sources_.end(), [&](const std::unique_ptr<DecklinkInputPlayerSource>& provider) { return &provider->Player() == &player; }) != player_sources_.end();
 			}
 
 			void AddToPlayer(const Core::Player &player)
@@ -171,18 +171,18 @@ namespace TVPlayR {
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
 				if (!IsAddedToPlayer(player))
 				{
-					std::unique_ptr<DecklinkInputSynchroProvider> provider = std::make_unique<DecklinkInputSynchroProvider>(player, capture_video_, audio_channels_count_);
-					player_providers_.emplace_back(std::move(provider));
+					std::unique_ptr<DecklinkInputPlayerSource> provider = std::make_unique<DecklinkInputPlayerSource>(player, capture_video_, audio_channels_count_);
+					player_sources_.emplace_back(std::move(provider));
 				}
 			}
 
 			void RemoveFromPlayer(const Core::Player &player)
 			{
 				std::lock_guard<std::mutex> lock(channel_list_mutex_);
-				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
-				if (provider == player_providers_.end())
+				auto provider = std::find_if(player_sources_.begin(), player_sources_.end(), [&](const std::unique_ptr<DecklinkInputPlayerSource>& p) { return &p->Player() == &player; });
+				if (provider == player_sources_.end())
 					return;
-				player_providers_.erase(provider);
+				player_sources_.erase(provider);
 			}
 
 			void AddOutputSink(std::shared_ptr<Core::OutputSink> &output_sink)
@@ -217,8 +217,8 @@ namespace TVPlayR {
 
 			Core::AVSync PullSync(const Core::Player &player, int audio_samples_count)
 			{
-				auto provider = std::find_if(player_providers_.begin(), player_providers_.end(), [&](const std::unique_ptr<DecklinkInputSynchroProvider>& p) { return &p->Player() == &player; });
-				if (provider == player_providers_.end())
+				auto provider = std::find_if(player_sources_.begin(), player_sources_.end(), [&](const std::unique_ptr<DecklinkInputPlayerSource>& p) { return &p->Player() == &player; });
+				if (provider == player_sources_.end())
 					return Core::AVSync();
 				return (*provider)->PullSync(audio_samples_count);
 			}

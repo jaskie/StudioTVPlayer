@@ -1,6 +1,5 @@
 #include "../pch.h"
 #include "AudioFifo.h"
-#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -12,7 +11,7 @@ AudioFifo::AudioFifo(AVRational input_time_base, AVSampleFormat sample_format, i
 	, channel_count_(channel_count)
 	, sample_rate_(sample_rate)
 	, audio_fifo_(av_audio_fifo_alloc(sample_format, channel_count, static_cast<int>(capacity * sample_rate / AV_TIME_BASE)), [](AVAudioFifo * fifo) {av_audio_fifo_free(fifo); })
-	, output_time_base_(av_make_q(1, sample_rate_))
+	, output_time_base_(av_make_q(1, sample_rate))
 	, seek_time_(seek_time)
 	, channel_layout_(GetChannelLayoutFromMask(channel_count))
 {

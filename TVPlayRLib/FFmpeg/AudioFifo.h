@@ -1,6 +1,6 @@
 #pragma once
 #include "../Core/AudioParameters.h"
-
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
@@ -29,7 +29,7 @@ public:
 	std::int64_t TimeMin() const;
 	AVRational TimeBase() const { return output_time_base_; }
 private:
-	const std::unique_ptr<AVAudioFifo, void(*)(AVAudioFifo*)> audio_fifo_;
+	const unique_ptr<AVAudioFifo> audio_fifo_;
 	const int sample_rate_;
 	const AVRational input_time_base_;
 	const AVRational output_time_base_;

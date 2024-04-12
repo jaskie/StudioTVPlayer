@@ -11,7 +11,7 @@ public:
 	~DecklinkInputPlayerSource();
 	void Push(const Core::AVSync &sync, AVRational frame_rate) override;
 private:
-	Common::Executor	executor_;
+	Common::Executor executor_;
 };
 
 }}

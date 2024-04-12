@@ -14,6 +14,7 @@ FFmpegInputPlayerSource::FFmpegInputPlayerSource(const Core::Player& player, boo
 
 void FFmpegInputPlayerSource::Push(const Core::AVSync& sync, AVRational frame_rate)
 {
+	DebugPrintLine(Common::DebugSeverity::trace, "Push:  video " + std::to_string(static_cast<float>(FrameTime(sync.Video)) / AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(FrameTime(sync.Audio)) / AV_TIME_BASE) + ", delta:" + std::to_string((FrameTime(sync.Video) - FrameTime(sync.Audio)) / 1000) + " ms");
 	PlayerSynchroSource::Push(sync, frame_rate);
 }
 

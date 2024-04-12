@@ -22,6 +22,7 @@ namespace TVPlayR {
 			out_frame->height = dest_height_;
 			out_frame->format = dest_pixel_format_;
 			out_frame->pts = in_frame->pts;
+			out_frame->time_base = in_frame->time_base;
 			out_frame->interlaced_frame = in_frame->interlaced_frame;
 			out_frame->top_field_first = in_frame->top_field_first;
 			out_frame->sample_aspect_ratio = in_frame->sample_aspect_ratio;

@@ -10,10 +10,5 @@ namespace TVPlayR
 		{
 			VideoFilterBase::SetFilter(filter_str, av_inv_q(input_frame_rate));
 		}
-
-		bool OutputVideoFilter::Push(const std::shared_ptr<AVFrame>& frame)
-		{
-			return VideoFilterBase::Push(frame);
-		}
 	}
 }

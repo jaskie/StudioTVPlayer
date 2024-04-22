@@ -20,7 +20,7 @@ AudioMuxer::AudioMuxer(const std::vector<std::unique_ptr<Decoder>> &decoders, st
 	, outputs_(NULL, [](AVFilterInOut *io) { avfilter_inout_free(&io); })
 	, output_time_base_(av_make_q(0, 1))
 {
-	InitializeGraph(decoders);
+	Initialize(decoders);
 }
 
 std::string AudioMuxer::GetAudioMuxerString(const std::vector<std::unique_ptr<Decoder>> &decoders)
@@ -122,23 +122,20 @@ void AudioMuxer::Flush()
 		av_buffersrc_write_frame(ctx.second.get(), NULL);
 }
 
-void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &decoders)
+void AudioMuxer::Initialize(const std::vector<std::unique_ptr<Decoder>> &decoders)
 {
 	if (std::find_if(decoders.begin(), decoders.end(), [](const std::unique_ptr<Decoder> &decoder) { return decoder->MediaType() != AVMEDIA_TYPE_AUDIO; }) != decoders.end())
-		THROW_EXCEPTION("AudioMuxer::InitializeGraph() got non-audio stream")
+		THROW_EXCEPTION("AudioMuxer::Initialize() got non-audio stream")
 
-		source_ctx_.clear();
+	source_ctx_.clear();
 	is_eof_ = false;
 	is_flushed_ = false;
 	graph_.reset(avfilter_graph_alloc());
-
 	AVSampleFormat out_sample_fmts[] = { output_audio_parameters_.SampleFormat, AV_SAMPLE_FMT_NONE };
 	std::int64_t out_channel_layouts[] = { output_channel_layout_ , -1 };
 	int out_sample_rates[] = { output_audio_parameters_.SampleRate, -1 };
 	AVFilterInOut *inputs = avfilter_inout_alloc();
-	inputs_.reset(inputs);
 	AVFilterInOut *outputs = avfilter_inout_alloc();
-	outputs_.reset(outputs);
 	const AVFilter *buffersrc = avfilter_get_by_name("abuffer");
 	const AVFilter *buffersink = avfilter_get_by_name("abuffersink");
 	AVFilterContext *weak_sink_ctx = NULL;
@@ -161,7 +158,7 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &de
 			decoder->TimeBase().num, decoder->TimeBase().den, decoder->AudioSampleRate(),
 			av_get_sample_fmt_name(decoder->AudioSampleFormat()));
 		av_channel_layout_describe(ch_layout, args + ret, sizeof(args) - ret);
-		AVFilterContext* weak_source = NULL;
+		AVFilterContext *weak_source = NULL;
 		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&weak_source, buffersrc, "ain", args, NULL, graph_.get()));
 		snprintf(args, sizeof(args), "a%d", i);
 		current_output->name = av_strdup(args);
@@ -169,7 +166,7 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &de
 		current_output->pad_idx = 0;
 		source_ctx_.emplace_back(std::pair<int, unique_ptr<AVFilterContext>>(
 			decoder->StreamIndex(),
-			unique_ptr<AVFilterContext>(weak_source, [](AVFilterContext* filter) { avfilter_free(filter); })));
+			unique_ptr<AVFilterContext>(weak_source, [](AVFilterContext *filter) { avfilter_free(filter); })));
 		if (i == decoders.size() - 1)
 			current_output->next = NULL;
 		else
@@ -183,8 +180,17 @@ void AudioMuxer::InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &de
 	inputs->filter_ctx = weak_sink_ctx;
 	inputs->pad_idx = 0;
 	inputs->next = NULL;
-	if (avfilter_graph_parse_ptr(graph_.get(), filter_str_.c_str(), &inputs, &outputs, NULL) < 0)
+	if (avfilter_graph_parse_ptr(graph_.get(), filter_str_.c_str(), &inputs, &outputs, NULL) >= 0)
+	{
+		inputs_.reset(inputs);
+		outputs_.reset(outputs);
+	}
+	else
+	{
+		avfilter_inout_free(&inputs);
+		avfilter_inout_free(&outputs);
 		THROW_EXCEPTION("AudioMuxer: avfilter_graph_parse_ptr failed");
+	}
 	if (avfilter_graph_config(graph_.get(), NULL) < 0)
 		THROW_EXCEPTION("AudioMuxer: avfilter_graph_config failed");
 	output_time_base_ = av_buffersink_get_time_base(weak_sink_ctx);

@@ -12,7 +12,6 @@ namespace TVPlayR {
 class VideoFilterBase :	public FilterBase, protected Common::DebugTarget
 {
 public:
-	VideoFilterBase(AVPixelFormat output_pix_fmt);
 	std::shared_ptr<AVFrame> Pull() override;
 	int OutputWidth();
 	int OutputHeight();
@@ -25,13 +24,16 @@ public:
 	bool IsInitialized() const;
 	void Push(const std::shared_ptr<AVFrame>& frame);
 protected:
-	void SetFilter(const std::string &filter_str, const AVRational input_time_base );
+	VideoFilterBase(AVPixelFormat output_pix_fmt);
+	void SetFilter(const std::string &filter_str);
+	virtual void Initialize(const std::shared_ptr<AVFrame> &frame);
 private:
 	std::string filter_;
-	AVFilterContext* source_ctx_ = NULL;
-	AVFilterContext* sink_ctx_ = NULL;
+	unique_ptr<AVFilterContext> source_ctx_;
+	unique_ptr<AVFilterContext> sink_ctx_;
+	unique_ptr<AVFilterInOut> inputs_;
+	unique_ptr<AVFilterInOut> outputs_;
 	const AVPixelFormat output_pix_fmt_;
-	AVRational output_time_base_ = { 0, 1 };
 	int input_width_ = 0;
 	int input_height_ = 0;
 	AVPixelFormat input_pixel_format_ = AV_PIX_FMT_NONE;
@@ -39,7 +41,6 @@ private:
 	AVRational input_sar_ = { 1, 1 };
 	std::mutex frame_queue_mutex_;
 	std::deque<std::shared_ptr<AVFrame>> frame_buffer_;
-	void CreateFilter(int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar);
 	bool PushFrameFromBuffer();
 };
 

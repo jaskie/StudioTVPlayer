@@ -40,12 +40,13 @@ private:
 	const std::int64_t start_timecode_;
 	const std::int64_t media_duration_;
 	std::mutex content_mutex_;
-	Common::ManualResetEvent push_event_;
-	Common::ManualResetEvent pull_event_;
+	Common::ManualResetEvent allow_push_;
+	Common::ManualResetEvent allow_pull_;
 	std::deque<std::shared_ptr<AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
 	std::unique_ptr<AudioFifo> fifo_loop_;
 	void Sweep();
+	void SetEvents();
 };
 
 }}

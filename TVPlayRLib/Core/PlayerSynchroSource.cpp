@@ -25,18 +25,18 @@ namespace TVPlayR {
 			if (process_video_ && sync.Video)
 			{
 				if (!scaler_)
-					scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_);
+					scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_, frame_rate);
 				if (frame_rate.num * input_frame_rate_.den != input_frame_rate_.num * frame_rate.den)
 				{
 					scaler_->Flush();
 					while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
-						frame_queue_.try_add(queue_item_t(sync.TimeInfo, received_video));
+						frame_queue_.emplace(sync.TimeInfo, received_video);
 					scaler_->Clear();
 					input_frame_rate_ = frame_rate;
 				}
-				scaler_->Push(sync.Video, frame_rate);
+				scaler_->Push(sync.Video);
 				while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
-					frame_queue_.try_add(queue_item_t(sync.TimeInfo, received_video));
+					frame_queue_.emplace(sync.TimeInfo, received_video);
 			}
 			if (sync.Audio)
 			{

@@ -21,7 +21,7 @@ public:
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
 	std::shared_ptr<AVFrame> Pull() override;
 	void Flush() override;
-	void InitializeGraph(const std::vector<std::unique_ptr<Decoder>> &decoders);
+	void Initialize(const std::vector<std::unique_ptr<Decoder>> &decoders);
 private:
 	std::string GetAudioMuxerString(const std::vector<std::unique_ptr<Decoder>> &decoders);
 	std::vector<std::pair<int, unique_ptr<AVFilterContext>>> source_ctx_;

@@ -24,8 +24,8 @@ namespace TVPlayR {
 		, capacity_(capacity)
 		, start_timecode_(start_timecode)
 		, media_duration_(media_duration)
-		, push_event_(true)
-		, pull_event_(false)
+		, allow_push_(true)
+		, allow_pull_(false)
 	{
 	}
 
@@ -35,7 +35,7 @@ namespace TVPlayR {
 	{
 		if (!(frame && audio_parameters_.ChannelCount))
 			return;
-		push_event_.Wait();
+		allow_push_.Wait();
 		DebugPrintLine(Common::DebugSeverity::trace, "Push audio " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
 		std::lock_guard<std::mutex> lock(content_mutex_);
 		assert(!is_flushed_);
@@ -50,10 +50,7 @@ namespace TVPlayR {
 			DebugPrintLine(Common::DebugSeverity::warning, "Audio fifo overflow. Flushing.");
 			fifo_->Push(frame);
 		}
-		if (IsFull())
-			push_event_.Reset();
-		if (IsReady())
-			pull_event_.Set();
+		SetEvents();
 	}
 
 	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame> &frame)
@@ -61,7 +58,7 @@ namespace TVPlayR {
 		if (!(frame && have_video_))
 			return;
 		assert(!is_flushed_);
-		push_event_.Wait();
+		allow_push_.Wait();
 		DebugPrintLine(Common::DebugSeverity::trace, "Push video " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
 		std::lock_guard<std::mutex> lock(content_mutex_);
 		if (video_queue_.size() > video_frame_rate_.num * 10 / video_frame_rate_.den) // approx. 10 seconds
@@ -70,15 +67,12 @@ namespace TVPlayR {
 			DebugPrintLine(Common::DebugSeverity::warning, "Video queue overflow. Flushing.");
 		}
 		video_queue_.push_back(frame);
-		if (IsFull())
-			push_event_.Reset();
-		if (IsReady())
-			pull_event_.Set();
+		SetEvents();
 	}
 
 	Core::AVSync SynchronizingBuffer::PullSync()
 	{ 
-		pull_event_.Wait();
+		allow_pull_.Wait();
 		std::lock_guard<std::mutex> lock(content_mutex_);
 		assert(!video_queue_.empty());
 		std::shared_ptr<AVFrame> video = video_queue_.front();
@@ -98,9 +92,9 @@ namespace TVPlayR {
 			DebugPrintLine(Common::DebugSeverity::trace, "PullSync: video " + std::to_string(static_cast<float>(FrameTime(video))/AV_TIME_BASE) + ", audio: " + std::to_string(static_cast<float>(PtsToTime(audio->pts, audio_time_base_))/AV_TIME_BASE) + ", delta:" + std::to_string((PtsToTime(video->pts, video_time_base_) - PtsToTime(audio->pts, audio_time_base_)) / 1000) + " ms");
 #endif // DEBUG
 		std::int64_t time = FrameTime(video);
-		push_event_.Set();
+		allow_push_.Set();
 		if (!IsReady())
-			pull_event_.Reset();
+			allow_pull_.Reset();
 		return Core::AVSync(audio, video, Core::FrameTimeInfo { time + start_timecode_, time, media_duration_ == AV_NOPTS_VALUE ? AV_NOPTS_VALUE : media_duration_ - time});
 	}
 
@@ -168,6 +162,14 @@ namespace TVPlayR {
 				video_queue_.pop_front();
 		if (fifo_ && min_video == AV_NOPTS_VALUE && (max_audio - min_audio) > 2 * capacity_)
 			fifo_->DiscardSamples(static_cast<int>(av_rescale(max_audio - min_audio - 2 * capacity_, audio_sample_rate_, AV_TIME_BASE)));*/
+	}
+
+	void SynchronizingBuffer::SetEvents()
+	{
+		if (IsFull())
+			allow_push_.Reset();
+		if (IsReady())
+			allow_pull_.Set();
 	}
 
 }}

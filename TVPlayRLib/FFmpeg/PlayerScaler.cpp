@@ -9,36 +9,21 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-static std::string ColorSpaceToString(enum ColorSpace color_space) {
-	switch (color_space)
-	{
-	case ColorSpace::bt601:
-		return "bt601";
-	case ColorSpace::bt709:
-		return "bt709";
-	case ColorSpace::bt2020:
-		return "bt2020";
-	default:
-		THROW_EXCEPTION("Invalid color space");
-	}
-}
-
-PlayerScaler::PlayerScaler(const Core::Player& player)
+PlayerScaler::PlayerScaler(const Core::Player& player, const AVRational input_frame_rate)
 	: VideoFilterBase(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
 	, output_format_(player.Format())
 	, output_pixel_format_(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
+	, input_frame_rate_(input_frame_rate)
 {
 }
 
-
-void PlayerScaler::Push(std::shared_ptr<AVFrame> frame, AVRational input_frame_rate)
+void PlayerScaler::Initialize(const std::shared_ptr<AVFrame>& frame)
 {
-	if (!IsInitialized())
-		VideoFilterBase::SetFilter(GetFilterString(frame, input_frame_rate), frame->time_base);
-	VideoFilterBase::Push(frame);
+	VideoFilterBase::SetFilter(GetFilterString(frame));
+	VideoFilterBase::Initialize(frame);
 }
 
-std::string PlayerScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate)
+std::string PlayerScaler::GetFilterString(const std::shared_ptr<AVFrame>& frame)
 {
 	std::ostringstream filter;
 	int input_height = frame->height;
@@ -53,6 +38,7 @@ std::string PlayerScaler::GetFilterString(std::shared_ptr<AVFrame>& frame, Commo
 			filter << "setsar=64/45,";
 		input_height = 576;
 	}
+	Common::Rational<int> input_frame_rate(input_frame_rate_);
 	if (input_frame_rate == output_format_.FrameRate())
 	{
 		if (input_interlaced)

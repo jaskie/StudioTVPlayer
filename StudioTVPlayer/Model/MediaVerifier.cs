@@ -46,6 +46,7 @@ namespace StudioTVPlayer.Model
             catch (OperationCanceledException)
             { }
             _mediaQueue.Dispose();
+            _cancellationTokenSource.Dispose();
         }
 
         public static MediaVerifier Current { get; } = new MediaVerifier();
@@ -59,7 +60,10 @@ namespace StudioTVPlayer.Model
             _mediaQueue.Add(new MediaVerifyData { Media = media, Width = DefaultThumbnailWidth, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
         }
 
-        public void Verify(MediaFile media, int thumbnailWidth, int thumbnailHeight)
+        /// <summary>
+        /// Method sets IsVerified and IsValid properties for <see cref="MediaFile"/>. Returns true is verification was successful, even when file is not valid.
+        /// </summary>
+        public bool Verify(MediaFile media, int thumbnailWidth = DefaultThumbnailWidth, int thumbnailHeight = DefaultThumbnailHeight)
         {
             try
             {
@@ -90,55 +94,41 @@ namespace StudioTVPlayer.Model
                     }
                 }
                 media.IsValid = media.Duration > TimeSpan.Zero;
+                media.IsVerified = true;
+                return true;
             }
             catch 
             {
                 media.IsValid = false;
-                throw;
+                media.IsVerified = true;
+                return false;
             }
-            media.IsVerified = true;
-        }
-
-        public void Verify(MediaFile media)
-        {
-            Verify(media, DefaultThumbnailWidth, DefaultThumbnailHeight);
         }
 
         private void MediaVerifierTask()
         {
             while (!_cancellationTokenSource.IsCancellationRequested)
             {
-                try
-                {
-                    MediaVerifyData vd = _mediaQueue.Take(_cancellationTokenSource.Token);
+                MediaVerifyData vd = _mediaQueue.Take(_cancellationTokenSource.Token);
 
-                    if (vd.CancellationToken.IsCancellationRequested)
-                        continue;
-                    if (!File.Exists(vd.Media.FullPath))
-                        continue;
-                    if (vd.FirstVerification == default)
-                        vd.FirstVerification = DateTime.Now;
-                    try
-                    {
-                        Verify(vd.Media, vd.Width, vd.Height);
-                    }
-                    catch (Exception e)
-                    {
-                        if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
-                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds. Error: {1}", vd.Media.FullPath, e);
-                        else
-                        {
-                            Task.Run(async () =>
-                            {
-                                await Task.Delay(TimeSpan.FromSeconds(5), vd.CancellationToken);
-                                _mediaQueue.Add(vd);
-                            }, _cancellationTokenSource.Token);
-                        }
-                    }
-                }
-                catch (OperationCanceledException)
+                if (vd.CancellationToken.IsCancellationRequested)
+                    continue;
+                if (!File.Exists(vd.Media.FullPath))
+                    continue;
+                if (vd.FirstVerification == default)
+                    vd.FirstVerification = DateTime.Now;
+                if (!Verify(vd.Media, vd.Width, vd.Height))
                 {
-                    return;
+                    if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
+                        Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath);
+                    else
+                    {
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(5), vd.CancellationToken);
+                            _mediaQueue.Add(vd);
+                        }, _cancellationTokenSource.Token);
+                    }
                 }
             }
         }

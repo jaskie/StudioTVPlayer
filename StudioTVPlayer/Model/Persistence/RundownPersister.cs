@@ -42,8 +42,7 @@ namespace StudioTVPlayer.Model.Persistence
                 {
                     case FileRundownItem fileRundownItem:
                         var mediaFile = new MediaFile(fileRundownItem.FileName);
-                        MediaVerifier.Current.Verify(mediaFile);
-                        if (mediaFile.IsValid)
+                        if (MediaVerifier.Current.Verify(mediaFile) && mediaFile.IsValid)
                             rundownItem = new Model.FileRundownItem(mediaFile);
                         break;
                     case DecklinkInputRundownItem decklinkInputRundownItem:

@@ -17,11 +17,13 @@
 namespace TVPlayR {
 	namespace Decklink {
 		
-		struct DecklinkOutput::implementation : IDeckLinkVideoOutputCallback, Common::DebugTarget
+		struct DecklinkOutput::implementation : IDeckLinkVideoOutputCallback, IDeckLinkNotificationCallback, Common::DebugTarget
 		{
 			const CComQIPtr<IDeckLinkOutput> output_;
 			const CComQIPtr<IDeckLinkKeyer> decklink_keyer_;
 			const CComQIPtr<IDeckLinkProfileAttributes> attributes_;
+			const CComQIPtr<IDeckLinkNotification> notification_;
+			const CComQIPtr<IDeckLinkStatus> status_;
 			int index_;
 			Core::VideoFormat format_;
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
@@ -46,6 +48,8 @@ namespace TVPlayR {
 				, output_(decklink)
 				, attributes_(decklink)
 				, decklink_keyer_(decklink)
+				, notification_(decklink)
+				, status_(decklink)
 				, input_buffer_(2)
 				, format_(Core::VideoFormatType::invalid)
 				, index_(index)
@@ -59,6 +63,7 @@ namespace TVPlayR {
 			~implementation()
 			{
 				Uninitialize();
+				notification_->Unsubscribe(BMDNotifications::bmdStatusChanged, this);
 				output_->SetScheduledFrameCompletionCallback(nullptr);
 			}
 
@@ -96,8 +101,10 @@ namespace TVPlayR {
 					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to enable video output");
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
+				if (FAILED(notification_->Subscribe(BMDNotifications::bmdStatusChanged, this)))
+					DebugPrintLine(Common::DebugSeverity::warning, "Failed to register notification callback.");
 			}
-						
+
 			void Preroll()
 			{
 				if (!output_)
@@ -194,10 +201,8 @@ namespace TVPlayR {
 			{
 				if (format_.type() == Core::VideoFormatType::invalid)
 					return;
+				output_->StopScheduledPlayback(0LL, NULL, 0LL);
 				format_ = Core::VideoFormatType::invalid;
-				BMDTimeValue frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
-				BMDTimeValue actual_stop;
-				output_->StopScheduledPlayback(frame_time, &actual_stop, format_.FrameRate().Numerator());
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
@@ -302,6 +307,24 @@ namespace TVPlayR {
 
 			HRESULT STDMETHODCALLTYPE ScheduledPlaybackHasStopped(void) override
 			{
+				return S_OK;
+			}
+#pragma endregion
+
+#pragma region IDeckLinkNotificationCallback
+			HRESULT STDMETHODCALLTYPE Notify(BMDNotifications topic, ULONGLONG param1, ULONGLONG param2)
+			{
+				if (topic == BMDNotifications::bmdStatusChanged && param1 == BMDDeckLinkStatusID::bmdDeckLinkStatusReferenceSignalLocked && keyer_ != DecklinkKeyerType::Internal)
+				{
+					BOOL locked;
+					if (SUCCEEDED(status_->GetFlag(BMDDeckLinkStatusID::bmdDeckLinkStatusReferenceSignalLocked, &locked)) && locked)
+					{
+						DebugPrintLine(Common::DebugSeverity::info, "Reference signal locked, restarting playback");
+						output_->StopScheduledPlayback(0LL, NULL, 0LL);
+						Preroll();
+						output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
+					}
+				}
 				return S_OK;
 			}
 #pragma endregion

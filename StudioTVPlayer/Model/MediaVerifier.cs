@@ -17,7 +17,6 @@ namespace StudioTVPlayer.Model
             public MediaFile Media;
             public int Height;
             public int Width;
-            public CancellationToken CancellationToken;
             public DateTime FirstVerification;
         }
 
@@ -51,13 +50,13 @@ namespace StudioTVPlayer.Model
 
         public static MediaVerifier Current { get; } = new MediaVerifier();
 
-        public void Queue(MediaFile media, CancellationToken cancellationToken)
+        public void Queue(MediaFile media)
         {
             if (_cancellationTokenSource.IsCancellationRequested)
                 return;
             if (_mediaQueue.Any(vd => vd.Media == media && vd.Width == DefaultThumbnailWidth && vd.Height == DefaultThumbnailHeight))
                 return;
-            _mediaQueue.Add(new MediaVerifyData { Media = media, Width = DefaultThumbnailWidth, Height = DefaultThumbnailHeight, CancellationToken = cancellationToken });
+            _mediaQueue.Add(new MediaVerifyData { Media = media, Width = DefaultThumbnailWidth, Height = DefaultThumbnailHeight });
         }
 
         /// <summary>
@@ -107,28 +106,34 @@ namespace StudioTVPlayer.Model
 
         private void MediaVerifierTask()
         {
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            var token = _cancellationTokenSource.Token;
+            while (true)
             {
-                MediaVerifyData vd = _mediaQueue.Take(_cancellationTokenSource.Token);
-
-                if (vd.CancellationToken.IsCancellationRequested)
-                    continue;
-                if (!File.Exists(vd.Media.FullPath))
-                    continue;
-                if (vd.FirstVerification == default)
-                    vd.FirstVerification = DateTime.Now;
-                if (!Verify(vd.Media, vd.Width, vd.Height))
+                try
                 {
-                    if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
-                        Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath);
-                    else
+                    MediaVerifyData vd = _mediaQueue.Take(token);
+
+                    if (!File.Exists(vd.Media.FullPath))
+                        continue;
+                    if (vd.FirstVerification == default)
+                        vd.FirstVerification = DateTime.Now;
+                    if (!Verify(vd.Media, vd.Width, vd.Height))
                     {
-                        Task.Run(async () =>
+                        if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
+                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath);
+                        else
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(5), vd.CancellationToken);
-                            _mediaQueue.Add(vd);
-                        }, _cancellationTokenSource.Token);
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(5), token)
+                                    .ContinueWith(_ => _mediaQueue.Add(vd));
+                            });
+                        }
                     }
+                }
+                catch (Exception e) when (e is OperationCanceledException || e is ObjectDisposedException)
+                {
+                    return;
                 }
             }
         }

@@ -1,7 +1,6 @@
 ﻿using LibAtem.Commands.MixEffects;
 using LibAtem.Common;
 using LibAtem.Net;
-using StudioTVPlayer.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,9 +29,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.DeviceId) ?? blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
                 foreach (var binging in controllerConfiguration.Bindings.OfType<Model.Configuration.BlackmagicDesignAtemPlayerBinding>())
                     AddBindingViewModel(new BlackmagicDesignAtemPlayerBindingViewModel(binging));
+                if (Model.BlackmagicDesignAtemDevices.IsConnected(_address))
+                    Connect = true;
             }
             else
+            {
                 _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault();
+                IsModified = true;
+            }
         }
 
         public override void Apply()
@@ -65,7 +69,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 {
                     if (value)
                     {
-                        _atemClient = BlackmagicDesignAtemDevices.GetDevice(address);
+                        _atemClient = Model.BlackmagicDesignAtemDevices.GetDevice(address);
                         _atemClient.OnConnection += OnConnection;
                         _atemClient.OnDisconnect += OnDisconnect;
                         _atemClient.OnReceive += OnReceive;
@@ -73,7 +77,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     }
                     else
                     {
-                        if (BlackmagicDesignAtemDevices.ReleaseDevice(address) && _atemClient != null)
+                        if (Model.BlackmagicDesignAtemDevices.ReleaseDevice(address) && _atemClient != null)
                         {
                             _atemClient.OnConnection -= OnConnection;
                             _atemClient.OnDisconnect -= OnDisconnect;
@@ -102,16 +106,16 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 switch (cmd)
                 {
                     case ProgramInputGetCommand prgI:
-                        NotifyBindings(BlackmagicDesignAtemCommand.PrgI, prgI.Index, prgI.Source);
+                        NotifyBindings(Model.BlackmagicDesignAtemCommand.PrgI, prgI.Index, prgI.Source);
                         break;
                     case PreviewInputGetCommand prvI:
-                        NotifyBindings(BlackmagicDesignAtemCommand.PrvI, prvI.Index, prvI.Source);
+                        NotifyBindings(Model.BlackmagicDesignAtemCommand.PrvI, prvI.Index, prvI.Source);
                         break;
                 }
             }
         }
 
-        private void NotifyBindings(BlackmagicDesignAtemCommand command, MixEffectBlockId me, VideoSource videoSource)
+        private void NotifyBindings(Model.BlackmagicDesignAtemCommand command, MixEffectBlockId me, VideoSource videoSource)
         {
             foreach (var binding in Bindings.OfType<BlackmagicDesignAtemPlayerBindingViewModel>())
                 binding.AtemCommandReceived(command, me, videoSource);
@@ -131,7 +135,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public bool CanPressConnect => Connect || SelectedDevice != null;
 
-        internal void NotifyDeviceSeen(BlackmagicDesignAtemDeviceInfo device)
+        internal void NotifyDeviceSeen(Model.BlackmagicDesignAtemDeviceInfo device)
         {
             NotifyPropertyChanged(nameof(Devices));
             if (device.DeviceId == _deviceId || device.Address.ToString() == _address)
@@ -145,7 +149,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             }
         }
 
-        internal void NotifyDeviceLost(BlackmagicDesignAtemDeviceInfo device)
+        internal void NotifyDeviceLost(Model.BlackmagicDesignAtemDeviceInfo device)
         {
             NotifyPropertyChanged(nameof(Devices));
             if (device == _selectedDevice)
@@ -172,11 +176,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     return;
                 NotifyPropertyChanged(nameof(DisplayName));
                 NotifyPropertyChanged(nameof(CanPressConnect));
-                if (value != null)
-                {
-                    _address = value.Address.ToString();
-                    _deviceId = value.DeviceId;
-                }
+                _address = value?.Address.ToString();
+                _deviceId = value?.DeviceId;
                 NotifyPropertyChanged(nameof(Address));
             }
         }
@@ -204,7 +205,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                         _atemClient.OnReceive -= OnReceive;
                         _atemClient = null;
                     }
-                    BlackmagicDesignAtemDevices.ReleaseDevice(oldAddress);
+                    Model.BlackmagicDesignAtemDevices.ReleaseDevice(oldAddress);
                     IsConnected = false;
                 }
             }
@@ -227,7 +228,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _disposed = true;
             if (_atemClient != null)
             {
-                BlackmagicDesignAtemDevices.ReleaseDevice(Address);
+                Model.BlackmagicDesignAtemDevices.ReleaseDevice(Address);
                 _atemClient.OnConnection -= OnConnection;
                 _atemClient.OnDisconnect -= OnDisconnect;
                 _atemClient.OnReceive -= OnReceive;

@@ -3,6 +3,9 @@ using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace StudioTVPlayer.ViewModel
@@ -37,6 +40,7 @@ namespace StudioTVPlayer.ViewModel
         public async void InitializeAndShowPlayoutView()
         {
             GlobalApplicationData.Current.PlayerControllerConnectionStatusChanged += PlayerControllerConnectionStatusChanged;
+            GlobalApplicationData.Current.PlayerControllersModified += PlayerControllersModified;
             try
             {
                 GlobalApplicationData.Current.Initialize();
@@ -45,19 +49,29 @@ namespace StudioTVPlayer.ViewModel
             catch (Exception e)
             {
                 await ShowMessageAsync("Initialization failed", 
-                    $"Application failed to initialize. It may be configuration problem.\n\nPlease, review the configuration considering following error:\n{(e.InnerException ?? e).Message}");
+                    $"Application failed to initialize. It may be a configuration problem.\n\nPlease, review the configuration considering following error:\n{(e.InnerException ?? e).Message}");
                 CurrentViewModel = new ConfigurationViewModel();
             }
         }
 
+        private void PlayerControllersModified(object sender, EventArgs e)
+        {
+            foreach (var playerControler in PlayerControllers)
+                playerControler.Dispose();
+            PlayerControllers = GlobalApplicationData.Current.PlayerControllers.Select(playerController => new PlayerControllerViewModel(playerController)).ToArray();
+            NotifyPropertyChanged(nameof(PlayerControllers));
+        }
+
         private void PlayerControllerConnectionStatusChanged(object sender, EventArgs e)
         {
-            NotifyPropertyChanged(nameof(PlayerControllersConnected));
+            NotifyPropertyChanged(nameof(AllPlayerControllersConnected));
         }
 
         public bool IsControllerStatusVisible => CurrentViewModel is PlayoutViewModel && GlobalApplicationData.Current.PlayerControllers.Count > 0;
 
-        public bool PlayerControllersConnected => GlobalApplicationData.Current.PlayerControllersConnected;
+        public bool AllPlayerControllersConnected => GlobalApplicationData.Current.AllPlayerControllersConnected;
+
+        public IEnumerable<PlayerControllerViewModel> PlayerControllers { get; private set; } = Array.Empty<PlayerControllerViewModel>();
 
         public void ShowPlayoutView()
         {

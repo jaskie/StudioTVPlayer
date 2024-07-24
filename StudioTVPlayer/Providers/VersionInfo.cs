@@ -16,16 +16,16 @@ namespace StudioTVPlayer.Providers
                 return $"{version.Major}.{version.Minor}.{version.Build}";
             }
         }
-        public string Wrapper => TVPlayR.VersionInfo.Wrapper;
+        public string Wrapper { get; } = TVPlayR.VersionInfo.Wrapper;
 
-        public string FFmpegAVFormat => TVPlayR.VersionInfo.FFmpegAVFormat;
+        public string FFmpegAVFormat { get; } = TVPlayR.VersionInfo.FFmpegAVFormat;
 
-        public string FFmpegAVCodec => TVPlayR.VersionInfo.FFmpegAVCodec;
+        public string FFmpegAVCodec { get; } = TVPlayR.VersionInfo.FFmpegAVCodec;
         
-        public string FFmpegAVFilter => TVPlayR.VersionInfo.FFmpegAVFilter;
+        public string FFmpegAVFilter { get; } = TVPlayR.VersionInfo.FFmpegAVFilter;
 
-        public string Ndi => TVPlayR.VersionInfo.Ndi;
+        public string Ndi { get; } = TVPlayR.VersionInfo.Ndi ?? "not found";
 
-        public string Decklink => TVPlayR.VersionInfo.Decklink;
+        public string Decklink { get; } = TVPlayR.VersionInfo.Decklink ?? "not found";
     }
 }

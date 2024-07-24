@@ -37,6 +37,8 @@ namespace TVPlayR {
 				, ndi_(LoadNdi())
 				, send_instance_(ndi_ ? CreateSend(ndi_, source_name, group_names) : nullptr)
 			{
+				if (!ndi_)
+					THROW_EXCEPTION("Unable to create NDI output: NDI library not found");
 			}
 
 			~implementation()
@@ -72,7 +74,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("NdiOutput: unable to initalize");
 			}
 
-			void AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)
+			void AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
 			{
 				executor_.invoke([=]
 					{
@@ -80,7 +82,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)
+			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
 			{
 				executor_.invoke([=]
 					{
@@ -88,7 +90,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(const Core::AVSync& sync)
+			void Push(const Core::AVSync &sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped");
@@ -153,11 +155,11 @@ namespace TVPlayR {
 
 		void NdiOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 
-		void NdiOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) { impl_->AddOverlay(overlay); }
+		void NdiOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) { impl_->AddOverlay(overlay); }
 
-		void NdiOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
+		void NdiOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) { impl_->RemoveOverlay(overlay); }
 
-		void NdiOutput::Push(const Core::AVSync & sync) { impl_->Push(sync); }
+		void NdiOutput::Push(const Core::AVSync &sync) { impl_->Push(sync); }
 
 		void NdiOutput::RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->RegisterClockTarget(target); }
 

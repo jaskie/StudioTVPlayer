@@ -15,6 +15,7 @@ namespace StudioTVPlayer.Model
         private readonly BlackmagicDesignAtemPlayerBinding[] _bindings;
 
         public BlackmagicDesignAtemPlayerController(Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration, IReadOnlyList<RundownPlayer> rundownPlayers)
+            : base(bmdPlayerControllerConfiguration)
         {
             _address = bmdPlayerControllerConfiguration.Address;
             _atemClient = BlackmagicDesignAtemDevices.GetDevice(_address);

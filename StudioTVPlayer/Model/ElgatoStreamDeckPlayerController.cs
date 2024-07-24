@@ -23,6 +23,7 @@ namespace StudioTVPlayer.Model
         private Font _font;
 
         public ElgatoStreamDeckPlayerController(Configuration.ElgatoStreamDeckPlayerController playerControllerConfiguration, IReadOnlyList<RundownPlayer> rundownPlayers)
+            : base(playerControllerConfiguration)
         {
             _playerControllerConfiguration = playerControllerConfiguration;
             _bindings = playerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId))).ToArray();

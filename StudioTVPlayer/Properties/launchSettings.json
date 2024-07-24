@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "StudioTVPlayer": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

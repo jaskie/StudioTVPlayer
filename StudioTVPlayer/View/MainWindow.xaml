@@ -6,10 +6,12 @@
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                  xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
+                 xmlns:rootViewModels="clr-namespace:StudioTVPlayer.ViewModel"
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
                  xmlns:configurationViews="clr-namespace:StudioTVPlayer.View.Configuration"
                  xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
                  mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance {x:Type rootViewModels:MainViewModel}}"
                  Title="Studio TVPlayer" 
                  Height="1024" Width="1280"
                  TitleCharacterCasing="Normal"
@@ -19,35 +21,51 @@
                  >
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <mah:WindowCommands.Resources>
-                <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}">
-                    <Setter Property="Opacity" Value="0.9"/>
-                    <Setter Property="Width" Value="45"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Button.Flat.Background.MouseOver}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </mah:WindowCommands.Resources>
             <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
                 <mah:FontIcon Glyph="&#xE713;" />
             </Button>
-            <Button Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ItemsSource="{Binding PlayerControllers}" >
+                <mah:DropDownButton.Style>
+                    <Style TargetType="mah:DropDownButton" BasedOn="{StaticResource MahApps.Styles.DropDownButton.WindowCommands}">
                         <Setter Property="Foreground" Value="DarkRed"/>
                         <Setter Property="ToolTip" Value="Not all playout controllers are connected.&#x0a;Check their status against configuration."/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding PlayerControllersConnected}" Value="True">
+                            <DataTrigger Binding="{Binding AllPlayerControllersConnected}" Value="True">
                                 <Setter Property="Foreground" Value="DarkGreen" />
                                 <Setter Property="ToolTip" Value="All playout controllers are connected"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Button.Style>
-                <mah:FontIcon Glyph="&#xEA3B;" />
-            </Button>
+                </mah:DropDownButton.Style>
+                <mah:DropDownButton.Content>
+                    <mah:FontIcon Glyph="&#xEA3B;" />
+                </mah:DropDownButton.Content>
+                <mah:DropDownButton.ItemTemplate>
+                    <DataTemplate DataType="{x:Type rootViewModels:PlayerControllerViewModel}" >
+                        <MenuItem Style="{StaticResource MahApps.Styles.MenuItem}">
+                            <MenuItem.Icon>
+                                <mah:FontIcon Glyph="&#xEA3B;" >
+                                    <mah:FontIcon.Style>
+                                        <Style TargetType="mah:FontIcon">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                            <Setter Property="ToolTip" Value="Connected" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                                    <Setter Property="Foreground" Value="DarkGreen"/>
+                                                    <Setter Property="ToolTip" Value="Disonnected" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </mah:FontIcon.Style>
+                                </mah:FontIcon>
+                            </MenuItem.Icon>
+                            <MenuItem.Header>
+                                <TextBlock Text="{Binding Name}" />
+                            </MenuItem.Header>
+                        </MenuItem>
+                    </DataTemplate>
+                </mah:DropDownButton.ItemTemplate>
+            </mah:DropDownButton>
             <Button ToolTip="Help" Command="{Binding HelpCommand}">
                 <mah:FontIcon Glyph="&#xE9CE;" />
             </Button>

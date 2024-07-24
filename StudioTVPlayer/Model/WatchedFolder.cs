@@ -221,7 +221,7 @@ namespace StudioTVPlayer.Model
 
         private void AddToVerificationQueue(MediaFile media)
         {
-            MediaVerifier.Current.Queue(media, _cancellationTokenSource.Token);
+            MediaVerifier.Current.Queue(media);
         }
 
     }

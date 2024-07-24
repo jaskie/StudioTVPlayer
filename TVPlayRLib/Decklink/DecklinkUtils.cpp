@@ -181,5 +181,22 @@ namespace TVPlayR {
 			}
 		}
 
+		char* BMDOutputFrameCompletionResultToString(BMDOutputFrameCompletionResult result)
+		{
+			switch (result)
+			{
+			case BMDOutputFrameCompletionResult::bmdOutputFrameCompleted:
+				return "Completed";
+			case BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate:
+				return "Displayed Late";
+			case BMDOutputFrameCompletionResult::bmdOutputFrameDropped:
+				return "Dropped";
+			case BMDOutputFrameCompletionResult::bmdOutputFrameFlushed:
+				return "Flushed";
+			default:
+				return "Unknown";
+			}
+		}
+
 	}
 }

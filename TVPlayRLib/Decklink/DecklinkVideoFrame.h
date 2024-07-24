@@ -10,6 +10,7 @@ namespace TVPlayR {
 		class DecklinkVideoFrame final : public IDeckLinkVideoFrame
 		{
 		private:
+			std::int64_t frame_time_;
 			std::shared_ptr<AVFrame> frame_;
 			std::vector<uint32_t> buffer_;
 			ULONG ref_count_;
@@ -21,9 +22,10 @@ namespace TVPlayR {
 			DecklinkVideoFrame(Core::VideoFormat& format);
 			virtual ~DecklinkVideoFrame();
 
-			void Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode);
+			void Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode, std::int64_t frame_time);
 			void Recycle();
-		
+			int64_t GetFrameTime() const { return frame_time_; }
+
 			//IUnknown
 			STDMETHOD(QueryInterface(REFIID, LPVOID*));
 			STDMETHOD_(ULONG, AddRef());

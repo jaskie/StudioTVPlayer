@@ -24,6 +24,7 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkProfileAttributes> attributes_;
 			const CComQIPtr<IDeckLinkNotification> notification_;
 			const CComQIPtr<IDeckLinkStatus> status_;
+			std::mutex preroll_mutex_;
 			int index_;
 			Core::VideoFormat format_;
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
@@ -109,14 +110,14 @@ namespace TVPlayR {
 			{
 				if (!output_)
 					return;
+				std::lock_guard<std::mutex> lock(preroll_mutex_);
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
 				output_->BeginAudioPreroll();
-				auto empty_video_frame = FFmpeg::CreateEmptyVideoFrame(format_, pixel_format_);
 				for (size_t i = 0; i < preroll_buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
-					ScheduleVideo(empty_video_frame, AV_NOPTS_VALUE);
+					ScheduleVideo(last_video_, last_video_time_);
 				}
 				output_->EndAudioPreroll();
 			}
@@ -127,10 +128,10 @@ namespace TVPlayR {
 				DecklinkVideoFrame* decklink_frame;
 				if (decklink_frames_recycler_.take(decklink_frame) != Common::BlockingCollectionStatus::Ok)
 				{
-					DebugPrintLine(Common::DebugSeverity::warning, "ScheduleVideo: Can't take frame from recycler");
+					DebugPrintLine(Common::DebugSeverity::info, "ScheduleVideo: Can't take DecklinkVideoFrame from recycler");
 					return;
 				}
-				decklink_frame->Update(format_, frame, timecode);
+				decklink_frame->Update(format_, frame, timecode, frame_time);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_time_ = timecode;
 				last_video_ = frame;
@@ -138,7 +139,7 @@ namespace TVPlayR {
 				if (FAILED(ret))
 				{
 					RecycleDecklinkFrame(decklink_frame);
-					DebugPrintLine(Common::DebugSeverity::warning, "Unable to schedule frame: " + std::to_string(frame->pts) + " HRESULT: " + std::to_string(ret));
+					DebugPrintLine(Common::DebugSeverity::warning, "Unable to schedule DecklinkVideoFrame: " + std::to_string(decklink_frame->GetFrameTime()) + " HRESULT: " + std::to_string(ret));
 				}
 			}
 
@@ -153,6 +154,7 @@ namespace TVPlayR {
 			{
 				if (!buffer)
 					return;
+				DebugPrintLineIf(buffer->nb_samples <= 0, Common::DebugSeverity::warning, "Empty audio frame");
 				unsigned int samples_written = 0;
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->ScheduleAudioSamples(buffer->data[0], buffer->nb_samples, scheduled_samples_, BMDAudioSampleRate::bmdAudioSampleRate48kHz, &samples_written);
@@ -186,6 +188,7 @@ namespace TVPlayR {
 				audio_channels_count_ = audio_channel_count;
 				audio_resampler_ = std::make_unique<FFmpeg::SwResample>(audio_channel_count, audio_sample_rate, AVSampleFormat::AV_SAMPLE_FMT_FLT, audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
 				last_video_time_ = 0LL;
+				last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, pixel_format_);
 				decklink_frames_recycler_.activate();
 				for (size_t i = 0; i < preroll_buffer_size_ + 1; i++)
 				{
@@ -255,11 +258,15 @@ namespace TVPlayR {
 			HRESULT STDMETHODCALLTYPE ScheduledFrameCompleted(IDeckLinkVideoFrame* completedFrame, BMDOutputFrameCompletionResult result) override
 			{
 				auto frame = dynamic_cast<DecklinkVideoFrame*>(completedFrame);
+#ifdef DEBUG
+				DebugPrintLine(result == BMDOutputFrameCompletionResult::bmdOutputFrameCompleted || result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed ? Common::DebugSeverity::trace : Common::DebugSeverity::info,
+					"DecklinkVideoFrame " + std::to_string(frame->GetFrameTime()) + " " + BMDOutputFrameCompletionResultToString(result));
+#endif
 				RecycleDecklinkFrame(frame);
 
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
 					return S_OK;
-
+				std::lock_guard<std::mutex> lock(preroll_mutex_);
 				int audio_samples_required = AudioSamplesRequired();
 				for (Core::ClockTarget* target : clock_targets_)
 					target->RequestFrame(audio_samples_required);
@@ -281,26 +288,11 @@ namespace TVPlayR {
 				}
 				else
 				{
-					DebugPrintLine(Common::DebugSeverity::trace, "Frame not received");
+					DebugPrintLine(Common::DebugSeverity::debug, "AVSync not received from input buffer, replaying last video frame");
 					ScheduleVideo(last_video_, last_video_time_);
 					auto audio = FFmpeg::CreateSilentAudioFrame(audio_samples_required, audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32);
 					ScheduleAudio(audio);
 				}
-
-#ifdef DEBUG
-				if (result != BMDOutputFrameCompletionResult::bmdOutputFrameCompleted)
-				{
-					std::stringstream msg;
-					msg << "Frame: " << scheduled_frames_ << ": " << ((result == BMDOutputFrameCompletionResult::bmdOutputFrameDisplayedLate) ? "late" : "dropped");
-					DebugPrintLine(Common::DebugSeverity::info, msg.str());
-				}
-				else
-				{
-					//std::stringstream msg;
-					//msg << "Frame: " << scheduled_frames_ << ": " << frame->GetPts();
-					//DebugPrintLine(msg.str());
-				}
-#endif
 
 				return S_OK;
 			}

@@ -8,7 +8,6 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>StudioTVPlayer.ico</ApplicationIcon>
     <OutDir>bin\$(Configuration)\</OutDir>
-    <AutoGenerateBindingRedirects>False</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <SplashScreen Include="StudioTVPlayer.ico" />

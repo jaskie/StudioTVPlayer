@@ -6,7 +6,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 ThumbnailFilter::ThumbnailFilter(int width, int height, const std::shared_ptr<AVFrame> &frame)
-	: VideoFilterBase(AV_PIX_FMT_RGB24)
+	: VideoFilterBase(AV_PIX_FMT_RGB24, "ThumbnailFilter")
 	, input_frame_(frame)
 	, width_(width)
 	, height_(height)

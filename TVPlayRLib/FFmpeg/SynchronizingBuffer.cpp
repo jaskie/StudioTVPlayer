@@ -147,7 +147,13 @@ namespace TVPlayR {
 	void SynchronizingBuffer::Flush()
 	{
 		is_flushed_ = true;
-		DebugPrintLine(Common::DebugSeverity::info, "Buffer flushed");
+		DebugPrintLine(Common::DebugSeverity::info, "Set is_flushed");
+	}
+
+	void SynchronizingBuffer::Release()
+	{
+		allow_push_.Set();
+		DebugPrintLine(Common::DebugSeverity::info, "Cleared");
 	}
 
 	void SynchronizingBuffer::Sweep()

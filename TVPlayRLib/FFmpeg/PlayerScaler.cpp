@@ -9,21 +9,25 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-PlayerScaler::PlayerScaler(const Core::Player& player, const AVRational input_frame_rate)
-	: VideoFilterBase(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
+PlayerScaler::PlayerScaler(const Core::Player& player)
+	: VideoFilterBase(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()), "PlayerScaler for " + player.Name())
 	, output_format_(player.Format())
 	, output_pixel_format_(TVPlayR::PixelFormatToFFmpegFormat(player.PixelFormat()))
-	, input_frame_rate_(input_frame_rate)
+{ }
+
+void PlayerScaler::SetInputFrameRate(const AVRational input_frame_rate)
 {
+	input_frame_rate_ = input_frame_rate;
+	VideoFilterBase::ClearFilter();
 }
 
 void PlayerScaler::Initialize(const std::shared_ptr<AVFrame>& frame)
 {
-	VideoFilterBase::SetFilter(GetFilterString(frame));
+	VideoFilterBase::SetFilter(GetFilterString(frame, input_frame_rate_));
 	VideoFilterBase::Initialize(frame);
 }
 
-std::string PlayerScaler::GetFilterString(const std::shared_ptr<AVFrame>& frame)
+std::string PlayerScaler::GetFilterString(const std::shared_ptr<AVFrame>& frame, Common::Rational<int> input_frame_rate)
 {
 	std::ostringstream filter;
 	int input_height = frame->height;
@@ -38,7 +42,6 @@ std::string PlayerScaler::GetFilterString(const std::shared_ptr<AVFrame>& frame)
 			filter << "setsar=64/45,";
 		input_height = 576;
 	}
-	Common::Rational<int> input_frame_rate(input_frame_rate_);
 	if (input_frame_rate == output_format_.FrameRate())
 	{
 		if (input_interlaced)

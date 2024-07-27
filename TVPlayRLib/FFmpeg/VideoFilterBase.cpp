@@ -4,13 +4,11 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
-	: Common::DebugTarget(Common::DebugSeverity::info, "VideoFilterBase")
+VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt, const std::string &name)
+	: Common::DebugTarget(Common::DebugSeverity::info, name)
 	, output_pix_fmt_(output_pix_fmt)
 	, source_ctx_(NULL, [](AVFilterContext* filter) { avfilter_free(filter); })
 	, sink_ctx_(NULL, [](AVFilterContext* filter) { avfilter_free(filter); })
-	, inputs_(NULL, [](AVFilterInOut* io) { avfilter_inout_free(&io); })
-	, outputs_(NULL, [](AVFilterInOut* io) { avfilter_inout_free(&io); })
 { }
 
 
@@ -45,10 +43,7 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull()
 		}
 		if (FF_SUCCESS(ret))
 		{
-			//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
-			//	frame->best_effort_timestamp = frame->pts;
 			frame->time_base = OutputTimeBase();
-			frame->pts = av_rescale_q(frame->pts, input_time_base_, frame->time_base);
 			DebugPrintLine(Common::DebugSeverity::trace, "Pull: " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
 			return frame;
 		}
@@ -100,7 +95,6 @@ void VideoFilterBase::Flush()
 
 void VideoFilterBase::SetFilter(const std::string &filter_str)
 {
-	Clear();
 	filter_ = filter_str;
 	input_width_ = 0;
 	input_height_ = 0;
@@ -111,35 +105,39 @@ void VideoFilterBase::SetFilter(const std::string &filter_str)
 void VideoFilterBase::Initialize(const std::shared_ptr<AVFrame>& frame)
 {
 	graph_.reset(avfilter_graph_alloc());
-	outputs_.reset(avfilter_inout_alloc());
-	inputs_.reset(avfilter_inout_alloc());
-	const AVFilter* buffersrc = avfilter_get_by_name("buffer");
-	const AVFilter* buffersink = avfilter_get_by_name("buffersink");
+	const AVFilter *buffersrc = avfilter_get_by_name("buffer");
+	const AVFilter *buffersink = avfilter_get_by_name("buffersink");
 	std::stringstream args;
 	args << "video_size=" << frame->width << "x" << frame->height
 		<< ":pix_fmt=" << static_cast<AVPixelFormat>(frame->format)
 		<< ":time_base=" << frame->time_base.num << "/" << frame->time_base.den
 		<< ":pixel_aspect=" << frame->sample_aspect_ratio.num << "/" << frame->sample_aspect_ratio.den;
-	AVFilterContext* weak_source = NULL;
+	AVFilterContext *weak_source = NULL;
 	THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&weak_source, buffersrc, "vin", args.str().c_str(), NULL, graph_.get()));
 	source_ctx_.reset(weak_source);
 	enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
-	AVFilterContext* weak_sink = NULL;
+	AVFilterContext *weak_sink = NULL;
 	THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&weak_sink, buffersink, "vout", NULL, NULL, graph_.get()));
 	THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(weak_sink, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN));
 	sink_ctx_.reset(weak_sink);
 
-	inputs_->name = av_strdup("in");
-	inputs_->filter_ctx = weak_source;
-	inputs_->pad_idx = 0;
-	inputs_->next = NULL;
+	AVFilterInOut *inputs = avfilter_inout_alloc();
+	inputs->name = av_strdup("in");
+	inputs->filter_ctx = weak_source;
+	inputs->pad_idx = 0;
+	inputs->next = NULL;
 
-	outputs_->name = av_strdup("out");
-	outputs_->filter_ctx = weak_sink;
-	outputs_->pad_idx = 0;
-	outputs_->next = NULL;
-	THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_.c_str(), outputs_.get(), inputs_.get(), NULL));
-	THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
+	AVFilterInOut *outputs = avfilter_inout_alloc();
+	outputs->name = av_strdup("out");
+	outputs->filter_ctx = weak_sink;
+	outputs->pad_idx = 0;
+	outputs->next = NULL;
+	int ret = avfilter_graph_parse_ptr(graph_.get(), filter_.c_str(), &outputs, &inputs, NULL);
+	if (!FF_SUCCESS(ret))
+		goto end;
+	ret = avfilter_graph_config(graph_.get(), NULL);
+	if (!FF_SUCCESS(ret))
+		goto end;
 	input_width_ = frame->width;
 	input_height_ = frame->height;
 	input_pixel_format_ = static_cast<AVPixelFormat>(frame->format);
@@ -149,6 +147,10 @@ void VideoFilterBase::Initialize(const std::shared_ptr<AVFrame>& frame)
 	DebugPrintLine(Common::DebugSeverity::debug, args.str());
 	if (DebugSeverity() <= Common::DebugSeverity::info)
 		DumpFilter(filter_, graph_.get());
+end:
+	avfilter_inout_free(&inputs);
+	avfilter_inout_free(&outputs);
+	THROW_ON_FFMPEG_ERROR(ret);
 }
 
 bool VideoFilterBase::PushFrameFromBuffer()
@@ -179,10 +181,10 @@ bool VideoFilterBase::IsInitialized() const
 	return !!graph_;
 }
 
-void VideoFilterBase::Clear() 
+void VideoFilterBase::ClearFilter() 
 { 
-	source_ctx_ = NULL;
-	sink_ctx_ = NULL;
+	source_ctx_.reset();
+	sink_ctx_.reset();
 	is_eof_ = false;
 	is_flushed_ = false;
 	graph_.reset();

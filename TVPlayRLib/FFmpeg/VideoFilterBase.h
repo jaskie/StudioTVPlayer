@@ -20,19 +20,17 @@ public:
 	AVRational OutputTimeBase() const override;
 	AVRational OutputFrameRate() const;
 	void Flush() override;
-	void Clear();
 	bool IsInitialized() const;
 	void Push(const std::shared_ptr<AVFrame>& frame);
 protected:
-	VideoFilterBase(AVPixelFormat output_pix_fmt);
+	VideoFilterBase(AVPixelFormat output_pix_fmt, const std::string &name);
 	void SetFilter(const std::string &filter_str);
 	virtual void Initialize(const std::shared_ptr<AVFrame> &frame);
+	void ClearFilter();
 private:
 	std::string filter_;
 	unique_ptr<AVFilterContext> source_ctx_;
 	unique_ptr<AVFilterContext> sink_ctx_;
-	unique_ptr<AVFilterInOut> inputs_;
-	unique_ptr<AVFilterInOut> outputs_;
 	const AVPixelFormat output_pix_fmt_;
 	int input_width_ = 0;
 	int input_height_ = 0;

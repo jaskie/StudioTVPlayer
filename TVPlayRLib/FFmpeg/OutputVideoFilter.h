@@ -13,7 +13,7 @@ namespace TVPlayR {
 			public VideoFilterBase
 		{
 		public:
-			OutputVideoFilter(const std::string &filter_str, AVPixelFormat output_pix_fmt);
+			OutputVideoFilter(const std::string &filter_str, AVPixelFormat output_pix_fmt, const std::string &name);
 		};
 
 	}

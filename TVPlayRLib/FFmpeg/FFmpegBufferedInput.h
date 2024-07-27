@@ -26,6 +26,7 @@ namespace TVPlayR {
 			void FlushBufferOrLoopIfNeeded();
 			virtual Core::AVSync PullSync();
 			bool Seek(const std::int64_t time);
+			virtual void ReleaseThreads();
 		private:
 			std::atomic_bool is_eof_ = false;
 			std::atomic_bool is_playing_ = false;
@@ -34,6 +35,7 @@ namespace TVPlayR {
 			std::unique_ptr<AudioMuxer> audio_muxer_;
 			std::unique_ptr<SynchronizingBuffer> buffer_;
 			std::thread producerThread_;
+			std::atomic_bool is_running_ = true;
 			const Core::AudioParameters output_audio_parameters_;
 			void ProducerTheradStart();
 		};

@@ -27,6 +27,7 @@ public:
 	bool IsFlushed() const;
 	bool IsEof() const;
 	void Flush();
+	void Release();
 private:
 	const Core::AudioParameters audio_parameters_;
 	const AVRational audio_time_base_;

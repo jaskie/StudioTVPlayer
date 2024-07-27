@@ -16,8 +16,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 	std::atomic_bool is_eof_ = false;
 	std::atomic_bool is_playing_ = false;
 	std::atomic_bool is_loop_ = false;
-	std::atomic_bool is_producer_running_ = true;
-	const Core::Player *player_ = nullptr;
+	std::atomic_bool is_running_ = true;
 	std::unique_ptr<FFmpegInputPlayerSource> player_source_;
 	std::mutex player_scaler_reset_mutex_;
 
@@ -32,9 +31,7 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 
 	~implementation()
 	{
-		is_producer_running_ = false;
-		if (player_)
-			RemoveFromPlayer(*player_);
+		ReleaseThreads();
 	}
 
 	Core::AVSync PullSync(const Core::Player &player, int audio_samples_count)
@@ -51,30 +48,29 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 
 	bool IsAddedToPlayer(const Core::Player &player)
 	{
-		return &player == player_;
+		return player_source_ && &player == &player_source_->Player();
 	}
 
 	void AddToPlayer(const Core::Player &player)
 	{
 		std::lock_guard<std::mutex> lock(player_scaler_reset_mutex_);
-		if (&player == player_)
+		if (player_source_ && &player == &player_source_->Player())
 		{
 			DebugPrintLine(Common::DebugSeverity::error, "Already added to this player");
 			return;
 		}
-		if (player_)
+		if (player_source_)
 			THROW_EXCEPTION("FFmpegInput: already added to another player");
-		player_ = &player;
 		player_source_ = std::make_unique<FFmpegInputPlayerSource>(player, true, player.AudioChannelsCount());
+		is_running_ = true;
 		frame_reader_thread_ = std::thread(&implementation::ProducerTheradStart, this);
 	}
 
 	void RemoveFromPlayer(const Core::Player &player)
 	{
-		if (player_ != &player)
+		if (!player_source_ || &player_source_->Player() != &player)
 			return;
-		player_ = nullptr;
-		player_source_.reset();
+		ReleaseThreads();
 	}
 
 	void Play()
@@ -106,11 +102,21 @@ struct FFmpegInput::implementation : FFmpegBufferedInput
 
 	void ProducerTheradStart()
 	{
-		while (player_source_)
+		while (is_running_)
 		{
 			auto sync = FFmpegBufferedInput::PullSync();
 			player_source_->Push(sync, FFmpegInputBase::GetFrameRate());
 		}
+	}
+
+	void ReleaseThreads() override final
+	{
+		FFmpegBufferedInput::ReleaseThreads();
+		is_running_ = false;
+		player_source_->Release();
+		if (frame_reader_thread_.joinable())
+			frame_reader_thread_.join();
+		player_source_.reset();
 	}
 
 };

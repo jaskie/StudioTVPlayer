@@ -13,8 +13,7 @@ namespace TVPlayR {
 			: player_(player)
 			, audio_fifo_(FFmpeg::AudioFifo(av_make_q(1, player.AudioSampleRate()), player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), 0LL, AV_TIME_BASE / 10))
 			, process_video_(process_video)
-			, input_frame_rate_({0, 1})
-			, frame_queue_(4)
+			, frame_queue_(2)
 			, last_video_(Core::FrameTimeInfo(), FFmpeg::CreateEmptyVideoFrame(player.Format(), player.PixelFormat()))
 			, audio_resampler_(audio_channels, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32, player.AudioChannelsCount(), player.AudioSampleRate(), player.AudioSampleFormat())
 		{
@@ -25,14 +24,16 @@ namespace TVPlayR {
 			if (process_video_ && sync.Video)
 			{
 				if (!scaler_)
-					scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_, frame_rate);
-				if (frame_rate.num * input_frame_rate_.den != input_frame_rate_.num * frame_rate.den)
+				{
+					scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_);
+					scaler_->SetInputFrameRate(frame_rate);
+				}
+				if (av_cmp_q(frame_rate, scaler_->GetInputFrameRate()) != 0)
 				{
 					scaler_->Flush();
 					while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
 						frame_queue_.emplace(sync.TimeInfo, received_video);
-					scaler_->Clear();
-					input_frame_rate_ = frame_rate;
+					scaler_->SetInputFrameRate(frame_rate);
 				}
 				scaler_->Push(sync.Video);
 				while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
@@ -52,6 +53,11 @@ namespace TVPlayR {
 			else
 				audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, player_.AudioChannelsCount(), player_.AudioSampleFormat());
 			return Core::AVSync(audio, last_video_.second, last_video_.first);
+		}
+
+		void PlayerSynchroSource::Release()
+		{
+			frame_queue_.complete_adding();
 		}
 
 		PlayerSynchroSource::~PlayerSynchroSource() { }

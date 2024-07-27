@@ -87,7 +87,7 @@ namespace TVPlayR {
 				if (params_.VideoFilter.empty())
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), dest_pixel_format_);
 				else
-					video_filter_ = std::make_unique<OutputVideoFilter>(params_.VideoFilter, dest_pixel_format_);
+					video_filter_ = std::make_unique<OutputVideoFilter>(params_.VideoFilter, dest_pixel_format_, "OutputVideoFilter for " + params_.Url);
 				executor_.begin_invoke([this] { Tick(); });
 			}
 

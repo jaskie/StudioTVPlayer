@@ -20,7 +20,6 @@ namespace TVPlayR {
 
 		FFmpegBufferedInput::~FFmpegBufferedInput()
 		{
-			producerThread_.join();
 		}
 
 #pragma region Input thread methods
@@ -30,7 +29,7 @@ namespace TVPlayR {
 #ifdef DEBUG
 			Common::SetThreadName(::GetCurrentThreadId(), ("FFmpegBufferedInput " + file_name_).c_str());
 #endif
-			while (true)
+			while (is_running_)
 			{
 				ProcessNextInputPacket();
 			}
@@ -168,6 +167,14 @@ namespace TVPlayR {
 				{
 					buffer_->Flush();
 				}
+		}
+
+		void FFmpegBufferedInput::ReleaseThreads()
+		{
+			is_running_ = false;
+			buffer_->Release();
+			if (producerThread_.joinable())
+				producerThread_.join();
 		}
 #pragma endregion
 

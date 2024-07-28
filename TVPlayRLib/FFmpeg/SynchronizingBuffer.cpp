@@ -17,7 +17,6 @@ namespace TVPlayR {
 		, audio_parameters_(audio_parameters)
 		, audio_time_base_(audio_time_base)
 		, video_time_base_(video_time_base)
-		, have_video_(true)
 		, video_queue_size_(av_rescale(capacity, video_frame_rate_.num, video_frame_rate_.den * AV_TIME_BASE))
 		, is_flushed_(false)
 		, audio_fifo_size_(static_cast<int>(av_rescale(capacity, audio_parameters.SampleRate, AV_TIME_BASE)))
@@ -41,7 +40,7 @@ namespace TVPlayR {
 		assert(!is_flushed_);
 		if (!fifo_)
 		{
-			fifo_ = std::make_unique<AudioFifo>(audio_time_base_, audio_parameters_.SampleFormat, audio_parameters_.ChannelCount, audio_parameters_.SampleRate, FrameTime(frame), capacity_ * 4);
+			fifo_ = std::make_unique<AudioFifo>(audio_time_base_, audio_parameters_.SampleFormat, audio_parameters_.ChannelCount, audio_parameters_.SampleRate, FrameTime(frame), capacity_ * 4, "SynchronizingBuffer");
 			DebugPrintLine(Common::DebugSeverity::info, "New fifo created");
 		}
 		if (!fifo_->Push(frame))
@@ -55,8 +54,6 @@ namespace TVPlayR {
 
 	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame> &frame)
 	{ 
-		if (!(frame && have_video_))
-			return;
 		assert(!is_flushed_);
 		allow_push_.Wait();
 		DebugPrintLine(Common::DebugSeverity::trace, "Push video " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
@@ -78,9 +75,10 @@ namespace TVPlayR {
 		std::shared_ptr<AVFrame> video = video_queue_.front();
 		video_queue_.pop_front();
 		auto& fifo = (fifo_loop_) ? fifo_loop_ : fifo_;
-		std::int64_t video_frame_end_time = FrameTime(video) + av_rescale(AV_TIME_BASE, video_frame_rate_.den, video_frame_rate_.num);
+		std::int64_t video_frame_start_time = FrameTime(video);
+		std::int64_t video_frame_end_time = video_frame_start_time + av_rescale(AV_TIME_BASE, video_frame_rate_.den, video_frame_rate_.num);
 		std::shared_ptr<AVFrame> audio = fifo
-			? fifo->PullToTime(video_frame_end_time)
+			? fifo->PullTimeRange(video_frame_start_time, video_frame_end_time)
 			: nullptr;
 		if (fifo_loop_ && fifo_loop_->SamplesCount() <= av_rescale(audio_parameters_.SampleRate / 2, video_time_base_.num, video_time_base_.den)) // less than half frame samples left
 		{

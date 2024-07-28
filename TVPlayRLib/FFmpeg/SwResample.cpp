@@ -4,11 +4,9 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		unique_ptr<SwrContext> AllocSwr(int out_ch_count, enum AVSampleFormat out_sample_fmt, int out_sample_rate,int in_ch_count, enum AVSampleFormat in_sample_fmt, int in_sample_rate)
+		unique_ptr<SwrContext> AllocSwr(const AVChannelLayout& out_ch_layout, enum AVSampleFormat out_sample_fmt, int out_sample_rate, const AVChannelLayout& in_ch_layout, enum AVSampleFormat in_sample_fmt, int in_sample_rate)
 		{
 			SwrContext* native_ctx = nullptr;
-			AVChannelLayout in_ch_layout = GetChannelLayoutFromMask(in_ch_count);
-			AVChannelLayout out_ch_layout = GetChannelLayoutFromMask(out_ch_count);
 			swr_alloc_set_opts2(&native_ctx, &out_ch_layout, out_sample_fmt, out_sample_rate, &in_ch_layout, in_sample_fmt, in_sample_rate, 0, NULL);
 			return unique_ptr<SwrContext>(native_ctx, [](SwrContext* ctx) { swr_free(&ctx); });
 		}
@@ -16,9 +14,9 @@ namespace TVPlayR {
 		SwResample::SwResample(int src_channel_count, int src_sample_rate, AVSampleFormat src_sample_format, int dest_channel_count, int dest_sample_rate, AVSampleFormat dest_sample_format)
 			: dest_sample_format_(dest_sample_format)
 			, dest_sample_rate_(dest_sample_rate)
-			, dest_channel_layout_(GetChannelLayoutFromMask(dest_channel_count))
+			, dest_channel_layout_(GetChannelLayout(dest_channel_count))
 			, dest_time_base_(av_make_q(1, dest_sample_rate))
-			, swr_(AllocSwr(dest_channel_count, dest_sample_format, dest_sample_rate, src_channel_count, src_sample_format, src_sample_rate))
+			, swr_(AllocSwr(dest_channel_layout_, dest_sample_format, dest_sample_rate, GetChannelLayout(src_channel_count), src_sample_format, src_sample_rate))
 		{ }
 
 		std::shared_ptr<AVFrame> SwResample::Resample(const std::shared_ptr<AVFrame> &frame)

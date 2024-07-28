@@ -22,7 +22,7 @@ if (error_code < 0) \
 	}
 
 template<class T> using unique_ptr = std::unique_ptr<T, std::function<void(T*)>>; // unique pointer type for FFmpeg wrappers
-#define empty_unique_ptr(T) FFmpeg::unique_ptr<T>(nullptr, [](T *) { })
+#define empty_unique_ptr(T) TVPlayR::FFmpeg::unique_ptr<T>(nullptr, [](T *) { })
 
 const uint64_t ALL_CHANNELS = 0x7FFFFFFFFFFFFFFFULL;
 
@@ -53,7 +53,7 @@ inline std::int64_t FrameTime(const std::shared_ptr<AVFrame>& frame)
 	return PtsToTime(frame->pts, frame->time_base);
 }
 
-inline AVChannelLayout GetChannelLayoutFromMask(int nb_channels)
+inline AVChannelLayout GetChannelLayout(int nb_channels)
 {
 	AVChannelLayout channel_layout;
 	av_channel_layout_from_mask(&channel_layout, ALL_CHANNELS >> (63 - nb_channels));

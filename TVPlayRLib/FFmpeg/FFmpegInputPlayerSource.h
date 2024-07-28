@@ -5,7 +5,7 @@ namespace TVPlayR {
 		class Player;
 	}
 	namespace FFmpeg {
-class FFmpegInputPlayerSource final : public Core::PlayerSynchroSource, private Common::DebugTarget
+class FFmpegInputPlayerSource final : public Core::PlayerSynchroSource
 {
 public:
 	FFmpegInputPlayerSource(const Core::Player &player, bool process_video, int audio_channels);

@@ -16,7 +16,7 @@ namespace TVPlayR {
 		* Base class to provide video/audio/timecode frames for player.
 		* Adjusts video and audio to player needs.
 		*/
-		class PlayerSynchroSource
+		class PlayerSynchroSource : Common::NonCopyable, protected Common::DebugTarget
 		{
 		public:
 			const Core::Player& Player() const { return player_; }
@@ -34,7 +34,7 @@ namespace TVPlayR {
 			FFmpeg::SwResample							audio_resampler_;
 			FFmpeg::AudioFifo							audio_fifo_;
 			queue_item_t								last_video_;
-			Common::BlockingCollection<queue_item_t>	frame_queue_;
+			Common::BlockingCollection<queue_item_t>	video_queue_;
 		};
 	}
 }

@@ -13,7 +13,7 @@ public:
 	/// </summary>
 	/// <param name="seek_time">samples before the time will be ignored</param>
 	/// <param name="capacity">fifo capacity in AV_TIME_BASE inits</param>
-	AudioFifo(AVRational input_time_base, AVSampleFormat sample_format, int channel_count, int sample_rate, std::int64_t seek_time, std::int64_t capacity);
+	AudioFifo(AVRational input_time_base, AVSampleFormat sample_format, int channel_count, int sample_rate, std::int64_t seek_time, std::int64_t capacity, const std::string& name);
 	bool Push(std::shared_ptr<AVFrame> frame);
 	/// <summary>
 	/// returns frame with requested nb_samples. If FIFO is smaller, rest will be filled with silence.
@@ -21,7 +21,7 @@ public:
 	/// <param name="nb_samples"></param>
 	/// <returns></returns>
 	std::shared_ptr<AVFrame> Pull(int nb_samples);
-	std::shared_ptr<AVFrame> PullToTime(std::int64_t time);
+	std::shared_ptr<AVFrame> PullTimeRange(std::int64_t start_time, std::int64_t end_time);
 	void DiscardSamples(int nb_samples);
 	void Reset(std::int64_t seek_time);
 	int SamplesCount() const;
@@ -37,8 +37,10 @@ private:
 	const int channel_count_; // both output and input
 	const AVChannelLayout channel_layout_; // both output and input
 	std::int64_t seek_time_;
-	std::int64_t start_sample_ = 0LL;
-	std::int64_t end_sample_ = 0LL;
+	std::int64_t fifo_start_sample_ = 0LL;
+	std::int64_t fifo_end_sample_ = 0LL;
+	std::int64_t first_frame_time_ = 0LL;
+	std::shared_ptr<AVFrame> AllocFrame(int nb_samples) const;
 };
 
 }}

@@ -43,7 +43,6 @@ std::shared_ptr<AVFrame> VideoFilterBase::Pull()
 		}
 		if (FF_SUCCESS(ret))
 		{
-			frame->time_base = OutputTimeBase();
 			DebugPrintLine(Common::DebugSeverity::trace, "Pull: " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
 			return frame;
 		}
@@ -144,7 +143,7 @@ void VideoFilterBase::Initialize(const std::shared_ptr<AVFrame>& frame)
 	input_sar_ = frame->sample_aspect_ratio;
 	input_time_base_ = frame->time_base;
 	assert(av_buffersink_get_format(weak_sink) == output_pix_fmt_);
-	DebugPrintLine(Common::DebugSeverity::debug, args.str());
+	DebugPrintLine(Common::DebugSeverity::info, args.str());
 	if (DebugSeverity() <= Common::DebugSeverity::info)
 		DumpFilter(filter_, graph_.get());
 end:

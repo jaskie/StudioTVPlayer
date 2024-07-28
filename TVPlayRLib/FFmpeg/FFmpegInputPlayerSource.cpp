@@ -8,7 +8,6 @@ namespace TVPlayR {
 
 FFmpegInputPlayerSource::FFmpegInputPlayerSource(const Core::Player &player, bool process_video, int audio_channels)
 	: Core::PlayerSynchroSource(player, process_video, audio_channels)
-	, Common::DebugTarget(Common::DebugSeverity::trace, "FFmpegInputPlayerSource for " + player.Name())
 {
 }
 

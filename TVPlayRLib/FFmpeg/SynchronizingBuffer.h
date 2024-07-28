@@ -33,7 +33,6 @@ private:
 	const AVRational audio_time_base_;
 	const AVRational video_frame_rate_;
 	const AVRational video_time_base_;
-	const bool have_video_;
 	std::atomic_bool is_flushed_;
 	const size_t video_queue_size_;
 	const int audio_fifo_size_;

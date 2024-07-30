@@ -12,7 +12,6 @@ namespace TVPlayR {
 		PlayerSynchroSource::PlayerSynchroSource(const Core::Player &player, bool process_video, int audio_channels)
 			: Common::DebugTarget(Common::DebugSeverity::info, "PlayerSynchroSource for " + player.Name())
 			, player_(player)
-			, audio_fifo_(FFmpeg::AudioFifo(av_make_q(1, player.AudioSampleRate()), player.AudioSampleFormat(), player.AudioChannelsCount(), player.AudioSampleRate(), 0LL, AV_TIME_BASE / 10, player.Name()))
 			, process_video_(process_video)
 			, video_queue_(2)
 			, last_video_(Core::FrameTimeInfo(), FFmpeg::CreateEmptyVideoFrame(player.Format(), player.PixelFormat()))
@@ -42,15 +41,20 @@ namespace TVPlayR {
 			}
 			if (sync.Audio)
 			{
-				audio_fifo_.Push(audio_resampler_.Resample(sync.Audio));
+				std::lock_guard lock(audio_fifo_mutex_);
+				if (!audio_fifo_)
+					audio_fifo_ = std::make_unique<FFmpeg::AudioFifo>(sync.Audio->time_base, player_.AudioSampleFormat(), player_.AudioChannelsCount(), player_.AudioSampleRate(), FFmpeg::FrameTime(sync.Audio), AV_TIME_BASE / 10, "player " + player_.Name());
+				audio_fifo_->Push(audio_resampler_.Resample(sync.Audio));
 			}
 		}
 
 		Core::AVSync PlayerSynchroSource::PullSync(int audio_samples_count)
 		{
+			auto video_received = video_queue_.try_take(last_video_);
+			std::lock_guard lock(audio_fifo_mutex_);
 			std::shared_ptr<AVFrame> audio;
-			if (video_queue_.try_take(last_video_) == Common::BlockingCollectionStatus::Ok)
-				audio = audio_fifo_.Pull(audio_samples_count);
+			if (video_received == Common::BlockingCollectionStatus::Ok)
+				audio = audio_fifo_->Pull(audio_samples_count);
 			else
 				audio = FFmpeg::CreateSilentAudioFrame(audio_samples_count, player_.AudioChannelsCount(), player_.AudioSampleFormat());
 			return Core::AVSync(audio, last_video_.second, last_video_.first);

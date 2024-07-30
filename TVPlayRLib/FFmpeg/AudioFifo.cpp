@@ -5,7 +5,7 @@ namespace TVPlayR {
 	namespace FFmpeg {
 
 AudioFifo::AudioFifo(AVRational input_time_base, AVSampleFormat sample_format, int channel_count, int sample_rate, std::int64_t seek_time, std::int64_t capacity, const std::string& name)
-	: Common::DebugTarget(Common::DebugSeverity::trace, "AduioFifo for " + name)
+	: Common::DebugTarget(Common::DebugSeverity::info, "AduioFifo for " + name)
 	, input_time_base_(input_time_base)
 	, sample_format_(sample_format)
 	, channel_count_(channel_count)
@@ -38,7 +38,6 @@ bool AudioFifo::Push(std::shared_ptr<AVFrame> frame)
 			return false;
 		if (av_audio_fifo_write(audio_fifo_.get(), (void**)frame->data, frame->nb_samples) != frame->nb_samples)
 			THROW_EXCEPTION("AudioFifo: not all audio samples were written to fifo");
-		fifo_end_sample_ += frame->nb_samples;
 		if (frame_start_time <= seek_time_) // first frame
 		{
 			fifo_start_sample_ = av_rescale(frame_start_time, frame->sample_rate, AV_TIME_BASE);
@@ -50,6 +49,7 @@ bool AudioFifo::Push(std::shared_ptr<AVFrame> frame)
 				fifo_start_sample_ += samples_to_discard;
 			}
 		}
+		fifo_end_sample_ += frame->nb_samples;
 	}
 	else
 		DebugPrintLine(Common::DebugSeverity::debug, "Frame ignored");
@@ -87,9 +87,9 @@ std::shared_ptr<AVFrame> AudioFifo::PullTimeRange(std::int64_t start_time, std::
 	std::int64_t to_sample = av_rescale(end_time, sample_rate_, AV_TIME_BASE);
 	if (from_sample > to_sample)
 		return nullptr;
-	auto frame = AllocFrame(to_sample - from_sample);
+	auto frame = AllocFrame(static_cast<int>(to_sample - from_sample));
 	frame->pts = av_rescale(from_sample, output_time_base_.den, static_cast<std::int64_t>(sample_rate_) * output_time_base_.num);
-	std::int64_t missing_samples = fifo_start_sample_ - from_sample;
+	int missing_samples = static_cast<int>(fifo_start_sample_ - from_sample);
 	assert(missing_samples >= 0);
 	if (missing_samples > 0)
 	{

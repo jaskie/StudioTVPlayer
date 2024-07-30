@@ -27,14 +27,16 @@ namespace TVPlayR {
 		protected:
 			PlayerSynchroSource(const Core::Player &player, bool process_video, int audio_channels);
 		private:
-			const Core::Player &player_;
 			typedef std::pair<Core::FrameTimeInfo, std::shared_ptr<AVFrame>> queue_item_t;
+
+			const Core::Player &player_;
 			std::unique_ptr<FFmpeg::PlayerScaler>		scaler_;
 			const bool									process_video_;
 			FFmpeg::SwResample							audio_resampler_;
-			FFmpeg::AudioFifo							audio_fifo_;
+			std::unique_ptr<FFmpeg::AudioFifo>			audio_fifo_;
 			queue_item_t								last_video_;
 			Common::BlockingCollection<queue_item_t>	video_queue_;
+			std::mutex 									audio_fifo_mutex_;
 		};
 	}
 }

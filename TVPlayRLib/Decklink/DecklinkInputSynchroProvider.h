@@ -40,6 +40,7 @@ private:
 	AVRational									input_frame_rate_;
 	Common::BlockingCollection<queue_item_t>	frame_queue_;
 	Common::Executor							executor_;
+	std::mutex									audio_fifo_mutex_;
 };
 
 }}

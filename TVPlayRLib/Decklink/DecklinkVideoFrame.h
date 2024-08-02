@@ -18,11 +18,12 @@ namespace TVPlayR {
 			int row_bytes_;
 			BMDPixelFormat pixel_format_;
 			DecklinkTimecode timecode_;
+			const Core::VideoFormat &format_;
 		public:
-			DecklinkVideoFrame(Core::VideoFormat& format);
+			DecklinkVideoFrame(Core::VideoFormat &format);
 			virtual ~DecklinkVideoFrame();
 
-			void Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode, std::int64_t frame_time);
+			void Update(const std::shared_ptr<AVFrame> &frame, std::int64_t timecode, std::int64_t frame_time);
 			void Recycle();
 			int64_t GetFrameTime() const { return frame_time_; }
 

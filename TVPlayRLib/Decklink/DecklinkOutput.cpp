@@ -98,7 +98,15 @@ namespace TVPlayR {
 						break;
 					}
 				}
-				if (FAILED(output_->EnableVideoOutput(actualMode, static_cast<BMDVideoOutputFlags>(static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputRP188) | static_cast<int>(BMDVideoOutputFlags::bmdVideoOutputVITC)))))
+				int flags = BMDVideoOutputFlags::bmdVideoOutputFlagDefault;
+				if (timecode_source_ != TimecodeOutputSource::None)
+				{
+					if (mode == BMDDisplayMode::bmdModeNTSC || mode == BMDDisplayMode::bmdModePAL)
+						flags |= BMDVideoOutputFlags::bmdVideoOutputVITC;
+					else
+						flags |= BMDVideoOutputFlags::bmdVideoOutputRP188;
+				}
+				if (FAILED(output_->EnableVideoOutput(actualMode, static_cast<BMDVideoOutputFlags>(flags))))
 					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to enable video output");
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
@@ -131,7 +139,7 @@ namespace TVPlayR {
 					DebugPrintLine(Common::DebugSeverity::info, "ScheduleVideo: Can't take DecklinkVideoFrame from recycler");
 					return;
 				}
-				decklink_frame->Update(format_, frame, timecode, frame_time);
+				decklink_frame->Update(frame, timecode, frame_time);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_time_ = timecode;
 				last_video_ = frame;
@@ -187,7 +195,7 @@ namespace TVPlayR {
 				pixel_format_ = pixel_format;
 				audio_channels_count_ = audio_channel_count;
 				audio_resampler_ = std::make_unique<FFmpeg::SwResample>(audio_channel_count, audio_sample_rate, AVSampleFormat::AV_SAMPLE_FMT_FLT, audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
-				last_video_time_ = 0LL;
+				last_video_time_ = AV_NOPTS_VALUE;
 				last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, pixel_format_);
 				decklink_frames_recycler_.activate();
 				for (size_t i = 0; i < preroll_buffer_size_ + 1; i++)

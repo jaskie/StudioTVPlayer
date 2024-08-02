@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
     namespace Decklink {
-        DecklinkTimecode::DecklinkTimecode(Core::VideoFormat& format)
+        DecklinkTimecode::DecklinkTimecode(const Core::VideoFormat& format)
             : time_(AV_NOPTS_VALUE)
             , format_(format)
         { }
@@ -14,9 +14,8 @@ namespace TVPlayR {
             return time_ != AV_NOPTS_VALUE;
         }
 
-        void DecklinkTimecode::Update(Core::VideoFormat& format, std::int64_t time)
+        void DecklinkTimecode::Update(std::int64_t time)
         {
-            format_ = format;
             time_ = time;
         }
 
@@ -29,7 +28,7 @@ namespace TVPlayR {
         STDMETHODIMP_(BMDTimecodeBCD) DecklinkTimecode::GetBCD()
         {
             int frame_number = format_.TimeToFrameNumber(time_);
-            auto smpte = format_.FrameNumberToSmpteTimecode(frame_number);
+            uint32_t smpte = format_.FrameNumberToSmpteTimecode(frame_number);
             BMDTimecodeBCD bcd;
             uint8_t* out;
             auto in = reinterpret_cast<uint8_t*>(&smpte);
@@ -43,7 +42,18 @@ namespace TVPlayR {
 
         STDMETHODIMP DecklinkTimecode::GetComponents(unsigned char* hours, unsigned char* minutes, unsigned char* seconds, unsigned char* frames)
         {
-            return E_NOTIMPL;
+            int frame_number = format_.TimeToFrameNumber(time_);
+            uint32_t smpte = format_.FrameNumberToSmpteTimecode(frame_number);
+            auto in = reinterpret_cast<uint8_t*>(&smpte);
+            if (hours)
+                *hours   = in[0];
+            if (minutes)
+                *minutes = in[1];
+            if (seconds)
+                *seconds = in[2];
+            if (frames)
+                *frames  = in[3];
+            return S_OK;
         }
 
         STDMETHODIMP DecklinkTimecode::GetString(BSTR* timecode)
@@ -53,15 +63,12 @@ namespace TVPlayR {
 
         STDMETHODIMP_(BMDTimecodeFlags) DecklinkTimecode::GetFlags()
         {
-            return BMDTimecodeFlags();
+            return 0;
         }
 
         STDMETHODIMP DecklinkTimecode::GetTimecodeUserBits(BMDTimecodeUserBits* userBits)
         {
-            if (userBits == nullptr)
-                return E_FAIL;
-            *userBits = BMDTimecodeUserBits();
-            return S_OK;
+            return E_POINTER;
         }
 
     }

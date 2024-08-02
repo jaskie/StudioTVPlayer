@@ -51,6 +51,7 @@ namespace TVPlayR {
 			, pixel_format_(BMDPixelFormat(0))
 			, timecode_(format)
 			, frame_time_(0)
+			, format_(format)
 		{ }
 
 		DecklinkVideoFrame::~DecklinkVideoFrame()
@@ -58,11 +59,11 @@ namespace TVPlayR {
 			assert(!ref_count_);
 		}
 
-		void DecklinkVideoFrame::Update(Core::VideoFormat& format, const std::shared_ptr<AVFrame>& frame, std::int64_t timecode, std::int64_t frame_time)
+		void DecklinkVideoFrame::Update(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode, std::int64_t frame_time)
 		{
-			timecode_.Update(format, timecode);
-			width_ = format.width();
-			height_ = format.height();
+			timecode_.Update(timecode);
+			width_ = format_.width();
+			height_ = format_.height();
 			row_bytes_ = frame->linesize[0];
 			pixel_format_ = GetBMDPixelFormat(frame);
 			frame_time_ = frame_time;
@@ -84,6 +85,7 @@ namespace TVPlayR {
 		{
 			frame_time_ = 0LL;
 			frame_.reset();
+			timecode_.Update(AV_NOPTS_VALUE);
 			// we don't clear the buffer, because it's allocation is expensive, and we can reuse it
 		}
 
@@ -129,7 +131,7 @@ namespace TVPlayR {
 			if (timecode == nullptr)
 				return E_FAIL;
 			if (!timecode_.IsValid())
-				return E_FAIL;
+				return S_FALSE;
 			*timecode = &timecode_;
 			return S_OK;
 		}

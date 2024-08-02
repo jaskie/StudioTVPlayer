@@ -31,10 +31,10 @@ namespace TVPlayR {
 			{
 			case Core::VideoFormatType::pal:
 			case Core::VideoFormatType::pal_fha:
-				return bmdModePAL;
+				return BMDDisplayMode::bmdModePAL;
 			case Core::VideoFormatType::ntsc:
 			case Core::VideoFormatType::ntsc_fha:
-				return bmdModeNTSC;
+				return BMDDisplayMode::bmdModeNTSC;
 			case Core::VideoFormatType::v720p5000:		return BMDDisplayMode::bmdModeHD720p50;
 			case Core::VideoFormatType::v720p5994:		return BMDDisplayMode::bmdModeHD720p5994;
 			case Core::VideoFormatType::v720p6000:		return BMDDisplayMode::bmdModeHD720p60;

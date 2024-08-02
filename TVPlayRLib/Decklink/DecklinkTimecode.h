@@ -11,11 +11,11 @@ namespace TVPlayR {
         {
         private:
             std::int64_t time_;
-            Core::VideoFormat& format_;
+            const Core::VideoFormat &format_;
         public:
-            DecklinkTimecode(Core::VideoFormat& format);
+            DecklinkTimecode(const Core::VideoFormat &format);
             bool IsValid() const;
-            void Update(Core::VideoFormat& format, std::int64_t time);
+            void Update(std::int64_t time);
             //IUnknown
             STDMETHOD(QueryInterface(REFIID, LPVOID*));
             STDMETHOD_(ULONG, AddRef());

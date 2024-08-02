@@ -309,14 +309,14 @@ int VideoFormat::StringToFrameNumber(const std::string& tc)
 	return timecode.start;
 }
 
-uint32_t VideoFormat::FrameNumberToSmpteTimecode(int frame_number)
+uint32_t VideoFormat::FrameNumberToSmpteTimecode(int frame_number) const
 {
 	if (!timecode_is_supported_)
 		return 0;
 	return av_timecode_get_smpte_from_framenum(&timecode_, frame_number);
 }
 
-int VideoFormat::TimeToFrameNumber(std::int64_t time)
+int VideoFormat::TimeToFrameNumber(std::int64_t time) const
 {
 	return static_cast<int>(av_rescale(time,  frame_rate_.Numerator(), frame_rate_.Denominator() * AV_TIME_BASE));
 }

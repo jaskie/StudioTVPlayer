@@ -40,6 +40,7 @@ namespace TVPlayR {
 				}
 				if (sync.Audio)
 				{
+					std::lock_guard<std::mutex> lock(audio_fifo_mutex_);
 					audio_fifo_.TryPush(audio_resampler_.Resample(sync.Audio));
 				}
 			});
@@ -48,15 +49,18 @@ namespace TVPlayR {
 		Core::AVSync DecklinkInputSynchroProvider::PullSync(int audio_samples_count)
 		{
 			frame_queue_.try_take(last_video_);
+			std::lock_guard<std::mutex> lock(audio_fifo_mutex_);
 			auto audio = audio_fifo_.Pull(audio_samples_count);
 			return Core::AVSync(audio, last_video_.second, last_video_.first);
 		}
 
 		void DecklinkInputSynchroProvider::Reset(AVRational input_frame_rate)
 		{
-			input_frame_rate_ = input_frame_rate;
-			if (scaler_)
-				scaler_->Reset();
+			executor_.begin_invoke([=] {
+				input_frame_rate_ = input_frame_rate;
+				if (scaler_)
+					scaler_->Reset();
+				});
 		}
 
 

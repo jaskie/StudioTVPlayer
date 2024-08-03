@@ -24,7 +24,6 @@ namespace TVPlayR {
 			const CComQIPtr<IDeckLinkProfileAttributes> attributes_;
 			const CComQIPtr<IDeckLinkNotification> notification_;
 			const CComQIPtr<IDeckLinkStatus> status_;
-			std::mutex preroll_mutex_;
 			int index_;
 			Core::VideoFormat format_;
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
@@ -35,7 +34,7 @@ namespace TVPlayR {
 			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 0;
 			Common::BlockingCollection<Core::AVSync> input_buffer_;
-			Common::BlockingCollection<DecklinkVideoFrame*> decklink_frames_recycler_;
+			Common::BlockingCollection<DecklinkVideoFrame*> decklink_frame_buffer_;
 			std::shared_ptr<AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
 			const DecklinkKeyerType keyer_;
@@ -98,15 +97,15 @@ namespace TVPlayR {
 						break;
 					}
 				}
-				int flags = BMDVideoOutputFlags::bmdVideoOutputFlagDefault;
+				BMDVideoOutputFlags flags = BMDVideoOutputFlags::bmdVideoOutputFlagDefault;
 				if (timecode_source_ != TimecodeOutputSource::None)
 				{
 					if (mode == BMDDisplayMode::bmdModeNTSC || mode == BMDDisplayMode::bmdModePAL)
-						flags |= BMDVideoOutputFlags::bmdVideoOutputVITC;
+						flags = BMDVideoOutputFlags::bmdVideoOutputVITC;
 					else
-						flags |= BMDVideoOutputFlags::bmdVideoOutputRP188;
+						flags = BMDVideoOutputFlags::bmdVideoOutputRP188;
 				}
-				if (FAILED(output_->EnableVideoOutput(actualMode, static_cast<BMDVideoOutputFlags>(flags))))
+				if (FAILED(output_->EnableVideoOutput(actualMode, flags)))
 					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to enable video output");
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
@@ -114,11 +113,10 @@ namespace TVPlayR {
 					DebugPrintLine(Common::DebugSeverity::warning, "Failed to register notification callback.");
 			}
 
-			void Preroll()
+			void StartScheduledPlayback()
 			{
 				if (!output_)
 					return;
-				std::lock_guard<std::mutex> lock(preroll_mutex_);
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
 				output_->BeginAudioPreroll();
@@ -128,18 +126,19 @@ namespace TVPlayR {
 					ScheduleVideo(last_video_, last_video_time_);
 				}
 				output_->EndAudioPreroll();
+				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
 			}
 
 			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
 			{
 				std::int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
-				DecklinkVideoFrame* decklink_frame;
-				if (decklink_frames_recycler_.take(decklink_frame) != Common::BlockingCollectionStatus::Ok)
+				DecklinkVideoFrame *decklink_frame;
+				if (decklink_frame_buffer_.take(decklink_frame) != Common::BlockingCollectionStatus::Ok)
 				{
 					DebugPrintLine(Common::DebugSeverity::info, "ScheduleVideo: Can't take DecklinkVideoFrame from recycler");
 					return;
 				}
-				decklink_frame->Update(frame, timecode, frame_time);
+				decklink_frame->Update(frame, timecode, scheduled_frames_);
 				HRESULT ret = output_->ScheduleVideoFrame(decklink_frame, frame_time, format_.FrameRate().Denominator(), format_.FrameRate().Numerator());
 				last_video_time_ = timecode;
 				last_video_ = frame;
@@ -147,15 +146,18 @@ namespace TVPlayR {
 				if (FAILED(ret))
 				{
 					RecycleDecklinkFrame(decklink_frame);
-					DebugPrintLine(Common::DebugSeverity::warning, "Unable to schedule DecklinkVideoFrame: " + std::to_string(decklink_frame->GetFrameTime()) + " HRESULT: " + std::to_string(ret));
+					DebugPrintLine(Common::DebugSeverity::warning, "Unable to schedule DecklinkVideoFrame: " + std::to_string(decklink_frame->GetFrameNumber()) + " HRESULT: " + std::to_string(ret));
 				}
 			}
 
 			void RecycleDecklinkFrame(DecklinkVideoFrame* decklink_frame)
 			{
 				decklink_frame->Recycle();
-				if (decklink_frames_recycler_.add(decklink_frame) != Common::BlockingCollectionStatus::Ok)
-					decklink_frame->Release(); // if the frame is added to recycler, then decklink output will release it.
+				if (decklink_frame_buffer_.add(decklink_frame) != Common::BlockingCollectionStatus::Ok)
+				{
+					DebugPrintLine(Common::DebugSeverity::error, "Unable to RecycleDecklinkFrame: " + std::to_string(decklink_frame->GetFrameNumber()));
+					delete decklink_frame;
+				}
 			}
 
 			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
@@ -197,31 +199,36 @@ namespace TVPlayR {
 				audio_resampler_ = std::make_unique<FFmpeg::SwResample>(audio_channel_count, audio_sample_rate, AVSampleFormat::AV_SAMPLE_FMT_FLT, audio_channels_count_, bmdAudioSampleRate48kHz, AVSampleFormat::AV_SAMPLE_FMT_S32);
 				last_video_time_ = AV_NOPTS_VALUE;
 				last_video_ = FFmpeg::CreateEmptyVideoFrame(format_, pixel_format_);
-				decklink_frames_recycler_.activate();
-				for (size_t i = 0; i < preroll_buffer_size_ + 1; i++)
+				for (int i = 0; i <= preroll_buffer_size_; i++) // one frame more than preroll_buffer_size_output buffer
 				{
-					DecklinkVideoFrame* decklink_frame = new DecklinkVideoFrame(format_);
-					decklink_frame->AddRef();
-					RecycleDecklinkFrame(decklink_frame);
+					if (decklink_frame_buffer_.add(new DecklinkVideoFrame(format_)) != Common::BlockingCollectionStatus::Ok)
+					{
+						DebugPrintLine(Common::DebugSeverity::warning, "Initialize: Can't add DecklinkVideoFrame to buffer");
+						break;
+					}
 				}
-				Preroll();
-				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
+				StartScheduledPlayback();
 			}
 
 			void Uninitialize()
 			{
+				DebugPrintLine(Common::DebugSeverity::info, "Uninitialize");
 				if (format_.type() == Core::VideoFormatType::invalid)
 					return;
-				output_->StopScheduledPlayback(0LL, NULL, 0LL);
 				format_ = Core::VideoFormatType::invalid;
+				StopScheduledPlayback();
 				if (keyer_ != DecklinkKeyerType::Internal)
 					output_->DisableAudioOutput();
 				output_->DisableVideoOutput();
 				DecklinkVideoFrame* decklink_frame;
-				decklink_frames_recycler_.complete_adding();
-				while (decklink_frames_recycler_.take(decklink_frame) == Common::BlockingCollectionStatus::Ok)
-					decklink_frame->Release();
+				while (decklink_frame_buffer_.try_take(decklink_frame) == Common::BlockingCollectionStatus::Ok)
+					delete decklink_frame;
 				audio_resampler_.reset();
+			}
+
+			void StopScheduledPlayback()
+			{
+				output_->StopScheduledPlayback(0LL, NULL, 0LL);
 			}
 
 			void RegisterClockTarget(Core::ClockTarget& target)
@@ -267,14 +274,17 @@ namespace TVPlayR {
 			{
 				auto frame = dynamic_cast<DecklinkVideoFrame*>(completedFrame);
 #ifdef DEBUG
-				DebugPrintLine(result == BMDOutputFrameCompletionResult::bmdOutputFrameCompleted || result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed ? Common::DebugSeverity::trace : Common::DebugSeverity::info,
-					"DecklinkVideoFrame " + std::to_string(frame->GetFrameTime()) + " " + BMDOutputFrameCompletionResultToString(result));
+				DebugPrintLine(result == BMDOutputFrameCompletionResult::bmdOutputFrameCompleted ? Common::DebugSeverity::trace : Common::DebugSeverity::debug,
+					"DecklinkVideoFrame " + std::to_string(frame->GetFrameNumber()) + " " + BMDOutputFrameCompletionResultToString(result));
 #endif
 				RecycleDecklinkFrame(frame);
-
 				if (result == BMDOutputFrameCompletionResult::bmdOutputFrameFlushed)
 					return S_OK;
-				std::lock_guard<std::mutex> lock(preroll_mutex_);
+
+				BOOL isScheduledPlaybackRunning;
+				if (FAILED(output_->IsScheduledPlaybackRunning(&isScheduledPlaybackRunning)) || !isScheduledPlaybackRunning)
+					return S_OK;
+
 				int audio_samples_required = AudioSamplesRequired();
 				for (Core::ClockTarget* target : clock_targets_)
 					target->RequestFrame(audio_samples_required);
@@ -320,9 +330,8 @@ namespace TVPlayR {
 					if (SUCCEEDED(status_->GetFlag(BMDDeckLinkStatusID::bmdDeckLinkStatusReferenceSignalLocked, &locked)) && locked)
 					{
 						DebugPrintLine(Common::DebugSeverity::info, "Reference signal locked, restarting playback");
-						output_->StopScheduledPlayback(0LL, NULL, 0LL);
-						Preroll();
-						output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
+						StopScheduledPlayback();
+						StartScheduledPlayback();
 					}
 				}
 				return S_OK;

@@ -4,7 +4,7 @@
 
 namespace TVPlayR {
     namespace Decklink {
-        DecklinkTimecode::DecklinkTimecode(const Core::VideoFormat& format)
+        DecklinkTimecode::DecklinkTimecode(const Core::VideoFormat &format)
             : time_(AV_NOPTS_VALUE)
             , format_(format)
         { }
@@ -27,6 +27,8 @@ namespace TVPlayR {
 
         STDMETHODIMP_(BMDTimecodeBCD) DecklinkTimecode::GetBCD()
         {
+            if (time_ == AV_NOPTS_VALUE)
+                return 0;
             int frame_number = format_.TimeToFrameNumber(time_);
             uint32_t smpte = format_.FrameNumberToSmpteTimecode(frame_number);
             BMDTimecodeBCD bcd;
@@ -42,6 +44,8 @@ namespace TVPlayR {
 
         STDMETHODIMP DecklinkTimecode::GetComponents(unsigned char* hours, unsigned char* minutes, unsigned char* seconds, unsigned char* frames)
         {
+            if (time_ == AV_NOPTS_VALUE)
+                return E_FAIL;
             int frame_number = format_.TimeToFrameNumber(time_);
             uint32_t smpte = format_.FrameNumberToSmpteTimecode(frame_number);
             auto in = reinterpret_cast<uint8_t*>(&smpte);

@@ -47,7 +47,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const FFOutputParams& params)
-				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
+				: Common::DebugTarget(Common::DebugSeverity::trace, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, format_(Core::VideoFormatType::invalid)
 				, dest_pixel_format_(av_get_pix_fmt(params.PixelFormat.c_str()))
@@ -88,7 +88,6 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), dest_pixel_format_);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, dest_pixel_format_);
-				executor_.begin_invoke([this] { Tick(); });
 			}
 
 			void InitializeFrameRequester()
@@ -146,6 +145,7 @@ namespace TVPlayR {
 			void RequestNextFrame()
 			{
 				assert(executor_.is_current());
+				DebugPrintLine(Common::DebugSeverity::trace, "RequestNextFrame");
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
 				for (Core::ClockTarget* target : clock_targets_)
 					target->RequestFrame(audio_samples_required);
@@ -222,6 +222,7 @@ namespace TVPlayR {
 
 			void Push(Core::AVSync& sync)
 			{
+				DebugPrintLine(Common::DebugSeverity::trace, "Push: frame pushed");
 				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
 				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
 				if (audio)
@@ -232,18 +233,28 @@ namespace TVPlayR {
 				video->pts = video_frames_pushed_;
 				video_frames_pushed_++;
 				if (buffer_.try_emplace(Core::AVSync(audio, video, sync.TimeInfo)) != Common::BlockingCollectionStatus::Ok)
-					DebugPrintLine(Common::DebugSeverity::warning, "Frame dropped");
+					DebugPrintLine(Common::DebugSeverity::warning, "Push: frame dropped");
 				executor_.begin_invoke([this]
 					{
 						if (!clock_targets_.empty())
+						{
 							WaitForNextFrameTime();
+							RequestNextFrame();
+						}
 						Tick();
 					});
 			}
 
 			void RegisterClockTarget(Core::ClockTarget* target)
 			{
-				executor_.invoke([=] { clock_targets_.push_back(target); });
+				executor_.invoke([target, this]
+					{
+						DebugPrintLine(Common::DebugSeverity::debug, "RegisterClockTarget");
+						bool was_empty = clock_targets_.empty();
+						clock_targets_.push_back(target);
+						if (was_empty)
+							InitializeFrameRequester();
+					});
 			}
 
 			void UnregisterClockTarget(Core::ClockTarget* target)

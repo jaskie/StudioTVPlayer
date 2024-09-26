@@ -29,7 +29,7 @@ namespace TVPlayR {
 			if (video_decoder_)
 				return;
 			auto stream = input_.GetVideoStream();
-			if (stream == nullptr)
+			if (stream == nullptr || stream->Codec == nullptr)
 				return;
 			video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, stream->StartTime, acceleration_, hw_device_);
 		}

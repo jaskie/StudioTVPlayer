@@ -111,13 +111,13 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		if (std::any_of(streams.begin(), streams.end(), [](const auto& stream) { return stream.Type == Core::MediaType::audio && stream.Language == "pol"; }))
 			for (const auto& stream : streams)
 			{
-				if (stream.Type == Core::MediaType::audio && stream.Language == "pol")
+				if (stream.Type == Core::MediaType::audio && stream.Codec && stream.Language == "pol")
 					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
 			}
 		else
 			for (const auto& stream : streams)
 			{
-				if (stream.Type == Core::MediaType::audio)
+				if (stream.Type == Core::MediaType::audio && stream.Codec)
 					audio_decoders_.emplace_back(std::make_unique<Decoder>(stream.Codec, stream.Stream, seek ? seek : stream.StartTime));
 			}
 	}

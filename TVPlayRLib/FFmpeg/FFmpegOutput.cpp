@@ -47,7 +47,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 
 			implementation(const FFOutputParams& params)
-				: Common::DebugTarget(Common::DebugSeverity::trace, "FFmpeg output: " + params.Url)
+				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, format_(Core::VideoFormatType::invalid)
 				, dest_pixel_format_(av_get_pix_fmt(params.PixelFormat.c_str()))

@@ -37,14 +37,19 @@ namespace TVPlayR {
 			std::unique_ptr<Encoder> audio_encoder_;
 			Common::BlockingCollection<Core::AVSync> buffer_;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
-			std::vector<Core::ClockTarget*> clock_targets_;
 			std::int64_t video_frames_requested_ = 0LL;
 			std::int64_t audio_samples_requested_ = 0LL;
 			std::int64_t video_frames_pushed_ = 0LL;
 			std::int64_t audio_samples_pushed_ = 0LL;
 			std::int64_t last_video_time_ = 0LL;
 			clock::time_point stream_start_time_;
-			Common::Executor executor_;
+			Common::Executor output_executor_;
+
+			// frame clock variables
+			std::atomic_bool frame_clock_thread_is_running_;
+			std::mutex frame_clock_mutex_;
+			std::vector<Core::ClockTarget*> frame_clock_targets_;
+			std::thread frame_clock_thread_;
 
 			implementation(const FFOutputParams& params)
 				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
@@ -56,7 +61,7 @@ namespace TVPlayR {
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
-				, executor_("FFmpegOutput: " + params.Url)
+				, output_executor_("FFmpegOutput: " + params.Url)
 			{
 				if (dest_pixel_format_ == AVPixelFormat::AV_PIX_FMT_NONE)
 					dest_pixel_format_ = video_codec_->pix_fmts[0];
@@ -64,7 +69,8 @@ namespace TVPlayR {
 
 			~implementation()
 			{
-				executor_.invoke([this]
+				frame_clock_thread_is_running_ = false;
+				output_executor_.invoke([this]
 				{
 					if (video_encoder_)
 						PushToEncoder(video_encoder_, nullptr);
@@ -73,7 +79,54 @@ namespace TVPlayR {
 					output_format_.Flush();
 					format_ = Core::VideoFormatType::invalid;
 				});
+				frame_clock_thread_.join();
 			}
+
+#pragma region Frame clock
+
+			void FrameClockTheradStart()
+			{
+#ifdef DEBUG
+				Common::SetThreadName("FFmpegOutputClock");
+#endif
+				::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+				stream_start_time_ = clock::now();
+				audio_samples_requested_ = 0LL;
+				video_frames_requested_ = 0LL;
+				while (frame_clock_thread_is_running_)
+				{
+					RequestNextFrame();
+					WaitForNextFrameTime();
+				}
+			}
+
+			void RequestNextFrame()
+			{
+				DebugPrintLine(Common::DebugSeverity::trace, "RequestNextFrame");
+				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
+				std::lock_guard<std::mutex> lock(frame_clock_mutex_);
+				for (Core::ClockTarget* target : frame_clock_targets_)
+					target->RequestFrame(audio_samples_required);
+				video_frames_requested_++;
+				audio_samples_requested_ += audio_samples_required;
+			}
+
+			void WaitForNextFrameTime()
+			{
+				auto& frame_rate = format_.FrameRate();
+				clock::time_point current_time = clock::now();
+				clock::time_point next_frame_time = stream_start_time_ + clock::duration(clock::period::den * frame_rate.Denominator() * video_frames_requested_ / (clock::period::num * frame_rate.Numerator()));
+				auto wait_time = next_frame_time - current_time;
+				if (wait_time > clock::duration::zero())
+				{
+					DebugPrintLine(Common::DebugSeverity::trace, "Waiting " + std::to_string(wait_time.count() / 1000000) + " ms");
+					std::this_thread::sleep_for(wait_time);
+				}
+				else
+					DebugPrintLine(Common::DebugSeverity::debug, "Negative wait time");
+			}
+
+#pragma endregion // Frame clock
 
 			void Initialize(Core::VideoFormatType video_format, TVPlayR::PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
 			{
@@ -88,22 +141,20 @@ namespace TVPlayR {
 					video_scaler_ = std::make_unique<SwScale>(format_.width(), format_.height(), src_pixel_format_, format_.width(), format_.height(), dest_pixel_format_);
 				else
 					video_filter_ = std::make_unique<OutputVideoFilter>(format_.FrameRate().av(), params_.VideoFilter, dest_pixel_format_);
+
+				frame_clock_thread_is_running_ = true;
+				frame_clock_thread_ = std::thread(&implementation::FrameClockTheradStart, this);
 			}
 
-			void InitializeFrameRequester()
+			void InitializeClock()
 			{
-				assert(executor_.is_current());
-				stream_start_time_ = clock::now();
-				audio_samples_requested_ = 0LL;
-				video_frames_requested_ = 0LL;
-				while (video_frames_requested_ <= static_cast<std::int64_t>(buffer_.bounded_capacity() / 2))
-					RequestNextFrame();
-				Tick();
+				assert(output_executor_.is_current());
+				ProcessFrameFromBuffer();
 			}
-			
-			void Tick()
+
+			void ProcessFrameFromBuffer()
 			{
-				assert(executor_.is_current());
+				assert(output_executor_.is_current());
 				Core::AVSync sync;
 				if (buffer_.try_take(sync) == TVPlayR::Common::BlockingCollectionStatus::Ok)
 				{
@@ -142,42 +193,15 @@ namespace TVPlayR {
 					DebugPrintLine(Common::DebugSeverity::info, "Buffer didn't return frame");
 			}
 
-			void RequestNextFrame()
-			{
-				assert(executor_.is_current());
-				DebugPrintLine(Common::DebugSeverity::trace, "RequestNextFrame");
-				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
-				for (Core::ClockTarget* target : clock_targets_)
-					target->RequestFrame(audio_samples_required);
-				video_frames_requested_++;
-				audio_samples_requested_ += audio_samples_required;
-			}
-
 			void PushToEncoder(const std::unique_ptr<Encoder>& encoder, const std::shared_ptr<AVFrame>& frame)
 			{
-				assert(executor_.is_current());
+				assert(output_executor_.is_current());
 				if (frame)
 					encoder->Push(frame);
 				else
 					encoder->Flush();
 				while (auto packet = encoder->Pull())
 					output_format_.Push(packet);
-			}
-
-			void WaitForNextFrameTime()
-			{
-				assert(executor_.is_current());
-				auto& frame_rate = format_.FrameRate();
-				clock::time_point current_time = clock::now();
-				clock::time_point next_frame_time = stream_start_time_ + clock::duration(clock::period::den * frame_rate.Denominator() * video_frames_requested_ / (clock::period::num * frame_rate.Numerator()));
-				auto wait_time = next_frame_time - current_time;
-				if (wait_time > clock::duration::zero())
-				{
-					DebugPrintLine(Common::DebugSeverity::trace, "Waiting " + std::to_string(wait_time.count() / 1000000) + " ms");
-					std::this_thread::sleep_for(wait_time);
-				}
-				else
-					DebugPrintLine(Common::DebugSeverity::warning, "Negative wait time");
 			}
 
 			void InitializeVideoEncoderAndOutput(const std::shared_ptr<AVFrame>& frame, AVRational time_base, AVRational frame_rate)
@@ -188,7 +212,7 @@ namespace TVPlayR {
 
 			void InitializeOuputIfPossible()
 			{
-				assert(executor_.is_current());
+				assert(output_executor_.is_current());
 				if (!video_encoder_ || !audio_encoder_)
 					return;
 				output_format_.Initialize(params_.OutputMetadata);
@@ -206,7 +230,7 @@ namespace TVPlayR {
 
 			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				executor_.invoke([=]
+				output_executor_.invoke([=]
 					{
 						overlays_.emplace_back(overlay);
 					});
@@ -214,7 +238,7 @@ namespace TVPlayR {
 
 			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
 			{
-				executor_.invoke([=]
+				output_executor_.invoke([=]
 					{
 						overlays_.erase(std::remove(overlays_.begin(), overlays_.end(), overlay), overlays_.end());
 					});
@@ -234,34 +258,25 @@ namespace TVPlayR {
 				video_frames_pushed_++;
 				if (buffer_.try_emplace(Core::AVSync(audio, video, sync.TimeInfo)) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::warning, "Push: frame dropped");
-				executor_.begin_invoke([this]
+				output_executor_.begin_invoke([this]
 					{
-						if (!clock_targets_.empty())
-						{
-							WaitForNextFrameTime();
-							RequestNextFrame();
-						}
-						Tick();
+						ProcessFrameFromBuffer();
 					});
 			}
 
 			void RegisterClockTarget(Core::ClockTarget* target)
 			{
-				executor_.invoke([target, this]
-					{
-						DebugPrintLine(Common::DebugSeverity::debug, "RegisterClockTarget");
-						bool was_empty = clock_targets_.empty();
-						clock_targets_.push_back(target);
-						if (was_empty)
-							InitializeFrameRequester();
-					});
+				DebugPrintLine(Common::DebugSeverity::debug, "RegisterClockTarget");
+				std::lock_guard<std::mutex> lock(frame_clock_mutex_);
+				frame_clock_targets_.push_back(target);
 			}
 
 			void UnregisterClockTarget(Core::ClockTarget* target)
 			{
-				executor_.invoke([=] { clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), target), clock_targets_.end()); });
+				DebugPrintLine(Common::DebugSeverity::debug, "UnregisterClockTarget");
+				std::lock_guard<std::mutex> lock(frame_clock_mutex_);
+				output_executor_.invoke([=] { frame_clock_targets_.erase(std::remove(frame_clock_targets_.begin(), frame_clock_targets_.end(), target), frame_clock_targets_.end()); });
 			}
-
 
 		};
 

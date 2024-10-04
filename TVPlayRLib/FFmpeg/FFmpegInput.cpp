@@ -60,7 +60,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 	void ProducerTheradStart()
 	{
 #ifdef DEBUG
-		Common::SetThreadName(::GetCurrentThreadId(), ("FFmpegInput " + file_name_).c_str());
+		Common::SetThreadName(("FFmpegInput " + file_name_).c_str());
 #endif
 		is_producer_running_ = true;
 		std::unique_lock<std::mutex> wait_lock(producer_mutex_);

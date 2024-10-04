@@ -33,7 +33,7 @@ namespace TVPlayR {
 			Common::Executor executor_;
 		
 			implementation(const Player& player, const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
-				: Common::DebugTarget(Common::DebugSeverity::warning, "Player " + name)
+				: Common::DebugTarget(Common::DebugSeverity::info, "Player " + name)
 				, player_(player)
 				, name_(name)
 				, format_(format)

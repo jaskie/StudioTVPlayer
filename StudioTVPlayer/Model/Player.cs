@@ -79,9 +79,9 @@ namespace StudioTVPlayer.Model
                         throw new ApplicationException("Invalid output configuration type");
                 }
                 output.Initialize(_player);
+                _player.AddOutputSink(output.Output);
                 if (output.IsFrameClock)
                     _player.SetFrameClockSource(output.Output);
-                _player.AddOutputSink(output.Output);
                 _outputs.Add(output);
             }
             _player.AudioVolume += Player_AudioVolume;

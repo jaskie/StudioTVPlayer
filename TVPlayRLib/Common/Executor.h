@@ -4,7 +4,7 @@ namespace TVPlayR {
     namespace Common {
 
 #ifdef DEBUG
-        static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
+        static void SetThreadName(LPCSTR szThreadName)
         {
             HANDLE hThread = ::GetCurrentThread();
             const size_t size = strlen(szThreadName) + 1;
@@ -103,7 +103,7 @@ namespace TVPlayR {
         void run(std::string name)
         {
 #ifdef DEBUG
-            SetThreadName(::GetCurrentThreadId(), name.c_str());
+            SetThreadName(name.c_str());
 #endif
             std::function<void()> task;
             while (is_running_) {

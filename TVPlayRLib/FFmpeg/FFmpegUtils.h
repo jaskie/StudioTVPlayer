@@ -55,4 +55,6 @@ bool HaveAlphaChannel(AVPixelFormat format);
 
 AVDictionary* ReadOptions(const std::string& params);
 
+AVPixelFormat FindBestOutputPixelFormat(const AVCodec *codec, const std::string &preffered_format, AVPixelFormat channelPixelFormat);
+
 }}

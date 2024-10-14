@@ -29,7 +29,7 @@ namespace TVPlayR {
 			const AVCodec* video_codec_;
 			const AVCodec* audio_codec_;
 			AVPixelFormat src_pixel_format_ = AVPixelFormat::AV_PIX_FMT_NONE;
-			AVPixelFormat dest_pixel_format_;
+			AVPixelFormat dest_pixel_format_ = AVPixelFormat::AV_PIX_FMT_NONE;
 			std::unique_ptr<SwScale> video_scaler_;
 			std::unique_ptr<OutputVideoFilter> video_filter_;
 			std::unique_ptr<SwResample> audio_resampler_;
@@ -55,17 +55,13 @@ namespace TVPlayR {
 				: Common::DebugTarget(Common::DebugSeverity::info, "FFmpeg output: " + params.Url)
 				, params_(params)
 				, format_(Core::VideoFormatType::invalid)
-				, dest_pixel_format_(av_get_pix_fmt(params.PixelFormat.c_str()))
 				, options_(ReadOptions(params.Options))
 				, output_format_(params.Url, params.OutputFormat, options_)
 				, buffer_(6)
 				, video_codec_(avcodec_find_encoder_by_name(params.VideoCodec.c_str()))
 				, audio_codec_(avcodec_find_encoder_by_name(params.AudioCodec.c_str()))
 				, output_executor_("FFmpegOutput: " + params.Url)
-			{
-				if (dest_pixel_format_ == AVPixelFormat::AV_PIX_FMT_NONE)
-					dest_pixel_format_ = video_codec_->pix_fmts[0];
-			}
+			{ }
 
 			~implementation()
 			{
@@ -134,6 +130,7 @@ namespace TVPlayR {
 					THROW_EXCEPTION("FFmpegOutput: already initialized")
 				format_ = video_format;
 				src_pixel_format_ =  PixelFormatToFFmpegFormat(pixel_format);
+				dest_pixel_format_ = FindBestOutputPixelFormat(video_codec_, params_.PixelFormat, src_pixel_format_);
 				audio_channels_count_ = audio_channel_count;
 				audio_sample_rate_ = audio_sample_rate;
 				audio_resampler_ = std::make_unique<SwResample>(audio_channel_count, audio_sample_rate, AVSampleFormat::AV_SAMPLE_FMT_FLT, audio_channel_count, audio_sample_rate, static_cast<AVSampleFormat>(audio_codec_->sample_fmts[0]));

@@ -120,7 +120,7 @@ namespace StudioTVPlayer.Model
                     if (!Verify(vd.Media, vd.Width, vd.Height))
                     {
                         if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
-                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath);
+                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath, null);
                         else
                         {
                             Task.Run(async () =>

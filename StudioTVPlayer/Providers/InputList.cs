@@ -57,5 +57,7 @@ namespace StudioTVPlayer.Providers
 
         public bool CanAddDecklinkInput => TVPlayR.DecklinkIterator.Devices.Any(d => d.HaveInput);
 
+        public bool CanAddInput => CanAddDecklinkInput;
+
     }
 }

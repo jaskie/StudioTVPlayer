@@ -61,7 +61,7 @@
                         mah:ControlsHelper.ContentCharacterCasing="Normal">
                     <StackPanel Orientation="Horizontal">
                         <mah:FontIcon FontSize="12" Glyph="&#xE710;" />
-                        <TextBlock Margin="5 0 0 0" FontSize="12" FontWeight="Normal">Add recorder</TextBlock>
+                        <TextBlock Margin="5 0 0 0" FontSize="12" FontWeight="Normal">Add instant recording</TextBlock>
                     </StackPanel>
                 </Button>
                 <ListBox ItemsSource="{Binding Recordings}" >

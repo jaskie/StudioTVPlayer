@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         {
             AddDecklinkInputCommand = new UiCommand(AddDecklinkInput);
             Inputs = new ObservableCollection<InputViewModelBase>(InputList.Current.Inputs.Select(input =>
-           {
+            {
                InputViewModelBase inputViewModel;
                switch (input)
                {
@@ -26,11 +26,11 @@ namespace StudioTVPlayer.ViewModel.Main.Input
                }
                inputViewModel.RemoveRequested += Input_RemoveRequested;
                return inputViewModel;
-           }));
+            }));
         }
 
         public ICommand AddDecklinkInputCommand { get; }
-                
+
         public IList<InputViewModelBase> Inputs { get; }
 
         public bool CanAddInput => InputList.Current.CanAddDecklinkInput;
@@ -43,14 +43,22 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             Inputs.Add(vm);
         }
 
-        private void Input_RemoveRequested(object sender, EventArgs e)
+        private async void Input_RemoveRequested(object sender, EventArgs e)
         {
             var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));
-            if (InputList.Current.RemoveInput(vm.Input))
+            if (vm.Recordings.Any())
             {
-                Inputs.Remove(vm);
-                vm.Dispose();
-                vm.RemoveRequested -= Input_RemoveRequested;
+                await MainViewModel.Instance.ShowMessageAsync("Remove input", "You cannot remove input with recordings. Remove recordings first.", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                return;
+            }
+            if (await MainViewModel.Instance.ShowMessageAsync("Remove input", "Do you really want to remove this input?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) == MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+            {
+                if (InputList.Current.RemoveInput(vm.Input))
+                {
+                    Inputs.Remove(vm);
+                    vm.Dispose();
+                    vm.RemoveRequested -= Input_RemoveRequested;
+                }
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using StudioTVPlayer.Helpers;
+﻿using MahApps.Metro.Controls.Dialogs;
+using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
@@ -119,9 +120,9 @@ namespace StudioTVPlayer.ViewModel
             await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
         }
 
-        public async Task ShowMessageAsync(string title, string message)
+        public async Task<MessageDialogResult> ShowMessageAsync(string title, string message, MessageDialogStyle messageDialogStyle = MessageDialogStyle.Affirmative, MetroDialogSettings dialogSettings = null)
         {
-            await _dialogCoordinator.ShowMessageAsync(this, title, message);
+            return await _dialogCoordinator.ShowMessageAsync(this, title, message, messageDialogStyle, dialogSettings);
         }
     }
 }

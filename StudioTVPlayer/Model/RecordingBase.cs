@@ -2,31 +2,38 @@
 
 namespace StudioTVPlayer.Model
 {
-    /// <summary>
-    /// describes recording in progress
-    /// </summary>
-    public class Recording: IDisposable
+    public abstract class RecordingBase
     {
         private bool _disposed;
 
         private TVPlayR.FFOutput _output;
 
-        public Recording(InputBase input)
+        public RecordingBase(InputBase input)
         {
             Input = input;
         }
 
-        public InputBase Input { get; }
+        public EncoderPreset EncoderPreset { get; private set; }
 
         public string FullPath { get; private set; }
 
-        public EncoderPreset EncoderPreset { get; private set; }
+        public InputBase Input { get; }
 
-        public void StartRecording(string fullPath, TVPlayR.VideoFormat format, EncoderPreset preset)
+        public event EventHandler Finished;
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                StopRecording();
+                _disposed = true;
+            }
+        }
+
+        public virtual void StartRecording(string fullPath, TVPlayR.VideoFormat format, EncoderPreset preset)
         {
             FullPath = fullPath;
             EncoderPreset = preset;
-            Providers.GlobalApplicationData.Current.AddRecording(this);
             _output = new TVPlayR.FFOutput(
                 address: fullPath,
                 video_codec: preset.VideoCodec,
@@ -35,7 +42,7 @@ namespace StudioTVPlayer.Model
                 audio_bitrate: preset.AudioBitrate,
                 options: preset.Options,
                 video_filter: preset.VideoFilter,
-                pixel_format:preset.PixelFormat,
+                pixel_format: preset.PixelFormat,
                 output_metadata: preset.OutputMetadata,
                 video_metadata: preset.VideoMetadata,
                 audio_metadata: preset.AudioMetadata,
@@ -51,11 +58,6 @@ namespace StudioTVPlayer.Model
             Input.AddOutputSink(_output);
         }
 
-        private void DecklinkInput_FormatChanged(object sender, EventArgs e)
-        {
-            StopRecording();
-        }
-
         public void StopRecording()
         {
             Input.RemoveOutputSink(_output);
@@ -68,15 +70,9 @@ namespace StudioTVPlayer.Model
             Finished?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler Finished;
-
-        public void Dispose()
+        private void DecklinkInput_FormatChanged(object sender, EventArgs e)
         {
-            if (!_disposed)
-            {
-                StopRecording();
-                _disposed = true;
-            }
+            StopRecording();
         }
     }
 }

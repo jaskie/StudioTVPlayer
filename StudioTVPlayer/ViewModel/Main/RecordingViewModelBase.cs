@@ -1,18 +1,18 @@
-﻿using ControlzEx.Standard;
-using StudioTVPlayer.Helpers;
+﻿using StudioTVPlayer.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public sealed class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
+    public abstract class RecordingViewModelBase : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {
-        private Model.Recording _recording;
+        private Model.RecordingBase _recording;
         private string _fileName;
         private string _folder;
         private string _fullPath;
@@ -21,7 +21,7 @@ namespace StudioTVPlayer.ViewModel.Main
         private bool _disposed;
         private readonly Model.InputBase _input;
 
-        public RecordingViewModel(Model.InputBase input)
+        public RecordingViewModelBase(Model.InputBase input)
         {
             _input = input;
             if (input is Model.DecklinkInput decklinkInput)
@@ -30,7 +30,7 @@ namespace StudioTVPlayer.ViewModel.Main
             _folder = Folders.LastOrDefault();
         }
 
-        public RecordingViewModel(Model.Recording recording)
+        public RecordingViewModelBase(Model.RecordingBase recording)
         {
             _recording = recording;
             _input = recording.Input;
@@ -111,7 +111,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 
-        private string ReadErrorInfo(string propertyName)
+        protected virtual string ReadErrorInfo(string propertyName)
         {
             if (IsRecording)
                 return string.Empty;
@@ -161,7 +161,7 @@ namespace StudioTVPlayer.ViewModel.Main
             NotifyPropertyChanged(nameof(CanChangeRecordingState));
         }
 
-        private void BrowseForFolder(object _)
+        protected void BrowseForFolder(object _)
         {
             if (FolderHelper.BrowseForFolder(ref _folder, $"Select folder to capture video"))
             {
@@ -177,14 +177,14 @@ namespace StudioTVPlayer.ViewModel.Main
         {
             Debug.Assert(_recording is null);
             Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
-            _recording = new Model.Recording(_input);
+            _recording = new Model.RecordingInstant(_input);
             _recording.StartRecording($"{_fullPath}.{EncoderPreset.FilenameExtension}", _input.CurrentFormat(), EncoderPreset);
             _recording.Finished += Recording_Finished;
         }
 
         private void Recording_Finished(object sender, EventArgs e)
         {
-            var recording = sender as Model.Recording ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as Model.RecordingInstant ?? throw new ArgumentException(nameof(sender));
             recording.Finished -= Recording_Finished;
             _recording = null;
             NotifyPropertyChanged(nameof(FileName));
@@ -196,7 +196,6 @@ namespace StudioTVPlayer.ViewModel.Main
         {
             NotifyPropertyChanged(nameof(EncoderPresets));
         }
-
 
     }
 }

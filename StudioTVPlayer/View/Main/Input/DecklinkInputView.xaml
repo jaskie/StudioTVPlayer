@@ -55,7 +55,7 @@
                   >
             <StackPanel >
                 <Button HorizontalAlignment="Left" Margin="5" FontWeight="Normal"
-                        Command="{Binding CommandAddRecorder}"
+                        Command="{Binding CommandAddRecordingInstant}"
                         Style="{StaticResource MahApps.Styles.Button}"
                         Padding="5 0"
                         mah:ControlsHelper.ContentCharacterCasing="Normal">
@@ -72,8 +72,8 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.Resources>
-                        <DataTemplate DataType="{x:Type mainVm:RecordingViewModel}">
-                            <main:RecordingView/>
+                        <DataTemplate DataType="{x:Type mainVm:RecordingInstantViewModel}">
+                            <main:RecordingInstantView/>
                         </DataTemplate>
                     </ListBox.Resources>
                 </ListBox>

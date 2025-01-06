@@ -48,8 +48,8 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
-		const PixelFormat pixel_format = PixelFormat::yuv422;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080p5000;
+		const PixelFormat pixel_format = PixelFormat::bgra;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
 
@@ -69,31 +69,34 @@ int main()
 		player.SetFrameClockSource(*decklink_output);
 		
 
-		//auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
-		//ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
-		//player.AddOutputSink(ndi);
+		auto ndi = std::make_shared<Ndi::NdiOutput>("Player 1", "");
+		ndi->Initialize(video_format, pixel_format, audio_channels, sample_rate);
+		player.AddOutputSink(ndi);
+		//player.SetFrameClockSource(*ndi);
+		auto ndi1 = std::make_shared<Ndi::NdiOutput>("Player 2", "");
+		ndi1->Initialize(video_format, pixel_format, audio_channels, sample_rate);
+		player.AddOutputSink(ndi1);
 		//player.SetFrameClockSource(*ndi);
 		//std::this_thread::sleep_for(200ms);
-		/*FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
-			"libx264",															// VideoCodec
-			"aac", 																	// AudioCodec
-			4000,																	// VideoBitrate
-			128, 																	// AudioBitrate
-			"g=18,bf=0",															// Options
-			"",//"bwdif,scale=384x216,interlace",										// VideoFilter
-			"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
-			"",															// VideoMetadata
-			"language=pol",												// AudioMetadata
-			121, // VideoStreamId
-			122  // AudioStreamId
-		};
-		
-		//FFmpeg::FFOutputParams stream_params{ "d:\\temp\\aaa.mov", "libx264", "aac", 4000, 128 };
+		//FFmpeg::FFOutputParams stream_params{"udp://127.0.0.1:1234?pkt_size=1316", // Url
+		//	"libx264",															// VideoCodec
+		//	"aac", 																	// AudioCodec
+		//	4000,																	// VideoBitrate
+		//	128, 																	// AudioBitrate
+		//	"g=18,bf=0",															// Options
+		//	"",//"bwdif,scale=384x216,interlace",									// VideoFilter
+		//	"x2rgb10",															// PixelFormat
+		//	"service_name=\"Test service\",service_provider=\"TVPlayR test\"",		// OutputMetadata
+		//	"",															// VideoMetadata
+		//	"language=pol",												// AudioMetadata
+		//	121, // VideoStreamId
+		//	122  // AudioStreamId
+		//};
+		//
 		//auto stream = std::make_shared<FFmpeg::FFmpegOutput>(stream_params);
 		//player.SetFrameClockSource(*stream);
-		//stream->InitializeFor(player);
+		//stream->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		//player.AddOutputSink(stream);
-		*/
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
 		auto input = std::make_shared<FFmpeg::FFmpegInput>("G:\\media\\test5.mov", Core::HwAccel::none, "");
@@ -150,7 +153,9 @@ int main()
 					input->Play();*/
 		}
 		//decklink_input->RemoveOutputSink(record_file);
-		//player.RemoveOutputSink(ndi);
+		//ndi->UnregisterClockTarget(player);
+		player.RemoveOutputSink(ndi);
+		player.RemoveOutputSink(ndi1);
 		player.RemoveOutputSink(decklink_output);
 		//player.RemoveOutput(stream);
 #ifdef _DEBUG

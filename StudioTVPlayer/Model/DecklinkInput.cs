@@ -57,9 +57,9 @@ namespace StudioTVPlayer.Model
 
         public override void Uninitialize()
         {
-            if (!(_preview is null))
+            if (_preview is not null)
                 _input?.RemoveOutputSink(_preview);
-            if (!(_input is null))
+            if (_input is not null)
             {
                 _input.FormatChanged -= Input_FormatChanged;
                 _input.Dispose();
@@ -69,7 +69,7 @@ namespace StudioTVPlayer.Model
             _preview = null;
         }
 
-        public override bool IsRunning => !(_input is null);
+        public override bool IsRunning => (_input is not null);
 
         private void Input_FormatChanged(object sender, TVPlayR.VideoFormatEventArgs e)
         {

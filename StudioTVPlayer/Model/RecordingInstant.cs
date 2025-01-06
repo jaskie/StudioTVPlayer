@@ -11,8 +11,8 @@ namespace StudioTVPlayer.Model
 
         public override void StartRecording(string fullPath, TVPlayR.VideoFormat format, EncoderPreset preset)
         {
-            Providers.GlobalApplicationData.Current.AddRecording(this);
             base.StartRecording(fullPath, format, preset);
+            Providers.GlobalApplicationData.Current.AddRecording(this);
         }
     }
 }

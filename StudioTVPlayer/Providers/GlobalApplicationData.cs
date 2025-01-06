@@ -12,7 +12,7 @@ namespace StudioTVPlayer.Providers
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
         private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
         private PlayerControllerBase[] _playerControllers = Array.Empty<PlayerControllerBase>();
-        private readonly List<RecordingBase> _recordings = new List<RecordingBase>();
+        private readonly List<RecordingInstant> _recordings = new List<RecordingInstant>();
 
         private GlobalApplicationData()
         {
@@ -25,7 +25,7 @@ namespace StudioTVPlayer.Providers
 
         public IReadOnlyList<PlayerControllerBase> PlayerControllers => _playerControllers;
 
-        public IReadOnlyList<RecordingBase> Recordings => _recordings;
+        public IReadOnlyList<RecordingInstant> Recordings => _recordings;
 
         public IReadOnlyList<EncoderPreset> EncoderPresets { get; private set; }
 
@@ -139,7 +139,7 @@ namespace StudioTVPlayer.Providers
             return presets;
         }
 
-        public void AddRecording(RecordingBase recording)
+        public void AddRecording(RecordingInstant recording)
         {
             _recordings.Add(recording);
             recording.Finished += Recording_Finished;
@@ -147,7 +147,7 @@ namespace StudioTVPlayer.Providers
 
         private void Recording_Finished(object sender, EventArgs e)
         {
-            var recording = sender as RecordingBase ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as RecordingInstant ?? throw new ArgumentException(nameof(sender));
             recording.Finished -= Recording_Finished;
             _recordings.Remove(recording);
         }

@@ -85,23 +85,15 @@ namespace TVPlayR {
 
 		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::QueryInterface(REFIID iid, LPVOID* ppv)
 		{
-			REFIID iunknown = IID_IUnknown;
-			if (memcmp(&iid, &iunknown, sizeof(REFIID)) == 0)
+			if (memcmp(&iid, &IID_IDeckLinkVideoFrame, sizeof(REFIID)) == 0 ||
+				memcmp(&iid, &IID_IUnknown, sizeof(REFIID)) == 0)
 			{
 				*ppv = this;
 				AddRef();
+				return S_OK;
 			}
-			else if (memcmp(&iid, &IID_IDeckLinkVideoFrame, sizeof(REFIID)) == 0)
-			{
-				*ppv = static_cast<IDeckLinkVideoFrame*>(this);
-				AddRef();
-			}
-			else
-			{
-				*ppv = nullptr;
-				return E_NOINTERFACE;
-			}
-			return S_OK;
+			*ppv = nullptr;
+			return E_NOINTERFACE;
 		}
 
 		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::AddRef() { return 1; }

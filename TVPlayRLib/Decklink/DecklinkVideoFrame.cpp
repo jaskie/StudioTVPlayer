@@ -83,7 +83,18 @@ namespace TVPlayR {
 			// we don't clear the buffer, because it's allocation is expensive, and we can reuse it
 		}
 
-		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::QueryInterface(REFIID, LPVOID*) { return E_NOINTERFACE; }
+		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::QueryInterface(REFIID iid, LPVOID* ppv)
+		{
+			if (memcmp(&iid, &IID_IDeckLinkVideoFrame, sizeof(REFIID)) == 0 ||
+				memcmp(&iid, &IID_IUnknown, sizeof(REFIID)) == 0)
+			{
+				*ppv = this;
+				AddRef();
+				return S_OK;
+			}
+			*ppv = nullptr;
+			return E_NOINTERFACE;
+		}
 
 		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::AddRef() { return 1; }
 

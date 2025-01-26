@@ -29,7 +29,7 @@ namespace TVPlayR {
 			PixelFormat pixel_format_ = PixelFormat::yuv422;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
 			std::vector<Core::ClockTarget*> clock_targets_;
-			int preroll_buffer_size_ = 4;
+			const int preroll_buffer_size_;
 			std::atomic_int64_t scheduled_frames_;
 			std::atomic_int64_t  scheduled_samples_;
 			int audio_channels_count_ = 0;
@@ -43,7 +43,7 @@ namespace TVPlayR {
 			Common::Executor overlay_executor_;
 			
 
-			implementation(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
+			implementation(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source, int preroll_buffer_size)
 				: Common::DebugTarget(Common::DebugSeverity::info, "Decklink " + std::to_string(index))
 				, output_(decklink)
 				, attributes_(decklink)
@@ -55,6 +55,7 @@ namespace TVPlayR {
 				, index_(index)
 				, keyer_(keyer)
 				, timecode_source_(timecode_source)
+				, preroll_buffer_size_(preroll_buffer_size)
 				, overlay_executor_("Overlay queue for Decklink" + std::to_string(index), 3)
 			{
 				output_->SetScheduledFrameCompletionCallback(this);
@@ -107,8 +108,9 @@ namespace TVPlayR {
 				}
 				if (FAILED(output_->EnableVideoOutput(actualMode, flags)))
 					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to enable video output");
-				if (keyer_ != DecklinkKeyerType::Internal)
-					output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped);
+				if (keyer_ != DecklinkKeyerType::Internal &&
+					FAILED(output_->EnableAudioOutput(BMDAudioSampleRate::bmdAudioSampleRate48kHz, BMDAudioSampleType::bmdAudioSampleType32bitInteger, audio_channels_count, BMDAudioOutputStreamType::bmdAudioOutputStreamTimestamped)))
+					THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to enable audio output");
 				if (FAILED(notification_->Subscribe(BMDNotifications::bmdStatusChanged, this)))
 					DebugPrintLine(Common::DebugSeverity::warning, "Failed to register notification callback.");
 			}
@@ -119,14 +121,21 @@ namespace TVPlayR {
 					return;
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
-				output_->BeginAudioPreroll();
 				for (size_t i = 0; i < preroll_buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
 					ScheduleVideo(last_video_, last_video_time_);
 				}
-				output_->EndAudioPreroll();
-				output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0);
+				int tryCount = 3; // we are taking up to 3 tries to start the playback
+				while (FAILED(output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0)))
+				{
+					if (tryCount--)
+						DebugPrintLine(Common::DebugSeverity::warning, "Failed to start scheduled playback.");
+					else
+						THROW_EXCEPTION("Decklink Output at index " + std::to_string(index_) + ": unable to start scheduled playback");
+					using namespace std::chrono;
+					std::this_thread::sleep_for(100ms);
+				}
 			}
 
 			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
@@ -178,14 +187,6 @@ namespace TVPlayR {
 				if (samples_required < 0)
 					samples_required = 0;
 				return static_cast<int>(samples_required);
-			}
-
-			bool SetBufferSize(int size) 
-			{
-				if (format_.type() != Core::VideoFormatType::invalid)
-					return false;
-				preroll_buffer_size_ = size;
-				return true;
 			}
 
 			void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate)
@@ -346,14 +347,13 @@ namespace TVPlayR {
 
 		};
 
-		DecklinkOutput::DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source)
-			: impl_(std::make_unique<implementation>(decklink, index, keyer, timecode_source))
+		DecklinkOutput::DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source, int preroll_buffer_size)
+			: impl_(std::make_unique<implementation>(decklink, index, keyer, timecode_source, preroll_buffer_size))
 		{}
 
 		DecklinkOutput::~DecklinkOutput() { }
 
-		bool DecklinkOutput::SetBufferSize(int size) { return impl_->SetBufferSize(size); }
-		int DecklinkOutput::GetBufferSize() const { return impl_->preroll_buffer_size_; }
+		int DecklinkOutput::GetPrerollBufferSize() const { return impl_->preroll_buffer_size_; }
 		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
 		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }

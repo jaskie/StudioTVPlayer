@@ -5,39 +5,43 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public abstract class RecordingViewModelBase : RemovableViewModelBase, IDataErrorInfo, IDisposable
+    public sealed class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {
-        private Model.RecordingBase _recording;
+        private Model.Recording _recording;
         private string _fileName;
         private string _folder;
-        private string _fullPath;
         private bool _isRecording;
+        private bool _isCompleted;
         private Model.EncoderPreset _encoderPreset;
         private bool _disposed;
         private readonly Model.InputBase _input;
 
-        public RecordingViewModelBase(Model.InputBase input)
+        public RecordingViewModel(Model.InputBase input) : this(input, null)
         {
+            _folder = Folders.LastOrDefault();
+            _fileName = $"Recording_{DateTime.Now:yyyyMMdd_HHmmss}";
+        }
+
+        public RecordingViewModel(Model.Recording recording) : this(recording.Input, recording.EncoderPreset)
+        {
+            _recording = recording;
+            _isRecording = true;
+            _folder = Path.GetDirectoryName(recording.FullPath);
+            _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
+        }
+
+        private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset)
+        {
+            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
+            OpenExternalFolderCommand = new UiCommand(OpenExternalFolder);
             _input = input;
             if (input is Model.DecklinkInput decklinkInput)
                 decklinkInput.FormatChanged += DecklinkInput_InputFormatChanged;
-            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
-            _folder = Folders.LastOrDefault();
-        }
-
-        public RecordingViewModelBase(Model.RecordingBase recording)
-        {
-            _recording = recording;
-            _input = recording.Input;
-            _isRecording = true;
-            EncoderPreset = recording.EncoderPreset;
-            _folder = Path.GetDirectoryName(recording.FullPath);
-            _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
+            _encoderPreset = encoderPreset ?? EncoderPresets.FirstOrDefault();
         }
 
         public IEnumerable<string> Folders => Providers.MostRecentUsed.Current.Folders;
@@ -49,7 +53,8 @@ namespace StudioTVPlayer.ViewModel.Main
             {
                 if (!Set(ref _folder, value))
                     return;
-                SetNewFullPath();
+                NotifyPropertyChanged(nameof(FullPath));
+                NotifyPropertyChanged(nameof(CanChangeRecordingState));
             }
         }
 
@@ -60,7 +65,8 @@ namespace StudioTVPlayer.ViewModel.Main
             {
                 if (!Set(ref _fileName, value))
                     return;
-                SetNewFullPath();
+                NotifyPropertyChanged(nameof(FullPath));
+                NotifyPropertyChanged(nameof(CanChangeRecordingState));
             }
         }
 
@@ -69,7 +75,7 @@ namespace StudioTVPlayer.ViewModel.Main
             get
             {
                 var currentFormatName = _input.CurrentFormat().Name;
-                return Providers.GlobalApplicationData.Current.EncoderPresets.Where(p => p.InputFormats == null || p.InputFormats.Contains(currentFormatName));
+                return Model.EncoderPresets.Instance.Presets.Where(p => p.InputFormats == null || p.InputFormats.Contains(currentFormatName));
             }
         }
 
@@ -80,8 +86,8 @@ namespace StudioTVPlayer.ViewModel.Main
             {
                 if (!Set(ref _encoderPreset, value))
                     return;
+                NotifyPropertyChanged(nameof(FullPath));
                 NotifyPropertyChanged(nameof(CanChangeRecordingState));
-                NotifyPropertyChanged(nameof(FileName));
             }
         }
 
@@ -100,10 +106,18 @@ namespace StudioTVPlayer.ViewModel.Main
             }
         }
 
+        public bool IsCompleted
+        {
+            get => _isCompleted;
+            private set => Set(ref _isCompleted, value);
+        }
+
         public bool CanChangeRecordingState => IsRecording // to stop the ongiong recording
-            || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(_fullPath) && !File.Exists($"{_fullPath}.{EncoderPreset.FilenameExtension}")); // to start new one
+            || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath)); // to start new one
 
         public ICommand BrowseForFolderCommand { get; }
+
+        public ICommand OpenExternalFolderCommand { get; }
 
         #region IDataErrorInfo
 
@@ -111,7 +125,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 
-        protected virtual string ReadErrorInfo(string propertyName)
+        private string ReadErrorInfo(string propertyName)
         {
             if (IsRecording)
                 return string.Empty;
@@ -119,7 +133,7 @@ namespace StudioTVPlayer.ViewModel.Main
             {
                 case nameof(Folder) when !IsRecording && !Directory.Exists(Folder):
                     return "Folder does not exists";
-                case nameof(FileName) when File.Exists($"{_fullPath}.{EncoderPreset?.FilenameExtension}"):
+                case nameof(FileName) when File.Exists(FullPath):
                     return "File already exists";
                 case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
                     return "Filename can't be empty";
@@ -150,46 +164,52 @@ namespace StudioTVPlayer.ViewModel.Main
                 decklinkInput.FormatChanged -= DecklinkInput_InputFormatChanged;
         }
 
-        private void SetNewFullPath()
+        public string FullPath
         {
-            if (string.IsNullOrEmpty(Folder) || string.IsNullOrEmpty(FileName))
+            get
             {
-                _fullPath = null;
+                if (string.IsNullOrEmpty(Folder) || string.IsNullOrEmpty(FileName) || EncoderPreset is null)
+                    return null;
+                return Path.Combine(Folder, $"{FileName}.{EncoderPreset.FilenameExtension}");
             }
-            else
-                _fullPath = Path.Combine(Folder, FileName);
-            NotifyPropertyChanged(nameof(CanChangeRecordingState));
         }
 
-        protected void BrowseForFolder(object _)
+        private void BrowseForFolder(object _)
         {
             if (FolderHelper.BrowseForFolder(ref _folder, $"Select folder to capture video"))
             {
                 NotifyPropertyChanged(nameof(Folder));
-                SetNewFullPath();
+                NotifyPropertyChanged(nameof(FullPath));
+                NotifyPropertyChanged(nameof(CanChangeRecordingState));
                 Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
             }
         }
 
-        private void StopRecording() => _recording?.StopRecording();
+        private void OpenExternalFolder(object _)
+        {
+            Process.Start("explorer.exe", $"/select,\"{FullPath}\"");
+        }
+
+        private void StopRecording() => _recording?.Stop();
 
         private void StartRecording()
         {
             Debug.Assert(_recording is null);
             Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
-            _recording = new Model.RecordingInstant(_input);
-            _recording.StartRecording($"{_fullPath}.{EncoderPreset.FilenameExtension}", _input.CurrentFormat(), EncoderPreset);
+            _recording = new Model.Recording(_input, _encoderPreset, FullPath);
+            _recording.Start();
             _recording.Finished += Recording_Finished;
         }
 
         private void Recording_Finished(object sender, EventArgs e)
         {
-            var recording = sender as Model.RecordingInstant ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as Model.Recording ?? throw new ArgumentException(nameof(sender));
             recording.Finished -= Recording_Finished;
             _recording = null;
             NotifyPropertyChanged(nameof(FileName));
             Set(ref _isRecording, false, nameof(IsRecording));
             NotifyPropertyChanged(nameof(CanChangeRecordingState));
+            IsCompleted = true;
         }
 
         private void DecklinkInput_InputFormatChanged(object sender, EventArgs e)

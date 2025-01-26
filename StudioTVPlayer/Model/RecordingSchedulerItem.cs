@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
-    class RecordingScheduled : RecordingBase
+    class RecordingSchedulerItem
     {
-        public RecordingScheduled(InputBase input) : base(input) { }
-
         public DateTime StartTime { get; set; }
 
         public TimeSpan Duration { get; set; }
@@ -23,5 +21,11 @@ namespace StudioTVPlayer.Model
 
         public string Name { get; set; }
 
+    }
+
+    public enum RepeatType
+    {
+        Single,
+        Daily
     }
 }

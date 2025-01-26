@@ -6,6 +6,22 @@ namespace StudioTVPlayer.Model
 {
     public abstract class InputBase : IDisposable
     {
+        private string _id;
+
+        [XmlAttribute]
+        public string Id
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_id))
+                {
+                    _id = Guid.NewGuid().ToString();
+                }
+                return _id;
+            }
+            set => _id = value;
+        }
+
         [XmlAttribute]
         public string VideoFormat { get; set; }
 

@@ -10,24 +10,24 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 {
     public abstract class InputViewModelBase : RemovableViewModelBase, IDisposable, IDataErrorInfo
     {
-        private readonly ObservableCollection<RecordingInstantViewModel> _recordings = new ObservableCollection<RecordingInstantViewModel>();
+        private readonly ObservableCollection<RecordingViewModel> _recordings = new ObservableCollection<RecordingViewModel>();
 
         public InputViewModelBase(Model.InputBase input)
         {
             Input = input;
             CommandAddRecordingInstant = new UiCommand(AddRecordingInstant);
-            foreach(var recording in Providers.GlobalApplicationData.Current.Recordings.Where(r => r.Input == input))
+/*            foreach(var recording in Providers.GlobalApplicationData.Current.Recordings.Where(r => r.Input == input))
             {
                 switch(recording)
                 {
-                    case Model.RecordingInstant recordingInstant:
+                    case Model.RecordingItemInstant recordingInstant:
                         var recordingVm = new RecordingInstantViewModel(recordingInstant);
                         recordingVm.RemoveRequested += Recording_RemoveRequested;
                         _recordings.Add(recordingVm);
                         break;
                 }
             }
-        }
+*/        }
 
         public Model.InputBase Input { get; }
 
@@ -46,18 +46,18 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public ICommand CommandAddRecordingInstant { get; }
 
-        public IEnumerable<RecordingInstantViewModel> Recordings => _recordings;
+        public IEnumerable<RecordingViewModel> Recordings => _recordings;
 
         private void AddRecordingInstant(object obj)
         {
-            var recording = new RecordingInstantViewModel(Input);
+            var recording = new RecordingViewModel(Input);
             recording.RemoveRequested += Recording_RemoveRequested;
             _recordings.Add(recording);
         }
 
         private void Recording_RemoveRequested(object sender, EventArgs e)
         {
-            var recording = sender as RecordingInstantViewModel ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as RecordingViewModel ?? throw new ArgumentException(nameof(sender));
             recording.RemoveRequested -= Recording_RemoveRequested;
             _recordings.Remove(recording);
         }

@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Model
     internal class RecordingScheduler
     {
 
-        private List<RecordingScheduled> _recordings = new List<RecordingScheduled>();
+        private List<RecordingSchedulerItem> _recordings = new List<RecordingSchedulerItem>();
 
         private RecordingScheduler()
         {
@@ -21,7 +21,7 @@ namespace StudioTVPlayer.Model
 
         public string OutputDirectory { get; set; }
 
-        public IEnumerable<RecordingScheduled> Recordings
+        public IEnumerable<RecordingSchedulerItem> Recordings
         {
             get
             {
@@ -30,7 +30,7 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public bool AddRecording(RecordingScheduled recording)
+        public bool AddRecording(RecordingSchedulerItem recording)
         {
             lock (((IList)_recordings).SyncRoot)
             {
@@ -41,11 +41,5 @@ namespace StudioTVPlayer.Model
             }
         }
 
-    }
-
-    public enum RepeatType
-    {
-        Single,
-        Daily
     }
 }

@@ -12,12 +12,9 @@ namespace StudioTVPlayer.Providers
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
         private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
         private PlayerControllerBase[] _playerControllers = Array.Empty<PlayerControllerBase>();
-        private readonly List<RecordingInstant> _recordings = new List<RecordingInstant>();
+        private readonly List<Recording> _recordings = new List<Recording>();
 
-        private GlobalApplicationData()
-        {
-            EncoderPresets = LoadEncoderPresets();
-        }
+        private GlobalApplicationData() { }
 
         public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
 
@@ -25,7 +22,7 @@ namespace StudioTVPlayer.Providers
 
         public IReadOnlyList<PlayerControllerBase> PlayerControllers => _playerControllers;
 
-        public IReadOnlyList<RecordingInstant> Recordings => _recordings;
+        public IReadOnlyList<Recording> Recordings => _recordings;
 
         public IReadOnlyList<EncoderPreset> EncoderPresets { get; private set; }
 
@@ -130,16 +127,7 @@ namespace StudioTVPlayer.Providers
 
         private void PlayerController_ConnectionStateChanged(object sender, EventArgs e) => PlayerControllerConnectionStatusChanged?.Invoke(sender, EventArgs.Empty);
 
-        public IReadOnlyList<EncoderPreset> LoadEncoderPresets()
-        {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<EncoderPreset>), new System.Xml.Serialization.XmlRootAttribute("PresetList"));
-            var presets = (List<EncoderPreset>)serializer.Deserialize(resourceStream);
-            return presets;
-        }
-
-        public void AddRecording(RecordingInstant recording)
+        public void AddRecording(Recording recording)
         {
             _recordings.Add(recording);
             recording.Finished += Recording_Finished;
@@ -147,7 +135,7 @@ namespace StudioTVPlayer.Providers
 
         private void Recording_Finished(object sender, EventArgs e)
         {
-            var recording = sender as RecordingInstant ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as Recording ?? throw new ArgumentException(nameof(sender));
             recording.Finished -= Recording_Finished;
             _recordings.Remove(recording);
         }

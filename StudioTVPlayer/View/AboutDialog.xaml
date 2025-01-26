@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel"
+             xmlns:ap="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:AboutDialogViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <Separator Height="5" />
-        <TextBlock>Studio TV Player is based on <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ffmpeg.org/">FFmpeg</Hyperlink> (core player), and 
-            <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://mahapps.com/">MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
+        <TextBlock>Studio TV Player is based on <Hyperlink NavigateUri="https://www.ffmpeg.org/" ap:HyperlinkProperties.IsExternal="True" >FFmpeg</Hyperlink> (core player), and 
+            <Hyperlink NavigateUri="https://mahapps.com/" ap:HyperlinkProperties.IsExternal="True">MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
         <TextBlock >Versions:</TextBlock>
         <Grid HorizontalAlignment="Left">
             <Grid.Resources>
@@ -44,11 +45,11 @@
             <Label Grid.Row="4">avfilter</Label>
             <TextBlock Grid.Row="4" Text="{Binding VersionInfo.FFmpegAVFilter}"/>
             <Label Grid.Row="5">
-                <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.blackmagicdesign.com/products/decklink">Decklink</Hyperlink>
+                <Hyperlink NavigateUri="https://www.blackmagicdesign.com/products/decklink" ap:HyperlinkProperties.IsExternal="True">Decklink</Hyperlink>
             </Label>
             <TextBlock Grid.Row="5" Text="{Binding VersionInfo.Decklink}"/>
             <Label Grid.Row="6">
-                <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ndi.tv/">NDI</Hyperlink>
+                <Hyperlink NavigateUri="https://www.ndi.tv/" ap:HyperlinkProperties.IsExternal="True">NDI</Hyperlink>
             </Label>
             <TextBlock Grid.Row="6" Text="{Binding VersionInfo.Ndi}"/>
         </Grid>

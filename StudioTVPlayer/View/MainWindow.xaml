@@ -24,7 +24,7 @@
             <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
                 <mah:FontIcon Glyph="&#xE713;" />
             </Button>
-            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ItemsSource="{Binding PlayerControllers}" >
+            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BoolToVisibilityConverter}}" ItemsSource="{Binding PlayerControllers}" >
                 <mah:DropDownButton.Style>
                     <Style TargetType="mah:DropDownButton" BasedOn="{StaticResource MahApps.Styles.DropDownButton.WindowCommands}">
                         <Setter Property="Foreground" Value="DarkRed"/>

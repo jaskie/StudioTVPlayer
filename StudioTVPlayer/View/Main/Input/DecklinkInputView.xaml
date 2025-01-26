@@ -72,8 +72,8 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.Resources>
-                        <DataTemplate DataType="{x:Type mainVm:RecordingInstantViewModel}">
-                            <main:RecordingInstantView/>
+                        <DataTemplate DataType="{x:Type mainVm:RecordingViewModel}">
+                            <main:RecordingView/>
                         </DataTemplate>
                     </ListBox.Resources>
                 </ListBox>

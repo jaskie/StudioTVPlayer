@@ -15,7 +15,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public PlayerControllerBindingViewModelBase(Model.Configuration.PlayerBindingBase playerBindingConfiguration)
         {
             BindingConfiguration = playerBindingConfiguration;
-            _player = Players.FirstOrDefault(i => i.Player.Id == playerBindingConfiguration.PlayerId);
+            _player = Players.FirstOrDefault(i => i.Player.Id == playerBindingConfiguration.PlayerId) ?? Players.FirstOrDefault();
             _playerMethod = playerBindingConfiguration.PlayerMethod;
         }
 

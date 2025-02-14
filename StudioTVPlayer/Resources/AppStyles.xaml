@@ -73,6 +73,7 @@
         <Setter Property="Margin" Value="5"/>
         <Setter Property="Padding" Value="2"/>
         <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="ToolTip" Value="Listen for the button press on the controller"/>
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>

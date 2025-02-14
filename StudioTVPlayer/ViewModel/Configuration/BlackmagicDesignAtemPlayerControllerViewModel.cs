@@ -3,13 +3,14 @@ using LibAtem.Common;
 using LibAtem.Net;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
     public sealed class BlackmagicDesignAtemPlayerControllerViewModel : PlayerControllerViewModelBase, IDisposable
     {
-        private Model.BlackmagicDesignAtemDeviceInfo _selectedDevice;
+        private BlackmagicDesignAtemDeviceInfoViewModel _selectedDevice;
         private bool _connect;
         private readonly Model.BlackmagicDesignAtemDiscovery _blackmagicDesignAtemDiscovery;
         private AtemClient _atemClient;
@@ -22,21 +23,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
             : base(controllerConfiguration ?? new Model.Configuration.BlackmagicDesignAtemPlayerController())
         {
             _blackmagicDesignAtemDiscovery = blackmagicDesignAtemDiscovery;
+            Devices = new ObservableCollection<BlackmagicDesignAtemDeviceInfoViewModel>(_blackmagicDesignAtemDiscovery.Devices.Select(device => new BlackmagicDesignAtemDeviceInfoViewModel(device)));
             if (controllerConfiguration != null)
             {
                 _address = controllerConfiguration.Address;
                 _deviceId = controllerConfiguration.DeviceId;
-                _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.DeviceId) ?? blackmagicDesignAtemDiscovery.Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
+                _selectedDevice = Devices.FirstOrDefault(d => d.DeviceId == controllerConfiguration.DeviceId) ?? Devices.FirstOrDefault(d => d.Address.ToString() == controllerConfiguration.Address);
                 foreach (var binging in controllerConfiguration.Bindings.OfType<Model.Configuration.BlackmagicDesignAtemPlayerBinding>())
                     AddBindingViewModel(new BlackmagicDesignAtemPlayerBindingViewModel(binging));
                 if (Model.BlackmagicDesignAtemDevices.IsConnected(_address))
                     Connect = true;
             }
             else
-            {
-                _selectedDevice = blackmagicDesignAtemDiscovery.Devices.FirstOrDefault();
-                IsModified = true;
-            }
+                SelectedDevice = Devices.FirstOrDefault();
         }
 
         public override void Apply()
@@ -137,22 +136,30 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         internal void NotifyDeviceSeen(Model.BlackmagicDesignAtemDeviceInfo device)
         {
-            NotifyPropertyChanged(nameof(Devices));
+            var deviceViewModel = new BlackmagicDesignAtemDeviceInfoViewModel(device);
+            Devices.Add(deviceViewModel);
             if (device.DeviceId == _deviceId || device.Address.ToString() == _address)
+                SelectedDevice = deviceViewModel;
+        }
+
+        internal void NotifyDeviceUpdated(Model.BlackmagicDesignAtemDeviceInfo device)
+        {
+            var deviceViewModel = Devices.FirstOrDefault(d => d.DeviceId == device.DeviceId || d.Address == device.Address.ToString());
+            if (deviceViewModel != null)
             {
-                _selectedDevice = device;
-                NotifyPropertyChanged(nameof(SelectedDevice));
-                NotifyPropertyChanged(nameof(DisplayName));
-                NotifyPropertyChanged(nameof(CanPressConnect));
-                _address = device.Address.ToString();
-                NotifyPropertyChanged(nameof(Address));
+                deviceViewModel.Update(device);
+                if (deviceViewModel == _selectedDevice)
+                    NotifyPropertyChanged(nameof(DisplayName));
             }
         }
 
         internal void NotifyDeviceLost(Model.BlackmagicDesignAtemDeviceInfo device)
         {
-            NotifyPropertyChanged(nameof(Devices));
-            if (device == _selectedDevice)
+            var deviceViewModel = Devices.FirstOrDefault(d => d.DeviceId == device.DeviceId || d.Address == device.Address.ToString());
+            if (deviceViewModel is null)
+                return;
+            Devices.Remove(deviceViewModel);
+            if (deviceViewModel == SelectedDevice)
                 SelectedDevice = null;
         }
 
@@ -166,18 +173,19 @@ namespace StudioTVPlayer.ViewModel.Configuration
             return base.ReadErrorInfo(columnName);
         }
 
-        public IEnumerable<Model.BlackmagicDesignAtemDeviceInfo> Devices => _blackmagicDesignAtemDiscovery.Devices;
+        public ObservableCollection<BlackmagicDesignAtemDeviceInfoViewModel> Devices { get; }
 
-        public Model.BlackmagicDesignAtemDeviceInfo SelectedDevice
+        public BlackmagicDesignAtemDeviceInfoViewModel SelectedDevice
         {
-            get => _selectedDevice; set
+            get => _selectedDevice;
+            set
             {
                 if (!Set(ref _selectedDevice, value))
                     return;
-                NotifyPropertyChanged(nameof(DisplayName));
-                NotifyPropertyChanged(nameof(CanPressConnect));
                 _address = value?.Address.ToString();
                 _deviceId = value?.DeviceId;
+                NotifyPropertyChanged(nameof(DisplayName));
+                NotifyPropertyChanged(nameof(CanPressConnect));
                 NotifyPropertyChanged(nameof(Address));
             }
         }

@@ -110,7 +110,7 @@ namespace TVPlayR {
 		return max_video - min_video >= capacity_ &&
 					(!fifo_ || max_audio - min_audio >= capacity_);*/
 	}
-	bool SynchronizingBuffer::IsReady() const 
+	bool SynchronizingBuffer::IsReady()
 	{ 
 		if (is_flushed_)
 			return true;

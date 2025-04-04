@@ -16,6 +16,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             _blackmagicDesignAtemDiscovery = new Model.BlackmagicDesignAtemDiscovery();
             _blackmagicDesignAtemDiscovery.DeviceSeen += BlackmagicDesignAtemDiscovery_DeviceSeen;
+            _blackmagicDesignAtemDiscovery.DeviceUpdated += BlackmagicDesignAtemDiscovery_DeviceUpdated;
             _blackmagicDesignAtemDiscovery.DeviceLost += BlackmagicDesignAtemDiscovery_DeviceLost;
             PlayerControllers = new ObservableCollection<PlayerControllerViewModelBase>(Providers.Configuration.Current.PlayerControllers.Select(playerControllerConfiguration =>
             {
@@ -67,6 +68,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 (vm as IDisposable)?.Dispose();
             }
             _blackmagicDesignAtemDiscovery.DeviceSeen -= BlackmagicDesignAtemDiscovery_DeviceSeen;
+            _blackmagicDesignAtemDiscovery.DeviceUpdated -= BlackmagicDesignAtemDiscovery_DeviceUpdated;
             _blackmagicDesignAtemDiscovery.DeviceLost -= BlackmagicDesignAtemDiscovery_DeviceLost;
             _blackmagicDesignAtemDiscovery.Dispose();
         }
@@ -105,6 +107,16 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceSeen(e.Device);
             });
         }
+
+        private void BlackmagicDesignAtemDiscovery_DeviceUpdated(object sender, Model.BlackmagicAtemDeviceEventArgs e)
+        {
+            OnUiThread(() =>
+            {
+                foreach (var blackmagicDecklinkPlayerControllerViewModel in PlayerControllers.OfType<BlackmagicDesignAtemPlayerControllerViewModel>())
+                    blackmagicDecklinkPlayerControllerViewModel.NotifyDeviceUpdated(e.Device);
+            });
+        }
+
 
         private void BlackmagicDesignAtemDiscovery_DeviceLost(object sender, Model.BlackmagicAtemDeviceEventArgs e)
         {

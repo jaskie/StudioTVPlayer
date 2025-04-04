@@ -12,33 +12,39 @@ namespace TVPlayR {
 
 		void PauseBuffer::SetFrame(std::shared_ptr<AVFrame>& frame)
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			last_frame_ = frame;
 		}
 
 		std::shared_ptr<AVFrame> PauseBuffer::GetFrame()
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			return is_playing_ ? last_frame_ : GetStillFrame();
 		}
 
 		void PauseBuffer::SetIsPlaying(bool is_playing)
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			is_playing_ = is_playing;
 			if (is_playing)
 				still_frame_.reset();
 		}
 		
-		bool PauseBuffer::IsEmpty() const
+		bool PauseBuffer::IsEmpty()
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			return !last_frame_;
 		}
 
-		int64_t PauseBuffer::Pts() const
+		int64_t PauseBuffer::Pts()
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			return last_frame_ ? last_frame_->pts : AV_NOPTS_VALUE;
 		}
 		
 		void PauseBuffer::Clear()
 		{
+			std::lock_guard<std::mutex> lock(mutex_);
 			last_frame_.reset();
 			still_frame_.reset();
 		}
@@ -92,7 +98,6 @@ namespace TVPlayR {
 				dest_data[plane] += dest->linesize[plane];
 			av_image_copy(dest_data, dest_linesizes, source_data, source_linesizes, static_cast<AVPixelFormat>(source->format), source->width, source->height / 2);
 			return dest;
-
 		}
 	}
 }

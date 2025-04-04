@@ -9,10 +9,9 @@ namespace TVPlayR {
 class DecklinkOutput final : public Core::OutputDevice
 {
 public:
-	explicit DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source);
+	explicit DecklinkOutput(IDeckLink* decklink, int index, DecklinkKeyerType keyer, TimecodeOutputSource timecode_source, int preroll_buffer_size = 4);
 	virtual ~DecklinkOutput();
-	bool SetBufferSize(int size);
-	int GetBufferSize() const;
+	int GetPrerollBufferSize() const;
 	// Inherited via OutputDevice
 	void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
 	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;

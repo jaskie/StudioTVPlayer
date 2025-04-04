@@ -14,6 +14,7 @@ namespace StudioTVPlayer.ViewModel
     public class MainViewModel : ViewModelBase, IDisposable
     {
         private ViewModelBase _currentViewModel;
+        private IEnumerable<PlayerControllerViewModel> _playerControllers = Array.Empty<PlayerControllerViewModel>();
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
 
         private MainViewModel()
@@ -60,7 +61,6 @@ namespace StudioTVPlayer.ViewModel
             foreach (var playerControler in PlayerControllers)
                 playerControler.Dispose();
             PlayerControllers = GlobalApplicationData.Current.PlayerControllers.Select(playerController => new PlayerControllerViewModel(playerController)).ToArray();
-            NotifyPropertyChanged(nameof(PlayerControllers));
         }
 
         private void PlayerControllerConnectionStatusChanged(object sender, EventArgs e)
@@ -72,7 +72,7 @@ namespace StudioTVPlayer.ViewModel
 
         public bool AllPlayerControllersConnected => GlobalApplicationData.Current.AllPlayerControllersConnected;
 
-        public IEnumerable<PlayerControllerViewModel> PlayerControllers { get; private set; } = Array.Empty<PlayerControllerViewModel>();
+        public IEnumerable<PlayerControllerViewModel> PlayerControllers { get => _playerControllers; private set => Set(ref _playerControllers, value); }
 
         public void ShowPlayoutView()
         {

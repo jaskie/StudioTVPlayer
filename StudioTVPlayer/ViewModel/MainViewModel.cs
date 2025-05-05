@@ -3,6 +3,7 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
+using StudioTVPlayer.ViewModel.Main.RecordingScheduler;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace StudioTVPlayer.ViewModel
             try
             {
                 GlobalApplicationData.Current.Initialize();
-                CurrentViewModel = new PlayoutViewModel();
+                ShowPlayoutView();
             }
             catch (Exception e)
             {
@@ -79,6 +80,35 @@ namespace StudioTVPlayer.ViewModel
             if (CurrentViewModel is PlayoutViewModel)
                 return;
             CurrentViewModel = new PlayoutViewModel();
+            NotifyPropertyChanged(nameof(IsPlayoutVisible));
+            NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
+            NotifyPropertyChanged(nameof(IsConfigutationViewActive));
+        }
+
+        public bool IsConfigutationViewActive => CurrentViewModel is ConfigurationViewModel;
+
+        public bool IsPlayoutVisible
+        {
+            get => CurrentViewModel is PlayoutViewModel;
+            set
+            {
+                if (!value || CurrentViewModel is PlayoutViewModel)
+                    return;
+                ShowPlayoutView();
+            }
+        }
+
+        public bool IsRecordingSchedulerVisible
+        {
+            get => CurrentViewModel is RecordingSchedulerViewModel;
+            set
+            {
+                if (!value || CurrentViewModel is RecordingSchedulerViewModel)
+                    return;
+                CurrentViewModel = new RecordingSchedulerViewModel();
+                NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
+                NotifyPropertyChanged(nameof(IsPlayoutVisible));
+            }
         }
 
         public UiCommand ConfigurationCommand { get; }
@@ -102,6 +132,7 @@ namespace StudioTVPlayer.ViewModel
             if (CurrentViewModel is ConfigurationViewModel)
                 return;
             CurrentViewModel = new ConfigurationViewModel();
+            NotifyPropertyChanged(nameof(IsConfigutationViewActive));
         }
 
         private async void About(object _)

@@ -23,7 +23,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Margin="5 5 7 5">
-                    <Label FontWeight="Bold">On selected player</Label>
+                    <Label FontWeight="Bold">When a player is focused</Label>
                     <Separator Height="0.5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -63,7 +63,7 @@
                 </StackPanel>
                 <GridSplitter Width="1" HorizontalAlignment="Right" IsEnabled="False"/>
                 <StackPanel Grid.Column="1" Margin="5" >
-                    <Label FontWeight="Bold" >On media list</Label>
+                    <Label FontWeight="Bold" >When a media list is selected</Label>
                     <Separator Height="0.5"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -81,6 +81,20 @@
                         <TextBlock Grid.Row="1">Alt + left arrow</TextBlock>
                         <Label Grid.Row="2">One day forward (if filtered)</Label>
                         <TextBlock Grid.Row="2">Alt + right arrow</TextBlock>
+                    </Grid>
+                    <Separator Height="0.5"/>
+                    <Label FontWeight="Bold" >Always in main window</Label>
+                    <Separator Height="0.5"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" >Open configuration</Label>
+                        <TextBlock Grid.Row="0">Ctrl+Shift+E</TextBlock>
                     </Grid>
                 </StackPanel>
             </Grid>

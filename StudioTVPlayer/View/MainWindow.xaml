@@ -18,6 +18,7 @@
                  ShowSystemMenu="True"
                  dialogs:DialogParticipation.Register="{Binding}"
                  Loaded="MetroWindow_Loaded"
+                 TitleAlignment="Center"
                  >
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
@@ -74,6 +75,12 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+    <mah:MetroWindow.LeftWindowCommands>
+        <mah:WindowCommands>
+            <ToggleButton IsChecked="{Binding IsPlayoutVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}">Players</ToggleButton>
+            <ToggleButton IsChecked="{Binding IsRecordingSchedulerVisible}" IsEnabled="{Binding IsConfigutationViewActive,Converter={StaticResource InvertedBooleanConverter}}">Scheduler</ToggleButton>
+        </mah:WindowCommands>
+    </mah:MetroWindow.LeftWindowCommands>
     <Window.InputBindings>
         <KeyBinding Gesture="Shift+Ctrl+E" Command="{Binding ConfigurationCommand}"/>
     </Window.InputBindings>

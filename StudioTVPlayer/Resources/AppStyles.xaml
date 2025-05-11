@@ -69,6 +69,21 @@
         </Setter>
     </Style>
 
+    <Style x:Key="SaveButtonStyle" TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Square}">
+        <Setter Property="Command" Value="{Binding RemoveCommand}"/>
+        <Setter Property="Width" Value="25"/>
+        <Setter Property="Height" Value="25"/>
+        <Setter Property="ToolTip" Value="Save"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <mah:FontIcon Glyph="&#xE73E;" FontSize="15"/>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ListenToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
         <Setter Property="Margin" Value="5"/>
         <Setter Property="Padding" Value="2"/>
@@ -146,6 +161,12 @@
         <Setter Property="mah:ItemHelper.ActiveSelectionBackgroundBrush" Value="Transparent"/>
         <Setter Property="mah:ItemHelper.HoverBackgroundBrush" Value="Transparent"/>
         <Setter Property="mah:ItemHelper.HoverSelectedBackgroundBrush" Value="Transparent"/>
+    </Style>
+
+    <Style x:Key="ListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource MahApps.Styles.ListBox}">
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource SimpleListBoxItemStyle}"/>
     </Style>
 
     <Style x:Key="StrongFocusIndicatorUserControl" TargetType="UserControl">

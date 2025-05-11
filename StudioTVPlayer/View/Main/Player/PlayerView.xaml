@@ -269,12 +269,13 @@
             </Button>
 
             <ListBox x:Name="list" Grid.Row="1" Grid.ColumnSpan="5" Margin="0 5" BorderThickness="1"
-                     ItemsSource="{Binding Rundown}" SelectedItem="{Binding SelectedRundownItem}" 
+                     ItemsSource="{Binding Rundown}"
+                     SelectedItem="{Binding SelectedRundownItem}"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" 
+                     BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}"
                      dd:DragDrop.IsDropTarget="True"
                      dd:DragDrop.IsDragSource="True"
-                     dd:DragDrop.DropHandler="{Binding}" 
+                     dd:DragDrop.DropHandler="{Binding}"
                      dd:DragDrop.UseDefaultDragAdorner="True"
                      dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                      >

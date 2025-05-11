@@ -1,9 +1,9 @@
 ﻿using MahApps.Metro.Controls.Dialogs;
 using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Model;
 using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
-using StudioTVPlayer.ViewModel.Main.RecordingScheduler;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -105,7 +105,7 @@ namespace StudioTVPlayer.ViewModel
             {
                 if (!value || CurrentViewModel is RecordingSchedulerViewModel)
                     return;
-                CurrentViewModel = new RecordingSchedulerViewModel();
+                CurrentViewModel = new RecordingSchedulerViewModel([]);
                 NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
                 NotifyPropertyChanged(nameof(IsPlayoutVisible));
             }

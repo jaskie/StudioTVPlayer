@@ -21,8 +21,8 @@
                 <TextBlock Margin="5 0 0 0" FontWeight="Normal">Add Decklink input</TextBlock>
             </StackPanel>
         </Button>
-        <ListBox Grid.Row="1" ItemsSource="{Binding Inputs}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
+        <ListBox Grid.Row="1" ItemsSource="{Binding Inputs}" 
+                 Style="{StaticResource ListBoxStyle}"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                  dd:DragDrop.UseDefaultDragAdorner="True"

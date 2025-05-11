@@ -36,9 +36,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ListBox Grid.Column="0" Grid.RowSpan="2" ItemsSource="{Binding Players}" 
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ItemContainerStyle="{StaticResource SimpleListBoxItemStyle}"
+        <ListBox Grid.Column="0" Grid.RowSpan="2"
+                 ItemsSource="{Binding Players}"
+                 Style="{StaticResource ListBoxStyle}"
                  >
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type playerViewModels:PlayerViewModel}">

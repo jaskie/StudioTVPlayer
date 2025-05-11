@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace StudioTVPlayer.View.Main.RecordingScheduler
+namespace StudioTVPlayer.View.Main
 {
     /// <summary>
     /// Interaction logic for RecordingSchedulerView.xaml

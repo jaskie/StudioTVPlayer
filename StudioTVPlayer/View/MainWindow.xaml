@@ -5,8 +5,8 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-                 xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
                  xmlns:rootViewModels="clr-namespace:StudioTVPlayer.ViewModel"
+                 xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
                  xmlns:configurationViews="clr-namespace:StudioTVPlayer.View.Configuration"
                  xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
@@ -88,6 +88,9 @@
         <ContentControl.Resources>
             <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
                 <mainViews:PlayoutView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type mainViewModels:RecordingSchedulerViewModel}">
+                <mainViews:RecordingSchedulerView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
                 <configurationViews:ConfigurationView />

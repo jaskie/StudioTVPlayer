@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StudioTVPlayer.Model
 {
-    class RecordingSchedulerItem
+    public class RecordingSchedulerItem
     {
         public DateTime StartTime { get; set; }
 
@@ -21,11 +21,25 @@ namespace StudioTVPlayer.Model
 
         public string Name { get; set; }
 
+        public FilenameCreationRule FilenameCreationRule { get; set; }
+
     }
 
     public enum RepeatType
     {
         Single,
         Daily
+    }
+
+    public enum FilenameCreationRule
+    {
+        None,
+        DateTimeAtBegin,
+        DateTimeAtEnd,
+        DateAtBegin,
+        DateAtEnd,
+        TimeAtBegin,
+        TimeAtEnd,
+        UseNameAsFormat
     }
 }

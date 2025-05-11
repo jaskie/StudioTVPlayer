@@ -25,7 +25,7 @@ namespace StudioTVPlayer
                     new FrameworkPropertyMetadata(
                     System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
             AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) => HandleException(e.ExceptionObject as Exception, e.IsTerminating);
-            Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
+            Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => e.Handled = true;
         }
 
         protected override void OnExit(ExitEventArgs e)

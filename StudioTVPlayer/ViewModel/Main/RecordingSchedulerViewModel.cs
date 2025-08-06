@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main
@@ -16,27 +14,23 @@ namespace StudioTVPlayer.ViewModel.Main
         private readonly ObservableCollection<RecordingSchedulerItemViewModel> _items;
         private RecordingSchedulerItemViewModel _selectedItem;
 
-        public RecordingSchedulerViewModel(IEnumerable<RecordingSchedulerItem> items)
+        public RecordingSchedulerViewModel()
         {
             AddRecordingScheduledItemCommand = new UiCommand(AddRecordingScheduledItem);
-            _items = [.. items.Select(item =>
+            _items = [.. RecordingScheduler.Current.Recordings.Select(item =>
             {
                 var newVm = new RecordingSchedulerItemViewModel(item);
-                newVm.RemoveRequested += Item_RemoveRequested;
+                newVm.RemoveRequested += RecordingSchedulerItemViewModel_RemoveRequested;
+                newVm.Saved += RecordingSchedulerItemViewModel_Saved;
                 return newVm;
             })];
             _items.CollectionChanged += Items_CollectionChanged;
         }
 
-        private void Item_RemoveRequested(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         private void AddRecordingScheduledItem(object obj)
         {
             var newItem = new RecordingSchedulerItem();
-            _items.Add(new RecordingSchedulerItemViewModel(newItem));
+            _items.Add(new RecordingSchedulerItemViewModel(newItem) { IsNew = true });
         }
 
         public ICommand AddRecordingScheduledItemCommand { get; }
@@ -50,20 +44,47 @@ namespace StudioTVPlayer.ViewModel.Main
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (var item in e.NewItems)
-                        (item as RecordingSchedulerItemViewModel).RemoveRequested += RecordingSchedulerViewModel_RemoveRequested;
+                    foreach (RecordingSchedulerItemViewModel item in e.NewItems)
+                    {
+                        item.RemoveRequested += RecordingSchedulerItemViewModel_RemoveRequested;
+                        item.Saved += RecordingSchedulerItemViewModel_Saved;
+                    }
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (var item in e.OldItems)
-                        (item as RecordingSchedulerItemViewModel).RemoveRequested -= RecordingSchedulerViewModel_RemoveRequested;
+                    foreach (RecordingSchedulerItemViewModel item in e.OldItems)
+                    {
+                        item.RemoveRequested -= RecordingSchedulerItemViewModel_RemoveRequested;
+                        item.Saved -= RecordingSchedulerItemViewModel_Saved;
+                    }
                     break;
             }
         }
 
-        private void RecordingSchedulerViewModel_RemoveRequested(object sender, EventArgs e)
+        private void RecordingSchedulerItemViewModel_Saved(object sender, EventArgs e)
         {
             var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException(nameof(sender));
-            _items.Remove(vm);
+            if (vm.IsNew)
+            {
+                RecordingScheduler.Current.AddRecording(vm.Item);
+                vm.IsNew = false;
+            }
+            SaveRecordingList();
         }
+
+        private void RecordingSchedulerItemViewModel_RemoveRequested(object sender, EventArgs e)
+        {
+            var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException(nameof(sender));
+            if (vm.IsNew || RecordingScheduler.Current.RemoveRecording(vm.Item))
+            {
+                _items.Remove(vm);
+                SaveRecordingList();
+            }
+        }
+
+        private void SaveRecordingList()
+        {
+            RecordingScheduler.Current.Save();
+        }
+
     }
 }

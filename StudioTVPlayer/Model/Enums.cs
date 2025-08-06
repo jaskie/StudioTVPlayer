@@ -73,4 +73,34 @@ namespace StudioTVPlayer.Model
         [Description("Preview - input change")]
         PrvI,
     }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum ScheduleRepeatType
+    {
+        [Description("One time")]
+        Single,
+        [Description("Repeat in selected days of week")]
+        Daily
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum FilenameCreationRule
+    {
+        [Description("Use provided name as filename directly")]
+        None,
+        [Description("Use name of the item with date/time at the beginning")]
+        DateTimeAtBegin,
+        [Description("Use name of the item with date/time at the end")]
+        DateTimeAtEnd,
+        [Description("Use name of the item with date at the beginning")]
+        DateAtBegin,
+        [Description("Use name of the item with date at the end")]
+        DateAtEnd,
+        [Description("Use name of the item with time at the beginning")]
+        TimeAtBegin,
+        [Description("Use name of the item with time at the end")]
+        TimeAtEnd,
+        [Description("Use name of the item to format date/time")]
+        UseNameAsFormat
+    }
 }

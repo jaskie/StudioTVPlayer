@@ -31,6 +31,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public Model.InputBase Input { get; }
 
+        public abstract string DisplayName { get; }
+
         public string Error => string.Empty;
 
         public string this[string columnName] => ReadErrorInfo(columnName);

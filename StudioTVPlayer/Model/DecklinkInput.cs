@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public class DecklinkInput : InputBase, IDisposable
+    public sealed class DecklinkInput : InputBase, IDisposable
     {
         private TVPlayR.DecklinkInput _input;
         private TVPlayR.PreviewSink _preview;

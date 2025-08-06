@@ -5,7 +5,6 @@ using StudioTVPlayer.Providers;
 using StudioTVPlayer.ViewModel.Configuration;
 using StudioTVPlayer.ViewModel.Main;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -105,7 +104,7 @@ namespace StudioTVPlayer.ViewModel
             {
                 if (!value || CurrentViewModel is RecordingSchedulerViewModel)
                     return;
-                CurrentViewModel = new RecordingSchedulerViewModel([]);
+                CurrentViewModel = new RecordingSchedulerViewModel();
                 NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
                 NotifyPropertyChanged(nameof(IsPlayoutVisible));
             }

@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
 {
-    public class DecklinkInputViewModel : InputViewModelBase
+    public sealed class DecklinkInputViewModel : InputViewModelBase
     {
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.DecklinkInfo _selectedDevice;
@@ -74,6 +74,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         public TVPlayR.VideoFormat[] VideoFormats => TVPlayR.VideoFormat.Formats;
 
         public ImageSource Thumbnail => Input.Thumbnail;
+
+        public override string DisplayName => SelectedDevice?.DisplayName;
 
         public override bool IsValid()
         {

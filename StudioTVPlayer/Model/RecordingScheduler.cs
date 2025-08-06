@@ -1,26 +1,30 @@
-﻿using System;
+﻿using StudioTVPlayer.Providers;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    internal class RecordingScheduler
+    public class RecordingScheduler: Helpers.IPersistable
     {
 
-        private List<RecordingSchedulerItem> _recordings = new List<RecordingSchedulerItem>();
+        private const string FileName = "ScheduledRecordings.xml";
+        private RecordingScheduler() { }
 
-        private RecordingScheduler()
-        {
 
-        }
+        [XmlArray(nameof(Recordings))]
+        public List<RecordingSchedulerItem> _recordings = [];
 
-        public static RecordingScheduler Current { get; } = new RecordingScheduler();
+        public static RecordingScheduler Current { get; } = Load();
 
         public string OutputDirectory { get; set; }
 
+        [XmlIgnore]
         public IEnumerable<RecordingSchedulerItem> Recordings
         {
             get
@@ -30,16 +34,45 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        public bool AddRecording(RecordingSchedulerItem recording)
+        public void AddRecording(RecordingSchedulerItem recording)
         {
             lock (((IList)_recordings).SyncRoot)
             {
-                if (_recordings.Any(r => r == recording))
-                    return false;
+                if (_recordings.Contains(recording))
+                    return;
                 _recordings.Add(recording);
-                return true;
             }
         }
 
+        public bool RemoveRecording(RecordingSchedulerItem recording)
+        {
+            lock (((IList)_recordings).SyncRoot)
+            {
+                return _recordings.Remove(recording);
+            }
+        }
+
+
+        #region persistence
+        private static RecordingScheduler Load()
+        {
+            var fullPath = Path.Combine(GlobalApplicationData.ApplicationDataDir, FileName);
+            try
+            {
+                return Helpers.DataStore.Load<RecordingScheduler>(fullPath) ?? new RecordingScheduler();
+            }
+            catch
+            {
+                return new RecordingScheduler();
+            }
+        }
+
+        public void Save()
+        {
+            var fullPath = Path.Combine(GlobalApplicationData.ApplicationDataDir, FileName);
+            Helpers.DataStore.Save(this, fullPath);
+        }
+
+        #endregion persistence
     }
 }

@@ -8,7 +8,9 @@ namespace StudioTVPlayer.Providers
     public class InputList : Helpers.IPersistable
     {
         private const string InputsFile = "inputs.xml";
-        
+
+        private InputList() { }
+
         [XmlArray(nameof(Inputs))]
         [XmlArrayItem(typeof(Model.DecklinkInput))]
         public List<Model.InputBase> _inputs = new List<Model.InputBase>();

@@ -11,8 +11,8 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,29 +20,92 @@
         </Grid.RowDefinitions>
         <Button Grid.Row="0" Margin="10" FontSize="14" Command="{Binding AddRecordingScheduledItemCommand}" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal">
-                <mah:FontIcon Glyph="&#xE710;" />
-                <TextBlock Margin="5 0 0 0" FontWeight="Normal">Schedule recording</TextBlock>
+                <mah:FontIcon Glyph="&#xE710;"/>
+                <TextBlock Margin="5 0 0 0" FontWeight="Normal">Schedule new recording</TextBlock>
             </StackPanel>
         </Button>
         <ListBox Grid.Row="1"
                  Style="{StaticResource ListBoxStyle}"
                  ItemsSource="{Binding Items}"
                  SelectedItem="{Binding SelectedItem}"
-                 d:ItemsSource="{d:SampleData ItemCount=5}"
+                 d:ItemsSource="{d:SampleData ItemCount=2}"
             >
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="local:RecordingSchedulerItemViewModel">
+                <DataTemplate DataType="{x:Type vm:RecordingSchedulerItemViewModel}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Button Grid.Column="1" Grid.Row="0" Style="{StaticResource SaveButtonStyle}" Command="{Binding UpdateCommand}"/>
-                        <Button Grid.Column="1" Grid.Row="1" Style="{StaticResource RemoveButtonStyle}" Command="{Binding RemoveCommand}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button Grid.Column="1" Style="{StaticResource SaveButtonStyle}" Command="{Binding UpdateCommand}" Margin="1 3"/>
+                            <Button Grid.Column="1" Style="{StaticResource UndoButtonStyle}" Command="{Binding UndoCommand}" Margin="1 3"/>
+                            <Button Grid.Column="1" Style="{StaticResource RemoveButtonStyle}" Command="{Binding RemoveCommand}" Margin="1 10 1 3"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.Resources>
+                                <Style TargetType="Label">
+                                    <Setter Property="Margin" Value="5 5 0 0"/>
+                                </Style>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                    <Setter Property="Margin" Value="3 0"/>
+                                </Style>
+                                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                    <Setter Property="Margin" Value="3 0"/>
+                                </Style>
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                    <Setter Property="Margin" Value="3 0"/>
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="3*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0">Name</Label>
+                            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Grid.Column="2" Grid.Row="0">Filename creation rule</Label>
+                            <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding FilenameCreationRules}" SelectedItem="{Binding FilenameCreationRule}"/>
+                            <Label Grid.Row="2">Start at</Label>
+                            <mah:DateTimePicker Grid.Row="3" Margin="3 0" PickerVisibility="All"
+                                                SelectedDateTime="{Binding StartTime}" Visibility="{Binding IsRepeatDaily, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+                            <mah:TimePicker Grid.Row="3" Margin="3 0" PickerVisibility="All"
+                                            SelectedDateTime="{Binding StartTime}" Visibility="{Binding IsRepeatDaily, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <Label Grid.Row="2" Grid.Column="1">Duration</Label>
+                            <mah:TimePicker Grid.Row="3" Grid.Column="1" Margin="3 0" PickerVisibility="All" IsClockVisible="False"
+                                            SelectedDateTime="{Binding Duration, Converter={StaticResource TimeSpanToDateTimeConverter}}"/>
+                            <Label Grid.Column="2" Grid.Row="2">Repeat</Label>
+                            <!-- repeat properties -->
+                            <Grid Grid.Column="2" Grid.Row="3" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox IsChecked="{Binding IsRepeatDaily}">Daily</CheckBox>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding IsRepeatDaily, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock VerticalAlignment="Center" Margin="0 0 3 0">on:</TextBlock>
+                                    <CheckBox IsChecked="{Binding IsRepeatMonday}">Mon</CheckBox>
+                                    <CheckBox IsChecked="{Binding IsRepeatTuesday}">Tue</CheckBox>
+                                    <CheckBox IsChecked="{Binding IsRepeatWednesday}">Wed</CheckBox>
+                                    <CheckBox IsChecked="{Binding IsRepeatThursday}">Thu</CheckBox>
+                                    <CheckBox IsChecked="{Binding IsRepeatFriday}">Fri</CheckBox>
+                                    <CheckBox IsChecked="{Binding IsRepeatSaturday}">Sat</CheckBox>
+                                    <CheckBox IsChecked="{Binding IsRepeatSunday}">Sun</CheckBox>
+                                </StackPanel>
+                            </Grid>
+                            <Label Grid.Row="4">Input source</Label>
+                            <ComboBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding Inputs}" SelectedItem="{Binding SelectedInput}" DisplayMemberPath="DisplayName"/>
+                            <Separator Grid.Row="6" Grid.ColumnSpan="3"/>
+                        </Grid>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

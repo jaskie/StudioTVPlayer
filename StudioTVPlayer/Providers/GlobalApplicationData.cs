@@ -37,6 +37,7 @@ namespace StudioTVPlayer.Providers
                 input.Dispose();
             foreach (var playerController in PlayerControllers)
                 playerController.Dispose();
+            RecordingScheduler.Current.Shutdown();
         }
 
         public void UpdatePlayers(List<PlayerUpdateItem> newConfiguration)
@@ -71,6 +72,7 @@ namespace StudioTVPlayer.Providers
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
             UpdatePlayerControllers();
+            RecordingScheduler.Current.Initialize();
         }
 
         public void UpdatePlayerControllers()

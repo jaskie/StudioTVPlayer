@@ -1,15 +1,17 @@
-﻿using StudioTVPlayer.Helpers;
+﻿using MahApps.Metro.Controls.Dialogs;
+using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public class RecordingSchedulerViewModel : ViewModelBase
+    public class RecordingSchedulerViewModel : ViewModelBase, ICanClose
     {
         private readonly ObservableCollection<RecordingSchedulerItemViewModel> _items;
         private RecordingSchedulerItemViewModel _selectedItem;
@@ -65,7 +67,7 @@ namespace StudioTVPlayer.ViewModel.Main
             var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException(nameof(sender));
             if (vm.IsNew)
             {
-                RecordingScheduler.Current.AddRecording(vm.Item);
+                RecordingScheduler.Current.AddRecording(vm.ModelItem);
                 vm.IsNew = false;
             }
             SaveRecordingList();
@@ -74,7 +76,7 @@ namespace StudioTVPlayer.ViewModel.Main
         private void RecordingSchedulerItemViewModel_RemoveRequested(object sender, EventArgs e)
         {
             var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException(nameof(sender));
-            if (vm.IsNew || RecordingScheduler.Current.RemoveRecording(vm.Item))
+            if (vm.IsNew || RecordingScheduler.Current.RemoveRecording(vm.ModelItem))
             {
                 _items.Remove(vm);
                 SaveRecordingList();
@@ -86,5 +88,31 @@ namespace StudioTVPlayer.ViewModel.Main
             RecordingScheduler.Current.Save();
         }
 
+        public async Task<bool> ConfirmCloseAsync()
+        {
+            if (_items.Any(item => item.IsModified))
+            {
+                var settings = new MetroDialogSettings()
+                {
+                    AffirmativeButtonText = "Save",
+                    NegativeButtonText = "Don't save",
+                    FirstAuxiliaryButtonText = "Cancel",
+                    DefaultButtonFocus = MessageDialogResult.Affirmative
+                };
+                var result = await MainViewModel.Instance.ShowMessageAsync("Unsaved changes", "There are unsaved changes in the recording scheduler.\nDo you want to save them before closing?", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, settings);
+                switch (result)
+                {
+                    case MessageDialogResult.Affirmative:
+                        foreach (var item in _items.Where(item => item.IsModified))
+                            item.Save();
+                        break;
+                    case MessageDialogResult.Negative:
+                        break;
+                    case MessageDialogResult.FirstAuxiliary:
+                        return false;
+                }
+            }
+            return true;
+        }
     }
 }

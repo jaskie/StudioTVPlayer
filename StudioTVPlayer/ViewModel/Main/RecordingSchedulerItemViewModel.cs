@@ -3,14 +3,15 @@ using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.Input;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main
 {
-    public class RecordingSchedulerItemViewModel : RemovableViewModelBase
+    public class RecordingSchedulerItemViewModel : RemovableViewModelBase, IDataErrorInfo
     {
-        private readonly RecordingSchedulerItem _item;
+        private readonly RecordingSchedulerItem _modelItem;
         private string _name;
         private DateTime _startTime;
         private TimeSpan _duration;
@@ -24,12 +25,13 @@ namespace StudioTVPlayer.ViewModel.Main
         private bool _isRepeatSaturday;
         private bool _isRepeatSunday;
         private InputViewModelBase _selectedInput;
+        private EncoderPreset _selectedEncoderPreset;
 
         public RecordingSchedulerItemViewModel(RecordingSchedulerItem item)
         {
-            _item = item ?? throw new ArgumentNullException(nameof(item));
+            _modelItem = item ?? throw new ArgumentNullException(nameof(item));
             Load(false);
-            UpdateCommand = new UiCommand(Update, _ => IsModified);
+            UpdateCommand = new UiCommand(_ => Save(), _ => IsModified);
             UndoCommand = new UiCommand(_ => Load(true), _ => IsModified);
         }
 
@@ -37,7 +39,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public event EventHandler Saved;
 
-        public RecordingSchedulerItem Item => _item;
+        internal RecordingSchedulerItem ModelItem => _modelItem;
 
         public ICommand UpdateCommand { get; }
 
@@ -50,7 +52,12 @@ namespace StudioTVPlayer.ViewModel.Main
         public FilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
 
         public DateTime StartTime { get => _startTime; set => Set(ref _startTime, value); }
+
         public TimeSpan Duration { get => _duration; set => Set(ref _duration, value); }
+
+        public EncoderPreset SelectedEncoderPreset { get => _selectedEncoderPreset; set => Set(ref _selectedEncoderPreset, value); }
+
+        public IEnumerable<Model.EncoderPreset> EncoderPresets => Model.EncoderPresets.Instance.Presets;
 
         public bool IsRepeatDaily
         {
@@ -73,7 +80,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         #endregion repeat days
 
-        public IEnumerable<InputViewModelBase> Inputs { get; } = Providers.InputList.Current.Inputs.Select(input =>
+        public IEnumerable<InputViewModelBase> Inputs { get; } = [.. Providers.InputList.Current.Inputs.Select(input =>
         {
             switch (input)
             {
@@ -82,16 +89,35 @@ namespace StudioTVPlayer.ViewModel.Main
                 default:
                     throw new ApplicationException("Invalid model type provided");
             }
-        }).ToArray();
+        })];
 
         public InputViewModelBase SelectedInput { get => _selectedInput; set => Set(ref _selectedInput, value); }
 
-        private void Update(object _)
+        public string Error => throw new NotImplementedException();
+
+        public string this[string columnName]
         {
-            _item.Name = Name;
-            _item.StartTime = StartTime;
-            _item.Duration = Duration;
-            _item.RepeatType = IsRepeatDaily ? ScheduleRepeatType.Daily : ScheduleRepeatType.Single;
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(SelectedInput):
+                        if (SelectedInput is null)
+                            return "Input is not selected";
+                        if (!SelectedInput.Input.IsRunning)
+                            return "Selected input is not running";
+                        break;
+                }
+                return null;
+            }
+        }
+
+        public void Save()
+        {
+            _modelItem.Name = Name;
+            _modelItem.StartTime = StartTime;
+            _modelItem.Duration = Duration;
+            _modelItem.RepeatType = IsRepeatDaily ? ScheduleRepeatType.Daily : ScheduleRepeatType.Single;
             var repeatDays = new List<DayOfWeek>();
             if (IsRepeatMonday) repeatDays.Add(DayOfWeek.Monday);
             if (IsRepeatTuesday) repeatDays.Add(DayOfWeek.Tuesday);
@@ -100,28 +126,30 @@ namespace StudioTVPlayer.ViewModel.Main
             if (IsRepeatFriday) repeatDays.Add(DayOfWeek.Friday);
             if (IsRepeatSaturday) repeatDays.Add(DayOfWeek.Saturday);
             if (IsRepeatSunday) repeatDays.Add(DayOfWeek.Sunday);
-            _item.RepeatDays = repeatDays.ToArray();
-            _item.FilenameCreationRule = FilenameCreationRule;
-            _item.InputId = SelectedInput?.Input?.Id;
+            _modelItem.RepeatDays = repeatDays.ToArray();
+            _modelItem.FilenameCreationRule = FilenameCreationRule;
+            _modelItem.InputId = SelectedInput?.Input?.Id;
+            _modelItem.EncoderPreset = SelectedEncoderPreset.PresetName;
             IsModified = false;
             Saved?.Invoke(this, EventArgs.Empty);
         }
 
         private void Load(bool refreshUi)
         {
-            _name = _item.Name;
-            _startTime = _item.StartTime;
-            _duration = _item.Duration;
-            _isRepeatDaily = _item.RepeatType == ScheduleRepeatType.Daily;
-            _isRepeatMonday = _item.RepeatDays?.Contains(DayOfWeek.Monday) ?? true;
-            _isRepeatTuesday = _item.RepeatDays?.Contains(DayOfWeek.Tuesday) ?? true;
-            _isRepeatWednesday = _item.RepeatDays?.Contains(DayOfWeek.Wednesday) ?? true;
-            _isRepeatThursday = _item.RepeatDays?.Contains(DayOfWeek.Thursday) ?? true;
-            _isRepeatFriday = _item.RepeatDays?.Contains(DayOfWeek.Friday) ?? true;
-            _isRepeatSaturday = _item.RepeatDays?.Contains(DayOfWeek.Saturday) ?? true;
-            _isRepeatSunday = _item.RepeatDays?.Contains(DayOfWeek.Sunday) ?? true;
-            _filenameCreationRule = _item.FilenameCreationRule;
-            _selectedInput = Inputs.FirstOrDefault(vm => vm.Input?.Id == _item.InputId);
+            _name = _modelItem.Name;
+            _startTime = _modelItem.StartTime;
+            _duration = _modelItem.Duration;
+            _isRepeatDaily = _modelItem.RepeatType == ScheduleRepeatType.Daily;
+            _isRepeatMonday = _modelItem.RepeatDays?.Contains(DayOfWeek.Monday) ?? true;
+            _isRepeatTuesday = _modelItem.RepeatDays?.Contains(DayOfWeek.Tuesday) ?? true;
+            _isRepeatWednesday = _modelItem.RepeatDays?.Contains(DayOfWeek.Wednesday) ?? true;
+            _isRepeatThursday = _modelItem.RepeatDays?.Contains(DayOfWeek.Thursday) ?? true;
+            _isRepeatFriday = _modelItem.RepeatDays?.Contains(DayOfWeek.Friday) ?? true;
+            _isRepeatSaturday = _modelItem.RepeatDays?.Contains(DayOfWeek.Saturday) ?? true;
+            _isRepeatSunday = _modelItem.RepeatDays?.Contains(DayOfWeek.Sunday) ?? true;
+            _filenameCreationRule = _modelItem.FilenameCreationRule;
+            _selectedInput = Inputs.FirstOrDefault(vm => vm.Input?.Id == _modelItem.InputId);
+            _selectedEncoderPreset = EncoderPresets.FirstOrDefault(preset => preset.PresetName == _modelItem.EncoderPreset);
             if (refreshUi)
                 NotifyPropertyChanged(null);
             IsModified = false;

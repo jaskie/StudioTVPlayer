@@ -32,4 +32,7 @@
   <ItemGroup>
     <Content Include="$(SolutionDir)\dependencies\FFMpeg\bin\*.dll" CopyToOutputDirectory="PreserveNewest" Visible="false" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModel\NewFolder\" />
+  </ItemGroup>
 </Project>

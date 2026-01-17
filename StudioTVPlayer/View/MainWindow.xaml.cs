@@ -1,20 +1,7 @@
 ﻿using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace StudioTVPlayer.View
 {
@@ -23,8 +10,10 @@ namespace StudioTVPlayer.View
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private bool _shouldClose;
+
         public MainWindow()
-        {          
+        {
             InitializeComponent();
             DataContext = ViewModel.MainViewModel.Instance;
         }
@@ -34,12 +23,28 @@ namespace StudioTVPlayer.View
             ViewModel.MainViewModel.Instance.InitializeAndShowPlayoutView();
         }
 
-        private void MetroWindow_Closing(object sender, CancelEventArgs e)
+        protected override async void OnClosing(CancelEventArgs e)
         {
-            base.OnClosing(e);
-            e.Cancel = e.Cancel || ViewModel.MainViewModel.Instance.CanClose();
-            if (!e.Cancel)
-                ViewModel.MainViewModel.Instance.Dispose();
+            if (_shouldClose)
+            {
+                base.OnClosing(e);
+                return;
+            }
+
+            e.Cancel = true;
+
+            var canClose = await ViewModel.MainViewModel.Instance.ConfirmCloseAsync();
+            if (!canClose)
+                return;
+
+            _shouldClose = true;
+            Close(); // re-enter OnClosing, will pass through
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            ViewModel.MainViewModel.Instance.Dispose();
+            base.OnClosed(e);
         }
     }
 }

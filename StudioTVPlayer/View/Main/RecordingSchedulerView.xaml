@@ -38,9 +38,9 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <Button Grid.Column="1" Style="{StaticResource SaveButtonStyle}" Command="{Binding UpdateCommand}" Margin="1 3"/>
-                            <Button Grid.Column="1" Style="{StaticResource UndoButtonStyle}" Command="{Binding UndoCommand}" Margin="1 3"/>
-                            <Button Grid.Column="1" Style="{StaticResource RemoveButtonStyle}" Command="{Binding RemoveCommand}" Margin="1 10 1 3"/>
+                            <Button Style="{StaticResource SaveButtonStyle}" Command="{Binding UpdateCommand}" Margin="1 3"/>
+                            <Button Style="{StaticResource UndoButtonStyle}" Command="{Binding UndoCommand}" Margin="1 3"/>
+                            <Button Style="{StaticResource RemoveButtonStyle}" Command="{Binding RemoveCommand}" Margin="1 10 1 3"/>
                         </StackPanel>
                         <Grid>
                             <Grid.Resources>
@@ -103,7 +103,9 @@
                                 </StackPanel>
                             </Grid>
                             <Label Grid.Row="4">Input source</Label>
-                            <ComboBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding Inputs}" SelectedItem="{Binding SelectedInput}" DisplayMemberPath="DisplayName"/>
+                            <ComboBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding Inputs}" SelectedItem="{Binding SelectedInput, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
+                            <Label Grid.Row="4" Grid.Column="2">Encoder preset</Label>
+                            <ComboBox Grid.Row="5" Grid.Column="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset}" DisplayMemberPath="PresetName"/>
                             <Separator Grid.Row="6" Grid.ColumnSpan="3"/>
                         </Grid>
                     </Grid>

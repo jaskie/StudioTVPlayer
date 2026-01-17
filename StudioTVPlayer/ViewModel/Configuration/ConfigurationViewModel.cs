@@ -25,7 +25,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             try
             {
                 Apply();
-                MainViewModel.Instance.ShowPlayoutView();
+                await MainViewModel.Instance.ShowPlayoutView();
             }
             catch (Exception e)
             {
@@ -45,7 +45,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Cancel(object obj)
         {
-            MainViewModel.Instance.ShowPlayoutView();
+            _ = MainViewModel.Instance.ShowPlayoutView();
         }
 
         public override void Apply()

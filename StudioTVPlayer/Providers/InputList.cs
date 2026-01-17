@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
@@ -55,6 +56,11 @@ namespace StudioTVPlayer.Providers
             input.Initialize();
             Save();
             return input;
+        }
+
+        public Model.InputBase Find(string inputId)
+        {
+            return _inputs.FirstOrDefault(input => input.Id == inputId);
         }
 
         public bool CanAddDecklinkInput => TVPlayR.DecklinkIterator.Devices.Any(d => d.HaveInput);

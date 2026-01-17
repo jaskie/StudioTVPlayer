@@ -14,8 +14,7 @@ namespace StudioTVPlayer.ViewModel
     public class MainViewModel : ViewModelBase, IDisposable
     {
         private ViewModelBase _currentViewModel;
-        private IEnumerable<PlayerControllerViewModel> _playerControllers = Array.Empty<PlayerControllerViewModel>();
-        private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
+        private IEnumerable<PlayerControllerViewModel> _playerControllers;
 
         private MainViewModel()
         {
@@ -46,7 +45,7 @@ namespace StudioTVPlayer.ViewModel
             try
             {
                 GlobalApplicationData.Current.Initialize();
-                ShowPlayoutView();
+                await ShowPlayoutView();
             }
             catch (Exception e)
             {
@@ -58,8 +57,9 @@ namespace StudioTVPlayer.ViewModel
 
         private void PlayerControllersModified(object sender, EventArgs e)
         {
-            foreach (var playerControler in PlayerControllers)
-                playerControler.Dispose();
+            if (PlayerControllers != null)
+                foreach (var playerControler in PlayerControllers)
+                    playerControler.Dispose();
             PlayerControllers = GlobalApplicationData.Current.PlayerControllers.Select(playerController => new PlayerControllerViewModel(playerController)).ToArray();
         }
 
@@ -74,9 +74,11 @@ namespace StudioTVPlayer.ViewModel
 
         public IEnumerable<PlayerControllerViewModel> PlayerControllers { get => _playerControllers; private set => Set(ref _playerControllers, value); }
 
-        public void ShowPlayoutView()
+        public async Task ShowPlayoutView()
         {
             if (CurrentViewModel is PlayoutViewModel)
+                return;
+            if (!await ConfirmCloseAsync())
                 return;
             CurrentViewModel = new PlayoutViewModel();
             NotifyPropertyChanged(nameof(IsPlayoutVisible));
@@ -93,7 +95,7 @@ namespace StudioTVPlayer.ViewModel
             {
                 if (!value || CurrentViewModel is PlayoutViewModel)
                     return;
-                ShowPlayoutView();
+                _ = ShowPlayoutView();
             }
         }
 
@@ -121,8 +123,10 @@ namespace StudioTVPlayer.ViewModel
             CurrentViewModel = null;
         }
 
-        public bool CanClose()
+        public async Task<bool> ConfirmCloseAsync()
         {
+            if (CurrentViewModel is ICanClose canClose)
+                return await canClose.ConfirmCloseAsync();
             return true;
         }
 
@@ -136,23 +140,23 @@ namespace StudioTVPlayer.ViewModel
 
         private async void About(object _)
         {
-            var dialog = new MahApps.Metro.Controls.Dialogs.CustomDialog { Title = "About Studio TVPlayer" };
-            var dialogVm = new AboutDialogViewModel(instance => _dialogCoordinator.HideMetroDialogAsync(this, dialog));
+            var dialog = new CustomDialog { Title = "About Studio TVPlayer" };
+            var dialogVm = new AboutDialogViewModel(instance => DialogCoordinator.Instance.HideMetroDialogAsync(this, dialog));
             dialog.Content = new View.AboutDialog { DataContext = dialogVm };
-            await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
+            await DialogCoordinator.Instance.ShowMetroDialogAsync(this, dialog);
         }
 
         private async void Help(object _)
         {
             var dialog = new MahApps.Metro.Controls.Dialogs.CustomDialog { Title = "Help" };
-            var dialogVm = new HelpDialogViewModel(instance => _dialogCoordinator.HideMetroDialogAsync(this, dialog));
+            var dialogVm = new HelpDialogViewModel(instance => DialogCoordinator.Instance.HideMetroDialogAsync(this, dialog));
             dialog.Content = new View.HelpDialog { DataContext = dialogVm };
-            await _dialogCoordinator.ShowMetroDialogAsync(this, dialog);
+            await DialogCoordinator.Instance.ShowMetroDialogAsync(this, dialog);
         }
 
         public async Task<MessageDialogResult> ShowMessageAsync(string title, string message, MessageDialogStyle messageDialogStyle = MessageDialogStyle.Affirmative, MetroDialogSettings dialogSettings = null)
         {
-            return await _dialogCoordinator.ShowMessageAsync(this, title, message, messageDialogStyle, dialogSettings);
+            return await DialogCoordinator.Instance.ShowMessageAsync(this, title, message, messageDialogStyle, dialogSettings);
         }
     }
 }

@@ -25,20 +25,22 @@ namespace StudioTVPlayer.View
 
         protected override async void OnClosing(CancelEventArgs e)
         {
+            // 2nd pass: actually close
             if (_shouldClose)
             {
                 base.OnClosing(e);
                 return;
             }
 
+            // 1st pass: ask user to confirm closing
             e.Cancel = true;
-
             var canClose = await ViewModel.MainViewModel.Instance.ConfirmCloseAsync();
-            if (!canClose)
-                return;
-
-            _shouldClose = true;
-            Close(); // re-enter OnClosing, will pass through
+            base.OnClosing(e);
+            if (canClose)
+            {
+                _shouldClose = true;
+                await Dispatcher.BeginInvoke(Close); // call 2nd pass
+            }
         }
 
         protected override void OnClosed(EventArgs e)

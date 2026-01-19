@@ -107,7 +107,7 @@ namespace StudioTVPlayer.Model
         private void MediaVerifierTask()
         {
             var token = _cancellationTokenSource.Token;
-            while (true)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {

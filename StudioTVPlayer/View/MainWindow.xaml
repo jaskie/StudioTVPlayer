@@ -78,7 +78,7 @@
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <ToggleButton IsChecked="{Binding IsPlayoutVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}">Players</ToggleButton>
-            <ToggleButton IsChecked="{Binding IsRecordingSchedulerVisible}" IsEnabled="{Binding IsConfigutationViewActive,Converter={StaticResource InvertedBooleanConverter}}">Scheduler</ToggleButton>
+            <ToggleButton IsChecked="{Binding IsRecordingSchedulerVisible}" IsEnabled="{Binding IsConfigutationViewActive,Converter={StaticResource InvertedBooleanConverter}}">Recordings</ToggleButton>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
     <Window.InputBindings>

@@ -28,6 +28,26 @@ namespace StudioTVPlayer
             Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => e.Handled = true;
         }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            var splash = new SplashScreen("/StudioTVPlayer.ico");
+            splash.Show(autoClose: false, topMost: true);
+            base.OnStartup(e);
+            try
+            {
+                var mainWindow = new View.MainWindow();
+                mainWindow.Show();
+                GlobalApplicationData.Current.Initialize();
+                splash.Close(TimeSpan.FromSeconds(0.5));
+            }
+            catch (Exception ex)
+            {
+                splash.Close(TimeSpan.Zero);
+                HandleException(ex, true);
+                Shutdown();
+            }
+        }
+
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
@@ -40,11 +60,10 @@ namespace StudioTVPlayer
             { }
         }
 
-
         private void HandleException(Exception e, bool isTerminating)
         {
             var exception = (e?.InnerException ?? e);
-            var message = $"{e?.GetType().Name ?? "Error without exception"} occured with message {e?.Message ?? "empty"}.";
+            var message = $"{e?.GetType().Name ?? "Error without exception"} occured with message: {e?.Message ?? "empty"}";
 #if DEBUG
             CrashLogger.SaveDump(e.ToString());
 #else

@@ -11,7 +11,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <SplashScreen Include="StudioTVPlayer.ico" />
+    <Resource Include="StudioTVPlayer.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dependencies\LibAtem.netstandard2.0\LibAtem.netstandard2.0.csproj" />

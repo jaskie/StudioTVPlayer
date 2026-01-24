@@ -74,8 +74,11 @@ namespace StudioTVPlayer.ViewModel.Main
         {
             get
             {
-                var currentFormatName = _input.CurrentFormat().Name;
-                return Model.EncoderPresets.Instance.Presets.Where(p => p.InputFormats == null || p.InputFormats.Contains(currentFormatName));
+                var currentFormat = _input.CurrentFormat();
+                if (currentFormat is null)
+                    return [];
+                var currentFormatName = currentFormat.Name;
+                return Model.EncoderPresets.Instance.Presets.Where(p => p.InputFormats is null || p.InputFormats.Contains(currentFormatName));
             }
         }
 

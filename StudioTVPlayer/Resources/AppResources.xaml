@@ -12,6 +12,7 @@
     <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter"/>
     <converters:BooleanToBrushConverter x:Key="BooleanToBrushConverter"/>
     <converters:TimeSpanToDateTimeConverter x:Key="TimeSpanToDateTimeConverter"/>
+    <converters:EnumValueToVisibilityConverter x:Key="EnumValueToVisibilityConverter"/>
 
     <DataTemplate x:Key="mediaDragTemplate">
         <Image Height="90" Source="{Binding Thumbnail}">

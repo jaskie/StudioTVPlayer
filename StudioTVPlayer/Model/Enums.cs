@@ -79,7 +79,7 @@ namespace StudioTVPlayer.Model
     {
         [Description("One time")]
         Single,
-        [Description("Repeat in selected days of week")]
+        [Description("Daily")]
         Daily
     }
 

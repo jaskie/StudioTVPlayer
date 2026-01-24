@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:BrowserViewModel}}"
              d:DesignHeight="450" d:DesignWidth="300"
-             Style="{StaticResource StrongFocusIndicatorUserControl}"
+             Style="{StaticResource StrongFocusIndicatorControlStyle}"
              >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Alt" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />

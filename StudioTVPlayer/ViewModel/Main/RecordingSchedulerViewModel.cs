@@ -40,7 +40,7 @@ namespace StudioTVPlayer.ViewModel.Main
         public IEnumerable<RecordingSchedulerItemViewModel> Items => _items;
 
         public RecordingSchedulerItemViewModel SelectedItem { get => _selectedItem; set => Set(ref _selectedItem, value); }
-        
+
         private void Items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)

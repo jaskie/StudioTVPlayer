@@ -4,35 +4,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:model="clr-namespace:StudioTVPlayer.Model"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:RecordingSchedulerViewModel}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="550" d:DesignWidth="900">
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*"/>
             <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button Grid.Row="0" Margin="10" FontSize="14" Command="{Binding AddRecordingScheduledItemCommand}" HorizontalAlignment="Left">
+        <Label HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="{StaticResource MahApps.Font.Size.SubHeader}">Scheduled recordings</Label>
+        <Button Grid.Row="0" Margin="10 10 13 10" FontSize="14" Command="{Binding AddRecordingScheduledItemCommand}" HorizontalAlignment="Right">
             <StackPanel Orientation="Horizontal">
                 <mah:FontIcon Glyph="&#xE710;"/>
                 <TextBlock Margin="5 0 0 0" FontWeight="Normal">Schedule new recording</TextBlock>
             </StackPanel>
         </Button>
         <ListBox Grid.Row="1"
+                 Margin="0 0 5 0"
                  Style="{StaticResource ListBoxStyle}"
                  ItemsSource="{Binding Items}"
                  SelectedItem="{Binding SelectedItem}"
-                 d:ItemsSource="{d:SampleData ItemCount=2}"
             >
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:RecordingSchedulerItemViewModel}">
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="Auto"/>
@@ -64,12 +70,11 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
-                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
+                                <ColumnDefinition Width="5*"/>
                                 <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="15*"/>
                             </Grid.ColumnDefinitions>
                             <Label Grid.Row="0">Name</Label>
                             <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
@@ -77,9 +82,9 @@
                             <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding FilenameCreationRules}" SelectedItem="{Binding FilenameCreationRule}"/>
                             <Label Grid.Row="2">Start at</Label>
                             <mah:DateTimePicker Grid.Row="3" Margin="3 0" PickerVisibility="All"
-                                                SelectedDateTime="{Binding StartTime}" Visibility="{Binding IsRepeatDaily, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+                                                SelectedDateTime="{Binding StartTime}" Visibility="{Binding SelectedRepeatType, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static model:ScheduleRepeatType.Single}}"/>
                             <mah:TimePicker Grid.Row="3" Margin="3 0" PickerVisibility="All"
-                                            SelectedDateTime="{Binding StartTime}" Visibility="{Binding IsRepeatDaily, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                            SelectedDateTime="{Binding StartTime}" Visibility="{Binding SelectedRepeatType, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static model:ScheduleRepeatType.Daily}}"/>
                             <Label Grid.Row="2" Grid.Column="1">Duration</Label>
                             <mah:TimePicker Grid.Row="3" Grid.Column="1" Margin="3 0" PickerVisibility="All" IsClockVisible="False"
                                             SelectedDateTime="{Binding Duration, Converter={StaticResource TimeSpanToDateTimeConverter}}"/>
@@ -90,8 +95,8 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox IsChecked="{Binding IsRepeatDaily}">Daily</CheckBox>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding IsRepeatDaily, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ComboBox Width="85" ItemsSource="{Binding RepeatTypes}" SelectedItem="{Binding SelectedRepeatType}"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="{Binding SelectedRepeatType, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static model:ScheduleRepeatType.Daily}}">
                                     <TextBlock VerticalAlignment="Center" Margin="0 0 3 0">on:</TextBlock>
                                     <CheckBox IsChecked="{Binding IsRepeatMonday}">Mon</CheckBox>
                                     <CheckBox IsChecked="{Binding IsRepeatTuesday}">Tue</CheckBox>
@@ -106,11 +111,16 @@
                             <ComboBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding Inputs}" SelectedItem="{Binding SelectedInput, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
                             <Label Grid.Row="4" Grid.Column="2">Encoder preset</Label>
                             <ComboBox Grid.Row="5" Grid.Column="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset}" DisplayMemberPath="PresetName"/>
-                            <Separator Grid.Row="6" Grid.ColumnSpan="3"/>
                         </Grid>
+                        <Separator Grid.Row="1" Grid.ColumnSpan="3"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
+        </ListBox>
+        <GridSplitter Grid.RowSpan="2" Style="{StaticResource HorizontalGridSplitterStyle}"/>
+        <Label Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="{StaticResource MahApps.Font.Size.SubHeader}">Recording history</Label>
+        <ListBox Grid.Column="1" Grid.Row="1" Style="{StaticResource ListBoxStyle}">
+            
         </ListBox>
     </Grid>
 </UserControl>

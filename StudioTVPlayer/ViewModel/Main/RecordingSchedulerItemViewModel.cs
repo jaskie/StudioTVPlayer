@@ -16,7 +16,6 @@ namespace StudioTVPlayer.ViewModel.Main
         private DateTime _startTime;
         private TimeSpan _duration;
         private FilenameCreationRule _filenameCreationRule;
-        private bool _isRepeatDaily;
         private bool _isRepeatMonday;
         private bool _isRepeatTuesday;
         private bool _isRepeatWednesday;
@@ -26,6 +25,7 @@ namespace StudioTVPlayer.ViewModel.Main
         private bool _isRepeatSunday;
         private InputViewModelBase _selectedInput;
         private EncoderPreset _selectedEncoderPreset;
+        private ScheduleRepeatType _selectedRepeatType;
 
         public RecordingSchedulerItemViewModel(RecordingSchedulerItem item)
         {
@@ -59,15 +59,8 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public IEnumerable<Model.EncoderPreset> EncoderPresets => Model.EncoderPresets.Instance.Presets;
 
-        public bool IsRepeatDaily
-        {
-            get => _isRepeatDaily;
-            set
-            {
-                if (!Set(ref _isRepeatDaily, value))
-                    return;
-            }
-        }
+        public static Array RepeatTypes { get; } = Enum.GetValues(typeof(ScheduleRepeatType));
+        public ScheduleRepeatType SelectedRepeatType { get => _selectedRepeatType; set => Set(ref _selectedRepeatType, value); }
 
         #region repeat days
         public bool IsRepeatMonday { get => _isRepeatMonday; set => Set(ref _isRepeatMonday, value); }
@@ -117,16 +110,8 @@ namespace StudioTVPlayer.ViewModel.Main
             _modelItem.Name = Name;
             _modelItem.StartTime = StartTime;
             _modelItem.Duration = Duration;
-            _modelItem.RepeatType = IsRepeatDaily ? ScheduleRepeatType.Daily : ScheduleRepeatType.Single;
-            var repeatDays = new List<DayOfWeek>();
-            if (IsRepeatMonday) repeatDays.Add(DayOfWeek.Monday);
-            if (IsRepeatTuesday) repeatDays.Add(DayOfWeek.Tuesday);
-            if (IsRepeatWednesday) repeatDays.Add(DayOfWeek.Wednesday);
-            if (IsRepeatThursday) repeatDays.Add(DayOfWeek.Thursday);
-            if (IsRepeatFriday) repeatDays.Add(DayOfWeek.Friday);
-            if (IsRepeatSaturday) repeatDays.Add(DayOfWeek.Saturday);
-            if (IsRepeatSunday) repeatDays.Add(DayOfWeek.Sunday);
-            _modelItem.RepeatDays = repeatDays.ToArray();
+            _modelItem.RepeatType = SelectedRepeatType;
+            _modelItem.RepeatDays = SelectedRepeatType == ScheduleRepeatType.Daily ? [.. SelectedRepeatDays] : null;
             _modelItem.FilenameCreationRule = FilenameCreationRule;
             _modelItem.InputId = SelectedInput?.Input?.Id;
             _modelItem.EncoderPreset = SelectedEncoderPreset.PresetName;
@@ -139,14 +124,8 @@ namespace StudioTVPlayer.ViewModel.Main
             _name = _modelItem.Name;
             _startTime = _modelItem.StartTime;
             _duration = _modelItem.Duration;
-            _isRepeatDaily = _modelItem.RepeatType == ScheduleRepeatType.Daily;
-            _isRepeatMonday = _modelItem.RepeatDays?.Contains(DayOfWeek.Monday) ?? true;
-            _isRepeatTuesday = _modelItem.RepeatDays?.Contains(DayOfWeek.Tuesday) ?? true;
-            _isRepeatWednesday = _modelItem.RepeatDays?.Contains(DayOfWeek.Wednesday) ?? true;
-            _isRepeatThursday = _modelItem.RepeatDays?.Contains(DayOfWeek.Thursday) ?? true;
-            _isRepeatFriday = _modelItem.RepeatDays?.Contains(DayOfWeek.Friday) ?? true;
-            _isRepeatSaturday = _modelItem.RepeatDays?.Contains(DayOfWeek.Saturday) ?? true;
-            _isRepeatSunday = _modelItem.RepeatDays?.Contains(DayOfWeek.Sunday) ?? true;
+            _selectedRepeatType = _modelItem.RepeatType;
+            SelectedRepeatDays = _modelItem.RepeatDays;
             _filenameCreationRule = _modelItem.FilenameCreationRule;
             _selectedInput = Inputs.FirstOrDefault(vm => vm.Input?.Id == _modelItem.InputId);
             _selectedEncoderPreset = EncoderPresets.FirstOrDefault(preset => preset.PresetName == _modelItem.EncoderPreset);
@@ -160,5 +139,28 @@ namespace StudioTVPlayer.ViewModel.Main
             return _selectedInput != null;
         }
 
+        private IEnumerable<DayOfWeek> SelectedRepeatDays
+        {
+            get
+            {
+                if (IsRepeatMonday) yield return DayOfWeek.Monday;
+                if (IsRepeatTuesday) yield return DayOfWeek.Tuesday;
+                if (IsRepeatWednesday) yield return DayOfWeek.Wednesday;
+                if (IsRepeatThursday) yield return DayOfWeek.Thursday;
+                if (IsRepeatFriday) yield return DayOfWeek.Friday;
+                if (IsRepeatSaturday) yield return DayOfWeek.Saturday;
+                if (IsRepeatSunday) yield return DayOfWeek.Sunday;
+            }
+            set
+            {
+                _isRepeatMonday = value?.Contains(DayOfWeek.Monday) ?? true;
+                _isRepeatTuesday = value?.Contains(DayOfWeek.Tuesday) ?? true;
+                _isRepeatWednesday = value?.Contains(DayOfWeek.Wednesday) ?? true;
+                _isRepeatThursday = value?.Contains(DayOfWeek.Thursday) ?? true;
+                _isRepeatFriday = value?.Contains(DayOfWeek.Friday) ?? true;
+                _isRepeatSaturday = value?.Contains(DayOfWeek.Saturday) ?? true;
+                _isRepeatSunday = value?.Contains(DayOfWeek.Sunday) ?? true;
+            }
+        }
     }
 }

@@ -103,4 +103,19 @@ namespace StudioTVPlayer.Model
         [Description("Use name of the item to format date/time")]
         UseNameAsFormat
     }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum RecordingState
+    {
+        [Description("Pending")]
+        Pending,
+        [Description("Running")]
+        Running,
+        [Description("Completed")]
+        Completed,
+        [Description("Failed")]
+        Failed,
+        [Description("Aborted")]
+        Aborted
+    }
 }

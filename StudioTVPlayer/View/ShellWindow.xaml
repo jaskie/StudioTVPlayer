@@ -8,10 +8,12 @@
                  xmlns:rootViewModels="clr-namespace:StudioTVPlayer.ViewModel"
                  xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
+                 xmlns:recordingViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
+                 xmlns:recordingViews="clr-namespace:StudioTVPlayer.View.Main.Recording"
                  xmlns:configurationViews="clr-namespace:StudioTVPlayer.View.Configuration"
                  xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
                  mc:Ignorable="d"
-                 d:DataContext="{d:DesignInstance {x:Type rootViewModels:MainViewModel}}"
+                 d:DataContext="{d:DesignInstance {x:Type rootViewModels:ShellViewModel}}"
                  Title="Studio TVPlayer" 
                  Height="1024" Width="1280"
                  TitleCharacterCasing="Normal"
@@ -89,8 +91,8 @@
             <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
                 <mainViews:PlayoutView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type mainViewModels:RecordingSchedulerViewModel}">
-                <mainViews:RecordingSchedulerView/>
+            <DataTemplate DataType="{x:Type recordingViewModels:RecordingSchedulerViewModel}">
+                <recordingViews:RecordingSchedulerView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
                 <configurationViews:ConfigurationView />

@@ -104,7 +104,7 @@ namespace StudioTVPlayer.Model
                 DateTime foundStartTime = DateTime.MaxValue;
                 foreach (var recording in _recordings)
                 {
-                    if (recording.State != RecordingState.Idle)
+                    if (recording.IsStarted)
                         continue;
                     var currentStartTime = recording.FindNextStartTime();
                     if (currentStartTime < foundStartTime)
@@ -129,7 +129,7 @@ namespace StudioTVPlayer.Model
                         await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecording.StartTime, _cancellationTokenSource.Token);
                         if (!_cancellationTokenSource.IsCancellationRequested)
                         {
-                            nextRecording.RecordingSchedulerItem.State = RecordingState.Running; // we have to set the state in the loop thread, otherwise it will be found many times
+                            nextRecording.RecordingSchedulerItem.IsStarted = true; // we have to set the flag in the loop thread, otherwise it will be found many times
                             _ = Task.Run(async () => await StartRecording(nextRecording.RecordingSchedulerItem, nextRecording.StartTime + nextRecording.RecordingSchedulerItem.Duration));
                         }
                     }
@@ -149,11 +149,10 @@ namespace StudioTVPlayer.Model
             await Helpers.WaitUntilHelper.WaitUntilAsync(endRecordingTime, CancellationToken.None);
             if (recordingSchedulerItem.RepeatType != ScheduleRepeatType.Single)
             {
-                recordingSchedulerItem.State = RecordingState.Idle;
+                recordingSchedulerItem.IsStarted = false;
                 _cancellationTokenSource?.Cancel(); // inform the main loop that it's possible to schedule the recordingSchedulerItem again
             }
-            else
-                recordingSchedulerItem.State = RecordingState.Finished;
+            // TODO: else remove the recording from GlobalApplicationData
         }
     }
 }

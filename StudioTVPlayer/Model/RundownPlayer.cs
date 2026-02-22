@@ -165,9 +165,9 @@ namespace StudioTVPlayer.Model
             _rundown.Add(item, index);
         }
 
-        public void LoadRundown(string fileName) => Persistence.RundownPersister.LoadRundown(_rundown, fileName);
+        public void LoadRundown(string fileName) => Providers.RundownPersister.LoadRundown(_rundown, fileName);
 
-        public void SaveRundown(string fileName) => Persistence.RundownPersister.SaveRundown(_rundown, fileName);
+        public void SaveRundown(string fileName) => Providers.RundownPersister.SaveRundown(_rundown, fileName);
 
         private void AfterPlayed(RundownItemBase rundownItem)
         {

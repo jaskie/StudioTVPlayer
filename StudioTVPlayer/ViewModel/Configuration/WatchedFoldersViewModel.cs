@@ -41,7 +41,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private async void WatchedFolder_RemoveRequested(object sender, EventArgs e)
         {
             var folder = sender as WatchedFolderViewModel ?? throw new ArgumentException(nameof(sender));
-            if (await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Confirmation", $"Really remove watched folder \"{folder.Name}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+            if (await _dialogCoordinator.ShowMessageAsync(ShellViewModel.Instance, "Confirmation", $"Really remove watched folder \"{folder.Name}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
                 return;
             WatchedFolders.Remove(folder);
             IsModified = true;

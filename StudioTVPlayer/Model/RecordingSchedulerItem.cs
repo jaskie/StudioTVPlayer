@@ -47,19 +47,12 @@ namespace StudioTVPlayer.Model
         public string EncoderPreset { get; set; }
 
         [XmlIgnore]
-        public RecordingState State { get; set; }
+        public bool IsStarted { get; set; }
 
         internal DateTime FindNextStartTime()
         {
             // TODO: update for daily repeats
             return StartTime;
         }
-    }
-
-    public enum RecordingState
-    {
-        Idle,
-        Running,
-        Finished
     }
 }

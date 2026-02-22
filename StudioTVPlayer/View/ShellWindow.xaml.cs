@@ -15,12 +15,12 @@ namespace StudioTVPlayer.View
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = ViewModel.MainViewModel.Instance;
+            DataContext = ViewModel.ShellViewModel.Instance;
         }
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.MainViewModel.Instance.InitializeAndShowPlayoutView();
+            ViewModel.ShellViewModel.Instance.InitializeAndShowPlayoutView();
         }
 
         protected override async void OnClosing(CancelEventArgs e)
@@ -34,7 +34,7 @@ namespace StudioTVPlayer.View
 
             // 1st pass: ask user to confirm closing
             e.Cancel = true;
-            var canClose = await ViewModel.MainViewModel.Instance.ConfirmCloseAsync();
+            var canClose = await ViewModel.ShellViewModel.Instance.ConfirmCloseAsync();
             base.OnClosing(e);
             if (canClose)
             {
@@ -45,7 +45,7 @@ namespace StudioTVPlayer.View
 
         protected override void OnClosed(EventArgs e)
         {
-            ViewModel.MainViewModel.Instance.Dispose();
+            ViewModel.ShellViewModel.Instance.Dispose();
             base.OnClosed(e);
         }
     }

@@ -25,11 +25,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             try
             {
                 Apply();
-                await MainViewModel.Instance.ShowPlayoutView();
+                await ShellViewModel.Instance.ShowPlayoutView();
             }
             catch (Exception e)
             {
-                await MainViewModel.Instance.ShowMessageAsync("Configuration error", $"Could not initialize this configuration:\n\n{(e.InnerException ?? e).Message}");
+                await ShellViewModel.Instance.ShowMessageAsync("Configuration error", $"Could not initialize this configuration:\n\n{(e.InnerException ?? e).Message}");
             }
         }
 
@@ -45,7 +45,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Cancel(object obj)
         {
-            _ = MainViewModel.Instance.ShowPlayoutView();
+            _ = ShellViewModel.Instance.ShowPlayoutView();
         }
 
         public override void Apply()

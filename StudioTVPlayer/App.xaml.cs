@@ -53,7 +53,7 @@ namespace StudioTVPlayer
             base.OnExit(e);
             try
             {
-                ViewModel.MainViewModel.Instance.Dispose();
+                ViewModel.ShellViewModel.Instance.Dispose();
                 GlobalApplicationData.Current.Shutdown();
             }
             catch (OperationCanceledException)

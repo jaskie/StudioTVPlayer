@@ -1,9 +1,6 @@
 ﻿using MahApps.Metro.Controls.Dialogs;
 using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
 using StudioTVPlayer.Providers;
-using StudioTVPlayer.ViewModel.Configuration;
-using StudioTVPlayer.ViewModel.Main;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class MainViewModel : ViewModelBase, IDisposable
+    public class ShellViewModel : ViewModelBase, IDisposable
     {
         private ViewModelBase _currentViewModel;
         private IEnumerable<PlayerControllerViewModel> _playerControllers;
 
-        private MainViewModel()
+        private ShellViewModel()
         {
-            ConfigurationCommand = new UiCommand(Configuration, _ => !(CurrentViewModel is ConfigurationViewModel));
+            ConfigurationCommand = new UiCommand(Configuration, _ => !(CurrentViewModel is Configuration.ConfigurationViewModel));
             AboutCommand = new UiCommand(About);
             HelpCommand = new UiCommand(Help);
         }
 
-        public static readonly MainViewModel Instance = new MainViewModel();
+        public static readonly ShellViewModel Instance = new ShellViewModel();
 
         public ViewModelBase CurrentViewModel
         {
@@ -51,7 +48,7 @@ namespace StudioTVPlayer.ViewModel
             {
                 await ShowMessageAsync("Initialization failed", 
                     $"Application failed to initialize. It may be a configuration problem.\n\nPlease, review the configuration considering following error:\n{(e.InnerException ?? e).Message}");
-                CurrentViewModel = new ConfigurationViewModel();
+                CurrentViewModel = new Configuration.ConfigurationViewModel();
             }
         }
 
@@ -68,7 +65,7 @@ namespace StudioTVPlayer.ViewModel
             NotifyPropertyChanged(nameof(AllPlayerControllersConnected));
         }
 
-        public bool IsControllerStatusVisible => CurrentViewModel is PlayoutViewModel && GlobalApplicationData.Current.PlayerControllers.Count > 0;
+        public bool IsControllerStatusVisible => CurrentViewModel is Main.PlayoutViewModel && GlobalApplicationData.Current.PlayerControllers.Count > 0;
 
         public bool AllPlayerControllersConnected => GlobalApplicationData.Current.AllPlayerControllersConnected;
 
@@ -76,24 +73,24 @@ namespace StudioTVPlayer.ViewModel
 
         public async Task ShowPlayoutView()
         {
-            if (CurrentViewModel is PlayoutViewModel)
+            if (CurrentViewModel is Main.PlayoutViewModel)
                 return;
             if (!await ConfirmCloseAsync())
                 return;
-            CurrentViewModel = new PlayoutViewModel();
+            CurrentViewModel = new Main.PlayoutViewModel();
             NotifyPropertyChanged(nameof(IsPlayoutVisible));
             NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
             NotifyPropertyChanged(nameof(IsConfigutationViewActive));
         }
 
-        public bool IsConfigutationViewActive => CurrentViewModel is ConfigurationViewModel;
+        public bool IsConfigutationViewActive => CurrentViewModel is Configuration.ConfigurationViewModel;
 
         public bool IsPlayoutVisible
         {
-            get => CurrentViewModel is PlayoutViewModel;
+            get => CurrentViewModel is Main.PlayoutViewModel;
             set
             {
-                if (!value || CurrentViewModel is PlayoutViewModel)
+                if (!value || CurrentViewModel is Main.PlayoutViewModel)
                     return;
                 _ = ShowPlayoutView();
             }
@@ -101,12 +98,12 @@ namespace StudioTVPlayer.ViewModel
 
         public bool IsRecordingSchedulerVisible
         {
-            get => CurrentViewModel is RecordingSchedulerViewModel;
+            get => CurrentViewModel is Main.Recording.RecordingSchedulerViewModel;
             set
             {
-                if (!value || CurrentViewModel is RecordingSchedulerViewModel)
+                if (!value || CurrentViewModel is Main.Recording.RecordingSchedulerViewModel)
                     return;
-                CurrentViewModel = new RecordingSchedulerViewModel();
+                CurrentViewModel = new Main.Recording.RecordingSchedulerViewModel();
                 NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
                 NotifyPropertyChanged(nameof(IsPlayoutVisible));
             }
@@ -132,9 +129,9 @@ namespace StudioTVPlayer.ViewModel
 
         private void Configuration(object _)
         {
-            if (CurrentViewModel is ConfigurationViewModel)
+            if (CurrentViewModel is Configuration.ConfigurationViewModel)
                 return;
-            CurrentViewModel = new ConfigurationViewModel();
+            CurrentViewModel = new Configuration.ConfigurationViewModel();
             NotifyPropertyChanged(nameof(IsConfigutationViewActive));
         }
 

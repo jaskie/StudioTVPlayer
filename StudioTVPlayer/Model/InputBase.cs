@@ -34,6 +34,9 @@ namespace StudioTVPlayer.Model
         [XmlIgnore]
         public abstract bool IsRunning { get; }
 
+        [XmlIgnore]
+        public string Name => TVPlayRInput?.Name;
+
         internal abstract TVPlayR.VideoFormat CurrentFormat();
 
         public abstract void Dispose();

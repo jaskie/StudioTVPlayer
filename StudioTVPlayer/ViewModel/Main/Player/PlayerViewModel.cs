@@ -340,7 +340,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_rundownPlayer.LoadedItem?.Name }");
+                await ShellViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_rundownPlayer.LoadedItem?.Name }");
                 return false;
             }
             return true;
@@ -356,7 +356,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_rundownPlayer.LoadedItem?.Name}");
+                await ShellViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_rundownPlayer.LoadedItem?.Name}");
                 return false;
             }
             return true;

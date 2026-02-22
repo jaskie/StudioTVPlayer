@@ -9,9 +9,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace StudioTVPlayer.ViewModel.Main
+namespace StudioTVPlayer.ViewModel.Main.Recording
 {
-    public class RecordingSchedulerViewModel : ViewModelBase, ICanClose
+    public sealed class RecordingSchedulerViewModel : ViewModelBase, ICanClose
     {
         private readonly ObservableCollection<RecordingSchedulerItemViewModel> _items;
         private RecordingSchedulerItemViewModel _selectedItem;
@@ -99,7 +99,7 @@ namespace StudioTVPlayer.ViewModel.Main
                     FirstAuxiliaryButtonText = "Cancel",
                     DefaultButtonFocus = MessageDialogResult.Affirmative
                 };
-                var result = await MainViewModel.Instance.ShowMessageAsync("Unsaved changes", "There are unsaved changes in the recording scheduler.\nDo you want to save them before closing?", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, settings);
+                var result = await ShellViewModel.Instance.ShowMessageAsync("Unsaved changes", "There are unsaved changes in the recording scheduler.\nDo you want to save them before closing?", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, settings);
                 switch (result)
                 {
                     case MessageDialogResult.Affirmative:

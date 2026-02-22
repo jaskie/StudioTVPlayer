@@ -3,7 +3,7 @@
     internal static class FolderHelper
     {
         public static bool BrowseForFolder(ref string folder, string description)
-        {            
+        {
             using (var dialog = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog(description) 
             { 
                 IsFolderPicker = true,

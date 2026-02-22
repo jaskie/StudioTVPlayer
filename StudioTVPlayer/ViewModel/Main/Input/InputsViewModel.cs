@@ -48,10 +48,10 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));
             if (vm.Recordings.Any())
             {
-                await MainViewModel.Instance.ShowMessageAsync("Remove input", "You cannot remove input with recordings. Remove recordings first.", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "You cannot remove input with recordings. Remove recordings first.", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
                 return;
             }
-            if (await MainViewModel.Instance.ShowMessageAsync("Remove input", "Do you really want to remove this input?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) == MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+            if (await ShellViewModel.Instance.ShowMessageAsync("Remove input", "Do you really want to remove this input?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) == MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
             {
                 if (InputList.Current.RemoveInput(vm.Input))
                 {

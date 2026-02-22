@@ -30,7 +30,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         private async void Player_RemoveRequested(object sender, EventArgs e)
         {
             var player = sender as PlayerViewModel ?? throw new ArgumentException(nameof(sender));
-            if (await _dialogCoordinator.ShowMessageAsync(MainViewModel.Instance, "Confirmation", $"Really remove player \"{player.Name}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+            if (await _dialogCoordinator.ShowMessageAsync(ShellViewModel.Instance, "Confirmation", $"Really remove player \"{player.Name}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
                 return;
             Players.Remove(player);
             IsModified = true;

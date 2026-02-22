@@ -18,7 +18,7 @@ namespace StudioTVPlayer.Providers
 
         [XmlIgnore]
         public IEnumerable<Model.InputBase> Inputs { get => _inputs; }
-        
+
         public static InputList Current { get; } = Load();
 
         private static InputList Load()

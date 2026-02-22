@@ -7,9 +7,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 
-namespace StudioTVPlayer.ViewModel.Main
+namespace StudioTVPlayer.ViewModel.Main.Recording
 {
-    public class RecordingSchedulerItemViewModel : RemovableViewModelBase, IDataErrorInfo
+    public sealed class RecordingSchedulerItemViewModel : RemovableViewModelBase, IDataErrorInfo
     {
         private readonly RecordingSchedulerItem _modelItem;
         private string _name;

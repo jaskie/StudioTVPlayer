@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
              xmlns:main="clr-namespace:StudioTVPlayer.View.Main"
-             xmlns:mainVm="clr-namespace:StudioTVPlayer.ViewModel.Main"
+             xmlns:recordingVm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:DecklinkInputViewModel}}"
@@ -72,7 +72,7 @@
                         </Style>
                     </ListBox.ItemContainerStyle>
                     <ListBox.Resources>
-                        <DataTemplate DataType="{x:Type mainVm:RecordingViewModel}">
+                        <DataTemplate DataType="{x:Type recordingVm:RecordingViewModel}">
                             <main:RecordingView/>
                         </DataTemplate>
                     </ListBox.Resources>

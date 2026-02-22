@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 
-namespace StudioTVPlayer.ViewModel.Main
+namespace StudioTVPlayer.ViewModel.Main.Recording
 {
     public sealed class RecordingViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {

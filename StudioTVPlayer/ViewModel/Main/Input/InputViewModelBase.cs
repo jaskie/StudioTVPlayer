@@ -10,7 +10,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 {
     public abstract class InputViewModelBase : RemovableViewModelBase, IDisposable, IDataErrorInfo
     {
-        private readonly ObservableCollection<RecordingViewModel> _recordings = new ObservableCollection<RecordingViewModel>();
+        private readonly ObservableCollection<Recording.RecordingViewModel> _recordings = new();
 
         public InputViewModelBase(Model.InputBase input)
         {
@@ -48,18 +48,18 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public ICommand CommandAddRecordingInstant { get; }
 
-        public IEnumerable<RecordingViewModel> Recordings => _recordings;
+        public IEnumerable<Recording.RecordingViewModel> Recordings => _recordings;
 
         private void AddRecordingInstant(object obj)
         {
-            var recording = new RecordingViewModel(Input);
+            var recording = new Recording.RecordingViewModel(Input);
             recording.RemoveRequested += Recording_RemoveRequested;
             _recordings.Add(recording);
         }
 
         private void Recording_RemoveRequested(object sender, EventArgs e)
         {
-            var recording = sender as RecordingViewModel ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as Recording.RecordingViewModel ?? throw new ArgumentException(nameof(sender));
             recording.RemoveRequested -= Recording_RemoveRequested;
             _recordings.Remove(recording);
         }

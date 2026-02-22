@@ -17,6 +17,8 @@ namespace StudioTVPlayer
     /// </summary>
     public partial class App : Application
     {
+        private static SplashScreen SplashScreen;
+
         public App()
         {
             DispatcherUnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
@@ -30,22 +32,25 @@ namespace StudioTVPlayer
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            var splash = new SplashScreen("/StudioTVPlayer.ico");
-            splash.Show(autoClose: false, topMost: true);
+            SplashScreen = new SplashScreen("/StudioTVPlayer.ico");
+            SplashScreen.Show(autoClose: false, topMost: true);
             base.OnStartup(e);
             try
             {
-                var mainWindow = new View.MainWindow();
-                mainWindow.Show();
                 GlobalApplicationData.Current.Initialize();
-                splash.Close(TimeSpan.FromSeconds(0.5));
             }
             catch (Exception ex)
             {
-                splash.Close(TimeSpan.Zero);
+                SplashScreen.Close(TimeSpan.Zero);
                 HandleException(ex, true);
                 Shutdown();
             }
+        }
+
+        public static void CloseSplashScreen()
+        {
+            SplashScreen?.Close(TimeSpan.FromSeconds(0.5));
+            SplashScreen = null;
         }
 
         protected override void OnExit(ExitEventArgs e)

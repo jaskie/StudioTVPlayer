@@ -21,6 +21,7 @@ namespace StudioTVPlayer.View
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             ViewModel.ShellViewModel.Instance.InitializeAndShowPlayoutView();
+            App.CloseSplashScreen();
         }
 
         protected override async void OnClosing(CancelEventArgs e)
@@ -48,5 +49,6 @@ namespace StudioTVPlayer.View
             ViewModel.ShellViewModel.Instance.Dispose();
             base.OnClosed(e);
         }
+
     }
 }

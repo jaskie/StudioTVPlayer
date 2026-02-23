@@ -15,7 +15,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private string _name;
         private DateTime _startTime;
         private TimeSpan _duration;
-        private FilenameCreationRule _filenameCreationRule;
+        private RecordingFilenameCreationRule _filenameCreationRule;
         private bool _isRepeatMonday;
         private bool _isRepeatTuesday;
         private bool _isRepeatWednesday;
@@ -47,9 +47,9 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public string Name { get => _name; set => Set(ref _name, value); }
 
-        public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(FilenameCreationRule));
+        public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(RecordingFilenameCreationRule));
 
-        public FilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
+        public RecordingFilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
 
         public DateTime StartTime { get => _startTime; set => Set(ref _startTime, value); }
 

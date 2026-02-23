@@ -84,7 +84,7 @@ namespace StudioTVPlayer.Model
     }
 
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
-    public enum FilenameCreationRule
+    public enum RecordingFilenameCreationRule
     {
         [Description("Use provided name as filename directly")]
         None,

@@ -3,24 +3,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main"
+             xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
              xmlns:ap="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance {x:Type vm:RecordingViewModel}}"
-             d:DesignHeight="150" d:DesignWidth="800"
+             Height="110"
+             d:DesignWidth="800"
              Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundBaseMediumLow}"
              >
     <Grid Margin="0 0 0 3">
-        <Grid Visibility="{Binding IsCompleted, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -32,7 +34,7 @@
             <Label Grid.Row="0">Folder</Label>
             <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0 5 0"
                 BorderThickness="{StaticResource ComboBoxBorderThemeThickness}"
-                IsEnabled="{Binding IsRecording, Converter={StaticResource InvertedBooleanConverter}}">
+                IsEnabled="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.TextBox.Border}"/>
@@ -62,54 +64,29 @@
             <Label Grid.Row="2">File name</Label>
             <TextBox Grid.Row="3" Margin="5 0" 
                  Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                 IsEnabled="{Binding IsRecording, Converter={StaticResource InvertedBooleanConverter}}"
-                 />
+                 IsEnabled="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}"
+                />
             <Label Grid.Column="1" Grid.Row="2">Format preset</Label>
             <ComboBox Grid.Column="1" Grid.Row="3" Margin="5 0"
                   ItemsSource="{Binding EncoderPresets}"
                   SelectedItem="{Binding EncoderPreset, ValidatesOnDataErrors=True}"
                   DisplayMemberPath="PresetName"
                   ToolTip="{Binding EncoderPreset.Description}"
-                  IsEnabled="{Binding IsRecording, Converter={StaticResource InvertedBooleanConverter}}"
-                  >
+                  IsEnabled="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}"
+                >
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="ComboBoxItem" BasedOn="{StaticResource MahApps.Styles.ComboBoxItem}">
                         <Setter Property="ToolTip" Value="{Binding Description}"/>
                     </Style>
                 </ComboBox.ItemContainerStyle>
             </ComboBox>
-            <Grid Grid.Column="2" Grid.RowSpan="10">
-                <Button Grid.Column="1" VerticalAlignment="Bottom"
-                    Style="{StaticResource RemoveButtonStyle}"
-                    IsEnabled="{Binding IsRecording,Converter={StaticResource InvertedBooleanConverter}}"/>
-                <ToggleButton Grid.Column="1" 
-                      IsChecked="{Binding IsRecording}" IsEnabled="{Binding CanChangeRecordingState}" 
-                      VerticalAlignment="Top" Width="40" Height="40" Margin="5" >
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton" BasedOn="{StaticResource MahApps.Styles.ToggleButton.Circle}">
-                            <Setter Property="Background" Value="Red"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Background" Value="DarkGray"/>
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="ToolTip" Value="Stop recording"/>
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="ToolTip" Value="Start recording"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                    <mah:ProgressRing Width="28" Foreground="White" IsActive="{Binding IsRecording}"/>
-                </ToggleButton>
-            </Grid>
         </Grid>
-        <Grid Visibility="{Binding IsCompleted, Converter={StaticResource BoolToVisibilityConverter}}" Margin="5 5 0 5">
+        <Grid Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}">
+        </Grid>
+        <Grid Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Finished}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -132,8 +109,36 @@
                     </StackPanel>
                 </Hyperlink>
             </TextBlock>
-            <Button Grid.Column="2" Grid.RowSpan="2"
-                    Style="{StaticResource RemoveButtonStyle}" ToolTip="Dismiss"/>
+        </Grid>
+        <Grid Grid.Column="1" >
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="1"
+                    Style="{StaticResource RemoveButtonStyle}"
+                    Command="{Binding RemoveCommand}"/>
+            <Button Grid.Row="0" Width="40" Height="40" Margin="5"
+                    Visibility="{Binding ShowRecordingButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Command="{Binding CommandToggleRecording}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
+                        <Setter Property="Background" Value="Red"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="DarkGray"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding Step}" Value="Running">
+                                <Setter Property="ToolTip" Value="Stop recording"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Step}" Value="Preparing">
+                                <Setter Property="ToolTip" Value="Start recording"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <mah:ProgressRing Width="28" Foreground="White" IsActive="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}"/>
+            </Button>
         </Grid>
     </Grid>
 </UserControl>

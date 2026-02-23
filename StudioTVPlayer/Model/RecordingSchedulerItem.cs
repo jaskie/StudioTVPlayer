@@ -41,7 +41,7 @@ namespace StudioTVPlayer.Model
         public string Name { get; set; }
 
         [XmlAttribute]
-        public FilenameCreationRule FilenameCreationRule { get; set; }
+        public RecordingFilenameCreationRule FilenameCreationRule { get; set; }
 
         [XmlAttribute]
         public string EncoderPreset { get; set; }

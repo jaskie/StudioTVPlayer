@@ -14,8 +14,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private Model.Recording _recording;
         private string _fileName;
         private string _folder;
-        private bool _isRecording;
-        private bool _isCompleted;
+        private RecordingStep _step;
         private Model.EncoderPreset _encoderPreset;
         private bool _disposed;
         private readonly Model.InputBase _input;
@@ -29,9 +28,15 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         public RecordingViewModel(Model.Recording recording) : this(recording.Input, recording.EncoderPreset)
         {
             _recording = recording;
-            _isRecording = true;
+            _step = recording.State switch
+            {
+                Model.RecordingState.Pending => RecordingStep.Preparing,
+                Model.RecordingState.Running => RecordingStep.Running,
+                _ => RecordingStep.Finished
+            };
             _folder = Path.GetDirectoryName(recording.FullPath);
             _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
+            CommandToggleRecording = new UiCommand(ToggleRecording, CanToggleRecording);
         }
 
         private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset)
@@ -39,9 +44,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             BrowseForFolderCommand = new UiCommand(BrowseForFolder);
             OpenExternalFolderCommand = new UiCommand(OpenExternalFolder);
             _input = input;
-            if (input is Model.DecklinkInput decklinkInput)
-                decklinkInput.FormatChanged += DecklinkInput_InputFormatChanged;
             _encoderPreset = encoderPreset ?? EncoderPresets.FirstOrDefault();
+            CommandToggleRecording = new UiCommand(ToggleRecording, CanToggleRecording);
         }
 
         public IEnumerable<string> Folders => Providers.MostRecentUsed.Current.Folders;
@@ -54,7 +58,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 if (!Set(ref _folder, value))
                     return;
                 NotifyPropertyChanged(nameof(FullPath));
-                NotifyPropertyChanged(nameof(CanChangeRecordingState));
             }
         }
 
@@ -66,7 +69,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 if (!Set(ref _fileName, value))
                     return;
                 NotifyPropertyChanged(nameof(FullPath));
-                NotifyPropertyChanged(nameof(CanChangeRecordingState));
             }
         }
 
@@ -90,33 +92,46 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 if (!Set(ref _encoderPreset, value))
                     return;
                 NotifyPropertyChanged(nameof(FullPath));
-                NotifyPropertyChanged(nameof(CanChangeRecordingState));
             }
         }
 
-        public bool IsRecording
+        public RecordingStep Step
         {
-            get => _isRecording;
-            set
+            get => _step;
+            private set
             {
-                if (!Set(ref _isRecording, value))
+                if (!Set(ref _step, value))
                     return;
-                if (value)
-                    StartRecording();
-                else
-                    StopRecording();
-                NotifyPropertyChanged(nameof(CanChangeRecordingState));
+                NotifyPropertyChanged(nameof(ShowRecordingButton));
+                NotifyPropertyChanged(nameof(CanRemove));
             }
         }
 
-        public bool IsCompleted
+        public ICommand CommandToggleRecording { get; }
+
+        private bool CanToggleRecording(object _) => Step switch
         {
-            get => _isCompleted;
-            private set => Set(ref _isCompleted, value);
+            RecordingStep.Preparing => EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath),
+            RecordingStep.Running => true,
+            _ => false
+        };
+
+        private void ToggleRecording(object obj)
+        {
+            switch (Step)
+            {
+                case RecordingStep.Preparing:
+                    StartRecording();
+                    break;
+                case RecordingStep.Running:
+                    StopRecording();
+                    break;
+            }
         }
 
-        public bool CanChangeRecordingState => IsRecording // to stop the ongiong recording
-            || (EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath)); // to start new one
+        public bool ShowRecordingButton => Step is RecordingStep.Preparing or RecordingStep.Running;
+
+        public bool CanRemove => Step != RecordingStep.Running;
 
         public ICommand BrowseForFolderCommand { get; }
 
@@ -130,19 +145,18 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         private string ReadErrorInfo(string propertyName)
         {
-            if (IsRecording)
-                return string.Empty;
-            switch (propertyName)
-            {
-                case nameof(Folder) when !IsRecording && !Directory.Exists(Folder):
-                    return "Folder does not exists";
-                case nameof(FileName) when File.Exists(FullPath):
-                    return "File already exists";
-                case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
-                    return "Filename can't be empty";
-                case nameof(EncoderPreset) when EncoderPreset is null:
-                    return "Preset is required to start recording";
-            }
+            if (Step == RecordingStep.Preparing)
+                switch (propertyName)
+                {
+                    case nameof(Folder) when Step == RecordingStep.Preparing && !Directory.Exists(Folder):
+                        return "Folder does not exists";
+                    case nameof(FileName) when File.Exists(FullPath):
+                        return "File already exists";
+                    case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
+                        return "Filename can't be empty";
+                    case nameof(EncoderPreset) when EncoderPreset is null:
+                        return "Preset is required to start recording";
+                }
             return string.Empty;
         }
 
@@ -155,7 +169,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         protected override bool CanRequestRemove(object obj)
         {
-            return !IsRecording;
+            return Step != RecordingStep.Running;
         }
 
         public void Dispose()
@@ -163,8 +177,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             if (_disposed)
                 return;
             _disposed = true;
-            if (_input is Model.DecklinkInput decklinkInput)
-                decklinkInput.FormatChanged -= DecklinkInput_InputFormatChanged;
         }
 
         public string FullPath
@@ -183,7 +195,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             {
                 NotifyPropertyChanged(nameof(Folder));
                 NotifyPropertyChanged(nameof(FullPath));
-                NotifyPropertyChanged(nameof(CanChangeRecordingState));
                 Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
             }
         }
@@ -193,7 +204,11 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             Process.Start("explorer.exe", $"/select,\"{FullPath}\"");
         }
 
-        private void StopRecording() => _recording?.Stop();
+        private void StopRecording()
+        {
+            _recording?.Stop();
+            Step = RecordingStep.Finished;
+        }
 
         private void StartRecording()
         {
@@ -202,6 +217,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             _recording = new Model.Recording(_input, _encoderPreset, FullPath);
             _recording.Start();
             _recording.Finished += Recording_Finished;
+            Step = RecordingStep.Running;
         }
 
         private void Recording_Finished(object sender, EventArgs e)
@@ -210,15 +226,14 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             recording.Finished -= Recording_Finished;
             _recording = null;
             NotifyPropertyChanged(nameof(FileName));
-            Set(ref _isRecording, false, nameof(IsRecording));
-            NotifyPropertyChanged(nameof(CanChangeRecordingState));
-            IsCompleted = true;
+            Step = RecordingStep.Finished;
         }
+    }
 
-        private void DecklinkInput_InputFormatChanged(object sender, EventArgs e)
-        {
-            NotifyPropertyChanged(nameof(EncoderPresets));
-        }
-
+    public enum RecordingStep
+    {
+        Preparing,
+        Running,
+        Finished
     }
 }

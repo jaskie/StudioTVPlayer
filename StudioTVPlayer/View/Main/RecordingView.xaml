@@ -14,10 +14,16 @@
              >
     <Grid Margin="0 0 0 3">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Grid Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}">
+        <Image Height="90" Source="{Binding Thumbnail}" Visibility="{Binding Thumbnail, Converter={StaticResource NotNullToVisibilityConverter}}">
+            <Image.Effect>
+                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
+            </Image.Effect>
+        </Image>
+        <Grid Grid.Column="1" Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -81,9 +87,9 @@
                 </ComboBox.ItemContainerStyle>
             </ComboBox>
         </Grid>
-        <Grid Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}">
+        <Grid Grid.Column="1" Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}">
         </Grid>
-        <Grid Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Finished}}">
+        <Grid Grid.Column="1" Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Finished}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -110,7 +116,7 @@
                 </Hyperlink>
             </TextBlock>
         </Grid>
-        <Grid Grid.Column="1" >
+        <Grid Grid.Column="2" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>

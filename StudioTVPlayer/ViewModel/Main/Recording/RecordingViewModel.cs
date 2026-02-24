@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Recording
 {
@@ -17,6 +18,9 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private RecordingStep _step;
         private Model.EncoderPreset _encoderPreset;
         private bool _disposed;
+        private ImageSource _thumbnail;
+        private DateTime _startTime;
+        private TimeSpan _duration;
         private readonly Model.InputBase _input;
 
         public RecordingViewModel(Model.InputBase input) : this(input, null)
@@ -106,6 +110,12 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 NotifyPropertyChanged(nameof(CanRemove));
             }
         }
+
+        public DateTime StartTime { get => _startTime; private set => Set(ref _startTime, value); }
+
+        public TimeSpan Duration { get => _duration; private set => Set(ref _duration, value); }
+
+        public ImageSource Thumbnail { get => _thumbnail; set => Set(ref _thumbnail, value); }
 
         public ICommand CommandToggleRecording { get; }
 
@@ -216,17 +226,27 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
             _recording = new Model.Recording(_input, _encoderPreset, FullPath);
             _recording.Start();
-            _recording.Finished += Recording_Finished;
+            _recording.PropertyChanged += Recording_PropertyChanged;
+            Thumbnail = _input.Thumbnail;
             Step = RecordingStep.Running;
         }
 
-        private void Recording_Finished(object sender, EventArgs e)
+        private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var recording = sender as Model.Recording ?? throw new ArgumentException(nameof(sender));
-            recording.Finished -= Recording_Finished;
-            _recording = null;
-            NotifyPropertyChanged(nameof(FileName));
-            Step = RecordingStep.Finished;
+            switch (e.PropertyName)
+            {
+                case nameof(Model.Recording.State) when recording.State is Model.RecordingState.Completed or Model.RecordingState.Failed or Model.RecordingState.Aborted:
+                    recording.PropertyChanged -= Recording_PropertyChanged;
+                    Duration = recording.Duration;
+                    Thumbnail = recording.Thumbnail;
+                    _recording = null;
+                    Step = RecordingStep.Finished;
+                    break;
+                case nameof(Model.Recording.StartTime):
+                    StartTime = recording.StartTime;
+                    break;
+            }
         }
     }
 

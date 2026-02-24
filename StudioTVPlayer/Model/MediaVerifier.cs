@@ -12,6 +12,9 @@ namespace StudioTVPlayer.Model
 {
     internal class MediaVerifier : IDisposable
     {
+        public const int DefaultThumbnailHeight = 126;
+        public const int DefaultThumbnailWidth = 224;
+        
         private struct MediaVerifyData
         {
             public MediaFile Media;
@@ -24,8 +27,6 @@ namespace StudioTVPlayer.Model
         private readonly Task _verificationTask;
         private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private const int DefaultThumbnailHeight = 126;
-        private const int DefaultThumbnailWidth = 224;
 
         private MediaVerifier()
         {

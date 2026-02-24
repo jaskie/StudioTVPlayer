@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using StudioTVPlayer.Model;
@@ -132,14 +133,17 @@ namespace StudioTVPlayer.Providers
         public void AddRecording(Recording recording)
         {
             _recordings.Add(recording);
-            recording.Finished += Recording_Finished;
+            recording.PropertyChanged += Recording_PropertyChanged;
         }
 
-        private void Recording_Finished(object sender, EventArgs e)
+        private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var recording = sender as Recording ?? throw new ArgumentException(nameof(sender));
-            recording.Finished -= Recording_Finished;
-            _recordings.Remove(recording);
+            if (e.PropertyName is nameof(Recording.State) && recording.State is RecordingState.Aborted or RecordingState.Completed or RecordingState.Failed)
+            {
+                recording.PropertyChanged -= Recording_PropertyChanged;
+                _recordings.Remove(recording);
+            }
         }
     }
 

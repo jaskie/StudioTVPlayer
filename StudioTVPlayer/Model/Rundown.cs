@@ -1,11 +1,8 @@
 ﻿using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Model.Persistence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,8 +15,8 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _nextAutoPlayItem;
         private bool _isLoop;
         private int _isDisposed;
-        private readonly List<RundownItemBase> _items = new List<RundownItemBase>();
-        private readonly object _rundownLock = new object();
+        private readonly List<RundownItemBase> _items = new();
+        private readonly object _rundownLock = new();
 
         public List<RundownItemBase> Items
         {
@@ -27,7 +24,7 @@ namespace StudioTVPlayer.Model
             {
                 lock (_rundownLock)
                 {
-                    return _items.ToList();
+                    return [.. _items];
                 }
             }
         }

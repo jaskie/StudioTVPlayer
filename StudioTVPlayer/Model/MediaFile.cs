@@ -1,27 +1,20 @@
-﻿using System;
-using System.ComponentModel;
+﻿using StudioTVPlayer.Helpers;
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
 
     [DebuggerDisplay(nameof(FullPath))]
-    public class MediaFile : INotifyPropertyChanged
+    public class MediaFile : PropertyChangedBase
     {
         private string _directoryName;
         private string _name;
         private TimeSpan _duration;
         private DateTime _creationTime;
         private ImageSource _thumbnail;
-
-        internal void Play()
-        {
-            throw new NotImplementedException();
-        }
-
         private bool _isVerified;
         private int _height;
         private int _width;
@@ -39,148 +32,76 @@ namespace StudioTVPlayer.Model
             ReadFileInfo();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public string DirectoryName
         {
             get => _directoryName;
-            private set
-            {
-                if (_directoryName == value)
-                    return;
-                _directoryName = value;
-                RaisePropertyChanged();
-            }
+            private set => Set(ref _directoryName, value);
         }
 
         public string Name
         {
             get => _name;
-            private set
-            {
-                if (_name == value)
-                    return;
-                _name = value;
-                RaisePropertyChanged();
-            }
+            private set => Set(ref _name, value);
         }
 
         public TimeSpan StartTime
         {
             get => _startTime;
-            internal set
-            {
-                if (_startTime == value)
-                    return;
-                _startTime = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _startTime, value);
         }
 
         public TimeSpan Duration
         {
             get => _duration;
-            internal set
-            {
-                if (_duration == value)
-                    return;
-                _duration = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _duration, value);
         }
 
         public DateTime CreationTime
         {
             get => _creationTime;
-            private set
-            {
-                if (_creationTime == value)
-                    return;
-                _creationTime = value;
-                RaisePropertyChanged();
-            }
+            private set => Set(ref _creationTime, value);
         }
 
         public int Height
         {
             get => _height;
-            internal set
-            {
-                if (_height == value)
-                    return;
-                _height = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _height, value);
         }
 
         public int Width
         {
             get => _width;
-            internal set
-            {
-                if (_width == value)
-                    return;
-                _width = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _width, value);
         }
 
         public ScanType ScanType
         {
             get => _scanType;
-            internal set
-            {
-                if (_scanType == value)
-                    return;
-                _scanType = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _scanType, value);
         }
 
         public string FrameRate
         {
             get => _frameRate;
-            internal set
-            {
-                if (_frameRate == value)
-                    return;
-                _frameRate = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _frameRate, value);
         }
 
         public int AudioChannelCount
         {
             get => _audioChannelCount;
-            internal set
-            {
-                if (_audioChannelCount == value)
-                    return;
-                _audioChannelCount = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _audioChannelCount, value);
         }
 
         public bool HaveAlphaChannel
         {
             get => _haveAlphaChannel;
-            internal set
-            {
-                if (_haveAlphaChannel == value)
-                    return;
-                _haveAlphaChannel = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _haveAlphaChannel, value);
         }
 
         public ImageSource Thumbnail
         {
             get => _thumbnail;
-            set
-            {
-                _thumbnail = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _thumbnail, value);
         }
 
         public string FullPath => Path.Combine(DirectoryName, Name);
@@ -188,36 +109,19 @@ namespace StudioTVPlayer.Model
         public bool IsVerified
         {
             get => _isVerified;
-            internal set
-            {
-                if (_isVerified == value)
-                    return;
-                _isVerified = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _isVerified, value);
         }
 
         public bool IsValid
         {
             get => _isValid;
-            internal set
-            {
-                if (_isValid == value)
-                    return;
-                _isValid = value;
-                RaisePropertyChanged();
-            }
+            internal set => Set(ref _isValid, value);
         }
 
         public void Refresh()
         {
             _fileInfo.Refresh();
             ReadFileInfo();
-        }
-
-        private void RaisePropertyChanged([CallerMemberName] string propertyname = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
         private void ReadFileInfo()

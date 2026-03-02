@@ -107,15 +107,15 @@ namespace StudioTVPlayer.Model
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
     public enum RecordingState
     {
-        [Description("Pending")]
+        [Description("pending")]
         Pending,
-        [Description("Running")]
+        [Description("in progress")]
         Running,
-        [Description("Completed")]
+        [Description("completed")]
         Completed,
-        [Description("Failed")]
+        [Description("failed")]
         Failed,
-        [Description("Aborted")]
+        [Description("aborted")]
         Aborted
     }
 }

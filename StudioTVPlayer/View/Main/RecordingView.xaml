@@ -3,27 +3,42 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
              xmlns:ap="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
+             xmlns:model="clr-namespace:StudioTVPlayer.Model"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance {x:Type vm:RecordingViewModel}}"
-             Height="110"
+             MinHeight="110"
              d:DesignWidth="800"
              Foreground="{StaticResource MahApps.Brushes.SystemControlForegroundBaseMediumLow}"
              >
-    <Grid Margin="0 0 0 3">
+    <Grid Margin="0 0 0 3"
+          dd:DragDrop.IsDragSource="True"
+          dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
+          dd:DragDrop.UseDefaultDragAdorner="True"
+          >
+        <Grid.Resources>
+            <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
+            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Margin" Value="5 0"/>
+            </Style>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Image Height="90" Source="{Binding Thumbnail}" Visibility="{Binding Thumbnail, Converter={StaticResource NotNullToVisibilityConverter}}">
+        <Image Grid.Column="0" Height="90" Margin="5 0 0 0"
+               Source="{Binding Thumbnail}"
+               Visibility="{Binding Thumbnail, Converter={StaticResource NotNullToVisibilityConverter}}">
             <Image.Effect>
-                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
+                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="{StaticResource MahApps.Colors.ThemeBackground}" />
             </Image.Effect>
         </Image>
-        <Grid Grid.Column="1" Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}">
+        <Grid Grid.Column="1"
+              Visibility="{Binding IsPrepareStep, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -34,13 +49,10 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Grid.Resources>
-                <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}"/>
-            </Grid.Resources>
             <Label Grid.Row="0">Folder</Label>
-            <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0 5 0"
-                BorderThickness="{StaticResource ComboBoxBorderThemeThickness}"
-                IsEnabled="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}">
+            <!-- Directory selector -->
+            <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0"
+                    BorderThickness="{StaticResource ComboBoxBorderThemeThickness}">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.TextBox.Border}"/>
@@ -60,80 +72,62 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <ComboBox IsEditable="True" Text="{Binding Folder, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Folders}" BorderThickness="0"/>
-                    <Button Grid.Column="1" Command="{Binding BrowseForFolderCommand}"
-                    Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
-                    ToolTip="Browse for the folder" >
+                    <Button Grid.Column="1"
+                            Command="{Binding BrowseForFolderCommand}"
+                            Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
+                            ToolTip="Browse for the folder" >
                         <mah:FontIcon Glyph="&#xED25;"/>
                     </Button>
                 </Grid>
             </Border>
             <Label Grid.Row="2">File name</Label>
-            <TextBox Grid.Row="3" Margin="5 0" 
-                 Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                 IsEnabled="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}"
-                />
+            <TextBox Grid.Row="3" TextWrapping="Wrap"
+                     Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
             <Label Grid.Column="1" Grid.Row="2">Format preset</Label>
             <ComboBox Grid.Column="1" Grid.Row="3" Margin="5 0"
-                  ItemsSource="{Binding EncoderPresets}"
-                  SelectedItem="{Binding EncoderPreset, ValidatesOnDataErrors=True}"
-                  DisplayMemberPath="PresetName"
-                  ToolTip="{Binding EncoderPreset.Description}"
-                  IsEnabled="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Preparing}}"
-                >
+                      ItemsSource="{Binding EncoderPresets}"
+                      SelectedItem="{Binding EncoderPreset, ValidatesOnDataErrors=True}"
+                      DisplayMemberPath="PresetName"
+                      ToolTip="{Binding EncoderPreset.Description}">
                 <ComboBox.ItemContainerStyle>
-                    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource MahApps.Styles.ComboBoxItem}">
+                    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource MahApps.Styles.ComboBoxItem}" >
                         <Setter Property="ToolTip" Value="{Binding Description}"/>
                     </Style>
                 </ComboBox.ItemContainerStyle>
             </ComboBox>
         </Grid>
-        <Grid Grid.Column="1" Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}">
-        </Grid>
-        <Grid Grid.Column="1" Visibility="{Binding Step, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static vm:RecordingStep.Finished}}">
+        <Grid Grid.Column="1"
+            Visibility="{Binding IsPrepareStep, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="40"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.ColumnSpan="2" Text="{Binding FullPath, StringFormat={}Recording completed: {0}}" TextWrapping="Wrap" Margin="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
-            <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="5" >
-                <Hyperlink NavigateUri="{Binding FullPath}" ap:HyperlinkProperties.IsExternal="True">
-                    <StackPanel Orientation="Horizontal">
-                         <TextBlock FontStyle="Italic" Margin="5">Open file</TextBlock>
-                         <mah:FontIcon FontSize="14" Glyph="&#xE8E5;"/>
-                    </StackPanel>
-                </Hyperlink>
-            </TextBlock>
-            <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="5">
-                <Hyperlink Command="{Binding OpenExternalFolderCommand}">
-                    <StackPanel Orientation="Horizontal">
-                         <TextBlock FontStyle="Italic" Margin="5">Show file in explorer</TextBlock>
-                         <mah:FontIcon FontSize="14" Glyph="&#xE838;"/>
-                    </StackPanel>
-                </Hyperlink>
-            </TextBlock>
+            <Label Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding State, Converter={StaticResource DescriptionConverter}}" ContentStringFormat="{}Recording to file is {0}" />
+            <TextBox Grid.Row="1" Grid.ColumnSpan="2" IsReadOnly="True" Text="{Binding FullPath, Mode=OneWay}"/>
+            <Label Grid.Row="2">Started</Label>
+            <TextBox Grid.Row="3" IsReadOnly="True" Text="{Binding StartTime, Mode=OneWay, StringFormat=G}"/>
+            <Label Grid.Row="2" Grid.Column="1">Duration</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Text="{Binding Duration, Mode=OneWay, StringFormat=hh\\:mm\\:ss}"/>
         </Grid>
         <Grid Grid.Column="2" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button Grid.Row="1"
-                    Style="{StaticResource RemoveButtonStyle}"
-                    Command="{Binding RemoveCommand}"/>
-            <Button Grid.Row="0" Width="40" Height="40" Margin="5"
-                    Visibility="{Binding ShowRecordingButton, Converter={StaticResource BooleanToVisibilityConverter}}"
+            <Button Grid.Row="0" Margin="2" BorderThickness="0"
+                    Visibility="{Binding IsFinishedStep, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
+                    Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"
                     Command="{Binding CommandToggleRecording}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
                         <Setter Property="Background" Value="Red"/>
                         <Style.Triggers>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="DarkGray"/>
-                            </Trigger>
                             <DataTrigger Binding="{Binding Step}" Value="Running">
                                 <Setter Property="ToolTip" Value="Stop recording"/>
                             </DataTrigger>
@@ -143,8 +137,29 @@
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
-                <mah:ProgressRing Width="28" Foreground="White" IsActive="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}"/>
+                <mah:ProgressRing Width="10" Foreground="White" IsActive="{Binding Step, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RecordingStep.Running}}"/>
             </Button>
+            <mah:DropDownButton Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="3 0 0 0"
+                                Visibility="{Binding IsFinishedStep, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <mah:DropDownButton.Items>
+                    <MenuItem Header="Show in folder" Command="{Binding OpenExternalFolderCommand}"/>
+                    <MenuItem Header="Add to player" ItemsSource="{Binding RundownPlayers}">
+                        <MenuItem.ItemContainerStyle>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="Header" Value="{Binding Name}"/>
+                                <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.CommandAddToPlayer, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Setter Property="CommandParameter" Value="{Binding .}"/>
+                            </Style>
+                        </MenuItem.ItemContainerStyle>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Delete" Command="{Binding CommandDeleteMedia}"/>
+
+                </mah:DropDownButton.Items>
+
+            </mah:DropDownButton>
+            <Button Grid.Row="1"
+                    Style="{StaticResource RemoveButtonStyle}"/>
         </Grid>
     </Grid>
 </UserControl>

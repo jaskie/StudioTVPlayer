@@ -21,6 +21,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private ImageSource _thumbnail;
         private DateTime _startTime;
         private TimeSpan _duration;
+        private Model.RecordingState _state;
         private readonly Model.InputBase _input;
 
         public RecordingViewModel(Model.InputBase input) : this(input, null)
@@ -38,18 +39,20 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 Model.RecordingState.Running => RecordingStep.Running,
                 _ => RecordingStep.Finished
             };
+            _state = recording.State;
             _folder = Path.GetDirectoryName(recording.FullPath);
             _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
-            CommandToggleRecording = new UiCommand(ToggleRecording, CanToggleRecording);
         }
 
         private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset)
         {
-            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
-            OpenExternalFolderCommand = new UiCommand(OpenExternalFolder);
             _input = input;
             _encoderPreset = encoderPreset ?? EncoderPresets.FirstOrDefault();
+            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
+            OpenExternalFolderCommand = new UiCommand(OpenExternalFolder);
             CommandToggleRecording = new UiCommand(ToggleRecording, CanToggleRecording);
+            CommandAddToPlayer = new UiCommand(AddToPlayer, CanAddToPlayer);
+            CommandDeleteMedia = new UiCommand(DeleteMedia, CanDeleteMedia);
         }
 
         public IEnumerable<string> Folders => Providers.MostRecentUsed.Current.Folders;
@@ -106,10 +109,12 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             {
                 if (!Set(ref _step, value))
                     return;
-                NotifyPropertyChanged(nameof(ShowRecordingButton));
-                NotifyPropertyChanged(nameof(CanRemove));
+                NotifyPropertyChanged(nameof(IsFinishedStep));
+                NotifyPropertyChanged(nameof(IsPrepareStep));
             }
         }
+
+        public Model.RecordingState State { get => _state; private set => Set(ref _state, value); }
 
         public DateTime StartTime { get => _startTime; private set => Set(ref _startTime, value); }
 
@@ -117,35 +122,24 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public ImageSource Thumbnail { get => _thumbnail; set => Set(ref _thumbnail, value); }
 
+        public bool IsPrepareStep => Step is RecordingStep.Preparing;
+
+
+        public bool IsFinishedStep => Step is RecordingStep.Finished;
+        
         public ICommand CommandToggleRecording { get; }
-
-        private bool CanToggleRecording(object _) => Step switch
-        {
-            RecordingStep.Preparing => EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath),
-            RecordingStep.Running => true,
-            _ => false
-        };
-
-        private void ToggleRecording(object obj)
-        {
-            switch (Step)
-            {
-                case RecordingStep.Preparing:
-                    StartRecording();
-                    break;
-                case RecordingStep.Running:
-                    StopRecording();
-                    break;
-            }
-        }
-
-        public bool ShowRecordingButton => Step is RecordingStep.Preparing or RecordingStep.Running;
-
-        public bool CanRemove => Step != RecordingStep.Running;
 
         public ICommand BrowseForFolderCommand { get; }
 
         public ICommand OpenExternalFolderCommand { get; }
+
+        public ICommand CommandAddToPlayer { get; }
+
+        public ICommand CommandDeleteMedia { get; }
+
+        public IEnumerable<Model.RundownPlayer> RundownPlayers => Providers.GlobalApplicationData.Current.RundownPlayers;
+
+        public Model.Recording Recording => _recording;
 
         #region IDataErrorInfo
 
@@ -182,6 +176,44 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             return Step != RecordingStep.Running;
         }
 
+        private void AddToPlayer(object parameter)
+        {
+            var rundownPlayer = parameter as Model.RundownPlayer ?? throw new ArgumentException(nameof(parameter));
+            rundownPlayer.AddMediaToQueue(_recording.Media, rundownPlayer.Items.Count);
+        }
+
+        private bool CanToggleRecording(object _) => Step switch
+        {
+            RecordingStep.Preparing => EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath),
+            RecordingStep.Running => true,
+            _ => false
+        };
+
+        private void ToggleRecording(object obj)
+        {
+            switch (Step)
+            {
+                case RecordingStep.Preparing:
+                    StartRecording();
+                    break;
+                case RecordingStep.Running:
+                    StopRecording();
+                    break;
+            }
+        }
+
+        private bool CanAddToPlayer(object _) => _recording?.Media?.IsValid is true;
+
+        private async void DeleteMedia(object _)
+        {
+            if (await MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance.ShowMessageAsync(ShellViewModel.Instance, "Confirmation", $"Really delete file \"{FullPath}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+                return;
+            File.Delete(FullPath);
+            RequestRemove(_);
+        }
+
+        private bool CanDeleteMedia(object _) => File.Exists(FullPath);
+
         public void Dispose()
         {
             if (_disposed)
@@ -217,18 +249,18 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private void StopRecording()
         {
             _recording?.Stop();
-            Step = RecordingStep.Finished;
         }
 
         private void StartRecording()
         {
             Debug.Assert(_recording is null);
-            Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
             _recording = new Model.Recording(_input, _encoderPreset, FullPath);
-            _recording.Start();
             _recording.PropertyChanged += Recording_PropertyChanged;
-            Thumbnail = _input.Thumbnail;
             Step = RecordingStep.Running;
+            State = Model.RecordingState.Running;
+            _recording.Start();
+            Thumbnail = _input.Thumbnail;
+            Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
         }
 
         private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -240,11 +272,14 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                     recording.PropertyChanged -= Recording_PropertyChanged;
                     Duration = recording.Duration;
                     Thumbnail = recording.Thumbnail;
-                    _recording = null;
                     Step = RecordingStep.Finished;
+                    State = recording.State;
                     break;
                 case nameof(Model.Recording.StartTime):
                     StartTime = recording.StartTime;
+                    break;
+                case nameof(Model.Recording.Duration):
+                    Duration = recording.Duration;
                     break;
             }
         }

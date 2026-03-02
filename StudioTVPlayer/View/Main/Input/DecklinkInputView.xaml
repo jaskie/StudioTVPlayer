@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
              xmlns:main="clr-namespace:StudioTVPlayer.View.Main"
              xmlns:recordingVm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
@@ -11,43 +12,48 @@
              d:DataContext="{d:DesignInstance {x:Type vm:DecklinkInputViewModel}}"
              d:DesignHeight="190" d:DesignWidth="400">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Image Grid.Column="0" Height="90" Width="160" Margin="5 0" Source="{Binding Thumbnail}">
-            <Image.Effect>
-                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="Black" />
-            </Image.Effect>
-        </Image>
-        <StackPanel Grid.Column="1">
-            <StackPanel.Resources>
-                <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}" >
-                    <Setter Property="Padding" Value="5 5 0 0"/>
-                </Style>
-                <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}" >
-                    <Setter Property="Margin" Value="5"/>
-                </Style>
-            </StackPanel.Resources>
-            <Label>Decklink input</Label>
-            <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
-            <Label>Video format</Label>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <CheckBox Grid.Column="0" Margin="5 0 0 0" IsChecked="{Binding FormatAutodetection}" IsEnabled="{Binding CanFormatAutodetection}" >Autodetection</CheckBox>
-                <ComboBox Grid.Column="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" IsEnabled="{Binding CanSelectVideoFormat}" DisplayMemberPath="Name"/>
-            </Grid>
-        </StackPanel>
-        <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
-        <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="Recordings"
+        <Grid dd:DragDrop.IsDragSource="True"
+              dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
+              dd:DragDrop.UseDefaultDragAdorner="True"
+            >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" Height="90" Width="160" Margin="5 0" Source="{Binding Thumbnail}" >
+                <Image.Effect>
+                    <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="{StaticResource MahApps.Colors.ThemeBackground}" />
+                </Image.Effect>
+            </Image>
+            <StackPanel Grid.Column="1">
+                <StackPanel.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource ConfigurationLabelStyle}" >
+                        <Setter Property="Padding" Value="5 5 0 0"/>
+                    </Style>
+                    <Style TargetType="ComboBox" BasedOn="{StaticResource ConfigurationComboBoxStyle}" >
+                        <Setter Property="Margin" Value="5"/>
+                    </Style>
+                </StackPanel.Resources>
+                <Label>Decklink input</Label>
+                <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
+                <Label>Video format</Label>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" Margin="5 0 0 0" IsChecked="{Binding FormatAutodetection}" IsEnabled="{Binding CanFormatAutodetection}" >Autodetection</CheckBox>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding VideoFormat, ValidatesOnDataErrors=True}" IsEnabled="{Binding CanSelectVideoFormat}" DisplayMemberPath="Name"/>
+                </Grid>
+            </StackPanel>
+            <Button Grid.Column="2" VerticalAlignment="Center" Style="{StaticResource RemoveButtonStyle}" />
+        </Grid>
+        <Expander Grid.Row="1" Header="Recordings"
                   mah:HeaderedControlHelper.HeaderBackground="{StaticResource MahApps.Brushes.Gray.SemiTransparent }" 
                   mah:ControlsHelper.ContentCharacterCasing="Normal"
                   BorderBrush="{StaticResource MahApps.Brushes.Gray9}"
@@ -64,7 +70,7 @@
                         <TextBlock Margin="5 0 0 0" FontSize="12" FontWeight="Normal">Add instant recording</TextBlock>
                     </StackPanel>
                 </Button>
-                <ListBox ItemsSource="{Binding Recordings}" >
+                <ListBox ItemsSource="{Binding Recordings}" Style="{StaticResource ListBoxStyle}">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource SimpleListBoxItemStyle}">
                             <Setter Property="BorderThickness" Value="0 1 0 0"/>

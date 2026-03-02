@@ -73,7 +73,7 @@ namespace StudioTVPlayer.Model
             return true;
         }
 
-        public void RemoveFromRundown()
+        public void RequestRemoveFromRundown()
         {
             RemoveRequested?.Invoke(this, EventArgs.Empty);
         }

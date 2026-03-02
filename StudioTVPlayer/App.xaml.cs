@@ -35,6 +35,7 @@ namespace StudioTVPlayer
             SplashScreen = new SplashScreen("/StudioTVPlayer.ico");
             SplashScreen.Show(autoClose: false, topMost: true);
             base.OnStartup(e);
+            GlobalUiHandlers.RegisterTextBoxSelectAllOnFocus();
             try
             {
                 GlobalApplicationData.Current.Initialize();

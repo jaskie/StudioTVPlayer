@@ -12,6 +12,7 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.Input;
 using StudioTVPlayer.ViewModel.Main.MediaBrowser;
+using StudioTVPlayer.ViewModel.Main.Recording;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
@@ -450,7 +451,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private bool CanTogglePlay(object obj)
         {
-            if (!(_rundownPlayer.LoadedItem is FileRundownItem))
+            if (_rundownPlayer.LoadedItem is not FileRundownItem)
                 return false;
             if (!IsPlaying && _rundownPlayer.IsEof())
                 return false;
@@ -477,7 +478,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             switch (dropInfo.Data)
             {
                 case MediaViewModel mediaViewModel:
-                    if (!mediaViewModel.IsVerified || mediaViewModel.Duration <= TimeSpan.Zero)
+                    if (!mediaViewModel.IsValid)
+                            return;
+                    break;
+                case RecordingViewModel recordingViewModel:
+                    if (recordingViewModel.Recording?.Media?.IsValid is not true)
                         return;
                     break;
                 case DecklinkInputViewModel decklink:
@@ -502,16 +507,17 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public void Drop(IDropInfo dropInfo)
         {
+            var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
             switch (dropInfo.Data)
             {
                 case MediaViewModel mediaViewModel:
-                    var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                     _rundownPlayer.AddMediaToQueue(mediaViewModel.Media, index);
                     break;
-
                 case DecklinkInputViewModel decklink:
-                    index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                     _rundownPlayer.AddLiveToQueue(decklink.Input, index);
+                    break;
+                case RecordingViewModel recordingViewModel:
+                    _rundownPlayer.AddMediaToQueue(recordingViewModel.Recording.Media, index);
                     break;
                 case LiveInputRundownItemViewModel _:
                 case FileRundownItemViewModel _:
@@ -522,7 +528,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     _rundownPlayer.MoveItem(srcIndex, destIndex);
                     Rundown.Move(srcIndex, destIndex);
                     break;
-
                 case IDataObject dataObject:
                     var fileName = (dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f));
                     if (fileName is null)
@@ -530,7 +535,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     var media = new MediaFile(fileName);
                     if (!(MediaVerifier.Current.Verify(media) && media.IsValid))
                         return;
-                    index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                     _rundownPlayer.AddMediaToQueue(media, index);
                     break;
             }

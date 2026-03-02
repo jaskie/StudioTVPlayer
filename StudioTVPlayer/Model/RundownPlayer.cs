@@ -23,6 +23,7 @@ namespace StudioTVPlayer.Model
             _rundown.ItemAdded += Rundown_ItemAdded;
             _rundown.ItemRemoved += Rundown_ItemRemoved;
         }
+
         public RundownItemBase LoadedItem
         {
             get => _loadedItem;

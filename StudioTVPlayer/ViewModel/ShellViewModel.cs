@@ -41,7 +41,6 @@ namespace StudioTVPlayer.ViewModel
             GlobalApplicationData.Current.PlayerControllersModified += PlayerControllersModified;
             try
             {
-                GlobalApplicationData.Current.Initialize();
                 await ShowPlayoutView();
             }
             catch (Exception e)

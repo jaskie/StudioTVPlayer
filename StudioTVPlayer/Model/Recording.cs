@@ -1,5 +1,6 @@
 ﻿using StudioTVPlayer.Helpers;
 using System;
+using System.Diagnostics;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
@@ -13,6 +14,7 @@ namespace StudioTVPlayer.Model
         private DateTime _startTime;
         private TimeSpan _duration;
         private ImageSource _thumbnail;
+        private Stopwatch _stopwatch;
 
         public Recording(InputBase input, EncoderPreset encoderPreset, string fullPath)
         {
@@ -38,6 +40,8 @@ namespace StudioTVPlayer.Model
 
         public TimeSpan Duration { get => _duration; private set => Set(ref _duration, value); }
 
+        public MediaFile Media { get; private set; }
+
         public void Dispose()
         {
             if (!_disposed)
@@ -51,6 +55,7 @@ namespace StudioTVPlayer.Model
         {
             if (_recordingState is not RecordingState.Pending)
                 return;
+            _stopwatch = new Stopwatch();
             _outputFile = new TVPlayR.FFOutput(
                 address: FullPath,
                 video_codec: EncoderPreset.VideoCodec,
@@ -67,6 +72,7 @@ namespace StudioTVPlayer.Model
                 audio_stream_id: EncoderPreset.AudioStreamId,
                 output_format: EncoderPreset.OutputFormat
                 );
+            Input.TVPlayRInput.FramePlayed += TVPlayRInput_FramePlayed;
             if (Input is DecklinkInput decklinkInput)
             {
                 decklinkInput.FormatChanged += DecklinkInput_FormatChanged;
@@ -75,6 +81,7 @@ namespace StudioTVPlayer.Model
             Input.AddOutputSink(_outputFile);
             Providers.GlobalApplicationData.Current.AddRecording(this);
             StartTime = DateTime.Now;
+            _stopwatch.Start();
             State = RecordingState.Running;
             Providers.RecordingPersister.SaveRecording(this);
         }
@@ -97,10 +104,17 @@ namespace StudioTVPlayer.Model
                 {
                     decklinkInput.FormatChanged -= DecklinkInput_FormatChanged;
                 }
+                Input.TVPlayRInput.FramePlayed -= TVPlayRInput_FramePlayed;
+                _stopwatch.Stop();
                 _outputFile.Dispose();
                 _outputFile = null;
             }
             VerifyAndSaveRecording(state);
+        }
+
+        private void TVPlayRInput_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
+        {
+            Duration = _stopwatch.Elapsed;
         }
 
         private void DecklinkInput_FormatChanged(object sender, EventArgs e)
@@ -115,21 +129,13 @@ namespace StudioTVPlayer.Model
 
         private void VerifyAndSaveRecording(RecordingState stateOnSuccess)
         {
-            try
-            {
-                using var mediaInfo = new TVPlayR.FileInfo(FullPath);
-                Duration = mediaInfo.VideoDuration;
-                var thumb = mediaInfo.GetBitmapSource(mediaInfo.VideoStart, MediaVerifier.DefaultThumbnailWidth, MediaVerifier.DefaultThumbnailHeight);
-                thumb.Freeze();
-                Thumbnail = thumb;
-                State = stateOnSuccess;
-            }
-            catch
-            {
-                Duration = TimeSpan.Zero;
-                Thumbnail = null;
-                State = RecordingState.Failed;
-            }
+            Media = new MediaFile(FullPath);
+            MediaVerifier.Current.Verify(Media);
+
+            Duration = Media.Duration;
+            Thumbnail = Media.Thumbnail;
+            State = Media.IsValid ? RecordingState.Completed : RecordingState.Failed;
+
             Providers.RecordingPersister.SaveRecording(this);
         }
     }

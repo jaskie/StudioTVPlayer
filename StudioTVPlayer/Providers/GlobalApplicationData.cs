@@ -11,10 +11,8 @@ namespace StudioTVPlayer.Providers
     {
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
-        private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
-        private PlayerControllerBase[] _playerControllers = Array.Empty<PlayerControllerBase>();
-        private readonly List<Recording> _recordings = new List<Recording>();
-
+        private readonly List<RundownPlayer> _rundownPlayers = [];
+        private PlayerControllerBase[] _playerControllers = [];
         private GlobalApplicationData() { }
 
         public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
@@ -23,15 +21,12 @@ namespace StudioTVPlayer.Providers
 
         public IReadOnlyList<PlayerControllerBase> PlayerControllers => _playerControllers;
 
-        public IReadOnlyList<Recording> Recordings => _recordings;
-
         public IReadOnlyList<EncoderPreset> EncoderPresets { get; private set; }
 
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
-            foreach (var recording in _recordings.ToList())
-                recording.Dispose(); //will also call Recording_Finished below
+            RecordingStore.Current.Dispose();
             foreach (var player in RundownPlayers)
                 player.Dispose();
             foreach (var input in InputList.Current.Inputs)
@@ -129,22 +124,6 @@ namespace StudioTVPlayer.Providers
         }
 
         private void PlayerController_ConnectionStateChanged(object sender, EventArgs e) => PlayerControllerConnectionStatusChanged?.Invoke(sender, EventArgs.Empty);
-
-        public void AddRecording(Recording recording)
-        {
-            _recordings.Add(recording);
-            recording.PropertyChanged += Recording_PropertyChanged;
-        }
-
-        private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var recording = sender as Recording ?? throw new ArgumentException(nameof(sender));
-            if (e.PropertyName is nameof(Recording.State) && recording.State is RecordingState.Aborted or RecordingState.Completed or RecordingState.Failed)
-            {
-                recording.PropertyChanged -= Recording_PropertyChanged;
-                _recordings.Remove(recording);
-            }
-        }
     }
 
     public class PlayerUpdateItem

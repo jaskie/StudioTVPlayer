@@ -16,18 +16,13 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         {
             Input = input;
             CommandAddRecordingInstant = new UiCommand(AddRecordingInstant);
-/*            foreach(var recording in Providers.GlobalApplicationData.Current.Recordings.Where(r => r.Input == input))
+            foreach (var recording in Providers.RecordingStore.Current.RunningRecordings.Where(r => r.Input == input))
             {
-                switch(recording)
-                {
-                    case Model.RecordingItemInstant recordingInstant:
-                        var recordingVm = new RecordingInstantViewModel(recordingInstant);
-                        recordingVm.RemoveRequested += Recording_RemoveRequested;
-                        _recordings.Add(recordingVm);
-                        break;
-                }
+                var recordingVm = new Recording.RecordingViewModel(recording);
+                recordingVm.RemoveRequested += Recording_RemoveRequested;
+                _recordings.Add(recordingVm);
             }
-*/        }
+        }
 
         public Model.InputBase Input { get; }
 
@@ -59,9 +54,10 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private void Recording_RemoveRequested(object sender, EventArgs e)
         {
-            var recording = sender as Recording.RecordingViewModel ?? throw new ArgumentException(nameof(sender));
-            recording.RemoveRequested -= Recording_RemoveRequested;
-            _recordings.Remove(recording);
+            var recordingViewModel = sender as Recording.RecordingViewModel ?? throw new ArgumentException(nameof(sender));
+            recordingViewModel.RemoveRequested -= Recording_RemoveRequested;
+            _recordings.Remove(recordingViewModel);
+            Providers.RecordingStore.Current.DeleteRecording(recordingViewModel.Recording);
         }
     }
 }

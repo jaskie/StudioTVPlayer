@@ -145,7 +145,7 @@ namespace StudioTVPlayer.Model
             var encoderPreset = EncoderPresets.Instance.Presets.FirstOrDefault(preset => preset.InputFormats is null); // TODO: preset selection
             var filename = Path.Combine(OutputDirectory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");
             var recording = new Recording(input, encoderPreset, filename);
-            Providers.GlobalApplicationData.Current.AddRecording(recording);
+            recording.Start();
             await Helpers.WaitUntilHelper.WaitUntilAsync(endRecordingTime, CancellationToken.None);
             if (recordingSchedulerItem.RepeatType != ScheduleRepeatType.Single)
             {

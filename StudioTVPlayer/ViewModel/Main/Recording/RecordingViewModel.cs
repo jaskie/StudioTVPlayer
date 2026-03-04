@@ -42,6 +42,10 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             _state = recording.State;
             _folder = Path.GetDirectoryName(recording.FullPath);
             _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
+            _startTime = recording.StartTime;
+            _thumbnail = recording.Thumbnail;
+            if (_step is RecordingStep.Running)
+                recording.PropertyChanged += Recording_PropertyChanged;
         }
 
         private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset)

@@ -40,14 +40,13 @@ namespace StudioTVPlayer.Providers
 
         public IEnumerable<Model.Recording> LoadRecordings()
         {
-            Directory.EnumerateFiles(_folder, "*.xml").Select(fileName =>
+            return Directory.EnumerateFiles(_folder, "*.xml").Select(fileName =>
             {
                 using var reader = new StreamReader(fileName);
                 var deserialized = _xmlSerializer.Deserialize(reader) as Model.Persistence.Recording;
                 var runningRecording = _runningRecordings.FirstOrDefault(r => r.Id.ToString() == deserialized.Id);
                 return runningRecording ?? new Model.Recording(deserialized);
             });
-            return [];
         }
 
         public void AddRunningRecording(Model.Recording recording)

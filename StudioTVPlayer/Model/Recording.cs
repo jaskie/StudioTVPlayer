@@ -1,5 +1,6 @@
 ﻿using StudioTVPlayer.Helpers;
 using System;
+using System.IO;
 using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
@@ -105,9 +106,9 @@ namespace StudioTVPlayer.Model
             }
             _outputFile.Initialize(Input.CurrentFormat(), TVPlayR.PixelFormat.yuv422, 2, 48000);
             Input.AddOutputSink(_outputFile);
-            Providers.RecordingStore.Current.AddRunningRecording(this);
             StartTime = DateTime.Now;
             State = RecordingState.Running;
+            Providers.RecordingStore.Current.AddRunningRecording(this);
             Providers.RecordingStore.Current.SaveRecording(this);
         }
 
@@ -153,14 +154,23 @@ namespace StudioTVPlayer.Model
 
         private void VerifyAndSaveRecording(RecordingState stateOnSuccess)
         {
-            Media = new MediaFile(FullPath);
-            MediaVerifier.Current.Verify(Media);
-
-            Duration = Media.Duration;
-            Thumbnail = Media.Thumbnail;
-            State = Media.IsValid ? stateOnSuccess : RecordingState.Failed;
-
+            State = Verify() ? stateOnSuccess : RecordingState.Failed;
             Providers.RecordingStore.Current.SaveRecording(this);
+        }
+
+        private bool Verify()
+        {
+            if (File.Exists(FullPath))
+                try
+                {
+                    Media = new MediaFile(FullPath);
+                    MediaVerifier.Current.Verify(Media);
+                    Thumbnail = Media.Thumbnail;
+                    Duration = Media.Duration;
+                    return Media.IsValid;
+                }
+                catch { }
+            return false;
         }
     }
 }

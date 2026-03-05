@@ -41,6 +41,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public RecordingSchedulerItemViewModel SelectedItem { get => _selectedItem; set => Set(ref _selectedItem, value); }
 
+        public RecordingHistoryViewModel RecordingHistory { get; } = new RecordingHistoryViewModel();
+
         private void Items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)

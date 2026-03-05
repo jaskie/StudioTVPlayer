@@ -116,6 +116,8 @@ namespace StudioTVPlayer.Model
         [Description("failed")]
         Failed,
         [Description("aborted")]
-        Aborted
+        Aborted,
+        [Description("missing")]
+        Missing
     }
 }

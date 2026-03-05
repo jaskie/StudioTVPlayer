@@ -10,7 +10,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 {
     public abstract class InputViewModelBase : RemovableViewModelBase, IDisposable, IDataErrorInfo
     {
-        private readonly ObservableCollection<Recording.RecordingViewModel> _recordings = new();
+        private readonly ObservableCollection<Recording.RecordingViewModel> _recordings = [];
 
         public InputViewModelBase(Model.InputBase input)
         {
@@ -57,7 +57,6 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             var recordingViewModel = sender as Recording.RecordingViewModel ?? throw new ArgumentException(nameof(sender));
             recordingViewModel.RemoveRequested -= Recording_RemoveRequested;
             _recordings.Remove(recordingViewModel);
-            Providers.RecordingStore.Current.DeleteRecording(recordingViewModel.Recording);
         }
     }
 }

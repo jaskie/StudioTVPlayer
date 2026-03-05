@@ -119,7 +119,12 @@
         </ListBox>
         <GridSplitter Grid.RowSpan="2" Style="{StaticResource HorizontalGridSplitterStyle}"/>
         <Label Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="{StaticResource MahApps.Font.Size.SubHeader}">Recording history</Label>
-        <ListBox Grid.Column="1" Grid.Row="1" Style="{StaticResource ListBoxStyle}">
+        <ListBox Grid.Column="1" Grid.Row="1" Style="{StaticResource ListBoxStyle}" ItemsSource="{Binding RecordingHistory.Recordings}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:RecordingViewModel" >
+                    <local:RecordingView/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
             
         </ListBox>
     </Grid>

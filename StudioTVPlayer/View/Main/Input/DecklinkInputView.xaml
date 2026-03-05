@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Input"
-             xmlns:main="clr-namespace:StudioTVPlayer.View.Main"
+             xmlns:recordingView="clr-namespace:StudioTVPlayer.View.Main.Recording"
              xmlns:recordingVm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
@@ -79,7 +79,7 @@
                     </ListBox.ItemContainerStyle>
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type recordingVm:RecordingViewModel}">
-                            <main:RecordingView/>
+                            <recordingView:RecordingView/>
                         </DataTemplate>
                     </ListBox.Resources>
                 </ListBox>

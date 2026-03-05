@@ -87,7 +87,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             get
             {
-                var currentFormat = _input.CurrentFormat();
+                var currentFormat = _input?.CurrentFormat();
                 if (currentFormat is null)
                     return [];
                 var currentFormatName = currentFormat.Name;
@@ -229,6 +229,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             get
             {
+                if (_recording is not null)
+                    return _recording.FullPath;
                 if (string.IsNullOrEmpty(Folder) || string.IsNullOrEmpty(FileName) || EncoderPreset is null)
                     return null;
                 return Path.Combine(Folder, $"{FileName}.{EncoderPreset.FilenameExtension}");
@@ -285,8 +287,21 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 case nameof(Model.Recording.Duration):
                     Duration = recording.Duration;
                     break;
+                case nameof(Thumbnail):
+                    Thumbnail = recording.Thumbnail;
+                    break;
+                case nameof(State):
+                    State = recording.State;
+                    break;
             }
         }
+
+        protected override void RequestRemove(object obj)
+        {
+            base.RequestRemove(obj);
+            Providers.RecordingStore.Current.DeleteRecording(Recording);
+        }
+
     }
 
     public enum RecordingStep

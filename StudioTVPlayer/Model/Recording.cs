@@ -1,5 +1,6 @@
 ﻿using StudioTVPlayer.Helpers;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Media;
 
@@ -51,6 +52,8 @@ namespace StudioTVPlayer.Model
                     break;
             }
         }
+
+        public event EventHandler VerificationCompleted;
 
         public string Id { get; }
 
@@ -158,8 +161,10 @@ namespace StudioTVPlayer.Model
             Providers.RecordingStore.Current.SaveRecording(this);
         }
 
-        private bool Verify()
+        public bool Verify()
         {
+            if (Media is not null)
+                return true;
             if (File.Exists(FullPath))
                 try
                 {
@@ -171,6 +176,33 @@ namespace StudioTVPlayer.Model
                 }
                 catch { }
             return false;
+        }
+
+        public void QueueVerify()
+        {
+            if (Media is not null)
+                return;
+            Media = new MediaFile(FullPath);
+            Media.PropertyChanged += Media_PropertyChanged;
+            MediaVerifier.Current.Queue(Media);
+        }
+
+        private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var media = sender as MediaFile ?? throw new ArgumentException($"{nameof(MediaFile)} expected, {sender?.GetType()} got.");
+            switch(e.PropertyName)
+            {
+                case nameof(MediaFile.Duration):
+                    Duration = media.Duration;
+                    break;
+                case nameof(MediaFile.Thumbnail):
+                    Thumbnail = media.Thumbnail;
+                    break;
+                case nameof(MediaFile.IsVerified):
+                    media.PropertyChanged -= Media_PropertyChanged;
+                    VerificationCompleted?.Invoke(this, EventArgs.Empty);
+                    break;
+            }
         }
     }
 }

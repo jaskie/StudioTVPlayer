@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -22,7 +23,9 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private DateTime _startTime;
         private TimeSpan _duration;
         private Model.RecordingState _state;
+        private bool _isQueuedToVerify;
         private readonly Model.InputBase _input;
+        private readonly Lazy<bool> _isVerified; 
 
         public RecordingViewModel(Model.InputBase input) : this(input, null)
         {
@@ -43,9 +46,23 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             _folder = Path.GetDirectoryName(recording.FullPath);
             _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
             _startTime = recording.StartTime;
+            _duration = recording.Duration;
             _thumbnail = recording.Thumbnail;
-            if (_step is RecordingStep.Running)
+            if (recording.State == Model.RecordingState.Running)
+            {
                 recording.PropertyChanged += Recording_PropertyChanged;
+                Thumbnail = _input?.Thumbnail;
+            }
+            if (recording.Media is null)
+            {
+                recording.VerificationCompleted += Recording_VerificationCompleted;
+                _isVerified = new Lazy<bool>(() =>
+                {
+                    IsQueuedToVerify = true;
+                    recording.QueueVerify();
+                    return true;
+                });
+            }
         }
 
         private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset)
@@ -124,7 +141,17 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public TimeSpan Duration { get => _duration; private set => Set(ref _duration, value); }
 
-        public ImageSource Thumbnail { get => _thumbnail; set => Set(ref _thumbnail, value); }
+        public ImageSource Thumbnail
+        {
+            get
+            {
+                _ = _isVerified?.Value;
+                return _thumbnail;
+            }
+            set => Set(ref _thumbnail, value);
+        }
+
+        public bool IsQueuedToVerify { get => _isQueuedToVerify; private set => Set(ref _isQueuedToVerify, value); }
 
         public bool IsPrepareStep => Step is RecordingStep.Preparing;
 
@@ -170,10 +197,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         #endregion IDataErrorInfo
 
-        public override bool IsValid()
-        {
-            return true;
-        }
+        public override bool IsValid() => true;
 
         protected override bool CanRequestRemove(object obj)
         {
@@ -195,6 +219,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         private void ToggleRecording(object obj)
         {
+            Debug.Assert(Step is RecordingStep.Preparing or RecordingStep.Running);
             switch (Step)
             {
                 case RecordingStep.Preparing:
@@ -223,6 +248,9 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             if (_disposed)
                 return;
             _disposed = true;
+            var recording = Recording;
+            if (recording?.State == Model.RecordingState.Running)
+                recording.PropertyChanged -= Recording_PropertyChanged;
         }
 
         public string FullPath
@@ -271,7 +299,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var recording = sender as Model.Recording ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as Model.Recording ?? throw new ArgumentException($"{nameof(Model.Recording)} expected, {sender?.GetType()} got.");
             switch (e.PropertyName)
             {
                 case nameof(Model.Recording.State) when recording.State is Model.RecordingState.Completed or Model.RecordingState.Failed or Model.RecordingState.Aborted:
@@ -279,7 +307,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                     Duration = recording.Duration;
                     Thumbnail = recording.Thumbnail;
                     Step = RecordingStep.Finished;
-                    State = recording.State;
                     break;
                 case nameof(Model.Recording.StartTime):
                     StartTime = recording.StartTime;
@@ -296,12 +323,24 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             }
         }
 
+        private void Recording_VerificationCompleted(object sender, EventArgs e)
+        {
+            var recording = sender as Model.Recording ?? throw new ArgumentException($"{nameof(Model.Recording)} expected, {sender?.GetType()} got.");
+            if (recording.State is Model.RecordingState.Completed or Model.RecordingState.Failed or Model.RecordingState.Aborted)
+                Step = RecordingStep.Finished;
+            recording.VerificationCompleted -= Recording_VerificationCompleted;
+            State = recording.State;
+            StartTime = recording.StartTime;
+            Duration = recording.Duration;
+            Thumbnail = recording.Thumbnail;
+            IsQueuedToVerify = false;
+        }
+
         protected override void RequestRemove(object obj)
         {
             base.RequestRemove(obj);
             Providers.RecordingStore.Current.DeleteRecording(Recording);
         }
-
     }
 
     public enum RecordingStep

@@ -11,10 +11,11 @@ using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main.Recording
 {
-    public sealed class RecordingSchedulerViewModel : ViewModelBase, ICanClose
+    public sealed class RecordingSchedulerViewModel : ViewModelBase, ICanClose, IDisposable
     {
         private readonly ObservableCollection<RecordingSchedulerItemViewModel> _items;
         private RecordingSchedulerItemViewModel _selectedItem;
+        private bool _isDisposed;
 
         public RecordingSchedulerViewModel()
         {
@@ -115,6 +116,14 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 }
             }
             return true;
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            RecordingHistory.Dispose();
         }
     }
 }

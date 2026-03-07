@@ -26,19 +26,10 @@
             </Style>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Image Grid.Column="0" Height="90" Margin="5 0 0 0"
-               Source="{Binding Thumbnail}"
-               Visibility="{Binding Thumbnail, Converter={StaticResource NotNullToVisibilityConverter}}">
-            <Image.Effect>
-                <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="{StaticResource MahApps.Colors.ThemeBackground}" />
-            </Image.Effect>
-        </Image>
-        <Grid Grid.Column="1"
-              Visibility="{Binding IsPrepareStep, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Visibility="{Binding IsPrepareStep, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -96,9 +87,9 @@
                 </ComboBox.ItemContainerStyle>
             </ComboBox>
         </Grid>
-        <Grid Grid.Column="1"
-            Visibility="{Binding IsPrepareStep, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" >
+        <Grid Visibility="{Binding IsPrepareStep, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" >
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170"/>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
@@ -108,14 +99,22 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding State, Converter={StaticResource DescriptionConverter}}" ContentStringFormat="{}Recording to file is {0}" />
-            <TextBox Grid.Row="1" Grid.ColumnSpan="2" IsReadOnly="True" Text="{Binding FullPath, Mode=OneWay}"/>
-            <Label Grid.Row="2">Started</Label>
-            <TextBox Grid.Row="3" IsReadOnly="True" Text="{Binding StartTime, Mode=OneWay, StringFormat=G}"/>
-            <Label Grid.Row="2" Grid.Column="1">Duration</Label>
-            <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Text="{Binding Duration, Mode=OneWay, StringFormat=hh\\:mm\\:ss}"/>
+            <mah:ProgressRing Grid.RowSpan="4" Height="90" Foreground="{DynamicResource MahApps.Brushes.Accent}" Visibility="{Binding IsQueuedToVerify, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Image Grid.RowSpan="4" Height="90" Margin="5 0 0 0"
+               Source="{Binding Thumbnail}"
+               Visibility="{Binding Thumbnail, Converter={StaticResource NotNullToVisibilityConverter}}">
+                <Image.Effect>
+                    <DropShadowEffect BlurRadius="5" ShadowDepth="5" Color="{StaticResource MahApps.Colors.ThemeBackground}" />
+                </Image.Effect>
+            </Image>
+            <Label Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Content="{Binding State, Converter={StaticResource DescriptionConverter}}" ContentStringFormat="{}Recording to file is {0}" />
+            <TextBox Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" IsReadOnly="True" Text="{Binding FullPath, Mode=OneWay}"/>
+            <Label Grid.Column="1" Grid.Row="2">Started</Label>
+            <TextBox Grid.Column="1" Grid.Row="3" IsReadOnly="True" Text="{Binding StartTime, Mode=OneWay, StringFormat=G}"/>
+            <Label Grid.Row="2" Grid.Column="2">Duration</Label>
+            <TextBox Grid.Row="3" Grid.Column="2" IsReadOnly="True" Text="{Binding Duration, Mode=OneWay, StringFormat=hh\\:mm\\:ss}"/>
         </Grid>
-        <Grid Grid.Column="2" >
+        <Grid Grid.Column="1" >
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>

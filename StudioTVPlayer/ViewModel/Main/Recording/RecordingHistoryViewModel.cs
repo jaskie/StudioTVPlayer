@@ -1,19 +1,26 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Windows.Data;
 
 namespace StudioTVPlayer.ViewModel.Main.Recording
 {
-    public sealed class RecordingHistoryViewModel : ViewModelBase
+    public sealed class RecordingHistoryViewModel : ViewModelBase, IDisposable
     {
+        private readonly IList<RecordingViewModel> _recordings;
+        private bool _isDisposed;
+
         public RecordingHistoryViewModel()
         {
-            Recordings = new ObservableCollection<RecordingViewModel>(Providers.RecordingStore.Current
+            _recordings = [.. Providers.RecordingStore.Current
                 .LoadRecordings()
-                .Select(CreateRecordingViewModel));
+                .Select(CreateRecordingViewModel)];
+            Recordings = CollectionViewSource.GetDefaultView(_recordings);
+            Recordings.SortDescriptions.Add(new SortDescription(nameof(RecordingViewModel.StartTime), ListSortDirection.Descending));
         }
 
-        public ObservableCollection<RecordingViewModel> Recordings { get; }
+        public ICollectionView Recordings { get; }
 
         private RecordingViewModel CreateRecordingViewModel(Model.Recording recording)
         {
@@ -26,7 +33,17 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             var recordingViewModel = sender as RecordingViewModel ?? throw new ArgumentException(nameof(sender));
             recordingViewModel.RemoveRequested -= RecordingViewModel_RemoveRequested;
-            Recordings.Remove(recordingViewModel);
+            _recordings.Remove(recordingViewModel);
+            Recordings.Refresh();
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            foreach (var recording in _recordings)
+                recording.RemoveRequested -= RecordingViewModel_RemoveRequested;
         }
     }
 }

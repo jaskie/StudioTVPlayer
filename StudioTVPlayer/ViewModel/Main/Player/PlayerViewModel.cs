@@ -577,7 +577,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                UISBusyState.SetBusyState();
+                UISBusyState.Set();
                 _rundownPlayer.SaveRundown(fileName);
             }
             catch (Exception ex)
@@ -593,7 +593,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                UISBusyState.SetBusyState();
+                UISBusyState.Set();
                 _rundownPlayer.LoadRundown(fileName);
             }
             catch (Exception ex)

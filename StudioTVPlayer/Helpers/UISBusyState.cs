@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Helpers
         /// <summary>
         /// Sets the cursor to busy and wait when UI thread is idle.
         /// </summary>
-        public static void SetBusyState()
+        public static void Set()
         {
             SetBusyState(true);
         }

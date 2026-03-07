@@ -76,6 +76,7 @@ namespace StudioTVPlayer.ViewModel
                 return;
             if (!await ConfirmCloseAsync())
                 return;
+            UISBusyState.Set();
             CurrentViewModel = new Main.PlayoutViewModel();
             NotifyPropertyChanged(nameof(IsPlayoutVisible));
             NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
@@ -102,6 +103,7 @@ namespace StudioTVPlayer.ViewModel
             {
                 if (!value || CurrentViewModel is Main.Recording.RecordingSchedulerViewModel)
                     return;
+                UISBusyState.Set();
                 CurrentViewModel = new Main.Recording.RecordingSchedulerViewModel();
                 NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
                 NotifyPropertyChanged(nameof(IsPlayoutVisible));

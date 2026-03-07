@@ -10,7 +10,7 @@ namespace StudioTVPlayer.Providers
         private const string ConfigurationFile = "Configuration.xml";
 
         [XmlArray]
-        public List<Model.WatchedFolder> WatchedFolders { get; set; } = new List<Model.WatchedFolder>();
+        public List<Model.WatchedFolder> WatchedFolders { get; set; } = [];
 
         [XmlArray]
         public List<Player> Players { get; set; } = new List<Player>();
@@ -18,7 +18,7 @@ namespace StudioTVPlayer.Providers
         [XmlArray]
         [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerController))]
         [XmlArrayItem(typeof(ElgatoStreamDeckPlayerController))]
-        public List<PlayerControllerBase> PlayerControllers { get; set; } = new List<PlayerControllerBase>();
+        public List<PlayerControllerBase> PlayerControllers { get; set; } = [];
 
         public static Configuration Current { get; } = Load();
 

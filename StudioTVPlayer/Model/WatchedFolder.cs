@@ -1,6 +1,5 @@
 ﻿using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Providers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,8 +21,8 @@ namespace StudioTVPlayer.Model
         private FileSystemWatcher _fs;
         private CancellationTokenSource _cancellationTokenSource;
         private DateTime _filterDate = DateTime.Today;
-        private readonly List<MediaFile> _medias = new List<MediaFile>();
-        private readonly object SyncRoot = new object();
+        private readonly List<MediaFile> _medias = [];
+        private readonly object _syncRoot = new();
 
         [XmlAttribute]
         public string Name { get; set; }
@@ -43,7 +42,7 @@ namespace StudioTVPlayer.Model
                 if (!Set(ref _filter, value))
                     return;
                 var filterParts = value.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries);
-                _filterWildcards = filterParts.Select(p => new Wildcard(p.ToLower())).ToArray();
+                _filterWildcards = [.. filterParts.Select(p => new Wildcard(p.ToLower()))];
             }
         }
 
@@ -51,7 +50,7 @@ namespace StudioTVPlayer.Model
 
         public void Initialize()
         {
-            lock (SyncRoot)
+            lock (_syncRoot)
             {
                 if (_isInitialized)
                     return;
@@ -81,7 +80,6 @@ namespace StudioTVPlayer.Model
                         {
                             _medias.Add(media);
                             media.PropertyChanged += Media_PropertyChanged;
-                            AddToVerificationQueue(media);
                         }
                     }
                     _isInitialized = true;
@@ -127,7 +125,6 @@ namespace StudioTVPlayer.Model
             MediaFile media;
             lock (((IList)_medias).SyncRoot)
                 media = AddMediaFromPath(e.FullPath);
-            AddToVerificationQueue(media);
             MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Create));
         }
 
@@ -139,7 +136,6 @@ namespace StudioTVPlayer.Model
                 media = _medias.FirstOrDefault(m => m.FullPath == e.FullPath);
             if (media == null)
                 return;
-            AddToVerificationQueue(media);
         }
 
         private void Fs_MediaRenamed(object sender, RenamedEventArgs e)
@@ -168,7 +164,6 @@ namespace StudioTVPlayer.Model
                 media.PropertyChanged -= Media_PropertyChanged;
             if (added || removed)
             {
-                AddToVerificationQueue(media);
                 media.Refresh();
                 MediaChanged?.Invoke(this, new MediaEventArgs(media, MediaEventKind.Create));
             }
@@ -218,11 +213,5 @@ namespace StudioTVPlayer.Model
             _isInitialized = false;
             return true;
         }
-
-        private void AddToVerificationQueue(MediaFile media)
-        {
-            MediaVerifier.Current.Queue(media);
-        }
-
     }
 }

@@ -15,7 +15,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
     {
         private readonly ICollectionView _mediaFilesView;
         private readonly WatchedFolder _watchedFolder;
-        private readonly ObservableCollection<MediaViewModel> _mediaFiles;
         private bool _isDisposed;
         private Sorting _selectedSorting;
         private MediaViewModel _selectedMedia;
@@ -32,8 +31,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _watchedFolder = watchedFolder;
             _watchedFolder.MediaChanged += WatchedFolder_MediaChanged;
             _watchedFolder.Initialize();
-            _mediaFiles = new ObservableCollection<MediaViewModel>(watchedFolder.Medias.Select(m => new MediaViewModel(m)));
-            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
+            MediaFiles = [.. watchedFolder.Medias.Select(m => new MediaViewModel(m))];
+            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(MediaFiles);
             _mediaFilesView.Filter = MediaFilter;
             _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
             _selectedSorting = Sorting.CreationTime;
@@ -49,7 +48,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         #region Properties
 
-        public IList<MediaViewModel> MediaFiles => _mediaFiles;
+        public IList<MediaViewModel> MediaFiles { get; }
         public string Name { get; }
         public string Path { get; }
         public bool IsFilteredByDate { get; }
@@ -77,9 +76,9 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                 if (!Set(ref _selectedDate, value))
                     return;
                 _watchedFolder.FilterDate = value;
-                _mediaFiles.Clear();
+                MediaFiles.Clear();
                 foreach (var media in _watchedFolder.Medias)
-                    _mediaFiles.Add(new MediaViewModel(media));
+                    MediaFiles.Add(new MediaViewModel(media));
                 _mediaFilesView.Refresh();
             }
         }
@@ -167,13 +166,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                 switch (e.Kind)
                 {
                     case MediaEventKind.Create:
-                        _mediaFiles.Add(new MediaViewModel(e.Media));
+                        MediaFiles.Add(new MediaViewModel(e.Media));
                         _mediaFilesView.Refresh();
                         break;
                     case MediaEventKind.Delete:
-                        var mediaVm = _mediaFiles.FirstOrDefault(m => m.Media == e.Media);
+                        var mediaVm = MediaFiles.FirstOrDefault(m => m.Media == e.Media);
                         if (mediaVm != null)
-                            _mediaFiles.Remove(mediaVm);
+                            MediaFiles.Remove(mediaVm);
                         _mediaFilesView.Refresh();
                         break;
                 }

@@ -7,6 +7,21 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
     public class MediaViewModel : ViewModelBase, IDisposable
     {
+        private Action _verifyOnceAction;
+        public MediaViewModel(Model.MediaFile media)
+        {
+            Media = media;
+            if (!media.IsVerified)
+            {
+                _verifyOnceAction = () =>
+                {
+                    _verifyOnceAction = null;
+                    Model.MediaVerifier.Current.Queue(media);
+                };
+            }
+            media.PropertyChanged += Media_PropertyChanged;
+            QueueToPlayerCommand = new UiCommand(QueueToPlayer);
+        }
 
         public Model.MediaFile Media { get; }
 
@@ -21,7 +36,14 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public int AudioChannelCount => Media.AudioChannelCount;
         public bool HaveAlphaChannel => Media.HaveAlphaChannel;
 
-        public ImageSource Thumbnail => Media.Thumbnail;
+        public ImageSource Thumbnail
+        {
+            get
+            {
+                _verifyOnceAction?.Invoke();
+                return Media.Thumbnail;
+            }
+        }
 
         public bool IsVerified => Media.IsVerified;
 
@@ -31,12 +53,6 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public UiCommand QueueToPlayerCommand { get; }
 
-        public MediaViewModel(Model.MediaFile media)
-        {
-            Media = media;
-            media.PropertyChanged += Media_PropertyChanged;
-            QueueToPlayerCommand = new UiCommand(QueueToPlayer);
-        }
 
         private void QueueToPlayer(object obj)
         {

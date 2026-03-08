@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -25,7 +24,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private Model.RecordingState _state;
         private bool _isQueuedToVerify;
         private readonly Model.InputBase _input;
-        private readonly Lazy<bool> _isVerified; 
+        private Action _verifyOnceAction; 
 
         public RecordingViewModel(Model.InputBase input) : this(input, null)
         {
@@ -53,15 +52,15 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 recording.PropertyChanged += Recording_PropertyChanged;
                 Thumbnail = _input?.Thumbnail;
             }
-            if (recording.Media is null)
+            if (recording.Media is null && _step is RecordingStep.Finished)
             {
-                recording.VerificationCompleted += Recording_VerificationCompleted;
-                _isVerified = new Lazy<bool>(() =>
+                _verifyOnceAction = () =>
                 {
-                    IsQueuedToVerify = true;
+                    _verifyOnceAction = null; // will not be called anymore
+                    IsQueuedToVerify = true; // display waiting ring
+                    recording.VerificationCompleted += Recording_VerificationCompleted;
                     recording.QueueVerify();
-                    return true;
-                });
+                };
             }
         }
 
@@ -145,7 +144,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             get
             {
-                _ = _isVerified?.Value;
+                _verifyOnceAction?.Invoke();
                 return _thumbnail;
             }
             set => Set(ref _thumbnail, value);

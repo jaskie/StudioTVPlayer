@@ -8,19 +8,19 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 {
     public sealed class RecordingHistoryViewModel : ViewModelBase, IDisposable
     {
-        private readonly IList<RecordingViewModel> _recordings;
+        private readonly ICollectionView _recordingsView;
         private bool _isDisposed;
 
         public RecordingHistoryViewModel()
         {
-            _recordings = [.. Providers.RecordingStore.Current
+            Recordings = [.. Providers.RecordingStore.Current
                 .LoadRecordings()
                 .Select(CreateRecordingViewModel)];
-            Recordings = CollectionViewSource.GetDefaultView(_recordings);
-            Recordings.SortDescriptions.Add(new SortDescription(nameof(RecordingViewModel.StartTime), ListSortDirection.Descending));
+            _recordingsView = CollectionViewSource.GetDefaultView(Recordings);
+            _recordingsView.SortDescriptions.Add(new SortDescription(nameof(RecordingViewModel.StartTime), ListSortDirection.Descending));
         }
 
-        public ICollectionView Recordings { get; }
+        public IList<RecordingViewModel> Recordings { get; }
 
         private RecordingViewModel CreateRecordingViewModel(Model.Recording recording)
         {
@@ -33,8 +33,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             var recordingViewModel = sender as RecordingViewModel ?? throw new ArgumentException(nameof(sender));
             recordingViewModel.RemoveRequested -= RecordingViewModel_RemoveRequested;
-            _recordings.Remove(recordingViewModel);
-            Recordings.Refresh();
+            Recordings.Remove(recordingViewModel);
+            _recordingsView.Refresh();
         }
 
         public void Dispose()
@@ -42,7 +42,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             if (_isDisposed)
                 return;
             _isDisposed = true;
-            foreach (var recording in _recordings)
+            foreach (var recording in Recordings)
                 recording.RemoveRequested -= RecordingViewModel_RemoveRequested;
         }
     }

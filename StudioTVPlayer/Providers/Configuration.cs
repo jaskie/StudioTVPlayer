@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Providers
         public List<Model.WatchedFolder> WatchedFolders { get; set; } = [];
 
         [XmlArray]
-        public List<Player> Players { get; set; } = new List<Player>();
+        public List<Player> Players { get; set; } = [];
 
         [XmlArray]
         [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerController))]

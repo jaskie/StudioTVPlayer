@@ -209,8 +209,7 @@ namespace StudioTVPlayer.Model
 
         private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!(sender is MediaFile media))
-                return;
+            var media = sender as MediaFile ?? throw new ArgumentException($"{nameof(MediaFile)} expected, {sender?.GetType()} got.");
             switch (e.PropertyName)
             {
                 case nameof(MediaFile.Duration):

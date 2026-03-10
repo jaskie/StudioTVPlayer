@@ -12,7 +12,7 @@ namespace StudioTVPlayer.Model
     {
         private string _directoryName;
         private string _name;
-        private TimeSpan _duration;
+        private Lazy<TimeSpan> _duration;
         private DateTime _creationTime;
         private ImageSource _thumbnail;
         private bool _isVerified;
@@ -30,6 +30,20 @@ namespace StudioTVPlayer.Model
         {
             _fileInfo = new FileInfo(path);
             ReadFileInfo();
+            _duration = new Lazy<TimeSpan>(() =>
+            {
+                try
+                {
+                    using var fileInfo = new TVPlayR.FileInfo(path);
+                    IsValid = true;
+                    return fileInfo.VideoDuration;
+                }
+                catch
+                {
+                    IsValid = false;
+                    return TimeSpan.Zero;
+                }
+            });
         }
 
         public string DirectoryName
@@ -52,8 +66,14 @@ namespace StudioTVPlayer.Model
 
         public TimeSpan Duration
         {
-            get => _duration;
-            internal set => Set(ref _duration, value);
+            get => _duration.Value;
+            internal set
+            {
+                if (_duration.IsValueCreated && _duration.Value == value)
+                    return;
+                _duration = new Lazy<TimeSpan>(() => value);
+                NotifyPropertyChanged();
+            }
         }
 
         public DateTime CreationTime

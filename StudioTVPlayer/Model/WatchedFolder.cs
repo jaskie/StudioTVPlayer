@@ -11,9 +11,10 @@ using System.Xml.Serialization;
 
 namespace StudioTVPlayer.Model
 {
-    public class WatchedFolder
+    public class WatchedFolder : IDisposable
     {
         private bool _isInitialized;
+        private bool _isDisposed;
         private string _path;
         private bool _isFilteredByDate;
         private string _filter;
@@ -41,7 +42,7 @@ namespace StudioTVPlayer.Model
             {
                 if (!Set(ref _filter, value))
                     return;
-                var filterParts = value.Split(new[] { '|', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                var filterParts = value.Split(['|', ';'], StringSplitOptions.RemoveEmptyEntries);
                 _filterWildcards = [.. filterParts.Select(p => new Wildcard(p.ToLower()))];
             }
         }
@@ -212,6 +213,14 @@ namespace StudioTVPlayer.Model
             field = value;
             _isInitialized = false;
             return true;
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            _medias.ForEach(m => m.PropertyChanged -= Media_PropertyChanged);
         }
     }
 }

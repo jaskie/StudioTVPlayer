@@ -14,8 +14,6 @@ namespace StudioTVPlayer.Providers
         private readonly XmlSerializer _xmlSerializer = new(typeof(Model.Persistence.Recording));
         private readonly List<Model.Recording> _runningRecordings = [];
 
-
-
         public static RecordingStore Current { get; } = new RecordingStore();
 
         private RecordingStore()
@@ -26,8 +24,9 @@ namespace StudioTVPlayer.Providers
             }
         }
 
-        public IReadOnlyList<Model.Recording> RunningRecordings => _runningRecordings;
+        public event EventHandler<RecordingEventArgs> RunningRecordingAdded;
 
+        public IReadOnlyList<Model.Recording> RunningRecordings => _runningRecordings;
 
         public void SaveRecording(Model.Recording recording)
         {
@@ -53,6 +52,7 @@ namespace StudioTVPlayer.Providers
         {
             Debug.Assert(recording.State is Model.RecordingState.Running);
             _runningRecordings.Add(recording);
+            RunningRecordingAdded?.Invoke(this, new RecordingEventArgs(recording));
             recording.PropertyChanged += Recording_PropertyChanged;
         }
 
@@ -81,5 +81,10 @@ namespace StudioTVPlayer.Providers
                 recording.Dispose(); //will also call Recording_Finished below
 
         }
+    }
+
+    public class RecordingEventArgs(Model.Recording recording) : EventArgs
+    {
+        public Model.Recording Recording { get; } = recording;
     }
 }

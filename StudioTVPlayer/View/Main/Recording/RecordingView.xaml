@@ -125,7 +125,7 @@
                     Command="{Binding CommandToggleRecording}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
-                        <Setter Property="Background" Value="Red"/>
+                        <Setter Property="Background" Value="DarkRed"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Step}" Value="Running">
                                 <Setter Property="ToolTip" Value="Stop recording"/>
@@ -152,7 +152,7 @@
                         </MenuItem.ItemContainerStyle>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Delete" Command="{Binding CommandDeleteMedia}"/>
+                    <MenuItem Header="Delete recorded file" TextElement.Foreground="{StaticResource MahApps.Brushes.Control.Validation}" Command="{Binding CommandDeleteMedia}"/>
 
                 </mah:DropDownButton.Items>
 

@@ -45,7 +45,6 @@
                     <local:RecordingView/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
-            
         </ListBox>
     </Grid>
 </UserControl>

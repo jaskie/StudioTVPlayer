@@ -18,5 +18,13 @@ namespace StudioTVPlayer.Helpers
             }
         }
 
+        public static async Task WaitForAsync(TimeSpan timeSpan, CancellationToken cancellationToken)
+        {
+            if (timeSpan > TimeSpan.Zero)
+            {
+                await Task.Delay(timeSpan);
+            }
+        }
+
     }
 }

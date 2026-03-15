@@ -16,8 +16,18 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             Recordings = [.. Providers.RecordingStore.Current
                 .LoadRecordings()
                 .Select(CreateRecordingViewModel)];
+            Providers.RecordingStore.Current.RunningRecordingAdded += RecordingStore_RunningRecordingAdded;
             _recordingsView = CollectionViewSource.GetDefaultView(Recordings);
             _recordingsView.SortDescriptions.Add(new SortDescription(nameof(RecordingViewModel.StartTime), ListSortDirection.Descending));
+        }
+
+        private void RecordingStore_RunningRecordingAdded(object sender, Providers.RecordingEventArgs e)
+        {
+            OnUiThread(() =>
+            {
+                Recordings.Add(CreateRecordingViewModel(e.Recording));
+                _recordingsView.Refresh();
+            });
         }
 
         public IList<RecordingViewModel> Recordings { get; }
@@ -42,6 +52,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             if (_isDisposed)
                 return;
             _isDisposed = true;
+            Providers.RecordingStore.Current.RunningRecordingAdded -= RecordingStore_RunningRecordingAdded;
             foreach (var recording in Recordings)
                 recording.RemoveRequested -= RecordingViewModel_RemoveRequested;
         }

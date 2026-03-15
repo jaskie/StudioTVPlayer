@@ -1,6 +1,7 @@
 ﻿using MahApps.Metro.Controls.Dialogs;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
+using StudioTVPlayer.Model.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -67,10 +68,10 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         private void RecordingSchedulerItemViewModel_Saved(object sender, EventArgs e)
         {
-            var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException(nameof(sender));
+            var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException($"{nameof(RecordingSchedulerItemViewModel)} expected, {sender?.GetType()} got.");
             if (vm.IsNew)
             {
-                RecordingScheduler.Current.AddRecording(vm.ModelItem);
+                RecordingScheduler.Current.AddRecording(vm.RecordingScheduletItem);
                 vm.IsNew = false;
             }
             SaveRecordingList();
@@ -78,10 +79,11 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         private void RecordingSchedulerItemViewModel_RemoveRequested(object sender, EventArgs e)
         {
-            var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException(nameof(sender));
-            if (vm.IsNew || RecordingScheduler.Current.RemoveRecording(vm.ModelItem))
+            var vm = sender as RecordingSchedulerItemViewModel ?? throw new ArgumentException($"{nameof(RecordingSchedulerItemViewModel)} expected, {sender?.GetType()} got.");
+            if (vm.IsNew || RecordingScheduler.Current.RemoveRecording(vm.RecordingScheduletItem))
             {
                 _items.Remove(vm);
+                vm.Dispose();
                 SaveRecordingList();
             }
         }
@@ -123,6 +125,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             if (_isDisposed)
                 return;
             _isDisposed = true;
+            foreach (var item in _items)
+                item.Dispose();
             RecordingHistory.Dispose();
         }
     }

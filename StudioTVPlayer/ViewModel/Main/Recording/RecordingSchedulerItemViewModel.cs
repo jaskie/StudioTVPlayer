@@ -1,21 +1,21 @@
 ﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main.Recording
 {
-    public sealed class RecordingSchedulerItemViewModel : RemovableViewModelBase, IDataErrorInfo
+    public sealed class RecordingSchedulerItemViewModel : RemovableViewModelBase, IDataErrorInfo, IDisposable
     {
-        private readonly RecordingSchedulerItem _modelItem;
+        private readonly Model.RecordingSchedulerItem _recordingSchedulerItem;
         private string _name;
         private DateTime _startTime;
         private TimeSpan _duration;
-        private RecordingFilenameCreationRule _filenameCreationRule;
+        private Model.RecordingFilenameCreationRule _filenameCreationRule;
         private bool _isRepeatMonday;
         private bool _isRepeatTuesday;
         private bool _isRepeatWednesday;
@@ -24,43 +24,49 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private bool _isRepeatSaturday;
         private bool _isRepeatSunday;
         private InputViewModelBase _selectedInput;
-        private EncoderPreset _selectedEncoderPreset;
-        private ScheduleRepeatType _selectedRepeatType;
+        private Model.EncoderPreset _selectedEncoderPreset;
+        private Model.ScheduleRepeatType _selectedRepeatType;
+        private bool _isDisposed;
 
-        public RecordingSchedulerItemViewModel(RecordingSchedulerItem item)
+        public RecordingSchedulerItemViewModel(Model.RecordingSchedulerItem recordingSchedulerItem)
         {
-            _modelItem = item ?? throw new ArgumentNullException(nameof(item));
+            Debug.Assert(recordingSchedulerItem is not null);
+            _recordingSchedulerItem = recordingSchedulerItem;
             Load(false);
+            recordingSchedulerItem.PropertyChanged += RecordingSchedulerItem_PropertyChanged;
             UpdateCommand = new UiCommand(_ => Save(), _ => IsModified);
             UndoCommand = new UiCommand(_ => Load(true), _ => IsModified);
+            StartNowCommand = new UiCommand(StartNow, CanStartNow);
         }
 
         internal bool IsNew { get; set; }
 
         public event EventHandler Saved;
 
-        internal RecordingSchedulerItem ModelItem => _modelItem;
+        internal Model.RecordingSchedulerItem RecordingScheduletItem => _recordingSchedulerItem;
 
         public ICommand UpdateCommand { get; }
 
         public ICommand UndoCommand { get; }
 
+        public ICommand StartNowCommand { get; }
+
         public string Name { get => _name; set => Set(ref _name, value); }
 
-        public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(RecordingFilenameCreationRule));
+        public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(Model.RecordingFilenameCreationRule));
 
-        public RecordingFilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
+        public Model.RecordingFilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
 
         public DateTime StartTime { get => _startTime; set => Set(ref _startTime, value); }
 
         public TimeSpan Duration { get => _duration; set => Set(ref _duration, value); }
 
-        public EncoderPreset SelectedEncoderPreset { get => _selectedEncoderPreset; set => Set(ref _selectedEncoderPreset, value); }
+        public Model.EncoderPreset SelectedEncoderPreset { get => _selectedEncoderPreset; set => Set(ref _selectedEncoderPreset, value); }
 
         public IEnumerable<Model.EncoderPreset> EncoderPresets => Model.EncoderPresets.Instance.Presets;
 
-        public static Array RepeatTypes { get; } = Enum.GetValues(typeof(ScheduleRepeatType));
-        public ScheduleRepeatType SelectedRepeatType { get => _selectedRepeatType; set => Set(ref _selectedRepeatType, value); }
+        public static Array RepeatTypes { get; } = Enum.GetValues(typeof(Model.ScheduleRepeatType));
+        public Model.ScheduleRepeatType SelectedRepeatType { get => _selectedRepeatType; set => Set(ref _selectedRepeatType, value); }
 
         #region repeat days
         public bool IsRepeatMonday { get => _isRepeatMonday; set => Set(ref _isRepeatMonday, value); }
@@ -77,7 +83,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             switch (input)
             {
-                case DecklinkInput decklinkInput:
+                case Model.DecklinkInput decklinkInput:
                     return new DecklinkInputViewModel(decklinkInput);
                 default:
                     throw new ApplicationException("Invalid model type provided");
@@ -107,28 +113,28 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public void Save()
         {
-            _modelItem.Name = Name;
-            _modelItem.StartTime = StartTime;
-            _modelItem.Duration = Duration;
-            _modelItem.RepeatType = SelectedRepeatType;
-            _modelItem.RepeatDays = SelectedRepeatType == ScheduleRepeatType.Daily ? [.. SelectedRepeatDays] : null;
-            _modelItem.FilenameCreationRule = FilenameCreationRule;
-            _modelItem.InputId = SelectedInput?.Input?.Id;
-            _modelItem.EncoderPreset = SelectedEncoderPreset.PresetName;
+            _recordingSchedulerItem.Name = Name;
+            _recordingSchedulerItem.StartTime = StartTime;
+            _recordingSchedulerItem.Duration = Duration;
+            _recordingSchedulerItem.RepeatType = SelectedRepeatType;
+            _recordingSchedulerItem.RepeatDays = SelectedRepeatType == Model.ScheduleRepeatType.Daily ? [.. SelectedRepeatDays] : null;
+            _recordingSchedulerItem.FilenameCreationRule = FilenameCreationRule;
+            _recordingSchedulerItem.InputId = SelectedInput?.Input?.Id;
+            _recordingSchedulerItem.EncoderPreset = SelectedEncoderPreset.PresetName;
             IsModified = false;
             Saved?.Invoke(this, EventArgs.Empty);
         }
 
         private void Load(bool refreshUi)
         {
-            _name = _modelItem.Name;
-            _startTime = _modelItem.StartTime;
-            _duration = _modelItem.Duration;
-            _selectedRepeatType = _modelItem.RepeatType;
-            SelectedRepeatDays = _modelItem.RepeatDays;
-            _filenameCreationRule = _modelItem.FilenameCreationRule;
-            _selectedInput = Inputs.FirstOrDefault(vm => vm.Input?.Id == _modelItem.InputId);
-            _selectedEncoderPreset = EncoderPresets.FirstOrDefault(preset => preset.PresetName == _modelItem.EncoderPreset);
+            _name = _recordingSchedulerItem.Name;
+        _startTime = _recordingSchedulerItem.StartTime;
+        _duration = _recordingSchedulerItem.Duration;
+            _selectedRepeatType = _recordingSchedulerItem.RepeatType;
+            SelectedRepeatDays = _recordingSchedulerItem.RepeatDays;
+        _filenameCreationRule = _recordingSchedulerItem.FilenameCreationRule;
+            _selectedInput = Inputs.FirstOrDefault(vm => vm.Input?.Id == _recordingSchedulerItem.InputId);
+            _selectedEncoderPreset = EncoderPresets.FirstOrDefault(preset => preset.PresetName == _recordingSchedulerItem.EncoderPreset);
             if (refreshUi)
                 NotifyPropertyChanged(null);
             IsModified = false;
@@ -137,6 +143,14 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         public override bool IsValid()
         {
             return _selectedInput != null;
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            _recordingSchedulerItem.PropertyChanged -= RecordingSchedulerItem_PropertyChanged;
         }
 
         private IEnumerable<DayOfWeek> SelectedRepeatDays
@@ -162,5 +176,26 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 _isRepeatSunday = value?.Contains(DayOfWeek.Sunday) ?? true;
             }
         }
+
+        private bool CanStartNow(object obj)
+        {
+            return !IsModified && !_recordingSchedulerItem.IsActive;
+        }
+
+        private async void StartNow(object obj)
+        {
+            _recordingSchedulerItem.IsActive = true;
+            await Model.RecordingScheduler.Current.StartRecording(_recordingSchedulerItem);
+        }
+
+        private void RecordingSchedulerItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Model.RecordingSchedulerItem.IsActive):
+                    Refresh();
+                    break;
+            }
+    }
     }
 }

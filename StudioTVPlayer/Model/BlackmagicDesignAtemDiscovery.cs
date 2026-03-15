@@ -157,13 +157,8 @@ namespace StudioTVPlayer.Model
         }
     }
 
-    public class BlackmagicAtemDeviceEventArgs : EventArgs
+    public class BlackmagicAtemDeviceEventArgs(BlackmagicDesignAtemDeviceInfo device) : EventArgs
     {
-        public BlackmagicAtemDeviceEventArgs(BlackmagicDesignAtemDeviceInfo device)
-        {
-            Device = device;
-        }
-
-        public BlackmagicDesignAtemDeviceInfo Device { get; }
+        public BlackmagicDesignAtemDeviceInfo Device { get; } = device;
     }
 }

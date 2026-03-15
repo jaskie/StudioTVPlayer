@@ -1,10 +1,8 @@
-﻿using LibAtem.Common;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -13,7 +11,7 @@ namespace StudioTVPlayer.Model
 {
     public class RecordingScheduler : Helpers.IPersistable
     {
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _mainLoopWaitCancellationTokenSource;
 
         private const string FileName = "ScheduledRecordings.xml";
 
@@ -25,13 +23,13 @@ namespace StudioTVPlayer.Model
         {
             if (_isRunnig)
                 return;
-            Task.Factory.StartNew(StartRecordingSchedulerLoop, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(RecordingSchedulerLoop, TaskCreationOptions.LongRunning);
         }
 
         public void Shutdown()
         {
             _isRunnig = false;
-            _cancellationTokenSource?.Cancel();
+            NotifyMainLoop();
         }
 
         [XmlArray(nameof(Recordings))]
@@ -39,7 +37,7 @@ namespace StudioTVPlayer.Model
 
         public static RecordingScheduler Current { get; } = Load();
 
-        public string OutputDirectory { get; set; }
+        public string OutputDirectory { get; set; } = "F:\\Temp\\Recordings";
 
         [XmlIgnore]
         public IEnumerable<RecordingSchedulerItem> Recordings
@@ -88,7 +86,7 @@ namespace StudioTVPlayer.Model
         /// </summary>
         public void Save()
         {
-            _cancellationTokenSource?.Cancel();
+            NotifyMainLoop();
             var fullPath = Path.Combine(Providers.GlobalApplicationData.ApplicationDataDir, FileName);
             lock (((IList)_recordings).SyncRoot)
                 Helpers.DataStore.Save(this, fullPath);
@@ -96,63 +94,128 @@ namespace StudioTVPlayer.Model
 
         #endregion persistence
 
-        private (RecordingSchedulerItem RecordingSchedulerItem, DateTime StartTime) FindNextRecording()
+        private (RecordingSchedulerItem RecordingSchedulerItem, DateTime StartTime) FindNextRecordingSchedulerItem()
         {
             lock (((IList)_recordings).SyncRoot)
             {
-                RecordingSchedulerItem found = null;
+                RecordingSchedulerItem foundRecordingItem = null;
                 DateTime foundStartTime = DateTime.MaxValue;
+                var now = DateTime.Now;
                 foreach (var recording in _recordings)
                 {
-                    if (recording.IsStarted)
+                    if (recording.IsActive)
                         continue;
-                    var currentStartTime = recording.FindNextStartTime();
-                    if (currentStartTime < foundStartTime)
+                    var currentStartTime = FindNextStartTime(recording, ref now);
+                    if (currentStartTime != default && currentStartTime < foundStartTime)
                     {
-                        found = recording;
+                        foundRecordingItem = recording;
                         foundStartTime = currentStartTime;
                     }
                 }
-                return (found, foundStartTime);
+                return (foundRecordingItem, foundStartTime);
             }
         }
 
-        private async Task StartRecordingSchedulerLoop()
+        private async Task RecordingSchedulerLoop()
         {
+            _isRunnig = true;
             while (_isRunnig)
             {
-                using (_cancellationTokenSource = new CancellationTokenSource())
+                using (_mainLoopWaitCancellationTokenSource = new CancellationTokenSource())
                 {
-                    var nextRecording = FindNextRecording();
-                    if (nextRecording.RecordingSchedulerItem != null)
+                    var nextRecordingInfo = FindNextRecordingSchedulerItem();
+                    if (nextRecordingInfo.RecordingSchedulerItem != null)
                     {
-                        await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecording.StartTime, _cancellationTokenSource.Token);
-                        if (!_cancellationTokenSource.IsCancellationRequested)
+                        await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecordingInfo.StartTime, _mainLoopWaitCancellationTokenSource.Token);
+                        if (!_mainLoopWaitCancellationTokenSource.IsCancellationRequested)
                         {
-                            nextRecording.RecordingSchedulerItem.IsStarted = true; // we have to set the flag in the loop thread, otherwise it will be found many times
-                            _ = Task.Run(async () => await StartRecording(nextRecording.RecordingSchedulerItem, nextRecording.StartTime + nextRecording.RecordingSchedulerItem.Duration));
+                            nextRecordingInfo.RecordingSchedulerItem.IsActive = true; // we have to set the flag in the loop thread, otherwise it will be found many times
+                            _ = Task.Run(async () => await StartRecording(nextRecordingInfo.RecordingSchedulerItem));
                         }
                     }
                     else // recordingSchedulerItem not found - we wait indefinitely for the recordingSchedulerItem collection change
-                        await Task.Delay(-1, _cancellationTokenSource.Token);
+                        await Task.Delay(-1, _mainLoopWaitCancellationTokenSource.Token);
                 }
             }
         }
 
-        private async Task StartRecording(RecordingSchedulerItem recordingSchedulerItem, DateTime endRecordingTime)
+        public async Task StartRecording(RecordingSchedulerItem recordingSchedulerItem)
         {
             var input = Providers.InputList.Current.Find(recordingSchedulerItem.InputId);
-            var encoderPreset = EncoderPresets.Instance.Presets.FirstOrDefault(preset => preset.InputFormats is null); // TODO: preset selection
+            var encoderPreset = EncoderPresets.Instance.Presets.FirstOrDefault(preset => preset.PresetName == recordingSchedulerItem.EncoderPreset);
             var filename = Path.Combine(OutputDirectory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");
             var recording = new Recording(input, encoderPreset, filename);
             recording.Start();
-            await Helpers.WaitUntilHelper.WaitUntilAsync(endRecordingTime, CancellationToken.None);
+            // we will always wait for the duration to pass, esp. if the recording jsut failed - we don't want to restart it automatically
+            await Helpers.WaitUntilHelper.WaitForAsync(recordingSchedulerItem.Duration, CancellationToken.None);
+            recording.Stop();
+            recordingSchedulerItem.IsActive = false;
             if (recordingSchedulerItem.RepeatType != ScheduleRepeatType.Single)
             {
-                recordingSchedulerItem.IsStarted = false;
-                _cancellationTokenSource?.Cancel(); // inform the main loop that it's possible to schedule the recordingSchedulerItem again
+                NotifyMainLoop(); // inform the main loop that it's possible to schedule the recordingSchedulerItem again
             }
-            // TODO: else remove the recording from GlobalApplicationData
+        }
+
+        private void NotifyMainLoop()
+        {
+            var oldToken = Interlocked.Exchange(ref _mainLoopWaitCancellationTokenSource, null);
+            oldToken?.Cancel();
+        }
+
+        private static DateTime FindNextStartTime(RecordingSchedulerItem item, ref DateTime now)
+        {
+            TimeSpan startTod = item.StartTime.TimeOfDay;
+            TimeSpan duration = item.Duration;
+
+            switch (item.RepeatType)
+            {
+                case ScheduleRepeatType.Single:
+                    DateTime singleStart = item.StartTime;
+                    DateTime singleEnd = singleStart + duration;
+
+                    // If it hasn't finished yet, the "start" is the scheduled start
+                    if (now < singleEnd)
+                        return singleStart;
+                    return default;
+
+                case ScheduleRepeatType.Daily:
+                    // 1. Check if we are currently in "yesterday's" wrapped window
+                    // (Only relevant if duration > time since midnight)
+                    DateTime yesterdayStart = now.Date.AddDays(-1).Add(startTod);
+                    if (item.RepeatDays.Contains(yesterdayStart.DayOfWeek) &&
+                        now < yesterdayStart + duration)
+                        return yesterdayStart;
+
+                    // 2. Check "today's" repetition and time window
+                    DateTime todayStart = now.Date.Add(startTod);
+                    if (item.RepeatDays.Contains(todayStart.DayOfWeek) &&
+                        now >= todayStart && now < todayStart + duration)
+                        return todayStart;
+
+                    // 3. Otherwise, the next is in the future
+                    if (TryFindDaysDelta(todayStart.DayOfWeek, item.RepeatDays, out var daysToWait))
+                        return todayStart.AddDays(daysToWait);
+                    return default;
+            }
+            return default;
+        }
+
+        private static bool TryFindDaysDelta(DayOfWeek today, DayOfWeek[] repeatDays, out int daysDelta)
+        {
+            daysDelta = default;
+            if (repeatDays == null || repeatDays.Length == 0)
+                return false;
+
+            for (int i = 1; i <= 7; i++)
+            {
+                DayOfWeek candidate = (DayOfWeek)(((int)today + i) % 7);
+                if (repeatDays.Contains(candidate))
+                {
+                    daysDelta = i;
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

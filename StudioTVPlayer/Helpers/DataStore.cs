@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Helpers
             var dirName = Path.GetDirectoryName(fileName);
             if (!Directory.Exists(dirName))
                 Directory.CreateDirectory(dirName);
-            var serializer = new XmlSerializer(data.GetType());
+            var serializer = XmlSerializer.FromTypes([data.GetType()])[0];
             using (var writer = new StreamWriter(fileName))
                 serializer.Serialize(writer, data);
         }
@@ -22,11 +22,9 @@ namespace StudioTVPlayer.Helpers
         {
             if (!File.Exists(fileName))
                 return default;
-            using (var reader = new StreamReader(fileName))
-            {
-                var serializer = new XmlSerializer(typeof(T));
-                return (T)serializer.Deserialize(reader);
-            }
+            using var reader = new StreamReader(fileName);
+            var serializer = XmlSerializer.FromTypes([typeof(T)])[0];
+            return (T)serializer.Deserialize(reader);
         }
     }
 }

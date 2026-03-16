@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.WatchedFoldersView"
+﻿<UserControl x:Class="StudioTVPlayer.View.Configuration.FoldersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,20 +7,55 @@
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
              mc:Ignorable="d" 
              FontSize="16"
-             d:DataContext="{d:DesignInstance vm:WatchedFoldersViewModel}"
+             d:DataContext="{d:DesignInstance vm:FoldersViewModel}"
              d:DesignHeight="450" d:DesignWidth="800"
              >
     <Grid VerticalAlignment="Top">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DataGrid DockPanel.Dock="Bottom" AutoGenerateColumns="False"
-                  ItemsSource="{Binding WatchedFolders}" 
-                  VerticalAlignment="Top"
-                  mah:DataGridHelper.EnableCellEditAssist="True"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  >
+        <StackPanel Grid.Row="0" Margin="5">
+            <Label Style="{StaticResource ConfigurationLabelStyle}">Recording directory</Label>
+            <!-- Directory selector -->
+            <Border  
+                    BorderThickness="{StaticResource ComboBoxBorderThemeThickness}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.TextBox.Border}"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.ComboBox.Border.MouseOver}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.ComboBox.Border.Focus}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding RecordingLocation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0"/>
+                    <Button Grid.Column="1"
+                            Command="{Binding BrowseForFolderCommand}"
+                            Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
+                            ToolTip="Browse for the folder" >
+                        <mah:FontIcon Glyph="&#xED25;"/>
+                    </Button>
+                </Grid>
+            </Border>
+        </StackPanel>
+        <DataGrid Grid.Row="1"
+            AutoGenerateColumns="False"
+            ItemsSource="{Binding WatchedFolders}" 
+            VerticalAlignment="Top"
+            mah:DataGridHelper.EnableCellEditAssist="True"
+            CanUserAddRows="False" CanUserDeleteRows="False"
+            >
             <DataGrid.Resources>
                 <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.MetroSquare}">
                     <Setter Property="BorderBrush" Value="Transparent"/>
@@ -33,7 +68,6 @@
             </DataGrid.Resources>
             <DataGrid.Columns >
                 <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" EditingElementStyle="{DynamicResource MahApps.Styles.TextBox}"/>
-
                 <DataGridTemplateColumn Header="Path" Width="*" SortMemberPath="Path">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -78,10 +112,10 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Button Grid.Row="1" Margin="0 10" Command="{Binding AddWatchedFolderCommand}" HorizontalAlignment="Left">
+        <Button Grid.Row="2" Margin="0 10" Command="{Binding AddWatchedFolderCommand}" HorizontalAlignment="Left" Style="{StaticResource MahApps.Styles.Button.ToolBar}">
             <StackPanel Orientation="Horizontal">
                 <mah:FontIcon Glyph="&#xE710;" />
-                <Label FontSize="16" FontWeight="Normal">Add new watched folder</Label>
+                <TextBlock  Style="{StaticResource ButtonTextBlockStyle}">Add new watched folder</TextBlock>
             </StackPanel>
         </Button>
     </Grid>

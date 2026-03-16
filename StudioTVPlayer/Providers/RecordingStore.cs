@@ -11,7 +11,7 @@ namespace StudioTVPlayer.Providers
     public class RecordingStore : IDisposable
     {
         private readonly string _folder = Path.Combine(GlobalApplicationData.ApplicationDataDir, "Recordings");
-        private readonly XmlSerializer _xmlSerializer = new(typeof(Model.Persistence.Recording));
+        private readonly XmlSerializer _xmlSerializer = XmlSerializer.FromTypes([typeof(Model.Persistence.Recording)])[0];
         private readonly List<Model.Recording> _runningRecordings = [];
 
         public static RecordingStore Current { get; } = new RecordingStore();

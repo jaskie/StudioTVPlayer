@@ -14,7 +14,8 @@
             })
             {
                 var result = dialog.ShowDialog();
-                if (result == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok)
+                if (result == Microsoft.WindowsAPICodePack.Dialogs.CommonFileDialogResult.Ok &&
+                    folder != dialog.FileName)
                 {
                     folder = dialog.FileName;
                     return true;

@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration

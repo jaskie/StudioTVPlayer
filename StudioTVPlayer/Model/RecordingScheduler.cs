@@ -37,8 +37,6 @@ namespace StudioTVPlayer.Model
 
         public static RecordingScheduler Current { get; } = Load();
 
-        public string OutputDirectory { get; set; } = "F:\\Temp\\Recordings";
-
         [XmlIgnore]
         public IEnumerable<RecordingSchedulerItem> Recordings
         {
@@ -143,7 +141,10 @@ namespace StudioTVPlayer.Model
         {
             var input = Providers.InputList.Current.Find(recordingSchedulerItem.InputId);
             var encoderPreset = EncoderPresets.Instance.Presets.FirstOrDefault(preset => preset.PresetName == recordingSchedulerItem.EncoderPreset);
-            var filename = Path.Combine(OutputDirectory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");
+            var directory = Providers.Configuration.Current.RecordingLocation;
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+            var filename = Path.Combine(directory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");
             var recording = new Recording(input, encoderPreset, filename);
             recording.Start();
             // we will always wait for the duration to pass, esp. if the recording jsut failed - we don't want to restart it automatically

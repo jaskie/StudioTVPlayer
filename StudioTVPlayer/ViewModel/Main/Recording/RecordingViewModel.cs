@@ -175,28 +175,31 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public string Error => string.Empty;
 
-        public string this[string columnName] => ReadErrorInfo(columnName);
-
-        private string ReadErrorInfo(string propertyName)
+        public string this[string columnName]
         {
-            if (Step == RecordingStep.Preparing)
-                switch (propertyName)
+            get
+            {
                 {
-                    case nameof(Folder) when Step == RecordingStep.Preparing && !Directory.Exists(Folder):
-                        return "Folder does not exists";
-                    case nameof(FileName) when File.Exists(FullPath):
-                        return "File already exists";
-                    case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
-                        return "Filename can't be empty";
-                    case nameof(EncoderPreset) when EncoderPreset is null:
-                        return "Preset is required to start recording";
+                    if (Step == RecordingStep.Preparing)
+                        switch (columnName)
+                        {
+                            case nameof(Folder) when Step == RecordingStep.Preparing && !Directory.Exists(Folder):
+                                return "Folder does not exists";
+                            case nameof(FileName) when File.Exists(FullPath):
+                                return "File already exists";
+                            case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
+                                return "Filename can't be empty";
+                            case nameof(EncoderPreset) when EncoderPreset is null:
+                                return "Preset is required to start recording";
+                        }
+                    return string.Empty;
                 }
-            return string.Empty;
+            }
         }
 
         #endregion IDataErrorInfo
 
-        public override bool IsValid() => true;
+public override bool IsValid() => true;
 
         protected override bool CanRequestRemove(object obj)
         {

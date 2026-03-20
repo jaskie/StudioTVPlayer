@@ -1,9 +1,11 @@
 ﻿using StudioTVPlayer.Helpers;
+using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 
@@ -27,6 +29,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private Model.EncoderPreset _selectedEncoderPreset;
         private Model.ScheduleRepeatType _selectedRepeatType;
         private bool _isDisposed;
+        private string _folder;
 
         public RecordingSchedulerItemViewModel(Model.RecordingSchedulerItem recordingSchedulerItem)
         {
@@ -34,7 +37,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             _recordingSchedulerItem = recordingSchedulerItem;
             Load(false);
             recordingSchedulerItem.PropertyChanged += RecordingSchedulerItem_PropertyChanged;
-            UpdateCommand = new UiCommand(_ => Save(), _ => IsModified);
+            UpdateCommand = new UiCommand(_ => Save(), CanSave);
             UndoCommand = new UiCommand(_ => Load(true), _ => IsModified);
             StartNowCommand = new UiCommand(StartNow, CanStartNow);
         }
@@ -52,6 +55,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         public ICommand StartNowCommand { get; }
 
         public string Name { get => _name; set => Set(ref _name, value); }
+
+        public string Folder { get => _folder; set => Set(ref _folder, value); }
 
         public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(Model.RecordingFilenameCreationRule));
 
@@ -106,14 +111,28 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                         if (!SelectedInput.Input.IsRunning)
                             return "Selected input is not running";
                         break;
+                    case (nameof(Folder)) when string.IsNullOrEmpty(Folder):
+                        return "Folder should be selected";
+                    case nameof(Folder) when !Directory.Exists(Folder):
+                        return "Specified directory does not exists";
+                    case nameof(EncoderPreset) when SelectedEncoderPreset is null:
+                        return "Preset is required to start recording";
+                    case nameof(Name) when string.IsNullOrWhiteSpace(Name):
+                        return "Name can't be empty";
                 }
                 return null;
             }
         }
 
+        private bool CanSave(object obj)
+        {
+            return IsModified && GetType().GetProperties().All(property => this[property.Name] is null);
+        }
+
         public void Save()
         {
             _recordingSchedulerItem.Name = Name;
+            _recordingSchedulerItem.Folder = Folder;
             _recordingSchedulerItem.StartTime = StartTime;
             _recordingSchedulerItem.Duration = Duration;
             _recordingSchedulerItem.RepeatType = SelectedRepeatType;
@@ -128,11 +147,12 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private void Load(bool refreshUi)
         {
             _name = _recordingSchedulerItem.Name;
-        _startTime = _recordingSchedulerItem.StartTime;
-        _duration = _recordingSchedulerItem.Duration;
+            _folder = _recordingSchedulerItem.Folder;
+            _startTime = _recordingSchedulerItem.StartTime;
+            _duration = _recordingSchedulerItem.Duration;
             _selectedRepeatType = _recordingSchedulerItem.RepeatType;
             SelectedRepeatDays = _recordingSchedulerItem.RepeatDays;
-        _filenameCreationRule = _recordingSchedulerItem.FilenameCreationRule;
+            _filenameCreationRule = _recordingSchedulerItem.FilenameCreationRule;
             _selectedInput = Inputs.FirstOrDefault(vm => vm.Input?.Id == _recordingSchedulerItem.InputId);
             _selectedEncoderPreset = EncoderPresets.FirstOrDefault(preset => preset.PresetName == _recordingSchedulerItem.EncoderPreset);
             if (refreshUi)
@@ -177,13 +197,14 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             }
         }
 
-        private bool CanStartNow(object obj)
+        private bool CanStartNow(object _)
         {
             return !IsModified && !_recordingSchedulerItem.IsActive;
         }
 
-        private async void StartNow(object obj)
+        private async void StartNow(object _)
         {
+            Save();
             _recordingSchedulerItem.IsActive = true;
             await Model.RecordingScheduler.Current.StartRecording(_recordingSchedulerItem);
         }

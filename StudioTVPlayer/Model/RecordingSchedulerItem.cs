@@ -15,13 +15,16 @@ namespace StudioTVPlayer.Model
         private TimeSpan _duration = TimeSpan.FromMinutes(10);
         private DateTime _startTime = DateTime.Now.AddHours(1);
         private string _inputId;
+        private string _folder;
+        private string _name;
 
-        [XmlAttribute]
         public string InputId { get => _inputId; set => Set(ref _inputId, value); }
 
         public DateTime StartTime { get => _startTime; set => Set(ref _startTime, value); }
+        
         [XmlIgnore]
         public TimeSpan Duration { get => _duration; set => Set(ref _duration, value); }
+        
         [XmlElement(nameof(Duration))]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public long DurationTicks
@@ -42,13 +45,13 @@ namespace StudioTVPlayer.Model
         [XmlElement]
         public DayOfWeek[] RepeatDays { get => _repeatDays; set => Set(ref _repeatDays, value); }
 
-        [XmlAttribute]
-        public string Name { get; set; }
+        public string Name { get => _name; set => Set(ref _name, value); }
+
+        public string Folder { get => _folder; set => Set(ref _folder, value); }
 
         [XmlAttribute]
         public RecordingFilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
 
-        [XmlAttribute]
         public string EncoderPreset { get => _encoderPreset; set => Set(ref _encoderPreset, value); }
 
         [XmlIgnore]

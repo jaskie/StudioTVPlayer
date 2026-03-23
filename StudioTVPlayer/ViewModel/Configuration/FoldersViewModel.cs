@@ -1,16 +1,13 @@
 ﻿using StudioTVPlayer.Helpers;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class FoldersViewModel : ModifyableViewModelBase, IDataErrorInfo
+    public class FoldersViewModel : ModifyableViewModelBase
     {
         private readonly MahApps.Metro.Controls.Dialogs.IDialogCoordinator _dialogCoordinator = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
-        private string _recordingLocation;
 
         public FoldersViewModel()
         {
@@ -21,41 +18,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
                     vm.RemoveRequested += WatchedFolder_RemoveRequested;
                     return vm;
                 }));
-            _recordingLocation = Providers.Configuration.Current.RecordingLocation;
             AddWatchedFolderCommand = new UiCommand(AddWatchedFolder);
-            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
         }
 
         public UiCommand AddWatchedFolderCommand { get; }
-        public UiCommand BrowseForFolderCommand { get; }
 
         public ObservableCollection<WatchedFolderViewModel> WatchedFolders { get; }
-
-        public string RecordingLocation { get => _recordingLocation; set => Set(ref _recordingLocation, value); }
-
-        public string Error => string.Empty;
-
-        public string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(RecordingLocation) when !Directory.Exists(RecordingLocation):
-                        return "Folder does not exists";
-                }
-                return string.Empty;
-            }
-        }
-
-        private void BrowseForFolder(object _)
-        {
-            if (FolderHelper.BrowseForFolder(ref _recordingLocation, $"Select folder to capture video"))
-            {
-                NotifyPropertyChanged(nameof(RecordingLocation));
-                IsModified = true;
-            }
-        }
 
         private void AddWatchedFolder(object obj)
         {
@@ -85,14 +53,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 f.Apply();
                 return f.WatchedFolder;
             })];
-            Providers.Configuration.Current.RecordingLocation = RecordingLocation;
             base.Apply();
         }
 
         public override bool IsValid()
         {
-            return Directory.Exists(RecordingLocation) && 
-                WatchedFolders.All(f => f.IsValid());
+            return WatchedFolders.All(f => f.IsValid());
         }
     }
 }

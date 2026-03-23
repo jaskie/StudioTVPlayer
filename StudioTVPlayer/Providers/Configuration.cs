@@ -9,9 +9,6 @@ namespace StudioTVPlayer.Providers
     {
         private const string ConfigurationFile = "Configuration.xml";
 
-        [XmlElement]
-        public string RecordingLocation { get; set; }
-
         [XmlArray]
         public List<Model.WatchedFolder> WatchedFolders { get; set; } = [];
 
@@ -30,18 +27,14 @@ namespace StudioTVPlayer.Providers
             var configurationFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, ConfigurationFile);
             try
             {
-                var configuration = Helpers.DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
+                var configuration = Helpers.DataStore.Load<Configuration>(configurationFile) ?? new();
                 foreach (var player in configuration.Players)
                     player.IsModified = false;
-                configuration.RecordingLocation = configuration.RecordingLocation ?? GetDefaultRecordingLocation();
                 return configuration;
             }
             catch
             {
-                return new Configuration
-                {
-                    RecordingLocation = GetDefaultRecordingLocation()
-                };
+                return new();
             }
         }
 

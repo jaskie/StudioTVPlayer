@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
+             xmlns:shared="clr-namespace:StudioTVPlayer.View.Shared"
              xmlns:ap="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              xmlns:model="clr-namespace:StudioTVPlayer.Model"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -42,35 +43,7 @@
             </Grid.RowDefinitions>
             <Label Grid.Row="0">Folder</Label>
             <!-- Directory selector -->
-            <Border Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0"
-                    BorderThickness="{StaticResource ComboBoxBorderThemeThickness}">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.TextBox.Border}"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.ComboBox.Border.MouseOver}"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource MahApps.Brushes.ComboBox.Border.Focus}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <Grid >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <ComboBox IsEditable="True" Text="{Binding Folder, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Folders}" BorderThickness="0"/>
-                    <Button Grid.Column="1"
-                            Command="{Binding BrowseForFolderCommand}"
-                            Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
-                            ToolTip="Browse for the folder" >
-                        <mah:FontIcon Glyph="&#xED25;"/>
-                    </Button>
-                </Grid>
-            </Border>
+            <shared:DirectorySelector Grid.Row="1" Grid.ColumnSpan="2" Margin="5 0" DataContext="{Binding DirectorySelector}" />
             <Label Grid.Row="2">File name</Label>
             <TextBox Grid.Row="3" TextWrapping="Wrap"
                      Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />

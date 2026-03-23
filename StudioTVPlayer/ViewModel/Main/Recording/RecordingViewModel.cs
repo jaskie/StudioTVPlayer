@@ -14,7 +14,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
     {
         private Model.Recording _recording;
         private string _fileName;
-        private string _folder;
         private RecordingStep _step;
         private Model.EncoderPreset _encoderPreset;
         private bool _disposed;
@@ -26,13 +25,12 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private readonly Model.InputBase _input;
         private Action _verifyOnceAction; 
 
-        public RecordingViewModel(Model.InputBase input) : this(input, null)
+        public RecordingViewModel(Model.InputBase input) : this(input, null, null)
         {
-            _folder = Folders.LastOrDefault();
             _fileName = $"Recording_{DateTime.Now:yyyyMMdd_HHmmss}";
         }
 
-        public RecordingViewModel(Model.Recording recording) : this(recording.Input, recording.EncoderPreset)
+        public RecordingViewModel(Model.Recording recording) : this(recording.Input, recording.EncoderPreset, Path.GetDirectoryName(recording.FullPath))
         {
             _recording = recording;
             _step = recording.State switch
@@ -42,7 +40,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 _ => RecordingStep.Finished
             };
             _state = recording.State;
-            _folder = Path.GetDirectoryName(recording.FullPath);
             _fileName = Path.GetFileNameWithoutExtension(recording.FullPath);
             _startTime = recording.StartTime;
             _duration = recording.Duration;
@@ -64,29 +61,25 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             }
         }
 
-        private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset)
+        private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset, string initialDirectory)
         {
             _input = input;
             _encoderPreset = encoderPreset ?? EncoderPresets.FirstOrDefault();
-            BrowseForFolderCommand = new UiCommand(BrowseForFolder);
+            DirectorySelector = new Shared.DirectorySelectorViewModel(initialDirectory);
+            DirectorySelector.PropertyChanged += DirectorySelector_DirectoryChanged;
             OpenExternalFolderCommand = new UiCommand(OpenExternalFolder);
             CommandToggleRecording = new UiCommand(ToggleRecording, CanToggleRecording);
             CommandAddToPlayer = new UiCommand(AddToPlayer, CanAddToPlayer);
             CommandDeleteMedia = new UiCommand(DeleteMedia, CanDeleteMedia);
         }
 
-        public IEnumerable<string> Folders => Providers.MostRecentUsed.Current.Folders;
-
-        public string Folder
+        private void DirectorySelector_DirectoryChanged(object sender, PropertyChangedEventArgs e)
         {
-            get => _folder;
-            set
-            {
-                if (!Set(ref _folder, value))
-                    return;
+            if (e.PropertyName is nameof(DirectorySelector.DirectoryName))
                 NotifyPropertyChanged(nameof(FullPath));
-            }
         }
+
+        public Shared.DirectorySelectorViewModel DirectorySelector { get; }
 
         public string FileName
         {
@@ -159,8 +152,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         
         public ICommand CommandToggleRecording { get; }
 
-        public ICommand BrowseForFolderCommand { get; }
-
         public ICommand OpenExternalFolderCommand { get; }
 
         public ICommand CommandAddToPlayer { get; }
@@ -183,8 +174,6 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                     if (Step == RecordingStep.Preparing)
                         switch (columnName)
                         {
-                            case nameof(Folder) when Step == RecordingStep.Preparing && !Directory.Exists(Folder):
-                                return "Folder does not exists";
                             case nameof(FileName) when File.Exists(FullPath):
                                 return "File already exists";
                             case nameof(FileName) when string.IsNullOrWhiteSpace(FileName):
@@ -199,7 +188,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         #endregion IDataErrorInfo
 
-public override bool IsValid() => true;
+        public override bool IsValid() => true;
 
         protected override bool CanRequestRemove(object obj)
         {
@@ -214,7 +203,7 @@ public override bool IsValid() => true;
 
         private bool CanToggleRecording(object _) => Step switch
         {
-            RecordingStep.Preparing => EncoderPreset != null && Directory.Exists(Folder) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath),
+            RecordingStep.Preparing => EncoderPreset != null && Directory.Exists(DirectorySelector.DirectoryName) && !string.IsNullOrEmpty(FullPath) && !File.Exists(FullPath),
             RecordingStep.Running => true,
             _ => false
         };
@@ -261,19 +250,9 @@ public override bool IsValid() => true;
             {
                 if (_recording is not null)
                     return _recording.FullPath;
-                if (string.IsNullOrEmpty(Folder) || string.IsNullOrEmpty(FileName) || EncoderPreset is null)
+                if (string.IsNullOrEmpty(DirectorySelector.DirectoryName) || string.IsNullOrEmpty(FileName) || EncoderPreset is null)
                     return null;
-                return Path.Combine(Folder, $"{FileName}.{EncoderPreset.FilenameExtension}");
-            }
-        }
-
-        private void BrowseForFolder(object _)
-        {
-            if (FolderHelper.BrowseForFolder(ref _folder, $"Select folder to capture video"))
-            {
-                NotifyPropertyChanged(nameof(Folder));
-                NotifyPropertyChanged(nameof(FullPath));
-                Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
+                return Path.Combine(DirectorySelector.DirectoryName, $"{FileName}.{EncoderPreset.FilenameExtension}");
             }
         }
 
@@ -296,7 +275,6 @@ public override bool IsValid() => true;
             State = Model.RecordingState.Running;
             _recording.Start();
             Thumbnail = _input.Thumbnail;
-            Providers.MostRecentUsed.Current.AddMostRecentlyUsedFolder(_folder);
         }
 
         private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)

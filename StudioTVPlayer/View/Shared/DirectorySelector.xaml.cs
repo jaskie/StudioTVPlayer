@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace StudioTVPlayer.Controls
+namespace StudioTVPlayer.View.Shared
 {
     /// <summary>
     /// Interaction logic for DirectorySelector.xaml

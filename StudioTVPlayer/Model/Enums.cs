@@ -86,21 +86,21 @@ namespace StudioTVPlayer.Model
     [TypeConverter(typeof(EnumDescriptionTypeConverter))]
     public enum RecordingFilenameCreationRule
     {
-        [Description("Use provided name as filename directly")]
+        [Description("Use name as filename")]
         None,
-        [Description("Use name of the item with date/time at the beginning")]
+        [Description("Add date/time prefix")]
         DateTimeAtBegin,
-        [Description("Use name of the item with date/time at the end")]
+        [Description("Add date/time suffix")]
         DateTimeAtEnd,
-        [Description("Use name of the item with date at the beginning")]
+        [Description("Add date prefix")]
         DateAtBegin,
-        [Description("Use name of the item with date at the end")]
+        [Description("Add date suffix")]
         DateAtEnd,
-        [Description("Use name of the item with time at the beginning")]
+        [Description("Add time prefix")]
         TimeAtBegin,
-        [Description("Use name of the item with time at the end")]
+        [Description("Add time suffix")]
         TimeAtEnd,
-        [Description("Use name of the item to format date/time")]
+        [Description("Use name for date/time format")]
         UseNameAsFormat
     }
 

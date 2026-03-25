@@ -141,7 +141,7 @@ namespace StudioTVPlayer.Model
         {
             var input = Providers.InputList.Current.Find(recordingSchedulerItem.InputId);
             var encoderPreset = EncoderPresets.Instance.Presets.FirstOrDefault(preset => preset.PresetName == recordingSchedulerItem.EncoderPreset);
-            var directory = recordingSchedulerItem.Folder;
+            var directory = recordingSchedulerItem.Directory;
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
             var filename = Path.Combine(directory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");

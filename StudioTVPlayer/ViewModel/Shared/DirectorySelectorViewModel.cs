@@ -20,7 +20,7 @@ namespace StudioTVPlayer.ViewModel.Shared
 
         public ICommand BrowseForFolderCommand { get; }
 
-        public string DirectoryName { get => _directoryName; set => Set(ref _directoryName, value); }
+        public string DirectoryName { get => _directoryName; set => SetDirectory(ref _directoryName, value); }
 
         public IEnumerable<string> RecentDirectories => Providers.MostRecentUsed.Current.Folders;
 
@@ -44,6 +44,11 @@ namespace StudioTVPlayer.ViewModel.Shared
         public override bool IsValid()
         {
             return string.IsNullOrEmpty(this[nameof(DirectoryName)]);
+        }
+
+        protected bool SetDirectory(ref string field, string value)
+        {
+            return base.Set(ref field, value ?? RecentDirectories.LastOrDefault(), nameof(DirectoryName));
         }
     }
 }

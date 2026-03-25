@@ -15,7 +15,7 @@ namespace StudioTVPlayer.Model
         private TimeSpan _duration = TimeSpan.FromMinutes(10);
         private DateTime _startTime = DateTime.Now.AddHours(1);
         private string _inputId;
-        private string _folder;
+        private string _directory;
         private string _name;
 
         public string InputId { get => _inputId; set => Set(ref _inputId, value); }
@@ -47,7 +47,7 @@ namespace StudioTVPlayer.Model
 
         public string Name { get => _name; set => Set(ref _name, value); }
 
-        public string Folder { get => _folder; set => Set(ref _folder, value); }
+        public string Directory { get => _directory; set => Set(ref _directory, value); }
 
         [XmlAttribute]
         public RecordingFilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }

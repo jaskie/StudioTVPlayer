@@ -6,10 +6,11 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:model="clr-namespace:StudioTVPlayer.Model"
              xmlns:local="clr-namespace:StudioTVPlayer.View.Main.Recording"
+             xmlns:shared="clr-namespace:StudioTVPlayer.View.Shared"
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance vm:RecordingSchedulerItemViewModel, IsDesignTimeCreatable=False}"
-             d:DesignHeight="200" d:DesignWidth="800">
+             d:DesignHeight="250" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -57,12 +58,15 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="8*"/>
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0">Name</Label>
             <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
             <Label Grid.Column="2" Grid.Row="0">Filename creation rule</Label>
             <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding FilenameCreationRules}" SelectedItem="{Binding FilenameCreationRule}"/>
+            <Label Grid.Column="3">Directory</Label>
+            <shared:DirectorySelector Grid.Column="3" Grid.Row="1" DataContext="{Binding DirectorySelector}"/>
             <Label Grid.Row="2">Start at</Label>
             <mah:DateTimePicker Grid.Row="3" Margin="3 0" PickerVisibility="All"
                             SelectedDateTime="{Binding StartTime}" Visibility="{Binding SelectedRepeatType, Converter={StaticResource EnumValueToVisibilityConverter}, ConverterParameter={x:Static model:ScheduleRepeatType.Single}}"/>
@@ -73,7 +77,7 @@
                         SelectedDateTime="{Binding Duration, Converter={StaticResource TimeSpanToDateTimeConverter}}"/>
             <Label Grid.Column="2" Grid.Row="2">Repeat</Label>
             <!-- repeat properties -->
-            <Grid Grid.Column="2" Grid.Row="3" >
+            <Grid Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition/>
@@ -90,7 +94,12 @@
                     <CheckBox IsChecked="{Binding IsRepeatSunday}">Sun</CheckBox>
                 </StackPanel>
             </Grid>
-            <Label Grid.Row="4">Input source</Label>
+            <Label Grid.Row="4">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock>Input source</TextBlock>
+                    <mah:FontIcon Glyph="&#xE946;" FontSize="16" Margin="5 0" ToolTip="Input has to be active at time of the recording"/>
+                </StackPanel>
+            </Label>
             <ComboBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding Inputs}" SelectedItem="{Binding SelectedInput, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
             <Label Grid.Row="4" Grid.Column="2">
                 <StackPanel Orientation="Horizontal">
@@ -98,7 +107,7 @@
                     <mah:FontIcon Glyph="&#xE946;" FontSize="16" Margin="5 0" ToolTip="Must be compatible with format of input at time of the recording"/>
                 </StackPanel>
             </Label>
-            <ComboBox Grid.Row="5" Grid.Column="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset}" DisplayMemberPath="PresetName">
+            <ComboBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset}" DisplayMemberPath="PresetName">
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
                         <Setter Property="ToolTip" Value="{Binding Description}"/>

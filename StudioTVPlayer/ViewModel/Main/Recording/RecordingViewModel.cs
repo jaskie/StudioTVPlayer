@@ -66,17 +66,18 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             _input = input;
             _encoderPreset = encoderPreset ?? EncoderPresets.FirstOrDefault();
             DirectorySelector = new Shared.DirectorySelectorViewModel(initialDirectory);
-            DirectorySelector.PropertyChanged += DirectorySelector_DirectoryChanged;
+            DirectorySelector.PropertyChanged += DirectorySelector_PropertyChanged;
             OpenExternalFolderCommand = new UiCommand(OpenExternalFolder);
             CommandToggleRecording = new UiCommand(ToggleRecording, CanToggleRecording);
             CommandAddToPlayer = new UiCommand(AddToPlayer, CanAddToPlayer);
             CommandDeleteMedia = new UiCommand(DeleteMedia, CanDeleteMedia);
         }
 
-        private void DirectorySelector_DirectoryChanged(object sender, PropertyChangedEventArgs e)
+        private void DirectorySelector_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName is nameof(DirectorySelector.DirectoryName))
                 NotifyPropertyChanged(nameof(FullPath));
+            IsModified = true;
         }
 
         public Shared.DirectorySelectorViewModel DirectorySelector { get; }

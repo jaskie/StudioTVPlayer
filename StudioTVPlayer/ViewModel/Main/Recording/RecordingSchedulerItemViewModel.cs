@@ -1,6 +1,6 @@
 ﻿using StudioTVPlayer.Helpers;
-using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.Input;
+using StudioTVPlayer.ViewModel.Shared;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,17 +29,18 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private Model.EncoderPreset _selectedEncoderPreset;
         private Model.ScheduleRepeatType _selectedRepeatType;
         private bool _isDisposed;
-        private string _folder;
 
         public RecordingSchedulerItemViewModel(Model.RecordingSchedulerItem recordingSchedulerItem)
         {
             Debug.Assert(recordingSchedulerItem is not null);
             _recordingSchedulerItem = recordingSchedulerItem;
-            Load(false);
             recordingSchedulerItem.PropertyChanged += RecordingSchedulerItem_PropertyChanged;
             UpdateCommand = new UiCommand(_ => Save(), CanSave);
             UndoCommand = new UiCommand(_ => Load(true), _ => IsModified);
             StartNowCommand = new UiCommand(StartNow, CanStartNow);
+            DirectorySelector = new DirectorySelectorViewModel(recordingSchedulerItem.Directory);
+            DirectorySelector.PropertyChanged += DirectorySelector_PropertyChanged;
+            Load(false);
         }
 
         internal bool IsNew { get; set; }
@@ -56,7 +57,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public string Name { get => _name; set => Set(ref _name, value); }
 
-        public string Folder { get => _folder; set => Set(ref _folder, value); }
+        public DirectorySelectorViewModel DirectorySelector { get; }
+
 
         public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(Model.RecordingFilenameCreationRule));
 
@@ -111,11 +113,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                         if (!SelectedInput.Input.IsRunning)
                             return "Selected input is not running";
                         break;
-                    case (nameof(Folder)) when string.IsNullOrEmpty(Folder):
-                        return "Folder should be selected";
-                    case nameof(Folder) when !Directory.Exists(Folder):
-                        return "Specified directory does not exists";
-                    case nameof(EncoderPreset) when SelectedEncoderPreset is null:
+                    case nameof(SelectedEncoderPreset) when SelectedEncoderPreset is null:
                         return "Preset is required to start recording";
                     case nameof(Name) when string.IsNullOrWhiteSpace(Name):
                         return "Name can't be empty";
@@ -132,7 +130,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         public void Save()
         {
             _recordingSchedulerItem.Name = Name;
-            _recordingSchedulerItem.Folder = Folder;
+            _recordingSchedulerItem.Directory = DirectorySelector.DirectoryName;
             _recordingSchedulerItem.StartTime = StartTime;
             _recordingSchedulerItem.Duration = Duration;
             _recordingSchedulerItem.RepeatType = SelectedRepeatType;
@@ -147,7 +145,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private void Load(bool refreshUi)
         {
             _name = _recordingSchedulerItem.Name;
-            _folder = _recordingSchedulerItem.Folder;
+            DirectorySelector.DirectoryName = _recordingSchedulerItem.Directory;
             _startTime = _recordingSchedulerItem.StartTime;
             _duration = _recordingSchedulerItem.Duration;
             _selectedRepeatType = _recordingSchedulerItem.RepeatType;
@@ -217,6 +215,12 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                     Refresh();
                     break;
             }
-    }
+        }
+
+        private void DirectorySelector_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            IsModified = true;
+        }
+
     }
 }

@@ -144,7 +144,7 @@ namespace StudioTVPlayer.Model
             var directory = recordingSchedulerItem.Directory;
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
-            var filename = Path.Combine(directory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");
+            var filename = Path.Combine(directory, $"{GenerateFileName(recordingSchedulerItem.FilenameCreationRule, recordingSchedulerItem.Name)}.{encoderPreset.FilenameExtension}");
             var recording = new Recording(input, encoderPreset, filename);
             recording.PropertyChanged += (s, e) =>
             {
@@ -164,6 +164,22 @@ namespace StudioTVPlayer.Model
             {
                 NotifyMainLoop(); // inform the main loop that it's possible to schedule the recordingSchedulerItem again
             }
+        }
+
+        private string GenerateFileName(RecordingFilenameCreationRule rule, string name)
+        {
+            return rule switch
+            {
+                RecordingFilenameCreationRule.None => name,
+                RecordingFilenameCreationRule.DateTimeAtBegin => $"{DateTime.Now:yyyymmdd_HHmmss}_{name}",
+                RecordingFilenameCreationRule.DateTimeAtEnd => $"{name}_{DateTime.Now:yyyymmdd_HHmmss}",
+                RecordingFilenameCreationRule.DateAtBegin => $"{DateTime.Now:yyyymmdd}_{name}",
+                RecordingFilenameCreationRule.DateAtEnd => $"{name}_{DateTime.Now:yyyymmdd}",
+                RecordingFilenameCreationRule.TimeAtBegin => $"{DateTime.Now:HHmmss}_{name}",
+                RecordingFilenameCreationRule.TimeAtEnd => $"{name}_{DateTime.Now:HHmmss}",
+                RecordingFilenameCreationRule.UseNameAsFormat => DateTime.Now.ToString(name),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
         }
 
         private void NotifyMainLoop()

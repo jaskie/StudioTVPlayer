@@ -78,13 +78,27 @@
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <mah:MetroWindow.LeftWindowCommands>
-        <mah:WindowCommands>
-            <ToggleButton IsChecked="{Binding IsPlayoutVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}">Players</ToggleButton>
-            <ToggleButton IsChecked="{Binding IsRecordingSchedulerVisible}" IsEnabled="{Binding IsConfigutationViewActive,Converter={StaticResource InvertedBooleanConverter}}">Recordings</ToggleButton>
+        <mah:WindowCommands TextElement.FontSize="15">
+            <ToggleButton IsChecked="{Binding IsPlayoutVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}"
+                          ToolTip="Switches to players and sources view | Shift+Ctrl+P">
+                <StackPanel Orientation="Horizontal">
+                    <mah:FontIcon Margin="5 0" Glyph="&#xE768;"/>
+                    <TextBlock>Playout</TextBlock>
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton IsChecked="{Binding IsRecordingSchedulerVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}"
+                          ToolTip="Switches to recording scheduler view | Shift+Ctrl+R">
+                <StackPanel Orientation="Horizontal">
+                    <mah:FontIcon Margin="5 0" Glyph="&#xF7EE;"/>
+                    <TextBlock>Recordings</TextBlock>
+                </StackPanel>
+            </ToggleButton>
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
     <Window.InputBindings>
         <KeyBinding Gesture="Shift+Ctrl+E" Command="{Binding ConfigurationCommand}"/>
+        <KeyBinding Gesture="Shift+Ctrl+P" Command="{Binding PlayoutCommand}"/>
+        <KeyBinding Gesture="Shift+Ctrl+R" Command="{Binding RecordingSchedulerCommand}"/>
     </Window.InputBindings>
     <ContentControl Content="{Binding CurrentViewModel}" >
         <ContentControl.Resources>

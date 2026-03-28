@@ -29,7 +29,7 @@ namespace StudioTVPlayer.Model
         /// <summary>
         /// Creating the Recording instance from deserialized one
         /// </summary>
-        /// <remarks>The constructor is intended to use only for finished recordings, the ongoing ones are kept in <see cref="Providers.GlobalApplicationData"/></remarks>
+        /// <remarks>The constructor is intended to use only for finished recordings, the ongoing ones are kept in <see cref="Providers.RecordingStore"/></remarks>
         public Recording(Persistence.Recording recording)
         {
             Id = recording.Id;
@@ -111,16 +111,11 @@ namespace StudioTVPlayer.Model
             Input.AddOutputSink(_outputFile);
             StartTime = DateTime.Now;
             State = RecordingState.Running;
-            Providers.RecordingStore.Current.AddRunningRecording(this);
+            Providers.RecordingStore.Current.AddRecording(this);
             Providers.RecordingStore.Current.SaveRecording(this);
         }
 
-        public void Stop()
-        {
-            Stop(RecordingState.Completed);
-        }
-
-        private void Stop(RecordingState state)
+        public void Stop(RecordingState state = RecordingState.Completed)
         {
             lock (_stopLock)
             {

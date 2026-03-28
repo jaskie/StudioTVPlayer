@@ -5,22 +5,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class ShellViewModel : ViewModelBase, IDisposable
+    public sealed class ShellViewModel : ViewModelBase, IDisposable
     {
         private ViewModelBase _currentViewModel;
         private IEnumerable<PlayerControllerViewModel> _playerControllers;
 
         private ShellViewModel()
         {
-            ConfigurationCommand = new UiCommand(Configuration, _ => !(CurrentViewModel is Configuration.ConfigurationViewModel));
+            ConfigurationCommand = new UiCommand(_ => Task.Run(async () => await ShowView<Configuration.ConfigurationViewModel>()), _ => CurrentViewModel is not Configuration.ConfigurationViewModel);
+            PlayoutCommand = new UiCommand(_ => Task.Run(async () => await ShowPlayoutView()), _ => CurrentViewModel is not Main.PlayoutViewModel);
+            RecordingSchedulerCommand = new UiCommand(_ => Task.Run(async () => await ShowView<Main.Recording.RecordingSchedulerViewModel>()), _ => CurrentViewModel is not Main.Recording.RecordingSchedulerViewModel);
             AboutCommand = new UiCommand(About);
             HelpCommand = new UiCommand(Help);
         }
 
-        public static readonly ShellViewModel Instance = new ShellViewModel();
+        public static readonly ShellViewModel Instance = new();
 
         public ViewModelBase CurrentViewModel
         {
@@ -70,19 +73,6 @@ namespace StudioTVPlayer.ViewModel
 
         public IEnumerable<PlayerControllerViewModel> PlayerControllers { get => _playerControllers; private set => Set(ref _playerControllers, value); }
 
-        public async Task ShowPlayoutView()
-        {
-            if (CurrentViewModel is Main.PlayoutViewModel)
-                return;
-            if (!await ConfirmCloseAsync())
-                return;
-            UISBusyState.Set();
-            CurrentViewModel = new Main.PlayoutViewModel();
-            NotifyPropertyChanged(nameof(IsPlayoutVisible));
-            NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
-            NotifyPropertyChanged(nameof(IsConfigutationViewActive));
-        }
-
         public bool IsConfigutationViewActive => CurrentViewModel is Configuration.ConfigurationViewModel;
 
         public bool IsPlayoutVisible
@@ -103,22 +93,19 @@ namespace StudioTVPlayer.ViewModel
             {
                 if (!value || CurrentViewModel is Main.Recording.RecordingSchedulerViewModel)
                     return;
-                UISBusyState.Set();
-                CurrentViewModel = new Main.Recording.RecordingSchedulerViewModel();
-                NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
-                NotifyPropertyChanged(nameof(IsPlayoutVisible));
+                _ = ShowView<Main.Recording.RecordingSchedulerViewModel>();
             }
         }
 
-        public UiCommand ConfigurationCommand { get; }
-
-        public UiCommand AboutCommand { get; }
-
-        public UiCommand HelpCommand { get; }
+        public ICommand PlayoutCommand { get; }
+        public ICommand RecordingSchedulerCommand { get; }
+        public ICommand ConfigurationCommand { get; }
+        public ICommand AboutCommand { get; }
+        public ICommand HelpCommand { get; }
 
         public void Dispose()
         {
-            CurrentViewModel = null;
+        CurrentViewModel = null;
         }
 
         public async Task<bool> ConfirmCloseAsync()
@@ -128,11 +115,21 @@ namespace StudioTVPlayer.ViewModel
             return true;
         }
 
-        private void Configuration(object _)
+        public async Task ShowPlayoutView()
         {
-            if (CurrentViewModel is Configuration.ConfigurationViewModel)
+            await ShowView<Main.PlayoutViewModel>();
+        }
+
+        private async Task ShowView<T>() where T: ViewModelBase, new()
+        {
+            if (CurrentViewModel is T)
                 return;
-            CurrentViewModel = new Configuration.ConfigurationViewModel();
+            if (!await ConfirmCloseAsync())
+                return;
+            UISBusyState.Set();
+            CurrentViewModel = new T();
+            NotifyPropertyChanged(nameof(IsPlayoutVisible));
+            NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));
             NotifyPropertyChanged(nameof(IsConfigutationViewActive));
         }
 

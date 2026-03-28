@@ -146,11 +146,20 @@ namespace StudioTVPlayer.Model
                 Directory.CreateDirectory(directory);
             var filename = Path.Combine(directory, $"{recordingSchedulerItem.Name}.{encoderPreset.FilenameExtension}");
             var recording = new Recording(input, encoderPreset, filename);
+            recording.PropertyChanged += (s, e) =>
+            {
+                switch(e.PropertyName)
+                {
+                    case (nameof(Recording.State)) when recording.State is RecordingState.Aborted or RecordingState.Completed or RecordingState.Failed:
+                        recordingSchedulerItem.IsActive = false;
+                        break;
+                }
+            };
             recording.Start();
             // we will always wait for the duration to pass, esp. if the recording jsut failed - we don't want to restart it automatically
             await Helpers.WaitUntilHelper.WaitForAsync(recordingSchedulerItem.Duration, CancellationToken.None);
+            // with the Stop() we expect PropertyChanged() to be raised resulting IsActive reset, if it's not failed or stopped manually
             recording.Stop();
-            recordingSchedulerItem.IsActive = false;
             if (recordingSchedulerItem.RepeatType != ScheduleRepeatType.Single)
             {
                 NotifyMainLoop(); // inform the main loop that it's possible to schedule the recordingSchedulerItem again

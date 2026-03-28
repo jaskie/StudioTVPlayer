@@ -16,12 +16,25 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             Recordings = [.. Providers.RecordingStore.Current
                 .LoadRecordings()
                 .Select(CreateRecordingViewModel)];
-            Providers.RecordingStore.Current.RunningRecordingAdded += RecordingStore_RunningRecordingAdded;
+            Providers.RecordingStore.Current.RecordingAdded += RecordingStore_RecordingAdded;
+            Providers.RecordingStore.Current.RecordingDeleted += RecordingStore_RecordingDeleted;
             _recordingsView = CollectionViewSource.GetDefaultView(Recordings);
             _recordingsView.SortDescriptions.Add(new SortDescription(nameof(RecordingViewModel.StartTime), ListSortDirection.Descending));
         }
 
-        private void RecordingStore_RunningRecordingAdded(object sender, Providers.RecordingEventArgs e)
+        private void RecordingStore_RecordingDeleted(object sender, Providers.RecordingEventArgs e)
+        {
+            OnUiThread(() =>
+            {
+                var recordingViewModel = Recordings.FirstOrDefault(vm => vm.Recording == e.Recording);
+                if (recordingViewModel is null)
+                    return;
+                Recordings.Remove(recordingViewModel);
+                _recordingsView.Refresh();
+            });
+        }
+
+        private void RecordingStore_RecordingAdded(object sender, Providers.RecordingEventArgs e)
         {
             OnUiThread(() =>
             {
@@ -52,7 +65,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             if (_isDisposed)
                 return;
             _isDisposed = true;
-            Providers.RecordingStore.Current.RunningRecordingAdded -= RecordingStore_RunningRecordingAdded;
+            Providers.RecordingStore.Current.RecordingAdded -= RecordingStore_RecordingAdded;
+            Providers.RecordingStore.Current.RecordingDeleted -= RecordingStore_RecordingDeleted;
             foreach (var recording in Recordings)
                 recording.RemoveRequested -= RecordingViewModel_RemoveRequested;
         }

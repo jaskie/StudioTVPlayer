@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,11 +11,15 @@ namespace StudioTVPlayer.Helpers
             var delay = dateTime - DateTime.Now;
             if (delay > TimeSpan.Zero)
             {
-                await Task.Delay(delay, cancellationToken);
+                try
+                {
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (TaskCanceledException) { }
             }
         }
 
-        public static async Task WaitForAsync(TimeSpan timeSpan, CancellationToken cancellationToken)
+        public static async Task WaitForAsync(TimeSpan timeSpan)
         {
             if (timeSpan > TimeSpan.Zero)
             {

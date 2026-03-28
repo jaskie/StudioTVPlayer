@@ -20,7 +20,7 @@ namespace StudioTVPlayer.Converters
         {
             if (value is DateTime dateTime)
             {
-                return new TimeSpan(dateTime.Ticks);
+                return dateTime.TimeOfDay;
             }
             return DependencyProperty.UnsetValue;
         }

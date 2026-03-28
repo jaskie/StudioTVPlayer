@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -119,20 +120,21 @@ namespace StudioTVPlayer.Model
             _isRunnig = true;
             while (_isRunnig)
             {
-                using (_mainLoopWaitCancellationTokenSource = new CancellationTokenSource())
+                using (var tcs = new CancellationTokenSource())
                 {
+                    var oldToken = Interlocked.Exchange(ref _mainLoopWaitCancellationTokenSource, tcs);
                     var nextRecordingInfo = FindNextRecordingSchedulerItem();
                     if (nextRecordingInfo.RecordingSchedulerItem != null)
                     {
-                        await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecordingInfo.StartTime, _mainLoopWaitCancellationTokenSource.Token);
-                        if (!_mainLoopWaitCancellationTokenSource.IsCancellationRequested)
+                        await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecordingInfo.StartTime, tcs.Token);
+                        if (!tcs.IsCancellationRequested)
                         {
                             nextRecordingInfo.RecordingSchedulerItem.IsActive = true; // we have to set the flag in the loop thread, otherwise it will be found many times
                             _ = Task.Run(async () => await StartRecording(nextRecordingInfo.RecordingSchedulerItem));
                         }
                     }
                     else // recordingSchedulerItem not found - we wait indefinitely for the recordingSchedulerItem collection change
-                        await Task.Delay(-1, _mainLoopWaitCancellationTokenSource.Token);
+                        await Task.Delay(-1, tcs.Token);
                 }
             }
         }
@@ -157,7 +159,7 @@ namespace StudioTVPlayer.Model
             };
             recording.Start();
             // we will always wait for the duration to pass, esp. if the recording jsut failed - we don't want to restart it automatically
-            await Helpers.WaitUntilHelper.WaitForAsync(recordingSchedulerItem.Duration, CancellationToken.None);
+            await Helpers.WaitUntilHelper.WaitForAsync(recordingSchedulerItem.Duration);
             // with the Stop() we expect PropertyChanged() to be raised resulting IsActive reset, if it's not failed or stopped manually
             recording.Stop();
             if (recordingSchedulerItem.RepeatType != ScheduleRepeatType.Single)
@@ -184,8 +186,7 @@ namespace StudioTVPlayer.Model
 
         private void NotifyMainLoop()
         {
-            var oldToken = Interlocked.Exchange(ref _mainLoopWaitCancellationTokenSource, null);
-            oldToken?.Cancel();
+            Interlocked.Exchange(ref _mainLoopWaitCancellationTokenSource, null)?.Cancel();
         }
 
         private static DateTime FindNextStartTime(RecordingSchedulerItem item, ref DateTime now)
@@ -215,7 +216,7 @@ namespace StudioTVPlayer.Model
                     // 2. Check "today's" repetition and time window
                     DateTime todayStart = now.Date.Add(startTod);
                     if (item.RepeatDays.Contains(todayStart.DayOfWeek) &&
-                        now >= todayStart && now < todayStart + duration)
+                        now < todayStart + duration)
                         return todayStart;
 
                     // 3. Otherwise, the next is in the future

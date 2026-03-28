@@ -61,7 +61,7 @@
                 <ColumnDefinition Width="8*"/>
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0">Name</Label>
-            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
             <Label Grid.Column="2" Grid.Row="0">Filename creation rule</Label>
             <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding FilenameCreationRules}" SelectedItem="{Binding FilenameCreationRule}"/>
             <Label Grid.Column="3">Directory</Label>
@@ -106,7 +106,7 @@
                     <mah:FontIcon Glyph="&#xE946;" FontSize="16" Margin="5 0" ToolTip="Must be compatible with format of input at time of the recording"/>
                 </StackPanel>
             </Label>
-            <ComboBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset}" DisplayMemberPath="PresetName">
+            <ComboBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset, ValidatesOnDataErrors=True}" DisplayMemberPath="PresetName">
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
                         <Setter Property="ToolTip" Value="{Binding Description}"/>

@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Providers
         private readonly string _folder = Path.Combine(GlobalApplicationData.ApplicationDataDir, "Recordings");
         private readonly XmlSerializer _xmlSerializer = XmlSerializer.FromTypes([typeof(Model.Persistence.Recording)])[0];
         private readonly List<Model.Recording> _runningRecordings = [];
-        private List<Model.Recording> _allRecordings;
+        private readonly List<Model.Recording> _allRecordings;
         private readonly object _runningRecordingsLock = new();
         private readonly object _allRecordingsLock = new();
 
@@ -25,6 +25,20 @@ namespace StudioTVPlayer.Providers
             {
                 Directory.CreateDirectory(_folder);
             }
+            _allRecordings ??= [.. Directory.EnumerateFiles(_folder, "*.xml")
+                .Select(fileName =>
+                {
+                    try
+                    {
+                    using var reader = new StreamReader(fileName);
+                    var deserialized = _xmlSerializer.Deserialize(reader) as Model.Persistence.Recording;
+                    return new Model.Recording(deserialized);
+                    }
+                    catch { } // just ignore non-deserializable files
+                    return null;
+                 })
+                .Where(r => r is not null)
+                ];
         }
 
         public event EventHandler<RecordingEventArgs> RecordingAdded;
@@ -46,21 +60,13 @@ namespace StudioTVPlayer.Providers
             _xmlSerializer.Serialize(stream, persistenceRecording);
         }
 
-        public IEnumerable<Model.Recording> LoadRecordings()
+        public IEnumerable<Model.Recording> Recordings
         {
-            lock (_allRecordingsLock)
-                _allRecordings ??= [.. Directory.EnumerateFiles(_folder, "*.xml").Select(fileName =>
-                    {
-                        using var reader = new StreamReader(fileName);
-                        var deserialized = _xmlSerializer.Deserialize(reader) as Model.Persistence.Recording;
-                        Model.Recording runningRecording;
-                        lock (_runningRecordingsLock)
-                        {
-                            runningRecording = _runningRecordings.FirstOrDefault(r => r.Id.ToString() == deserialized.Id);
-                        }
-                        return runningRecording ?? new Model.Recording(deserialized);
-                    })];
-            return [.. _allRecordings];
+            get
+            {
+                lock (_allRecordingsLock)
+                    return [.. _allRecordings];
+            }
         }
 
         public void AddRecording(Model.Recording recording)

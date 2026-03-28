@@ -122,7 +122,10 @@ namespace StudioTVPlayer.Model
                 if (_state is not RecordingState.Running)
                     return;
                 if (_outputFile is null)
+                {
+                    State = RecordingState.Failed;
                     return;
+                }
                 Input.RemoveOutputSink(_outputFile);
                 if (Input is DecklinkInput decklinkInput)
                 {

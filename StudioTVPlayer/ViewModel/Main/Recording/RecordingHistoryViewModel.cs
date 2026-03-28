@@ -14,7 +14,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         public RecordingHistoryViewModel()
         {
             Recordings = [.. Providers.RecordingStore.Current
-                .LoadRecordings()
+                .Recordings
                 .Select(CreateRecordingViewModel)];
             Providers.RecordingStore.Current.RecordingAdded += RecordingStore_RecordingAdded;
             Providers.RecordingStore.Current.RecordingDeleted += RecordingStore_RecordingDeleted;

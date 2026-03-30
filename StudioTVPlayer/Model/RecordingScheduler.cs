@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,20 +15,20 @@ namespace StudioTVPlayer.Model
 
         private const string FileName = "ScheduledRecordings.xml";
 
-        private bool _isRunnig;
+        private bool _isRunning;
 
         private RecordingScheduler() { }
 
         public void Initialize()
         {
-            if (_isRunnig)
+            if (_isRunning)
                 return;
             Task.Factory.StartNew(RecordingSchedulerLoop, TaskCreationOptions.LongRunning);
         }
 
         public void Shutdown()
         {
-            _isRunnig = false;
+            _isRunning = false;
             NotifyMainLoop();
         }
 
@@ -102,9 +101,9 @@ namespace StudioTVPlayer.Model
                 var now = DateTime.Now;
                 foreach (var recording in _recordings)
                 {
-                    if (recording.IsActive)
+                    if (recording.IsActive || recording.BlockScheduledStart)
                         continue;
-                    var currentStartTime = FindNextStartTime(recording, ref now);
+                    var currentStartTime = FindNextStartTime(recording, now);
                     if (currentStartTime != default && currentStartTime < foundStartTime)
                     {
                         foundRecordingItem = recording;
@@ -115,35 +114,45 @@ namespace StudioTVPlayer.Model
             }
         }
 
-        private async Task RecordingSchedulerLoop()
+        private async void RecordingSchedulerLoop()
         {
-            _isRunnig = true;
-            while (_isRunnig)
+            _isRunning = true;
+            while (_isRunning)
             {
-                using (var tcs = new CancellationTokenSource())
+                using (_mainLoopWaitCancellationTokenSource = new CancellationTokenSource())
                 {
-                    var oldToken = Interlocked.Exchange(ref _mainLoopWaitCancellationTokenSource, tcs);
                     var nextRecordingInfo = FindNextRecordingSchedulerItem();
                     if (nextRecordingInfo.RecordingSchedulerItem != null)
                     {
-                        await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecordingInfo.StartTime, tcs.Token);
-                        if (!tcs.IsCancellationRequested)
+                        await Helpers.WaitUntilHelper.WaitUntilAsync(nextRecordingInfo.StartTime, _mainLoopWaitCancellationTokenSource.Token);
+                        if (!_mainLoopWaitCancellationTokenSource.IsCancellationRequested)
                         {
                             nextRecordingInfo.RecordingSchedulerItem.IsActive = true; // we have to set the flag in the loop thread, otherwise it will be found many times
-                            _ = Task.Run(async () => await StartRecording(nextRecordingInfo.RecordingSchedulerItem));
+                            _ = Task.Run(async () => await StartRecording(nextRecordingInfo.RecordingSchedulerItem, true));
                         }
                     }
                     else // recordingSchedulerItem not found - we wait indefinitely for the recordingSchedulerItem collection change
-                        await Task.Delay(-1, tcs.Token);
+                        try
+                        {
+                            await Task.Delay(-1, _mainLoopWaitCancellationTokenSource.Token);
+                        }
+                        catch (TaskCanceledException) { } // silently ignore
                 }
             }
         }
 
-        public async Task StartRecording(RecordingSchedulerItem recordingSchedulerItem)
+        public async Task StartRecording(RecordingSchedulerItem recordingSchedulerItem, bool blockScheduledStart)
         {
+            recordingSchedulerItem.BlockScheduledStart = blockScheduledStart;
             var input = Providers.InputList.Current.Find(recordingSchedulerItem.InputId);
             var encoderPreset = EncoderPresets.Instance.Presets.FirstOrDefault(preset => preset.PresetName == recordingSchedulerItem.EncoderPreset);
             var directory = recordingSchedulerItem.Directory;
+            if (input is null)
+                throw new ArgumentException("Unable to start recording - no input provided");
+            if (encoderPreset is null)
+                throw new ArgumentException("Unable to start recording - empty encoder preset");
+            if (string.IsNullOrEmpty(directory))
+                throw new ArgumentException("Unable to start recording - empty target directory");
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
             var filename = Path.Combine(directory, $"{GenerateFileName(recordingSchedulerItem.FilenameCreationRule, recordingSchedulerItem.Name)}.{encoderPreset.FilenameExtension}");
@@ -162,10 +171,8 @@ namespace StudioTVPlayer.Model
             await Helpers.WaitUntilHelper.WaitForAsync(recordingSchedulerItem.Duration);
             // with the Stop() we expect PropertyChanged() to be raised resulting IsActive reset, if it's not failed or stopped manually
             recording.Stop();
-            if (recordingSchedulerItem.RepeatType != ScheduleRepeatType.Single)
-            {
-                NotifyMainLoop(); // inform the main loop that it's possible to schedule the recordingSchedulerItem again
-            }
+            recordingSchedulerItem.BlockScheduledStart = false;
+            NotifyMainLoop();
         }
 
         private string GenerateFileName(RecordingFilenameCreationRule rule, string name)
@@ -173,10 +180,10 @@ namespace StudioTVPlayer.Model
             return rule switch
             {
                 RecordingFilenameCreationRule.None => name,
-                RecordingFilenameCreationRule.DateTimeAtBegin => $"{DateTime.Now:yyyymmdd_HHmmss}_{name}",
-                RecordingFilenameCreationRule.DateTimeAtEnd => $"{name}_{DateTime.Now:yyyymmdd_HHmmss}",
-                RecordingFilenameCreationRule.DateAtBegin => $"{DateTime.Now:yyyymmdd}_{name}",
-                RecordingFilenameCreationRule.DateAtEnd => $"{name}_{DateTime.Now:yyyymmdd}",
+                RecordingFilenameCreationRule.DateTimeAtBegin => $"{DateTime.Now:yyyyMMdd_HHmmss}_{name}",
+                RecordingFilenameCreationRule.DateTimeAtEnd => $"{name}_{DateTime.Now:yyyyMMdd_HHmmss}",
+                RecordingFilenameCreationRule.DateAtBegin => $"{DateTime.Now:yyyyMMdd}_{name}",
+                RecordingFilenameCreationRule.DateAtEnd => $"{name}_{DateTime.Now:yyyyMMdd}",
                 RecordingFilenameCreationRule.TimeAtBegin => $"{DateTime.Now:HHmmss}_{name}",
                 RecordingFilenameCreationRule.TimeAtEnd => $"{name}_{DateTime.Now:HHmmss}",
                 RecordingFilenameCreationRule.UseNameAsFormat => DateTime.Now.ToString(name),
@@ -186,10 +193,10 @@ namespace StudioTVPlayer.Model
 
         private void NotifyMainLoop()
         {
-            Interlocked.Exchange(ref _mainLoopWaitCancellationTokenSource, null)?.Cancel();
+            _mainLoopWaitCancellationTokenSource?.Cancel();
         }
 
-        private static DateTime FindNextStartTime(RecordingSchedulerItem item, ref DateTime now)
+        private static DateTime FindNextStartTime(RecordingSchedulerItem item, DateTime now)
         {
             TimeSpan startTod = item.StartTime.TimeOfDay;
             TimeSpan duration = item.Duration;

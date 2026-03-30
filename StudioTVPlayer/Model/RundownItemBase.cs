@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StudioTVPlayer.Helpers;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -6,7 +7,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class RundownItemBase : INotifyPropertyChanged, IDisposable
+    public abstract class RundownItemBase : PropertyChangedBase, IDisposable
     {
         private bool _isAutoStart;
         private bool _isDisabled;
@@ -15,7 +16,6 @@ namespace StudioTVPlayer.Model
         public event EventHandler<TVPlayR.TimeEventArgs> FramePlayed;
         public event EventHandler RemoveRequested;
         public event EventHandler Loaded;
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public bool IsPrepared => _prepared != default;
 
@@ -27,7 +27,7 @@ namespace StudioTVPlayer.Model
                 if (_isAutoStart == value)
                     return;
                 _isAutoStart = value;
-                RaisePropertyChanged();
+                NotifyPropertyChanged();
             }
         }
 
@@ -39,7 +39,7 @@ namespace StudioTVPlayer.Model
                 if (_isDisabled == value)
                     return;
                 _isDisabled = value;
-                RaisePropertyChanged();
+                NotifyPropertyChanged();
             }
         }
 
@@ -107,11 +107,6 @@ namespace StudioTVPlayer.Model
         private void Input_Loaded(object sender, EventArgs e)
         {
             Loaded?.Invoke(this, e);
-        }
-
-        protected void RaisePropertyChanged([CallerMemberName] string propertyname = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
     }
 }

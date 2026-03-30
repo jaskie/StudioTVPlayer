@@ -31,7 +31,7 @@ namespace StudioTVPlayer.Model
                 _isLoop = value;
                 if (!(_input is null))
                     _input.IsLoop = value;
-                RaisePropertyChanged();
+                NotifyPropertyChanged();
             }
         }
 

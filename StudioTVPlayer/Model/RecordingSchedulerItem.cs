@@ -57,5 +57,10 @@ namespace StudioTVPlayer.Model
         [XmlIgnore]
         public bool IsActive { get => _isActive; set => Set(ref _isActive, value); }
 
+        /// <summary>
+        /// When started once by <see cref="RecordingScheduler"/>, will block its restart after failure (to avoid generateion of tons of failed recordings)
+        /// </summary>
+        [XmlIgnore]
+        public bool BlockScheduledStart { get; set; }
     }
 }

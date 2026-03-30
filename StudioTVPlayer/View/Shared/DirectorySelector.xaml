@@ -32,7 +32,7 @@
                 Command="{Binding BrowseForFolderCommand}"
                 Style="{StaticResource MahApps.Styles.Button.MetroWindow.Dark}"
                 ToolTip="Browse for the folder" >
-                <mah:FontIcon Glyph="&#xED25;" Foreground="{StaticResource MahApps.Brushes.Text}"/>
+                <mah:FontIcon Glyph="&#xED25;" FontSize="20" Foreground="{StaticResource MahApps.Brushes.Text}"/>
             </Button>
         </Grid>
     </Border>

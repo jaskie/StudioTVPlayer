@@ -45,6 +45,11 @@
                 <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
                     <Setter Property="Margin" Value="3 0"/>
                 </Style>
+                <Style TargetType="mah:FontIcon">
+                    <Setter Property="Glyph" Value="&#xE946;"/>
+                    <Setter Property="FontSize" Value="16"/>
+                    <Setter Property="Margin" Value="5 0" />
+                </Style>
             </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -60,7 +65,12 @@
                 <ColumnDefinition Width="7*"/>
                 <ColumnDefinition Width="8*"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Row="0">Name</Label>
+            <Label Grid.Row="0">
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock>Name</TextBlock>
+                    <mah:FontIcon Glyph="&#xE946;" ToolTip="The name will be used to build filename using specified rule"/>
+                </StackPanel>
+            </Label>
             <TextBox Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
             <Label Grid.Column="2" Grid.Row="0">Filename creation rule</Label>
             <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding FilenameCreationRules}" SelectedItem="{Binding FilenameCreationRule}"/>
@@ -96,14 +106,14 @@
             <Label Grid.Row="4">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock>Input source</TextBlock>
-                    <mah:FontIcon Glyph="&#xE946;" FontSize="16" Margin="5 0" ToolTip="Input has to be active at time of the recording"/>
+                    <mah:FontIcon Glyph="&#xE946;" ToolTip="Input has to be active at time of the recording"/>
                 </StackPanel>
             </Label>
             <ComboBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding Inputs}" SelectedItem="{Binding SelectedInput, ValidatesOnDataErrors=True}" DisplayMemberPath="DisplayName"/>
             <Label Grid.Row="4" Grid.Column="2">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock>Encoder preset</TextBlock>
-                    <mah:FontIcon Glyph="&#xE946;" FontSize="16" Margin="5 0" ToolTip="Must be compatible with format of input at time of the recording"/>
+                    <mah:FontIcon Glyph="&#xE946;" ToolTip="Must be compatible with format of input at time of the recording"/>
                 </StackPanel>
             </Label>
             <ComboBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding EncoderPresets}" SelectedItem="{Binding SelectedEncoderPreset, ValidatesOnDataErrors=True}" DisplayMemberPath="PresetName">

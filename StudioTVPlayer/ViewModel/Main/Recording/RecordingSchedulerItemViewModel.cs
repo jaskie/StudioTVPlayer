@@ -62,7 +62,16 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public static Array FilenameCreationRules { get; } = Enum.GetValues(typeof(Model.RecordingFilenameCreationRule));
 
-        public Model.RecordingFilenameCreationRule FilenameCreationRule { get => _filenameCreationRule; set => Set(ref _filenameCreationRule, value); }
+        public Model.RecordingFilenameCreationRule FilenameCreationRule
+        {
+            get => _filenameCreationRule;
+            set
+            {
+                if (!Set(ref _filenameCreationRule, value))
+                    return;
+                NotifyPropertyChanged(nameof(Name)); // we need re-validation of the Name
+            }
+        }
 
         public DateTime StartTime { get => _startTime; set => Set(ref _startTime, value); }
 
@@ -117,6 +126,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                         return "Preset is required to start recording";
                     case nameof(Name) when string.IsNullOrWhiteSpace(Name):
                         return "Name can't be empty";
+                    case nameof(Name) when FilenameCreationRule != Model.RecordingFilenameCreationRule.UseNameAsFormat && Path.GetInvalidFileNameChars().Intersect(Name).Any():
+                        return "Name contains character(s) not allowed in filename";
                 }
                 return null;
             }
@@ -204,7 +215,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             Save();
             _recordingSchedulerItem.IsActive = true;
-            await Model.RecordingScheduler.Current.StartRecording(_recordingSchedulerItem);
+            await Model.RecordingScheduler.Current.StartRecording(_recordingSchedulerItem, false);
         }
 
         private void RecordingSchedulerItem_PropertyChanged(object sender, PropertyChangedEventArgs e)

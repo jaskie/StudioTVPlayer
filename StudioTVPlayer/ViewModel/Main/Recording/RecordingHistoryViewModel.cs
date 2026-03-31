@@ -9,16 +9,17 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
     public sealed class RecordingHistoryViewModel : ViewModelBase, IDisposable
     {
         private readonly ICollectionView _recordingsView;
+        private readonly IList<RecordingViewModel> _recordings;
         private bool _isDisposed;
 
         public RecordingHistoryViewModel()
         {
-            Recordings = [.. Providers.RecordingStore.Current
+            _recordings = [.. Providers.RecordingStore.Current
                 .Recordings
                 .Select(CreateRecordingViewModel)];
             Providers.RecordingStore.Current.RecordingAdded += RecordingStore_RecordingAdded;
             Providers.RecordingStore.Current.RecordingDeleted += RecordingStore_RecordingDeleted;
-            _recordingsView = CollectionViewSource.GetDefaultView(Recordings);
+            _recordingsView = CollectionViewSource.GetDefaultView(_recordings);
             _recordingsView.SortDescriptions.Add(new SortDescription(nameof(RecordingViewModel.StartTime), ListSortDirection.Descending));
         }
 
@@ -26,10 +27,10 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             OnUiThread(() =>
             {
-                var recordingViewModel = Recordings.FirstOrDefault(vm => vm.Recording == e.Recording);
+                var recordingViewModel = _recordings.FirstOrDefault(vm => vm.Recording == e.Recording);
                 if (recordingViewModel is null)
                     return;
-                Recordings.Remove(recordingViewModel);
+                _recordings.Remove(recordingViewModel);
                 _recordingsView.Refresh();
             });
         }
@@ -38,12 +39,12 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             OnUiThread(() =>
             {
-                Recordings.Add(CreateRecordingViewModel(e.Recording));
+                _recordings.Add(CreateRecordingViewModel(e.Recording));
                 _recordingsView.Refresh();
             });
         }
 
-        public IList<RecordingViewModel> Recordings { get; }
+        public ICollectionView Recordings => _recordingsView;
 
         private RecordingViewModel CreateRecordingViewModel(Model.Recording recording)
         {
@@ -56,7 +57,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         {
             var recordingViewModel = sender as RecordingViewModel ?? throw new ArgumentException(nameof(sender));
             recordingViewModel.RemoveRequested -= RecordingViewModel_RemoveRequested;
-            Recordings.Remove(recordingViewModel);
+            _recordings.Remove(recordingViewModel);
             _recordingsView.Refresh();
         }
 
@@ -67,7 +68,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             _isDisposed = true;
             Providers.RecordingStore.Current.RecordingAdded -= RecordingStore_RecordingAdded;
             Providers.RecordingStore.Current.RecordingDeleted -= RecordingStore_RecordingDeleted;
-            foreach (var recording in Recordings)
+            foreach (var recording in _recordings)
                 recording.RemoveRequested -= RecordingViewModel_RemoveRequested;
         }
     }

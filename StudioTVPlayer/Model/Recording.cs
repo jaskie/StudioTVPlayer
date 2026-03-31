@@ -38,19 +38,6 @@ namespace StudioTVPlayer.Model
             _state = recording.State;
             _startTime = recording.GetStartTime();
             _duration = recording.GetDuration();
-            switch (recording.State)
-            {
-                case RecordingState.Pending:
-                    break;
-                case RecordingState.Running:
-                    break;
-                case RecordingState.Completed:
-                    break;
-                case RecordingState.Failed:
-                    break;
-                case RecordingState.Aborted:
-                    break;
-            }
         }
 
         public event EventHandler VerificationCompleted;

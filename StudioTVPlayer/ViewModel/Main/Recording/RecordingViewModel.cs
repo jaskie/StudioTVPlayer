@@ -288,6 +288,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                     Duration = recording.Duration;
                     Thumbnail = recording.Thumbnail;
                     Step = RecordingStep.Finished;
+                    State = recording.State;
                     break;
                 case nameof(Model.Recording.StartTime):
                     StartTime = recording.StartTime;
@@ -295,10 +296,10 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
                 case nameof(Model.Recording.Duration):
                     Duration = recording.Duration;
                     break;
-                case nameof(Thumbnail):
+                case nameof(Model.Recording.Thumbnail):
                     Thumbnail = recording.Thumbnail;
                     break;
-                case nameof(State):
+                case nameof(Model.Recording.State):
                     State = recording.State;
                     break;
             }

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using StudioTVPlayer.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
 {
@@ -101,7 +101,7 @@ namespace StudioTVPlayer.Providers
 
         private void Player_PlayerChanged(object sender, EventArgs e)
         {
-            var player = sender as RundownPlayer ?? throw new ArgumentException(nameof(sender));
+            var player = sender as RundownPlayer ?? throw new ArgumentException($"{nameof(RundownPlayer)} expected, {sender?.GetType()} got.");
             foreach (var playerController in PlayerControllers)
                 playerController.NotifyPlayerChanged(player);
         }

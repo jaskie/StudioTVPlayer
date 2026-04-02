@@ -187,7 +187,7 @@ namespace StudioTVPlayer.Model
                 RecordingFilenameCreationRule.TimeAtBegin => $"{DateTime.Now:HHmmss}_{name}",
                 RecordingFilenameCreationRule.TimeAtEnd => $"{name}_{DateTime.Now:HHmmss}",
                 RecordingFilenameCreationRule.UseNameAsFormat => DateTime.Now.ToString(name),
-                _ => throw new ArgumentOutOfRangeException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(rule)),
             };
         }
 

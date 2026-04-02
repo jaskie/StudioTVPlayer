@@ -9,6 +9,8 @@
     <ApplicationIcon>StudioTVPlayer.ico</ApplicationIcon>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest-minimum</AnalysisLevel>
+    <NoWarn>1701;1702;CA1816;CA1822</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="StudioTVPlayer.ico" />

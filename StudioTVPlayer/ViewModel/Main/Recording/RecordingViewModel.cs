@@ -64,6 +64,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
         private RecordingViewModel(Model.InputBase input, Model.EncoderPreset encoderPreset, string initialDirectory)
         {
             _input = input;
+            if (input is Model.DecklinkInput decklinkInput)
+                decklinkInput.FormatChanged += DecklinkInput_FormatChanged;
             _encoderPreset = encoderPreset ?? EncoderPresets.FirstOrDefault();
             DirectorySelector = new Shared.DirectorySelectorViewModel(initialDirectory);
             DirectorySelector.PropertyChanged += DirectorySelector_PropertyChanged;
@@ -198,7 +200,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         private void AddToPlayer(object parameter)
         {
-            var rundownPlayer = parameter as Model.RundownPlayer ?? throw new ArgumentException(nameof(parameter));
+            var rundownPlayer = parameter as Model.RundownPlayer ?? throw new ArgumentException($"{nameof(Model.RundownPlayer)} expected, {parameter?.GetType()} got.");
             rundownPlayer.AddMediaToQueue(_recording.Media, rundownPlayer.Items.Count);
         }
 
@@ -243,6 +245,8 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             var recording = Recording;
             if (recording?.State == Model.RecordingState.Running)
                 recording.PropertyChanged -= Recording_PropertyChanged;
+            if (_input is Model.DecklinkInput decklinkInput)
+                decklinkInput.FormatChanged -= DecklinkInput_FormatChanged;
         }
 
         public string FullPath
@@ -316,6 +320,11 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
             Duration = recording.Duration;
             Thumbnail = recording.Thumbnail;
             IsQueuedToVerify = false;
+        }
+
+        private void DecklinkInput_FormatChanged(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged(nameof(EncoderPresets));
         }
 
         protected override void RequestRemove(object obj)

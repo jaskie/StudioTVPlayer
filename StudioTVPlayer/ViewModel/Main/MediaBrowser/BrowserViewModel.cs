@@ -149,7 +149,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private void ChangeDate(object days)
         {
             if (!(days is string str && int.TryParse(str, out var increment)))
-                throw new ArgumentException(nameof(days));
+                throw new ArgumentException("days should be convertible to int");
             SelectedDate = SelectedDate.AddDays(increment);
         }
 

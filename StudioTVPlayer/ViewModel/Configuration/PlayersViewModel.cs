@@ -1,8 +1,8 @@
-﻿using System;
+﻿using StudioTVPlayer.Helpers;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
-using StudioTVPlayer.Helpers;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
@@ -29,7 +29,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private async void Player_RemoveRequested(object sender, EventArgs e)
         {
-            var player = sender as PlayerViewModel ?? throw new ArgumentException(nameof(sender));
+            var player = sender as PlayerViewModel ?? throw new ArgumentException($"{nameof(PlayersViewModel)} expected, {sender?.GetType()} got.");
             if (await _dialogCoordinator.ShowMessageAsync(ShellViewModel.Instance, "Confirmation", $"Really remove player \"{player.Name}\"?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) != MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
                 return;
             Players.Remove(player);
@@ -69,9 +69,9 @@ namespace StudioTVPlayer.ViewModel.Configuration
             return false;
         }
 
-        private void DeletePlayer(object obj)
+        private void DeletePlayer(object sender)
         {
-            var player = obj as PlayerViewModel ?? throw new ArgumentException(nameof(obj));
+            var player = sender as PlayerViewModel ?? throw new ArgumentException($"{nameof(PlayerViewModel)} expected, {sender?.GetType()} got.");
             if (Players.Remove(player))
             {
                 player.RemoveRequested -= Player_RemoveRequested;

@@ -246,7 +246,7 @@ namespace StudioTVPlayer.Model
         {
             Task.Run(() => // do not block incoming thread
             {
-                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got."); ;
                 if (rundownItem == _loadedItem) // next didn't loaded
                 {
                     if (rundownItem.IsEof)

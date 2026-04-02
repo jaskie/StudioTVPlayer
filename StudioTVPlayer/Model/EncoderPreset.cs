@@ -29,20 +29,19 @@ namespace StudioTVPlayer.Model
     public sealed class EncoderPresets
     {
         public static EncoderPresets Instance { get; } = new EncoderPresets();
+        
         private EncoderPresets() 
         {
-            _presets = Load();
+            Presets = Load();
         }
 
-        private EncoderPreset[] _presets;
-
-        public IReadOnlyCollection<EncoderPreset> Presets => _presets;
+        public EncoderPreset[] Presets { get; }
 
         private EncoderPreset[] Load()
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(EncoderPreset[]), new System.Xml.Serialization.XmlRootAttribute("PresetList"));
+            var serializer = new XmlSerializer(typeof(EncoderPreset[]), new XmlRootAttribute("PresetList"));
             var presets = (EncoderPreset[])serializer.Deserialize(resourceStream);
             return presets;
         }

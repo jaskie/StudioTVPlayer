@@ -1,7 +1,7 @@
-﻿using System;
+﻿using StudioTVPlayer.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Windows.Media;
-using StudioTVPlayer.Helpers;
 
 namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
@@ -54,9 +54,9 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public UiCommand QueueToPlayerCommand { get; }
 
 
-        private void QueueToPlayer(object obj)
+        private void QueueToPlayer(object sender)
         {
-            var player = obj as Model.RundownPlayer ?? throw new ArgumentException(nameof(obj));
+            var player = sender as Model.RundownPlayer ?? throw new ArgumentException($"{nameof(Model.RundownPlayer)} expected, {sender?.GetType()} got.");
             player.Submit(Media);
         }
 

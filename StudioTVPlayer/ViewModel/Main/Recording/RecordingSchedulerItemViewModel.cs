@@ -79,7 +79,7 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public Model.EncoderPreset SelectedEncoderPreset { get => _selectedEncoderPreset; set => Set(ref _selectedEncoderPreset, value); }
 
-        public IEnumerable<Model.EncoderPreset> EncoderPresets => Model.EncoderPresets.Instance.Presets;
+        public Model.EncoderPreset[] EncoderPresets => Model.EncoderPresets.Instance.Presets;
 
         public static Array RepeatTypes { get; } = Enum.GetValues(typeof(Model.ScheduleRepeatType));
         public Model.ScheduleRepeatType SelectedRepeatType { get => _selectedRepeatType; set => Set(ref _selectedRepeatType, value); }

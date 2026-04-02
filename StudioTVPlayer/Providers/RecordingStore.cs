@@ -103,7 +103,7 @@ namespace StudioTVPlayer.Providers
 
         private void Recording_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var recording = sender as Model.Recording ?? throw new ArgumentException(nameof(sender));
+            var recording = sender as Model.Recording ?? throw new ArgumentException($"{nameof(Model.Recording)} expected, {sender?.GetType()} got.");
             if (e.PropertyName is nameof(Model.Recording.State) && recording.State is Model.RecordingState.Aborted or Model.RecordingState.Completed or Model.RecordingState.Failed)
             {
                 recording.PropertyChanged -= Recording_PropertyChanged;

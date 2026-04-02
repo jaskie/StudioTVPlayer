@@ -314,7 +314,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(object param)
         {
-            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModelBase ?? throw new ArgumentException(nameof(param)));
+            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModelBase ?? throw new ArgumentException($"{nameof(RundownItemViewModelBase)} expected, {param?.GetType()} got."));
         }
 
         private void LoadMedia(RundownItemViewModelBase playerItem) => _rundownPlayer.Load(playerItem.RundownItem);
@@ -566,7 +566,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 case LiveInputRundownItem liveInputRundownItem:
                     return new LiveInputRundownItemViewModel(liveInputRundownItem);
                 default:
-                    throw new ArgumentException(nameof(rundownItem));
+                    throw new ArgumentOutOfRangeException(nameof(rundownItem));
             }
         }
 

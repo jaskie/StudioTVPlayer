@@ -54,7 +54,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private void Recording_RemoveRequested(object sender, EventArgs e)
         {
-            var recordingViewModel = sender as Recording.RecordingViewModel ?? throw new ArgumentException(nameof(sender));
+            var recordingViewModel = sender as Recording.RecordingViewModel ?? throw new ArgumentException($"{nameof(Recording.RecordingViewModel)} expected, {sender?.GetType()} got.");
             recordingViewModel.RemoveRequested -= Recording_RemoveRequested;
             _recordings.Remove(recordingViewModel);
         }

@@ -68,7 +68,7 @@ namespace StudioTVPlayer.Model
                 string modelName = null;
                 foreach (var s in strings)
                 {
-                    var splitted = s.Split(new[] { '=' }, 2);
+                    var splitted = s.Split(['='], 2);
                     if (splitted.Length != 2)
                         continue;
                     switch (splitted[0])

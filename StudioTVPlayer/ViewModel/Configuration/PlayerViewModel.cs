@@ -199,7 +199,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Output_RemoveRequested(object sender, EventArgs e)
         {
-            var output = sender as OutputViewModelBase ?? throw new ArgumentException(nameof(sender));
+            var output = sender as OutputViewModelBase ?? throw new ArgumentException($"{nameof(OutputViewModelBase)} expected, {sender?.GetType()} got.");
             output.RemoveRequested -= Output_RemoveRequested;
             output.CheckErrorInfo -= Output_CheckErrorInfo;
             output.Modified -= Output_Modified;

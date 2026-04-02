@@ -12,7 +12,7 @@ namespace StudioTVPlayer.ViewModel.Main
     public class PlayoutViewModel : ViewModelBase, IDisposable
     {
         private bool _disposed;
-        private ViewModelBase selectedBrowser;
+        private ViewModelBase _selectedBrowser;
 
         public PlayoutViewModel()
         {
@@ -34,7 +34,7 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public IReadOnlyCollection<ViewModelBase> Browsers { get; }
 
-        public ViewModelBase SelectedBrowser { get => selectedBrowser; set => Set(ref selectedBrowser, value); }
+        public ViewModelBase SelectedBrowser { get => _selectedBrowser; set => Set(ref _selectedBrowser, value); }
 
         private void FocusBrowser(object obj)
         {

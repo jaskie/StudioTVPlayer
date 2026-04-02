@@ -67,7 +67,7 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_Loaded(object sender, EventArgs _)
         {
-            var item = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            var item = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got.");
             ItemLoaded?.Invoke(this, new RundownItemEventArgs(item));
             _loadedItem = item;
             RundownChanged();
@@ -75,13 +75,13 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_RemoveRequested(object sender, EventArgs _)
         {
-            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got.");
             Remove(rundownItem);
         }
 
         private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got.");
             switch (e.PropertyName)
             {
                 case nameof(RundownItemBase.IsAutoStart):
@@ -100,7 +100,7 @@ namespace StudioTVPlayer.Model
                 else if (index < _items.Count)
                     _items.Insert(index, rundownItem);
                 else
-                    throw new ArgumentException(nameof(index));
+                    throw new ArgumentException("Invalid index provided");
             }
             rundownItem.PropertyChanged += RundownItem_PropertyChanged;
             rundownItem.RemoveRequested += RundownItem_RemoveRequested;

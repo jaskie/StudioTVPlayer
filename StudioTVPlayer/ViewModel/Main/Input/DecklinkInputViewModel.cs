@@ -110,7 +110,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private void Input_FormatChanged(object sender, EventArgs e)
         {
-            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException(nameof(sender));
+            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException($"{nameof(Model.DecklinkInput)} expected, {sender?.GetType()} got.");
             _videoFormat = decklink.CurrentFormat();
             NotifyPropertyChanged(nameof(VideoFormat));
         }

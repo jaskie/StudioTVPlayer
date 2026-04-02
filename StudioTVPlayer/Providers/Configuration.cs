@@ -43,12 +43,5 @@ namespace StudioTVPlayer.Providers
             var configurationFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, ConfigurationFile);
             Helpers.DataStore.Save(this, configurationFile);
         }
-
-        private static string GetDefaultRecordingLocation()
-        {
-            var videos = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyVideos, System.Environment.SpecialFolderOption.Create);
-            return Path.Combine(videos, "Recordings");
-        }
-
     }
 }

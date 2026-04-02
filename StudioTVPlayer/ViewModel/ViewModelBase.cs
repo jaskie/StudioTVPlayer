@@ -42,7 +42,7 @@ namespace StudioTVPlayer.ViewModel
         /// <summary>
         /// Raised when a property on this object has a new value.
         /// </summary>
-        public virtual event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Raises this object's PropertyChanged event.

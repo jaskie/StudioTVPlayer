@@ -71,7 +71,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Binding_RemoveRequested(object sender, EventArgs e)
         {
-            var vm = sender as PlayerControllerBindingViewModelBase ?? throw new ArgumentException(nameof(sender));
+            var vm = sender as PlayerControllerBindingViewModelBase ?? throw new ArgumentException($"{nameof(PlayerControllerBindingViewModelBase)} expected, {sender?.GetType()} got.");
             vm.Modified -= Binding_Modified;
             vm.RemoveRequested -= Binding_RemoveRequested;
             Bindings.Remove(vm);

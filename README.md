@@ -2,19 +2,20 @@
 A simple TV studio player with SDI, NDI and MPEG TS outputs for Windows
 ## Features:
 * Few players inside one application, controlled using mouse and keyboard shortcuts, i.e. A/B playout plus wallscreen on single UI
+* Decklink input recording, with ability to play file while recording
+* [NEW] Recording scheduler with history
 * Almost any file format can be played - it uses FFmpeg under the hood
 * Uses Blackmagic Design Decklink cards as SDI outputs and inputs
 * Can also output to [NDI](https://ndi.video) and MPEG-TS streams
 * Can play files with alpha channel (transparency), with key & fill on separate SDI outputs of supporting Decklink cards (i.e. Duo 2, 8K Pro, Extreme 4K)
-* Watched folders with clip thumbnails with [NEW] quick search
+* Watched folders with clip thumbnails with quick search
 * Drag & drop files to rundown from watched folder or directly from Windows Explorer
-* Audio level adjustment for playing file (+/- 15 dB)
+* Audio level adjustment for file being played (+/- 15 dB)
 * Simple rundowns, with option to loop whole rundown or individual files
 * Time/Timecode input and output on RP-188 VANC stream or overlay on video (can be set for single output)
-* Multiple outputs for single player, i.e. one with and one w/o timecode overlay
-* Decklink input recording, with ability to play file while recording
+* Multiple outputs for single player, i.e. additional one with timecode overlay
 * 10-bit processing and output on Decklink (not recommended with overlays)
-* [NEW] Player control (e.g. play, cue) integration with Blackmagic Atem switcher and Elgato StreamDeck
+* Player control (e.g. play, cue) integration with Blackmagic Atem switcher and Elgato StreamDeck
 
 ## Prerequisits
 * Windows 7 or newer with .Net Framework 4.8 installed

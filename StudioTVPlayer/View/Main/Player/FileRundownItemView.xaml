@@ -81,7 +81,7 @@
             <mah:FontIcon Glyph="&#xEF3B;"/>
         </ToggleButton>
         <TextBlock Grid.Column="4" Text="{Binding RundownItem.Name}" />
-        <TextBlock Grid.Column="5" Text="{Binding RundownItem.Media.Duration, StringFormat={}{0:hh}:{0:mm}:{0:ss}}" />
+        <TextBlock Grid.Column="5" Text="{Binding RundownItem.Media.Duration, StringFormat=hh\\:mm\\:ss}" />
         <TextBlock Grid.Column="6" Text="{Binding RundownItem.Media.CreationTime, StringFormat=g}" />
         <Button Grid.Column="7" Style="{StaticResource RemoveButtonStyle}" />
     </Grid>

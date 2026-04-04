@@ -1,8 +1,9 @@
-﻿using System;
+﻿using StudioTVPlayer.Model;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using StudioTVPlayer.Model;
 
 namespace StudioTVPlayer.Providers
 {
@@ -10,14 +11,9 @@ namespace StudioTVPlayer.Providers
     {
         private const string PathName = "StudioTVPlayer";
         public static readonly string ApplicationDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), PathName);
-        private readonly List<RundownPlayer> _rundownPlayers = new List<RundownPlayer>();
-        private PlayerControllerBase[] _playerControllers = Array.Empty<PlayerControllerBase>();
-        private readonly List<Recording> _recordings = new List<Recording>();
-
-        private GlobalApplicationData()
-        {
-            EncoderPresets = LoadEncoderPresets();
-        }
+        private readonly List<RundownPlayer> _rundownPlayers = [];
+        private PlayerControllerBase[] _playerControllers = [];
+        private GlobalApplicationData() { }
 
         public static GlobalApplicationData Current { get; } = new GlobalApplicationData();
 
@@ -25,21 +21,19 @@ namespace StudioTVPlayer.Providers
 
         public IReadOnlyList<PlayerControllerBase> PlayerControllers => _playerControllers;
 
-        public IReadOnlyList<Recording> Recordings => _recordings;
-
         public IReadOnlyList<EncoderPreset> EncoderPresets { get; private set; }
 
         public void Shutdown()
         {
             MediaVerifier.Current.Dispose();
-            foreach (var recording in _recordings.ToList())
-                recording.Dispose(); //will also call Recording_Finished below
+            RecordingStore.Current.Dispose();
             foreach (var player in RundownPlayers)
                 player.Dispose();
             foreach (var input in InputList.Current.Inputs)
                 input.Dispose();
             foreach (var playerController in PlayerControllers)
                 playerController.Dispose();
+            RecordingScheduler.Current.Shutdown();
         }
 
         public void UpdatePlayers(List<PlayerUpdateItem> newConfiguration)
@@ -74,6 +68,7 @@ namespace StudioTVPlayer.Providers
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
             UpdatePlayerControllers();
+            RecordingScheduler.Current.Initialize();
         }
 
         public void UpdatePlayerControllers()
@@ -106,7 +101,7 @@ namespace StudioTVPlayer.Providers
 
         private void Player_PlayerChanged(object sender, EventArgs e)
         {
-            var player = sender as RundownPlayer ?? throw new ArgumentException(nameof(sender));
+            var player = sender as RundownPlayer ?? throw new ArgumentException($"{nameof(RundownPlayer)} expected, {sender?.GetType()} got.");
             foreach (var playerController in PlayerControllers)
                 playerController.NotifyPlayerChanged(player);
         }
@@ -129,28 +124,6 @@ namespace StudioTVPlayer.Providers
         }
 
         private void PlayerController_ConnectionStateChanged(object sender, EventArgs e) => PlayerControllerConnectionStatusChanged?.Invoke(sender, EventArgs.Empty);
-
-        public IReadOnlyList<EncoderPreset> LoadEncoderPresets()
-        {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
-            var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<EncoderPreset>), new System.Xml.Serialization.XmlRootAttribute("PresetList"));
-            var presets = (List<EncoderPreset>)serializer.Deserialize(resourceStream);
-            return presets;
-        }
-
-        public void AddRecording(Recording recording)
-        {
-            _recordings.Add(recording);
-            recording.Finished += Recording_Finished;
-        }
-
-        private void Recording_Finished(object sender, EventArgs e)
-        {
-            var recording = sender as Recording ?? throw new ArgumentException(nameof(sender));
-            recording.Finished -= Recording_Finished;
-            _recordings.Remove(recording);
-        }
     }
 
     public class PlayerUpdateItem

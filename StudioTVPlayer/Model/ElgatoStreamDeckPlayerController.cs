@@ -33,7 +33,7 @@ namespace StudioTVPlayer.Model
         private ElgatoStreamDeckPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer)
         {
             Debug.Assert(rundownPlayer != null);
-            var elgatoStreamDeckPlayerBindingConfiguration = playerBindingConfiguration as Configuration.ElgatoStreamDeckPlayerBinding ?? throw new ArgumentException(nameof(playerBindingConfiguration));
+            var elgatoStreamDeckPlayerBindingConfiguration = playerBindingConfiguration as Configuration.ElgatoStreamDeckPlayerBinding ?? throw new ArgumentException($"{nameof(Configuration.ElgatoStreamDeckPlayerBinding)} expected, {playerBindingConfiguration?.GetType()} got."); ;
             return new ElgatoStreamDeckPlayerBinding(elgatoStreamDeckPlayerBindingConfiguration, rundownPlayer);
         }
 

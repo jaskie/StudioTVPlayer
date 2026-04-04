@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
 {
-    public class DecklinkInputViewModel : InputViewModelBase
+    public sealed class DecklinkInputViewModel : InputViewModelBase
     {
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.DecklinkInfo _selectedDevice;
@@ -75,6 +75,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public ImageSource Thumbnail => Input.Thumbnail;
 
+        public override string DisplayName => SelectedDevice?.DisplayName;
+
         public override bool IsValid()
         {
             return string.IsNullOrEmpty(ReadErrorInfo(nameof(VideoFormat)))
@@ -108,7 +110,7 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private void Input_FormatChanged(object sender, EventArgs e)
         {
-            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException(nameof(sender));
+            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException($"{nameof(Model.DecklinkInput)} expected, {sender?.GetType()} got.");
             _videoFormat = decklink.CurrentFormat();
             NotifyPropertyChanged(nameof(VideoFormat));
         }

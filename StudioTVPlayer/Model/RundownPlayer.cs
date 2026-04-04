@@ -23,6 +23,7 @@ namespace StudioTVPlayer.Model
             _rundown.ItemAdded += Rundown_ItemAdded;
             _rundown.ItemRemoved += Rundown_ItemRemoved;
         }
+
         public RundownItemBase LoadedItem
         {
             get => _loadedItem;
@@ -165,9 +166,9 @@ namespace StudioTVPlayer.Model
             _rundown.Add(item, index);
         }
 
-        public void LoadRundown(string fileName) => Persistence.RundownPersister.LoadRundown(_rundown, fileName);
+        public void LoadRundown(string fileName) => Providers.RundownPersister.LoadRundown(_rundown, fileName);
 
-        public void SaveRundown(string fileName) => Persistence.RundownPersister.SaveRundown(_rundown, fileName);
+        public void SaveRundown(string fileName) => Providers.RundownPersister.SaveRundown(_rundown, fileName);
 
         private void AfterPlayed(RundownItemBase rundownItem)
         {
@@ -208,8 +209,7 @@ namespace StudioTVPlayer.Model
 
         private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!(sender is MediaFile media))
-                return;
+            var media = sender as MediaFile ?? throw new ArgumentException($"{nameof(MediaFile)} expected, {sender?.GetType()} got.");
             switch (e.PropertyName)
             {
                 case nameof(MediaFile.Duration):
@@ -246,7 +246,7 @@ namespace StudioTVPlayer.Model
         {
             Task.Run(() => // do not block incoming thread
             {
-                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got."); ;
                 if (rundownItem == _loadedItem) // next didn't loaded
                 {
                     if (rundownItem.IsEof)

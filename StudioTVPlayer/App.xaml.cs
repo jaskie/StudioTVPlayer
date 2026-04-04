@@ -1,12 +1,6 @@
 ﻿#undef DEBUG
 using StudioTVPlayer.Providers;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -17,6 +11,8 @@ namespace StudioTVPlayer
     /// </summary>
     public partial class App : Application
     {
+        private static SplashScreen SplashScreen;
+
         public App()
         {
             DispatcherUnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
@@ -25,7 +21,31 @@ namespace StudioTVPlayer
                     new FrameworkPropertyMetadata(
                     System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
             AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) => HandleException(e.ExceptionObject as Exception, e.IsTerminating);
-            Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
+            Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => e.Handled = true;
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            SplashScreen = new SplashScreen("/StudioTVPlayer.ico");
+            SplashScreen.Show(autoClose: false, topMost: true);
+            base.OnStartup(e);
+            GlobalUiHandlers.RegisterTextBoxSelectAllOnFocus();
+            try
+            {
+                GlobalApplicationData.Current.Initialize();
+            }
+            catch (Exception ex)
+            {
+                SplashScreen.Close(TimeSpan.Zero);
+                HandleException(ex, true);
+                Shutdown();
+            }
+        }
+
+        public static void CloseSplashScreen()
+        {
+            SplashScreen?.Close(TimeSpan.FromSeconds(0.5));
+            SplashScreen = null;
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -33,18 +53,17 @@ namespace StudioTVPlayer
             base.OnExit(e);
             try
             {
-                ViewModel.MainViewModel.Instance.Dispose();
+                ViewModel.ShellViewModel.Instance.Dispose();
                 GlobalApplicationData.Current.Shutdown();
             }
             catch (OperationCanceledException)
             { }
         }
 
-
         private void HandleException(Exception e, bool isTerminating)
         {
             var exception = (e?.InnerException ?? e);
-            var message = $"{e?.GetType().Name ?? "Error without exception"} occured with message {e?.Message ?? "empty"}.";
+            var message = $"{e?.GetType().Name ?? "Error without exception"} occured with message: {e?.Message ?? "empty"}";
 #if DEBUG
             CrashLogger.SaveDump(e.ToString());
 #else

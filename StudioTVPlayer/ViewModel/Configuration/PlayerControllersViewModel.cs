@@ -172,7 +172,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void PlayerController_RemoveRequested(object sender, EventArgs e)
         {
-            var vm = sender as PlayerControllerViewModelBase ?? throw new ArgumentException(nameof(sender));
+            var vm = sender as PlayerControllerViewModelBase ?? throw new ArgumentException($"{nameof(PlayerControllerViewModelBase)} expected, {sender?.GetType()} got."); ;
             if (!PlayerControllers.Remove(vm))
                 throw new ApplicationException("PlayerController was not in the list");
             UnsubscribePlayerControllerEvents(vm);

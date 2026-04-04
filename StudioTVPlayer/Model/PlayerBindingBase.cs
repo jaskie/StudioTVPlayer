@@ -15,7 +15,7 @@ namespace StudioTVPlayer.Model
 
         public readonly RundownPlayer RundownPlayer;
 
-        protected bool CanExecute => MainViewModel.Instance.CurrentViewModel is PlayoutViewModel;
+        protected bool CanExecute => ShellViewModel.Instance.CurrentViewModel is PlayoutViewModel;
 
         protected void ExecuteOnPlayer()
         {

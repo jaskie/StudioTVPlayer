@@ -1,12 +1,27 @@
-﻿using System;
+﻿using StudioTVPlayer.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Windows.Media;
-using StudioTVPlayer.Helpers;
 
 namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
     public class MediaViewModel : ViewModelBase, IDisposable
     {
+        private Action _verifyOnceAction;
+        public MediaViewModel(Model.MediaFile media)
+        {
+            Media = media;
+            if (!media.IsVerified)
+            {
+                _verifyOnceAction = () =>
+                {
+                    _verifyOnceAction = null;
+                    Model.MediaVerifier.Current.Queue(media);
+                };
+            }
+            media.PropertyChanged += Media_PropertyChanged;
+            QueueToPlayerCommand = new UiCommand(QueueToPlayer);
+        }
 
         public Model.MediaFile Media { get; }
 
@@ -21,7 +36,14 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         public int AudioChannelCount => Media.AudioChannelCount;
         public bool HaveAlphaChannel => Media.HaveAlphaChannel;
 
-        public ImageSource Thumbnail => Media.Thumbnail;
+        public ImageSource Thumbnail
+        {
+            get
+            {
+                _verifyOnceAction?.Invoke();
+                return Media.Thumbnail;
+            }
+        }
 
         public bool IsVerified => Media.IsVerified;
 
@@ -31,16 +53,10 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         public UiCommand QueueToPlayerCommand { get; }
 
-        public MediaViewModel(Model.MediaFile media)
-        {
-            Media = media;
-            media.PropertyChanged += Media_PropertyChanged;
-            QueueToPlayerCommand = new UiCommand(QueueToPlayer);
-        }
 
-        private void QueueToPlayer(object obj)
+        private void QueueToPlayer(object sender)
         {
-            var player = obj as Model.RundownPlayer ?? throw new ArgumentException(nameof(obj));
+            var player = sender as Model.RundownPlayer ?? throw new ArgumentException($"{nameof(Model.RundownPlayer)} expected, {sender?.GetType()} got.");
             player.Submit(Media);
         }
 

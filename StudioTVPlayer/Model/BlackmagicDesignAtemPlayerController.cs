@@ -31,7 +31,7 @@ namespace StudioTVPlayer.Model
         private BlackmagicDesignAtemPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer)
         {
             Debug.Assert(rundownPlayer != null);
-            var blackmagicDesignAtemPlayerBindingConfiguration = playerBindingConfiguration as Configuration.BlackmagicDesignAtemPlayerBinding ?? throw new ArgumentException(nameof(playerBindingConfiguration));
+            var blackmagicDesignAtemPlayerBindingConfiguration = playerBindingConfiguration as Configuration.BlackmagicDesignAtemPlayerBinding ?? throw new ArgumentException($"{nameof(Configuration.BlackmagicDesignAtemPlayerBinding)} expected, {playerBindingConfiguration?.GetType()} got.");
             return new BlackmagicDesignAtemPlayerBinding(blackmagicDesignAtemPlayerBindingConfiguration, rundownPlayer);
         }
 

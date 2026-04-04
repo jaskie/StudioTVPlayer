@@ -7,17 +7,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
         event EventHandler<CheckErrorEventArgs> CheckErrorInfo;
     }
 
-    public class CheckErrorEventArgs: EventArgs
+    public class CheckErrorEventArgs(ViewModelBase source, string propertyName) : EventArgs
     {
-        public CheckErrorEventArgs(ViewModelBase source, string propertyName)
-        {
-            Source = source;
-            PropertyName = propertyName;
-        }
+        public ViewModelBase Source { get; } = source;
 
-        public ViewModelBase Source { get; }
-        
-        public string PropertyName { get; }
+        public string PropertyName { get; } = propertyName;
 
         public string Message { get; set; } = string.Empty;
     }

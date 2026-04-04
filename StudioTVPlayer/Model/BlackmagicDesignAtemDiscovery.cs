@@ -68,7 +68,7 @@ namespace StudioTVPlayer.Model
                 string modelName = null;
                 foreach (var s in strings)
                 {
-                    var splitted = s.Split(new[] { '=' }, 2);
+                    var splitted = s.Split(['='], 2);
                     if (splitted.Length != 2)
                         continue;
                     switch (splitted[0])
@@ -157,13 +157,8 @@ namespace StudioTVPlayer.Model
         }
     }
 
-    public class BlackmagicAtemDeviceEventArgs : EventArgs
+    public class BlackmagicAtemDeviceEventArgs(BlackmagicDesignAtemDeviceInfo device) : EventArgs
     {
-        public BlackmagicAtemDeviceEventArgs(BlackmagicDesignAtemDeviceInfo device)
-        {
-            Device = device;
-        }
-
-        public BlackmagicDesignAtemDeviceInfo Device { get; }
+        public BlackmagicDesignAtemDeviceInfo Device { get; } = device;
     }
 }

@@ -75,7 +75,7 @@ namespace StudioTVPlayer.Model
                 case PlayerMethodKind.Clear:
                     return "\xE71A";
                 default:
-                    throw new ArgumentException(nameof(playerMethodKind));
+                    throw new ArgumentException("Not supported PlayerMethodKind");
             }
         }
 

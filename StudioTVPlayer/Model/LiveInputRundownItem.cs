@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Model
 
         public override ImageSource Thumbnail => null;
 
-        public override string Name => _input.TVPlayRInput.Name;
+        public override string Name => _input.Name;
 
         public InputBase Input => _input;
 

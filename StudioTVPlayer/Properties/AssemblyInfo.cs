@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("Studio TVPlayer")]
 [assembly: AssemblyDescription("Player for TV studio")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Jerzy Jaśkiewicz")]
 [assembly: AssemblyProduct("Studio TVPlayer")]
-[assembly: AssemblyCopyright("Copyright © 2025")]
+[assembly: AssemblyCopyright("Copyright © 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

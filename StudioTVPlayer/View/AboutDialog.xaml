@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:StudioTVPlayer.ViewModel"
+             xmlns:ap="clr-namespace:StudioTVPlayer.Helpers.AttachedProperties"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:AboutDialogViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <Separator Height="5" />
-        <TextBlock>Studio TV Player is based on <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ffmpeg.org/">FFmpeg</Hyperlink> (core player), and 
-            <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://mahapps.com/">MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
+        <TextBlock TextWrapping="Wrap">Studio TV Player is simple, <Hyperlink NavigateUri="https://github.com/jaskie/StudioTVPlayer" ap:HyperlinkProperties.IsExternal="True">open source</Hyperlink> play-out and recording application to use in TV studio environment. It is based on <Hyperlink NavigateUri="https://www.ffmpeg.org/" ap:HyperlinkProperties.IsExternal="True" >FFmpeg</Hyperlink> (core player), and 
+            <Hyperlink NavigateUri="https://mahapps.com/" ap:HyperlinkProperties.IsExternal="True">MahApps.Metro</Hyperlink> (UI) <LineBreak/></TextBlock>
         <TextBlock >Versions:</TextBlock>
         <Grid HorizontalAlignment="Left">
             <Grid.Resources>
@@ -44,14 +45,17 @@
             <Label Grid.Row="4">avfilter</Label>
             <TextBlock Grid.Row="4" Text="{Binding VersionInfo.FFmpegAVFilter}"/>
             <Label Grid.Row="5">
-                <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.blackmagicdesign.com/products/decklink">Decklink</Hyperlink>
+                <Hyperlink NavigateUri="https://www.blackmagicdesign.com/products/decklink" ap:HyperlinkProperties.IsExternal="True">Decklink</Hyperlink>
             </Label>
             <TextBlock Grid.Row="5" Text="{Binding VersionInfo.Decklink}"/>
             <Label Grid.Row="6">
-                <Hyperlink Command="{Binding OpenHyperlinkCommand}" CommandParameter="https://www.ndi.tv/">NDI</Hyperlink>
+                <Hyperlink NavigateUri="https://ndi.video/" ap:HyperlinkProperties.IsExternal="True">NDI</Hyperlink>
             </Label>
             <TextBlock Grid.Row="6" Text="{Binding VersionInfo.Ndi}"/>
         </Grid>
-        <Button IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="Close" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
+        <Grid>
+            <TextBlock Grid.Column="0" HorizontalAlignment="Left" Grid.Row="7" Margin="0 20" VerticalAlignment="Bottom" Grid.ColumnSpan="2">See, what's new on <Hyperlink NavigateUri="https://github.com/jaskie/StudioTVPlayer" ap:HyperlinkProperties.IsExternal="True">GitHub</Hyperlink></TextBlock>
+            <Button Grid.Row="7" Grid.Column="1" IsCancel="True" Command="{Binding CloseCommand}" Margin="20" HorizontalAlignment="Right" Content="Close" Style="{DynamicResource MahApps.Styles.Button.Dialogs.Accent}"/>
+        </Grid>
     </StackPanel>
 </UserControl>

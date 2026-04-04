@@ -31,7 +31,7 @@ namespace StudioTVPlayer.Model
                 _isLoop = value;
                 if (!(_input is null))
                     _input.IsLoop = value;
-                RaisePropertyChanged();
+                NotifyPropertyChanged();
             }
         }
 
@@ -97,7 +97,7 @@ namespace StudioTVPlayer.Model
 
         private void InputFile_Paused(object sender, EventArgs e)
         {
-                Paused?.Invoke(this, EventArgs.Empty);
+            Paused?.Invoke(this, EventArgs.Empty);
         }
     }
 }

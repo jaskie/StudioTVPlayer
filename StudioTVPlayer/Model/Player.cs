@@ -26,7 +26,7 @@ namespace StudioTVPlayer.Model
         {
             Configuration = configuration;
         }
-        
+
         public Configuration.Player Configuration { get; }
 
         public string Id => Configuration.Id;

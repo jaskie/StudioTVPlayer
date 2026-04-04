@@ -11,6 +11,6 @@ namespace StudioTVPlayer.Model.Configuration
         [XmlArray]
         [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerBinding))]
         [XmlArrayItem(typeof(ElgatoStreamDeckPlayerBinding))]
-        public PlayerBindingBase[] Bindings { get; set; } = Array.Empty<PlayerBindingBase>();
+        public PlayerBindingBase[] Bindings { get; set; } = [];
     }
 }

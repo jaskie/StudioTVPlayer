@@ -25,7 +25,7 @@ namespace StudioTVPlayer.Model
 
         public override void Initialize(TVPlayR.Player player)
         {
-            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == _configuration.DeviceIndex);
+            var info = TVPlayR.DecklinkIterator.Devices.FirstOrDefault(i => i.Index == _configuration.DeviceIndex) ?? throw new ApplicationException($"Decklink {_configuration.DeviceIndex} not found.");
             if (info == null)
                 throw new ApplicationException($"Decklink {_configuration.DeviceIndex} not found.");
             _output = info is null ? null : TVPlayR.DecklinkIterator.CreateOutput(info, _configuration.Keyer, _configuration.TimecodeSource);

@@ -1,4 +1,5 @@
-﻿using StudioTVPlayer.Helpers;
+﻿using MahApps.Metro.Controls.Dialogs;
+using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Providers;
 using System;
 using System.Collections.Generic;
@@ -45,13 +46,16 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         private async void Input_RemoveRequested(object sender, EventArgs e)
         {
-            var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));
-            if (vm.Recordings.Any())
+            var vm = sender as InputViewModelBase ?? throw new ArgumentException($"{nameof(InputViewModelBase)} expected, {sender?.GetType()} got.");
+            if (RecordingStore.Current.RunningRecordings.Any(r => r.Input == vm.Input))
             {
-                await MainViewModel.Instance.ShowMessageAsync("Remove input", "You cannot remove input with recordings. Remove recordings first.", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.Affirmative);
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "You cannot remove input with ongoing recording(s).", MessageDialogStyle.Affirmative);
                 return;
             }
-            if (await MainViewModel.Instance.ShowMessageAsync("Remove input", "Do you really want to remove this input?", MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative) == MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative)
+            if ((Model.RecordingScheduler.Current.Recordings.Any(r => r.InputId == vm.Input.Id) &&
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "There are scheduled recordings for this input.\n\nDo you really want to remove it?", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Affirmative)
+                ||
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "Do you really want to remove this input?", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Affirmative)
             {
                 if (InputList.Current.RemoveInput(vm.Input))
                 {

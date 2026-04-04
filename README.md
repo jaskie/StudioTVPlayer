@@ -23,5 +23,8 @@ A simple TV studio player with SDI, NDI and MPEG TS outputs for Windows
 * [NDI Runtime](http://ndi.link/NDIRedistV5) - if you want to use NDI output
 * Decklink drivers (version 11.5 or newer), if any Blackmagic card will be in use.
 
-## Screenshot
+## Screenshots
+### Players tab:
 ![UI](https://user-images.githubusercontent.com/1919742/196053982-079e425a-5c35-4b5a-926b-1060f7fcfde4.png)
+### Recordings tab
+<img width="1300" height="666" alt="Zrzut ekranu 2026-04-04 195437" src="https://github.com/user-attachments/assets/8e992a7e-dc84-471b-a461-04bd9faae399" />

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -14,7 +13,7 @@ namespace StudioTVPlayer.Helpers
         private static bool _isBusy;
 
         /// <summary>
-        /// Sets the cursor to busy and wait when UI thread is idle.
+        /// Sets the cursor to busy and wait when application is idle.
         /// </summary>
         public static void Set()
         {
@@ -26,18 +25,10 @@ namespace StudioTVPlayer.Helpers
             if (busy == _isBusy)
                 return;
             _isBusy = busy;
-            Application.Current.Dispatcher.BeginInvoke((Action)(() => Mouse.OverrideCursor = busy ? Cursors.Wait : null));
+            Application.Current?.Dispatcher.BeginInvoke(() => Mouse.OverrideCursor = busy ? Cursors.Wait : null, DispatcherPriority.Send);
             if (_isBusy)
-                _ = new DispatcherTimer(TimeSpan.Zero, DispatcherPriority.ContextIdle, DispatcherTimer_Tick, Application.Current.Dispatcher);
+                Application.Current?.Dispatcher.BeginInvoke(() => SetBusyState(false), DispatcherPriority.ApplicationIdle);
         }
 
-        private static void DispatcherTimer_Tick(object sender, EventArgs _)
-        {
-            if (sender is not DispatcherTimer dispatcherTimer)
-                return;
-            SetBusyState(false);
-            dispatcherTimer.Stop();
-            dispatcherTimer.Tick -= DispatcherTimer_Tick;
-        }
     }
 }

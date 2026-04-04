@@ -121,11 +121,13 @@ namespace TVPlayR {
 					return;
 				scheduled_frames_ = 0LL;
 				scheduled_samples_ = 0LL;
+				output_->BeginAudioPreroll();
 				for (size_t i = 0; i < preroll_buffer_size_; i++)
 				{
 					ScheduleAudio(FFmpeg::CreateSilentAudioFrame(AudioSamplesRequired(), audio_channels_count_, AVSampleFormat::AV_SAMPLE_FMT_S32));
 					ScheduleVideo(last_video_, last_video_time_);
 				}
+				output_->EndAudioPreroll();
 				int tryCount = 3; // we are taking up to 3 tries to start the playback
 				while (FAILED(output_->StartScheduledPlayback(0LL, format_.FrameRate().Numerator(), 1.0)))
 				{

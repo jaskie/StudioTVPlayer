@@ -40,7 +40,7 @@ namespace StudioTVPlayer.Model
         /// </summary>
         public KeyBitmap GetKeyBitmap(Font font, int keySize, RundownPlayer player = null)
         {
-            using (var bitmapImage = new Bitmap(keySize, keySize, System.Drawing.Imaging.PixelFormat.Format24bppRgb))
+            using (var bitmapImage = new Bitmap(keySize, keySize, PixelFormat.Format24bppRgb))
             {
                 var icon = MethodToIcon(PlayerMethod, player?.PlayerState ?? PlayerState.Disabled);
                 bool isEnabled = CanEnable(player);

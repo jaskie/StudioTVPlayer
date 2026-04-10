@@ -56,12 +56,17 @@
                  TabIndex="1"
                  ItemsSource="{Binding MediaFiles}" 
                  SelectedItem="{Binding SelectedMedia}"
-                 Style="{StaticResource ListBoxStyle}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  dd:DragDrop.IsDragSource="True"
                  dd:DragDrop.DragAdornerTemplate="{StaticResource mediaDragTemplate}"
                  dd:DragDrop.UseDefaultDragAdorner="True"
                  >
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}">
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="0"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type vm:MediaViewModel}">
                     <local:MediaView/>

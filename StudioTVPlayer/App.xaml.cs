@@ -29,13 +29,15 @@ namespace StudioTVPlayer
 
         public App()
         {
-            DispatcherUnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
             FrameworkElement.LanguageProperty.OverrideMetadata(
                     typeof(FrameworkElement),
                     new FrameworkPropertyMetadata(
                     System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
+            DispatcherUnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => HandleException(e.Exception, false);
             AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) => HandleException(e.ExceptionObject as Exception, e.IsTerminating);
             Dispatcher.UnhandledException += (object sender, DispatcherUnhandledExceptionEventArgs e) => e.Handled = true;
+
+            var commandLineArgs = Environment.GetCommandLineArgs();
         }
 
         protected override void OnStartup(StartupEventArgs e)

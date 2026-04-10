@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "LoadRundown": {
+      "commandName": "Project",
+      "commandLineArgs": "\"LoadRundown:Player 1=C:\\temp\\rundown.rundown\""
+    },
+    "StudioTVPlayer": {
+      "commandName": "Project"
+    }
+  }
+}

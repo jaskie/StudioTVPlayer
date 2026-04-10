@@ -8,5 +8,8 @@ namespace StudioTVPlayer.Model.Persistence
         [XmlElement(typeof(FileRundownItem))]
         [XmlElement(typeof(DecklinkInputRundownItem))]
         public RundownItemBase[] RundownItems { get; set; }
+
+        [XmlAttribute]
+        public bool IsLoop { get; set; }
     }
 }

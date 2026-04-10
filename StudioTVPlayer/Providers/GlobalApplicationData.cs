@@ -1,7 +1,6 @@
 ﻿using StudioTVPlayer.Model;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
@@ -64,10 +63,11 @@ namespace StudioTVPlayer.Providers
 
         public void Initialize()
         {
-            UpdatePlayers(Configuration.Current.Players.Select(p => new PlayerUpdateItem(p, true)).ToList());
+            UpdatePlayers([.. Configuration.Current.Players.Select(p => new PlayerUpdateItem(p, true))]);
             foreach (var input in InputList.Current.Inputs)
                 input.Initialize();
             UpdatePlayerControllers();
+            LoadRundownsFromCommandLine();
             RecordingScheduler.Current.Initialize();
         }
 
@@ -97,6 +97,19 @@ namespace StudioTVPlayer.Providers
             player.ItemRemoved += Player_PlayerChanged;
             player.Seeked += Player_PlayerChanged;
             return player;
+        }
+
+        private void LoadRundownsFromCommandLine()
+        {
+            foreach (var player in _rundownPlayers)
+            {
+                var rundownToLoad = CommandLineProcessor.Instance.RundownToLoad(player.Name);
+                if (!string.IsNullOrEmpty(rundownToLoad))
+                {
+                    player.LoadRundown(rundownToLoad);
+                    player.LoadNextItem();
+                }
+            }
         }
 
         private void Player_PlayerChanged(object sender, EventArgs e)

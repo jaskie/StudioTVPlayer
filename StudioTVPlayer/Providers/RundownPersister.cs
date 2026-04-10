@@ -18,7 +18,7 @@ namespace StudioTVPlayer.Providers
                         Model.LiveInputRundownItem liveInputRundownItem when liveInputRundownItem.Input is Model.DecklinkInput decklinkInput => new Model.Persistence.DecklinkInputRundownItem { DeviceIndex = decklinkInput.DeviceIndex, IsAutoStart = item.IsAutoStart },
                         _ => throw new NotImplementedException(),
                     });
-            new Model.Persistence.Rundown { RundownItems = [.. items] }.Save(fileName);
+            new Model.Persistence.Rundown { RundownItems = [.. items], IsLoop = rundown.IsLoop }.Save(fileName);
         }
 
         /// <summary>
@@ -26,8 +26,9 @@ namespace StudioTVPlayer.Providers
         /// </summary>
         public static void LoadRundown(Model.Rundown rundown, string fileName)
         {
-            var savedRundown = DataStore.Load<Model.Persistence.Rundown>(fileName) ?? throw new ApplicationException($"File {fileName} can't be loaded");
+            var savedRundown = DataStore.Load<Model.Persistence.Rundown>(fileName) ?? throw new ApplicationException($"Unable to load rundown from {fileName}");
             rundown.ClearItems();
+            rundown.IsLoop = savedRundown.IsLoop;
             foreach (var savedItem in savedRundown.RundownItems)
             {
                 Model.RundownItemBase rundownItem = null;

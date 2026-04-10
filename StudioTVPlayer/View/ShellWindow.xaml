@@ -5,6 +5,7 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+                 xmlns:tb="http://www.hardcodet.net/taskbar"
                  xmlns:rootViewModels="clr-namespace:StudioTVPlayer.ViewModel"
                  xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
@@ -23,7 +24,16 @@
                  TitleAlignment="Center"
                  >
     <mah:MetroWindow.RightWindowCommands>
-        <mah:WindowCommands>
+        <mah:WindowCommands ShowSeparators="False">
+            <mah:WindowCommands.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MahApps.Brushes.WindowButtonCommands.Background.MouseOver}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </mah:WindowCommands.Resources>
             <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
                 <mah:FontIcon Glyph="&#xE713;" />
             </Button>
@@ -75,6 +85,9 @@
             <Button ToolTip="About" Command="{Binding AboutCommand}">
                 <mah:FontIcon Glyph="&#xE946;" />
             </Button>
+            <Button ToolTip="Minimize to tray" Click="MinimizeToTray_Click">
+                <mah:FontIcon Glyph="&#xE788;" />
+            </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <mah:MetroWindow.LeftWindowCommands>
@@ -100,17 +113,23 @@
         <KeyBinding Gesture="Shift+Ctrl+P" Command="{Binding PlayoutCommand}"/>
         <KeyBinding Gesture="Shift+Ctrl+R" Command="{Binding RecordingSchedulerCommand}"/>
     </Window.InputBindings>
-    <ContentControl Content="{Binding CurrentViewModel}" >
-        <ContentControl.Resources>
-            <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
-                <mainViews:PlayoutView />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type recordingViewModels:RecordingSchedulerViewModel}">
-                <recordingViews:RecordingSchedulerView/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
-                <configurationViews:ConfigurationView />
-            </DataTemplate>
-        </ContentControl.Resources>
-    </ContentControl>
+    <Grid>
+        <ContentControl Content="{Binding CurrentViewModel}" >
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
+                    <mainViews:PlayoutView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type recordingViewModels:RecordingSchedulerViewModel}">
+                    <recordingViews:RecordingSchedulerView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
+                    <configurationViews:ConfigurationView />
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+        <tb:TaskbarIcon x:Name="taskbarIcon" IconSource="/StudioTVPlayer.ico"
+                       TrayMouseDoubleClick="TaskbarIcon_TrayMouseDoubleClick"
+                        ToolTipText="StudioTVPlayer"
+                        />
+    </Grid>
 </mah:MetroWindow>

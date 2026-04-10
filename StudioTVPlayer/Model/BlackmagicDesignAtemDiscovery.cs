@@ -25,11 +25,13 @@ namespace StudioTVPlayer.Model
 
         public BlackmagicDesignAtemDiscovery(int updatePeriod = 10000)
         {
-            _knownDevices = new ConcurrentBag<BlackmagicDesignAtemDeviceInfo>();
+            _knownDevices = [];
 
-            _mdns = new MulticastService();
-            _mdns.UseIpv4 = true;
-            _mdns.UseIpv6 = false;
+            _mdns = new MulticastService
+            {
+                UseIpv4 = true,
+                UseIpv6 = false
+            };
             _mdns.NetworkInterfaceDiscovered += (s, e) => _mdns.SendQuery(ServiceName);
             _mdns.AnswerReceived += AnswerReceived;
             _mdns.Start();
@@ -37,7 +39,7 @@ namespace StudioTVPlayer.Model
             _considerMissingTime = updatePeriod * 3;
         }
 
-        public IReadOnlyCollection<BlackmagicDesignAtemDeviceInfo> Devices => _knownDevices.ToArray();
+        public IReadOnlyCollection<BlackmagicDesignAtemDeviceInfo> Devices => [.. _knownDevices];
 
         private void AnswerReceived(object _, MessageEventArgs args)
         {
@@ -126,24 +128,14 @@ namespace StudioTVPlayer.Model
         }
     }
 
-    public class BlackmagicDesignAtemDeviceInfo
+    public class BlackmagicDesignAtemDeviceInfo(string deviceId, string modelName, string deviceName, DateTime lastSeen, IPAddress address, int port)
     {
-        public string DeviceId { get; }
-        public string ModelName { get; }
-        public string DeviceName { get; private set; }
-        public DateTime LastSeen { get; private set; }
-        public IPAddress Address { get; private set; }
-        public int Port { get; private set; }
-
-        public BlackmagicDesignAtemDeviceInfo(string deviceId, string modelName, string deviceName, DateTime lastSeen, IPAddress address, int port)
-        {
-            DeviceId = deviceId;
-            ModelName = modelName;
-            DeviceName = deviceName;
-            LastSeen = lastSeen;
-            Address = address;
-            Port = port;
-        }
+        public string DeviceId { get; } = deviceId;
+        public string ModelName { get; } = modelName;
+        public string DeviceName { get; private set; } = deviceName;
+        public DateTime LastSeen { get; private set; } = lastSeen;
+        public IPAddress Address { get; private set; } = address;
+        public int Port { get; private set; } = port;
 
         internal bool Update(string deviceName, DateTime lastSeen, IPAddress address, int port)
         {

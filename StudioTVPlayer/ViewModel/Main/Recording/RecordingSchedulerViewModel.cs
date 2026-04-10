@@ -1,7 +1,6 @@
 ﻿using MahApps.Metro.Controls.Dialogs;
 using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
-using StudioTVPlayer.Model.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +11,7 @@ using System.Windows.Input;
 
 namespace StudioTVPlayer.ViewModel.Main.Recording
 {
-    public sealed class RecordingSchedulerViewModel : ViewModelBase, ICanClose, IDisposable
+    public sealed class RecordingSchedulerViewModel : ViewModelBase, IConfirmClose, IDisposable
     {
         private readonly ObservableCollection<RecordingSchedulerItemViewModel> _items;
         private RecordingSchedulerItemViewModel _selectedItem;

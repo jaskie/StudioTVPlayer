@@ -24,7 +24,6 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 if (FolderHelper.BrowseForFolder(ref path, $"Select path for folder {Name}"))
                     Path = path;
             });
-
         }
 
         public string Name { get => _name; set => Set(ref _name, value); }

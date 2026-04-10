@@ -23,7 +23,7 @@ namespace StudioTVPlayer.Model
             _atemClient.OnDisconnect += OnDisconnect;
             _atemClient.OnReceive += OnReceive;
             IsConnected = BlackmagicDesignAtemDevices.IsConnected(_address);
-            _bindings = bmdPlayerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId))).ToArray();
+            _bindings = [.. bmdPlayerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId)))];
         }
 
         public override void NotifyPlayerChanged(RundownPlayer player) { }

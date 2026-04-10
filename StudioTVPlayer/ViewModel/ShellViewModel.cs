@@ -59,7 +59,7 @@ namespace StudioTVPlayer.ViewModel
             if (PlayerControllers != null)
                 foreach (var playerControler in PlayerControllers)
                     playerControler.Dispose();
-            PlayerControllers = GlobalApplicationData.Current.PlayerControllers.Select(playerController => new PlayerControllerViewModel(playerController)).ToArray();
+            PlayerControllers = [.. GlobalApplicationData.Current.PlayerControllers.Select(playerController => new PlayerControllerViewModel(playerController))];
         }
 
         private void PlayerControllerConnectionStatusChanged(object sender, EventArgs e)
@@ -110,7 +110,7 @@ namespace StudioTVPlayer.ViewModel
 
         public async Task<bool> ConfirmCloseAsync()
         {
-            if (CurrentViewModel is ICanClose canClose)
+            if (CurrentViewModel is IConfirmClose canClose)
                 return await canClose.ConfirmCloseAsync();
             return true;
         }
@@ -126,7 +126,7 @@ namespace StudioTVPlayer.ViewModel
                 return;
             if (!await ConfirmCloseAsync())
                 return;
-            UISBusyState.Set();
+            UIBusyState.Set();
             CurrentViewModel = new T();
             NotifyPropertyChanged(nameof(IsPlayoutVisible));
             NotifyPropertyChanged(nameof(IsRecordingSchedulerVisible));

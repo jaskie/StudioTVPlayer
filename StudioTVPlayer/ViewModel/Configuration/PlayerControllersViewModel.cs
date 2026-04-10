@@ -18,20 +18,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
             _blackmagicDesignAtemDiscovery.DeviceSeen += BlackmagicDesignAtemDiscovery_DeviceSeen;
             _blackmagicDesignAtemDiscovery.DeviceUpdated += BlackmagicDesignAtemDiscovery_DeviceUpdated;
             _blackmagicDesignAtemDiscovery.DeviceLost += BlackmagicDesignAtemDiscovery_DeviceLost;
-            PlayerControllers = new ObservableCollection<PlayerControllerViewModelBase>(Providers.Configuration.Current.PlayerControllers.Select(playerControllerConfiguration =>
+            PlayerControllers = new (Providers.Configuration.Current.PlayerControllers.Select(playerControllerConfiguration =>
             {
-                PlayerControllerViewModelBase vm;
-                switch (playerControllerConfiguration)
+                PlayerControllerViewModelBase vm = playerControllerConfiguration switch
                 {
-                    case Model.Configuration.BlackmagicDesignAtemPlayerController blackmagicDecklinkPlayerController:
-                        vm = new BlackmagicDesignAtemPlayerControllerViewModel(_blackmagicDesignAtemDiscovery, blackmagicDecklinkPlayerController);
-                        break;
-                    case Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerController:
-                        vm = new ElgatoStreamDeckPlayerControllerViewModel(elgatoStreamDeckPlayerController);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+                    Model.Configuration.BlackmagicDesignAtemPlayerController blackmagicDecklinkPlayerController => new BlackmagicDesignAtemPlayerControllerViewModel(_blackmagicDesignAtemDiscovery, blackmagicDecklinkPlayerController),
+                    Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerController => new ElgatoStreamDeckPlayerControllerViewModel(elgatoStreamDeckPlayerController),
+                    _ => throw new NotImplementedException(),
+                };
                 SubscribePlayerControllerEvents(vm);
                 return vm;
             }));
@@ -41,13 +35,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override void Apply()
         {
-            Providers.Configuration.Current.PlayerControllers = PlayerControllers
+            Providers.Configuration.Current.PlayerControllers = [.. PlayerControllers
                 .Select(vm =>
                         {
                             vm.Apply();
                             return vm.PlayerControllerConfiguration;
-                        })
-                .ToList();
+                        })];
             Providers.GlobalApplicationData.Current.UpdatePlayerControllers();
             base.Apply();
         }

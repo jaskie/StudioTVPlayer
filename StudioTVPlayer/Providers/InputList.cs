@@ -13,7 +13,7 @@ namespace StudioTVPlayer.Providers
 
         [XmlArray(nameof(Inputs))]
         [XmlArrayItem(typeof(Model.DecklinkInput))]
-        public List<Model.InputBase> _inputs = new List<Model.InputBase>();
+        public List<Model.InputBase> _inputs = [];
 
         [XmlIgnore]
         public IEnumerable<Model.InputBase> Inputs { get => _inputs; }

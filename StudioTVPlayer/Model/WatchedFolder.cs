@@ -149,7 +149,7 @@ namespace StudioTVPlayer.Model
             lock (((IList)_medias).SyncRoot)
             {
                 media = _medias.FirstOrDefault(m => m.FullPath == e.OldFullPath);
-                if (!(media is null) && !accept)
+                if (media is not null && !accept)
                 {
                     _medias.Remove(media);
                     removed = true;
@@ -160,7 +160,7 @@ namespace StudioTVPlayer.Model
                     added = true;
                 }
             }
-            Debug.Assert((added || removed) && !(media is null));
+            Debug.Assert((added || removed) && media is not null);
             if (removed)
                 media.PropertyChanged -= Media_PropertyChanged;
             if (added || removed)

@@ -97,18 +97,16 @@ namespace StudioTVPlayer.ViewModel.Main.Recording
 
         public IEnumerable<InputViewModelBase> Inputs { get; } = [.. Providers.InputList.Current.Inputs.Select(input =>
         {
-            switch (input)
+            return input switch
             {
-                case Model.DecklinkInput decklinkInput:
-                    return new DecklinkInputViewModel(decklinkInput);
-                default:
-                    throw new ApplicationException("Invalid model type provided");
-            }
+                Model.DecklinkInput decklinkInput => new DecklinkInputViewModel(decklinkInput),
+                _ => throw new ApplicationException("Invalid model type provided"), 
+            }; 
         })];
 
         public InputViewModelBase SelectedInput { get => _selectedInput; set => Set(ref _selectedInput, value); }
 
-        public string Error => throw new NotImplementedException();
+        public string Error => string.Empty;
 
         public string this[string columnName]
         {

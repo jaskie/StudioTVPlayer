@@ -15,7 +15,7 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _nextAutoPlayItem;
         private bool _isLoop;
         private int _isDisposed;
-        private readonly List<RundownItemBase> _items = new();
+        private readonly List<RundownItemBase> _items = [];
         private readonly object _rundownLock = new();
 
         public List<RundownItemBase> Items

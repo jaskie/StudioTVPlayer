@@ -2,15 +2,8 @@
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
-    public class FileRundownItemViewModel : RundownItemViewModelBase
+    public class FileRundownItemViewModel(FileRundownItem rundownItem) : RundownItemViewModelBase
     {
-        private readonly FileRundownItem _rundownItem;
-
-        public FileRundownItemViewModel(FileRundownItem rundownItem)
-        {
-            _rundownItem = rundownItem;
-        }
-
-        public override RundownItemBase RundownItem => _rundownItem;
+        public override RundownItemBase RundownItem => rundownItem;
     }
 }

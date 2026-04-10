@@ -23,7 +23,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             : base(controllerConfiguration ?? new Model.Configuration.BlackmagicDesignAtemPlayerController())
         {
             _blackmagicDesignAtemDiscovery = blackmagicDesignAtemDiscovery;
-            Devices = new ObservableCollection<BlackmagicDesignAtemDeviceInfoViewModel>(_blackmagicDesignAtemDiscovery.Devices.Select(device => new BlackmagicDesignAtemDeviceInfoViewModel(device)));
+            Devices = new(_blackmagicDesignAtemDiscovery.Devices.Select(device => new BlackmagicDesignAtemDeviceInfoViewModel(device)));
             if (controllerConfiguration != null)
             {
                 _address = controllerConfiguration.Address;

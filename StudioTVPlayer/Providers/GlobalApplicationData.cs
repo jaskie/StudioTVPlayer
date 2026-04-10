@@ -78,7 +78,7 @@ namespace StudioTVPlayer.Providers
                 playerController.ConnectionStateChanged -= PlayerController_ConnectionStateChanged;
                 playerController.Dispose();
             }
-            _playerControllers = Configuration.Current.PlayerControllers.Select(CreatePlayerController).ToArray();
+            _playerControllers = [.. Configuration.Current.PlayerControllers.Select(CreatePlayerController)];
             PlayerControllerConnectionStatusChanged?.Invoke(this, EventArgs.Empty);
             PlayerControllersModified?.Invoke(this, EventArgs.Empty);
         }
@@ -122,16 +122,12 @@ namespace StudioTVPlayer.Providers
         private PlayerControllerBase CreatePlayerController(Model.Configuration.PlayerControllerBase playerControllerConfiguration)
         {
             PlayerControllerBase playerController = null;
-            switch (playerControllerConfiguration)
+            playerController = playerControllerConfiguration switch
             {
-                case Model.Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration:
-                    playerController = new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration, RundownPlayers);
-                    break;
-                case Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerControllerConfiguration:
-                    playerController = new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration, RundownPlayers);
-                    break;
-                default: throw new ApplicationException($"Unknown player controller ({playerControllerConfiguration})");
-            }
+                Model.Configuration.BlackmagicDesignAtemPlayerController bmdPlayerControllerConfiguration => new BlackmagicDesignAtemPlayerController(bmdPlayerControllerConfiguration, RundownPlayers),
+                Model.Configuration.ElgatoStreamDeckPlayerController elgatoStreamDeckPlayerControllerConfiguration => new ElgatoStreamDeckPlayerController(elgatoStreamDeckPlayerControllerConfiguration, RundownPlayers),
+                _ => throw new ApplicationException($"Unknown player controller ({playerControllerConfiguration})"),
+            };
             playerController.ConnectionStateChanged += PlayerController_ConnectionStateChanged;
             return playerController;
         }
@@ -139,14 +135,9 @@ namespace StudioTVPlayer.Providers
         private void PlayerController_ConnectionStateChanged(object sender, EventArgs e) => PlayerControllerConnectionStatusChanged?.Invoke(sender, EventArgs.Empty);
     }
 
-    public class PlayerUpdateItem
+    public class PlayerUpdateItem(Model.Configuration.Player player, bool needsReinitialization)
     {
-        public PlayerUpdateItem(Model.Configuration.Player player, bool needsReinitialization)
-        {
-            Player = player;
-            NeedsReinitialization = needsReinitialization;
-        }
-        public Model.Configuration.Player Player { get; }
-        public bool NeedsReinitialization { get; }
+        public Model.Configuration.Player Player { get; } = player;
+        public bool NeedsReinitialization { get; } = needsReinitialization;
     }
 }

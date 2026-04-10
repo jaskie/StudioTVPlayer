@@ -2,16 +2,11 @@
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class OutputBase: IDisposable
+    public abstract class OutputBase(Configuration.OutputBase configuration) : IDisposable
     {
         private TVPlayR.OverlayBase _overlay;
 
-        public OutputBase(Configuration.OutputBase configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public Configuration.OutputBase Configuration { get; }
+        public Configuration.OutputBase Configuration { get; } = configuration;
 
         public bool IsFrameClock => Configuration.IsFrameClock;
 

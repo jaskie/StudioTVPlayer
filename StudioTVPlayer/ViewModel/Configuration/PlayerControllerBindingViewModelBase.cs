@@ -47,12 +47,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         protected virtual string ReadErrorInfo(string columnName)
         {
-            switch (columnName)
+            return columnName switch
             {
-                case nameof(Player) when Player is null:
-                    return "Please select player";
-            }
-            return string.Empty;
+                nameof(Player) when Player is null => "Please select player",
+                _ => string.Empty,
+            };
         }
 
     }

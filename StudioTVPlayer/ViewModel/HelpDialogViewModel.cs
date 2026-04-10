@@ -2,10 +2,7 @@
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class HelpDialogViewModel : DialogViewModelBase
+    public class HelpDialogViewModel(Action<DialogViewModelBase> closeHandler) : DialogViewModelBase(closeHandler)
     {
-        public HelpDialogViewModel(Action<DialogViewModelBase> closeHandler) : base(closeHandler)
-        {
-        }
     }
 }

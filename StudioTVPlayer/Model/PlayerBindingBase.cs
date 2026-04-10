@@ -3,17 +3,10 @@ using StudioTVPlayer.ViewModel;
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class PlayerBindingBase
+    public abstract class PlayerBindingBase(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer)
     {
-        protected readonly PlayerMethodKind PlayerMethod;
-
-        protected PlayerBindingBase(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer) 
-        {
-            PlayerMethod = playerBindingConfiguration.PlayerMethod;
-            RundownPlayer = rundownPlayer;
-        }
-
-        public readonly RundownPlayer RundownPlayer;
+        protected readonly PlayerMethodKind PlayerMethod = playerBindingConfiguration.PlayerMethod;
+        public readonly RundownPlayer RundownPlayer = rundownPlayer;
 
         protected bool CanExecute => ShellViewModel.Instance.CurrentViewModel is PlayoutViewModel;
 

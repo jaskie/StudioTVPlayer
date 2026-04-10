@@ -25,8 +25,8 @@ namespace StudioTVPlayer.Model
 
         private bool _disposed;
         private readonly Task _verificationTask;
-        private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly BlockingCollection<MediaVerifyData> _mediaQueue = [];
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private MediaVerifier()
         {

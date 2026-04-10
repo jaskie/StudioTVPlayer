@@ -7,7 +7,7 @@ namespace StudioTVPlayer.Helpers
     /// <summary>
     ///   Contains helper method for showing waitcursor
     /// </summary>
-    public static class UISBusyState
+    public static class UIBusyState
     {
 
         private static bool _isBusy;

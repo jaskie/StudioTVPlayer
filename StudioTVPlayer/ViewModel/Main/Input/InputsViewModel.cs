@@ -16,16 +16,12 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             AddDecklinkInputCommand = new UiCommand(AddDecklinkInput);
             Inputs = new ObservableCollection<InputViewModelBase>(InputList.Current.Inputs.Select(input =>
             {
-               InputViewModelBase inputViewModel;
-               switch (input)
-               {
-                   case Model.DecklinkInput decklink:
-                       inputViewModel = new DecklinkInputViewModel(decklink);
-                       break;
-                   default:
-                       throw new ApplicationException("Invalid model type provided");
-               }
-               inputViewModel.RemoveRequested += Input_RemoveRequested;
+                InputViewModelBase inputViewModel = input switch
+                {
+                    Model.DecklinkInput decklink => new DecklinkInputViewModel(decklink),
+                    _ => throw new ApplicationException("Invalid model type provided"),
+                };
+                inputViewModel.RemoveRequested += Input_RemoveRequested;
                return inputViewModel;
             }));
         }

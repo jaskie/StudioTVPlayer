@@ -1,14 +1,7 @@
 ﻿namespace StudioTVPlayer.Helpers
 {
-    public class Wildcard
+    public class Wildcard(string pattern)
     {
-        private readonly string _pattern;
-
-        public Wildcard(string pattern)
-        {
-            _pattern = pattern;
-        }
-
         public static bool Match(string value, string pattern)
         {
             int start = -1;
@@ -49,23 +42,23 @@
 
         public bool IsMatch(string str, ref int start, ref int end)
         {
-            if (_pattern.Length == 0) return false;
+            if (pattern.Length == 0) return false;
             int pindex = 0;
             int sindex = 0;
-            int pattern_len = _pattern.Length;
+            int pattern_len = pattern.Length;
             int str_len = str.Length;
             start = -1;
             while (true)
             {
                 bool star = false;
-                if (_pattern[pindex] == '*')
+                if (pattern[pindex] == '*')
                 {
                     star = true;
                     do
                     {
                         pindex++;
                     }
-                    while (pindex < pattern_len && _pattern[pindex] == '*');
+                    while (pindex < pattern_len && pattern[pindex] == '*');
                 }
                 end = sindex;
                 int i;
@@ -73,14 +66,14 @@
                 {
                     int si = 0;
                     bool breakLoops = false;
-                    for (i = 0; pindex + i < pattern_len && _pattern[pindex + i] != '*'; i++)
+                    for (i = 0; pindex + i < pattern_len && pattern[pindex + i] != '*'; i++)
                     {
                         si = sindex + i;
                         if (si == str_len)
                         {
                             return false;
                         }
-                        if (str[si] == _pattern[pindex + i])
+                        if (str[si] == pattern[pindex + i])
                         {
                             continue;
                         }
@@ -88,7 +81,7 @@
                         {
                             return false;
                         }
-                        if (_pattern[pindex + i] == '?' && str[si] != '.')
+                        if (pattern[pindex + i] == '?' && str[si] != '.')
                         {
                             continue;
                         }
@@ -113,7 +106,7 @@
                         {
                             start = sindex;
                         }
-                        if (pindex + i < pattern_len && _pattern[pindex + i] == '*')
+                        if (pindex + i < pattern_len && pattern[pindex + i] == '*')
                         {
                             break;
                         }
@@ -125,7 +118,7 @@
                             }
                             return true;
                         }
-                        if (i != 0 && _pattern[pindex + i - 1] == '*')
+                        if (i != 0 && pattern[pindex + i - 1] == '*')
                         {
                             return true;
                         }
@@ -147,24 +140,24 @@
 
         public bool IsMatch(string str, ref int start, ref int end, char[] toLowerTable)
         {
-            if (_pattern.Length == 0) return false;
+            if (pattern.Length == 0) return false;
 
             int pindex = 0;
             int sindex = 0;
-            int pattern_len = _pattern.Length;
+            int pattern_len = pattern.Length;
             int str_len = str.Length;
             start = -1;
             while (true)
             {
                 bool star = false;
-                if (_pattern[pindex] == '*')
+                if (pattern[pindex] == '*')
                 {
                     star = true;
                     do
                     {
                         pindex++;
                     }
-                    while (pindex < pattern_len && _pattern[pindex] == '*');
+                    while (pindex < pattern_len && pattern[pindex] == '*');
                 }
                 end = sindex;
                 int i;
@@ -173,7 +166,7 @@
                     int si = 0;
                     bool breakLoops = false;
 
-                    for (i = 0; pindex + i < pattern_len && _pattern[pindex + i] != '*'; i++)
+                    for (i = 0; pindex + i < pattern_len && pattern[pindex + i] != '*'; i++)
                     {
                         si = sindex + i;
                         if (si == str_len)
@@ -181,7 +174,7 @@
                             return false;
                         }
                         char c = toLowerTable[str[si]];
-                        if (c == _pattern[pindex + i])
+                        if (c == pattern[pindex + i])
                         {
                             continue;
                         }
@@ -189,7 +182,7 @@
                         {
                             return false;
                         }
-                        if (_pattern[pindex + i] == '?' && c != '.')
+                        if (pattern[pindex + i] == '?' && c != '.')
                         {
                             continue;
                         }
@@ -214,7 +207,7 @@
                         {
                             start = sindex;
                         }
-                        if (pindex + i < pattern_len && _pattern[pindex + i] == '*')
+                        if (pindex + i < pattern_len && pattern[pindex + i] == '*')
                         {
                             break;
                         }
@@ -226,7 +219,7 @@
                             }
                             return true;
                         }
-                        if (i != 0 && _pattern[pindex + i - 1] == '*')
+                        if (i != 0 && pattern[pindex + i - 1] == '*')
                         {
                             return true;
                         }

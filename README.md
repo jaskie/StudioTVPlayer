@@ -1,5 +1,5 @@
 # StudioTVPlayer
-A simple TV studio player with SDI, NDI and MPEG TS outputs for Windows
+A simple TV studio player and recorder with SDI, NDI and MPEG TS outputs for Windows
 ## Features:
 * Few players inside one application, controlled using mouse and keyboard shortcuts, i.e. A/B playout plus wallscreen on single UI
 * Decklink input recording, with ability to play file while recording

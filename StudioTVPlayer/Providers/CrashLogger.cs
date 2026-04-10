@@ -10,11 +10,9 @@ namespace StudioTVPlayer.Providers
         public static void SaveDump(string text)
         {
             var fileName = Path.Combine(ApplicationDataDir, $"{DateTime.Now:yyyyMMdd HHmmss}.log");
-            using (var stream = File.CreateText(fileName))
-            {
-                stream.Write(text);
-                stream.Close();
-            }
+            using var stream = File.CreateText(fileName);
+            stream.Write(text);
+            stream.Close();
         }
     }
 }

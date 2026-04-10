@@ -40,22 +40,18 @@ namespace StudioTVPlayer.Model
         /// </summary>
         public KeyBitmap GetKeyBitmap(Font font, int keySize, RundownPlayer player = null)
         {
-            using (var bitmapImage = new Bitmap(keySize, keySize, PixelFormat.Format24bppRgb))
-            {
-                var icon = MethodToIcon(PlayerMethod, player?.PlayerState ?? PlayerState.Disabled);
-                bool isEnabled = CanEnable(player);
-                if (isEnabled == _isEnabled && icon == _icon)
-                    return null;
-                _isEnabled = isEnabled;
-                _icon = icon;
-                using (var g = Graphics.FromImage(bitmapImage))
-                {
-                    g.FillRectangle(isEnabled ? _backgroundBrush ?? Brushes.Red : Brushes.DarkGray, 0, 0, keySize, keySize);
-                    var size = g.MeasureString(icon, font);
-                    g.DrawString(icon, font, isEnabled ? Brushes.White : Brushes.LightGray, (keySize - size.Width) / 2, (keySize - size.Height) / 2);
-                    return KeyBitmap.Create.FromBgr24Array(keySize, keySize, BitmapToByteArray(bitmapImage));
-                }
-            }
+            using var bitmapImage = new Bitmap(keySize, keySize, PixelFormat.Format24bppRgb);
+            var icon = MethodToIcon(PlayerMethod, player?.PlayerState ?? PlayerState.Disabled);
+            bool isEnabled = CanEnable(player);
+            if (isEnabled == _isEnabled && icon == _icon)
+                return null;
+            _isEnabled = isEnabled;
+            _icon = icon;
+            using var g = Graphics.FromImage(bitmapImage);
+            g.FillRectangle(isEnabled ? _backgroundBrush ?? Brushes.Red : Brushes.DarkGray, 0, 0, keySize, keySize);
+            var size = g.MeasureString(icon, font);
+            g.DrawString(icon, font, isEnabled ? Brushes.White : Brushes.LightGray, (keySize - size.Width) / 2, (keySize - size.Height) / 2);
+            return KeyBitmap.Create.FromBgr24Array(keySize, keySize, BitmapToByteArray(bitmapImage));
         }
 
         private static string MethodToIcon(PlayerMethodKind playerMethodKind, PlayerState playerState)
@@ -101,23 +97,16 @@ namespace StudioTVPlayer.Model
             if (player is null)
                 return false;
             var playerState = player.PlayerState;
-            switch (PlayerMethod)
+            return PlayerMethod switch
             {
-                case PlayerMethodKind.Cue:
-                    return player.CanCue();
-                case PlayerMethodKind.LoadNext:
-                    return player.CanLoadNextItem();
-                case PlayerMethodKind.Play:
-                    return playerState == PlayerState.Cue || playerState == PlayerState.Paused;
-                case PlayerMethodKind.Pause:
-                    return playerState == PlayerState.Playing;
-                case PlayerMethodKind.Toggle:
-                    return playerState != PlayerState.Finished && (playerState == PlayerState.Cue || playerState == PlayerState.Paused || playerState == PlayerState.Playing);
-                case PlayerMethodKind.Clear:
-                    return player.IsLoaded();
-                default:
-                    return false;
-            }
+                PlayerMethodKind.Cue => player.CanCue(),
+                PlayerMethodKind.LoadNext => player.CanLoadNextItem(),
+                PlayerMethodKind.Play => playerState == PlayerState.Cue || playerState == PlayerState.Paused,
+                PlayerMethodKind.Pause => playerState == PlayerState.Playing,
+                PlayerMethodKind.Toggle => playerState != PlayerState.Finished && (playerState == PlayerState.Cue || playerState == PlayerState.Paused || playerState == PlayerState.Playing),
+                PlayerMethodKind.Clear => player.IsLoaded(),
+                _ => false,
+            };
         }
 
         public void Dispose()

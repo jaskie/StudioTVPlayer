@@ -17,7 +17,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             AddPlayerCommand = new UiCommand(AddPlayer);
             DeletePlayerCommand = new UiCommand(DeletePlayer, CanDeletePlayer);
             UnloadedCommand = new UiCommand((param) => { CommitChanges(param); });
-            Players = new ObservableCollection<PlayerViewModel>(Providers.Configuration.Current.Players.Select(c => new PlayerViewModel(c)));
+            Players = new (Providers.Configuration.Current.Players.Select(c => new PlayerViewModel(c)));
             foreach (var player in Players)
             {
                 player.Modified += (o, e) => IsModified = true;

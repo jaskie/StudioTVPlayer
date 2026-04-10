@@ -97,15 +97,12 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         protected override string ReadErrorInfo(string propertyName)
         {
-            switch (propertyName)
+            return propertyName switch
             {
-                case nameof(SelectedDevice) when SelectedDevice is null:
-                    return "Input device have to be set";
-                case nameof(VideoFormat) when VideoFormat is null:
-                    return "Video format can't be empty";
-                default:
-                    return string.Empty;
-            }
+                nameof(SelectedDevice) when SelectedDevice is null => "Input device have to be set",
+                nameof(VideoFormat) when VideoFormat is null => "Video format can't be empty",
+                _ => string.Empty,
+            };
         }
 
         private void Input_FormatChanged(object sender, EventArgs e)

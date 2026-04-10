@@ -14,8 +14,8 @@ namespace StudioTVPlayer.Helpers
             if (!Directory.Exists(dirName))
                 Directory.CreateDirectory(dirName);
             var serializer = XmlSerializer.FromTypes([data.GetType()])[0];
-            using (var writer = new StreamWriter(fileName))
-                serializer.Serialize(writer, data);
+            using var writer = new StreamWriter(fileName);
+            serializer.Serialize(writer, data);
         }
 
         public static T Load<T>(string fileName) where T : IPersistable

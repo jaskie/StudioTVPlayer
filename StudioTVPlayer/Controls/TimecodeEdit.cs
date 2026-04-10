@@ -66,7 +66,7 @@ namespace StudioTVPlayer.Controls
             {
                 element.Time = vf.FrameNumberToTime(vf.StringToFrameNumber(element.Text));
                 ICommand command = GetEnterPressedCommand((TextBox)sender);
-                object[] param = { sender, e };
+                object[] param = [sender, e];
                 command?.Execute(param);
             }
         }
@@ -215,24 +215,14 @@ namespace StudioTVPlayer.Controls
         /// </summary>
         private bool IsValidCharAt(char c, int position, bool isDropFrame)
         {
-            switch (position)
+            return position switch
             {
-                case 0:
-                case 1:
-                case 4:
-                case 7:
-                    return char.IsDigit(c);
-                case 2:
-                case 5:
-                    return c == ':';
-                case 3:
-                case 6:
-                    return c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5';
-                case 8:
-                    return isDropFrame ? c == ';' : c == ':';
-                default:
-                    return false;
-            }
+                0 or 1 or 4 or 7 => char.IsDigit(c),
+                2 or 5 => c == ':',
+                3 or 6 => c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5',
+                8 => isDropFrame ? c == ';' : c == ':',
+                _ => false,
+            };
         }
 
         /// <summary>

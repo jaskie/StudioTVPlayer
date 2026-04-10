@@ -2,7 +2,7 @@
 
 namespace StudioTVPlayer.Helpers
 {
-    public interface ICanClose
+    public interface IConfirmClose
     {
         Task<bool> ConfirmCloseAsync();
     }

@@ -3,19 +3,14 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public sealed class FileRundownItem : RundownItemBase
+    public sealed class FileRundownItem(MediaFile media) : RundownItemBase
     {
         private bool _isLoop;
         private TVPlayR.FileInput _input;
 
-        public FileRundownItem(MediaFile media)
-        {
-            Media = media;
-        }
-
         public event EventHandler Paused;
 
-        public MediaFile Media { get; }
+        public MediaFile Media { get; } = media;
 
         public override bool IsPlaying() => _input?.IsPlaying == true;
 
@@ -29,8 +24,7 @@ namespace StudioTVPlayer.Model
                 if (_isLoop == value)
                     return;
                 _isLoop = value;
-                if (!(_input is null))
-                    _input.IsLoop = value;
+                _input?.IsLoop = value;
                 NotifyPropertyChanged();
             }
         }

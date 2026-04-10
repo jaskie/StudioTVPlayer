@@ -17,7 +17,7 @@ namespace StudioTVPlayer.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is bool && (bool)value ? parameter : DependencyProperty.UnsetValue;
+            return value is bool v && v ? parameter : DependencyProperty.UnsetValue;
         }
     }
 }

@@ -41,11 +41,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Name = rundownPlayer.Name;
             Id = rundownPlayer.Id;
             VideoFormat = rundownPlayer.VideoFormat;
-            AudioLevelBars = Enumerable.Repeat(0, rundownPlayer.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
+            AudioLevelBars = [.. Enumerable.Repeat(0, rundownPlayer.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue))];
             IsAlpha = rundownPlayer.IsAplha;
             if (rundownPlayer.LivePreview)
                 _preview = rundownPlayer.GetPreview(224, 126);
-            Rundown = new ObservableCollection<RundownItemViewModelBase>(rundownPlayer.Items.Select(CreateRundownItemViewModel));
+            Rundown = new (rundownPlayer.Items.Select(CreateRundownItemViewModel));
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == rundownPlayer.LoadedItem);
 
             rundownPlayer.ItemLoaded += MediaPlayer_Loaded;
@@ -212,8 +212,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 }
                 else
                     value.IsLoaded = true;
-                if (oldItem != null)
-                    oldItem.IsLoaded = false;
+                oldItem?.IsLoaded = false;
                 _sliderPosition = CurrentItemStartTime.TotalSeconds;
                 NotifyPropertyChanged(nameof(IsPlaying));
                 NotifyPropertyChanged(nameof(SliderPosition));
@@ -367,18 +366,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             OnUiThread(() =>
             {
-                switch (TimeDisplaySource)
+                DisplayTime = TimeDisplaySource switch
                 {
-                    case TimeDisplaySource.TimeFromBegin:
-                        DisplayTime = e.TimeFromBegin;
-                        break;
-                    case TimeDisplaySource.Timecode:
-                        DisplayTime = e.Timecode;
-                        break;
-                    default:
-                        DisplayTime = null;
-                        break;
-                }
+                    TimeDisplaySource.TimeFromBegin => (TimeSpan?)e.TimeFromBegin,
+                    TimeDisplaySource.Timecode => e.Timecode,
+                    _ => null,
+                };
                 OutTime = e.TimeToEnd;
                 OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _rundownPlayer.OneFrame;
                 Set(ref _sliderPosition, e.TimeFromBegin.TotalSeconds, nameof(SliderPosition));
@@ -559,15 +552,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private RundownItemViewModelBase CreateRundownItemViewModel(RundownItemBase rundownItem)
         {
-            switch (rundownItem)
+            return rundownItem switch
             {
-                case FileRundownItem fileRundownItem:
-                    return new FileRundownItemViewModel(fileRundownItem);
-                case LiveInputRundownItem liveInputRundownItem:
-                    return new LiveInputRundownItemViewModel(liveInputRundownItem);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(rundownItem));
-            }
+                FileRundownItem fileRundownItem => new FileRundownItemViewModel(fileRundownItem),
+                LiveInputRundownItem liveInputRundownItem => new LiveInputRundownItemViewModel(liveInputRundownItem),
+                _ => throw new ArgumentOutOfRangeException(nameof(rundownItem)),
+            };
         }
 
         private void SaveRundown(object _)
@@ -577,7 +567,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                UISBusyState.Set();
+                UIBusyState.Set();
                 _rundownPlayer.SaveRundown(fileName);
             }
             catch (Exception ex)
@@ -593,7 +583,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                UISBusyState.Set();
+                UIBusyState.Set();
                 _rundownPlayer.LoadRundown(fileName);
             }
             catch (Exception ex)

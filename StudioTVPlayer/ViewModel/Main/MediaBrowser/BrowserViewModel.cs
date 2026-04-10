@@ -130,8 +130,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         {
             if (string.IsNullOrEmpty(_filter))
                 return true;
-            var media = mediaItem as MediaViewModel;
-            if (media == null || string.IsNullOrWhiteSpace(media.Name))
+            if (mediaItem is not MediaViewModel media || string.IsNullOrWhiteSpace(media.Name))
                 return false;
             return media.Name.IndexOf(_filter, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }

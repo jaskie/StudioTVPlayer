@@ -3,24 +3,17 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public sealed class LiveInputRundownItem : RundownItemBase
+    public sealed class LiveInputRundownItem(InputBase input) : RundownItemBase
     {
-        private readonly InputBase _input;
-
-        public LiveInputRundownItem(InputBase input)
-        {
-            _input = input;
-        }
-
         public override bool IsPlaying() => true;
 
         public override ImageSource Thumbnail => null;
 
-        public override string Name => _input.Name;
+        public override string Name => input.Name;
 
-        public InputBase Input => _input;
+        public InputBase Input => input;
 
-        internal override TVPlayR.InputBase TVPlayRInput => _input.TVPlayRInput;
+        internal override TVPlayR.InputBase TVPlayRInput => input.TVPlayRInput;
 
         public override bool CanSeek() => false;
 
@@ -43,7 +36,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Prepare(audioChannelCount))
                 return false;
-            SubscribeToEvents(_input.TVPlayRInput);
+            SubscribeToEvents(input.TVPlayRInput);
             return true;
         }
 
@@ -51,7 +44,7 @@ namespace StudioTVPlayer.Model
         {
             if (!base.Unload())
                 return false;
-            UnsubscribeFromEvents(_input.TVPlayRInput);
+            UnsubscribeFromEvents(input.TVPlayRInput);
             return true;
         }
 

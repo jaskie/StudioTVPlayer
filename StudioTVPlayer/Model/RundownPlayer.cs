@@ -14,7 +14,7 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _loadedItem;
         private RundownItemBase _loadedNextRundownItem;
         private PlayerState _playerState = PlayerState.Unloaded;
-        private readonly Rundown _rundown = new Rundown();
+        private readonly Rundown _rundown = new();
         private bool _disposed;
 
         public RundownPlayer(Configuration.Player configuration) : base(configuration)
@@ -102,7 +102,7 @@ namespace StudioTVPlayer.Model
 
         public void Cue()
         {
-            if (!(_loadedItem is RundownItemBase rundownItem))
+            if (_loadedItem is not RundownItemBase rundownItem)
                 return;
             rundownItem.Pause();
             if (rundownItem.Seek((rundownItem as FileRundownItem)?.Media.StartTime ?? TimeSpan.Zero))
@@ -226,7 +226,7 @@ namespace StudioTVPlayer.Model
 
         public bool Seek(TimeSpan timeSpan)
         {
-            if (!(LoadedItem is FileRundownItem file) ||
+            if (LoadedItem is not FileRundownItem file ||
                 !file.Seek(timeSpan))
                 return false;
             Seeked?.Invoke(this, EventArgs.Empty);
@@ -266,8 +266,7 @@ namespace StudioTVPlayer.Model
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);
-            var current = sender as FileRundownItem;
-            if (current == null || current != _loadedItem)
+            if (sender is not FileRundownItem current || current != _loadedItem)
                 return;
             if (current.Media.Duration - e.TimeFromBegin > PreloadTime)
                 return;

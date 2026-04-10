@@ -25,19 +25,15 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             Player = player;
             _name = player.Name;
-            OutputViewModelBase viewModelSelector(Model.Configuration.OutputBase o)
+            static OutputViewModelBase viewModelSelector(Model.Configuration.OutputBase o)
             {
-                switch (o)
+                return o switch
                 {
-                    case Model.Configuration.DecklinkOutput decklink:
-                        return new DecklinkOutputViewModel(decklink);
-                    case Model.Configuration.NdiOutput ndi:
-                        return new NdiOutputViewModel(ndi);
-                    case Model.Configuration.FFOutput stream:
-                        return new FFOutputViewModel(stream);
-                    default:
-                        throw new ApplicationException("Invalid type provided");
-                }
+                    Model.Configuration.DecklinkOutput decklink => new DecklinkOutputViewModel(decklink),
+                    Model.Configuration.NdiOutput ndi => new NdiOutputViewModel(ndi),
+                    Model.Configuration.FFOutput stream => new FFOutputViewModel(stream),
+                    _ => throw new ApplicationException("Invalid type provided"),
+                };
             }
             _outputs = new(player.Outputs?.Select(viewModelSelector));
             foreach (var output in _outputs)
@@ -79,16 +75,14 @@ namespace StudioTVPlayer.ViewModel.Configuration
                 var oldClockSource = _frameClockSource;
                 if (!Set(ref _frameClockSource, value))
                     return;
-                if (!(oldClockSource is null))
-                    oldClockSource.IsFrameClock = false;
-                if (!(value is null))
-                    value.IsFrameClock = true;
+                oldClockSource?.IsFrameClock = false;
+                value?.IsFrameClock = true;
             }
         }
 
         public TVPlayR.VideoFormat[] VideoFormats => TVPlayR.VideoFormat.Formats;
 
-        public TVPlayR.PixelFormat[] PixelFormats { get; } = new[] { TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422, TVPlayR.PixelFormat.rgb10 };
+        public TVPlayR.PixelFormat[] PixelFormats { get; } = [TVPlayR.PixelFormat.bgra, TVPlayR.PixelFormat.yuv422, TVPlayR.PixelFormat.rgb10];
 
         public TVPlayR.VideoFormat SelectedVideoFormat { get => _selectedVideoFormat; set => Set(ref _selectedVideoFormat, value); }
 
@@ -144,7 +138,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
             Player.LivePreview = LivePreview;
             Player.DisablePlayedItems = DisablePlayedItems;
             Player.AddItemsWithAutoPlay = AddItemsWithAutoPlay;
-            Player.Outputs = Outputs.Select(o => o.OutputConfiguration).ToArray();
+            Player.Outputs = [.. Outputs.Select(o => o.OutputConfiguration)];
             base.Apply();
         }
 

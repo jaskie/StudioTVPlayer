@@ -12,6 +12,7 @@ using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Model;
 using StudioTVPlayer.ViewModel.Main.Input;
 using StudioTVPlayer.ViewModel.Main.MediaBrowser;
+using StudioTVPlayer.ViewModel.Main.Recording;
 
 namespace StudioTVPlayer.ViewModel.Main.Player
 {
@@ -40,11 +41,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             Name = rundownPlayer.Name;
             Id = rundownPlayer.Id;
             VideoFormat = rundownPlayer.VideoFormat;
-            AudioLevelBars = Enumerable.Repeat(0, rundownPlayer.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue)).ToArray();
+            AudioLevelBars = [.. Enumerable.Repeat(0, rundownPlayer.AudioChannelCount).Select(_ => new AudioLevelBarViewModel(AudioLevelMinValue, AudioLevelMaxValue))];
             IsAlpha = rundownPlayer.IsAplha;
             if (rundownPlayer.LivePreview)
                 _preview = rundownPlayer.GetPreview(224, 126);
-            Rundown = new ObservableCollection<RundownItemViewModelBase>(rundownPlayer.Items.Select(CreateRundownItemViewModel));
+            Rundown = new (rundownPlayer.Items.Select(CreateRundownItemViewModel));
             _currentRundownItem = Rundown.FirstOrDefault(item => item.RundownItem == rundownPlayer.LoadedItem);
 
             rundownPlayer.ItemLoaded += MediaPlayer_Loaded;
@@ -211,8 +212,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 }
                 else
                     value.IsLoaded = true;
-                if (oldItem != null)
-                    oldItem.IsLoaded = false;
+                oldItem?.IsLoaded = false;
                 _sliderPosition = CurrentItemStartTime.TotalSeconds;
                 NotifyPropertyChanged(nameof(IsPlaying));
                 NotifyPropertyChanged(nameof(SliderPosition));
@@ -313,7 +313,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private void LoadMedia(object param)
         {
-            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModelBase ?? throw new ArgumentException(nameof(param)));
+            LoadMedia(((param as object[])?[0] as FrameworkElement)?.DataContext as RundownItemViewModelBase ?? throw new ArgumentException($"{nameof(RundownItemViewModelBase)} expected, {param?.GetType()} got."));
         }
 
         private void LoadMedia(RundownItemViewModelBase playerItem) => _rundownPlayer.Load(playerItem.RundownItem);
@@ -340,7 +340,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
             catch
             {
-                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_rundownPlayer.LoadedItem?.Name }");
+                await ShellViewModel.Instance.ShowMessageAsync("Error", $"Error starting {_rundownPlayer.LoadedItem?.Name }");
                 return false;
             }
             return true;
@@ -356,7 +356,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                await MainViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_rundownPlayer.LoadedItem?.Name}");
+                await ShellViewModel.Instance.ShowMessageAsync("Error", $"Error pausing clip {_rundownPlayer.LoadedItem?.Name}");
                 return false;
             }
             return true;
@@ -366,18 +366,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
         {
             OnUiThread(() =>
             {
-                switch (TimeDisplaySource)
+                DisplayTime = TimeDisplaySource switch
                 {
-                    case TimeDisplaySource.TimeFromBegin:
-                        DisplayTime = e.TimeFromBegin;
-                        break;
-                    case TimeDisplaySource.Timecode:
-                        DisplayTime = e.Timecode;
-                        break;
-                    default:
-                        DisplayTime = null;
-                        break;
-                }
+                    TimeDisplaySource.TimeFromBegin => (TimeSpan?)e.TimeFromBegin,
+                    TimeDisplaySource.Timecode => e.Timecode,
+                    _ => null,
+                };
                 OutTime = e.TimeToEnd;
                 OutTimeBlink = IsPlaying && OutTime < TimeSpan.FromSeconds(10) && OutTime > _rundownPlayer.OneFrame;
                 Set(ref _sliderPosition, e.TimeFromBegin.TotalSeconds, nameof(SliderPosition));
@@ -450,7 +444,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private bool CanTogglePlay(object obj)
         {
-            if (!(_rundownPlayer.LoadedItem is FileRundownItem))
+            if (_rundownPlayer.LoadedItem is not FileRundownItem)
                 return false;
             if (!IsPlaying && _rundownPlayer.IsEof())
                 return false;
@@ -477,7 +471,11 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             switch (dropInfo.Data)
             {
                 case MediaViewModel mediaViewModel:
-                    if (!mediaViewModel.IsVerified || mediaViewModel.Duration <= TimeSpan.Zero)
+                    if (!mediaViewModel.IsValid)
+                            return;
+                    break;
+                case RecordingViewModel recordingViewModel:
+                    if (recordingViewModel.Recording?.Media?.IsValid is not true)
                         return;
                     break;
                 case DecklinkInputViewModel decklink:
@@ -502,16 +500,17 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         public void Drop(IDropInfo dropInfo)
         {
+            var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
             switch (dropInfo.Data)
             {
                 case MediaViewModel mediaViewModel:
-                    var index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                     _rundownPlayer.AddMediaToQueue(mediaViewModel.Media, index);
                     break;
-
                 case DecklinkInputViewModel decklink:
-                    index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                     _rundownPlayer.AddLiveToQueue(decklink.Input, index);
+                    break;
+                case RecordingViewModel recordingViewModel:
+                    _rundownPlayer.AddMediaToQueue(recordingViewModel.Recording.Media, index);
                     break;
                 case LiveInputRundownItemViewModel _:
                 case FileRundownItemViewModel _:
@@ -522,7 +521,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     _rundownPlayer.MoveItem(srcIndex, destIndex);
                     Rundown.Move(srcIndex, destIndex);
                     break;
-
                 case IDataObject dataObject:
                     var fileName = (dataObject.GetData(DataFormats.FileDrop) as string[])?.FirstOrDefault(f => File.Exists(f));
                     if (fileName is null)
@@ -530,7 +528,6 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                     var media = new MediaFile(fileName);
                     if (!(MediaVerifier.Current.Verify(media) && media.IsValid))
                         return;
-                    index = dropInfo.TargetCollection is null ? Rundown.Count : dropInfo.InsertIndex;
                     _rundownPlayer.AddMediaToQueue(media, index);
                     break;
             }
@@ -555,15 +552,12 @@ namespace StudioTVPlayer.ViewModel.Main.Player
 
         private RundownItemViewModelBase CreateRundownItemViewModel(RundownItemBase rundownItem)
         {
-            switch (rundownItem)
+            return rundownItem switch
             {
-                case FileRundownItem fileRundownItem:
-                    return new FileRundownItemViewModel(fileRundownItem);
-                case LiveInputRundownItem liveInputRundownItem:
-                    return new LiveInputRundownItemViewModel(liveInputRundownItem);
-                default:
-                    throw new ArgumentException(nameof(rundownItem));
-            }
+                FileRundownItem fileRundownItem => new FileRundownItemViewModel(fileRundownItem),
+                LiveInputRundownItem liveInputRundownItem => new LiveInputRundownItemViewModel(liveInputRundownItem),
+                _ => throw new ArgumentOutOfRangeException(nameof(rundownItem)),
+            };
         }
 
         private void SaveRundown(object _)
@@ -573,7 +567,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                UISBusyState.SetBusyState();
+                UIBusyState.Set();
                 _rundownPlayer.SaveRundown(fileName);
             }
             catch (Exception ex)
@@ -589,7 +583,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
                 return;
             try
             {
-                UISBusyState.SetBusyState();
+                UIBusyState.Set();
                 _rundownPlayer.LoadRundown(fileName);
             }
             catch (Exception ex)

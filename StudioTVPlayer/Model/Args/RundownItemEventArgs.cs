@@ -2,24 +2,14 @@
 
 namespace StudioTVPlayer.Model.Args
 {
-    public class RundownItemEventArgs : EventArgs
+    public class RundownItemEventArgs(RundownItemBase rundownItem) : EventArgs
     {
-        public RundownItemEventArgs(RundownItemBase rundownItem)
-        {
-            RundownItem = rundownItem;
-        }
-
-        public RundownItemBase RundownItem { get; }
+        public RundownItemBase RundownItem { get; } = rundownItem;
     }
 
-    public class RundownItemIndexedEventArgs: RundownItemEventArgs
+    public class RundownItemIndexedEventArgs(RundownItemBase item, int index) : RundownItemEventArgs(item)
     {
-        public RundownItemIndexedEventArgs(RundownItemBase item, int index) : base(item)
-        {
-            Index = index;
-        }
-
-        public int Index { get; }
+        public int Index { get; } = index;
     }
 
 }

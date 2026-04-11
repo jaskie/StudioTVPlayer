@@ -12,6 +12,9 @@ namespace StudioTVPlayer.Model
 {
     internal class MediaVerifier : IDisposable
     {
+        public const int DefaultThumbnailHeight = 126;
+        public const int DefaultThumbnailWidth = 224;
+        
         private struct MediaVerifyData
         {
             public MediaFile Media;
@@ -22,10 +25,8 @@ namespace StudioTVPlayer.Model
 
         private bool _disposed;
         private readonly Task _verificationTask;
-        private readonly BlockingCollection<MediaVerifyData> _mediaQueue = new BlockingCollection<MediaVerifyData>();
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private const int DefaultThumbnailHeight = 126;
-        private const int DefaultThumbnailWidth = 224;
+        private readonly BlockingCollection<MediaVerifyData> _mediaQueue = [];
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private MediaVerifier()
         {
@@ -107,7 +108,7 @@ namespace StudioTVPlayer.Model
         private void MediaVerifierTask()
         {
             var token = _cancellationTokenSource.Token;
-            while (true)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
@@ -120,7 +121,7 @@ namespace StudioTVPlayer.Model
                     if (!Verify(vd.Media, vd.Width, vd.Height))
                     {
                         if (DateTime.Now > vd.FirstVerification + TimeSpan.FromSeconds(30))
-                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath);
+                            Debug.WriteLine("Verification of {0} unsuccessfull in 30 seconds.", vd.Media.FullPath, null);
                         else
                         {
                             Task.Run(async () =>

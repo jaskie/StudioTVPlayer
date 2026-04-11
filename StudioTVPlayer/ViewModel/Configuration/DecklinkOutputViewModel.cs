@@ -1,5 +1,4 @@
-﻿using StudioTVPlayer;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace StudioTVPlayer.ViewModel.Configuration
@@ -41,7 +40,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override bool IsValid()
         {
-            return !(SelectedDevice is null) && string.IsNullOrEmpty(this[nameof(SelectedDevice)]);
+            return SelectedDevice is not null && string.IsNullOrEmpty(this[nameof(SelectedDevice)]);
         }
 
         protected override string ReadErrorInfo(string propertyName)

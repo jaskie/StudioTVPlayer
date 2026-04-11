@@ -12,11 +12,17 @@ namespace StudioTVPlayer.ViewModel.Main
     public class PlayoutViewModel : ViewModelBase, IDisposable
     {
         private bool _disposed;
+        private ViewModelBase _selectedBrowser;
+
         public PlayoutViewModel()
         {
-            Players = GlobalApplicationData.Current.RundownPlayers.Select(p => new PlayerViewModel(p)).ToArray();
-            Browsers = Providers.Configuration.Current.WatchedFolders.Select(f => new BrowserViewModel(f)).ToArray();
-            Inputs = new InputsViewModel();
+            Players = [.. GlobalApplicationData.Current.RundownPlayers.Select(p => new PlayerViewModel(p))];
+            Browsers = [.. (InputList.Current.CanAddInput ?
+                // add InputsViewModel to the list of browsers
+                (new ViewModelBase[] { new InputsViewModel() }).Concat(Providers.Configuration.Current.WatchedFolders.Select(f => new BrowserViewModel(f))) :
+                // otherwise, just add BrowserViewModel to the list of browsers
+                Providers.Configuration.Current.WatchedFolders.Select(f => new BrowserViewModel(f)))];
+            SelectedBrowser = Browsers.FirstOrDefault(x => x is BrowserViewModel) ?? Browsers.FirstOrDefault();
             FocusPlayerCommand = new UiCommand(FocusPlayer);
             FocusBrowserCommand = new UiCommand(FocusBrowser);
         }
@@ -26,9 +32,9 @@ namespace StudioTVPlayer.ViewModel.Main
 
         public IReadOnlyCollection<PlayerViewModel> Players { get; }
 
-        public IReadOnlyCollection<BrowserViewModel> Browsers { get; }
+        public IReadOnlyCollection<ViewModelBase> Browsers { get; }
 
-        public InputsViewModel Inputs { get; }
+        public ViewModelBase SelectedBrowser { get => _selectedBrowser; set => Set(ref _selectedBrowser, value); }
 
         private void FocusBrowser(object obj)
         {
@@ -45,9 +51,8 @@ namespace StudioTVPlayer.ViewModel.Main
             _disposed = true;
             foreach (var player in Players)
                 player.Dispose();
-            foreach (var browser in Browsers)
+            foreach (var browser in Browsers.OfType<IDisposable>())
                 browser.Dispose();
-            Inputs.Dispose();
         }
 
     }

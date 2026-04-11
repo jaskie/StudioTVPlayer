@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.ViewModel.Main.Input
 {
-    public class DecklinkInputViewModel : InputViewModelBase
+    public sealed class DecklinkInputViewModel : InputViewModelBase
     {
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.DecklinkInfo _selectedDevice;
@@ -75,6 +75,8 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         public ImageSource Thumbnail => Input.Thumbnail;
 
+        public override string DisplayName => SelectedDevice?.DisplayName;
+
         public override bool IsValid()
         {
             return string.IsNullOrEmpty(ReadErrorInfo(nameof(VideoFormat)))
@@ -95,20 +97,17 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         protected override string ReadErrorInfo(string propertyName)
         {
-            switch (propertyName)
+            return propertyName switch
             {
-                case nameof(SelectedDevice) when SelectedDevice is null:
-                    return "Input device have to be set";
-                case nameof(VideoFormat) when VideoFormat is null:
-                    return "Video format can't be empty";
-                default:
-                    return string.Empty;
-            }
+                nameof(SelectedDevice) when SelectedDevice is null => "Input device have to be set",
+                nameof(VideoFormat) when VideoFormat is null => "Video format can't be empty",
+                _ => string.Empty,
+            };
         }
 
         private void Input_FormatChanged(object sender, EventArgs e)
         {
-            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException(nameof(sender));
+            var decklink = sender as Model.DecklinkInput ?? throw new ArgumentException($"{nameof(Model.DecklinkInput)} expected, {sender?.GetType()} got.");
             _videoFormat = decklink.CurrentFormat();
             NotifyPropertyChanged(nameof(VideoFormat));
         }

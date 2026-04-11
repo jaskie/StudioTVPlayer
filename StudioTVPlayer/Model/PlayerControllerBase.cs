@@ -2,26 +2,19 @@
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class PlayerControllerBase : IDisposable
+    public abstract class PlayerControllerBase(Configuration.PlayerControllerBase playerControllerConfiguration) : IDisposable
     {
-        protected PlayerControllerBase(Configuration.PlayerControllerBase playerControllerConfiguration)
-        {
-            Name = playerControllerConfiguration.Name;
-        }
-
-        private bool _isConnected;
-
         public event EventHandler ConnectionStateChanged;
 
-        public bool IsConnected => _isConnected;
+        public bool IsConnected { get; protected set; }
 
-        public string Name { get; }
+        public string Name { get; } = playerControllerConfiguration.Name;
 
         public abstract void Dispose();
 
         protected void NotifyConnectionStateChanged(bool isConnected)
         {
-            _isConnected = isConnected;
+            IsConnected = isConnected;
             ConnectionStateChanged?.Invoke(this, EventArgs.Empty);
         }
 

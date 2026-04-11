@@ -1,14 +1,8 @@
 ﻿namespace StudioTVPlayer.Model
 {
-    public class FFOutput : OutputBase
+    public class FFOutput(Configuration.FFOutput configuration) : OutputBase(configuration)
     {
         private TVPlayR.FFOutput _ffOutput;
-        private readonly Configuration.FFOutput _configuration;
-
-        public FFOutput(Configuration.FFOutput configuration) : base(configuration)
-        {
-            _configuration = configuration;
-        }
 
         public override void Dispose()
         {
@@ -19,9 +13,9 @@
             _ffOutput = null;
         }
 
-        public string Url => _configuration.Url;
+        public string Url => configuration.Url;
 
-        public EncoderSettings EncoderSettings => _configuration.EncoderSettings;
+        public EncoderSettings EncoderSettings => configuration.EncoderSettings;
 
         public override TVPlayR.OutputBase Output => _ffOutput;
 

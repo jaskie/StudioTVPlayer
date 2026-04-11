@@ -16,7 +16,7 @@ namespace StudioTVPlayer.Model
     {
         private readonly Configuration.ElgatoStreamDeckPlayerController _playerControllerConfiguration;
         private readonly ElgatoStreamDeckPlayerBinding[] _bindings;
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         private IMacroBoard _streamDeck;
         private bool _disposed;
         private CancellationTokenSource _connectCancelationTokenSource;
@@ -26,14 +26,14 @@ namespace StudioTVPlayer.Model
             : base(playerControllerConfiguration)
         {
             _playerControllerConfiguration = playerControllerConfiguration;
-            _bindings = playerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId))).ToArray();
+            _bindings = [.. playerControllerConfiguration.Bindings.Select(bindingConfiguration => CreateBinding(bindingConfiguration, rundownPlayers.FirstOrDefault(p => p.Id == bindingConfiguration.PlayerId)))];
             Task.Run(TryToReconnect);
         }
 
         private ElgatoStreamDeckPlayerBinding CreateBinding(Configuration.PlayerBindingBase playerBindingConfiguration, RundownPlayer rundownPlayer)
         {
             Debug.Assert(rundownPlayer != null);
-            var elgatoStreamDeckPlayerBindingConfiguration = playerBindingConfiguration as Configuration.ElgatoStreamDeckPlayerBinding ?? throw new ArgumentException(nameof(playerBindingConfiguration));
+            var elgatoStreamDeckPlayerBindingConfiguration = playerBindingConfiguration as Configuration.ElgatoStreamDeckPlayerBinding ?? throw new ArgumentException($"{nameof(Configuration.ElgatoStreamDeckPlayerBinding)} expected, {playerBindingConfiguration?.GetType()} got."); ;
             return new ElgatoStreamDeckPlayerBinding(elgatoStreamDeckPlayerBindingConfiguration, rundownPlayer);
         }
 
@@ -118,11 +118,9 @@ namespace StudioTVPlayer.Model
                 _connectCancelationTokenSource?.Cancel();
                 _streamDeck = null;
             }
-            if (_font != null)
-            {
-                _font.Dispose();
-                _font = null;
-            }
+
+            _font?.Dispose();
+            _font = null;
             foreach (var binding in _bindings)
             {
                 binding.Dispose();

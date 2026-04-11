@@ -15,7 +15,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" FontSize="{DynamicResource MahApps.Font.Size.Header}">Configuration</Label>
+        <Label Grid.Row="0" FontSize="{StaticResource MahApps.Font.Size.SubHeader}">Configuration</Label>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 15 0 -5">
             <StackPanel.Resources>
                 <Style TargetType="TextBlock" >
@@ -54,8 +54,8 @@
             <TabItem Header="Players">
                 <views:PlayersView Margin="5" DataContext="{Binding Players}"/>
             </TabItem>
-            <TabItem Header="Watched folders">
-                <views:WatchedFoldersView Margin="5" DataContext="{Binding WatchedFolders}" />
+            <TabItem Header="Folders">
+                <views:FoldersView Margin="5" DataContext="{Binding Folders}" />
             </TabItem>
             <TabItem Header="Controllers">
                 <views:PlayerControllersView Margin="5" DataContext="{Binding PlayerControllers}" />

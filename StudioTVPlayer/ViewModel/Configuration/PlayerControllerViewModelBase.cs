@@ -11,7 +11,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
     public abstract class PlayerControllerViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
         public readonly Model.Configuration.PlayerControllerBase PlayerControllerConfiguration;
-        private readonly ObservableCollection<PlayerControllerBindingViewModelBase> _bindings = new ObservableCollection<PlayerControllerBindingViewModelBase>();
+        private readonly ObservableCollection<PlayerControllerBindingViewModelBase> _bindings = [];
 
         public PlayerControllerViewModelBase(Model.Configuration.PlayerControllerBase playerControllerConfiguration)
         {
@@ -58,7 +58,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
         {
             foreach (var binding in Bindings)
                 binding.Apply();
-            PlayerControllerConfiguration.Bindings = Bindings.Select(binding => binding.BindingConfiguration).ToArray();
+            PlayerControllerConfiguration.Bindings = [.. Bindings.Select(binding => binding.BindingConfiguration)];
             base.Apply();
         }
 
@@ -71,7 +71,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Binding_RemoveRequested(object sender, EventArgs e)
         {
-            var vm = sender as PlayerControllerBindingViewModelBase ?? throw new ArgumentException(nameof(sender));
+            var vm = sender as PlayerControllerBindingViewModelBase ?? throw new ArgumentException($"{nameof(PlayerControllerBindingViewModelBase)} expected, {sender?.GetType()} got.");
             vm.Modified -= Binding_Modified;
             vm.RemoveRequested -= Binding_RemoveRequested;
             Bindings.Remove(vm);

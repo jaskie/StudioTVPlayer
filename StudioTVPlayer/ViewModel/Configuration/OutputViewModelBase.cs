@@ -3,18 +3,11 @@ using System.ComponentModel;
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public abstract class OutputViewModelBase : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
+    public abstract class OutputViewModelBase(Model.Configuration.OutputBase outputConfiguration) : RemovableViewModelBase, IDataErrorInfo, ICheckErrorInfo
     {
-        private bool _isFrameClock;
-        private TVPlayR.TimecodeOutputSource _timecodeOverlay;
-        internal Model.Configuration.OutputBase OutputConfiguration;
-
-        public OutputViewModelBase(Model.Configuration.OutputBase outputConfiguration)
-        {
-            OutputConfiguration = outputConfiguration;
-            _isFrameClock = outputConfiguration.IsFrameClock;
-            _timecodeOverlay = outputConfiguration.TimecodeOverlay;
-        }
+        private bool _isFrameClock = outputConfiguration.IsFrameClock;
+        private TVPlayR.TimecodeOutputSource _timecodeOverlay = outputConfiguration.TimecodeOverlay;
+        internal Model.Configuration.OutputBase OutputConfiguration = outputConfiguration;
 
         public string this[string columnName] => ReadErrorInfo(columnName);
 

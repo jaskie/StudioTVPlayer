@@ -73,4 +73,51 @@ namespace StudioTVPlayer.Model
         [Description("Preview - input change")]
         PrvI,
     }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum ScheduleRepeatType
+    {
+        [Description("One time")]
+        Single,
+        [Description("Daily")]
+        Daily
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum RecordingFilenameCreationRule
+    {
+        [Description("Use name as filename")]
+        None,
+        [Description("Add date/time prefix")]
+        DateTimeAtBegin,
+        [Description("Add date/time suffix")]
+        DateTimeAtEnd,
+        [Description("Add date prefix")]
+        DateAtBegin,
+        [Description("Add date suffix")]
+        DateAtEnd,
+        [Description("Add time prefix")]
+        TimeAtBegin,
+        [Description("Add time suffix")]
+        TimeAtEnd,
+        [Description("Use name for date/time format")]
+        UseNameAsFormat
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum RecordingState
+    {
+        [Description("pending")]
+        Pending,
+        [Description("in progress")]
+        Running,
+        [Description("completed")]
+        Completed,
+        [Description("failed")]
+        Failed,
+        [Description("aborted")]
+        Aborted,
+        [Description("missing")]
+        Missing
+    }
 }

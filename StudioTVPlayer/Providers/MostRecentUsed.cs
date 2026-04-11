@@ -6,7 +6,7 @@ namespace StudioTVPlayer.Providers
 {
     public class MostRecentUsed
     {
-        private readonly MostRecentlyUsedList _folders = new MostRecentlyUsedList(Path.Combine(GlobalApplicationData.ApplicationDataDir, "MRU_Folders.txt"), 5);
+        private readonly MostRecentlyUsedList _folders = new(Path.Combine(GlobalApplicationData.ApplicationDataDir, "MRU_Folders.txt"), 5);
 
         private class MostRecentlyUsedList
         {
@@ -22,12 +22,12 @@ namespace StudioTVPlayer.Providers
                 {
                     try
                     {
-                        _items = File.ReadAllLines(fileName).ToList();
+                        _items = [.. File.ReadAllLines(fileName)];
                         return;
                     }
                     catch { } // ignore if unable to read
                 }
-                _items = new List<string>();
+                _items = [];
             }
 
             public bool Add(string folder)

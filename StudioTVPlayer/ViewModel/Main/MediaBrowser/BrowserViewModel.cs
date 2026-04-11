@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -13,9 +12,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 {
     public class BrowserViewModel : ViewModelBase, IDisposable
     {
-        private readonly ICollectionView _mediaFilesView;
+        private readonly IList<MediaViewModel> _mediaFiles;
         private readonly WatchedFolder _watchedFolder;
-        private readonly ObservableCollection<MediaViewModel> _mediaFiles;
         private bool _isDisposed;
         private Sorting _selectedSorting;
         private MediaViewModel _selectedMedia;
@@ -32,10 +30,10 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             _watchedFolder = watchedFolder;
             _watchedFolder.MediaChanged += WatchedFolder_MediaChanged;
             _watchedFolder.Initialize();
-            _mediaFiles = new ObservableCollection<MediaViewModel>(watchedFolder.Medias.Select(m => new MediaViewModel(m)));
-            _mediaFilesView = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
-            _mediaFilesView.Filter = MediaFilter;
-            _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
+            _mediaFiles = [.. watchedFolder.Medias.Select(m => new MediaViewModel(m))];
+            MediaFiles = System.Windows.Data.CollectionViewSource.GetDefaultView(_mediaFiles);
+            MediaFiles.Filter = MediaFilter;
+            MediaFiles.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
             _selectedSorting = Sorting.CreationTime;
             Name = watchedFolder.Name;
             Path = watchedFolder.Path;
@@ -46,10 +44,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             ExploreFolderCommand = new UiCommand(ExploreFolder);
         }
 
-
         #region Properties
 
-        public IList<MediaViewModel> MediaFiles => _mediaFiles;
         public string Name { get; }
         public string Path { get; }
         public bool IsFilteredByDate { get; }
@@ -62,6 +58,8 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             get => _isFocused;
             set => Set(ref _isFocused, value);
         }
+
+        public ICollectionView MediaFiles { get; }
 
         public MediaViewModel SelectedMedia
         {
@@ -80,7 +78,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                 _mediaFiles.Clear();
                 foreach (var media in _watchedFolder.Medias)
                     _mediaFiles.Add(new MediaViewModel(media));
-                _mediaFilesView.Refresh();
+                MediaFiles.Refresh();
             }
         }
 
@@ -91,7 +89,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
             {
                 if (!Set(ref _filter, value))
                     return;
-                _mediaFilesView.Refresh();
+                MediaFiles.Refresh();
             }
         }
 
@@ -113,17 +111,17 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
 
         private void SortMediaCollection()
         {
-            _mediaFilesView.SortDescriptions.Clear();
+            MediaFiles.SortDescriptions.Clear();
             switch (SelectedSorting)
             {
                 case Sorting.Name:
-                    _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Name), ListSortDirection.Ascending));
+                    MediaFiles.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Name), ListSortDirection.Ascending));
                     break;
                 case Sorting.Duration:
-                    _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Duration), ListSortDirection.Ascending));
+                    MediaFiles.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.Duration), ListSortDirection.Ascending));
                     break;
                 case Sorting.CreationTime:
-                    _mediaFilesView.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
+                    MediaFiles.SortDescriptions.Add(new SortDescription(nameof(MediaViewModel.CreationTime), ListSortDirection.Descending));
                     break;
             }
         }
@@ -132,8 +130,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         {
             if (string.IsNullOrEmpty(_filter))
                 return true;
-            var media = mediaItem as MediaViewModel;
-            if (media == null || string.IsNullOrWhiteSpace(media.Name))
+            if (mediaItem is not MediaViewModel media || string.IsNullOrWhiteSpace(media.Name))
                 return false;
             return media.Name.IndexOf(_filter, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }
@@ -151,7 +148,7 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
         private void ChangeDate(object days)
         {
             if (!(days is string str && int.TryParse(str, out var increment)))
-                throw new ArgumentException(nameof(days));
+                throw new ArgumentException("days should be convertible to int");
             SelectedDate = SelectedDate.AddDays(increment);
         }
 
@@ -168,13 +165,13 @@ namespace StudioTVPlayer.ViewModel.Main.MediaBrowser
                 {
                     case MediaEventKind.Create:
                         _mediaFiles.Add(new MediaViewModel(e.Media));
-                        _mediaFilesView.Refresh();
+                        MediaFiles.Refresh();
                         break;
                     case MediaEventKind.Delete:
                         var mediaVm = _mediaFiles.FirstOrDefault(m => m.Media == e.Media);
                         if (mediaVm != null)
                             _mediaFiles.Remove(mediaVm);
-                        _mediaFilesView.Refresh();
+                        MediaFiles.Refresh();
                         break;
                 }
                 Debug.WriteLine("Media {0} {1}", e.Media.Name, e.Kind);

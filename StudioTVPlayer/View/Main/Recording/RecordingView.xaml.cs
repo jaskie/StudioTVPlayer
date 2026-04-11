@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace StudioTVPlayer.View.Main
+namespace StudioTVPlayer.View.Main.Recording
 {
     /// <summary>
     /// Interaction logic for RecordingView.xaml

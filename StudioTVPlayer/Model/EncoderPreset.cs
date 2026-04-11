@@ -24,4 +24,26 @@ namespace StudioTVPlayer.Model
         [XmlArrayItem("Format")]
         public string[] InputFormats { get; set; }
     }
+
+    public sealed class EncoderPresets
+    {
+        public static EncoderPresets Instance { get; } = new EncoderPresets();
+        
+        private EncoderPresets() 
+        {
+            Presets = Load();
+        }
+
+        public EncoderPreset[] Presets { get; }
+
+        private EncoderPreset[] Load()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceStream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.Resources.EmbeddedPresets.xml");
+            var serializer = new XmlSerializer(typeof(EncoderPreset[]), new XmlRootAttribute("PresetList"));
+            var presets = (EncoderPreset[])serializer.Deserialize(resourceStream);
+            return presets;
+        }
+
+    }
 }

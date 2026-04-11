@@ -14,7 +14,7 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _loadedItem;
         private RundownItemBase _loadedNextRundownItem;
         private PlayerState _playerState = PlayerState.Unloaded;
-        private readonly Rundown _rundown = new Rundown();
+        private readonly Rundown _rundown = new();
         private bool _disposed;
 
         public RundownPlayer(Configuration.Player configuration) : base(configuration)
@@ -23,6 +23,7 @@ namespace StudioTVPlayer.Model
             _rundown.ItemAdded += Rundown_ItemAdded;
             _rundown.ItemRemoved += Rundown_ItemRemoved;
         }
+
         public RundownItemBase LoadedItem
         {
             get => _loadedItem;
@@ -101,7 +102,7 @@ namespace StudioTVPlayer.Model
 
         public void Cue()
         {
-            if (!(_loadedItem is RundownItemBase rundownItem))
+            if (_loadedItem is not RundownItemBase rundownItem)
                 return;
             rundownItem.Pause();
             if (rundownItem.Seek((rundownItem as FileRundownItem)?.Media.StartTime ?? TimeSpan.Zero))
@@ -165,9 +166,9 @@ namespace StudioTVPlayer.Model
             _rundown.Add(item, index);
         }
 
-        public void LoadRundown(string fileName) => Persistence.RundownPersister.LoadRundown(_rundown, fileName);
+        public void LoadRundown(string fileName) => Providers.RundownPersister.LoadRundown(_rundown, fileName);
 
-        public void SaveRundown(string fileName) => Persistence.RundownPersister.SaveRundown(_rundown, fileName);
+        public void SaveRundown(string fileName) => Providers.RundownPersister.SaveRundown(_rundown, fileName);
 
         private void AfterPlayed(RundownItemBase rundownItem)
         {
@@ -208,8 +209,7 @@ namespace StudioTVPlayer.Model
 
         private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!(sender is MediaFile media))
-                return;
+            var media = sender as MediaFile ?? throw new ArgumentException($"{nameof(MediaFile)} expected, {sender?.GetType()} got.");
             switch (e.PropertyName)
             {
                 case nameof(MediaFile.Duration):
@@ -226,7 +226,7 @@ namespace StudioTVPlayer.Model
 
         public bool Seek(TimeSpan timeSpan)
         {
-            if (!(LoadedItem is FileRundownItem file) ||
+            if (LoadedItem is not FileRundownItem file ||
                 !file.Seek(timeSpan))
                 return false;
             Seeked?.Invoke(this, EventArgs.Empty);
@@ -246,7 +246,7 @@ namespace StudioTVPlayer.Model
         {
             Task.Run(() => // do not block incoming thread
             {
-                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+                var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got."); ;
                 if (rundownItem == _loadedItem) // next didn't loaded
                 {
                     if (rundownItem.IsEof)
@@ -266,8 +266,7 @@ namespace StudioTVPlayer.Model
         private void PlaiyngRundownItem_FramePlayed(object sender, TVPlayR.TimeEventArgs e)
         {
             FramePlayed?.Invoke(this, e);
-            var current = sender as FileRundownItem;
-            if (current == null || current != _loadedItem)
+            if (sender is not FileRundownItem current || current != _loadedItem)
                 return;
             if (current.Media.Duration - e.TimeFromBegin > PreloadTime)
                 return;

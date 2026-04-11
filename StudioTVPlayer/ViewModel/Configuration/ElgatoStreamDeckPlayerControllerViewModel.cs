@@ -145,32 +145,25 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         protected override string ReadErrorInfo(string columnName)
         {
-            switch (columnName)
+            return columnName switch
             {
-                case nameof(SelectedDevice) when SelectedDevice is null:
-                    return "Please select some panel";
-            }
-            return base.ReadErrorInfo(columnName);
+                nameof(SelectedDevice) when SelectedDevice is null => "Please select some panel",
+                _ => base.ReadErrorInfo(columnName),
+            };
         }
 
         private void RefreshDevices(object _ = null)
         {
             int deviceIndex = 1;
-            _devices = StreamDeck.EnumerateDevices().Select(d => new StreamDeckDevice(d, deviceIndex++)).ToArray();
+            _devices = [.. StreamDeck.EnumerateDevices().Select(d => new StreamDeckDevice(d, deviceIndex++))];
             NotifyPropertyChanged(nameof(Devices));
         }
 
-        public class StreamDeckDevice
+        public class StreamDeckDevice(StreamDeckDeviceReference Device, int index)
         {
-            private readonly int _index;
-            public StreamDeckDevice(StreamDeckDeviceReference Device, int index)
-            {
-                this.Device = Device;
-                _index = index;
-            }
-            public StreamDeckDeviceReference Device { get; }
+            public StreamDeckDeviceReference Device { get; } = Device;
 
-            public string DisplayName => $"[{_index}] {Device.DeviceName}";
+            public string DisplayName => $"[{index}] {Device.DeviceName}";
         }
 
     }

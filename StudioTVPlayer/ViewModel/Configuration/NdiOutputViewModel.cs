@@ -2,18 +2,10 @@
 
 namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class NdiOutputViewModel : OutputViewModelBase
+    public class NdiOutputViewModel(Model.Configuration.NdiOutput ndiConfiguration) : OutputViewModelBase(ndiConfiguration)
     {
-        private readonly Model.Configuration.NdiOutput _ndi;
-        private string _groupNames;
-        private string _sourceName;
-
-        public NdiOutputViewModel(Model.Configuration.NdiOutput ndiConfiguration) : base(ndiConfiguration)
-        {
-            _ndi = ndiConfiguration;
-            _groupNames = ndiConfiguration.GroupNames;
-            _sourceName = ndiConfiguration.SourceName;
-        }
+        private string _groupNames = ndiConfiguration.GroupNames;
+        private string _sourceName = ndiConfiguration.SourceName;
 
         public string GroupNames { get => _groupNames; set => Set(ref _groupNames, value); }
         
@@ -24,8 +16,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
             if (!IsModified)
                 return;
             base.Apply();
-            _ndi.GroupNames = GroupNames;
-            _ndi.SourceName = SourceName;
+            ndiConfiguration.GroupNames = GroupNames;
+            ndiConfiguration.SourceName = SourceName;
         }
 
         protected override string ReadErrorInfo(string propertyName)

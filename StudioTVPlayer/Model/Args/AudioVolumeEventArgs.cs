@@ -2,13 +2,8 @@
 
 namespace StudioTVPlayer.Model.Args
 {
-    public class AudioVolumeEventArgs : EventArgs
+    public class AudioVolumeEventArgs(float[] audioVolume) : EventArgs
     {
-        public AudioVolumeEventArgs(float[] audioVolume)
-        {
-            AudioVolume = audioVolume;
-        }
-
-        public float[] AudioVolume { get; }
+        public float[] AudioVolume { get; } = audioVolume;
     }
 }

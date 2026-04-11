@@ -1,4 +1,5 @@
-﻿using StudioTVPlayer.Helpers;
+﻿using MahApps.Metro.Controls.Dialogs;
+using StudioTVPlayer.Helpers;
 using StudioTVPlayer.Providers;
 using System;
 using System.Collections.Generic;
@@ -14,23 +15,19 @@ namespace StudioTVPlayer.ViewModel.Main.Input
         {
             AddDecklinkInputCommand = new UiCommand(AddDecklinkInput);
             Inputs = new ObservableCollection<InputViewModelBase>(InputList.Current.Inputs.Select(input =>
-           {
-               InputViewModelBase inputViewModel;
-               switch (input)
-               {
-                   case Model.DecklinkInput decklink:
-                       inputViewModel = new DecklinkInputViewModel(decklink);
-                       break;
-                   default:
-                       throw new ApplicationException("Invalid model type provided");
-               }
-               inputViewModel.RemoveRequested += Input_RemoveRequested;
+            {
+                InputViewModelBase inputViewModel = input switch
+                {
+                    Model.DecklinkInput decklink => new DecklinkInputViewModel(decklink),
+                    _ => throw new ApplicationException("Invalid model type provided"),
+                };
+                inputViewModel.RemoveRequested += Input_RemoveRequested;
                return inputViewModel;
-           }));
+            }));
         }
 
         public ICommand AddDecklinkInputCommand { get; }
-                
+
         public IList<InputViewModelBase> Inputs { get; }
 
         public bool CanAddInput => InputList.Current.CanAddDecklinkInput;
@@ -43,14 +40,25 @@ namespace StudioTVPlayer.ViewModel.Main.Input
             Inputs.Add(vm);
         }
 
-        private void Input_RemoveRequested(object sender, EventArgs e)
+        private async void Input_RemoveRequested(object sender, EventArgs e)
         {
-            var vm = sender as DecklinkInputViewModel ?? throw new ArgumentException(nameof(sender));
-            if (InputList.Current.RemoveInput(vm.Input))
+            var vm = sender as InputViewModelBase ?? throw new ArgumentException($"{nameof(InputViewModelBase)} expected, {sender?.GetType()} got.");
+            if (RecordingStore.Current.RunningRecordings.Any(r => r.Input == vm.Input))
             {
-                Inputs.Remove(vm);
-                vm.Dispose();
-                vm.RemoveRequested -= Input_RemoveRequested;
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "You cannot remove input with ongoing recording(s).", MessageDialogStyle.Affirmative);
+                return;
+            }
+            if ((Model.RecordingScheduler.Current.Recordings.Any(r => r.InputId == vm.Input.Id) &&
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "There are scheduled recordings for this input.\n\nDo you really want to remove it?", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Affirmative)
+                ||
+                await ShellViewModel.Instance.ShowMessageAsync("Remove input", "Do you really want to remove this input?", MessageDialogStyle.AffirmativeAndNegative) == MessageDialogResult.Affirmative)
+            {
+                if (InputList.Current.RemoveInput(vm.Input))
+                {
+                    Inputs.Remove(vm);
+                    vm.Dispose();
+                    vm.RemoveRequested -= Input_RemoveRequested;
+                }
             }
         }
 

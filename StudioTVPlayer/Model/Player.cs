@@ -9,11 +9,11 @@ using System.Windows.Media;
 
 namespace StudioTVPlayer.Model
 {
-    public abstract class Player : IDisposable
+    public abstract class Player(Configuration.Player configuration) : IDisposable
     {
         private TVPlayR.Player _player;
         private TVPlayR.PreviewSink _outputPreview;
-        private readonly List<OutputBase> _outputs = new List<OutputBase>();
+        private readonly List<OutputBase> _outputs = [];
         private bool _addItemsWithAutoPlay;
         private TVPlayR.VideoFormat _videoFormat;
         private TVPlayR.PixelFormat _pixelFormat;
@@ -22,12 +22,7 @@ namespace StudioTVPlayer.Model
         public event EventHandler<AudioVolumeEventArgs> AudioVolume;
         public event EventHandler Cleared;
 
-        public Player(Configuration.Player configuration)
-        {
-            Configuration = configuration;
-        }
-        
-        public Configuration.Player Configuration { get; }
+        public Configuration.Player Configuration { get; } = configuration;
 
         public string Id => Configuration.Id;
 
@@ -63,25 +58,17 @@ namespace StudioTVPlayer.Model
             _player = new TVPlayR.Player(Name, VideoFormat, _pixelFormat, AudioChannelCount);
             foreach (var outputConfiguration in Configuration.Outputs)
             {
-                OutputBase output;
-                switch (outputConfiguration)
+                OutputBase output = outputConfiguration switch
                 {
-                    case Configuration.DecklinkOutput decklink:
-                        output = new DecklinkOutput(decklink);
-                        break;
-                    case Configuration.NdiOutput ndi:
-                        output = new NdiOutput(ndi);
-                        break;
-                    case Configuration.FFOutput ff:
-                        output = new FFOutput(ff);
-                        break;
-                    default:
-                        throw new ApplicationException("Invalid output configuration type");
-                }
+                    Configuration.DecklinkOutput decklink => new DecklinkOutput(decklink),
+                    Configuration.NdiOutput ndi => new NdiOutput(ndi),
+                    Configuration.FFOutput ff => new FFOutput(ff),
+                    _ => throw new ApplicationException("Invalid output configuration type"),
+                };
                 output.Initialize(_player);
+                _player.AddOutputSink(output.Output);
                 if (output.IsFrameClock)
                     _player.SetFrameClockSource(output.Output);
-                _player.AddOutputSink(output.Output);
                 _outputs.Add(output);
             }
             _player.AudioVolume += Player_AudioVolume;
@@ -116,11 +103,8 @@ namespace StudioTVPlayer.Model
                 o.Dispose();
             }
             _outputs.Clear(); ;
-            if (!(_outputPreview is null))
-            {
-                _outputPreview.Dispose();
-                _outputPreview = null;
-            }
+            _outputPreview?.Dispose();
+            _outputPreview = null;
             _player.AudioVolume -= Player_AudioVolume;
             _player.Clear();
             _player.Dispose();

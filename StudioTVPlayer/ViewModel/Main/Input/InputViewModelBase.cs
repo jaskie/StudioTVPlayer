@@ -10,21 +10,23 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 {
     public abstract class InputViewModelBase : RemovableViewModelBase, IDisposable, IDataErrorInfo
     {
-        private readonly ObservableCollection<RecordingViewModel> _recordings = new ObservableCollection<RecordingViewModel>();
+        private readonly ObservableCollection<Recording.RecordingViewModel> _recordings = [];
 
         public InputViewModelBase(Model.InputBase input)
         {
             Input = input;
-            CommandAddRecorder = new UiCommand(AddRecorder);
-            foreach(var recording in Providers.GlobalApplicationData.Current.Recordings.Where(r => r.Input == input))
+            CommandAddRecordingInstant = new UiCommand(AddRecordingInstant);
+            foreach (var recording in Providers.RecordingStore.Current.RunningRecordings.Where(r => r.Input == input))
             {
-                var recordingVm = new RecordingViewModel(recording);
-                recordingVm.RemoveRequested += Recorder_RemoveRequested;
+                var recordingVm = new Recording.RecordingViewModel(recording);
+                recordingVm.RemoveRequested += Recording_RemoveRequested;
                 _recordings.Add(recordingVm);
             }
         }
 
         public Model.InputBase Input { get; }
+
+        public abstract string DisplayName { get; }
 
         public string Error => string.Empty;
 
@@ -39,22 +41,22 @@ namespace StudioTVPlayer.ViewModel.Main.Input
 
         protected abstract string ReadErrorInfo(string propertyName);
 
-        public ICommand CommandAddRecorder { get; }
+        public ICommand CommandAddRecordingInstant { get; }
 
-        public IEnumerable<RecordingViewModel> Recordings => _recordings;
+        public IEnumerable<Recording.RecordingViewModel> Recordings => _recordings;
 
-        private void AddRecorder(object obj)
+        private void AddRecordingInstant(object obj)
         {
-            var recorder = new RecordingViewModel(Input);
-            recorder.RemoveRequested += Recorder_RemoveRequested;
-            _recordings.Add(recorder);
+            var recording = new Recording.RecordingViewModel(Input);
+            recording.RemoveRequested += Recording_RemoveRequested;
+            _recordings.Add(recording);
         }
 
-        private void Recorder_RemoveRequested(object sender, EventArgs e)
+        private void Recording_RemoveRequested(object sender, EventArgs e)
         {
-            var recorder = sender as RecordingViewModel ?? throw new ArgumentException(nameof(sender));
-            recorder.RemoveRequested -= Recorder_RemoveRequested;
-            _recordings.Remove(recorder);
+            var recordingViewModel = sender as Recording.RecordingViewModel ?? throw new ArgumentException($"{nameof(Recording.RecordingViewModel)} expected, {sender?.GetType()} got.");
+            recordingViewModel.RemoveRequested -= Recording_RemoveRequested;
+            _recordings.Remove(recordingViewModel);
         }
     }
 }

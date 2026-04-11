@@ -9,7 +9,7 @@ namespace StudioTVPlayer.ViewModel.Main.Player
     {
         protected RundownItemViewModelBase()
         {
-            RemoveCommand = new UiCommand(Remove, _ => !IsLoaded);
+            RequestRemoveCommand = new UiCommand(RequestRemove, _ => !IsLoaded);
         }
 
         private bool _isLoaded;
@@ -25,15 +25,15 @@ namespace StudioTVPlayer.ViewModel.Main.Player
             }
         }
 
-        public ICommand RemoveCommand { get; }
+        public ICommand RequestRemoveCommand { get; }
 
         public abstract RundownItemBase RundownItem { get; }
 
         public ImageSource Thumbnail => RundownItem.Thumbnail;
 
-        private void Remove(object _)
+        private void RequestRemove(object _)
         {
-            RundownItem.RemoveFromRundown();
+            RundownItem.RequestRemoveFromRundown();
         }
     }
 }

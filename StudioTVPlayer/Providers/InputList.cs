@@ -8,14 +8,16 @@ namespace StudioTVPlayer.Providers
     public class InputList : Helpers.IPersistable
     {
         private const string InputsFile = "inputs.xml";
-        
+
+        private InputList() { }
+
         [XmlArray(nameof(Inputs))]
         [XmlArrayItem(typeof(Model.DecklinkInput))]
-        public List<Model.InputBase> _inputs = new List<Model.InputBase>();
+        public List<Model.InputBase> _inputs = [];
 
         [XmlIgnore]
         public IEnumerable<Model.InputBase> Inputs { get => _inputs; }
-        
+
         public static InputList Current { get; } = Load();
 
         private static InputList Load()
@@ -55,7 +57,14 @@ namespace StudioTVPlayer.Providers
             return input;
         }
 
+        public Model.InputBase Find(string inputId)
+        {
+            return _inputs.FirstOrDefault(input => input.Id == inputId);
+        }
+
         public bool CanAddDecklinkInput => TVPlayR.DecklinkIterator.Devices.Any(d => d.HaveInput);
+
+        public bool CanAddInput => CanAddDecklinkInput;
 
     }
 }

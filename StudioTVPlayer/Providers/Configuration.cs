@@ -10,15 +10,15 @@ namespace StudioTVPlayer.Providers
         private const string ConfigurationFile = "Configuration.xml";
 
         [XmlArray]
-        public List<Model.WatchedFolder> WatchedFolders { get; set; } = new List<Model.WatchedFolder>();
+        public List<Model.WatchedFolder> WatchedFolders { get; set; } = [];
 
         [XmlArray]
-        public List<Player> Players { get; set; } = new List<Player>();
+        public List<Player> Players { get; set; } = [];
 
         [XmlArray]
         [XmlArrayItem(typeof(BlackmagicDesignAtemPlayerController))]
         [XmlArrayItem(typeof(ElgatoStreamDeckPlayerController))]
-        public List<PlayerControllerBase> PlayerControllers { get; set; } = new List<PlayerControllerBase>();
+        public List<PlayerControllerBase> PlayerControllers { get; set; } = [];
 
         public static Configuration Current { get; } = Load();
 
@@ -27,14 +27,14 @@ namespace StudioTVPlayer.Providers
             var configurationFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, ConfigurationFile);
             try
             {
-                var configuration = Helpers.DataStore.Load<Configuration>(configurationFile) ?? new Configuration();
+                var configuration = Helpers.DataStore.Load<Configuration>(configurationFile) ?? new();
                 foreach (var player in configuration.Players)
                     player.IsModified = false;
                 return configuration;
             }
             catch
             {
-                return new Configuration();
+                return new();
             }
         }
 
@@ -43,6 +43,5 @@ namespace StudioTVPlayer.Providers
             var configurationFile = Path.Combine(GlobalApplicationData.ApplicationDataDir, ConfigurationFile);
             Helpers.DataStore.Save(this, configurationFile);
         }
-
     }
 }

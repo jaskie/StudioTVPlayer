@@ -11,10 +11,10 @@ namespace StudioTVPlayer.ViewModel
         public PlayerControllerViewModel(Model.PlayerControllerBase playerController)
         {
             _playerController = playerController;
-            _playerController.ConnectionStateChanged += _playerController_ConnectionStateChanged;
+            _playerController.ConnectionStateChanged += PlayerController_ConnectionStateChanged;
         }
 
-        private void _playerController_ConnectionStateChanged(object sender, System.EventArgs e)
+        private void PlayerController_ConnectionStateChanged(object sender, System.EventArgs e)
         {
             NotifyPropertyChanged(nameof(IsConnected));
         }
@@ -24,7 +24,7 @@ namespace StudioTVPlayer.ViewModel
             if (_disposed)
                 return;
             _disposed = true;
-            _playerController.ConnectionStateChanged -= _playerController_ConnectionStateChanged;
+            _playerController.ConnectionStateChanged -= PlayerController_ConnectionStateChanged;
         }
 
         public string Name => _playerController.Name;

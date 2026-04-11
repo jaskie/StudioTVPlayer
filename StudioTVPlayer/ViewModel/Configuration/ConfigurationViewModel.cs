@@ -10,8 +10,8 @@ namespace StudioTVPlayer.ViewModel.Configuration
         public ConfigurationViewModel()
         {
             Instance = this;
-            WatchedFolders = new WatchedFoldersViewModel();
-            WatchedFolders.Modified += Item_Modified;
+            Folders = new FoldersViewModel();
+            Folders.Modified += Item_Modified;
             Players = new PlayersViewModel();
             Players.Modified += Item_Modified;
             PlayerControllers = new PlayerControllersViewModel();
@@ -25,11 +25,11 @@ namespace StudioTVPlayer.ViewModel.Configuration
             try
             {
                 Apply();
-                MainViewModel.Instance.ShowPlayoutView();
+                await ShellViewModel.Instance.ShowPlayoutView();
             }
             catch (Exception e)
             {
-                await MainViewModel.Instance.ShowMessageAsync("Configuration error", $"Could not initialize this configuration:\n\n{(e.InnerException ?? e).Message}");
+                await ShellViewModel.Instance.ShowMessageAsync("Configuration error", $"Could not initialize this configuration:\n\n{(e.InnerException ?? e).Message}");
             }
         }
 
@@ -37,7 +37,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public UiCommand CancelCommand { get; }
 
-        public WatchedFoldersViewModel WatchedFolders { get; } 
+        public FoldersViewModel Folders { get; } 
 
         public PlayersViewModel Players { get; }
 
@@ -45,12 +45,12 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         private void Cancel(object obj)
         {
-            MainViewModel.Instance.ShowPlayoutView();
+            _ = ShellViewModel.Instance.ShowPlayoutView();
         }
 
         public override void Apply()
         {
-            WatchedFolders.Apply();
+            Folders.Apply();
             Players.Apply();
             PlayerControllers.Apply();
             Providers.Configuration.Current.Save();
@@ -61,7 +61,7 @@ namespace StudioTVPlayer.ViewModel.Configuration
 
         public override bool IsValid()
         {
-            return WatchedFolders.IsValid() && Players.IsValid() && PlayerControllers.IsValid();
+            return Folders.IsValid() && Players.IsValid() && PlayerControllers.IsValid();
         }
 
         public void Dispose()

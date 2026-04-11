@@ -1,11 +1,8 @@
 ﻿using StudioTVPlayer.Model.Args;
-using StudioTVPlayer.Model.Persistence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,8 +15,8 @@ namespace StudioTVPlayer.Model
         private RundownItemBase _nextAutoPlayItem;
         private bool _isLoop;
         private int _isDisposed;
-        private readonly List<RundownItemBase> _items = new List<RundownItemBase>();
-        private readonly object _rundownLock = new object();
+        private readonly List<RundownItemBase> _items = [];
+        private readonly object _rundownLock = new();
 
         public List<RundownItemBase> Items
         {
@@ -27,7 +24,7 @@ namespace StudioTVPlayer.Model
             {
                 lock (_rundownLock)
                 {
-                    return _items.ToList();
+                    return [.. _items];
                 }
             }
         }
@@ -70,7 +67,7 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_Loaded(object sender, EventArgs _)
         {
-            var item = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            var item = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got.");
             ItemLoaded?.Invoke(this, new RundownItemEventArgs(item));
             _loadedItem = item;
             RundownChanged();
@@ -78,13 +75,13 @@ namespace StudioTVPlayer.Model
 
         private void RundownItem_RemoveRequested(object sender, EventArgs _)
         {
-            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got.");
             Remove(rundownItem);
         }
 
         private void RundownItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException(nameof(sender));
+            var rundownItem = sender as RundownItemBase ?? throw new ArgumentException($"{nameof(RundownItemBase)} expected, {sender?.GetType()} got.");
             switch (e.PropertyName)
             {
                 case nameof(RundownItemBase.IsAutoStart):
@@ -103,7 +100,7 @@ namespace StudioTVPlayer.Model
                 else if (index < _items.Count)
                     _items.Insert(index, rundownItem);
                 else
-                    throw new ArgumentException(nameof(index));
+                    throw new ArgumentException("Invalid index provided");
             }
             rundownItem.PropertyChanged += RundownItem_PropertyChanged;
             rundownItem.RemoveRequested += RundownItem_RemoveRequested;

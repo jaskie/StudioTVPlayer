@@ -31,10 +31,10 @@ namespace TVPlayR {
 			{
 			case Core::VideoFormatType::pal:
 			case Core::VideoFormatType::pal_fha:
-				return bmdModePAL;
+				return BMDDisplayMode::bmdModePAL;
 			case Core::VideoFormatType::ntsc:
 			case Core::VideoFormatType::ntsc_fha:
-				return bmdModeNTSC;
+				return BMDDisplayMode::bmdModeNTSC;
 			case Core::VideoFormatType::v720p5000:		return BMDDisplayMode::bmdModeHD720p50;
 			case Core::VideoFormatType::v720p5994:		return BMDDisplayMode::bmdModeHD720p5994;
 			case Core::VideoFormatType::v720p6000:		return BMDDisplayMode::bmdModeHD720p60;
@@ -95,9 +95,9 @@ namespace TVPlayR {
 			}
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame *decklink_frame, FieldOrder field_order, AVRational sar, BMDTimeScale time_scale)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkVideo(IDeckLinkVideoInputFrame* decklink_frame, FieldOrder field_order, AVRational sar, BMDTimeScale time_scale)
 		{
-			void *video_bytes = nullptr;
+			void* video_bytes = nullptr;
 			if (!decklink_frame || FAILED(decklink_frame->GetBytes(&video_bytes)) && video_bytes)
 				return nullptr;
 			std::shared_ptr<AVFrame> frame = FFmpeg::AllocFrame();
@@ -108,8 +108,6 @@ namespace TVPlayR {
 			frame->interlaced_frame = field_order > FieldOrder::Progressive;
 			frame->top_field_first = field_order == TVPlayR::FieldOrder::TopFieldFirst;
 			frame->sample_aspect_ratio = sar;
-			// TODO: establish time_base
-			//frame->time_base = av_make_q
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame.get(), 0));
 			assert(decklink_frame->GetRowBytes() == frame->linesize[0]);
 			std::memcpy(frame->data[0], video_bytes, frame->linesize[0] * frame->height);
@@ -119,9 +117,9 @@ namespace TVPlayR {
 			return frame;
 		}
 
-		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket *audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate)
+		std::shared_ptr<AVFrame> AVFrameFromDecklinkAudio(IDeckLinkAudioInputPacket* audio_packet, int channels, BMDAudioSampleType sample_type, BMDTimeScale sample_rate)
 		{
-			void *audio_bytes = nullptr;
+			void* audio_bytes = nullptr;
 			if (!audio_packet || FAILED(audio_packet->GetBytes(&audio_bytes)) || !audio_bytes)
 				return nullptr;
 			std::shared_ptr<AVFrame> audio = FFmpeg::AllocFrame();
@@ -139,18 +137,16 @@ namespace TVPlayR {
 			audio->sample_rate = BMDAudioSampleRate::bmdAudioSampleRate48kHz;
 			audio->format = AV_SAMPLE_FMT_S32;
 			audio->nb_samples = audio_packet->GetSampleFrameCount();
-			// TODO: verify time_base
-			audio->time_base = { 1, BMDAudioSampleRate::bmdAudioSampleRate48kHz };
 			BMDTimeValue packetTime;
 			if (SUCCEEDED(audio_packet->GetPacketTime(&packetTime, sample_rate)))
 				audio->pts = packetTime;
-			av_channel_layout_from_mask(&audio->ch_layout, FFmpeg::ALL_CHANNELS >> (63 - channels));
+			av_channel_layout_default(&audio->ch_layout, channels);
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(audio.get(), 0));
 			std::memcpy(audio->data[0], audio_bytes, audio->linesize[0]);
 			return audio;
 		}
 
-		std::int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame *video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int> &frame_rate)
+		std::int64_t GetTimeFromTimecode(IDeckLinkVideoInputFrame* video_frame, BMDTimecodeFormat timecode_format, const Common::Rational<int>& frame_rate)
 		{
 			CComPtr<IDeckLinkTimecode> timecode;
 			if (video_frame && SUCCEEDED(video_frame->GetTimecode(timecode_format, &timecode)))
@@ -162,7 +158,7 @@ namespace TVPlayR {
 			return AV_NOPTS_VALUE;
 		}
 
-		std::int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame *decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int> &frame_rate)
+		std::int64_t TimeFromDeclinkTimecode(IDeckLinkVideoInputFrame* decklink_frame, TVPlayR::DecklinkTimecodeSource timecode_source, const Common::Rational<int>& frame_rate)
 		{
 			switch (timecode_source)
 			{

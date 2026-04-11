@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -21,15 +20,18 @@ namespace StudioTVPlayer.Model
         private bool _disposed;
 
         public event EventHandler<BlackmagicAtemDeviceEventArgs> DeviceSeen;
+        public event EventHandler<BlackmagicAtemDeviceEventArgs> DeviceUpdated;
         public event EventHandler<BlackmagicAtemDeviceEventArgs> DeviceLost;
 
         public BlackmagicDesignAtemDiscovery(int updatePeriod = 10000)
         {
-            _knownDevices = new ConcurrentBag<BlackmagicDesignAtemDeviceInfo>();
+            _knownDevices = [];
 
-            _mdns = new MulticastService();
-            _mdns.UseIpv4 = true;
-            _mdns.UseIpv6 = false;
+            _mdns = new MulticastService
+            {
+                UseIpv4 = true,
+                UseIpv6 = false
+            };
             _mdns.NetworkInterfaceDiscovered += (s, e) => _mdns.SendQuery(ServiceName);
             _mdns.AnswerReceived += AnswerReceived;
             _mdns.Start();
@@ -37,7 +39,7 @@ namespace StudioTVPlayer.Model
             _considerMissingTime = updatePeriod * 3;
         }
 
-        public IReadOnlyCollection<BlackmagicDesignAtemDeviceInfo> Devices => _knownDevices.ToArray();
+        public IReadOnlyCollection<BlackmagicDesignAtemDeviceInfo> Devices => [.. _knownDevices];
 
         private void AnswerReceived(object _, MessageEventArgs args)
         {
@@ -66,9 +68,9 @@ namespace StudioTVPlayer.Model
             {
                 string id = null;
                 string modelName = null;
-                foreach(var s in strings)
+                foreach (var s in strings)
                 {
-                    var splitted = s.Split(new[] { '=' }, 2);
+                    var splitted = s.Split(['='], 2);
                     if (splitted.Length != 2)
                         continue;
                     switch (splitted[0])
@@ -95,7 +97,8 @@ namespace StudioTVPlayer.Model
                     DeviceSeen?.Invoke(this, new BlackmagicAtemDeviceEventArgs(dev));
                 }
                 else
-                    dev.Update(deviceName, DateTime.Now, aRec.Address, srvRec.Port);
+                if (dev.Update(deviceName, DateTime.Now, aRec.Address, srvRec.Port))
+                    DeviceUpdated?.Invoke(this, new BlackmagicAtemDeviceEventArgs(dev));
             }
         }
 
@@ -125,46 +128,29 @@ namespace StudioTVPlayer.Model
         }
     }
 
-    public class BlackmagicDesignAtemDeviceInfo: Helpers.PropertyChangedBase
+    public class BlackmagicDesignAtemDeviceInfo(string deviceId, string modelName, string deviceName, DateTime lastSeen, IPAddress address, int port)
     {
-        private string _deviceName;
-        private DateTime _lastSeen;
-        private IPAddress _address;
-        private int _port;
+        public string DeviceId { get; } = deviceId;
+        public string ModelName { get; } = modelName;
+        public string DeviceName { get; private set; } = deviceName;
+        public DateTime LastSeen { get; private set; } = lastSeen;
+        public IPAddress Address { get; private set; } = address;
+        public int Port { get; private set; } = port;
 
-        public string DeviceId { get; }
-        public string ModelName { get; }
-        public string DeviceName { get => _deviceName; private set => Set(ref _deviceName, value); }
-        public DateTime LastSeen { get => _lastSeen; private set => Set(ref _lastSeen, value); }
-        public IPAddress Address { get => _address; private set => Set(ref _address, value); }
-        public int Port { get => _port; private set => Set(ref _port, value); }
-
-        public BlackmagicDesignAtemDeviceInfo(string deviceId, string modelName, string deviceName, DateTime lastSeen, IPAddress address, int port)
+        internal bool Update(string deviceName, DateTime lastSeen, IPAddress address, int port)
         {
-            DeviceId = deviceId;
-            ModelName = modelName;
-            _deviceName = deviceName;
-            _lastSeen = lastSeen;
-            _address = address;
-            _port = port;
-        }
-
-        internal void Update(string deviceName, DateTime lastSeen, IPAddress address, int port)
-        {
+            if (DeviceName == deviceName && LastSeen == lastSeen && Address == address && Port == port)
+                return false;
             DeviceName = deviceName;
             LastSeen = lastSeen;
             Address = address;
             Port = port;
+            return true;
         }
     }
 
-    public class BlackmagicAtemDeviceEventArgs : EventArgs
+    public class BlackmagicAtemDeviceEventArgs(BlackmagicDesignAtemDeviceInfo device) : EventArgs
     {
-        public BlackmagicAtemDeviceEventArgs(BlackmagicDesignAtemDeviceInfo device)
-        {
-            Device = device;
-        }
-
-        public BlackmagicDesignAtemDeviceInfo Device { get; }
+        public BlackmagicDesignAtemDeviceInfo Device { get; } = device;
     }
 }

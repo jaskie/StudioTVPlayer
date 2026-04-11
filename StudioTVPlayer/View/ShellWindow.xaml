@@ -5,26 +5,39 @@
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-                 xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
+                 xmlns:tb="http://www.hardcodet.net/taskbar"
                  xmlns:rootViewModels="clr-namespace:StudioTVPlayer.ViewModel"
+                 xmlns:mainViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main"
                  xmlns:mainViews="clr-namespace:StudioTVPlayer.View.Main"
+                 xmlns:recordingViewModels="clr-namespace:StudioTVPlayer.ViewModel.Main.Recording"
+                 xmlns:recordingViews="clr-namespace:StudioTVPlayer.View.Main.Recording"
                  xmlns:configurationViews="clr-namespace:StudioTVPlayer.View.Configuration"
                  xmlns:configurationViewModels="clr-namespace:StudioTVPlayer.ViewModel.Configuration"
                  mc:Ignorable="d"
-                 d:DataContext="{d:DesignInstance {x:Type rootViewModels:MainViewModel}}"
+                 d:DataContext="{d:DesignInstance {x:Type rootViewModels:ShellViewModel}}"
                  Title="Studio TVPlayer" 
                  Height="1024" Width="1280"
                  TitleCharacterCasing="Normal"
                  ShowSystemMenu="True"
                  dialogs:DialogParticipation.Register="{Binding}"
                  Loaded="MetroWindow_Loaded"
+                 TitleAlignment="Center"
                  >
     <mah:MetroWindow.RightWindowCommands>
-        <mah:WindowCommands>
+        <mah:WindowCommands ShowSeparators="False">
+            <mah:WindowCommands.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.WindowCommands}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MahApps.Brushes.WindowButtonCommands.Background.MouseOver}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </mah:WindowCommands.Resources>
             <Button ToolTip="Configuration" Command="{Binding ConfigurationCommand}">
                 <mah:FontIcon Glyph="&#xE713;" />
             </Button>
-            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ItemsSource="{Binding PlayerControllers}" >
+            <mah:DropDownButton Visibility="{Binding IsControllerStatusVisible, Converter={StaticResource BoolToVisibilityConverter}}" ItemsSource="{Binding PlayerControllers}" >
                 <mah:DropDownButton.Style>
                     <Style TargetType="mah:DropDownButton" BasedOn="{StaticResource MahApps.Styles.DropDownButton.WindowCommands}">
                         <Setter Property="Foreground" Value="DarkRed"/>
@@ -72,19 +85,51 @@
             <Button ToolTip="About" Command="{Binding AboutCommand}">
                 <mah:FontIcon Glyph="&#xE946;" />
             </Button>
+            <Button ToolTip="Minimize to tray" Click="MinimizeToTray_Click">
+                <mah:FontIcon Glyph="&#xE788;" />
+            </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+    <mah:MetroWindow.LeftWindowCommands>
+        <mah:WindowCommands TextElement.FontSize="15">
+            <ToggleButton IsChecked="{Binding IsPlayoutVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}"
+                          ToolTip="Switches to players and sources view | Shift+Ctrl+P">
+                <StackPanel Orientation="Horizontal">
+                    <mah:FontIcon Margin="5 0" Glyph="&#xE768;"/>
+                    <TextBlock>Playout</TextBlock>
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton IsChecked="{Binding IsRecordingSchedulerVisible}" IsEnabled="{Binding IsConfigutationViewActive, Converter={StaticResource InvertedBooleanConverter}}"
+                          ToolTip="Switches to recording scheduler view | Shift+Ctrl+R">
+                <StackPanel Orientation="Horizontal">
+                    <mah:FontIcon Margin="5 0" Glyph="&#xF7EE;"/>
+                    <TextBlock>Recordings</TextBlock>
+                </StackPanel>
+            </ToggleButton>
+        </mah:WindowCommands>
+    </mah:MetroWindow.LeftWindowCommands>
     <Window.InputBindings>
         <KeyBinding Gesture="Shift+Ctrl+E" Command="{Binding ConfigurationCommand}"/>
+        <KeyBinding Gesture="Shift+Ctrl+P" Command="{Binding PlayoutCommand}"/>
+        <KeyBinding Gesture="Shift+Ctrl+R" Command="{Binding RecordingSchedulerCommand}"/>
     </Window.InputBindings>
-    <ContentControl Content="{Binding CurrentViewModel}" >
-        <ContentControl.Resources>
-            <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
-                <mainViews:PlayoutView />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
-                <configurationViews:ConfigurationView />
-            </DataTemplate>
-        </ContentControl.Resources>
-    </ContentControl>
+    <Grid>
+        <ContentControl Content="{Binding CurrentViewModel}" >
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type mainViewModels:PlayoutViewModel}">
+                    <mainViews:PlayoutView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type recordingViewModels:RecordingSchedulerViewModel}">
+                    <recordingViews:RecordingSchedulerView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type configurationViewModels:ConfigurationViewModel}">
+                    <configurationViews:ConfigurationView />
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+        <tb:TaskbarIcon x:Name="taskbarIcon" IconSource="/StudioTVPlayer.ico"
+                       TrayMouseDoubleClick="TaskbarIcon_TrayMouseDoubleClick"
+                        ToolTipText="StudioTVPlayer"
+                        />
+    </Grid>
 </mah:MetroWindow>

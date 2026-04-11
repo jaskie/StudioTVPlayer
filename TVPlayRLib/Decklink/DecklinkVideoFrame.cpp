@@ -8,7 +8,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		static void ConvertFrame(const std::shared_ptr<AVFrame> &source, std::vector<uint32_t> &dest)
+		static void ConvertFrame(const std::shared_ptr<AVFrame>& source, std::vector<uint32_t>& dest)
 		{
 			if (source->format == AV_PIX_FMT_X2RGB10LE)
 			{
@@ -28,7 +28,7 @@ namespace TVPlayR {
 			}
 		}
 
-		static BMDPixelFormat GetBMDPixelFormat(const std::shared_ptr<AVFrame> &frame)
+		static BMDPixelFormat GetBMDPixelFormat(const std::shared_ptr<AVFrame>& frame)
 		{
 			switch (frame->format)
 			{
@@ -43,29 +43,24 @@ namespace TVPlayR {
 			}
 		}
 
-		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat &format)
-			: ref_count_(0)
-			, width_(0)
+		DecklinkVideoFrame::DecklinkVideoFrame(Core::VideoFormat& format)
+			: width_(0)
 			, height_(0)
 			, row_bytes_(0)
 			, pixel_format_(BMDPixelFormat(0))
 			, timecode_(format)
-			, frame_time_(0)
+			, frame_number_(0)
+			, format_(format)
 		{ }
 
-		DecklinkVideoFrame::~DecklinkVideoFrame()
+		void DecklinkVideoFrame::Update(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode, std::int64_t frame_number)
 		{
-			assert(!ref_count_);
-		}
-
-		void DecklinkVideoFrame::Update(Core::VideoFormat &format, const std::shared_ptr<AVFrame> &frame, std::int64_t timecode, std::int64_t frame_time)
-		{
-			timecode_.Update(format, timecode);
-			width_ = format.width();
-			height_ = format.height();
+			timecode_.Update(timecode);
+			width_ = format_.width();
+			height_ = format_.height();
 			row_bytes_ = frame->linesize[0];
 			pixel_format_ = GetBMDPixelFormat(frame);
-			frame_time_ = frame_time;
+			frame_number_ = frame_number;
 
 			if (frame->format == AV_PIX_FMT_X2RGB10LE)
 			{
@@ -82,24 +77,30 @@ namespace TVPlayR {
 
 		void DecklinkVideoFrame::Recycle()
 		{
-			frame_time_ = 0LL;
+			frame_number_ = 0LL;
 			frame_.reset();
+			timecode_.Update(AV_NOPTS_VALUE);
 			// we don't clear the buffer, because it's allocation is expensive, and we can reuse it
 		}
 
-		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::QueryInterface(REFIID, LPVOID*) { return E_NOINTERFACE; }
-
-		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::AddRef() { return InterlockedIncrement(&ref_count_); }
-
-		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::Release()
+		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::QueryInterface(REFIID iid, LPVOID* ppv)
 		{
-			ULONG count = InterlockedDecrement(&ref_count_);
-			if (count == 0)
-				delete this;
-			return count;
+			if (memcmp(&iid, &IID_IDeckLinkVideoFrame, sizeof(REFIID)) == 0 ||
+				memcmp(&iid, &IID_IUnknown, sizeof(REFIID)) == 0)
+			{
+				*ppv = this;
+				AddRef();
+				return S_OK;
+			}
+			*ppv = nullptr;
+			return E_NOINTERFACE;
 		}
 
-		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return timecode_.IsValid() ? BMDVideoOutputFlags::bmdVideoOutputRP188 | BMDVideoOutputFlags::bmdVideoOutputVITC : BMDVideoOutputFlags::bmdVideoOutputFlagDefault; }
+		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::AddRef() { return 1; }
+
+		ULONG STDMETHODCALLTYPE DecklinkVideoFrame::Release() { return 1; }
+
+		BMDFrameFlags STDMETHODCALLTYPE DecklinkVideoFrame::GetFlags() { return bmdFrameFlagDefault; }
 
 		long STDMETHODCALLTYPE DecklinkVideoFrame::GetWidth() { return width_; }
 
@@ -109,7 +110,7 @@ namespace TVPlayR {
 
 		BMDPixelFormat STDMETHODCALLTYPE DecklinkVideoFrame::GetPixelFormat() { return pixel_format_; }
 
-		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::GetBytes(void **buffer)
+		HRESULT STDMETHODCALLTYPE DecklinkVideoFrame::GetBytes(void** buffer)
 		{
 			if (!buffer_.empty())
 			{
@@ -124,12 +125,12 @@ namespace TVPlayR {
 			return E_FAIL;
 		}
 
-		STDMETHODIMP DecklinkVideoFrame::GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode **timecode)
+		STDMETHODIMP DecklinkVideoFrame::GetTimecode(BMDTimecodeFormat format, IDeckLinkTimecode** timecode)
 		{
 			if (timecode == nullptr)
 				return E_FAIL;
 			if (!timecode_.IsValid())
-				return E_FAIL;
+				return S_FALSE;
 			*timecode = &timecode_;
 			return S_OK;
 		}

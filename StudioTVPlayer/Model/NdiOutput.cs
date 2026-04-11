@@ -1,18 +1,12 @@
 ﻿namespace StudioTVPlayer.Model
 {
-    public class NdiOutput: OutputBase
+    public class NdiOutput(Configuration.NdiOutput configuration) : OutputBase(configuration)
     {
         private TVPlayR.NdiOutput _outputDevice;
-        private readonly Configuration.NdiOutput _configuration;
 
-        public NdiOutput(Configuration.NdiOutput configuration) : base(configuration)
-        {
-            _configuration = configuration;
-        }
+        public string SourceName => configuration.SourceName;
 
-        public string SourceName => _configuration.SourceName;
-
-        public string GroupNames => _configuration.GroupNames;
+        public string GroupNames => configuration.GroupNames;
 
         public override TVPlayR.OutputBase Output => _outputDevice;
 

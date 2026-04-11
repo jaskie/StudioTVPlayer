@@ -1,39 +1,20 @@
 ﻿namespace StudioTVPlayer.ViewModel.Configuration
 {
-    public class FFOutputViewModel : OutputViewModelBase
+    public class FFOutputViewModel(Model.Configuration.FFOutput streamOutputConfiguration) : OutputViewModelBase(streamOutputConfiguration)
     {
-        private string _url;
-        private string _videoCodec;
-        private string _audioCodec;
-        private int _videoBitrate;
-        private int _audioBitrate;
-        private string _videoFilter;
-        private string _pixelFormat;
-        private string _outputMetadata;
-        private string _audioMetadata;
-        private string _videoMetadata;
-        private string _options;
-        private int _videoStreamId;
-        private int _audioStreamId;
-        private readonly Model.Configuration.FFOutput _streamOutput;
-
-        public FFOutputViewModel(Model.Configuration.FFOutput streamOutputConfiguration) : base(streamOutputConfiguration)
-        {
-            _streamOutput = streamOutputConfiguration;
-            _url = streamOutputConfiguration.Url;
-            _videoCodec = streamOutputConfiguration.EncoderSettings.VideoCodec;
-            _audioCodec = streamOutputConfiguration.EncoderSettings.AudioCodec;
-            _videoBitrate = streamOutputConfiguration.EncoderSettings.VideoBitrate;
-            _audioBitrate = streamOutputConfiguration.EncoderSettings.AudioBitrate;
-            _videoFilter = streamOutputConfiguration.EncoderSettings.VideoFilter;
-            _pixelFormat = streamOutputConfiguration.EncoderSettings.PixelFormat;
-            _outputMetadata = streamOutputConfiguration.EncoderSettings.OutputMetadata;
-            _audioMetadata = streamOutputConfiguration.EncoderSettings.AudioMetadata;
-            _videoMetadata = streamOutputConfiguration.EncoderSettings.VideoMetadata;
-            _options = streamOutputConfiguration.EncoderSettings.Options;
-            _videoStreamId = streamOutputConfiguration.EncoderSettings.VideoStreamId;
-            _audioStreamId = streamOutputConfiguration.EncoderSettings.AudioStreamId;
-        }
+        private string _url = streamOutputConfiguration.Url;
+        private string _videoCodec = streamOutputConfiguration.EncoderSettings.VideoCodec;
+        private string _audioCodec = streamOutputConfiguration.EncoderSettings.AudioCodec;
+        private int _videoBitrate = streamOutputConfiguration.EncoderSettings.VideoBitrate;
+        private int _audioBitrate = streamOutputConfiguration.EncoderSettings.AudioBitrate;
+        private string _videoFilter = streamOutputConfiguration.EncoderSettings.VideoFilter;
+        private string _pixelFormat = streamOutputConfiguration.EncoderSettings.PixelFormat;
+        private string _outputMetadata = streamOutputConfiguration.EncoderSettings.OutputMetadata;
+        private string _audioMetadata = streamOutputConfiguration.EncoderSettings.AudioMetadata;
+        private string _videoMetadata = streamOutputConfiguration.EncoderSettings.VideoMetadata;
+        private string _options = streamOutputConfiguration.EncoderSettings.Options;
+        private int _videoStreamId = streamOutputConfiguration.EncoderSettings.VideoStreamId;
+        private int _audioStreamId = streamOutputConfiguration.EncoderSettings.AudioStreamId;
 
         public string Url { get => _url; set => Set(ref _url, value); }
         public string VideoCodec { get => _videoCodec; set => Set(ref _videoCodec, value); }
@@ -55,8 +36,8 @@
         public override void Apply()
         {
             base.Apply();
-            _streamOutput.Url = _url;
-            _streamOutput.EncoderSettings = new Model.EncoderSettings
+            streamOutputConfiguration.Url = _url;
+            streamOutputConfiguration.EncoderSettings = new Model.EncoderSettings
             {
                 VideoCodec = _videoCodec,
                 AudioCodec = _audioCodec,
@@ -74,12 +55,11 @@
         }
         protected override string ReadErrorInfo(string propertyName)
         {
-            switch (propertyName)
+            return propertyName switch
             {
-                case nameof(Url) when string.IsNullOrWhiteSpace(Url):
-                    return "Destination address can't be empty";
-            }
-            return base.ReadErrorInfo(propertyName);
+                nameof(Url) when string.IsNullOrWhiteSpace(Url) => "Destination address can't be empty",
+                _ => base.ReadErrorInfo(propertyName),
+            };
         }
 
         public override bool IsValid()

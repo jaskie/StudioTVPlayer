@@ -1,8 +1,11 @@
 {
   "profiles": {
-    "StudioTVPlayer": {
+    "LoadRundown": {
       "commandName": "Project",
-      "nativeDebugging": true
+      "commandLineArgs": "\"LoadRundown:Player 1=C:\\temp\\rundown.rundown\""
+    },
+    "StudioTVPlayer": {
+      "commandName": "Project"
     }
   }
 }

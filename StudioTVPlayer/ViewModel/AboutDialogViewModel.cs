@@ -3,12 +3,8 @@ using System;
 
 namespace StudioTVPlayer.ViewModel
 {
-    public class AboutDialogViewModel: DialogViewModelBase
+    public class AboutDialogViewModel(Action<DialogViewModelBase> closeHandler) : DialogViewModelBase(closeHandler)
     {
-        public AboutDialogViewModel(Action<DialogViewModelBase> closeHandler) : base(closeHandler)
-        {
-        }
-
         public VersionInfo VersionInfo => VersionInfo.Current;
     }
 }

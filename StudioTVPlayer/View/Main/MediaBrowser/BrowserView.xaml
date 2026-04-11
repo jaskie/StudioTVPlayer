@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type vm:BrowserViewModel}}"
              d:DesignHeight="450" d:DesignWidth="300"
-             Style="{StaticResource StrongFocusIndicatorUserControl}"
+             Style="{StaticResource StrongFocusIndicatorControlStyle}"
              >
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Alt" Key="Right" Command="{Binding ChangeDateCommand}" CommandParameter="1" />
@@ -62,8 +62,8 @@
                  dd:DragDrop.UseDefaultDragAdorner="True"
                  >
             <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource MahApps.Styles.ListBoxItem}">
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
                     <Setter Property="Padding" Value="0"/>
                 </Style>
             </ListBox.ItemContainerStyle>

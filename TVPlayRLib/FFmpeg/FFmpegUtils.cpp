@@ -57,7 +57,7 @@ namespace TVPlayR {
 			frame->pict_type = AV_PICTURE_TYPE_NONE;
 			frame->sample_aspect_ratio = format.SampleAspectRatio().av();
 			frame->interlaced_frame = format.interlaced();
-			frame->top_field_first = format.field_order() == TVPlayR::FieldOrder::TopFieldFirst;
+			frame->top_field_first = format.FieldOrder() == TVPlayR::FieldOrder::TopFieldFirst;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
 			uint32_t* data_begin = reinterpret_cast<uint32_t*>(frame->data[0]);
 			ptrdiff_t linesize[4] = { frame->linesize[0], 0, 0, 0 };

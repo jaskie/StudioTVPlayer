@@ -286,7 +286,7 @@ int VideoFormat::height() const { return height_; }
 Common::Rational<int> VideoFormat::SampleAspectRatio() const { return sample_aspect_ratio_; }
 Common::Rational<int> VideoFormat::FrameRate() const { return frame_rate_; }
 std::string VideoFormat::Name() const { return name_; }
-FieldOrder VideoFormat::field_order() const { return field_order_; }
+TVPlayR::FieldOrder VideoFormat::FieldOrder() const { return field_order_; }
 bool VideoFormat::interlaced() const { return field_order_ == TVPlayR::FieldOrder::BottomFieldFirst || field_order_ == TVPlayR::FieldOrder::TopFieldFirst; }
 bool VideoFormat::IsDropFrame() const { return is_drop_frame_; }
 

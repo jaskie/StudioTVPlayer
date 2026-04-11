@@ -9,7 +9,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-		SynchronizingBuffer::SynchronizingBuffer(const Core::Player& player, bool is_playing, std::int64_t capacity, std::int64_t start_timecode, std::int64_t media_duration, FieldOrder field_order)
+		SynchronizingBuffer::SynchronizingBuffer(const Core::Player& player, bool is_playing, std::int64_t capacity, std::int64_t start_timecode, std::int64_t media_duration)
 			: Common::DebugTarget(Common::DebugSeverity::error, "SynchronizingBuffer " + player.Name())
 			, video_format_(player.Format().type())
 			, video_frame_rate_(player.Format().FrameRate().av())
@@ -26,7 +26,7 @@ namespace TVPlayR {
 			, capacity_(capacity)
 			, start_timecode_(start_timecode)
 			, media_duration_(media_duration)
-			, pause_buffer_(field_order, is_playing)
+			, pause_buffer_(is_playing)
 		{
 			DebugPrintLine(Common::DebugSeverity::info, "Created");
 		}

@@ -87,7 +87,7 @@ namespace TVPlayR {
 				THROW_EXCEPTION("NdiUtils::CreateVideoFrame: invalid format of video frame");
 			}
 			NDIlib_frame_format_type_e frame_format_type;
-			switch (format.field_order())
+			switch (format.FieldOrder())
 			{
 			case TVPlayR::FieldOrder::BottomFieldFirst:
 			case TVPlayR::FieldOrder::TopFieldFirst:

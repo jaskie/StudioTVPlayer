@@ -97,8 +97,7 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 			is_playing_,
 			AV_TIME_BASE, // 1s
 			input_.ReadStartTimecode(),
-			GetVideoDuration(),
-			GetFieldOrder()
+			GetVideoDuration()
 			);
 	}
 

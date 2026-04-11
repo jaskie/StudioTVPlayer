@@ -43,11 +43,11 @@ std::string PlayerScaler::GetFilterString(const std::shared_ptr<const AVFrame>& 
 	{
 		if (input_interlaced)
 		{
-			if (input_height < output_format_.height() && output_format_.field_order() != TVPlayR::FieldOrder::Progressive) // bwdif used only when upscaling
+			if (input_height < output_format_.height() && output_format_.FieldOrder() != TVPlayR::FieldOrder::Progressive) // bwdif used only when upscaling
 				filter << "bwdif,scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ",interlace,";
-			else if ((input_height != output_format_.height() || input_width != output_format_.width()) && output_format_.field_order() != TVPlayR::FieldOrder::Progressive)
+			else if ((input_height != output_format_.height() || input_width != output_format_.width()) && output_format_.FieldOrder() != TVPlayR::FieldOrder::Progressive)
 				filter << "scale=w=" << output_format_.width() << ":h=" << output_format_.height() << ":out_color_matrix=" << ColorSpaceToString(output_format_.ColorSpace()) << ":interl=1,";
-			else if (output_format_.field_order() == TVPlayR::FieldOrder::Progressive)
+			else if (output_format_.FieldOrder() == TVPlayR::FieldOrder::Progressive)
 				filter << "yadif,";
 		}
 		else // progressive input

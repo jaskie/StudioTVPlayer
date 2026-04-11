@@ -49,7 +49,7 @@ public:
 	Common::Rational<int> SampleAspectRatio() const;
 	Common::Rational<int> FrameRate() const;
 	std::string Name() const;
-	FieldOrder field_order() const;
+	TVPlayR::FieldOrder FieldOrder() const;
 	bool interlaced() const;
 	bool IsDropFrame() const;
 	std::string FrameNumberToString(int frame_number) const;

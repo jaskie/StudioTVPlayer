@@ -54,7 +54,7 @@ namespace TVPlayR {
 				, timecode_source_(timecode_source)
 				, capture_video_(capture_video)
 				, current_format_(initial_format)
-				, current_field_order_(current_format_.field_order())
+				, current_field_order_(current_format_.FieldOrder())
 				, current_sar_(current_format_.SampleAspectRatio().av())
 				, format_autodetection_(format_autodetection)
 				, pixel_format_(Decklink::BMDPixelFormatFromPixelFormat(pixel_format))
@@ -121,7 +121,7 @@ namespace TVPlayR {
 					current_format_ = BMDDisplayModeToVideoFormatType(newDisplayMode->GetDisplayMode(), is_wide_);
 					if (current_format_.type() == Core::VideoFormatType::invalid)
 						return S_OK;
-					current_field_order_ = current_format_.field_order();
+					current_field_order_ = current_format_.FieldOrder();
 					current_sar_ = current_format_.SampleAspectRatio().av();
 					for (auto& provider : player_providers_)
 						provider->Reset(current_format_.FrameRate().av());

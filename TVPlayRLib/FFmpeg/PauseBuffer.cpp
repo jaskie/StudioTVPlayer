@@ -4,9 +4,8 @@
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		PauseBuffer::PauseBuffer(FieldOrder field_order, bool is_playing)
-			: field_order_(field_order)
-			, is_playing_(is_playing)
+		PauseBuffer::PauseBuffer(bool is_playing)
+			: is_playing_(is_playing)
 		{
 		}
 
@@ -51,35 +50,23 @@ namespace TVPlayR {
 
 		std::shared_ptr<const AVFrame>& PauseBuffer::GetStillFrame()
 		{
-			if (last_frame_ && !still_frame_)
+ 			if (last_frame_ && !still_frame_)
 			{
-				switch (field_order_)
-				{
-				case FieldOrder::TopFieldFirst:
-					still_frame_ = FrameToField(last_frame_, true);
-					break;
-				case FieldOrder::BottomFieldFirst:
-					still_frame_ = FrameToField(last_frame_, false);
-					break;
-				default:
-					still_frame_ = last_frame_;
-					break;
-				}
+				still_frame_ = last_frame_->interlaced_frame ? FrameToField(last_frame_) : last_frame_;
 			}
 			return still_frame_;
 		}
 
-		std::shared_ptr<const AVFrame> PauseBuffer::FrameToField(std::shared_ptr<const AVFrame>& source, bool top_field)
+		std::shared_ptr<const AVFrame> PauseBuffer::FrameToField(std::shared_ptr<const AVFrame>& source) const
 		{
-			assert(field_order_ == FieldOrder::BottomFieldFirst || field_order_ == FieldOrder::TopFieldFirst);
+			assert(source->interlaced_frame);
 			std::shared_ptr<AVFrame> dest = AllocFrame();
 			dest->width = source->width;
 			dest->height = source->height;
 			dest->format = source->format;
 			dest->pict_type = source->pict_type;
 			dest->sample_aspect_ratio = source->sample_aspect_ratio;
-			dest->interlaced_frame = source->interlaced_frame;
-			dest->top_field_first = source->top_field_first;
+			dest->interlaced_frame = false;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(dest.get(), 0));
 
 			const uint8_t* source_data[AV_NUM_DATA_POINTERS] = { 0 };
@@ -88,7 +75,7 @@ namespace TVPlayR {
 			int dest_linesizes[AV_NUM_DATA_POINTERS] = { 0 };
 			for (int plane = 0; plane < AV_NUM_DATA_POINTERS; plane++)
 			{
-				source_data[plane] = source->data[plane] + (top_field ? 0 : source->linesize[plane]);
+				source_data[plane] = source->data[plane] + (source->top_field_first ? 0 : source->linesize[plane]);
 				source_linesizes[plane] = source->linesize[plane] * 2;
 				dest_data[plane] = dest->data[plane];
 				dest_linesizes[plane] = dest->linesize[plane] * 2;

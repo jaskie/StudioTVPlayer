@@ -72,7 +72,7 @@ namespace TVPlayR {
 				std::fill(data_begin, data_begin + (frame->linesize[0] * frame->height / sizeof(uint32_t)), 0x00000000);
 				break;
 			default:
-				THROW_EXCEPTION("Invalid frame pixel format");
+				THROW_EXCEPTION("Invalid frame pixel format")
 				break;
 			}
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
@@ -87,7 +87,7 @@ namespace TVPlayR {
 			if (!frame)
 				THROW_EXCEPTION("FFmpegUtils: audio frame not allocated");
 			frame->format = format;
-			av_channel_layout_from_mask(&frame->ch_layout, ALL_CHANNELS >> (63 - num_channels));
+			av_channel_layout_default(&frame->ch_layout, num_channels);
 			frame->nb_samples = samples_count;
 			frame->sample_rate = 48000;
 			THROW_ON_FFMPEG_ERROR(av_frame_get_buffer(frame, 0));
@@ -148,6 +148,34 @@ namespace TVPlayR {
 #endif // DEBUG
 			}
 			return result;
+		}
+
+		AVPixelFormat FindBestOutputPixelFormat(const AVCodec *codec, const std::string& preffered_format, AVPixelFormat channelPixelFormat)
+		{
+			AVPixelFormat preffered = av_get_pix_fmt(preffered_format.c_str());
+			int i = 0;
+			if (preffered != AV_PIX_FMT_NONE)
+			{
+				while (codec->pix_fmts[i] != AV_PIX_FMT_NONE)
+				{
+					if (codec->pix_fmts[i] == preffered)
+						return preffered;
+					i++;
+				}
+			}
+			/*
+			* The following code is commented out until a method to establish actual codec support for a pixel format.
+			* Currently, only way to determine the codec support on specific hardware is to try to open the codec with the desired pixel format, which ends in access violation exception.
+			*
+			i = 0;
+			while (codec->pix_fmts[i] != AV_PIX_FMT_NONE)
+			{
+				if (codec->pix_fmts[i] == channelPixelFormat)
+					return channelPixelFormat;
+				i++;
+			}
+			*/
+			return codec->pix_fmts[0];
 		}
 
 

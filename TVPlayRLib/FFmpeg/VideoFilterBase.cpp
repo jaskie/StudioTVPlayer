@@ -1,99 +1,98 @@
 #include "../pch.h"
+#include "FFmpegUtils.h"
 #include "VideoFilterBase.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
 
-VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt, const std::string &name)
-	: Common::DebugTarget(Common::DebugSeverity::info, name)
-	, output_pix_fmt_(output_pix_fmt)
-	, source_ctx_(NULL, [](AVFilterContext* filter) { avfilter_free(filter); })
-	, sink_ctx_(NULL, [](AVFilterContext* filter) { avfilter_free(filter); })
-{ }
-
-
-void VideoFilterBase::Push(const std::shared_ptr<AVFrame> &frame)
+bool VideoFilterBase::Push(std::shared_ptr<AVFrame> frame) 
 { 
-	std::lock_guard<std::mutex> lock(frame_queue_mutex_);
-	frame_buffer_.emplace_back(frame);
-	assert(frame_buffer_.size() < 100);
+	if (frame->width != input_width_ ||
+		frame->height != input_height_ ||
+		frame->format != input_pixel_format_ ||
+		frame->sample_aspect_ratio.num != input_sar_.num ||
+		frame->sample_aspect_ratio.den != input_sar_.den
+		)
+		CreateFilter(frame->width, frame->height, static_cast<AVPixelFormat>(frame->format), frame->sample_aspect_ratio);
+	return av_buffersrc_write_frame(source_ctx_, frame.get()) >= 0;
 }
 
-std::shared_ptr<AVFrame> VideoFilterBase::Pull()
-{
-	if (!sink_ctx_ && !PushFrameFromBuffer())
+VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
+	: Common::DebugTarget(Common::DebugSeverity::info, "VideoFilterBase")
+	, output_pix_fmt_(output_pix_fmt)
+{ }
+
+std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
+	if (!sink_ctx_)
+		return nullptr;
+	auto frame = AllocFrame();
+	auto ret = av_buffersink_get_frame(sink_ctx_, frame.get());
+	switch (ret)
 	{
+	case AVERROR_EOF:
+		is_eof_ = true;
+		return nullptr;
+	case AVERROR(EAGAIN):
+		break;
+	case AVERROR(EINVAL):
 		return nullptr;
 	}
-	auto frame = AllocFrame();
-	while (true)
+	if (FF(ret))
 	{
-		int ret = av_buffersink_get_frame(sink_ctx_.get(), frame.get());
-		switch (ret)
-		{
-		case AVERROR_EOF:
-			is_eof_ = true;
-			return nullptr;
-		case AVERROR(EAGAIN):
-			if (!PushFrameFromBuffer())
-				return nullptr;
-			continue;
-		case AVERROR(EINVAL):
-			return nullptr;
-		}
-		if (FF_SUCCESS(ret))
-		{
-			DebugPrintLine(Common::DebugSeverity::trace, "Pull: " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
-			return frame;
-		}
+		//if (frame->best_effort_timestamp == AV_NOPTS_VALUE)
+		//	frame->best_effort_timestamp = frame->pts;
+		//frame->pts = av_rescale_q(frame->best_effort_timestamp, input_time_base_, av_buffersink_get_time_base(sink_ctx_));
+		DebugPrintLine(Common::DebugSeverity::trace, "Pulled from VideoFilterBase: " + std::to_string(PtsToTime(frame->pts, av_buffersink_get_time_base(sink_ctx_)) / 1000) + "\n");
+		return frame;
 	}
 	return nullptr;
 }
 
-int VideoFilterBase::OutputWidth()
-{
+int VideoFilterBase::OutputWidth() { 
 	assert(sink_ctx_);
-	return av_buffersink_get_w(sink_ctx_.get());
+	return av_buffersink_get_w(sink_ctx_);
 }
 
-int VideoFilterBase::OutputHeight()
+int VideoFilterBase::OutputHeight() { 
+	assert(sink_ctx_);
+	return av_buffersink_get_h(sink_ctx_);
+}
+
+AVRational VideoFilterBase::OutputSampleAspectRatio() 
 { 
 	assert(sink_ctx_);
-	return av_buffersink_get_h(sink_ctx_.get());
+	return av_buffersink_get_sample_aspect_ratio(sink_ctx_);
 }
 
-AVRational VideoFilterBase::OutputSampleAspectRatio()
+AVPixelFormat VideoFilterBase::OutputPixelFormat() 
 { 
 	assert(sink_ctx_);
-	return av_buffersink_get_sample_aspect_ratio(sink_ctx_.get());
+	return static_cast<AVPixelFormat>(av_buffersink_get_format(sink_ctx_));
 }
 
-AVPixelFormat VideoFilterBase::OutputPixelFormat()
-{ 
-	return output_pix_fmt_;
-}
-
-AVRational VideoFilterBase::OutputTimeBase() const
+AVRational VideoFilterBase::OutputTimeBase() const 
 { 
 	assert(sink_ctx_);
-	return av_buffersink_get_time_base(sink_ctx_.get());
+	return av_buffersink_get_time_base(sink_ctx_);
 }
 
-AVRational VideoFilterBase::OutputFrameRate() const
+AVRational VideoFilterBase::OutputFrameRate() const 
 { 
 	assert(sink_ctx_);
-	return av_buffersink_get_frame_rate(sink_ctx_.get());
+	return av_buffersink_get_frame_rate(sink_ctx_);
 }
 
-void VideoFilterBase::Flush()
-{
+
+void VideoFilterBase::Flush() { 
 	if (source_ctx_)
-		av_buffersrc_write_frame(source_ctx_.get(), NULL);
+		av_buffersrc_write_frame(source_ctx_, NULL);
 	is_flushed_ = true;
 }
 
-void VideoFilterBase::SetFilter(const std::string &filter_str)
+void VideoFilterBase::SetFilter(const std::string& filter_str, const AVRational input_time_base)
 {
+	Reset();
+	input_time_base_ = input_time_base;
 	filter_ = filter_str;
 	input_width_ = 0;
 	input_height_ = 0;
@@ -101,89 +100,63 @@ void VideoFilterBase::SetFilter(const std::string &filter_str)
 	input_sar_ = av_make_q(1, 1);
 }
 
-void VideoFilterBase::Initialize(const std::shared_ptr<AVFrame>& frame)
+void VideoFilterBase::CreateFilter(int input_width, int input_height, AVPixelFormat input_pixel_format, const AVRational input_sar) 
 {
-	graph_.reset(avfilter_graph_alloc());
-	const AVFilter *buffersrc = avfilter_get_by_name("buffer");
-	const AVFilter *buffersink = avfilter_get_by_name("buffersink");
-	std::stringstream args;
-	args << "video_size=" << frame->width << "x" << frame->height
-		<< ":pix_fmt=" << static_cast<AVPixelFormat>(frame->format)
-		<< ":time_base=" << frame->time_base.num << "/" << frame->time_base.den
-		<< ":pixel_aspect=" << frame->sample_aspect_ratio.num << "/" << frame->sample_aspect_ratio.den;
-	AVFilterContext *weak_source = NULL;
-	THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&weak_source, buffersrc, "vin", args.str().c_str(), NULL, graph_.get()));
-	source_ctx_.reset(weak_source);
-	enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
-	AVFilterContext *weak_sink = NULL;
-	THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&weak_sink, buffersink, "vout", NULL, NULL, graph_.get()));
-	THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(weak_sink, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN));
-	sink_ctx_.reset(weak_sink);
-
-	AVFilterInOut *inputs = avfilter_inout_alloc();
-	inputs->name = av_strdup("in");
-	inputs->filter_ctx = weak_source;
-	inputs->pad_idx = 0;
-	inputs->next = NULL;
-
-	AVFilterInOut *outputs = avfilter_inout_alloc();
-	outputs->name = av_strdup("out");
-	outputs->filter_ctx = weak_sink;
-	outputs->pad_idx = 0;
-	outputs->next = NULL;
-	int ret = avfilter_graph_parse_ptr(graph_.get(), filter_.c_str(), &outputs, &inputs, NULL);
-	if (!FF_SUCCESS(ret))
-		goto end;
-	ret = avfilter_graph_config(graph_.get(), NULL);
-	if (!FF_SUCCESS(ret))
-		goto end;
-	input_width_ = frame->width;
-	input_height_ = frame->height;
-	input_pixel_format_ = static_cast<AVPixelFormat>(frame->format);
-	input_sar_ = frame->sample_aspect_ratio;
-	input_time_base_ = frame->time_base;
-	assert(av_buffersink_get_format(weak_sink) == output_pix_fmt_);
-	DebugPrintLine(Common::DebugSeverity::info, args.str());
-	if (DebugSeverity() <= Common::DebugSeverity::info)
-		DumpFilter(filter_, graph_.get());
-end:
-	avfilter_inout_free(&inputs);
-	avfilter_inout_free(&outputs);
-	THROW_ON_FFMPEG_ERROR(ret);
-}
-
-bool VideoFilterBase::PushFrameFromBuffer()
-{
-	std::lock_guard<std::mutex> lock(frame_queue_mutex_);
-	if (frame_buffer_.empty())
-		return false; // buffer empty - normal case
-	std::shared_ptr<AVFrame> &frame = frame_buffer_.front();
-	if (frame->width != input_width_ ||
-		frame->height != input_height_ ||
-		frame->format != input_pixel_format_ ||
-		av_cmp_q(frame->sample_aspect_ratio, input_sar_) != 0
-		)
-		Initialize(frame);
-	if (FF_SUCCESS(av_buffersrc_write_frame(source_ctx_.get(), frame.get())))
+	graph_ = std::unique_ptr<AVFilterGraph, void(*)(AVFilterGraph*)>(avfilter_graph_alloc(), [](AVFilterGraph* graph) { avfilter_graph_free(&graph); });
+	AVFilterInOut* inputs = avfilter_inout_alloc();
+	AVFilterInOut* outputs = avfilter_inout_alloc();
+	try
 	{
-		DebugPrintLine(Common::DebugSeverity::trace, "PushFrameFromBuffer: " + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
-		frame_buffer_.pop_front();
-		return true;
+		const AVFilter* buffersrc = avfilter_get_by_name("buffer");
+		const AVFilter* buffersink = avfilter_get_by_name("buffersink");
+		char args[512];
+		snprintf(args, sizeof(args),
+			"video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
+			input_width, input_height, input_pixel_format,
+			input_time_base_.num, input_time_base_.den,
+			input_sar.num, input_sar.den);
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&source_ctx_, buffersrc, "vin", args, NULL, graph_.get()));
+		enum AVPixelFormat pix_fmts[] = { output_pix_fmt_, AV_PIX_FMT_NONE };
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_create_filter(&sink_ctx_, buffersink, "vout", NULL, NULL, graph_.get()));
+		THROW_ON_FFMPEG_ERROR(av_opt_set_int_list(sink_ctx_, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN));
+
+		outputs->name = av_strdup("in");
+		outputs->filter_ctx = source_ctx_;
+		outputs->pad_idx = 0;
+		outputs->next = NULL;
+
+		inputs->name = av_strdup("out");
+		inputs->filter_ctx = sink_ctx_;
+		inputs->pad_idx = 0;
+		inputs->next = NULL;
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_parse(graph_.get(), filter_.c_str(), inputs, outputs, NULL));
+		THROW_ON_FFMPEG_ERROR(avfilter_graph_config(graph_.get(), NULL));
+		input_width_ = input_width;
+		input_height_ = input_height;
+		input_pixel_format_ = static_cast<AVPixelFormat>(input_pixel_format);
+		input_sar_ = input_sar;
+		DebugPrintLine(Common::DebugSeverity::debug, args);
+		if (DebugSeverity() == Common::DebugSeverity::trace)
+			DumpFilter(filter_, graph_.get());
 	}
-	DebugPrintLine(Common::DebugSeverity::warning, "av_buffersrc_write_frame failded for" + std::to_string(static_cast<float>(FrameTime(frame)) / AV_TIME_BASE));
-	return false;
+	catch (const std::exception& e)
+	{
+		avfilter_inout_free(&inputs);
+		avfilter_inout_free(&outputs);
+		throw e;
+	}
 }
 
 
-bool VideoFilterBase::IsInitialized() const
+bool VideoFilterBase::IsInitialized() const 
 {
 	return !!graph_;
 }
 
-void VideoFilterBase::ClearFilter() 
+void VideoFilterBase::Reset() 
 { 
-	source_ctx_.reset();
-	sink_ctx_.reset();
+	source_ctx_ = NULL;
+	sink_ctx_ = NULL;
 	is_eof_ = false;
 	is_flushed_ = false;
 	graph_.reset();

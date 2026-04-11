@@ -5,10 +5,15 @@ namespace TVPlayR
 {
 	namespace FFmpeg
 	{
-		OutputVideoFilter::OutputVideoFilter(const std::string& filter_str, AVPixelFormat output_pix_fmt, const std::string &name)
-			: VideoFilterBase(output_pix_fmt, name)
+		OutputVideoFilter::OutputVideoFilter(AVRational input_frame_rate, const std::string& filter_str, AVPixelFormat output_pix_fmt)
+			: VideoFilterBase(output_pix_fmt)
 		{
-			VideoFilterBase::SetFilter(filter_str);
+			VideoFilterBase::SetFilter(filter_str, av_inv_q(input_frame_rate));
+		}
+
+		bool OutputVideoFilter::Push(std::shared_ptr<AVFrame> frame)
+		{
+			return VideoFilterBase::Push(frame);
 		}
 	}
 }

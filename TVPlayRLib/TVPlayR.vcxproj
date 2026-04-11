@@ -92,12 +92,9 @@
     <ClInclude Include="Core\AudioParameters.h" />
     <ClInclude Include="Core\CoreUtils.h" />
     <ClInclude Include="Core\OverlayBase.h" />
-    <ClInclude Include="Core\PlayerSynchroSource.h" />
     <ClInclude Include="DecklinkKeyerType.h" />
-    <ClInclude Include="Decklink\DecklinkInputPlayerSource.h" />
     <ClInclude Include="DecklinkTimecodeSource.h" />
-    <ClInclude Include="FFmpeg\FFmpegInputPlayerSource.h" />
-    <ClInclude Include="FFmpeg\FFmpegBufferedInput.h" />
+    <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h" />
     <ClInclude Include="FFmpeg\Encoder.h" />
     <ClInclude Include="FFmpeg\FFmpegInputBase.h" />
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h" />
@@ -154,7 +151,6 @@
     <ClInclude Include="FFmpeg\SwScale.h" />
     <ClInclude Include="FFmpeg\SwResample.h" />
     <ClInclude Include="TimecodeOutputSource.h" />
-    <ClInclude Include="FFmpeg\VideoOverlayFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\CoreUtils.cpp">
@@ -162,14 +158,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Core\InputSource.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Core\PlayerSynchroSource.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Decklink\DecklinkInputPlayerSource.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -181,19 +169,15 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\pch.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="Decklink\DecklinkTimecode.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Decklink\DecklinkUtils.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="FFmpeg\FFmpegInputPlayerSource.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="FFmpeg\FFmpegBufferedInput.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -322,10 +306,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="FFmpeg\SwResample.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="FFmpeg\VideoOverlayFilter.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>

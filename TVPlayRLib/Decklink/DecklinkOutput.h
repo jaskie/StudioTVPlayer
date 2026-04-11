@@ -14,9 +14,9 @@ public:
 	int GetPrerollBufferSize() const;
 	// Inherited via OutputDevice
 	void Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) override;
-	void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
-	void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) override;
-	void Push(Core::AVSync& sync) override;
+	void AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) override;
+	void RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) override;
+	void Push(const Core::AVSync& sync) override;
 	void RegisterClockTarget(Core::ClockTarget& target) override;
 	void UnregisterClockTarget(Core::ClockTarget& target) override;
 private:

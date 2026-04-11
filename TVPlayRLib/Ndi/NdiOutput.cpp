@@ -19,7 +19,7 @@ namespace TVPlayR {
 			const NDIlib_send_instance_t send_instance_;
 			Core::VideoFormat format_;
 			std::vector<std::shared_ptr<Core::OverlayBase>> overlays_;
-			std::vector<std::shared_ptr<Core::ClockTarget>> clock_targets_;
+			std::vector<Core::ClockTarget*> clock_targets_;
 			int audio_channels_count_ = 2;
 			int audio_sample_rate_ = 48000;
 			std::unique_ptr<FFmpeg::SwScale> frame_converter_;
@@ -71,10 +71,10 @@ namespace TVPlayR {
 					return true;
 				});
 				if (!success)
-					THROW_EXCEPTION("NdiOutput: unable to initalize");
+					THROW_EXCEPTION("NdiOutput: unable to initalize")
 			}
 
-			void AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
+			void AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)
 			{
 				executor_.invoke([=]
 					{
@@ -82,7 +82,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay)
+			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)
 			{
 				executor_.invoke([=]
 					{
@@ -90,12 +90,12 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(const Core::AVSync &sync)
+			void Push(const Core::AVSync& sync)
 			{
 				if (buffer_.try_add(sync) != Common::BlockingCollectionStatus::Ok)
 					DebugPrintLine(Common::DebugSeverity::debug, "Frame dropped");
 			}
-
+						
 			void Tick()
 			{
 				assert(executor_.is_current());
@@ -131,40 +131,40 @@ namespace TVPlayR {
 			{
 				assert(executor_.is_current());
 				int audio_samples_required = static_cast<int>(av_rescale(video_frames_requested_ + 1LL, audio_sample_rate_ * format_.FrameRate().Denominator(), format_.FrameRate().Numerator()) - audio_samples_requested_);
-				for (auto &target : clock_targets_)
-					target->RequestNextFrame(audio_samples_required);
+				for (Core::ClockTarget * target : clock_targets_)
+					target->RequestFrame(audio_samples_required);
 				video_frames_requested_++;
 				audio_samples_requested_ += audio_samples_required;
 			}
 
-			void RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target)
+			void RegisterClockTarget(Core::ClockTarget* target)
 			{
 				executor_.invoke([=] { clock_targets_.push_back(target); });
 			}
 
-			void UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target)
+			void UnregisterClockTarget(Core::ClockTarget* target)
 			{
 				executor_.invoke([=] { clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), target), clock_targets_.end()); });
 			}
 
 
 		};
-
+			
 		NdiOutput::NdiOutput(const std::string& source_name, const std::string& group_name) : impl_(std::make_unique<implementation>(source_name, group_name)) { }
 		NdiOutput::~NdiOutput() { }
 
 		void NdiOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
 
-		void NdiOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) { impl_->AddOverlay(overlay); }
+		void NdiOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) { impl_->AddOverlay(overlay); }
 
-		void NdiOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase> &overlay) { impl_->RemoveOverlay(overlay); }
+		void NdiOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
 
-		void NdiOutput::Push(const Core::AVSync &sync) { impl_->Push(sync); }
+		void NdiOutput::Push(const Core::AVSync & sync) { impl_->Push(sync); }
 
-		void NdiOutput::RegisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->RegisterClockTarget(target); }
+		void NdiOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(&target); }
 
-		void NdiOutput::UnregisterClockTarget(const std::shared_ptr<Core::ClockTarget> &target) { impl_->UnregisterClockTarget(target); }
-
+		void NdiOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(&target); }
+		
 	}
 }
 

@@ -16,7 +16,6 @@
 #include "FFmpeg/FFmpegOutput.h"
 #include "FFmpeg/FFOutputParams.h"
 #include "FFmpeg/FFmpegUtils.h"
-#include "FFmpeg/VideoOverlayFilter.h"
 #include "PixelFormat.h"
 #include "Common/ComInitializer.h"
 
@@ -49,7 +48,7 @@ int main()
 		av_log_set_callback(NULL);
 #endif
 		Common::ComInitializer com_initializer;
-		const Core::VideoFormatType video_format = Core::VideoFormatType::v2160p2500;
+		const Core::VideoFormatType video_format = Core::VideoFormatType::v1080i5000;
 		const PixelFormat pixel_format = PixelFormat::yuv422;
 		const int audio_channels = 2;
 		const int sample_rate = 48000;
@@ -67,7 +66,7 @@ int main()
 		auto decklink_output = iterator.CreateOutput(*iterator[device_index], DecklinkKeyerType::Default, TimecodeOutputSource::TimeToEnd);
 		decklink_output->Initialize(video_format, pixel_format, audio_channels, sample_rate);
 		player->AddOutputSink(decklink_output);
-		decklink_output->RegisterClockTarget(player);
+		decklink_output->RegisterClockTarget(*player);
 
 		//auto overlay = std::make_shared<FFmpeg::VideoOverlayFilter>(player.Format(), PixelFormatToFFmpegFormat(player.PixelFormat()));
 		//player.AddOverlay(overlay);		
@@ -103,7 +102,7 @@ int main()
 		
 		//auto input = iterator.CreateInput(*iterator[device_index], Core::VideoFormatType::v1080i5000, 2);
 
-		auto input = std::make_shared<FFmpeg::FFmpegInput>("G:\\media\\test5.mov", Core::HwAccel::none, "");
+		auto input = std::make_shared<FFmpeg::FFmpegInput>("F:\\media\\test5.mov", Core::HwAccel::none, "");
 		//input->SetIsLoop(true);
 		//auto input = std::make_shared<FFmpeg::FFmpegInput>("udp://225.100.10.26:5500", Core::HwAccel::none, "", 2);
 		//auto seek = input->GetVideoDuration() - AV_TIME_BASE;
@@ -157,7 +156,7 @@ int main()
 					input->Play();
 		}
 		//decklink_input->RemoveOutputSink(record_file);
-		decklink_output->UnregisterClockTarget(player);
+		decklink_output->UnregisterClockTarget(*player);
 		player->RemoveOutputSink(ndi);
 		player->RemoveOutputSink(decklink_output);
 		//player->RemoveOutputSink(stream);

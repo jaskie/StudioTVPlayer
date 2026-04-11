@@ -55,7 +55,7 @@ namespace TVPlayR {
 					audio_volume_callback_ = nullptr;
 			}
 
-			void RequestNextFrame(int audio_samples_count)
+			void RequestFrame(int audio_samples_count)
 			{
 				if (audio_samples_count < 0)
 					audio_samples_count = 0;
@@ -75,7 +75,7 @@ namespace TVPlayR {
 							DebugPrintLine(Common::DebugSeverity::warning, "Played empty video frame");
 						}
 						if (audio)
-							volume = audio_volume_.ProcessVolume(audio, coherence);
+							volume = audio_volume_.ProcessVolume(audio, &coherence);
 						AddOverlayAndPushToOutputs(video, audio, sync.TimeInfo);
 						if (playing_source_->IsEof() && next_source_)
 						{
@@ -107,18 +107,23 @@ namespace TVPlayR {
 					device->Push(sync);
 			}
 
-			void AddOutputSink(std::shared_ptr<OutputSink> &device)
+			void AddOutputSink(std::shared_ptr<OutputSink>& device)
 			{
 				assert(device);
 				std::lock_guard<std::mutex> lock(devices_mutex_);
 				outputs_.push_back(device);
 			}
 
-			void RemoveOutputSink(std::shared_ptr<OutputSink> &device)
+			void RemoveOutputSink(std::shared_ptr<OutputSink>& device)
 			{
 				assert(device);
 				std::lock_guard<std::mutex> lock(devices_mutex_);
 				outputs_.erase(std::remove(outputs_.begin(), outputs_.end(), device), outputs_.end());
+			}
+
+			void SetFrameClockSource(Player& self, FrameClockSource& clock)
+			{
+				clock.RegisterClockTarget(self);
 			}
 
 			void SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback)
@@ -127,7 +132,7 @@ namespace TVPlayR {
 				audio_volume_callback_ = callback;
 			}
 
-			void Load(std::shared_ptr<InputSource> &source)
+			void Load(std::shared_ptr<InputSource>& source)
 			{
 				executor_.invoke([this, &source]
 				{
@@ -136,7 +141,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void LoadNext(std::shared_ptr<InputSource> &source)
+			void LoadNext(std::shared_ptr<InputSource>& source)
 			{
 				executor_.invoke([this, &source]
 				{
@@ -156,7 +161,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void AddOverlay(std::shared_ptr<OverlayBase> &overlay)
+			void AddOverlay(std::shared_ptr<OverlayBase>& overlay)
 			{
 				executor_.invoke([&]
 				{
@@ -164,7 +169,7 @@ namespace TVPlayR {
 				});
 			}
 
-			void RemoveOverlay(std::shared_ptr<OverlayBase> &overlay)
+			void RemoveOverlay(std::shared_ptr<OverlayBase>& overlay)
 			{
 				executor_.invoke([&]
 				{
@@ -183,8 +188,8 @@ namespace TVPlayR {
 
 		};
 
-		Player::Player(const std::string &name, const VideoFormatType &format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
-			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count, audio_sample_rate)) { }
+		Player::Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate)
+			: impl_(std::make_unique<implementation>(*this, name, format, pixel_format, audio_channels_count, audio_sample_rate)) {}
 		
 		Player::~Player() {}
 
@@ -197,7 +202,9 @@ namespace TVPlayR {
 			impl_->RemoveOutputSink(sink);
 		}
 
-		void Player::RequestNextFrame(int audio_samples_count) { impl_->RequestNextFrame(audio_samples_count); }
+		void Player::SetFrameClockSource(FrameClockSource& clock) { impl_->SetFrameClockSource(*this, clock); }
+
+		void Player::RequestFrame(int audio_samples_count) { impl_->RequestFrame(audio_samples_count); }
 
 		void Player::Load(std::shared_ptr<InputSource> source) 
 		{
@@ -219,7 +226,7 @@ namespace TVPlayR {
 
 		void Player::Clear() { impl_->Clear(); }
 
-		const VideoFormat &Player::Format() const	{ return impl_->format_; }
+		const VideoFormat & Player::Format() const	{ return impl_->format_; }
 
 		const TVPlayR::PixelFormat Player::PixelFormat() const { return impl_->pixel_format_;	}
 
@@ -233,7 +240,7 @@ namespace TVPlayR {
 
 		void Player::SetAudioVolumeCallback(AUDIO_VOLUME_CALLBACK callback) { impl_->SetAudioVolumeCallback(callback); }
 
-		const std::string &Player::Name() const { return impl_->name_; }
+		const std::string& Player::Name() const { return impl_->name_; }
 
 
 }}

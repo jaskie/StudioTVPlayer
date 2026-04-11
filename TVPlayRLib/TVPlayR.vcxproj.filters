@@ -152,9 +152,6 @@
     <ClInclude Include="FFmpeg\FFmpegFileInfo.h">
       <Filter>FFmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="Decklink\DecklinkInputPlayerSource.h">
-      <Filter>Decklink</Filter>
-    </ClInclude>
     <ClInclude Include="Core\OverlayBase.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -200,23 +197,14 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="ColorSpace.h" />
-    <ClInclude Include="FFmpeg\VideoOverlayFilter.h">
-      <Filter>FFmpeg</Filter>
-    </ClInclude>
-    <ClInclude Include="FFmpeg\FFmpegBufferedInput.h">
-      <Filter>FFmpeg</Filter>
-    </ClInclude>
     <ClInclude Include="Core\AudioParameters.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\PlayerSynchroSource.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Common\ManualResetEvent.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="FFmpeg\FFmpegInputPlayerSource.h">
-      <Filter>FFmpeg</Filter>
+    <ClInclude Include="Decklink\DecklinkInputSynchroProvider.h">
+      <Filter>Decklink</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -296,9 +284,6 @@
     <ClCompile Include="FFmpeg\FFmpegFileInfo.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
-    <ClCompile Include="Decklink\DecklinkInputPlayerSource.cpp">
-      <Filter>Decklink</Filter>
-    </ClCompile>
     <ClCompile Include="FFmpeg\FFmpegInputBase.cpp">
       <Filter>FFmpeg</Filter>
     </ClCompile>
@@ -335,17 +320,8 @@
     <ClCompile Include="Core\InputSource.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="FFmpeg\VideoOverlayFilter.cpp">
-      <Filter>FFmpeg</Filter>
-    </ClCompile>
-    <ClCompile Include="FFmpeg\FFmpegBufferedInput.cpp">
-      <Filter>FFmpeg</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\PlayerSynchroSource.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="FFmpeg\FFmpegInputPlayerSource.cpp">
-      <Filter>FFmpeg</Filter>
+    <ClCompile Include="Decklink\DecklinkInputSynchroProvider.cpp">
+      <Filter>Decklink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

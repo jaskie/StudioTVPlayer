@@ -244,7 +244,7 @@ namespace TVPlayR {
 				clock_targets_.erase(std::remove(clock_targets_.begin(), clock_targets_.end(), &target), clock_targets_.end());
 			}
 
-			void AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			void AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)
 			{
 				overlay_executor_.invoke([&]
 					{
@@ -252,7 +252,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay)
+			void RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)
 			{
 				overlay_executor_.invoke([&]
 					{
@@ -260,7 +260,7 @@ namespace TVPlayR {
 					});
 			}
 
-			void Push(Core::AVSync& sync)
+			void Push(const Core::AVSync& sync)
 			{
 				overlay_executor_.begin_invoke([sync, this]
 					{
@@ -289,7 +289,7 @@ namespace TVPlayR {
 					return S_OK;
 
 				int audio_samples_required = AudioSamplesRequired();
-				for (Core::ClockTarget* target : clock_targets_)
+				for (auto target : clock_targets_)
 					target->RequestFrame(audio_samples_required);
 
 				Core::AVSync sync;
@@ -357,9 +357,9 @@ namespace TVPlayR {
 
 		int DecklinkOutput::GetPrerollBufferSize() const { return impl_->preroll_buffer_size_; }
 		void DecklinkOutput::Initialize(Core::VideoFormatType video_format, PixelFormat pixel_format, int audio_channel_count, int audio_sample_rate) { return impl_->Initialize(video_format, pixel_format, audio_channel_count, audio_sample_rate); }
-		void DecklinkOutput::AddOverlay(std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
-		void DecklinkOutput::RemoveOverlay(std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
-		void DecklinkOutput::Push(Core::AVSync& sync) { impl_->Push(sync); }
+		void DecklinkOutput::AddOverlay(const std::shared_ptr<Core::OverlayBase>& overlay)	{ impl_->AddOverlay(overlay); }
+		void DecklinkOutput::RemoveOverlay(const std::shared_ptr<Core::OverlayBase>& overlay) { impl_->RemoveOverlay(overlay); }
+		void DecklinkOutput::Push(const Core::AVSync& sync) { impl_->Push(sync); }
 		void DecklinkOutput::RegisterClockTarget(Core::ClockTarget& target) { impl_->RegisterClockTarget(target); }
 		void DecklinkOutput::UnregisterClockTarget(Core::ClockTarget& target) { impl_->UnregisterClockTarget(target); }
 	}

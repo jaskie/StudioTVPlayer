@@ -24,21 +24,16 @@ namespace TVPlayR {
 		{
 		}
 
-		FFmpegInputBase::~FFmpegInputBase()
-		{
-		}
-
 		void FFmpegInputBase::InitializeVideoDecoder()
 		{
 			if (video_decoder_)
 				return;
-			for (auto& stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-				{
-					video_decoder_ = std::make_unique<Decoder>(stream.Codec, stream.Stream, stream.StartTime, acceleration_, hw_device_);
-					return;
-				}
+			auto stream = input_.GetVideoStream();
+			if (stream == nullptr || stream->Codec == nullptr)
+				return;
+			video_decoder_ = std::make_unique<Decoder>(stream->Codec, stream->Stream, stream->StartTime, acceleration_, hw_device_);
 		}
+
 
 		bool FFmpegInputBase::IsStream() const
 		{
@@ -52,14 +47,14 @@ namespace TVPlayR {
 
 		const Core::StreamInfo& FFmpegInputBase::GetStreamInfo(int index) const
 		{
-			auto &streams = input_.GetStreams();
+			auto& streams = input_.GetStreams();
 			assert(index >= 0 && index < streams.size());
 			return streams[index];
 		}
 
-		std::int64_t FFmpegInputBase::GetAudioDuration() const
+		std::int64_t FFmpegInputBase::GetAudioDuration()
 		{
-			for (auto &stream : input_.GetStreams())
+			for (auto& stream : input_.GetStreams())
 				if (stream.Type == Core::MediaType::audio)
 					return stream.Duration;
 			return 0LL;
@@ -67,63 +62,66 @@ namespace TVPlayR {
 
 		std::int64_t FFmpegInputBase::GetVideoStart() const
 		{
-			return input_.GetVideoStartTime();
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return 0LL;
+			return stream->StartTime;
 		}
 
 		std::int64_t FFmpegInputBase::GetVideoDuration() const
 		{
-			for (auto &stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return stream.Duration;
-			return 0LL;
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return AV_NOPTS_VALUE;
+			return stream->Duration;
 		}
 
 		AVRational FFmpegInputBase::GetTimeBase() const
 		{
-			for (auto &stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return stream.Stream->time_base;
-			return { 0, 1 };
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return { 0, 1 };
+			return stream->Stream->time_base;
 		}
 
 		AVRational FFmpegInputBase::GetFrameRate() const
 		{
-			for (auto &stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return stream.Stream->r_frame_rate;
-			return { 0, 1 };
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return { 0, 1 };
+			return stream->Stream->r_frame_rate;
 		}
 
 		int FFmpegInputBase::GetWidth() const
 		{
-			for (auto &stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return stream.Stream->codecpar->width;
-			return 0;
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return 0;
+			return stream->Stream->codecpar->width;
 		}
 
 		int FFmpegInputBase::GetHeight() const
 		{
-			for (auto& stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return stream.Stream->codecpar->height;
-			return 0;
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return 0;
+			return stream->Stream->codecpar->height;
 		}
 
 		TVPlayR::FieldOrder FFmpegInputBase::GetFieldOrder() const
 		{
-			for (auto &stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return TVPlayR::FieldOrderFromAVFieldOrder(stream.Stream->codecpar->field_order);
-			return TVPlayR::FieldOrder::Unknown;
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return TVPlayR::FieldOrder::Unknown;
+			return TVPlayR::FieldOrderFromAVFieldOrder(stream->Stream->codecpar->field_order);
 		}
 
 		bool FFmpegInputBase::HaveAlphaChannel() const
 		{
-			for (auto& stream : input_.GetStreams())
-				if (stream.Type == Core::MediaType::video)
-					return FFmpeg::HaveAlphaChannel(static_cast<AVPixelFormat>(stream.Stream->codecpar->format));
-			return false;
+			const Core::StreamInfo* stream = input_.GetVideoStream();
+			if (stream == nullptr)
+				return false;
+			return FFmpeg::HaveAlphaChannel(static_cast<AVPixelFormat>(stream->Stream->codecpar->format));
 		}
 
 		int FFmpegInputBase::GetAudioChannelCount() const

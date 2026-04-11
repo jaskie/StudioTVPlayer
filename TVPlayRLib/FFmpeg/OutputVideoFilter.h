@@ -6,14 +6,12 @@ namespace TVPlayR {
 		class Player;
 	}
 	namespace FFmpeg {
-		/// <summary>
-		/// Filter for sending video to FFMpegOutput
-		/// </summary>
 		class OutputVideoFilter :
 			public VideoFilterBase
 		{
 		public:
-			OutputVideoFilter(const std::string &filter_str, AVPixelFormat output_pix_fmt, const std::string &name);
+			OutputVideoFilter(AVRational input_frame_rate, const std::string& filter_str, AVPixelFormat output_pix_fmt);
+			bool Push(std::shared_ptr<AVFrame> frame);
 		};
 
 	}

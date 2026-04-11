@@ -6,9 +6,9 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-AVPixelFormat GetHwPixelFormat(AVCodecContext *ctx, const enum AVPixelFormat *pix_fmts)
+AVPixelFormat GetHwPixelFormat(AVCodecContext* ctx, const enum AVPixelFormat* pix_fmts)
 {
-	const AVPixelFormat *p;
+	const AVPixelFormat* p;
 	for (p = pix_fmts; *p != -1; p++)
 	{
 		if (*p == AV_PIX_FMT_CUDA)
@@ -19,36 +19,36 @@ AVPixelFormat GetHwPixelFormat(AVCodecContext *ctx, const enum AVPixelFormat *pi
 
 struct Decoder::implementation : Common::DebugTarget
 {
-	const AVCodec *codec_;
+	const AVCodec* codec_;
 	const std::int64_t start_ts_;
 	const Core::HwAccel acceleration_;
-	AVCodecHWConfig *hw_config_ = NULL;
+	AVCodecHWConfig* hw_config_ = NULL;
 	const std::string hw_device_index_;
 	bool is_eof_ = false;
-	bool flush_packet_sent_ = false;
+	bool flush_packet_pushed_ = false;
 	bool flush_packet_received_ = false;
 	const int stream_index_;
 	const int channels_count_;
 	const int sample_rate_;
 	std::deque<std::shared_ptr<AVPacket>> packet_queue_;
 	const AVRational time_base_;
-	AVStream * const stream_;
+	AVStream* const stream_;
 	const AVMediaType media_type_;
 	unique_ptr<AVBufferRef> hw_device_ctx_;
-	unique_ptr<AVCodecContext> ctx_;
+	const unique_ptr<AVCodecContext> ctx_;
 	std::int64_t seek_pts_;
 	const std::int64_t duration_;
 	std::mutex mutex_;
 
-	implementation(const AVCodec *codec, AVStream * const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string &hw_device_index)
-		: Common::DebugTarget(Common::DebugSeverity::info, "Decoder")
+	implementation(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
+		: Common::DebugTarget(Common::DebugSeverity::info, "Decoder " + std::string(codec->name))
 		, codec_(codec)
 		, ctx_(CreateCodecContext())
 		, start_ts_(stream ? stream->start_time : 0LL)
-		, duration_(stream ? stream->duration : 0LL)
+		, duration_(stream ? stream->duration: 0LL)
 		, stream_index_(stream ? stream->index : 0)
-		, channels_count_(stream&& stream->codecpar ? stream->codecpar->ch_layout.nb_channels : 0)
-		, sample_rate_(stream&& stream->codecpar ? stream->codecpar->sample_rate : 0)
+		, channels_count_(stream && stream->codecpar ? stream->codecpar->ch_layout.nb_channels : 0)
+		, sample_rate_(stream && stream->codecpar ? stream->codecpar->sample_rate : 0)
 		, time_base_(stream ? stream->time_base : av_make_q(0, 1))
 		, seek_pts_(TimeToPts(seek_time, time_base_))
 		, stream_(stream)
@@ -56,15 +56,16 @@ struct Decoder::implementation : Common::DebugTarget
 		, acceleration_(acceleration)
 		, hw_device_index_(hw_device_index)
 		, media_type_(codec ? codec->type : AVMediaType::AVMEDIA_TYPE_UNKNOWN)
-		, hw_device_ctx_(NULL, [](AVBufferRef* p) {})
+		, hw_device_ctx_(NULL, [](AVBufferRef* p) { })
 	{
 
 	}
 
 	unique_ptr<AVCodecContext> CreateCodecContext()
 	{
-		unique_ptr<AVCodecContext> ctx = unique_ptr<AVCodecContext>(codec_ ? avcodec_alloc_context3(codec_) : NULL,
-			[](AVCodecContext *c) { if (c) avcodec_free_context(&c); });
+		auto ctx = unique_ptr<AVCodecContext>(
+			codec_ ? avcodec_alloc_context3(codec_) : NULL,
+			[](AVCodecContext* c) { if (c) avcodec_free_context(&c); });
 		if (!ctx || !stream_ || !codec_)
 			THROW_EXCEPTION("Decoder: codec context not created");
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_to_context(ctx.get(), stream_->codecpar));
@@ -78,7 +79,8 @@ struct Decoder::implementation : Common::DebugTarget
 				device_type = AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA;
 				break;
 			}
-			const AVCodecHWConfig *config = NULL;
+			
+			const AVCodecHWConfig* config = NULL;
 			for (int i = 0;; i++) {
 				config = avcodec_get_hw_config(codec_, i);
 				if (!config) {
@@ -92,25 +94,22 @@ struct Decoder::implementation : Common::DebugTarget
 			}
 			if (hw_pix_format == AV_PIX_FMT_CUDA)
 				ctx->get_format = GetHwPixelFormat;
-			AVBufferRef *weak_hw_device_ctx = NULL;
-			if (FF_SUCCESS(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
+			AVBufferRef* weak_hw_device_ctx = NULL;
+			if (FF(av_hwdevice_ctx_create(&weak_hw_device_ctx, device_type, hw_device_index_.c_str(), NULL, 0)))
 			{
 				ctx->hw_device_ctx = av_buffer_ref(weak_hw_device_ctx);
-				hw_device_ctx_ = FFmpeg::unique_ptr<AVBufferRef>(weak_hw_device_ctx, [](AVBufferRef* p) { av_buffer_unref(&p); });
+				hw_device_ctx_ = unique_ptr<AVBufferRef>(weak_hw_device_ctx, [](AVBufferRef* p) { av_buffer_unref(&p); });
 			}
 		}
 
 		av_opt_set_int(ctx.get(), "refcounted_frames", 1, 0);
 		av_opt_set_int(ctx.get(), "threads", 4, 0);
 		THROW_ON_FFMPEG_ERROR(avcodec_open2(ctx.get(), codec_, NULL));
-		flush_packet_received_ = false;
-		flush_packet_sent_ = false;
-		is_eof_ = false;
-		DebugPrintLine(Common::DebugSeverity::debug, "Decoder created");
+		DebugPrintLine(Common::DebugSeverity::debug, "created");
 		return ctx;
 	}
 
-	void Push(const std::shared_ptr<AVPacket> &packet)
+	void Push(const std::shared_ptr<AVPacket>& packet)
 	{
 		assert(!packet || packet->stream_index == stream_index_);
 		std::lock_guard<std::mutex> lock(mutex_);
@@ -139,9 +138,13 @@ struct Decoder::implementation : Common::DebugTarget
 			return;
 		auto packet = packet_queue_.front();
 		if (!packet)
-			flush_packet_sent_ = true;
-		if (flush_packet_sent_ && packet)
-			ctx_ = CreateCodecContext();
+			flush_packet_pushed_ = true;
+		else if (flush_packet_pushed_)
+		{
+			avcodec_flush_buffers(ctx_.get());
+			flush_packet_pushed_ = false;
+			DebugPrintLine(Common::DebugSeverity::debug, "reset");
+		}
 #ifdef DEBUG
 		if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
 			if (packet)
@@ -177,9 +180,7 @@ struct Decoder::implementation : Common::DebugTarget
 		case 0:
 			if (frame->pts == AV_NOPTS_VALUE)
 				frame->pts = frame->best_effort_timestamp;
-			if (frame->time_base.num == 0)
-				frame->time_base = time_base_;
-			if (frame->pts >= seek_pts_)
+			if (frame->pts >= seek_pts_ || frame->pts + frame->duration > seek_pts_)
 			{
 				if (hw_device_ctx_)
 				{
@@ -190,9 +191,9 @@ struct Decoder::implementation : Common::DebugTarget
 				}
 #ifdef DEBUG
 				if (ctx_->codec_type == AVMEDIA_TYPE_VIDEO)
-					DebugPrintLine(Common::DebugSeverity::trace, "Pulled video frame from decoder: " + std::to_string(FrameTime(frame) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type));
+					DebugPrintLine(Common::DebugSeverity::trace, "Pulled video frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000) + ", type: " + av_get_picture_type_char(frame->pict_type));
 				if (ctx_->codec_type == AVMEDIA_TYPE_AUDIO)
-					DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from decoder: " + std::to_string(FrameTime(frame) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000));
+					DebugPrintLine(Common::DebugSeverity::trace, "Pulled audio frame from decoder: " + std::to_string(PtsToTime(frame->pts, time_base_) / 1000) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000));
 #endif 
 				return frame;
 			}
@@ -207,12 +208,12 @@ struct Decoder::implementation : Common::DebugTarget
 		}
 		return nullptr;
 	}
-
+	
 	void Flush()
 	{
 		Push(nullptr);
 		flush_packet_received_ = true;
-		DebugPrintLine(Common::DebugSeverity::info, "Decoder flushed");
+		DebugPrintLine(Common::DebugSeverity::debug, "flushed");
 	}
 
 	void Seek(const std::int64_t seek_time)
@@ -220,22 +221,24 @@ struct Decoder::implementation : Common::DebugTarget
 		std::lock_guard<std::mutex> lock(mutex_);
 		avcodec_flush_buffers(ctx_.get());
 		packet_queue_.clear();
+		is_eof_ = false;
+		flush_packet_received_ = false;
 		seek_pts_ = TimeToPts(seek_time, time_base_);
 	}
 
 };
 
-Decoder::Decoder(const AVCodec *codec, AVStream * const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string &hw_device_index)
+Decoder::Decoder(const AVCodec* codec, AVStream* const stream, std::int64_t seek_time, Core::HwAccel acceleration, const std::string& hw_device_index)
 	: impl_(std::make_unique<implementation>(codec, stream, seek_time, acceleration, hw_device_index))
 { }
 
-Decoder::Decoder(const AVCodec *codec, AVStream * const stream, std::int64_t seek_time)
+Decoder::Decoder(const AVCodec * codec, AVStream * const stream, std::int64_t seek_time)
 	: Decoder(codec, stream, seek_time, Core::HwAccel::none, "")
 { }
 
 Decoder::~Decoder() { }
 
-void Decoder::Push(const std::shared_ptr<AVPacket> &packet) { impl_->Push(packet); }
+void Decoder::Push(const std::shared_ptr<AVPacket>& packet) { impl_->Push(packet); }
 
 std::shared_ptr<AVFrame> Decoder::Pull() { return impl_->Pull(); }
 
@@ -253,15 +256,15 @@ int Decoder::AudioSampleRate() const { return impl_->sample_rate_; }
 
 int Decoder::StreamIndex() const { return impl_->stream_index_; }
 
-AVChannelLayout * Decoder::AudioChannelLayout() const { return impl_->ctx_ ? &impl_->ctx_->ch_layout : nullptr; }
+AVChannelLayout* Decoder::AudioChannelLayout() const { return impl_->ctx_ ? &impl_->ctx_->ch_layout : nullptr; }
 
 AVSampleFormat Decoder::AudioSampleFormat() const { return impl_->ctx_ ? impl_->ctx_->sample_fmt : AVSampleFormat::AV_SAMPLE_FMT_NONE; }
 
 AVMediaType Decoder::MediaType() const { return impl_->media_type_; }
 
-const AVRational & Decoder::TimeBase() const { return impl_->time_base_; }
+const AVRational& Decoder::TimeBase() const { return impl_->time_base_; }
 
-const AVRational & Decoder::FrameRate() const { return impl_->stream_->r_frame_rate; }
+const AVRational& Decoder::FrameRate() const { return impl_->stream_->r_frame_rate; }
 
 
 }}

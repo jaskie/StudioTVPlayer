@@ -1,13 +1,14 @@
 #include "../pch.h"
 #include "OutputFormat.h"
+#include "FFmpegUtils.h"
 
 namespace TVPlayR {
 	namespace FFmpeg {
-		OutputFormat::OutputFormat(const std::string &url, const std::string &format_name, AVDictionary *&options)
+		OutputFormat::OutputFormat(const std::string& url, const std::string& format_name, AVDictionary*& options)
 			: Common::DebugTarget(Common::DebugSeverity::info, "OutputFormat " + url)
 			, url_(url)
 			, options_(options)
-			, format_ctx_(AllocFormatContextAndOpenFile(url, format_name), [this](AVFormatContext *ctx) { FreeFormatContext(ctx); })
+			, format_ctx_(AllocFormatContextAndOpenFile(url, format_name), [this](AVFormatContext* ctx) { FreeFormatContext(ctx); })
 		{
 		}
 
@@ -32,7 +33,7 @@ namespace TVPlayR {
 			is_flushed_ = true;
 		}
 
-		void OutputFormat::Initialize(const std::string &stream_metadata)
+		void OutputFormat::Initialize(const std::string& stream_metadata)
 		{
 			assert(!is_initialized_);
 			DebugPrintLine(Common::DebugSeverity::debug, "Writing header");
@@ -52,7 +53,7 @@ namespace TVPlayR {
 			is_initialized_ = true;
 		}
 
-		AVFormatContext* OutputFormat::AllocFormatContextAndOpenFile(const std::string &url, const std::string &format_name)
+		AVFormatContext* OutputFormat::AllocFormatContextAndOpenFile(const std::string& url, const std::string& format_name)
 		{
 			const AVOutputFormat* format = nullptr;
 			if (url.find("rtmp://") == 0)
@@ -73,12 +74,12 @@ namespace TVPlayR {
 			return ctx;
 		}
 
-		void OutputFormat::FreeFormatContext(AVFormatContext *ctx)
+		void OutputFormat::FreeFormatContext(AVFormatContext* ctx)
 		{
-			if (is_initialized_ && !FF_SUCCESS(av_write_trailer(ctx)))
+			if (is_initialized_ && !FF(av_write_trailer(ctx)))
 				DebugPrintLine(Common::DebugSeverity::warning, "av_write_trailer failed");
 			if (!(ctx->oformat->flags & AVFMT_NOFILE))
-				if (!FF_SUCCESS(avio_close(ctx->pb)))
+				if (!FF(avio_close(ctx->pb)))
 					DebugPrintLine(Common::DebugSeverity::warning, "avio_close failed");
 			avformat_free_context(ctx);
 			DebugPrintLine(Common::DebugSeverity::info, "avformat_free_context");

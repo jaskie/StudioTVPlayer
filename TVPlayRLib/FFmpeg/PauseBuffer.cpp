@@ -30,7 +30,7 @@ namespace TVPlayR {
 				still_frame_.reset();
 		}
 		
-		bool PauseBuffer::IsEmpty()
+		bool PauseBuffer::IsEmpty() const
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
 			return !last_frame_;

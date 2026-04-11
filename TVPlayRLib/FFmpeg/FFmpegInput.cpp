@@ -93,10 +93,9 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		if (!audio_decoders_.empty())
 			audio_muxer_ = std::make_unique<AudioMuxer>(audio_decoders_, AV_CH_LAYOUT_STEREO, player_->AudioSampleFormat(), 48000, player_->AudioChannelsCount());
 		buffer_ = std::make_unique<SynchronizingBuffer>(
-			player_,
+			*player_,
 			is_playing_,
 			AV_TIME_BASE, // 1s
-			0,
 			input_.ReadStartTimecode(),
 			GetVideoDuration(),
 			GetFieldOrder()
@@ -243,14 +242,13 @@ struct FFmpegInput::implementation : Common::DebugTarget, FFmpegInputBase
 		bool finished = false;
 		Core::AVSync sync;
 		{
-			if (!(buffer_ && buffer_->IsReady()))
-			{
-				std::unique_lock<std::mutex> lock(buffer_content_mutex_);
-				buffer_cv_.wait(lock);
-			}
-			if (is_eof_)
-				return buffer_->PullSync(audio_samples_count);
+			std::unique_lock<std::mutex> lock(buffer_content_mutex_);
+			buffer_cv_.wait(lock, [&]() { return (buffer_ && buffer_->IsReady()) || !is_producer_running_; });
+			if (!buffer_)
+				return sync;
 			sync = buffer_->PullSync(audio_samples_count);
+			if (is_eof_)
+				return sync;
 			finished = buffer_->IsEof();
 		}
 		if (frame_played_callback_)
@@ -403,3 +401,4 @@ void FFmpegInput::SetupAudio(const std::vector<Core::AudioChannelMapEntry>& audi
 void FFmpegInput::SetFramePlayedCallback(TIME_CALLBACK frame_played_callback) { impl_->frame_played_callback_ = frame_played_callback; }
 void FFmpegInput::SetPausedCallback(PAUSED_CALLBACK paused_callback) { impl_->paused_callback_ = paused_callback; }
 }}
+

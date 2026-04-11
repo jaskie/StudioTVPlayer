@@ -10,11 +10,11 @@ public:
 	void SetFrame(std::shared_ptr<const AVFrame>& frame);
 	std::shared_ptr<const AVFrame> GetFrame();
 	void SetIsPlaying(bool is_playing);
-	bool IsEmpty();
+	bool IsEmpty() const;
 	int64_t Pts();
 	void Clear();
 private:
-	std::mutex mutex_;
+	mutable std::mutex mutex_;
 	const FieldOrder field_order_;
 	std::shared_ptr<const AVFrame> last_frame_;
 	std::shared_ptr<const AVFrame> still_frame_;

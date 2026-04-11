@@ -8,7 +8,7 @@ class FilterBase : public Common::NonCopyable
 public:
 	FilterBase();
 	virtual AVRational OutputTimeBase() const = 0;
-	virtual std::shared_ptr<AVFrame> Pull() = 0;
+	virtual const std::shared_ptr<AVFrame> Pull() = 0;
 	virtual void Flush() = 0;
 	bool IsFlushed() const { return is_flushed_; }
 	bool IsEof() { return is_eof_; };

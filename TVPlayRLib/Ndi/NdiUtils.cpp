@@ -68,7 +68,7 @@ namespace TVPlayR {
 			return ndi->send_create(&send_create_description);
 		}
 
-		NDIlib_video_frame_v2_t CreateVideoFrame(const Core::VideoFormat& format, const std::shared_ptr<AVFrame>& avframe, std::int64_t timecode)
+		NDIlib_video_frame_v2_t CreateVideoFrame(const Core::VideoFormat& format, const std::shared_ptr<const AVFrame>& avframe, std::int64_t timecode)
 		{
 			if (!avframe)
 				THROW_EXCEPTION("NdiUtils::CreateVideoFrame: no frame provided");
@@ -111,7 +111,7 @@ namespace TVPlayR {
 			);
 		}
 
-		NDIlib_audio_frame_interleaved_32f_t CreateAudioFrame(std::shared_ptr<AVFrame> avframe, std::int64_t timecode)
+		NDIlib_audio_frame_interleaved_32f_t CreateAudioFrame(std::shared_ptr<const AVFrame> avframe, std::int64_t timecode)
 		{
 			assert(avframe->format == AV_SAMPLE_FMT_FLT);
 			return NDIlib_audio_frame_interleaved_32f_t(

@@ -10,13 +10,13 @@ namespace TVPlayR {
 		{
 		}
 
-		void PauseBuffer::SetFrame(std::shared_ptr<AVFrame>& frame)
+		void PauseBuffer::SetFrame(std::shared_ptr<const AVFrame>& frame)
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
 			last_frame_ = frame;
 		}
 
-		std::shared_ptr<AVFrame> PauseBuffer::GetFrame()
+		std::shared_ptr<const AVFrame> PauseBuffer::GetFrame()
 		{
 			std::lock_guard<std::mutex> lock(mutex_);
 			return is_playing_ ? last_frame_ : GetStillFrame();
@@ -49,7 +49,7 @@ namespace TVPlayR {
 			still_frame_.reset();
 		}
 
-		std::shared_ptr<AVFrame>& PauseBuffer::GetStillFrame()
+		std::shared_ptr<const AVFrame>& PauseBuffer::GetStillFrame()
 		{
 			if (last_frame_ && !still_frame_)
 			{
@@ -69,7 +69,7 @@ namespace TVPlayR {
 			return still_frame_;
 		}
 
-		std::shared_ptr<AVFrame> PauseBuffer::FrameToField(std::shared_ptr<AVFrame>& source, bool top_field)
+		std::shared_ptr<const AVFrame> PauseBuffer::FrameToField(std::shared_ptr<const AVFrame>& source, bool top_field)
 		{
 			assert(field_order_ == FieldOrder::BottomFieldFirst || field_order_ == FieldOrder::TopFieldFirst);
 			std::shared_ptr<AVFrame> dest = AllocFrame();

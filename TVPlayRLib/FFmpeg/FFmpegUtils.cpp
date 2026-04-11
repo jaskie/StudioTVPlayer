@@ -46,7 +46,7 @@ namespace TVPlayR {
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
-		std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt)
+		std::shared_ptr<const AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt)
 		{
 			AVFrame* frame = av_frame_alloc();
 			if (!frame)
@@ -78,7 +78,7 @@ namespace TVPlayR {
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
-		std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format)
+		std::shared_ptr<const AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format)
 		{
 			if (samples_count <= 0)
 				return nullptr;

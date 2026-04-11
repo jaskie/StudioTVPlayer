@@ -8,7 +8,7 @@ namespace TVPlayR {
 
 	namespace Core {
 		class Player;
-		struct AVSync;
+		class AVSync;
 		struct FrameTimeInfo;
 	}
 	namespace FFmpeg {
@@ -30,7 +30,7 @@ public:
 	Core::AVSync PullSync(int audio_samples_count);
 	void Reset(AVRational input_frame_rate);
 private:
-	typedef std::pair<Core::FrameTimeInfo, std::shared_ptr<AVFrame>> queue_item_t;
+	typedef std::pair<Core::FrameTimeInfo, std::shared_ptr<const AVFrame>> queue_item_t;
 	const Core::Player&							player_;
 	std::unique_ptr<FFmpeg::PlayerScaler>		scaler_;
 	const bool									process_video_;

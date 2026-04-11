@@ -21,7 +21,7 @@ public:
 class Player final : public ClockTarget, private Common::NonCopyable
 {
 public:
-	typedef std::function<void(std::vector<float>&, float)> AUDIO_VOLUME_CALLBACK;
+	typedef std::function<void(std::vector<float>&)> AUDIO_VOLUME_CALLBACK;
 	Player(const std::string& name, const VideoFormatType& format, TVPlayR::PixelFormat pixel_format, int audio_channels_count, int audio_sample_rate);
 	virtual ~Player();
 	void AddOutputSink(std::shared_ptr<OutputSink> device);

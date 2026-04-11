@@ -8,7 +8,7 @@
 namespace TVPlayR {
 	namespace Decklink {
 
-		static void ConvertFrame(const std::shared_ptr<AVFrame>& source, std::vector<uint32_t>& dest)
+		static void ConvertFrame(const std::shared_ptr<const AVFrame>& source, std::vector<uint32_t>& dest)
 		{
 			if (source->format == AV_PIX_FMT_X2RGB10LE)
 			{
@@ -28,7 +28,7 @@ namespace TVPlayR {
 			}
 		}
 
-		static BMDPixelFormat GetBMDPixelFormat(const std::shared_ptr<AVFrame>& frame)
+		static BMDPixelFormat GetBMDPixelFormat(const std::shared_ptr<const AVFrame>& frame)
 		{
 			switch (frame->format)
 			{
@@ -53,7 +53,7 @@ namespace TVPlayR {
 			, format_(format)
 		{ }
 
-		void DecklinkVideoFrame::Update(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode, std::int64_t frame_number)
+		void DecklinkVideoFrame::Update(const std::shared_ptr<const AVFrame>& frame, std::int64_t timecode, std::int64_t frame_number)
 		{
 			timecode_.Update(timecode);
 			width_ = format_.width();

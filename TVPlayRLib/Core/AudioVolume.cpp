@@ -15,8 +15,7 @@ void AudioVolume::SetVolume(float volume)
 	new_volume_ = volume;
 }
 
-
-std::vector<float> AudioVolume::ProcessVolume(const std::shared_ptr<AVFrame>& frame, float* coherence)
+std::vector<float> AudioVolume::ProcessVolume(const std::shared_ptr<const AVFrame>& frame)
 {
 	assert(frame->format == AVSampleFormat::AV_SAMPLE_FMT_FLT);
 	float* samples = reinterpret_cast<float*>(frame->data[0]);
@@ -33,11 +32,6 @@ std::vector<float> AudioVolume::ProcessVolume(const std::shared_ptr<AVFrame>& fr
 	}
 	if (volume_ != new_volume_)
 		volume_ = new_volume_; // in case when volume change failed within one frame period
-	if (coherence)
-	{
-		//TODO: calculate the coherence
-		*coherence = 0.0;
-	}
 	return peak_volume;
 }
 

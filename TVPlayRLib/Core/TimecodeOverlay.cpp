@@ -65,9 +65,9 @@ namespace TVPlayR {
 
 			Core::AVSync Transform(Core::AVSync& sync)
 			{
-				if (!sync.Video)
+				if (!sync.Video())
 					return sync;
-				std::shared_ptr<AVFrame>& input_frame = sync.Video;
+				auto& input_frame = sync.Video();
 				assert(input_frame->width == video_format_.width() && input_frame->height == video_format_.height());
 				if (!out_scaler_ && input_frame->format != AV_PIX_FMT_BGRA)
 					out_scaler_ = std::make_unique<FFmpeg::SwScale>(video_format_.width(), video_format_.height(), AV_PIX_FMT_BGRA, input_frame->width, input_frame->height, static_cast<AVPixelFormat>(input_frame->format));
@@ -78,7 +78,7 @@ namespace TVPlayR {
 				if (time != AV_NOPTS_VALUE)
 					Draw(rgba_frame, GetTimeString(time));
 				// if incomming frame pixel format is AV_PIX_FMT_BGRA we draw directly on the frame
-				return Core::AVSync(sync.Audio, out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.TimeInfo);
+				return Core::AVSync(sync.Audio(), out_scaler_ ? out_scaler_->Scale(rgba_frame) : rgba_frame, sync.TimeInfo);
 			}
 
 			void Draw(std::shared_ptr<AVFrame>& video, std::string timecode_str)

@@ -157,10 +157,10 @@ namespace TVPlayR {
 				{
 					for (auto& overlay : overlays_)
 						sync = overlay->Transform(sync);
-					std::shared_ptr<AVFrame> processed_video;
+					std::shared_ptr<const AVFrame> processed_video;
 					if (video_filter_)
 					{
-						video_filter_->Push(sync.Video);
+						video_filter_->Push(sync.Video());
 						processed_video = video_filter_->Pull();
 						if (!video_encoder_ && processed_video)
 						{
@@ -172,7 +172,7 @@ namespace TVPlayR {
 					}
 					else if (video_scaler_)
 					{
-						processed_video = video_scaler_->Scale(sync.Video);
+						processed_video = video_scaler_->Scale(sync.Video());
 						if (!video_encoder_ && processed_video)
 							InitializeVideoEncoderAndOutput(processed_video, format_.FrameRate().invert().av(), format_.FrameRate().av());
 					}
@@ -183,14 +183,14 @@ namespace TVPlayR {
 					}
 					if (video_encoder_ && processed_video)
 						PushToEncoder(video_encoder_, processed_video);
-					if (sync.Audio)
-						PushToEncoder(audio_encoder_, audio_resampler_->Resample(sync.Audio));
+					if (sync.Audio())
+						PushToEncoder(audio_encoder_, audio_resampler_->Resample(sync.Audio()));
 				}
 				else
 					DebugPrintLine(Common::DebugSeverity::info, "Buffer didn't return frame");
 			}
 
-			void PushToEncoder(const std::unique_ptr<Encoder>& encoder, const std::shared_ptr<AVFrame>& frame)
+			void PushToEncoder(const std::unique_ptr<Encoder>& encoder, const std::shared_ptr<const AVFrame>& frame)
 			{
 				assert(output_executor_.is_current());
 				if (frame)
@@ -201,7 +201,7 @@ namespace TVPlayR {
 					output_format_.Push(packet);
 			}
 
-			void InitializeVideoEncoderAndOutput(const std::shared_ptr<AVFrame>& frame, AVRational time_base, AVRational frame_rate)
+			void InitializeVideoEncoderAndOutput(const std::shared_ptr<const AVFrame>& frame, AVRational time_base, AVRational frame_rate)
 			{
 				video_encoder_ = std::make_unique<Encoder>(output_format_, video_codec_, params_.VideoBitrate, dest_pixel_format_, frame, time_base, frame_rate, &options_, params_.VideoMetadata, params_.VideoStreamId);
 				InitializeOuputIfPossible();
@@ -244,8 +244,8 @@ namespace TVPlayR {
 			void Push(const Core::AVSync& sync)
 			{
 				DebugPrintLine(Common::DebugSeverity::trace, "Push: frame pushed");
-				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio));
-				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video));
+				std::shared_ptr<AVFrame> audio(CloneFrame(sync.Audio()));
+				std::shared_ptr<AVFrame> video(CloneFrame(sync.Video()));
 				if (audio)
 				{
 					audio->pts = audio_samples_pushed_;

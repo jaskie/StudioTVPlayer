@@ -27,9 +27,9 @@ std::shared_ptr<AVPacket> AllocPacket();
 
 std::shared_ptr<AVFrame> AllocFrame();
 
-std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source);
+std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<const AVFrame>& source);
 
-std::shared_ptr<AVFrame> CopyFrame(const std::shared_ptr<AVFrame>& source);
+std::shared_ptr<AVFrame> CopyFrame(const std::shared_ptr<const AVFrame>& source);
 
 inline std::int64_t PtsToTime(std::int64_t pts, const AVRational time_base)
 {
@@ -45,9 +45,9 @@ inline std::int64_t TimeToPts(std::int64_t time, const AVRational time_base)
 	return av_rescale(time, time_base.den, static_cast<std::int64_t>(time_base.num) * AV_TIME_BASE);
 }
 
-std::shared_ptr<AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt);
+std::shared_ptr<const AVFrame> CreateEmptyVideoFrame(const Core::VideoFormat& format, TVPlayR::PixelFormat pix_fmt);
 
-std::shared_ptr<AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format);
+std::shared_ptr<const AVFrame> CreateSilentAudioFrame(int samples_count, int num_channels, AVSampleFormat format);
 
 void DumpFilter(const std::string& filter_str, AVFilterGraph* graph);
 

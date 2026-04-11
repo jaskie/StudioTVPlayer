@@ -102,21 +102,22 @@ namespace TVPlayR {
 				if (format_.type() != Core::VideoFormatType::invalid)
 				{
 					Core::AVSync buffer;
+					std::shared_ptr<const AVFrame> audio, video;
 					if (buffer_.try_take(buffer) == Common::BlockingCollectionStatus::Ok)
 					{
-						if (!(buffer.Video->format == AV_PIX_FMT_BGRA || buffer.Video->format == AV_PIX_FMT_UYVY422))
+						if (!(buffer.Video()->format == AV_PIX_FMT_BGRA || buffer.Video()->format == AV_PIX_FMT_UYVY422))
 						{
 							if (!frame_converter_)
-								frame_converter_ = std::make_unique<FFmpeg::SwScale>(buffer.Video->width, buffer.Video->height, static_cast<AVPixelFormat>(buffer.Video->format), format_.width(), format_.height(), overlays_.empty() ? AV_PIX_FMT_UYVY422 : AV_PIX_FMT_BGRA);
-							buffer.Video = frame_converter_->Scale(buffer.Video);
+								frame_converter_ = std::make_unique<FFmpeg::SwScale>(buffer.Video()->width, buffer.Video()->height, static_cast<AVPixelFormat>(buffer.Video()->format), format_.width(), format_.height(), overlays_.empty() ? AV_PIX_FMT_UYVY422 : AV_PIX_FMT_BGRA);
+							video = frame_converter_->Scale(buffer.Video());
 						}
 						for (auto& overlay : overlays_)
 							buffer = overlay->Transform(buffer);
-						NDIlib_video_frame_v2_t ndi_video = Ndi::CreateVideoFrame(format_, buffer.Video, buffer.TimeInfo.Timecode);
+						NDIlib_video_frame_v2_t ndi_video = Ndi::CreateVideoFrame(format_, video, buffer.TimeInfo.Timecode);
 						ndi_->send_send_video_v2(send_instance_, &ndi_video);
-						if (buffer.Audio)
+						if (audio)
 						{
-							auto ndi_audio = Ndi::CreateAudioFrame(buffer.Audio, buffer.TimeInfo.Timecode);
+							auto ndi_audio = Ndi::CreateAudioFrame(audio, buffer.TimeInfo.Timecode);
 							ndi_->util_send_send_audio_interleaved_32f(send_instance_, &ndi_audio);
 						}
 					}

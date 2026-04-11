@@ -30,18 +30,18 @@ namespace TVPlayR {
 		void DecklinkInputSynchroProvider::Push(Core::AVSync& sync)
 		{
 			executor_.begin_invoke([=] {
-				if (process_video_ && sync.Video)
+				if (process_video_ && sync.Video())
 				{
 					if (!scaler_)
 						scaler_ = std::make_unique<FFmpeg::PlayerScaler>(player_);
-					scaler_->Push(sync.Video, input_frame_rate_, av_inv_q(input_frame_rate_));
-					while (std::shared_ptr<AVFrame> received_video = scaler_->Pull())
+					scaler_->Push(sync.Video(), input_frame_rate_, av_inv_q(input_frame_rate_));
+					while (std::shared_ptr<const AVFrame> received_video = scaler_->Pull())
 						frame_queue_.try_add(queue_item_t(sync.TimeInfo, received_video));
 				}
-				if (sync.Audio)
+				if (sync.Audio())
 				{
 					std::lock_guard<std::mutex> lock(audio_fifo_mutex_);
-					audio_fifo_.TryPush(audio_resampler_.Resample(sync.Audio));
+					audio_fifo_.TryPush(audio_resampler_.Resample(sync.Audio()));
 				}
 			});
 		}
@@ -62,7 +62,5 @@ namespace TVPlayR {
 					scaler_->Reset();
 				});
 		}
-
-
 
 }}

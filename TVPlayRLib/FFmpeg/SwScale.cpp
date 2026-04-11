@@ -16,7 +16,7 @@ namespace TVPlayR {
 				[](SwsContext* ctx) { sws_freeContext(ctx); })
 		{ }
 
-		std::shared_ptr<AVFrame> SwScale::Scale(const std::shared_ptr<AVFrame>& in_frame)
+		std::shared_ptr<AVFrame> SwScale::Scale(const std::shared_ptr<const AVFrame>& in_frame)
 		{
 			std::shared_ptr<AVFrame> out_frame = AllocFrame();
 			out_frame->width = dest_width_;

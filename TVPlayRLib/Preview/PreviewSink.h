@@ -3,7 +3,7 @@
 
 namespace TVPlayR {
 	namespace Core {
-		struct AVSync;
+		class AVSync;
 	}
 	namespace Preview {
 
@@ -12,9 +12,9 @@ namespace TVPlayR {
 		public:
 			explicit PreviewSink(int output_width, int output_height);
 			virtual ~PreviewSink();
-			typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<AVFrame>);
+			typedef void(*FRAME_PLAYED_CALLBACK)(std::shared_ptr<const AVFrame>);
 			void SetFramePlayedCallback(FRAME_PLAYED_CALLBACK frame_played_callback);
-			void Push(Core::AVSync& sync);
+			void Push(const Core::AVSync& sync) override;
 		private:
 			struct implementation;
 			std::unique_ptr<implementation> impl_;

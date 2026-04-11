@@ -25,7 +25,7 @@ namespace TVPlayR {
 			const TVPlayR::PixelFormat pixel_format_;
 			const int audio_channels_count_;
 			const int audio_sample_rate_;
-			const std::shared_ptr<AVFrame> empty_video_;
+			const std::shared_ptr<const AVFrame> empty_video_;
 			std::vector<std::shared_ptr<OverlayBase>> overlays_;
 			const AVSampleFormat audio_sample_format_ = AVSampleFormat::AV_SAMPLE_FMT_FLT;
 			std::mutex audio_volume_callback_mutex_;
@@ -62,20 +62,19 @@ namespace TVPlayR {
 				executor_.begin_invoke([this, audio_samples_count]()
 				{
 					std::vector<float> volume(player_.AudioChannelsCount(), 0.0);
-					float coherence = 0.0;
 					DebugPrintLine(Common::DebugSeverity::trace, "Requested frame with " + std::to_string(audio_samples_count) + " samples of audio");
 					if (playing_source_)
 					{
 						auto sync = playing_source_->PullSync(player_, audio_samples_count);
-						auto& audio = sync.Audio;
-						auto& video = sync.Video;
-						assert((audio_samples_count == 0 && !sync.Audio) || (sync.Audio->nb_samples == audio_samples_count));
+						auto& audio = sync.Audio();
+						auto video = sync.Video();
+						assert((audio_samples_count == 0 && !sync.Audio()) || (sync.Audio()->nb_samples == audio_samples_count));
 						if (!video) {
 							video = empty_video_;
 							DebugPrintLine(Common::DebugSeverity::warning, "Played empty video frame");
 						}
 						if (audio)
-							volume = audio_volume_.ProcessVolume(audio, &coherence);
+							volume = audio_volume_.ProcessVolume(audio);
 						AddOverlayAndPushToOutputs(video, audio, sync.TimeInfo);
 						if (playing_source_->IsEof() && next_source_)
 						{
@@ -92,12 +91,12 @@ namespace TVPlayR {
 					}
 					std::lock_guard<std::mutex> lock(audio_volume_callback_mutex_);
 					if (audio_volume_callback_)
-						audio_volume_callback_(volume, coherence);
+						audio_volume_callback_(volume);
 				});
 			}
 
 			// used only in executor thread
-			void AddOverlayAndPushToOutputs(std::shared_ptr<AVFrame> video, std::shared_ptr<AVFrame> audio, FrameTimeInfo time_info)
+			void AddOverlayAndPushToOutputs(std::shared_ptr<const AVFrame> video, std::shared_ptr<const AVFrame> audio, FrameTimeInfo time_info)
 			{
 				Core::AVSync sync(audio, video, time_info);
 				for (auto& overlay : overlays_)

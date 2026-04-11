@@ -7,13 +7,13 @@ class AudioFifo final : private Common::NonCopyable, private Common::DebugTarget
 {
 public:
 	AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_rate, AVRational time_base, std::int64_t seek_time, std::int64_t fifo_duration);
-	bool TryPush(std::shared_ptr<AVFrame> frame);
+	bool TryPush(const std::shared_ptr<const AVFrame> frame);
 	/// <summary>
 	/// returns frame with requested nb_samples. If FIFO is smaller, rest will be filled with silence.
 	/// </summary>
 	/// <param name="nb_samples"></param>
 	/// <returns></returns>
-	std::shared_ptr<AVFrame> Pull(int nb_samples);
+	std::shared_ptr<const AVFrame> Pull(int nb_samples);
 	void DiscardSamples(int nb_samples);
 	void Reset(std::int64_t seek_time);
 	int SamplesCount() const;

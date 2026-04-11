@@ -7,7 +7,7 @@ namespace TVPlayR {
 		class Player;
 		class OutputSink;
 		struct FrameTimeInfo;
-		struct AVSync;
+		class AVSync;
 
 class InputSource : Common::NonCopyable
 {

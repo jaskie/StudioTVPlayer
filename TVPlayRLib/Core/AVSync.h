@@ -3,40 +3,45 @@
 
 namespace TVPlayR {
 	namespace Core {
-		struct AVSync
+		class AVSync final
 		{
-			AVSync(std::shared_ptr<AVFrame>& audio, std::shared_ptr<AVFrame>& video, FrameTimeInfo time_info)
-				: Audio(audio)
-				, Video(video)
+		private:
+			std::shared_ptr<const AVFrame> _audio;
+			std::shared_ptr<const AVFrame> _video;
+		public:
+			AVSync(const std::shared_ptr<const AVFrame>& audio, const std::shared_ptr<const AVFrame>& video, FrameTimeInfo time_info)
+				: _audio(audio)
+				, _video(video)
 				, TimeInfo(time_info)
 			{ }
-			AVSync() : AVSync(std::shared_ptr<AVFrame>(), std::shared_ptr<AVFrame>(), FrameTimeInfo()) {}
+			AVSync() : AVSync(nullptr, nullptr, FrameTimeInfo()) {}
 			AVSync(AVSync&& other) = default;
 			AVSync(const AVSync& other) = default;
-			std::shared_ptr<AVFrame> Audio;
-			std::shared_ptr<AVFrame> Video;
 			FrameTimeInfo TimeInfo;
 			AVSync operator=(AVSync&& other) noexcept
 			{
 				if (&other == this)
 					return *this;
-				Audio = std::move(other.Audio);
-				Video = std::move(other.Video);
+				_audio = std::move(other._audio);
+				_video = std::move(other._video);
 				TimeInfo = std::move(other.TimeInfo);
 				return *this;
 			}
+
+			const std::shared_ptr<const AVFrame>& Audio() const { return _audio; }
+			const std::shared_ptr<const AVFrame>& Video() const { return _video; }
 			
 			AVSync operator=(const AVSync& other)
 			{
-				Audio = other.Audio;
-				Video = other.Video;
+				_audio = other._audio;
+				_video = other._video;
 				TimeInfo = other.TimeInfo;
 				return *this;
 			}
 
 			operator bool() const noexcept
 			{
-				return Audio || Video;
+				return _audio || _video;
 			}
 		};
 

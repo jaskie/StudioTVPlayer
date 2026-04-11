@@ -38,7 +38,7 @@ namespace TVPlayR {
 		DebugPrintLine(Common::DebugSeverity::info, "Finalized");
 	}
 	
-	void SynchronizingBuffer::PushAudio(const std::shared_ptr<AVFrame>& frame) 
+	void SynchronizingBuffer::PushAudio(const std::shared_ptr<const AVFrame>& frame) 
 	{
 		if (!(frame && have_audio_))
 			return;
@@ -58,7 +58,7 @@ namespace TVPlayR {
 		}
 	}
 
-	void SynchronizingBuffer::PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base) 
+	void SynchronizingBuffer::PushVideo(const std::shared_ptr<const AVFrame>& frame, const AVRational& time_base) 
 	{ 
 		if (!(frame && have_video_))
 			return;
@@ -77,7 +77,7 @@ namespace TVPlayR {
 	Core::AVSync SynchronizingBuffer::PullSync(int audio_samples_count)
 	{ 
 		auto& fifo = (fifo_loop_) ? fifo_loop_ : fifo_;
-		std::shared_ptr<AVFrame> audio = is_playing_ && fifo
+		std::shared_ptr<const AVFrame> audio = is_playing_ && fifo
 			? fifo->Pull(audio_samples_count)
 			: FFmpeg::CreateSilentAudioFrame(audio_samples_count, audio_channel_count_, audio_sample_format_);
 		if (fifo_loop_ && fifo_loop_->SamplesCount() <= av_rescale(sample_rate_ / 2, input_video_time_base_.num, input_video_time_base_.den)) // less than half frame samples left

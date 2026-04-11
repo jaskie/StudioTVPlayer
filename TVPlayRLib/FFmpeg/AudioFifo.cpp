@@ -16,7 +16,7 @@ AudioFifo::AudioFifo(AVSampleFormat sample_fmt, int channels_count, int sample_r
 	av_channel_layout_default(&channel_layout_, channels_count);
 }
 
-bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
+bool AudioFifo::TryPush(const std::shared_ptr<const AVFrame> frame)
 {
 	assert(frame->format == sample_fmt_);
     DebugPrintLine(Common::DebugSeverity::trace, "Pushed audio frame to fifo: " + std::to_string(static_cast<float>(PtsToTime(frame->pts, time_base_)) / AV_TIME_BASE) + ", duration: " + std::to_string(PtsToTime(frame->duration, time_base_) / 1000) + " ms");
@@ -53,7 +53,7 @@ bool AudioFifo::TryPush(std::shared_ptr<AVFrame> frame)
 	return true;
 }
 
-std::shared_ptr<AVFrame> AudioFifo::Pull(int nb_samples)
+std::shared_ptr<const AVFrame> AudioFifo::Pull(int nb_samples)
 {
 	int samples_in_fifo = av_audio_fifo_size(aduio_fifo_.get());
 	if (nb_samples < 0)

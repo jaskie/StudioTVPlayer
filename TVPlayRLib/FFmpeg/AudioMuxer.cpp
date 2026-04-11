@@ -89,7 +89,7 @@ void AudioMuxer::Push(int stream_index, std::shared_ptr<AVFrame> frame)
 	}		
 }
 
-std::shared_ptr<AVFrame> AudioMuxer::Pull()
+const std::shared_ptr<AVFrame> AudioMuxer::Pull()
 {
 	auto frame = AllocFrame();
 	int ret = av_buffersink_get_frame(sink_ctx_, frame.get());

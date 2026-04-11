@@ -9,7 +9,7 @@ using namespace System::Threading;
 namespace TVPlayR
 {
     PreviewSink::PreviewSink(System::Windows::Threading::Dispatcher^ ui_dispatcher, int width, int height)
-        : _preview(new std::shared_ptr<Preview::PreviewSink>(new  Preview::PreviewSink(width, height)))
+        : _preview(new std::shared_ptr<Preview::PreviewSink>(new Preview::PreviewSink(width, height)))
         , _ui_dispatcher(ui_dispatcher)
         , _draw_frame_action(gcnew Action(this, &PreviewSink::DrawFrame))
         , _frame_played_semaphore(gcnew System::Threading::SemaphoreSlim(1))

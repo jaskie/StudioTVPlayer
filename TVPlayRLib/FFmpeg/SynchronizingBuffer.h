@@ -5,7 +5,7 @@ namespace TVPlayR {
 	namespace Core 
 	{
 		class Player;
-		struct AVSync;
+		class AVSync;
 		enum class VideoFormatType;
 	}
 	namespace FFmpeg {
@@ -16,8 +16,8 @@ class SynchronizingBuffer final : Common::NonCopyable, Common::DebugTarget
 public:
 	SynchronizingBuffer(const Core::Player * player, bool is_playing, std::int64_t duration, std::int64_t initial_sync, std::int64_t start_timecode, std::int64_t media_duration, FieldOrder field_order);
 	virtual ~SynchronizingBuffer();
-	void PushAudio(const std::shared_ptr<AVFrame>& frame);
-	void PushVideo(const std::shared_ptr<AVFrame>& frame, const AVRational& time_base);
+	void PushAudio(const std::shared_ptr<const AVFrame>& frame);
+	void PushVideo(const std::shared_ptr<const AVFrame>& frame, const AVRational& time_base);
 	Core::AVSync PullSync(int audio_samples_count);
 	bool IsFull() const;
 	bool IsReady();
@@ -45,7 +45,7 @@ private:
 	const std::int64_t capacity_;
 	const std::int64_t start_timecode_;
 	const std::int64_t media_duration_;
-	std::deque<std::shared_ptr<AVFrame>> video_queue_;
+	std::deque<std::shared_ptr<const AVFrame>> video_queue_;
 	std::unique_ptr<AudioFifo> fifo_;
 	std::unique_ptr<AudioFifo> fifo_loop_;
 	PauseBuffer pause_buffer_;

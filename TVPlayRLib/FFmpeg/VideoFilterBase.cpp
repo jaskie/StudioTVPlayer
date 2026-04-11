@@ -5,7 +5,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-bool VideoFilterBase::Push(std::shared_ptr<AVFrame> frame) 
+bool VideoFilterBase::Push(const std::shared_ptr<const AVFrame> frame) 
 { 
 	if (frame->width != input_width_ ||
 		frame->height != input_height_ ||
@@ -22,7 +22,7 @@ VideoFilterBase::VideoFilterBase(AVPixelFormat output_pix_fmt)
 	, output_pix_fmt_(output_pix_fmt)
 { }
 
-std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
+const std::shared_ptr<AVFrame> VideoFilterBase::Pull() {
 	if (!sink_ctx_)
 		return nullptr;
 	auto frame = AllocFrame();

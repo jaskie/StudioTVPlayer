@@ -6,7 +6,7 @@ namespace TVPlayR {
 		{
 		public:
 			SwScale(int src_width, int src_height, AVPixelFormat src_pixel_format, int dest_width, int dest_height, AVPixelFormat dest_pixel_format);
-			std::shared_ptr<AVFrame> Scale(const std::shared_ptr<AVFrame>& in_frame);
+			std::shared_ptr<AVFrame> Scale(const std::shared_ptr<const AVFrame>& in_frame);
 			inline const AVPixelFormat GetSrcPixelFormat() const { return src_pixel_format_; }
 			inline const int GetSrcWidth() const { return src_width_; }
 			inline const int GetSrcHeight() const { return src_height_; }

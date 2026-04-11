@@ -15,7 +15,7 @@ public:
 	AVRational OutputTimeBase() const override;
 	AVSampleFormat OutputSampleFormat();
 	void Push(int stream_index, std::shared_ptr<AVFrame> frame);
-	std::shared_ptr<AVFrame> Pull() override;
+	const std::shared_ptr<AVFrame> Pull() override;
 	void Flush() override;
 	void Reset();
 private:

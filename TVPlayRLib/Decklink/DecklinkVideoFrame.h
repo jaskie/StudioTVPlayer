@@ -11,7 +11,7 @@ namespace TVPlayR {
 		{
 		private:
 			std::int64_t frame_number_;
-			std::shared_ptr<AVFrame> frame_;
+			std::shared_ptr<const AVFrame> frame_;
 			std::vector<uint32_t> buffer_;
 			int width_, height_;
 			int row_bytes_;
@@ -22,7 +22,7 @@ namespace TVPlayR {
 			DecklinkVideoFrame(Core::VideoFormat &format);
 
 			// Utility functions
-			void Update(const std::shared_ptr<AVFrame> &frame, std::int64_t timecode, std::int64_t frame_number);
+			void Update(const std::shared_ptr<const AVFrame> &frame, std::int64_t timecode, std::int64_t frame_number);
 			void Recycle();
 			int64_t GetFrameNumber() const { return frame_number_; }
 

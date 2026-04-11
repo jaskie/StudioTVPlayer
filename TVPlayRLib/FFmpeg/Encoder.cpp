@@ -8,7 +8,7 @@
 namespace TVPlayR {
 	namespace FFmpeg {
 
-	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, AVPixelFormat pixel_format, std::shared_ptr<AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id)
+	Encoder::Encoder(const OutputFormat& output_format, const AVCodec* encoder, int bitrate, AVPixelFormat pixel_format, std::shared_ptr<const AVFrame> video_frame, AVRational time_base, AVRational frame_rate, AVDictionary** options, const std::string& stream_metadata, int stream_id)
 		: Common::DebugTarget(Common::DebugSeverity::info, "Video encoder for " + output_format.GetUrl())
 		, encoder_(encoder)
 		, enc_ctx_(GetVideoContext(output_format.Ctx(), encoder_, bitrate, pixel_format, video_frame->width, video_frame->height, time_base, frame_rate, video_frame->sample_aspect_ratio, video_frame->interlaced_frame))
@@ -127,7 +127,7 @@ namespace TVPlayR {
 		THROW_ON_FFMPEG_ERROR(avcodec_parameters_from_context(stream_->codecpar, enc_ctx_.get()));
 	}
 	
-	void Encoder::Push(const std::shared_ptr<AVFrame>& frame)
+	void Encoder::Push(const std::shared_ptr<const AVFrame>& frame)
 	{
 		if (fifo_)
 		{
@@ -140,14 +140,14 @@ namespace TVPlayR {
 		}
 		else
 		{
-			frame->pict_type = AV_PICTURE_TYPE_NONE;
-			frame->pts = output_timestamp_;
+			//frame->pict_type = AV_PICTURE_TYPE_NONE;
+			//frame->pts = output_timestamp_;
 			output_timestamp_ += (enc_ctx_->codec_type == AVMEDIA_TYPE_AUDIO ? frame->nb_samples : 1LL);
 			frame_buffer_.emplace_back(frame);
 		}
 	}
 
-	bool Encoder::InternalPush(AVFrame* frame)
+	bool Encoder::InternalPush(const AVFrame* frame)
 	{
 		if (frame)
 			DebugPrintLine(Common::DebugSeverity::trace, "InternalPush pts=" + std::to_string(frame->pts));

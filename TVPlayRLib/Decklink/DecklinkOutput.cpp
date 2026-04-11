@@ -35,7 +35,7 @@ namespace TVPlayR {
 			int audio_channels_count_ = 0;
 			Common::BlockingCollection<Core::AVSync> input_buffer_;
 			Common::BlockingCollection<DecklinkVideoFrame*> decklink_frame_buffer_;
-			std::shared_ptr<AVFrame> last_video_;
+			std::shared_ptr<const AVFrame> last_video_;
 			std::atomic_int64_t last_video_time_;
 			const DecklinkKeyerType keyer_;
 			const TimecodeOutputSource timecode_source_;
@@ -140,7 +140,7 @@ namespace TVPlayR {
 				}
 			}
 
-			void ScheduleVideo(const std::shared_ptr<AVFrame>& frame, std::int64_t timecode)
+			void ScheduleVideo(const std::shared_ptr<const AVFrame>& frame, std::int64_t timecode)
 			{
 				std::int64_t frame_time = scheduled_frames_ * format_.FrameRate().Denominator();
 				DecklinkVideoFrame *decklink_frame;
@@ -171,7 +171,7 @@ namespace TVPlayR {
 				}
 			}
 
-			void ScheduleAudio(std::shared_ptr<AVFrame>& buffer)
+			void ScheduleAudio(const std::shared_ptr<const AVFrame>& buffer)
 			{
 				if (!buffer)
 					return;
@@ -295,10 +295,10 @@ namespace TVPlayR {
 				Core::AVSync sync;
 				if (input_buffer_.try_take(sync) == Common::BlockingCollectionStatus::Ok)
 				{
-					ScheduleVideo(sync.Video, Core::TimecodeFromFameTimeInfo(sync.TimeInfo, timecode_source_));
-					if (sync.Audio)
+					ScheduleVideo(sync.Video(), Core::TimecodeFromFameTimeInfo(sync.TimeInfo, timecode_source_));
+					if (sync.Audio())
 					{
-						ScheduleAudio(audio_resampler_? audio_resampler_->Resample(sync.Audio) : sync.Audio);
+						ScheduleAudio(audio_resampler_ ? audio_resampler_->Resample(sync.Audio()) : sync.Audio());
 					}
 					else if (audio_samples_required > 0)
 					{

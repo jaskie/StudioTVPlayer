@@ -7,7 +7,7 @@ namespace TVPlayR {
 		enum class VideoFormatType;
 		class ClockTarget;
 		class OverlayBase;
-		struct AVSync;
+		class AVSync;
 
 class OutputSink
 {

@@ -4,7 +4,7 @@
 namespace TVPlayR {
 	namespace Core {
 
-		struct AVSync;
+		class AVSync;
 
 class OverlayBase : public Common::NonCopyable
 {

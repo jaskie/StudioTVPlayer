@@ -58,7 +58,7 @@ namespace TVPlayR {
 	
 	TVPlayR::FieldOrder VideoFormat::FieldOrder::get()
 	{
-		return _native_fomat->field_order();
+		return _native_fomat->FieldOrder();
 	}
 
 	int VideoFormat::Id::get()

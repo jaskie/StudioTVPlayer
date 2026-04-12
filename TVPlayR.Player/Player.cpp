@@ -14,7 +14,7 @@
 #include "AudioVolumeEventArgs.h"
 
 namespace TVPlayR {
-	void Player::AudioVolumeCallback(std::vector<float>& audio_volume, float coherence)
+	void Player::AudioVolumeCallback(std::vector<float>& audio_volume)
 	{
 		array<float>^ result = gcnew array<float>(static_cast<int>(audio_volume.size()));
 		if (audio_volume.size())
@@ -22,7 +22,7 @@ namespace TVPlayR {
 			pin_ptr<float> dest = &result[0];
 			std::memcpy(dest, &audio_volume[0], audio_volume.size() * sizeof(float));
 		}
-		AudioVolume(this, gcnew AudioVolumeEventArgs(result, coherence));
+		AudioVolume(this, gcnew AudioVolumeEventArgs(result));
 	}
 
 	Core::Player* CreateNativePlayer(String^ name, TVPlayR::VideoFormat^ videoFormat, TVPlayR::PixelFormat pixelFormat, int audioChannelCount, int sampleRate)
@@ -43,7 +43,7 @@ namespace TVPlayR {
 		_audioVolumeDelegate = gcnew AudioVolumeDelegate(this, &Player::AudioVolumeCallback);
 		_audioVolumeHandle = GCHandle::Alloc(_audioVolumeDelegate);
 		IntPtr audioVolumeIp = Marshal::GetFunctionPointerForDelegate(_audioVolumeDelegate);
-		typedef void(__stdcall* AUDIO_VOLUME_CALLBACK) (std::vector<float>&, float); // compatible with Core::Player::AUDIO_VOLUME_CALLBACK
+		typedef void(__stdcall* AUDIO_VOLUME_CALLBACK) (std::vector<float>&); // compatible with Core::Player::AUDIO_VOLUME_CALLBACK
 		_player->SetAudioVolumeCallback(static_cast<AUDIO_VOLUME_CALLBACK>(audioVolumeIp.ToPointer()));
 	}
 

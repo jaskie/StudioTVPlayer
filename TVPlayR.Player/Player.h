@@ -24,11 +24,11 @@ namespace TVPlayR {
 		float _volume = 1.0f;
 		VideoFormat^ _videoFormat;
 		const PixelFormat _pixelFormat;
-		delegate void AudioVolumeDelegate(std::vector<float>&, float);
+		delegate void AudioVolumeDelegate(std::vector<float>&);
 		AudioVolumeDelegate^ _audioVolumeDelegate;
 		GCHandle _audioVolumeHandle;
 		System::Collections::Generic::List<OutputSink^>^ _outputs = gcnew System::Collections::Generic::List<OutputSink^>();
-		void AudioVolumeCallback(std::vector<float>& audio_volume, float coherence);
+		void AudioVolumeCallback(std::vector<float>& audio_volume);
 	internal:
 		Core::Player& GetNativePlayer();
 	public:

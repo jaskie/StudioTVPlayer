@@ -20,7 +20,7 @@ namespace TVPlayR {
 			return std::shared_ptr<AVFrame>(av_frame_alloc(), FreeFrame);
 		}
 
-		std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<AVFrame>& source)
+		std::shared_ptr<AVFrame> CloneFrame(const std::shared_ptr<const AVFrame>& source)
 		{
 			if (!source)
 				return nullptr;
@@ -29,7 +29,7 @@ namespace TVPlayR {
 			return std::shared_ptr<AVFrame>(frame, FreeFrame);
 		}
 
-		std::shared_ptr<AVFrame> CopyFrame(const std::shared_ptr<AVFrame>& source)
+		std::shared_ptr<AVFrame> CopyFrame(const std::shared_ptr<const AVFrame>& source)
 		{
 			if (!source)
 				return nullptr;
